@@ -14,16 +14,376 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      follows: {
+        Row: {
+          created_at: string
+          follower_id: string
+          provider_user_id: string
+        }
+        Insert: {
+          created_at?: string
+          follower_id: string
+          provider_user_id: string
+        }
+        Update: {
+          created_at?: string
+          follower_id?: string
+          provider_user_id?: string
+        }
+        Relationships: []
+      }
+      post_comments: {
+        Row: {
+          created_at: string
+          hidden: boolean
+          id: string
+          post_id: string
+          text: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          hidden?: boolean
+          id?: string
+          post_id: string
+          text: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          hidden?: boolean
+          id?: string
+          post_id?: string
+          text?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "timeline_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      post_likes: {
+        Row: {
+          created_at: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_likes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "timeline_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          district: string | null
+          full_name: string
+          id: string
+          is_provider: boolean
+          town: string | null
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          district?: string | null
+          full_name?: string
+          id: string
+          is_provider?: boolean
+          town?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          district?: string | null
+          full_name?: string
+          id?: string
+          is_provider?: boolean
+          town?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      provider_recommendations: {
+        Row: {
+          created_at: string
+          hidden: boolean
+          id: string
+          message: string
+          provider_user_id: string
+          rating: number | null
+          service: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          hidden?: boolean
+          id?: string
+          message: string
+          provider_user_id: string
+          rating?: number | null
+          service: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          hidden?: boolean
+          id?: string
+          message?: string
+          provider_user_id?: string
+          rating?: number | null
+          service?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      reports: {
+        Row: {
+          created_at: string
+          details: string | null
+          id: string
+          reason: string
+          reporter_id: string
+          status: Database["public"]["Enums"]["report_status"]
+          target_id: string
+          target_type: string
+        }
+        Insert: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          reason: string
+          reporter_id: string
+          status?: Database["public"]["Enums"]["report_status"]
+          target_id: string
+          target_type: string
+        }
+        Update: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          reason?: string
+          reporter_id?: string
+          status?: Database["public"]["Enums"]["report_status"]
+          target_id?: string
+          target_type?: string
+        }
+        Relationships: []
+      }
+      reviews: {
+        Row: {
+          created_at: string
+          hidden: boolean
+          id: string
+          provider_user_id: string
+          rating: number
+          text: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          hidden?: boolean
+          id?: string
+          provider_user_id: string
+          rating: number
+          text?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          hidden?: boolean
+          id?: string
+          provider_user_id?: string
+          rating?: number
+          text?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      saved_providers: {
+        Row: {
+          created_at: string
+          provider_user_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          provider_user_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          provider_user_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      service_profiles: {
+        Row: {
+          area: string | null
+          areas_served: string[]
+          availability: Database["public"]["Enums"]["availability_status"]
+          bio: string
+          business_name: string | null
+          category_slug: string
+          created_at: string
+          district: string
+          email: string | null
+          phone: string | null
+          subcategory: string
+          suspended: boolean
+          town: string
+          updated_at: string
+          user_id: string
+          verified: Database["public"]["Enums"]["verification_status"]
+          whatsapp: string | null
+          years_experience: number
+        }
+        Insert: {
+          area?: string | null
+          areas_served?: string[]
+          availability?: Database["public"]["Enums"]["availability_status"]
+          bio?: string
+          business_name?: string | null
+          category_slug: string
+          created_at?: string
+          district?: string
+          email?: string | null
+          phone?: string | null
+          subcategory: string
+          suspended?: boolean
+          town?: string
+          updated_at?: string
+          user_id: string
+          verified?: Database["public"]["Enums"]["verification_status"]
+          whatsapp?: string | null
+          years_experience?: number
+        }
+        Update: {
+          area?: string | null
+          areas_served?: string[]
+          availability?: Database["public"]["Enums"]["availability_status"]
+          bio?: string
+          business_name?: string | null
+          category_slug?: string
+          created_at?: string
+          district?: string
+          email?: string | null
+          phone?: string | null
+          subcategory?: string
+          suspended?: boolean
+          town?: string
+          updated_at?: string
+          user_id?: string
+          verified?: Database["public"]["Enums"]["verification_status"]
+          whatsapp?: string | null
+          years_experience?: number
+        }
+        Relationships: []
+      }
+      timeline_posts: {
+        Row: {
+          category_slug: string | null
+          created_at: string
+          featured: boolean
+          hidden: boolean
+          hidden_reason: string | null
+          id: string
+          location: string | null
+          media_urls: string[]
+          provider_user_id: string
+          text: string
+        }
+        Insert: {
+          category_slug?: string | null
+          created_at?: string
+          featured?: boolean
+          hidden?: boolean
+          hidden_reason?: string | null
+          id?: string
+          location?: string | null
+          media_urls?: string[]
+          provider_user_id: string
+          text: string
+        }
+        Update: {
+          category_slug?: string | null
+          created_at?: string
+          featured?: boolean
+          hidden?: boolean
+          hidden_reason?: string | null
+          id?: string
+          location?: string | null
+          media_urls?: string[]
+          provider_user_id?: string
+          text?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "moderator" | "user"
+      availability_status: "available" | "busy" | "away"
+      report_status: "open" | "reviewing" | "resolved" | "dismissed"
+      verification_status: "none" | "pending" | "verified" | "featured"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +510,11 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "moderator", "user"],
+      availability_status: ["available", "busy", "away"],
+      report_status: ["open", "reviewing", "resolved", "dismissed"],
+      verification_status: ["none", "pending", "verified", "featured"],
+    },
   },
 } as const
