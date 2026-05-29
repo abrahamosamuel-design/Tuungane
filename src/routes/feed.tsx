@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
@@ -11,7 +12,7 @@ export const Route = createFileRoute("/feed")({
   component: Feed,
 });
 
-type Filter = "all" | "following" | "verified" | "popular";
+type Filter = "all" | "following" | "verified" | "popular" | "nearby";
 
 function Feed() {
   const { user } = useAuth();
@@ -31,6 +32,15 @@ function Feed() {
     }
     if (filter === "verified") {
       const { data } = await supabase.from("service_profiles").select("user_id").in("verified", ["verified", "featured"]);
+      providerIds = (data ?? []).map((p) => p.user_id);
+      if (providerIds.length === 0) { setPosts([]); setLoading(false); return; }
+    }
+    if (filter === "nearby") {
+      if (!user) { toast.error("Sign in to see providers near you"); setPosts([]); setLoading(false); return; }
+      const { data: me } = await supabase.from("profiles").select("district,town").eq("id", user.id).maybeSingle();
+      const district = me?.district?.trim();
+      if (!district) { toast.info("Add your district in your profile to see nearby posts"); setPosts([]); setLoading(false); return; }
+      const { data } = await supabase.from("service_profiles").select("user_id").eq("district", district);
       providerIds = (data ?? []).map((p) => p.user_id);
       if (providerIds.length === 0) { setPosts([]); setLoading(false); return; }
     }
@@ -60,7 +70,7 @@ function Feed() {
   useEffect(() => { load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [filter, category, user?.id]);
 
   const filters: { id: Filter; label: string }[] = [
-    { id: "all", label: "All" }, { id: "following", label: "Following" }, { id: "popular", label: "Popular" }, { id: "verified", label: "Verified" },
+    { id: "all", label: "All" }, { id: "following", label: "Following" }, { id: "nearby", label: "Nearby" }, { id: "popular", label: "Popular" }, { id: "verified", label: "Verified" },
   ];
 
   return (
