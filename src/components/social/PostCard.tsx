@@ -47,12 +47,18 @@ export function PostCard({ post, onChanged }: Props) {
   }, [post.id, user]);
 
   const loadComments = async () => {
-    const { data } = await supabase
+    const { data: rows } = await supabase
       .from("post_comments")
-      .select("id,user_id,text,created_at,profiles:user_id(full_name,avatar_url)")
+      .select("id,user_id,text,created_at")
       .eq("post_id", post.id)
       .order("created_at", { ascending: true });
-    setComments((data ?? []).map((c) => ({ ...c, profile: (c as { profiles?: { full_name: string; avatar_url: string | null } }).profiles })));
+    const ids = Array.from(new Set((rows ?? []).map((r) => r.user_id)));
+    let profMap = new Map<string, { full_name: string; avatar_url: string | null }>();
+    if (ids.length) {
+      const { data: profs } = await supabase.from("profiles").select("id,full_name,avatar_url").in("id", ids);
+      profMap = new Map((profs ?? []).map((p) => [p.id, { full_name: p.full_name, avatar_url: p.avatar_url }]));
+    }
+    setComments((rows ?? []).map((c) => ({ ...c, profile: profMap.get(c.user_id) })));
   };
 
   const requireAuth = () => {
