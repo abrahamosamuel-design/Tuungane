@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Image as ImageIcon, X, Loader2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Image as ImageIcon, X, Loader2, Ban } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { uploadMedia } from "@/lib/upload";
@@ -13,8 +13,29 @@ export function PostComposer({ defaultCategory, onPosted }: { defaultCategory?: 
   const [location, setLocation] = useState("");
   const [media, setMedia] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
+  const [suspended, setSuspended] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { data } = await supabase.from("service_profiles").select("suspended").eq("user_id", user.id).maybeSingle();
+      setSuspended(!!data?.suspended);
+    })();
+  }, [user]);
 
   if (!user) return null;
+
+  if (suspended) {
+    return (
+      <div className="flex items-start gap-3 rounded-2xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive">
+        <Ban className="mt-0.5 h-4 w-4 shrink-0" />
+        <div>
+          <p className="font-semibold">Posting is disabled</p>
+          <p className="text-xs opacity-90">Your service profile has been suspended by a moderator. Contact support if you think this is a mistake.</p>
+        </div>
+      </div>
+    );
+  }
 
   const addFiles = async (files: FileList | null) => {
     if (!files) return;

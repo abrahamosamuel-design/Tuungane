@@ -10,6 +10,7 @@ import { PostCard, type PostRow } from "@/components/social/PostCard";
 import { RecommendDialog } from "@/components/social/RecommendDialog";
 import { ReviewDialog } from "@/components/social/ReviewDialog";
 import { ReportDialog } from "@/components/social/ReportDialog";
+import { SaveButton } from "@/components/social/SaveButton";
 import { timeAgo } from "@/lib/format";
 
 export const Route = createFileRoute("/u/$id")({
@@ -88,6 +89,7 @@ function UserProfile() {
             </div>
             <div className="flex flex-wrap items-center gap-2">
               {!isOwn && profile.is_provider && <FollowButton providerUserId={id} />}
+              {!isOwn && profile.is_provider && <SaveButton providerUserId={id} variant="full" />}
               {!isOwn && user && profile.is_provider && (
                 <>
                   <button onClick={() => setRecOpen(true)} className="rounded-full border border-border px-3 py-2 text-xs font-semibold text-navy hover:border-orange">Recommend</button>

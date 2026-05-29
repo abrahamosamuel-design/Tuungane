@@ -35,6 +35,9 @@ function ProviderPage() {
   const category = getCategory(p.categorySlug);
   return (
     <Layout>
+      <div className="border-b border-orange/30 bg-orange/10 px-4 py-2 text-center text-xs text-navy">
+        <span className="font-semibold">Sample profile</span> · This is preview content. Real provider profiles live at <Link to="/feed" className="text-orange underline">the activity feed</Link>.
+      </div>
       {/* Cover + Identity */}
       <section className="relative">
         <div className="h-40 sm:h-56" style={{ background: "var(--gradient-hero)" }} />
