@@ -1,7 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ArrowLeft, BadgeCheck, Sparkles, Star, MapPin, Phone, MessageCircle, Mail, Heart, Share2, Flag, Bookmark, Users } from "lucide-react";
 import { Layout } from "@/components/Layout";
-import { getProvider } from "@/data/providers";
+import { getProvider, type Provider } from "@/data/providers";
 import { getCategory } from "@/data/categories";
 
 export const Route = createFileRoute("/providers/$id")({
@@ -101,7 +101,7 @@ function ProviderPage() {
               <span className="text-xs text-muted-foreground">{p.portfolio.length} posts</span>
             </div>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              {p.portfolio.map((post: typeof p.portfolio[number]) => (
+              {p.portfolio.map((post: Provider["portfolio"][number]) => (
                 <article key={post.id} className="overflow-hidden rounded-xl border border-border">
                   <div className="aspect-[4/3] w-full bg-surface" style={{ background: `url(https://images.unsplash.com/photo-${post.seed}?w=600&q=70&auto=format&fit=crop) center/cover` }} />
                   <div className="p-4">
