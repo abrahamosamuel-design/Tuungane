@@ -101,7 +101,7 @@ function ProviderPage() {
               <span className="text-xs text-muted-foreground">{p.portfolio.length} posts</span>
             </div>
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
-              {p.portfolio.map((post) => (
+              {p.portfolio.map((post: typeof p.portfolio[number]) => (
                 <article key={post.id} className="overflow-hidden rounded-xl border border-border">
                   <div className="aspect-[4/3] w-full bg-surface" style={{ background: `url(https://images.unsplash.com/photo-${post.seed}?w=600&q=70&auto=format&fit=crop) center/cover` }} />
                   <div className="p-4">

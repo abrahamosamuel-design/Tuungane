@@ -42,7 +42,7 @@ function CategoryPage() {
           <h1 className="mt-4 font-display text-3xl font-bold text-navy sm:text-4xl">{category.name}</h1>
           <p className="mt-2 max-w-2xl text-muted-foreground">{category.blurb}</p>
           <div className="mt-5 flex flex-wrap gap-2">
-            {category.subcategories.map((s) => (
+            {category.subcategories.map((s: string) => (
               <span key={s} className="rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-navy">{s}</span>
             ))}
           </div>
