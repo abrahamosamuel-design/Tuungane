@@ -11,10 +11,15 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as ServicesRouteImport } from './routes/services'
+import { Route as MeRouteImport } from './routes/me'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as FeedRouteImport } from './routes/feed'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as UIdRouteImport } from './routes/u.$id'
 import { Route as ServicesSlugRouteImport } from './routes/services.$slug'
 import { Route as ProvidersIdRouteImport } from './routes/providers.$id'
 
@@ -28,14 +33,34 @@ const ServicesRoute = ServicesRouteImport.update({
   path: '/services',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MeRoute = MeRouteImport.update({
+  id: '/me',
+  path: '/me',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FeedRoute = FeedRouteImport.update({
+  id: '/feed',
+  path: '/feed',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -46,6 +71,11 @@ const AboutRoute = AboutRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UIdRoute = UIdRouteImport.update({
+  id: '/u/$id',
+  path: '/u/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ServicesSlugRoute = ServicesSlugRouteImport.update({
@@ -62,75 +92,110 @@ const ProvidersIdRoute = ProvidersIdRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRoute
   '/contact': typeof ContactRoute
+  '/dashboard': typeof DashboardRoute
+  '/feed': typeof FeedRoute
   '/login': typeof LoginRoute
+  '/me': typeof MeRoute
   '/services': typeof ServicesRouteWithChildren
   '/terms': typeof TermsRoute
   '/providers/$id': typeof ProvidersIdRoute
   '/services/$slug': typeof ServicesSlugRoute
+  '/u/$id': typeof UIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRoute
   '/contact': typeof ContactRoute
+  '/dashboard': typeof DashboardRoute
+  '/feed': typeof FeedRoute
   '/login': typeof LoginRoute
+  '/me': typeof MeRoute
   '/services': typeof ServicesRouteWithChildren
   '/terms': typeof TermsRoute
   '/providers/$id': typeof ProvidersIdRoute
   '/services/$slug': typeof ServicesSlugRoute
+  '/u/$id': typeof UIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/admin': typeof AdminRoute
   '/contact': typeof ContactRoute
+  '/dashboard': typeof DashboardRoute
+  '/feed': typeof FeedRoute
   '/login': typeof LoginRoute
+  '/me': typeof MeRoute
   '/services': typeof ServicesRouteWithChildren
   '/terms': typeof TermsRoute
   '/providers/$id': typeof ProvidersIdRoute
   '/services/$slug': typeof ServicesSlugRoute
+  '/u/$id': typeof UIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/about'
+    | '/admin'
     | '/contact'
+    | '/dashboard'
+    | '/feed'
     | '/login'
+    | '/me'
     | '/services'
     | '/terms'
     | '/providers/$id'
     | '/services/$slug'
+    | '/u/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
+    | '/admin'
     | '/contact'
+    | '/dashboard'
+    | '/feed'
     | '/login'
+    | '/me'
     | '/services'
     | '/terms'
     | '/providers/$id'
     | '/services/$slug'
+    | '/u/$id'
   id:
     | '__root__'
     | '/'
     | '/about'
+    | '/admin'
     | '/contact'
+    | '/dashboard'
+    | '/feed'
     | '/login'
+    | '/me'
     | '/services'
     | '/terms'
     | '/providers/$id'
     | '/services/$slug'
+    | '/u/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  AdminRoute: typeof AdminRoute
   ContactRoute: typeof ContactRoute
+  DashboardRoute: typeof DashboardRoute
+  FeedRoute: typeof FeedRoute
   LoginRoute: typeof LoginRoute
+  MeRoute: typeof MeRoute
   ServicesRoute: typeof ServicesRouteWithChildren
   TermsRoute: typeof TermsRoute
   ProvidersIdRoute: typeof ProvidersIdRoute
+  UIdRoute: typeof UIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -149,6 +214,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ServicesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/me': {
+      id: '/me'
+      path: '/me'
+      fullPath: '/me'
+      preLoaderRoute: typeof MeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -156,11 +228,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/feed': {
+      id: '/feed'
+      path: '/feed'
+      fullPath: '/feed'
+      preLoaderRoute: typeof FeedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/contact': {
       id: '/contact'
       path: '/contact'
       fullPath: '/contact'
       preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -175,6 +268,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/u/$id': {
+      id: '/u/$id'
+      path: '/u/$id'
+      fullPath: '/u/$id'
+      preLoaderRoute: typeof UIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/services/$slug': {
@@ -209,12 +309,27 @@ const ServicesRouteWithChildren = ServicesRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  AdminRoute: AdminRoute,
   ContactRoute: ContactRoute,
+  DashboardRoute: DashboardRoute,
+  FeedRoute: FeedRoute,
   LoginRoute: LoginRoute,
+  MeRoute: MeRoute,
   ServicesRoute: ServicesRouteWithChildren,
   TermsRoute: TermsRoute,
   ProvidersIdRoute: ProvidersIdRoute,
+  UIdRoute: UIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
