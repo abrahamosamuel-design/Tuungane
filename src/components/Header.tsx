@@ -61,9 +61,10 @@ export function Header() {
             </div>
           ) : (
             <>
+              <Link to="/opportunities/new" className="hidden items-center gap-1 text-sm font-medium text-navy hover:text-orange lg:inline-flex"><Plus className="h-4 w-4" /> Post opportunity</Link>
               <Link to="/login" className="text-sm font-medium text-navy hover:text-orange">Log in</Link>
               <Link to="/login" search={{ tab: "signup" } as never} className="inline-flex items-center rounded-full bg-orange px-4 py-2 text-sm font-semibold text-orange-foreground shadow-sm transition-all hover:brightness-110">
-                Post your skill
+                Post a service
               </Link>
             </>
           )}
