@@ -19,7 +19,8 @@ function Dashboard() {
   const [profile, setProfile] = useState<{ full_name: string; avatar_url: string | null; is_provider: boolean } | null>(null);
   const [sp, setSp] = useState<{ category_slug: string; subcategory: string; business_name: string | null; bio: string; district: string; town: string; phone: string | null; whatsapp: string | null } | null>(null);
   const [posts, setPosts] = useState<PostRow[]>([]);
-  const [stats, setStats] = useState({ followers: 0, posts: 0, recs: 0 });
+  const [stats, setStats] = useState({ followers: 0, posts: 0, recs: 0, likes: 0, comments: 0, reviews: 0, saves: 0, opps: 0 });
+  const [customerStats, setCustomerStats] = useState({ following: 0, saved: 0, savedOpps: 0, reviewsWritten: 0, recsGiven: 0 });
 
   useEffect(() => {
     if (!loading && !user) nav({ to: "/login", search: { tab: "login", redirect: "/dashboard" } as never });

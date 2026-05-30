@@ -1,54 +1,62 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { BadgeCheck, MapPin, Sparkles } from "lucide-react";
 import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { PostCard, type PostRow } from "@/components/social/PostCard";
+import { OpportunityCard, type OpportunityRow } from "@/components/OpportunityCard";
 import { categories } from "@/data/categories";
+import { postTypes, type PostTypeValue } from "@/data/postTypes";
 
 export const Route = createFileRoute("/feed")({
   head: () => ({ meta: [{ title: "Activity Feed — Tuungane" }] }),
   component: Feed,
 });
 
-type Filter = "all" | "following" | "verified" | "popular" | "nearby";
+type Tab = "posts" | "services" | "opportunities";
+type PostFilter = "all" | "following" | "verified" | "popular" | "nearby";
+
+const avatar = (s: string) =>
+  `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(s || "T")}&backgroundColor=1e3a8a,f97316,16a34a&fontFamily=Plus%20Jakarta%20Sans`;
 
 function Feed() {
   const { user } = useAuth();
-  const [filter, setFilter] = useState<Filter>("all");
+  const [tab, setTab] = useState<Tab>("posts");
+  const [filter, setFilter] = useState<PostFilter>("all");
   const [category, setCategory] = useState<string>("");
+  const [postType, setPostType] = useState<PostTypeValue | "">("");
   const [posts, setPosts] = useState<PostRow[]>([]);
+  const [providers, setProviders] = useState<any[]>([]);
+  const [opps, setOpps] = useState<OpportunityRow[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const load = async () => {
-    setLoading(true);
+  const loadPosts = async () => {
     let providerIds: string[] | null = null;
-
     if (filter === "following" && user) {
       const { data } = await supabase.from("follows").select("provider_user_id").eq("follower_id", user.id);
       providerIds = (data ?? []).map((f) => f.provider_user_id);
-      if (providerIds.length === 0) { setPosts([]); setLoading(false); return; }
+      if (providerIds.length === 0) { setPosts([]); return; }
     }
     if (filter === "verified") {
       const { data } = await supabase.from("service_profiles").select("user_id").in("verified", ["verified", "featured"]);
       providerIds = (data ?? []).map((p) => p.user_id);
-      if (providerIds.length === 0) { setPosts([]); setLoading(false); return; }
+      if (providerIds.length === 0) { setPosts([]); return; }
     }
     if (filter === "nearby") {
-      if (!user) { toast.error("Sign in to see providers near you"); setPosts([]); setLoading(false); return; }
-      const { data: me } = await supabase.from("profiles").select("district,town").eq("id", user.id).maybeSingle();
+      if (!user) { toast.error("Sign in to see providers near you"); setPosts([]); return; }
+      const { data: me } = await supabase.from("profiles").select("district").eq("id", user.id).maybeSingle();
       const district = me?.district?.trim();
-      if (!district) { toast.info("Add your district in your profile to see nearby posts"); setPosts([]); setLoading(false); return; }
+      if (!district) { toast.info("Add your district in your profile to see nearby posts"); setPosts([]); return; }
       const { data } = await supabase.from("service_profiles").select("user_id").eq("district", district);
       providerIds = (data ?? []).map((p) => p.user_id);
-      if (providerIds.length === 0) { setPosts([]); setLoading(false); return; }
+      if (providerIds.length === 0) { setPosts([]); return; }
     }
-
     let q = supabase.from("timeline_posts").select("*").eq("hidden", false).order("created_at", { ascending: false }).limit(50);
     if (providerIds) q = q.in("provider_user_id", providerIds);
     if (category) q = q.eq("category_slug", category);
-
+    if (postType) q = q.eq("post_type", postType);
     const { data: rows } = await q;
     const ids = Array.from(new Set((rows ?? []).map((r) => r.provider_user_id)));
     const profMap = new Map<string, { full_name: string; avatar_url: string | null; is_provider: boolean }>();
@@ -64,12 +72,48 @@ function Feed() {
       mapped = mapped.sort((a, b) => (tally.get(b.id) ?? 0) - (tally.get(a.id) ?? 0));
     }
     setPosts(mapped);
+  };
+
+  const loadProviders = async () => {
+    let q = supabase.from("service_profiles").select("*").eq("suspended", false).order("updated_at", { ascending: false }).limit(50);
+    if (category) q = q.eq("category_slug", category);
+    const { data } = await q;
+    const ids = (data ?? []).map((p) => p.user_id);
+    const profMap = new Map<string, { full_name: string; avatar_url: string | null }>();
+    if (ids.length) {
+      const { data: profs } = await supabase.from("profiles").select("id,full_name,avatar_url").in("id", ids);
+      (profs ?? []).forEach((p) => profMap.set(p.id, p));
+    }
+    setProviders((data ?? []).map((p) => ({ ...p, profile: profMap.get(p.user_id) })));
+  };
+
+  const loadOpps = async () => {
+    let q = supabase.from("opportunities").select("*").in("status", ["approved", "featured"]).order("created_at", { ascending: false }).limit(50);
+    if (category) q = q.eq("category_slug", category);
+    const { data } = await q;
+    const ids = Array.from(new Set((data ?? []).map((o) => o.poster_id)));
+    const profMap = new Map<string, { full_name: string; avatar_url: string | null }>();
+    if (ids.length) {
+      const { data: profs } = await supabase.from("profiles").select("id,full_name,avatar_url").in("id", ids);
+      (profs ?? []).forEach((p) => profMap.set(p.id, p));
+    }
+    setOpps((data ?? []).map((o) => ({ ...o, author: profMap.get(o.poster_id) ?? null })) as OpportunityRow[]);
+  };
+
+  const load = async () => {
+    setLoading(true);
+    if (tab === "posts") await loadPosts();
+    else if (tab === "services") await loadProviders();
+    else await loadOpps();
     setLoading(false);
   };
 
-  useEffect(() => { load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [filter, category, user?.id]);
+  useEffect(() => { load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [tab, filter, category, postType, user?.id]);
 
-  const filters: { id: Filter; label: string }[] = [
+  const tabs: { id: Tab; label: string }[] = [
+    { id: "posts", label: "Posts" }, { id: "services", label: "Services" }, { id: "opportunities", label: "Opportunities" },
+  ];
+  const postFilters: { id: PostFilter; label: string }[] = [
     { id: "all", label: "All" }, { id: "following", label: "Following" }, { id: "nearby", label: "Nearby" }, { id: "popular", label: "Popular" }, { id: "verified", label: "Verified" },
   ];
 
@@ -77,29 +121,69 @@ function Feed() {
     <Layout>
       <section className="mx-auto max-w-2xl px-4 py-8">
         <h1 className="font-display text-3xl font-bold text-navy">Activity feed</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Recent work from service providers on Tuungane.</p>
+        <p className="mt-1 text-sm text-muted-foreground">Discover work, providers, and opportunities on Tuungane.</p>
 
-        <div className="mt-5 flex flex-wrap gap-2">
-          {filters.map((f) => (
+        <div className="mt-5 flex gap-1 rounded-full border border-border bg-card p-1">
+          {tabs.map((t) => (
+            <button key={t.id} onClick={() => setTab(t.id)} className={`flex-1 rounded-full px-3 py-1.5 text-xs font-semibold transition ${tab === t.id ? "bg-navy text-navy-foreground" : "text-muted-foreground hover:text-navy"}`}>{t.label}</button>
+          ))}
+        </div>
+
+        <div className="mt-4 flex flex-wrap gap-2">
+          {tab === "posts" && postFilters.map((f) => (
             <button key={f.id} onClick={() => setFilter(f.id)} className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${filter === f.id ? "bg-navy text-navy-foreground" : "border border-border bg-background text-muted-foreground hover:border-navy"}`}>{f.label}</button>
           ))}
           <select value={category} onChange={(e) => setCategory(e.target.value)} className="rounded-full border border-border bg-background px-3 py-1.5 text-xs">
             <option value="">All categories</option>
             {categories.map((c) => <option key={c.slug} value={c.slug}>{c.name}</option>)}
           </select>
+          {tab === "posts" && (
+            <select value={postType} onChange={(e) => setPostType(e.target.value as PostTypeValue | "")} className="rounded-full border border-border bg-background px-3 py-1.5 text-xs">
+              <option value="">Any post type</option>
+              {postTypes.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
+            </select>
+          )}
         </div>
 
         <div className="mt-6 space-y-4">
           {loading && <p className="text-sm text-muted-foreground">Loading...</p>}
-          {!loading && posts.length === 0 && (
-            <div className="rounded-2xl border border-dashed border-border bg-card p-10 text-center">
-              <p className="font-semibold text-navy">No posts yet</p>
-              <p className="mt-1 text-sm text-muted-foreground">{filter === "following" ? "Follow some providers to see their work here." : "Be the first to share work on Tuungane."}</p>
-            </div>
-          )}
-          {posts.map((p) => <PostCard key={p.id} post={p} onChanged={load} />)}
+
+          {!loading && tab === "posts" && (posts.length === 0 ? (
+            <Empty title="No posts yet" hint={filter === "following" ? "Follow providers to see their work here." : "Be the first to share work."} />
+          ) : posts.map((p) => <PostCard key={p.id} post={p} onChanged={load} />))}
+
+          {!loading && tab === "services" && (providers.length === 0 ? (
+            <Empty title="No providers found" hint="Try a different category." />
+          ) : providers.map((p) => (
+            <Link key={p.user_id} to="/u/$id" params={{ id: p.user_id }} className="flex items-start gap-3 rounded-2xl border border-border bg-card p-4 transition hover:border-orange">
+              <img src={p.profile?.avatar_url || avatar(p.profile?.full_name || "T")} alt="" className="h-12 w-12 rounded-xl border border-border" />
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1.5">
+                  <p className="truncate font-semibold text-navy">{p.business_name || p.profile?.full_name}</p>
+                  {p.verified === "verified" && <BadgeCheck className="h-4 w-4 text-green" />}
+                  {p.verified === "featured" && <Sparkles className="h-4 w-4 text-orange" />}
+                </div>
+                <p className="text-xs text-muted-foreground">{p.subcategory}</p>
+                <p className="mt-1 line-clamp-2 text-sm text-foreground/70">{p.bio}</p>
+                <p className="mt-1 inline-flex items-center gap-1 text-xs text-muted-foreground"><MapPin className="h-3 w-3" />{p.town}, {p.district}</p>
+              </div>
+            </Link>
+          )))}
+
+          {!loading && tab === "opportunities" && (opps.length === 0 ? (
+            <Empty title="No opportunities yet" hint={<>Post a gig, job, or apprenticeship from the <Link to="/opportunities/new" className="font-semibold text-orange">Opportunities</Link> page.</>} />
+          ) : opps.map((o) => <OpportunityCard key={o.id} o={o} />))}
         </div>
       </section>
     </Layout>
+  );
+}
+
+function Empty({ title, hint }: { title: string; hint: React.ReactNode }) {
+  return (
+    <div className="rounded-2xl border border-dashed border-border bg-card p-10 text-center">
+      <p className="font-semibold text-navy">{title}</p>
+      <p className="mt-1 text-sm text-muted-foreground">{hint}</p>
+    </div>
   );
 }
