@@ -12,7 +12,7 @@ export function Footer() {
               <Logo className="h-10 w-auto" />
             </div>
             <p className="mt-4 max-w-sm text-sm text-white/70">
-              Tuungane — Connect to Opportunity. Connect. Grow. Prosper Together.
+              Tuungane helps people find trusted service providers and helps skilled people find gigs, jobs, internships, volunteer work, and apprenticeships. Find services. Find work. Grow through skill.
             </p>
             <div className="mt-5 flex items-center gap-3">
               {[Facebook, Instagram, Twitter, Linkedin].map((Icon, i) => (
@@ -26,6 +26,7 @@ export function Footer() {
             <h4 className="text-sm font-semibold text-white">Explore</h4>
             <ul className="mt-3 space-y-2 text-sm text-white/70">
               <li><Link to="/services" className="hover:text-orange">Services</Link></li>
+              <li><Link to="/opportunities" className="hover:text-orange">Opportunities</Link></li>
               <li><Link to="/about" className="hover:text-orange">About</Link></li>
               <li><Link to="/contact" className="hover:text-orange">Contact</Link></li>
               <li><Link to="/terms" className="hover:text-orange">Terms & Safety</Link></li>

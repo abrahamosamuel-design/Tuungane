@@ -32,6 +32,163 @@ export type Database = {
         }
         Relationships: []
       }
+      opportunities: {
+        Row: {
+          area: string | null
+          category_slug: string
+          compensation: string | null
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string
+          deadline: string | null
+          description: string
+          district: string | null
+          expires_at: string | null
+          id: string
+          image_url: string | null
+          is_featured: boolean
+          location: string
+          opportunity_type: Database["public"]["Enums"]["opportunity_type"]
+          poster_id: string
+          poster_type: Database["public"]["Enums"]["poster_type"]
+          requirements: string | null
+          status: Database["public"]["Enums"]["opportunity_status"]
+          subcategory: string | null
+          title: string
+          town: string | null
+          updated_at: string
+          whatsapp_number: string | null
+        }
+        Insert: {
+          area?: string | null
+          category_slug: string
+          compensation?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          deadline?: string | null
+          description: string
+          district?: string | null
+          expires_at?: string | null
+          id?: string
+          image_url?: string | null
+          is_featured?: boolean
+          location?: string
+          opportunity_type: Database["public"]["Enums"]["opportunity_type"]
+          poster_id: string
+          poster_type?: Database["public"]["Enums"]["poster_type"]
+          requirements?: string | null
+          status?: Database["public"]["Enums"]["opportunity_status"]
+          subcategory?: string | null
+          title: string
+          town?: string | null
+          updated_at?: string
+          whatsapp_number?: string | null
+        }
+        Update: {
+          area?: string | null
+          category_slug?: string
+          compensation?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          deadline?: string | null
+          description?: string
+          district?: string | null
+          expires_at?: string | null
+          id?: string
+          image_url?: string | null
+          is_featured?: boolean
+          location?: string
+          opportunity_type?: Database["public"]["Enums"]["opportunity_type"]
+          poster_id?: string
+          poster_type?: Database["public"]["Enums"]["poster_type"]
+          requirements?: string | null
+          status?: Database["public"]["Enums"]["opportunity_status"]
+          subcategory?: string | null
+          title?: string
+          town?: string | null
+          updated_at?: string
+          whatsapp_number?: string | null
+        }
+        Relationships: []
+      }
+      opportunity_applications: {
+        Row: {
+          applicant_id: string
+          contact_phone: string | null
+          created_at: string
+          id: string
+          message: string
+          opportunity_id: string
+          status: Database["public"]["Enums"]["application_status"]
+        }
+        Insert: {
+          applicant_id: string
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          message?: string
+          opportunity_id: string
+          status?: Database["public"]["Enums"]["application_status"]
+        }
+        Update: {
+          applicant_id?: string
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          message?: string
+          opportunity_id?: string
+          status?: Database["public"]["Enums"]["application_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opportunity_applications_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "opportunities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      opportunity_reports: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          opportunity_id: string
+          reason: string
+          reporter_id: string
+          status: Database["public"]["Enums"]["opp_report_status"]
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          opportunity_id: string
+          reason: string
+          reporter_id: string
+          status?: Database["public"]["Enums"]["opp_report_status"]
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          opportunity_id?: string
+          reason?: string
+          reporter_id?: string
+          status?: Database["public"]["Enums"]["opp_report_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "opportunity_reports_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "opportunities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       post_comments: {
         Row: {
           created_at: string
@@ -225,6 +382,35 @@ export type Database = {
         }
         Relationships: []
       }
+      saved_opportunities: {
+        Row: {
+          created_at: string
+          id: string
+          opportunity_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          opportunity_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          opportunity_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_opportunities_opportunity_id_fkey"
+            columns: ["opportunity_id"]
+            isOneToOne: false
+            referencedRelation: "opportunities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       saved_providers: {
         Row: {
           created_at: string
@@ -381,7 +567,29 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
+      application_status: "sent" | "viewed" | "accepted" | "rejected"
       availability_status: "available" | "busy" | "away"
+      opp_report_status: "open" | "reviewed" | "resolved" | "dismissed"
+      opportunity_status:
+        | "pending"
+        | "approved"
+        | "rejected"
+        | "featured"
+        | "expired"
+      opportunity_type:
+        | "gig"
+        | "job"
+        | "internship"
+        | "volunteer"
+        | "apprenticeship"
+      poster_type:
+        | "individual"
+        | "business"
+        | "organization"
+        | "school"
+        | "church"
+        | "ngo"
+        | "admin"
       report_status: "open" | "reviewing" | "resolved" | "dismissed"
       verification_status: "none" | "pending" | "verified" | "featured"
     }
@@ -512,7 +720,32 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "moderator", "user"],
+      application_status: ["sent", "viewed", "accepted", "rejected"],
       availability_status: ["available", "busy", "away"],
+      opp_report_status: ["open", "reviewed", "resolved", "dismissed"],
+      opportunity_status: [
+        "pending",
+        "approved",
+        "rejected",
+        "featured",
+        "expired",
+      ],
+      opportunity_type: [
+        "gig",
+        "job",
+        "internship",
+        "volunteer",
+        "apprenticeship",
+      ],
+      poster_type: [
+        "individual",
+        "business",
+        "organization",
+        "school",
+        "church",
+        "ngo",
+        "admin",
+      ],
       report_status: ["open", "reviewing", "resolved", "dismissed"],
       verification_status: ["none", "pending", "verified", "featured"],
     },

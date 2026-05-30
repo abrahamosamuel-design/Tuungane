@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as ServicesRouteImport } from './routes/services'
+import { Route as OpportunitiesRouteImport } from './routes/opportunities'
 import { Route as MeRouteImport } from './routes/me'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as FeedRouteImport } from './routes/feed'
@@ -22,6 +23,8 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as UIdRouteImport } from './routes/u.$id'
 import { Route as ServicesSlugRouteImport } from './routes/services.$slug'
 import { Route as ProvidersIdRouteImport } from './routes/providers.$id'
+import { Route as OpportunitiesNewRouteImport } from './routes/opportunities.new'
+import { Route as OpportunitiesIdRouteImport } from './routes/opportunities.$id'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -31,6 +34,11 @@ const TermsRoute = TermsRouteImport.update({
 const ServicesRoute = ServicesRouteImport.update({
   id: '/services',
   path: '/services',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OpportunitiesRoute = OpportunitiesRouteImport.update({
+  id: '/opportunities',
+  path: '/opportunities',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MeRoute = MeRouteImport.update({
@@ -88,6 +96,16 @@ const ProvidersIdRoute = ProvidersIdRouteImport.update({
   path: '/providers/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OpportunitiesNewRoute = OpportunitiesNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => OpportunitiesRoute,
+} as any)
+const OpportunitiesIdRoute = OpportunitiesIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => OpportunitiesRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -98,8 +116,11 @@ export interface FileRoutesByFullPath {
   '/feed': typeof FeedRoute
   '/login': typeof LoginRoute
   '/me': typeof MeRoute
+  '/opportunities': typeof OpportunitiesRouteWithChildren
   '/services': typeof ServicesRouteWithChildren
   '/terms': typeof TermsRoute
+  '/opportunities/$id': typeof OpportunitiesIdRoute
+  '/opportunities/new': typeof OpportunitiesNewRoute
   '/providers/$id': typeof ProvidersIdRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/u/$id': typeof UIdRoute
@@ -113,8 +134,11 @@ export interface FileRoutesByTo {
   '/feed': typeof FeedRoute
   '/login': typeof LoginRoute
   '/me': typeof MeRoute
+  '/opportunities': typeof OpportunitiesRouteWithChildren
   '/services': typeof ServicesRouteWithChildren
   '/terms': typeof TermsRoute
+  '/opportunities/$id': typeof OpportunitiesIdRoute
+  '/opportunities/new': typeof OpportunitiesNewRoute
   '/providers/$id': typeof ProvidersIdRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/u/$id': typeof UIdRoute
@@ -129,8 +153,11 @@ export interface FileRoutesById {
   '/feed': typeof FeedRoute
   '/login': typeof LoginRoute
   '/me': typeof MeRoute
+  '/opportunities': typeof OpportunitiesRouteWithChildren
   '/services': typeof ServicesRouteWithChildren
   '/terms': typeof TermsRoute
+  '/opportunities/$id': typeof OpportunitiesIdRoute
+  '/opportunities/new': typeof OpportunitiesNewRoute
   '/providers/$id': typeof ProvidersIdRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/u/$id': typeof UIdRoute
@@ -146,8 +173,11 @@ export interface FileRouteTypes {
     | '/feed'
     | '/login'
     | '/me'
+    | '/opportunities'
     | '/services'
     | '/terms'
+    | '/opportunities/$id'
+    | '/opportunities/new'
     | '/providers/$id'
     | '/services/$slug'
     | '/u/$id'
@@ -161,8 +191,11 @@ export interface FileRouteTypes {
     | '/feed'
     | '/login'
     | '/me'
+    | '/opportunities'
     | '/services'
     | '/terms'
+    | '/opportunities/$id'
+    | '/opportunities/new'
     | '/providers/$id'
     | '/services/$slug'
     | '/u/$id'
@@ -176,8 +209,11 @@ export interface FileRouteTypes {
     | '/feed'
     | '/login'
     | '/me'
+    | '/opportunities'
     | '/services'
     | '/terms'
+    | '/opportunities/$id'
+    | '/opportunities/new'
     | '/providers/$id'
     | '/services/$slug'
     | '/u/$id'
@@ -192,6 +228,7 @@ export interface RootRouteChildren {
   FeedRoute: typeof FeedRoute
   LoginRoute: typeof LoginRoute
   MeRoute: typeof MeRoute
+  OpportunitiesRoute: typeof OpportunitiesRouteWithChildren
   ServicesRoute: typeof ServicesRouteWithChildren
   TermsRoute: typeof TermsRoute
   ProvidersIdRoute: typeof ProvidersIdRoute
@@ -212,6 +249,13 @@ declare module '@tanstack/react-router' {
       path: '/services'
       fullPath: '/services'
       preLoaderRoute: typeof ServicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/opportunities': {
+      id: '/opportunities'
+      path: '/opportunities'
+      fullPath: '/opportunities'
+      preLoaderRoute: typeof OpportunitiesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/me': {
@@ -291,8 +335,36 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProvidersIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/opportunities/new': {
+      id: '/opportunities/new'
+      path: '/new'
+      fullPath: '/opportunities/new'
+      preLoaderRoute: typeof OpportunitiesNewRouteImport
+      parentRoute: typeof OpportunitiesRoute
+    }
+    '/opportunities/$id': {
+      id: '/opportunities/$id'
+      path: '/$id'
+      fullPath: '/opportunities/$id'
+      preLoaderRoute: typeof OpportunitiesIdRouteImport
+      parentRoute: typeof OpportunitiesRoute
+    }
   }
 }
+
+interface OpportunitiesRouteChildren {
+  OpportunitiesIdRoute: typeof OpportunitiesIdRoute
+  OpportunitiesNewRoute: typeof OpportunitiesNewRoute
+}
+
+const OpportunitiesRouteChildren: OpportunitiesRouteChildren = {
+  OpportunitiesIdRoute: OpportunitiesIdRoute,
+  OpportunitiesNewRoute: OpportunitiesNewRoute,
+}
+
+const OpportunitiesRouteWithChildren = OpportunitiesRoute._addFileChildren(
+  OpportunitiesRouteChildren,
+)
 
 interface ServicesRouteChildren {
   ServicesSlugRoute: typeof ServicesSlugRoute
@@ -315,6 +387,7 @@ const rootRouteChildren: RootRouteChildren = {
   FeedRoute: FeedRoute,
   LoginRoute: LoginRoute,
   MeRoute: MeRoute,
+  OpportunitiesRoute: OpportunitiesRouteWithChildren,
   ServicesRoute: ServicesRouteWithChildren,
   TermsRoute: TermsRoute,
   ProvidersIdRoute: ProvidersIdRoute,

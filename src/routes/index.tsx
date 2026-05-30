@@ -34,14 +34,14 @@ function Index() {
                 Find Trusted Service Providers <span className="text-orange">Near You</span>
               </h1>
               <p className="mt-5 max-w-xl text-base text-white/80 sm:text-lg">
-                Tuungane helps you discover skilled people in your area and helps service providers become visible, trusted, and connected to opportunity.
+                Tuungane helps people find trusted service providers and helps skilled people find gigs, jobs, internships, volunteer work, and apprenticeships. <span className="text-white">Find services. Find work. Grow through skill.</span>
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Link to="/services" className="inline-flex items-center justify-center gap-2 rounded-full bg-orange px-6 py-3 text-sm font-semibold text-orange-foreground shadow-lg transition hover:brightness-110">
                   <Search className="h-4 w-4" /> Find a Service
                 </Link>
-                <Link to="/login" className="inline-flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/5 px-6 py-3 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/10">
-                  Post Your Skill <ArrowRight className="h-4 w-4" />
+                <Link to="/opportunities" className="inline-flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/5 px-6 py-3 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/10">
+                  Find Work Opportunities <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
               <div className="mt-10 flex flex-wrap items-center gap-6 text-sm text-white/70">
@@ -135,6 +135,23 @@ function Index() {
           {[...featured, ...providers.slice(0, 3)].slice(0, 6).map((p) => (
             <ProviderCard key={p.id} p={p} />
           ))}
+        </div>
+      </section>
+
+      {/* Opportunities */}
+      <section className="bg-surface py-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-orange">Skills-Based Opportunities</p>
+              <h2 className="mt-1 font-display text-3xl font-bold text-navy">Find work that fits your skills</h2>
+              <p className="mt-2 max-w-2xl text-sm text-muted-foreground">Find gigs, jobs, internships, volunteer work, and apprenticeships connected to your skills and services.</p>
+            </div>
+            <div className="flex gap-2">
+              <Link to="/opportunities" className="rounded-full bg-navy px-5 py-2.5 text-sm font-semibold text-navy-foreground hover:brightness-110">Browse Opportunities</Link>
+              <Link to="/opportunities/new" className="rounded-full bg-orange px-5 py-2.5 text-sm font-semibold text-orange-foreground hover:brightness-110">Post an Opportunity</Link>
+            </div>
+          </div>
         </div>
       </section>
 

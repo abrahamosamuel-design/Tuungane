@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Menu, X, User as UserIcon, LogOut, LayoutDashboard, Shield, Rss } from "lucide-react";
+import { Menu, X, User as UserIcon, LogOut, LayoutDashboard, Shield, Rss, Plus, Briefcase, Wrench } from "lucide-react";
 import { useState } from "react";
 import { Logo } from "./Logo";
 import { useAuth } from "@/hooks/use-auth";
@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/use-auth";
 const nav = [
   { to: "/", label: "Home" },
   { to: "/services", label: "Services" },
+  { to: "/opportunities", label: "Opportunities" },
   { to: "/feed", label: "Feed" },
   { to: "/about", label: "About" },
 ];
@@ -48,6 +49,8 @@ export function Header() {
                     <MenuItem to="/dashboard" icon={<LayoutDashboard className="h-4 w-4" />} label="My dashboard" onClick={() => setMenu(false)} />
                     <MenuItem to="/me" icon={<UserIcon className="h-4 w-4" />} label="My profile" onClick={() => setMenu(false)} />
                     <MenuItem to="/feed" icon={<Rss className="h-4 w-4" />} label="Activity feed" onClick={() => setMenu(false)} />
+                    <MenuItem to="/dashboard" icon={<Wrench className="h-4 w-4" />} label="Post a service" onClick={() => setMenu(false)} />
+                    <MenuItem to="/opportunities/new" icon={<Briefcase className="h-4 w-4" />} label="Post an opportunity" onClick={() => setMenu(false)} />
                     {isModerator && <MenuItem to="/admin" icon={<Shield className="h-4 w-4" />} label="Admin & moderation" onClick={() => setMenu(false)} />}
                     <button onClick={() => { setMenu(false); signOut(); }} className="flex w-full items-center gap-2 border-t border-border px-3 py-2.5 text-left text-sm text-destructive hover:bg-muted">
                       <LogOut className="h-4 w-4" /> Sign out
@@ -58,9 +61,10 @@ export function Header() {
             </div>
           ) : (
             <>
+              <Link to="/opportunities/new" className="hidden items-center gap-1 text-sm font-medium text-navy hover:text-orange lg:inline-flex"><Plus className="h-4 w-4" /> Post opportunity</Link>
               <Link to="/login" className="text-sm font-medium text-navy hover:text-orange">Log in</Link>
               <Link to="/login" search={{ tab: "signup" } as never} className="inline-flex items-center rounded-full bg-orange px-4 py-2 text-sm font-semibold text-orange-foreground shadow-sm transition-all hover:brightness-110">
-                Post your skill
+                Post a service
               </Link>
             </>
           )}
@@ -79,13 +83,17 @@ export function Header() {
               <>
                 <Link to="/dashboard" onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted">My dashboard</Link>
                 <Link to="/me" onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted">My profile</Link>
+                <Link to="/opportunities/new" onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted">Post an opportunity</Link>
                 {isModerator && <Link to="/admin" onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted">Admin</Link>}
                 <button onClick={() => { setOpen(false); signOut(); }} className="block w-full rounded-md px-3 py-2 text-left text-sm font-medium text-destructive hover:bg-muted">Sign out</button>
               </>
             ) : (
-              <Link to="/login" onClick={() => setOpen(false)} className="mt-2 block rounded-full bg-orange px-4 py-2 text-center text-sm font-semibold text-orange-foreground">
-                Log in or sign up
-              </Link>
+              <>
+                <Link to="/opportunities/new" onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted">Post an opportunity</Link>
+                <Link to="/login" onClick={() => setOpen(false)} className="mt-2 block rounded-full bg-orange px-4 py-2 text-center text-sm font-semibold text-orange-foreground">
+                  Log in or sign up
+                </Link>
+              </>
             )}
           </div>
         </div>
