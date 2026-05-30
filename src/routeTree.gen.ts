@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as ServicesRouteImport } from './routes/services'
+import { Route as OpportunitiesRouteImport } from './routes/opportunities'
 import { Route as MeRouteImport } from './routes/me'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as FeedRouteImport } from './routes/feed'
@@ -31,6 +32,11 @@ const TermsRoute = TermsRouteImport.update({
 const ServicesRoute = ServicesRouteImport.update({
   id: '/services',
   path: '/services',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OpportunitiesRoute = OpportunitiesRouteImport.update({
+  id: '/opportunities',
+  path: '/opportunities',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MeRoute = MeRouteImport.update({
@@ -98,6 +104,7 @@ export interface FileRoutesByFullPath {
   '/feed': typeof FeedRoute
   '/login': typeof LoginRoute
   '/me': typeof MeRoute
+  '/opportunities': typeof OpportunitiesRoute
   '/services': typeof ServicesRouteWithChildren
   '/terms': typeof TermsRoute
   '/providers/$id': typeof ProvidersIdRoute
@@ -113,6 +120,7 @@ export interface FileRoutesByTo {
   '/feed': typeof FeedRoute
   '/login': typeof LoginRoute
   '/me': typeof MeRoute
+  '/opportunities': typeof OpportunitiesRoute
   '/services': typeof ServicesRouteWithChildren
   '/terms': typeof TermsRoute
   '/providers/$id': typeof ProvidersIdRoute
@@ -129,6 +137,7 @@ export interface FileRoutesById {
   '/feed': typeof FeedRoute
   '/login': typeof LoginRoute
   '/me': typeof MeRoute
+  '/opportunities': typeof OpportunitiesRoute
   '/services': typeof ServicesRouteWithChildren
   '/terms': typeof TermsRoute
   '/providers/$id': typeof ProvidersIdRoute
@@ -146,6 +155,7 @@ export interface FileRouteTypes {
     | '/feed'
     | '/login'
     | '/me'
+    | '/opportunities'
     | '/services'
     | '/terms'
     | '/providers/$id'
@@ -161,6 +171,7 @@ export interface FileRouteTypes {
     | '/feed'
     | '/login'
     | '/me'
+    | '/opportunities'
     | '/services'
     | '/terms'
     | '/providers/$id'
@@ -176,6 +187,7 @@ export interface FileRouteTypes {
     | '/feed'
     | '/login'
     | '/me'
+    | '/opportunities'
     | '/services'
     | '/terms'
     | '/providers/$id'
@@ -192,6 +204,7 @@ export interface RootRouteChildren {
   FeedRoute: typeof FeedRoute
   LoginRoute: typeof LoginRoute
   MeRoute: typeof MeRoute
+  OpportunitiesRoute: typeof OpportunitiesRoute
   ServicesRoute: typeof ServicesRouteWithChildren
   TermsRoute: typeof TermsRoute
   ProvidersIdRoute: typeof ProvidersIdRoute
@@ -212,6 +225,13 @@ declare module '@tanstack/react-router' {
       path: '/services'
       fullPath: '/services'
       preLoaderRoute: typeof ServicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/opportunities': {
+      id: '/opportunities'
+      path: '/opportunities'
+      fullPath: '/opportunities'
+      preLoaderRoute: typeof OpportunitiesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/me': {
@@ -315,6 +335,7 @@ const rootRouteChildren: RootRouteChildren = {
   FeedRoute: FeedRoute,
   LoginRoute: LoginRoute,
   MeRoute: MeRoute,
+  OpportunitiesRoute: OpportunitiesRoute,
   ServicesRoute: ServicesRouteWithChildren,
   TermsRoute: TermsRoute,
   ProvidersIdRoute: ProvidersIdRoute,
@@ -323,3 +344,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
