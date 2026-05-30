@@ -12,7 +12,7 @@ export function Footer() {
               <Logo className="h-10 w-auto" />
             </div>
             <p className="mt-4 max-w-sm text-sm text-white/70">
-              Tuungane — Connect to Opportunity. Connect. Grow. Prosper Together.
+              Tuungane helps people find trusted service providers and helps skilled people find gigs, jobs, internships, volunteer work, and apprenticeships. Find services. Find work. Grow through skill.
             </p>
             <div className="mt-5 flex items-center gap-3">
               {[Facebook, Instagram, Twitter, Linkedin].map((Icon, i) => (
