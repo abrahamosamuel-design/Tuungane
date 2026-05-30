@@ -49,6 +49,8 @@ export function Header() {
                     <MenuItem to="/dashboard" icon={<LayoutDashboard className="h-4 w-4" />} label="My dashboard" onClick={() => setMenu(false)} />
                     <MenuItem to="/me" icon={<UserIcon className="h-4 w-4" />} label="My profile" onClick={() => setMenu(false)} />
                     <MenuItem to="/feed" icon={<Rss className="h-4 w-4" />} label="Activity feed" onClick={() => setMenu(false)} />
+                    <MenuItem to="/dashboard" icon={<Wrench className="h-4 w-4" />} label="Post a service" onClick={() => setMenu(false)} />
+                    <MenuItem to="/opportunities/new" icon={<Briefcase className="h-4 w-4" />} label="Post an opportunity" onClick={() => setMenu(false)} />
                     {isModerator && <MenuItem to="/admin" icon={<Shield className="h-4 w-4" />} label="Admin & moderation" onClick={() => setMenu(false)} />}
                     <button onClick={() => { setMenu(false); signOut(); }} className="flex w-full items-center gap-2 border-t border-border px-3 py-2.5 text-left text-sm text-destructive hover:bg-muted">
                       <LogOut className="h-4 w-4" /> Sign out
