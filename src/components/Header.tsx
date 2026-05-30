@@ -39,6 +39,8 @@ export function Header() {
         </nav>
         <div className="hidden items-center gap-3 md:flex">
           {loading ? null : user ? (
+            <>
+            <NotificationsBell />
             <div className="relative">
               <button onClick={() => setMenu((m) => !m)} className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1.5 text-sm font-medium text-navy hover:border-orange/60">
                 <UserIcon className="h-4 w-4" /> {user.email?.split("@")[0]}
