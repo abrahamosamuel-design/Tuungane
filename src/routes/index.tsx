@@ -138,6 +138,23 @@ function Index() {
         </div>
       </section>
 
+      {/* Opportunities */}
+      <section className="bg-surface py-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-orange">Skills-Based Opportunities</p>
+              <h2 className="mt-1 font-display text-3xl font-bold text-navy">Find work that fits your skills</h2>
+              <p className="mt-2 max-w-2xl text-sm text-muted-foreground">Find gigs, jobs, internships, volunteer work, and apprenticeships connected to your skills and services.</p>
+            </div>
+            <div className="flex gap-2">
+              <Link to="/opportunities" className="rounded-full bg-navy px-5 py-2.5 text-sm font-semibold text-navy-foreground hover:brightness-110">Browse Opportunities</Link>
+              <Link to="/opportunities/new" className="rounded-full bg-orange px-5 py-2.5 text-sm font-semibold text-orange-foreground hover:brightness-110">Post an Opportunity</Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Why Tuungane */}
       <section className="bg-navy py-16 text-navy-foreground">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
