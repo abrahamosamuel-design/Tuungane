@@ -95,7 +95,6 @@ function NotificationsPage() {
               {!n.read && <span className="mt-2 h-2 w-2 rounded-full bg-orange" />}
             </a>
           ))}
-          })}
         </div>
       </section>
     </Layout>
