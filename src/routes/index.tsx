@@ -34,7 +34,7 @@ function Index() {
                 Find Trusted Service Providers <span className="text-orange">Near You</span>
               </h1>
               <p className="mt-5 max-w-xl text-base text-white/80 sm:text-lg">
-                Tuungane helps you discover skilled people in your area and helps service providers become visible, trusted, and connected to opportunity.
+                Tuungane helps people find trusted service providers and helps skilled people find gigs, jobs, internships, volunteer work, and apprenticeships. <span className="text-white">Find services. Find work. Grow through skill.</span>
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Link to="/services" className="inline-flex items-center justify-center gap-2 rounded-full bg-orange px-6 py-3 text-sm font-semibold text-orange-foreground shadow-lg transition hover:brightness-110">
