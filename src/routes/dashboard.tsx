@@ -19,7 +19,8 @@ function Dashboard() {
   const [profile, setProfile] = useState<{ full_name: string; avatar_url: string | null; is_provider: boolean } | null>(null);
   const [sp, setSp] = useState<{ category_slug: string; subcategory: string; business_name: string | null; bio: string; district: string; town: string; phone: string | null; whatsapp: string | null } | null>(null);
   const [posts, setPosts] = useState<PostRow[]>([]);
-  const [stats, setStats] = useState({ followers: 0, posts: 0, recs: 0 });
+  const [stats, setStats] = useState({ followers: 0, posts: 0, recs: 0, likes: 0, comments: 0, reviews: 0, saves: 0, opps: 0 });
+  const [customerStats, setCustomerStats] = useState({ following: 0, saved: 0, savedOpps: 0, reviewsWritten: 0, recsGiven: 0 });
 
   useEffect(() => {
     if (!loading && !user) nav({ to: "/login", search: { tab: "login", redirect: "/dashboard" } as never });
@@ -33,11 +34,29 @@ function Dashboard() {
     setSp(s);
     const { data: ps } = await supabase.from("timeline_posts").select("*").eq("provider_user_id", user.id).order("created_at", { ascending: false });
     setPosts((ps ?? []).map((r) => ({ ...r, author: p ?? undefined })) as PostRow[]);
-    const [{ count: f }, { count: r }] = await Promise.all([
-      supabase.from("follows").select("*", { count: "exact", head: true }).eq("provider_user_id", user.id),
-      supabase.from("provider_recommendations").select("*", { count: "exact", head: true }).eq("provider_user_id", user.id),
-    ]);
-    setStats({ followers: f ?? 0, posts: ps?.length ?? 0, recs: r ?? 0 });
+    const postIds = (ps ?? []).map((r) => r.id);
+
+    if (p?.is_provider) {
+      const [{ count: f }, { count: r }, likesRes, commentsRes, { count: rv }, { count: sv }, { count: op }] = await Promise.all([
+        supabase.from("follows").select("*", { count: "exact", head: true }).eq("provider_user_id", user.id),
+        supabase.from("provider_recommendations").select("*", { count: "exact", head: true }).eq("provider_user_id", user.id),
+        postIds.length ? supabase.from("post_likes").select("*", { count: "exact", head: true }).in("post_id", postIds) : Promise.resolve({ count: 0 } as any),
+        postIds.length ? supabase.from("post_comments").select("*", { count: "exact", head: true }).in("post_id", postIds) : Promise.resolve({ count: 0 } as any),
+        supabase.from("reviews").select("*", { count: "exact", head: true }).eq("provider_user_id", user.id),
+        supabase.from("saved_providers").select("*", { count: "exact", head: true }).eq("provider_user_id", user.id),
+        supabase.from("opportunities").select("*", { count: "exact", head: true }).eq("poster_id", user.id),
+      ]);
+      setStats({ followers: f ?? 0, posts: ps?.length ?? 0, recs: r ?? 0, likes: likesRes.count ?? 0, comments: commentsRes.count ?? 0, reviews: rv ?? 0, saves: sv ?? 0, opps: op ?? 0 });
+    } else {
+      const [{ count: fol }, { count: sp2 }, { count: so }, { count: rw }, { count: rg }] = await Promise.all([
+        supabase.from("follows").select("*", { count: "exact", head: true }).eq("follower_id", user.id),
+        supabase.from("saved_providers").select("*", { count: "exact", head: true }).eq("user_id", user.id),
+        supabase.from("saved_opportunities").select("*", { count: "exact", head: true }).eq("user_id", user.id),
+        supabase.from("reviews").select("*", { count: "exact", head: true }).eq("user_id", user.id),
+        supabase.from("provider_recommendations").select("*", { count: "exact", head: true }).eq("user_id", user.id),
+      ]);
+      setCustomerStats({ following: fol ?? 0, saved: sp2 ?? 0, savedOpps: so ?? 0, reviewsWritten: rw ?? 0, recsGiven: rg ?? 0 });
+    }
   };
 
   useEffect(() => { if (user) load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [user]);
@@ -56,10 +75,25 @@ function Dashboard() {
         </div>
 
         {profile?.is_provider && (
-          <div className="mt-6 grid grid-cols-3 gap-3">
+          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
             <Stat label="Followers" value={stats.followers} />
             <Stat label="Posts" value={stats.posts} />
+            <Stat label="Likes" value={stats.likes} />
+            <Stat label="Comments" value={stats.comments} />
             <Stat label="Recommendations" value={stats.recs} />
+            <Stat label="Reviews" value={stats.reviews} />
+            <Stat label="Saves" value={stats.saves} />
+            <Stat label="Opportunities" value={stats.opps} />
+          </div>
+        )}
+
+        {!profile?.is_provider && (
+          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-5">
+            <Stat label="Following" value={customerStats.following} />
+            <Stat label="Saved providers" value={customerStats.saved} />
+            <Stat label="Saved opps" value={customerStats.savedOpps} />
+            <Stat label="Reviews written" value={customerStats.reviewsWritten} />
+            <Stat label="Recommendations" value={customerStats.recsGiven} />
           </div>
         )}
 
