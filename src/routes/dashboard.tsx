@@ -34,11 +34,29 @@ function Dashboard() {
     setSp(s);
     const { data: ps } = await supabase.from("timeline_posts").select("*").eq("provider_user_id", user.id).order("created_at", { ascending: false });
     setPosts((ps ?? []).map((r) => ({ ...r, author: p ?? undefined })) as PostRow[]);
-    const [{ count: f }, { count: r }] = await Promise.all([
-      supabase.from("follows").select("*", { count: "exact", head: true }).eq("provider_user_id", user.id),
-      supabase.from("provider_recommendations").select("*", { count: "exact", head: true }).eq("provider_user_id", user.id),
-    ]);
-    setStats({ followers: f ?? 0, posts: ps?.length ?? 0, recs: r ?? 0 });
+    const postIds = (ps ?? []).map((r) => r.id);
+
+    if (p?.is_provider) {
+      const [{ count: f }, { count: r }, likesRes, commentsRes, { count: rv }, { count: sv }, { count: op }] = await Promise.all([
+        supabase.from("follows").select("*", { count: "exact", head: true }).eq("provider_user_id", user.id),
+        supabase.from("provider_recommendations").select("*", { count: "exact", head: true }).eq("provider_user_id", user.id),
+        postIds.length ? supabase.from("post_likes").select("*", { count: "exact", head: true }).in("post_id", postIds) : Promise.resolve({ count: 0 } as any),
+        postIds.length ? supabase.from("post_comments").select("*", { count: "exact", head: true }).in("post_id", postIds) : Promise.resolve({ count: 0 } as any),
+        supabase.from("reviews").select("*", { count: "exact", head: true }).eq("provider_user_id", user.id),
+        supabase.from("saved_providers").select("*", { count: "exact", head: true }).eq("provider_user_id", user.id),
+        supabase.from("opportunities").select("*", { count: "exact", head: true }).eq("poster_id", user.id),
+      ]);
+      setStats({ followers: f ?? 0, posts: ps?.length ?? 0, recs: r ?? 0, likes: likesRes.count ?? 0, comments: commentsRes.count ?? 0, reviews: rv ?? 0, saves: sv ?? 0, opps: op ?? 0 });
+    } else {
+      const [{ count: fol }, { count: sp2 }, { count: so }, { count: rw }, { count: rg }] = await Promise.all([
+        supabase.from("follows").select("*", { count: "exact", head: true }).eq("follower_id", user.id),
+        supabase.from("saved_providers").select("*", { count: "exact", head: true }).eq("user_id", user.id),
+        supabase.from("saved_opportunities").select("*", { count: "exact", head: true }).eq("user_id", user.id),
+        supabase.from("reviews").select("*", { count: "exact", head: true }).eq("user_id", user.id),
+        supabase.from("provider_recommendations").select("*", { count: "exact", head: true }).eq("user_id", user.id),
+      ]);
+      setCustomerStats({ following: fol ?? 0, saved: sp2 ?? 0, savedOpps: so ?? 0, reviewsWritten: rw ?? 0, recsGiven: rg ?? 0 });
+    }
   };
 
   useEffect(() => { if (user) load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [user]);
