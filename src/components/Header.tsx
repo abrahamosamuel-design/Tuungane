@@ -62,6 +62,7 @@ export function Header() {
                 </>
               )}
             </div>
+            </>
           ) : (
             <>
               <Link to="/opportunities/new" className="hidden items-center gap-1 text-sm font-medium text-navy hover:text-orange lg:inline-flex"><Plus className="h-4 w-4" /> Post opportunity</Link>
