@@ -75,10 +75,25 @@ function Dashboard() {
         </div>
 
         {profile?.is_provider && (
-          <div className="mt-6 grid grid-cols-3 gap-3">
+          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
             <Stat label="Followers" value={stats.followers} />
             <Stat label="Posts" value={stats.posts} />
+            <Stat label="Likes" value={stats.likes} />
+            <Stat label="Comments" value={stats.comments} />
             <Stat label="Recommendations" value={stats.recs} />
+            <Stat label="Reviews" value={stats.reviews} />
+            <Stat label="Saves" value={stats.saves} />
+            <Stat label="Opportunities" value={stats.opps} />
+          </div>
+        )}
+
+        {!profile?.is_provider && (
+          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-5">
+            <Stat label="Following" value={customerStats.following} />
+            <Stat label="Saved providers" value={customerStats.saved} />
+            <Stat label="Saved opps" value={customerStats.savedOpps} />
+            <Stat label="Reviews written" value={customerStats.reviewsWritten} />
+            <Stat label="Recommendations" value={customerStats.recsGiven} />
           </div>
         )}
 
