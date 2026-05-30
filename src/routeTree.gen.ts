@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as OpportunitiesRouteImport } from './routes/opportunities'
+import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as MeRouteImport } from './routes/me'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as FeedRouteImport } from './routes/feed'
@@ -39,6 +40,11 @@ const ServicesRoute = ServicesRouteImport.update({
 const OpportunitiesRoute = OpportunitiesRouteImport.update({
   id: '/opportunities',
   path: '/opportunities',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotificationsRoute = NotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MeRoute = MeRouteImport.update({
@@ -116,6 +122,7 @@ export interface FileRoutesByFullPath {
   '/feed': typeof FeedRoute
   '/login': typeof LoginRoute
   '/me': typeof MeRoute
+  '/notifications': typeof NotificationsRoute
   '/opportunities': typeof OpportunitiesRouteWithChildren
   '/services': typeof ServicesRouteWithChildren
   '/terms': typeof TermsRoute
@@ -134,6 +141,7 @@ export interface FileRoutesByTo {
   '/feed': typeof FeedRoute
   '/login': typeof LoginRoute
   '/me': typeof MeRoute
+  '/notifications': typeof NotificationsRoute
   '/opportunities': typeof OpportunitiesRouteWithChildren
   '/services': typeof ServicesRouteWithChildren
   '/terms': typeof TermsRoute
@@ -153,6 +161,7 @@ export interface FileRoutesById {
   '/feed': typeof FeedRoute
   '/login': typeof LoginRoute
   '/me': typeof MeRoute
+  '/notifications': typeof NotificationsRoute
   '/opportunities': typeof OpportunitiesRouteWithChildren
   '/services': typeof ServicesRouteWithChildren
   '/terms': typeof TermsRoute
@@ -173,6 +182,7 @@ export interface FileRouteTypes {
     | '/feed'
     | '/login'
     | '/me'
+    | '/notifications'
     | '/opportunities'
     | '/services'
     | '/terms'
@@ -191,6 +201,7 @@ export interface FileRouteTypes {
     | '/feed'
     | '/login'
     | '/me'
+    | '/notifications'
     | '/opportunities'
     | '/services'
     | '/terms'
@@ -209,6 +220,7 @@ export interface FileRouteTypes {
     | '/feed'
     | '/login'
     | '/me'
+    | '/notifications'
     | '/opportunities'
     | '/services'
     | '/terms'
@@ -228,6 +240,7 @@ export interface RootRouteChildren {
   FeedRoute: typeof FeedRoute
   LoginRoute: typeof LoginRoute
   MeRoute: typeof MeRoute
+  NotificationsRoute: typeof NotificationsRoute
   OpportunitiesRoute: typeof OpportunitiesRouteWithChildren
   ServicesRoute: typeof ServicesRouteWithChildren
   TermsRoute: typeof TermsRoute
@@ -256,6 +269,13 @@ declare module '@tanstack/react-router' {
       path: '/opportunities'
       fullPath: '/opportunities'
       preLoaderRoute: typeof OpportunitiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notifications': {
+      id: '/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof NotificationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/me': {
@@ -387,6 +407,7 @@ const rootRouteChildren: RootRouteChildren = {
   FeedRoute: FeedRoute,
   LoginRoute: LoginRoute,
   MeRoute: MeRoute,
+  NotificationsRoute: NotificationsRoute,
   OpportunitiesRoute: OpportunitiesRouteWithChildren,
   ServicesRoute: ServicesRouteWithChildren,
   TermsRoute: TermsRoute,
@@ -396,3 +417,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

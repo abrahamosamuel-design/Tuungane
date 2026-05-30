@@ -8,6 +8,7 @@ import { Avatar } from "./Avatar";
 import { toast } from "sonner";
 import { ReportDialog } from "./ReportDialog";
 import { RecommendDialog } from "./RecommendDialog";
+import { postTypeMap, type PostTypeValue } from "@/data/postTypes";
 
 export interface PostRow {
   id: string;
@@ -19,6 +20,7 @@ export interface PostRow {
   hidden: boolean;
   featured: boolean;
   created_at: string;
+  post_type?: PostTypeValue | null;
   author?: { full_name: string; avatar_url: string | null; is_provider: boolean };
 }
 
@@ -29,6 +31,7 @@ export function PostCard({ post, onChanged }: Props) {
   const nav = useNavigate();
   const [likes, setLikes] = useState(0);
   const [liked, setLiked] = useState(false);
+  const [commentCount, setCommentCount] = useState(0);
   const [showComments, setShowComments] = useState(false);
   const [comments, setComments] = useState<Array<{ id: string; user_id: string; text: string; created_at: string; profile?: { full_name: string; avatar_url: string | null } }>>([]);
   const [newComment, setNewComment] = useState("");
@@ -37,8 +40,12 @@ export function PostCard({ post, onChanged }: Props) {
 
   useEffect(() => {
     (async () => {
-      const { count } = await supabase.from("post_likes").select("*", { count: "exact", head: true }).eq("post_id", post.id);
-      setLikes(count ?? 0);
+      const [{ count: lc }, { count: cc }] = await Promise.all([
+        supabase.from("post_likes").select("*", { count: "exact", head: true }).eq("post_id", post.id),
+        supabase.from("post_comments").select("*", { count: "exact", head: true }).eq("post_id", post.id).eq("hidden", false),
+      ]);
+      setLikes(lc ?? 0);
+      setCommentCount(cc ?? 0);
       if (user) {
         const { data } = await supabase.from("post_likes").select("post_id").eq("post_id", post.id).eq("user_id", user.id).maybeSingle();
         setLiked(!!data);
@@ -48,10 +55,7 @@ export function PostCard({ post, onChanged }: Props) {
 
   const loadComments = async () => {
     const { data: rows } = await supabase
-      .from("post_comments")
-      .select("id,user_id,text,created_at")
-      .eq("post_id", post.id)
-      .order("created_at", { ascending: true });
+      .from("post_comments").select("id,user_id,text,created_at").eq("post_id", post.id).eq("hidden", false).order("created_at", { ascending: true });
     const ids = Array.from(new Set((rows ?? []).map((r) => r.user_id)));
     let profMap = new Map<string, { full_name: string; avatar_url: string | null }>();
     if (ids.length) {
@@ -59,6 +63,7 @@ export function PostCard({ post, onChanged }: Props) {
       profMap = new Map((profs ?? []).map((p) => [p.id, { full_name: p.full_name, avatar_url: p.avatar_url }]));
     }
     setComments((rows ?? []).map((c) => ({ ...c, profile: profMap.get(c.user_id) })));
+    setCommentCount((rows ?? []).length);
   };
 
   const requireAuth = () => {
@@ -113,6 +118,8 @@ export function PostCard({ post, onChanged }: Props) {
     }
   };
 
+  const ptMeta = post.post_type ? postTypeMap[post.post_type] : null;
+
   return (
     <article className="rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)]">
       <header className="flex items-start justify-between gap-3">
@@ -127,7 +134,8 @@ export function PostCard({ post, onChanged }: Props) {
             </p>
           </div>
         </Link>
-        <div className="flex items-center gap-1">
+        <div className="flex flex-wrap items-center gap-1">
+          {ptMeta && <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${ptMeta.color}`}>{ptMeta.label}</span>}
           {post.featured && <span className="rounded-full bg-orange/10 px-2 py-0.5 text-xs font-medium text-orange">Featured</span>}
           {post.hidden && <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive">Hidden</span>}
         </div>
@@ -143,9 +151,18 @@ export function PostCard({ post, onChanged }: Props) {
         </div>
       )}
 
-      <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3">
+      {(likes > 0 || commentCount > 0) && (
+        <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
+          <span>{likes > 0 && `${likes} like${likes === 1 ? "" : "s"}`}</span>
+          <button onClick={() => { setShowComments((v) => !v); if (!showComments) loadComments(); }} className="hover:text-orange">
+            {commentCount > 0 && `${commentCount} comment${commentCount === 1 ? "" : "s"}`}
+          </button>
+        </div>
+      )}
+
+      <div className="mt-2 flex flex-wrap items-center justify-between gap-2 border-t border-border pt-2">
         <div className="flex flex-wrap items-center gap-1">
-          <ActionBtn onClick={toggleLike} active={liked} icon={<Heart className={`h-4 w-4 ${liked ? "fill-current" : ""}`} />} label={`${likes}`} />
+          <ActionBtn onClick={toggleLike} active={liked} icon={<Heart className={`h-4 w-4 ${liked ? "fill-current" : ""}`} />} label="Like" />
           <ActionBtn onClick={() => { setShowComments((v) => !v); if (!showComments) loadComments(); }} icon={<MessageCircle className="h-4 w-4" />} label="Comment" />
           <ActionBtn onClick={() => { if (requireAuth()) setRecOpen(true); }} icon={<ThumbsUp className="h-4 w-4" />} label="Recommend" />
           <ActionBtn onClick={share} icon={<Share2 className="h-4 w-4" />} label="Share" />

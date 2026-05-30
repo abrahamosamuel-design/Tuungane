@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { Header } from "./Header";
 import { Footer } from "./Footer";
+import { MobileBottomNav } from "./MobileBottomNav";
 
 export function Layout({ children }: { children: ReactNode }) {
   return (
@@ -8,6 +9,7 @@ export function Layout({ children }: { children: ReactNode }) {
       <Header />
       <main className="flex-1">{children}</main>
       <Footer />
+      <MobileBottomNav />
     </div>
   );
 }
