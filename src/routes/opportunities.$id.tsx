@@ -4,7 +4,7 @@ import { ArrowLeft, MapPin, Calendar, Phone, MessageCircle, Mail, Bookmark, Flag
 import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import { categories, getCategory } from "@/data/categories";
+import { getCategory } from "@/data/categories";
 import { reportReasons } from "@/data/opportunities";
 import { OpportunityCard, type OpportunityRow } from "@/components/OpportunityCard";
 import { timeAgo } from "@/lib/format";
