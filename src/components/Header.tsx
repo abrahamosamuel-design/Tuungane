@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Menu, X, User as UserIcon, LogOut, LayoutDashboard, Shield, Rss, Plus, Briefcase, Wrench } from "lucide-react";
 import { useState } from "react";
 import { Logo } from "./Logo";
+import { NotificationsBell } from "./NotificationsBell";
 import { useAuth } from "@/hooks/use-auth";
 
 const nav = [
@@ -38,6 +39,8 @@ export function Header() {
         </nav>
         <div className="hidden items-center gap-3 md:flex">
           {loading ? null : user ? (
+            <>
+            <NotificationsBell />
             <div className="relative">
               <button onClick={() => setMenu((m) => !m)} className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1.5 text-sm font-medium text-navy hover:border-orange/60">
                 <UserIcon className="h-4 w-4" /> {user.email?.split("@")[0]}
@@ -59,6 +62,7 @@ export function Header() {
                 </>
               )}
             </div>
+            </>
           ) : (
             <>
               <Link to="/opportunities/new" className="hidden items-center gap-1 text-sm font-medium text-navy hover:text-orange lg:inline-flex"><Plus className="h-4 w-4" /> Post opportunity</Link>

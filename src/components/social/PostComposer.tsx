@@ -4,13 +4,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { uploadMedia } from "@/lib/upload";
 import { categories } from "@/data/categories";
+import { postTypes, type PostTypeValue } from "@/data/postTypes";
 import { toast } from "sonner";
 
-export function PostComposer({ defaultCategory, onPosted }: { defaultCategory?: string | null; onPosted?: () => void }) {
+export function PostComposer({ defaultCategory, defaultPostType, onPosted }: { defaultCategory?: string | null; defaultPostType?: PostTypeValue; onPosted?: () => void }) {
   const { user } = useAuth();
   const [text, setText] = useState("");
   const [category, setCategory] = useState(defaultCategory ?? "");
   const [location, setLocation] = useState("");
+  const [postType, setPostType] = useState<PostTypeValue>(defaultPostType ?? "work_update");
   const [media, setMedia] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
   const [suspended, setSuspended] = useState(false);
@@ -31,7 +33,7 @@ export function PostComposer({ defaultCategory, onPosted }: { defaultCategory?: 
         <Ban className="mt-0.5 h-4 w-4 shrink-0" />
         <div>
           <p className="font-semibold">Posting is disabled</p>
-          <p className="text-xs opacity-90">Your service profile has been suspended by a moderator. Contact support if you think this is a mistake.</p>
+          <p className="text-xs opacity-90">Your service profile has been suspended by a moderator.</p>
         </div>
       </div>
     );
@@ -52,7 +54,12 @@ export function PostComposer({ defaultCategory, onPosted }: { defaultCategory?: 
     if (!text.trim() && media.length === 0) { toast.error("Add some text or a photo"); return; }
     setBusy(true);
     const { error } = await supabase.from("timeline_posts").insert({
-      provider_user_id: user.id, text: text.trim(), category_slug: category || null, location: location.trim() || null, media_urls: media,
+      provider_user_id: user.id,
+      text: text.trim(),
+      category_slug: category || null,
+      location: location.trim() || null,
+      media_urls: media,
+      post_type: postType,
     });
     setBusy(false);
     if (error) toast.error(error.message);
@@ -65,7 +72,7 @@ export function PostComposer({ defaultCategory, onPosted }: { defaultCategory?: 
 
   return (
     <div className="rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)]">
-      <textarea value={text} onChange={(e) => setText(e.target.value)} rows={3} placeholder="Share your work — a completed job, available service, or update from the field..." className="w-full resize-none rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-orange" />
+      <textarea value={text} onChange={(e) => setText(e.target.value)} rows={3} placeholder="Share your work, skill, service update, or opportunity..." className="w-full resize-none rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-orange" />
       {media.length > 0 && (
         <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
           {media.map((u, i) => (
@@ -77,11 +84,14 @@ export function PostComposer({ defaultCategory, onPosted }: { defaultCategory?: 
         </div>
       )}
       <div className="mt-3 flex flex-wrap items-center gap-2">
+        <select value={postType} onChange={(e) => setPostType(e.target.value as PostTypeValue)} className="rounded-full border border-border bg-background px-3 py-1.5 text-xs font-medium">
+          {postTypes.map((p) => <option key={p.value} value={p.value}>{p.label}</option>)}
+        </select>
         <select value={category} onChange={(e) => setCategory(e.target.value)} className="rounded-full border border-border bg-background px-3 py-1.5 text-xs">
           <option value="">Category…</option>
           {categories.map((c) => <option key={c.slug} value={c.slug}>{c.name}</option>)}
         </select>
-        <input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Location (e.g. Entebbe)" className="rounded-full border border-border bg-background px-3 py-1.5 text-xs outline-none focus:border-orange" />
+        <input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Location" className="w-28 rounded-full border border-border bg-background px-3 py-1.5 text-xs outline-none focus:border-orange" />
         <label className="inline-flex cursor-pointer items-center gap-1 rounded-full border border-border bg-background px-3 py-1.5 text-xs hover:border-orange">
           <ImageIcon className="h-3.5 w-3.5" /> Photo
           <input type="file" accept="image/*" multiple className="hidden" onChange={(e) => addFiles(e.target.files)} disabled={busy || media.length >= 4} />

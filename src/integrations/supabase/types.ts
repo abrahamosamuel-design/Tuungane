@@ -32,6 +32,42 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          id: string
+          message: string
+          read: boolean
+          target_id: string | null
+          target_type: string | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          message?: string
+          read?: boolean
+          target_id?: string | null
+          target_type?: string | null
+          type: string
+          user_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          message?: string
+          read?: boolean
+          target_id?: string | null
+          target_type?: string | null
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       opportunities: {
         Row: {
           area: string | null
@@ -437,6 +473,7 @@ export type Database = {
           bio: string
           business_name: string | null
           category_slug: string
+          cover_url: string | null
           created_at: string
           district: string
           email: string | null
@@ -457,6 +494,7 @@ export type Database = {
           bio?: string
           business_name?: string | null
           category_slug: string
+          cover_url?: string | null
           created_at?: string
           district?: string
           email?: string | null
@@ -477,6 +515,7 @@ export type Database = {
           bio?: string
           business_name?: string | null
           category_slug?: string
+          cover_url?: string | null
           created_at?: string
           district?: string
           email?: string | null
@@ -502,6 +541,7 @@ export type Database = {
           id: string
           location: string | null
           media_urls: string[]
+          post_type: Database["public"]["Enums"]["post_type"]
           provider_user_id: string
           text: string
         }
@@ -514,6 +554,7 @@ export type Database = {
           id?: string
           location?: string | null
           media_urls?: string[]
+          post_type?: Database["public"]["Enums"]["post_type"]
           provider_user_id: string
           text: string
         }
@@ -526,6 +567,7 @@ export type Database = {
           id?: string
           location?: string | null
           media_urls?: string[]
+          post_type?: Database["public"]["Enums"]["post_type"]
           provider_user_id?: string
           text?: string
         }
@@ -557,6 +599,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_notification: {
+        Args: {
+          _actor_id: string
+          _message: string
+          _target_id: string
+          _target_type: string
+          _type: string
+          _user_id: string
+        }
+        Returns: undefined
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -582,6 +635,14 @@ export type Database = {
         | "internship"
         | "volunteer"
         | "apprenticeship"
+      post_type:
+        | "work_update"
+        | "completed_job"
+        | "available"
+        | "before_after"
+        | "new_service"
+        | "promotion"
+        | "opportunity_shared"
       poster_type:
         | "individual"
         | "business"
@@ -736,6 +797,15 @@ export const Constants = {
         "internship",
         "volunteer",
         "apprenticeship",
+      ],
+      post_type: [
+        "work_update",
+        "completed_job",
+        "available",
+        "before_after",
+        "new_service",
+        "promotion",
+        "opportunity_shared",
       ],
       poster_type: [
         "individual",
