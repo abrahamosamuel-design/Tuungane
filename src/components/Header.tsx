@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/use-auth";
 const nav = [
   { to: "/", label: "Home" },
   { to: "/services", label: "Services" },
+  { to: "/opportunities", label: "Opportunities" },
   { to: "/feed", label: "Feed" },
   { to: "/about", label: "About" },
 ];
