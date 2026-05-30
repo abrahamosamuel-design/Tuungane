@@ -40,8 +40,8 @@ function Index() {
                 <Link to="/services" className="inline-flex items-center justify-center gap-2 rounded-full bg-orange px-6 py-3 text-sm font-semibold text-orange-foreground shadow-lg transition hover:brightness-110">
                   <Search className="h-4 w-4" /> Find a Service
                 </Link>
-                <Link to="/login" className="inline-flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/5 px-6 py-3 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/10">
-                  Post Your Skill <ArrowRight className="h-4 w-4" />
+                <Link to="/opportunities" className="inline-flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/5 px-6 py-3 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/10">
+                  Find Work Opportunities <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
               <div className="mt-10 flex flex-wrap items-center gap-6 text-sm text-white/70">
