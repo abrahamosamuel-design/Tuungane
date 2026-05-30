@@ -23,6 +23,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as UIdRouteImport } from './routes/u.$id'
 import { Route as ServicesSlugRouteImport } from './routes/services.$slug'
 import { Route as ProvidersIdRouteImport } from './routes/providers.$id'
+import { Route as OpportunitiesNewRouteImport } from './routes/opportunities.new'
 import { Route as OpportunitiesIdRouteImport } from './routes/opportunities.$id'
 
 const TermsRoute = TermsRouteImport.update({
@@ -95,6 +96,11 @@ const ProvidersIdRoute = ProvidersIdRouteImport.update({
   path: '/providers/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const OpportunitiesNewRoute = OpportunitiesNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => OpportunitiesRoute,
+} as any)
 const OpportunitiesIdRoute = OpportunitiesIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -114,6 +120,7 @@ export interface FileRoutesByFullPath {
   '/services': typeof ServicesRouteWithChildren
   '/terms': typeof TermsRoute
   '/opportunities/$id': typeof OpportunitiesIdRoute
+  '/opportunities/new': typeof OpportunitiesNewRoute
   '/providers/$id': typeof ProvidersIdRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/u/$id': typeof UIdRoute
@@ -131,6 +138,7 @@ export interface FileRoutesByTo {
   '/services': typeof ServicesRouteWithChildren
   '/terms': typeof TermsRoute
   '/opportunities/$id': typeof OpportunitiesIdRoute
+  '/opportunities/new': typeof OpportunitiesNewRoute
   '/providers/$id': typeof ProvidersIdRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/u/$id': typeof UIdRoute
@@ -149,6 +157,7 @@ export interface FileRoutesById {
   '/services': typeof ServicesRouteWithChildren
   '/terms': typeof TermsRoute
   '/opportunities/$id': typeof OpportunitiesIdRoute
+  '/opportunities/new': typeof OpportunitiesNewRoute
   '/providers/$id': typeof ProvidersIdRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/u/$id': typeof UIdRoute
@@ -168,6 +177,7 @@ export interface FileRouteTypes {
     | '/services'
     | '/terms'
     | '/opportunities/$id'
+    | '/opportunities/new'
     | '/providers/$id'
     | '/services/$slug'
     | '/u/$id'
@@ -185,6 +195,7 @@ export interface FileRouteTypes {
     | '/services'
     | '/terms'
     | '/opportunities/$id'
+    | '/opportunities/new'
     | '/providers/$id'
     | '/services/$slug'
     | '/u/$id'
@@ -202,6 +213,7 @@ export interface FileRouteTypes {
     | '/services'
     | '/terms'
     | '/opportunities/$id'
+    | '/opportunities/new'
     | '/providers/$id'
     | '/services/$slug'
     | '/u/$id'
@@ -323,6 +335,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProvidersIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/opportunities/new': {
+      id: '/opportunities/new'
+      path: '/new'
+      fullPath: '/opportunities/new'
+      preLoaderRoute: typeof OpportunitiesNewRouteImport
+      parentRoute: typeof OpportunitiesRoute
+    }
     '/opportunities/$id': {
       id: '/opportunities/$id'
       path: '/$id'
@@ -335,10 +354,12 @@ declare module '@tanstack/react-router' {
 
 interface OpportunitiesRouteChildren {
   OpportunitiesIdRoute: typeof OpportunitiesIdRoute
+  OpportunitiesNewRoute: typeof OpportunitiesNewRoute
 }
 
 const OpportunitiesRouteChildren: OpportunitiesRouteChildren = {
   OpportunitiesIdRoute: OpportunitiesIdRoute,
+  OpportunitiesNewRoute: OpportunitiesNewRoute,
 }
 
 const OpportunitiesRouteWithChildren = OpportunitiesRoute._addFileChildren(
