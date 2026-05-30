@@ -55,10 +55,10 @@ function NotificationsPage() {
 
   useEffect(() => { if (user) load(); /* eslint-disable-next-line */ }, [user?.id]);
 
-  const linkFor = (n: Notif) => {
-    if (n.target_type === "profile" && n.target_id) return { to: "/u/$id", params: { id: n.target_id } } as const;
-    if (n.target_type === "post" && user) return { to: "/u/$id", params: { id: user.id } } as const;
-    return { to: "/feed" } as const;
+  const hrefFor = (n: Notif) => {
+    if (n.target_type === "profile" && n.target_id) return `/u/${n.target_id}`;
+    if (n.target_type === "post" && user) return `/u/${user.id}`;
+    return "/feed";
   };
 
   if (!user) return null;
@@ -75,24 +75,26 @@ function NotificationsPage() {
               <p className="mt-1 text-sm text-muted-foreground">When people follow you, like your posts, or recommend you, it'll show up here.</p>
             </div>
           )}
-          {items.map((n) => {
-            const target = linkFor(n);
-            return (
-              <Link key={n.id} {...(target as unknown as Record<string, unknown>)} className={`flex items-start gap-3 rounded-2xl border border-border p-3 transition hover:border-orange ${n.read ? "bg-card" : "bg-orange/5"}`}>
-                <div className="relative">
-                  <Avatar name={n.actor?.full_name ?? "User"} url={n.actor?.avatar_url ?? null} size={40} />
-                  <span className="absolute -bottom-1 -right-1 rounded-full bg-card p-1 shadow-sm">{iconFor(n.type)}</span>
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm text-foreground">
-                    <span className="font-semibold text-navy">{n.actor?.full_name ?? "Someone"}</span>{" "}
-                    <span className="text-muted-foreground">{n.message}</span>
-                  </p>
-                  <p className="text-xs text-muted-foreground">{timeAgo(n.created_at)}</p>
-                </div>
-                {!n.read && <span className="mt-2 h-2 w-2 rounded-full bg-orange" />}
-              </Link>
-            );
+          {items.map((n) => (
+            <a
+              key={n.id}
+              href={hrefFor(n)}
+              className={`flex items-start gap-3 rounded-2xl border border-border p-3 transition hover:border-orange ${n.read ? "bg-card" : "bg-orange/5"}`}
+            >
+              <div className="relative">
+                <Avatar name={n.actor?.full_name ?? "User"} url={n.actor?.avatar_url ?? null} size={40} />
+                <span className="absolute -bottom-1 -right-1 rounded-full bg-card p-1 shadow-sm">{iconFor(n.type)}</span>
+              </div>
+              <div className="flex-1">
+                <p className="text-sm text-foreground">
+                  <span className="font-semibold text-navy">{n.actor?.full_name ?? "Someone"}</span>{" "}
+                  <span className="text-muted-foreground">{n.message}</span>
+                </p>
+                <p className="text-xs text-muted-foreground">{timeAgo(n.created_at)}</p>
+              </div>
+              {!n.read && <span className="mt-2 h-2 w-2 rounded-full bg-orange" />}
+            </a>
+          ))}
           })}
         </div>
       </section>
