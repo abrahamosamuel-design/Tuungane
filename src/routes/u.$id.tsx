@@ -294,7 +294,7 @@ function UserProfile() {
               )}
               {opps.length === 0 && <p className="rounded-2xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground">No opportunities posted.</p>}
               <div className="grid gap-3 sm:grid-cols-2">
-                {opps.map((o) => <OpportunityCard key={o.id} opp={{ ...o, author: { full_name: profile.full_name, avatar_url: profile.avatar_url } }} />)}
+                {opps.map((o) => <OpportunityCard key={o.id} o={{ ...o, author: { full_name: profile.full_name, avatar_url: profile.avatar_url } }} />)}
               </div>
             </>
           )}
