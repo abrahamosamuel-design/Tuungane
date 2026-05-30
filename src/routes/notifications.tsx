@@ -78,7 +78,7 @@ function NotificationsPage() {
           {items.map((n) => {
             const target = linkFor(n);
             return (
-              <Link key={n.id} {...(target as never)} className={`flex items-start gap-3 rounded-2xl border border-border p-3 transition hover:border-orange ${n.read ? "bg-card" : "bg-orange/5"}`}>
+              <Link key={n.id} {...(target as unknown as Record<string, unknown>)} className={`flex items-start gap-3 rounded-2xl border border-border p-3 transition hover:border-orange ${n.read ? "bg-card" : "bg-orange/5"}`}>
                 <div className="relative">
                   <Avatar name={n.actor?.full_name ?? "User"} url={n.actor?.avatar_url ?? null} size={40} />
                   <span className="absolute -bottom-1 -right-1 rounded-full bg-card p-1 shadow-sm">{iconFor(n.type)}</span>
