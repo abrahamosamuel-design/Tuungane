@@ -1,9 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { ArrowRight, BadgeCheck, Search, Sparkles, ShieldCheck, Users, MapPin, Star, Wrench, Sparkles as SparklesIcon, Building2, Scissors, Truck, Car, GraduationCap, Camera, ChefHat, Laptop, HeartPulse, Sprout, MoreHorizontal } from "lucide-react";
 import { Layout } from "@/components/Layout";
 import { ProviderCard } from "@/components/ProviderCard";
+import { OfficialPostCard } from "@/components/OfficialPostCard";
 import { categories } from "@/data/categories";
 import { featuredProviders, providers } from "@/data/providers";
+import { supabase } from "@/integrations/supabase/client";
+import type { OfficialAccountRow, OfficialPostRow } from "@/data/officialPostTypes";
 
 const iconMap: Record<string, any> = { Wrench, Sparkles: SparklesIcon, Building2, Scissors, Truck, Car, GraduationCap, Camera, ChefHat, Laptop, HeartPulse, Sprout, MoreHorizontal };
 

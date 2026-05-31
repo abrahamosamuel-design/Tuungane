@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as OpportunitiesRouteImport } from './routes/opportunities'
+import { Route as OfficialRouteImport } from './routes/official'
 import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as MeRouteImport } from './routes/me'
 import { Route as LoginRouteImport } from './routes/login'
@@ -26,6 +27,7 @@ import { Route as ServicesSlugRouteImport } from './routes/services.$slug'
 import { Route as ProvidersIdRouteImport } from './routes/providers.$id'
 import { Route as OpportunitiesNewRouteImport } from './routes/opportunities.new'
 import { Route as OpportunitiesIdRouteImport } from './routes/opportunities.$id'
+import { Route as OfficialPostsIdRouteImport } from './routes/official-posts.$id'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -40,6 +42,11 @@ const ServicesRoute = ServicesRouteImport.update({
 const OpportunitiesRoute = OpportunitiesRouteImport.update({
   id: '/opportunities',
   path: '/opportunities',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OfficialRoute = OfficialRouteImport.update({
+  id: '/official',
+  path: '/official',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NotificationsRoute = NotificationsRouteImport.update({
@@ -112,6 +119,11 @@ const OpportunitiesIdRoute = OpportunitiesIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => OpportunitiesRoute,
 } as any)
+const OfficialPostsIdRoute = OfficialPostsIdRouteImport.update({
+  id: '/official-posts/$id',
+  path: '/official-posts/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -123,9 +135,11 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/me': typeof MeRoute
   '/notifications': typeof NotificationsRoute
+  '/official': typeof OfficialRoute
   '/opportunities': typeof OpportunitiesRouteWithChildren
   '/services': typeof ServicesRouteWithChildren
   '/terms': typeof TermsRoute
+  '/official-posts/$id': typeof OfficialPostsIdRoute
   '/opportunities/$id': typeof OpportunitiesIdRoute
   '/opportunities/new': typeof OpportunitiesNewRoute
   '/providers/$id': typeof ProvidersIdRoute
@@ -142,9 +156,11 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/me': typeof MeRoute
   '/notifications': typeof NotificationsRoute
+  '/official': typeof OfficialRoute
   '/opportunities': typeof OpportunitiesRouteWithChildren
   '/services': typeof ServicesRouteWithChildren
   '/terms': typeof TermsRoute
+  '/official-posts/$id': typeof OfficialPostsIdRoute
   '/opportunities/$id': typeof OpportunitiesIdRoute
   '/opportunities/new': typeof OpportunitiesNewRoute
   '/providers/$id': typeof ProvidersIdRoute
@@ -162,9 +178,11 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/me': typeof MeRoute
   '/notifications': typeof NotificationsRoute
+  '/official': typeof OfficialRoute
   '/opportunities': typeof OpportunitiesRouteWithChildren
   '/services': typeof ServicesRouteWithChildren
   '/terms': typeof TermsRoute
+  '/official-posts/$id': typeof OfficialPostsIdRoute
   '/opportunities/$id': typeof OpportunitiesIdRoute
   '/opportunities/new': typeof OpportunitiesNewRoute
   '/providers/$id': typeof ProvidersIdRoute
@@ -183,9 +201,11 @@ export interface FileRouteTypes {
     | '/login'
     | '/me'
     | '/notifications'
+    | '/official'
     | '/opportunities'
     | '/services'
     | '/terms'
+    | '/official-posts/$id'
     | '/opportunities/$id'
     | '/opportunities/new'
     | '/providers/$id'
@@ -202,9 +222,11 @@ export interface FileRouteTypes {
     | '/login'
     | '/me'
     | '/notifications'
+    | '/official'
     | '/opportunities'
     | '/services'
     | '/terms'
+    | '/official-posts/$id'
     | '/opportunities/$id'
     | '/opportunities/new'
     | '/providers/$id'
@@ -221,9 +243,11 @@ export interface FileRouteTypes {
     | '/login'
     | '/me'
     | '/notifications'
+    | '/official'
     | '/opportunities'
     | '/services'
     | '/terms'
+    | '/official-posts/$id'
     | '/opportunities/$id'
     | '/opportunities/new'
     | '/providers/$id'
@@ -241,9 +265,11 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   MeRoute: typeof MeRoute
   NotificationsRoute: typeof NotificationsRoute
+  OfficialRoute: typeof OfficialRoute
   OpportunitiesRoute: typeof OpportunitiesRouteWithChildren
   ServicesRoute: typeof ServicesRouteWithChildren
   TermsRoute: typeof TermsRoute
+  OfficialPostsIdRoute: typeof OfficialPostsIdRoute
   ProvidersIdRoute: typeof ProvidersIdRoute
   UIdRoute: typeof UIdRoute
 }
@@ -269,6 +295,13 @@ declare module '@tanstack/react-router' {
       path: '/opportunities'
       fullPath: '/opportunities'
       preLoaderRoute: typeof OpportunitiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/official': {
+      id: '/official'
+      path: '/official'
+      fullPath: '/official'
+      preLoaderRoute: typeof OfficialRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/notifications': {
@@ -369,6 +402,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OpportunitiesIdRouteImport
       parentRoute: typeof OpportunitiesRoute
     }
+    '/official-posts/$id': {
+      id: '/official-posts/$id'
+      path: '/official-posts/$id'
+      fullPath: '/official-posts/$id'
+      preLoaderRoute: typeof OfficialPostsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -408,22 +448,14 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   MeRoute: MeRoute,
   NotificationsRoute: NotificationsRoute,
+  OfficialRoute: OfficialRoute,
   OpportunitiesRoute: OpportunitiesRouteWithChildren,
   ServicesRoute: ServicesRouteWithChildren,
   TermsRoute: TermsRoute,
+  OfficialPostsIdRoute: OfficialPostsIdRoute,
   ProvidersIdRoute: ProvidersIdRoute,
   UIdRoute: UIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
