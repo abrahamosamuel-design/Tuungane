@@ -181,13 +181,14 @@ function OfficialTabContent() {
   useEffect(() => { load(); }, []);
 
   const togglePost = async (id: string, field: "is_featured" | "is_pinned" | "is_homepage", v: boolean) => {
-    await supabase.from("official_posts").update({ [field]: !v }).eq("id", id); load();
+    const patch: Record<string, boolean> = { [field]: !v };
+    await (supabase.from("official_posts") as any).update(patch).eq("id", id); load();
   };
   const deletePost = async (id: string) => {
     if (!confirm("Delete this official post?")) return;
     await supabase.from("official_posts").delete().eq("id", id); load();
   };
-  const setSeededStatus = async (uid: string, status: string) => {
+  const setSeededStatus = async (uid: string, status: "unclaimed" | "claim_pending" | "claimed") => {
     await supabase.from("service_profiles").update({ seeded_status: status, seeded_by_official: true }).eq("user_id", uid); load();
   };
   const reviewClaim = async (id: string, requester: string, profileUid: string, decision: "approved" | "rejected") => {
