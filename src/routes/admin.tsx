@@ -1,9 +1,12 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { PostCard, type PostRow } from "@/components/social/PostCard";
+import { OfficialAccountForm } from "@/components/admin/OfficialAccountForm";
+import { OfficialPostForm } from "@/components/admin/OfficialPostForm";
+import { officialPostTypeMap, type OfficialAccountRow, type OfficialPostRow } from "@/data/officialPostTypes";
 import { timeAgo } from "@/lib/format";
 import { toast } from "sonner";
 
@@ -12,7 +15,7 @@ export const Route = createFileRoute("/admin")({
   component: Admin,
 });
 
-type Tab = "reports" | "posts" | "providers" | "recs";
+type Tab = "reports" | "posts" | "providers" | "recs" | "official";
 
 function Admin() {
   const { user, loading, isModerator, isAdmin } = useAuth();
