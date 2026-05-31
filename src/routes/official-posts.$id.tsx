@@ -75,7 +75,7 @@ function OfficialPostDetail() {
           <div className="mt-4 space-y-3">
             {comments.map((c) => (
               <div key={c.id} className="flex gap-2">
-                <Avatar src={c.profile?.avatar_url} name={c.profile?.full_name ?? "User"} size={28} />
+                <Avatar url={c.profile?.avatar_url} name={c.profile?.full_name ?? "User"} size={28} />
                 <div className="flex-1 rounded-xl bg-surface px-3 py-2">
                   <p className="text-xs font-semibold text-navy">{c.profile?.full_name ?? "User"} <span className="ml-1 font-normal text-muted-foreground">· {timeAgo(c.created_at)}</span></p>
                   <p className="text-sm text-foreground/80">{c.text}</p>
