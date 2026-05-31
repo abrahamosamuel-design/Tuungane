@@ -148,6 +148,8 @@ function Admin() {
               ))}
             </div>
           )}
+
+          {tab === "official" && <OfficialTabContent />}
         </div>
       </section>
     </Layout>
