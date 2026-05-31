@@ -68,6 +68,171 @@ export type Database = {
         }
         Relationships: []
       }
+      official_accounts: {
+        Row: {
+          bio: string
+          cover_image_url: string | null
+          created_at: string
+          created_by_admin_id: string | null
+          id: string
+          is_active: boolean
+          is_official: boolean
+          is_verified: boolean
+          name: string
+          posting_enabled: boolean
+          profile_image_url: string | null
+          tagline: string
+          updated_at: string
+        }
+        Insert: {
+          bio?: string
+          cover_image_url?: string | null
+          created_at?: string
+          created_by_admin_id?: string | null
+          id?: string
+          is_active?: boolean
+          is_official?: boolean
+          is_verified?: boolean
+          name?: string
+          posting_enabled?: boolean
+          profile_image_url?: string | null
+          tagline?: string
+          updated_at?: string
+        }
+        Update: {
+          bio?: string
+          cover_image_url?: string | null
+          created_at?: string
+          created_by_admin_id?: string | null
+          id?: string
+          is_active?: boolean
+          is_official?: boolean
+          is_verified?: boolean
+          name?: string
+          posting_enabled?: boolean
+          profile_image_url?: string | null
+          tagline?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      official_post_comments: {
+        Row: {
+          created_at: string
+          hidden: boolean
+          id: string
+          post_id: string
+          text: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          hidden?: boolean
+          id?: string
+          post_id: string
+          text: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          hidden?: boolean
+          id?: string
+          post_id?: string
+          text?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      official_post_likes: {
+        Row: {
+          created_at: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      official_posts: {
+        Row: {
+          category_slug: string | null
+          contact_info: string | null
+          content: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          image_url: string | null
+          is_featured: boolean
+          is_homepage: boolean
+          is_pinned: boolean
+          linked_opportunity_id: string | null
+          linked_provider_id: string | null
+          location: string | null
+          official_account_id: string
+          post_type: Database["public"]["Enums"]["official_post_type"]
+          safety_note: string | null
+          source_verified: boolean
+          status: string
+          subcategory: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category_slug?: string | null
+          contact_info?: string | null
+          content?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          image_url?: string | null
+          is_featured?: boolean
+          is_homepage?: boolean
+          is_pinned?: boolean
+          linked_opportunity_id?: string | null
+          linked_provider_id?: string | null
+          location?: string | null
+          official_account_id: string
+          post_type: Database["public"]["Enums"]["official_post_type"]
+          safety_note?: string | null
+          source_verified?: boolean
+          status?: string
+          subcategory?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category_slug?: string | null
+          contact_info?: string | null
+          content?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          image_url?: string | null
+          is_featured?: boolean
+          is_homepage?: boolean
+          is_pinned?: boolean
+          linked_opportunity_id?: string | null
+          linked_provider_id?: string | null
+          location?: string | null
+          official_account_id?: string
+          post_type?: Database["public"]["Enums"]["official_post_type"]
+          safety_note?: string | null
+          source_verified?: boolean
+          status?: string
+          subcategory?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       opportunities: {
         Row: {
           area: string | null
@@ -286,6 +451,57 @@ export type Database = {
           },
         ]
       }
+      profile_claim_requests: {
+        Row: {
+          created_at: string
+          email: string | null
+          explanation: string
+          full_name: string
+          id: string
+          phone_number: string
+          relationship_to_profile: string
+          requester_user_id: string
+          reviewed_at: string | null
+          reviewed_by_admin_id: string | null
+          service_profile_user_id: string
+          status: Database["public"]["Enums"]["claim_status"]
+          supporting_file_url: string | null
+          whatsapp_number: string | null
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          explanation?: string
+          full_name: string
+          id?: string
+          phone_number: string
+          relationship_to_profile: string
+          requester_user_id: string
+          reviewed_at?: string | null
+          reviewed_by_admin_id?: string | null
+          service_profile_user_id: string
+          status?: Database["public"]["Enums"]["claim_status"]
+          supporting_file_url?: string | null
+          whatsapp_number?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          explanation?: string
+          full_name?: string
+          id?: string
+          phone_number?: string
+          relationship_to_profile?: string
+          requester_user_id?: string
+          reviewed_at?: string | null
+          reviewed_by_admin_id?: string | null
+          service_profile_user_id?: string
+          status?: Database["public"]["Enums"]["claim_status"]
+          supporting_file_url?: string | null
+          whatsapp_number?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -478,6 +694,10 @@ export type Database = {
           district: string
           email: string | null
           phone: string | null
+          seeded_by_official: boolean
+          seeded_status:
+            | Database["public"]["Enums"]["seeded_profile_status"]
+            | null
           subcategory: string
           suspended: boolean
           town: string
@@ -499,6 +719,10 @@ export type Database = {
           district?: string
           email?: string | null
           phone?: string | null
+          seeded_by_official?: boolean
+          seeded_status?:
+            | Database["public"]["Enums"]["seeded_profile_status"]
+            | null
           subcategory: string
           suspended?: boolean
           town?: string
@@ -520,6 +744,10 @@ export type Database = {
           district?: string
           email?: string | null
           phone?: string | null
+          seeded_by_official?: boolean
+          seeded_status?:
+            | Database["public"]["Enums"]["seeded_profile_status"]
+            | null
           subcategory?: string
           suspended?: boolean
           town?: string
@@ -622,6 +850,17 @@ export type Database = {
       app_role: "admin" | "moderator" | "user"
       application_status: "sent" | "viewed" | "accepted" | "rejected"
       availability_status: "available" | "busy" | "away"
+      claim_status: "pending" | "approved" | "rejected"
+      official_post_type:
+        | "opportunity"
+        | "featured_provider"
+        | "verified_provider"
+        | "service_highlight"
+        | "safety_tip"
+        | "platform_update"
+        | "user_education"
+        | "new_feature"
+        | "announcement"
       opp_report_status: "open" | "reviewed" | "resolved" | "dismissed"
       opportunity_status:
         | "pending"
@@ -652,6 +891,7 @@ export type Database = {
         | "ngo"
         | "admin"
       report_status: "open" | "reviewing" | "resolved" | "dismissed"
+      seeded_profile_status: "unclaimed" | "claim_pending" | "claimed"
       verification_status: "none" | "pending" | "verified" | "featured"
     }
     CompositeTypes: {
@@ -783,6 +1023,18 @@ export const Constants = {
       app_role: ["admin", "moderator", "user"],
       application_status: ["sent", "viewed", "accepted", "rejected"],
       availability_status: ["available", "busy", "away"],
+      claim_status: ["pending", "approved", "rejected"],
+      official_post_type: [
+        "opportunity",
+        "featured_provider",
+        "verified_provider",
+        "service_highlight",
+        "safety_tip",
+        "platform_update",
+        "user_education",
+        "new_feature",
+        "announcement",
+      ],
       opp_report_status: ["open", "reviewed", "resolved", "dismissed"],
       opportunity_status: [
         "pending",
@@ -817,6 +1069,7 @@ export const Constants = {
         "admin",
       ],
       report_status: ["open", "reviewing", "resolved", "dismissed"],
+      seeded_profile_status: ["unclaimed", "claim_pending", "claimed"],
       verification_status: ["none", "pending", "verified", "featured"],
     },
   },
