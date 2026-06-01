@@ -62,6 +62,19 @@ function Opportunities() {
       .order("created_at", { ascending: false })
       .limit(4);
     setFeatured((feats ?? []) as OpportunityRow[]);
+
+    // Official opportunities
+    const [{ data: acct }, { data: ops }] = await Promise.all([
+      supabase.from("official_accounts").select("*").eq("is_active", true).limit(1).maybeSingle(),
+      supabase.from("official_posts").select("*").eq("status", "published").eq("post_type", "opportunity").order("is_pinned", { ascending: false }).order("created_at", { ascending: false }).limit(20),
+    ]);
+    setOfficialAccount(acct as OfficialAccountRow | null);
+    let filteredOps = (ops ?? []) as OfficialPostRow[];
+    if (cat) filteredOps = filteredOps.filter((o) => o.category_slug === cat);
+    if (loc) filteredOps = filteredOps.filter((o) => (o.location ?? "").toLowerCase().includes(loc.toLowerCase()));
+    if (q) filteredOps = filteredOps.filter((o) => o.title.toLowerCase().includes(q.toLowerCase()));
+    setOfficialOpps(filteredOps);
+
     setLoading(false);
   };
 
