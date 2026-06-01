@@ -130,6 +130,32 @@ function CreditsPage() {
 
   const isLoggedIn = !!user;
 
+  const toggleDebug = () => {
+    setDebug((d) => {
+      const next = !d;
+      try { window.localStorage.setItem("credits:debug", next ? "1" : "0"); } catch {}
+      return next;
+    });
+  };
+
+  const txSum = useMemo(() => txs.reduce((s, t) => s + (t.amount || 0), 0), [txs]);
+  const latestReq = reqs[0];
+  const latestTx = txs[0];
+  const pendingReqs = useMemo(() => reqs.filter((r) => r.status === "pending"), [reqs]);
+  const paidReqs = useMemo(() => reqs.filter((r) => r.status === "paid"), [reqs]);
+
+  type Check = { label: string; pass: boolean; detail?: string };
+  const checks: Check[] = isLoggedIn ? [
+    { label: "User session loaded", pass: !!user, detail: user?.id },
+    { label: "Wallet balance loaded", pass: balance !== null && balance !== undefined, detail: `balance=${balance ?? "—"}` },
+    { label: "Realtime channel SUBSCRIBED", pass: realtimeStatus === "SUBSCRIBED", detail: `status=${realtimeStatus}` },
+    { label: "Transactions fetched", pass: txs.length >= 0, detail: `${txs.length} rows (sample of last 50)` },
+    { label: "Purchase requests fetched", pass: reqs.length >= 0, detail: `${reqs.length} rows` },
+    { label: "Every paid request has a matching credit", pass: paidReqs.every((r) => txs.some((t) => t.amount === r.credits_requested && t.amount > 0)), detail: `${paidReqs.length} paid` },
+    { label: "No stuck pending > 7 days", pass: pendingReqs.every((r) => (Date.now() - new Date(r.created_at).getTime()) < 7 * 86400_000), detail: `${pendingReqs.length} pending` },
+    { label: "Balance ≈ sum of transactions", pass: balance === undefined || balance === null || balance === txSum, detail: `wallet=${balance ?? "—"} vs sum=${txSum}` },
+  ] : [];
+
   return (
     <Layout>
       <section className="mx-auto max-w-5xl px-4 py-8 space-y-8">
