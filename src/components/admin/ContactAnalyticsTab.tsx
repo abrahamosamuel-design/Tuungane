@@ -176,6 +176,24 @@ export function ContactAnalyticsTab() {
                 <button onClick={() => setJobFilter("has_job")} className={`rounded-full px-2.5 py-1 font-semibold ${jobFilter === "has_job" ? "bg-navy text-navy-foreground" : "border border-border hover:border-navy"}`}>Has job ID</button>
                 <button onClick={() => setJobFilter("no_job")} className={`rounded-full px-2.5 py-1 font-semibold ${jobFilter === "no_job" ? "bg-navy text-navy-foreground" : "border border-border hover:border-navy"}`}>No job ID</button>
               </div>
+              <div className="flex flex-wrap gap-2 text-xs items-center pt-1">
+                <span className="text-muted-foreground mr-1">Date range:</span>
+                <input
+                  type="date"
+                  value={dateFrom}
+                  onChange={(e) => setDateFrom(e.target.value)}
+                  className="rounded border border-border bg-background px-2 py-1 text-xs"
+                />
+                <span className="text-muted-foreground">to</span>
+                <input
+                  type="date"
+                  value={dateTo}
+                  onChange={(e) => setDateTo(e.target.value)}
+                  className="rounded border border-border bg-background px-2 py-1 text-xs"
+                />
+                <button onClick={load} className="rounded-full bg-navy px-3 py-1 text-[10px] font-bold text-navy-foreground uppercase tracking-wider">Apply</button>
+                <button onClick={() => { setDateFrom(""); setDateTo(""); }} className="rounded-full border border-border px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground hover:border-navy">Clear</button>
+              </div>
             </div>
           </div>
 
