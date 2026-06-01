@@ -18,7 +18,7 @@ export const Route = createFileRoute("/feed")({
 });
 
 type Tab = "posts" | "services" | "opportunities";
-type PostFilter = "all" | "following" | "verified" | "popular" | "nearby";
+type PostFilter = "all" | "following" | "verified" | "popular" | "nearby" | "official";
 
 const avatar = (s: string) =>
   `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(s || "T")}&backgroundColor=1e3a8a,f97316,16a34a&fontFamily=Plus%20Jakarta%20Sans`;
