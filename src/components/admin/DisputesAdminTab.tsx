@@ -23,7 +23,8 @@ export function DisputesAdminTab() {
   useEffect(() => { load(); }, [filter]);
 
   const setStatus = async (id: string, status: "reviewing" | "resolved" | "dismissed") => {
-    const patch: Record<string, unknown> = { status, admin_notes: note[id] || undefined };
+    const patch: { status: typeof status; admin_notes?: string; resolved_at?: string } = { status };
+    if (note[id]) patch.admin_notes = note[id];
     if (status === "resolved" || status === "dismissed") patch.resolved_at = new Date().toISOString();
     await supabase.from("service_disputes").update(patch).eq("id", id);
     toast.success(`Marked ${status}`); load();
