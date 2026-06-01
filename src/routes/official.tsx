@@ -50,12 +50,12 @@ function OfficialPage() {
   return (
     <Layout>
       <div className="relative h-44 w-full sm:h-64" style={{ background: account?.cover_image_url ? `url(${account.cover_image_url}) center/cover` : "var(--gradient-hero)" }} />
-      <section className="mx-auto -mt-16 max-w-4xl px-4 sm:px-6 lg:px-8">
+      <section className="relative z-10 mx-auto -mt-20 max-w-4xl px-4 sm:-mt-24 sm:px-6 lg:px-8">
         <div className="rounded-3xl border border-orange/40 bg-card p-6 shadow-[var(--shadow-elevated)] sm:p-8">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-            <img src={account?.profile_image_url || logo} alt="Tuungane Official" className="h-24 w-24 rounded-2xl border-4 border-card bg-white object-cover shadow-md" />
-            <div className="flex-1">
-              <div className="flex flex-wrap items-center gap-2">
+          <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:items-start sm:text-left">
+            <img src={account?.profile_image_url || logo} alt="Tuungane Official" className="h-24 w-24 shrink-0 rounded-2xl border-4 border-card bg-white object-cover shadow-md" />
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
                 <h1 className="font-display text-2xl font-bold text-navy sm:text-3xl">{account?.name ?? "Tuungane Official"}</h1>
                 <OfficialBadge /><VerifiedBadge />
               </div>
