@@ -180,3 +180,18 @@ function Pick({ label, options, value, onChange }: { label: string; options: rea
     </div>
   );
 }
+
+function StarRow({ label, value, onChange }: { label: string; value: number; onChange: (v: number) => void }) {
+  return (
+    <div className="flex items-center justify-between gap-2">
+      <span className="text-xs text-navy">{label}</span>
+      <div className="flex gap-0.5">
+        {[1, 2, 3, 4, 5].map((n) => (
+          <button key={n} type="button" onClick={() => onChange(n)} aria-label={`${label} ${n} stars`}>
+            <Star className={`h-4 w-4 ${n <= value ? "fill-orange text-orange" : "text-muted-foreground"}`} />
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
