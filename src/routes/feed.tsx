@@ -32,6 +32,8 @@ function Feed() {
   const [posts, setPosts] = useState<PostRow[]>([]);
   const [providers, setProviders] = useState<any[]>([]);
   const [opps, setOpps] = useState<OpportunityRow[]>([]);
+  const [officialPosts, setOfficialPosts] = useState<OfficialPostRow[]>([]);
+  const [officialAccount, setOfficialAccount] = useState<OfficialAccountRow | null>(null);
   const [loading, setLoading] = useState(true);
 
   const loadPosts = async () => {
