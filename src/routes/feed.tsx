@@ -7,8 +7,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { PostCard, type PostRow } from "@/components/social/PostCard";
 import { OpportunityCard, type OpportunityRow } from "@/components/OpportunityCard";
+import { OfficialPostCard } from "@/components/OfficialPostCard";
 import { categories } from "@/data/categories";
 import { postTypes, type PostTypeValue } from "@/data/postTypes";
+import type { OfficialAccountRow, OfficialPostRow } from "@/data/officialPostTypes";
 
 export const Route = createFileRoute("/feed")({
   head: () => ({ meta: [{ title: "Activity Feed — Tuungane" }] }),
