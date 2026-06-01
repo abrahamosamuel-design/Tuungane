@@ -62,14 +62,30 @@ function Services() {
       const { data } = await qy;
       const ids = (data ?? []).map((p) => p.user_id);
       const profMap = new Map<string, { full_name: string; avatar_url: string | null }>();
+      const trustMap = new Map<string, { trust_score: number; average_rating: number; completed_jobs: number }>();
       if (ids.length) {
-        const { data: profs } = await supabase.from("profiles").select("id,full_name,avatar_url").in("id", ids);
-        (profs ?? []).forEach((p) => profMap.set(p.id, p));
+        const [profsRes, trustRes] = await Promise.all([
+          supabase.from("profiles").select("id,full_name,avatar_url").in("id", ids),
+          supabase.from("provider_trust_stats").select("provider_id,trust_score,average_rating,completed_service_requests").in("provider_id", ids),
+        ]);
+        (profsRes.data ?? []).forEach((p) => profMap.set(p.id, p));
+        (trustRes.data ?? []).forEach((t: any) => trustMap.set(t.provider_id, {
+          trust_score: Number(t.trust_score ?? 0),
+          average_rating: Number(t.average_rating ?? 0),
+          completed_jobs: Number(t.completed_service_requests ?? 0),
+        }));
       }
-      setReal((data ?? []).map((p) => ({ ...p, profile: profMap.get(p.user_id) ?? null })) as RealProvider[]);
+      setReal((data ?? []).map((p) => ({
+        ...p,
+        profile: profMap.get(p.user_id) ?? null,
+        trust_score: trustMap.get(p.user_id)?.trust_score ?? 0,
+        average_rating: trustMap.get(p.user_id)?.average_rating ?? 0,
+        completed_jobs: trustMap.get(p.user_id)?.completed_jobs ?? 0,
+      })) as RealProvider[]);
       setLoadingReal(false);
     })();
   }, [filter]);
+
 
   const { has: isBoostedProvider } = useBoostedSet("provider", ["boost_profile", "feature_business_page"]);
 
