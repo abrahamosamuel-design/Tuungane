@@ -4,6 +4,7 @@ import { MapPin, Search, Send, AlertTriangle } from "lucide-react";
 import { Layout } from "@/components/Layout";
 import { Avatar } from "@/components/social/Avatar";
 import { supabase } from "@/integrations/supabase/client";
+import { useBoostedSet } from "@/hooks/use-boosted-set";
 import { useAuth } from "@/hooks/use-auth";
 import { categories } from "@/data/categories";
 import { urgencyOptions, requestStatusMap, type ServiceRequestRow } from "@/data/serviceRequestTypes";
@@ -30,6 +31,7 @@ function ServiceRequestsFeed() {
   const [urg, setUrg] = useState("");
   const [search, setSearch] = useState("");
   const [providerCategory, setProviderCategory] = useState<string | null>(null);
+  const { has: isBoostedReq } = useBoostedSet("service_request", ["urgent_request"]);
 
   useEffect(() => {
     (async () => {
@@ -77,7 +79,7 @@ function ServiceRequestsFeed() {
       if (!hay.includes(q)) return false;
     }
     return true;
-  }), [items, cat, town, urg, search]);
+  }).sort((a, b) => Number(isBoostedReq(b.id)) - Number(isBoostedReq(a.id))), [items, cat, town, urg, search, isBoostedReq]);
 
   const matching = providerCategory ? filtered.filter((r) => r.category_slug === providerCategory) : [];
 
