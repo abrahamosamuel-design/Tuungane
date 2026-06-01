@@ -25,6 +25,10 @@ import { useActiveBoosts } from "@/hooks/use-boosts";
 import { BoostBadge } from "@/components/BoostBadge";
 import { BoostButton } from "@/components/BoostButton";
 import { MobileActionBar } from "@/components/MobileActionBar";
+import { ContactProviderModal } from "@/components/ContactProviderModal";
+import { ContactOptionsUnlocked } from "@/components/ContactOptionsUnlocked";
+import { useContactGate } from "@/hooks/use-contact-gate";
+import { Lock } from "lucide-react";
 
 
 export const Route = createFileRoute("/u/$id")({
