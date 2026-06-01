@@ -11,6 +11,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { requestStatusMap, trustScoreLabel, type ProviderResponseRow, type ServiceRequestRow, type TrustStatsRow } from "@/data/serviceRequestTypes";
 import { timeAgo } from "@/lib/format";
 import { toast } from "sonner";
+import { SafetyNote, SAFETY_TIPS } from "@/components/SafetyNote";
 
 export const Route = createFileRoute("/requests/$id")({
   head: () => ({ meta: [{ title: "Service request — Tuungane" }] }),
@@ -174,6 +175,8 @@ function RequestDetailsPage() {
             <StatusTracker status={req.status} hasFeedback={hasFeedback} />
           </div>
         </div>
+
+        <div className="mt-3"><SafetyNote>{SAFETY_TIPS.request}</SafetyNote></div>
 
         {/* Customer view: comparison list */}
         {isCustomer && req.status === "requested" && (
