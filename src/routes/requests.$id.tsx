@@ -13,6 +13,7 @@ import { timeAgo } from "@/lib/format";
 import { toast } from "sonner";
 import { SafetyNote, SAFETY_TIPS } from "@/components/SafetyNote";
 import { MobileActionBar } from "@/components/MobileActionBar";
+import { ContactOptionsUnlocked } from "@/components/ContactOptionsUnlocked";
 
 
 export const Route = createFileRoute("/requests/$id")({
