@@ -197,6 +197,33 @@ function RequestDetailsPage() {
 
         <div className="mt-3"><SafetyNote>{SAFETY_TIPS.request}</SafetyNote></div>
 
+        {/* Unlocked contact options — only for the customer, only after a provider is associated */}
+        {isCustomer && providerContact && (providerContact.phone || providerContact.whatsapp || providerContact.email) && (
+          (req.selected_provider_id || (req.provider_id && req.status !== "requested")) && (
+            <div className="mt-4">
+              <p className="mb-2 text-xs font-semibold text-navy">
+                Contact {providerContact.name ?? "the provider"} <span className="font-normal text-muted-foreground">— your request is now tracked by Tuungane.</span>
+              </p>
+              <ContactOptionsUnlocked
+                customerId={user.id}
+                providerId={req.selected_provider_id ?? req.provider_id}
+                serviceRequestId={req.id}
+                phone={providerContact.phone}
+                whatsapp={providerContact.whatsapp}
+                email={providerContact.email}
+              />
+              <p className="mt-2 text-[11px] text-muted-foreground">After the service is completed, you'll be able to give verified feedback.</p>
+            </div>
+          )
+        )}
+
+        {/* Provider-side safety note */}
+        {!isCustomer && (
+          <div className="mt-3 rounded-2xl border border-border bg-surface p-3 text-xs text-foreground/80">
+            This customer contacted you through Tuungane. Please communicate clearly, agree on service details, and update the request status so feedback can be collected after completion.
+          </div>
+        )}
+
         {/* Customer view: comparison list */}
         {isCustomer && req.status === "requested" && (
           <div className="mt-6">
