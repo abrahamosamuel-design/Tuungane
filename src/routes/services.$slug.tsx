@@ -14,8 +14,9 @@ type Row = {
   town: string | null;
   district: string | null;
   verified: string | null;
-  trust_score: number | null;
-  profiles?: { full_name: string; avatar_url: string | null } | null;
+  full_name?: string;
+  avatar_url?: string | null;
+  rating?: number;
 };
 
 export const Route = createFileRoute("/services/$slug")({
@@ -59,13 +60,34 @@ function CategoryPage() {
 
   useEffect(() => {
     (async () => {
-      const { data } = await supabase
+      const { data: sps } = await supabase
         .from("service_profiles")
-        .select("user_id,business_name,subcategory,bio,town,district,verified,trust_score,profiles:profiles!service_profiles_user_id_fkey(full_name,avatar_url)")
+        .select("user_id,business_name,subcategory,bio,town,district,verified")
         .eq("category_slug", category.slug)
-        .order("trust_score", { ascending: false, nullsFirst: false })
+        .eq("suspended", false)
         .limit(60);
-      setList((data ?? []) as unknown as Row[]);
+      const rows = (sps ?? []) as Row[];
+      const ids = rows.map((r) => r.user_id);
+      if (ids.length === 0) {
+        setList([]);
+        return;
+      }
+      const [{ data: profs }, { data: stats }] = await Promise.all([
+        supabase.from("profiles").select("id,full_name,avatar_url").in("id", ids),
+        supabase.from("provider_trust_stats").select("provider_id,average_rating").in("provider_id", ids),
+      ]);
+      const pmap = new Map((profs ?? []).map((p) => [p.id, p]));
+      const smap = new Map((stats ?? []).map((s) => [s.provider_id, s.average_rating ?? 0]));
+      setList(
+        rows
+          .map((r) => ({
+            ...r,
+            full_name: pmap.get(r.user_id)?.full_name,
+            avatar_url: pmap.get(r.user_id)?.avatar_url ?? null,
+            rating: Number(smap.get(r.user_id) ?? 0),
+          }))
+          .sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0)),
+      );
     })();
   }, [category.slug]);
 
@@ -110,7 +132,7 @@ function CategoryPage() {
 }
 
 function RealProviderCard({ p }: { p: Row }) {
-  const name = p.business_name || p.profiles?.full_name || "Provider";
+  const name = p.business_name || p.full_name || "Provider";
   return (
     <Link
       to="/u/$id"
@@ -118,7 +140,7 @@ function RealProviderCard({ p }: { p: Row }) {
       className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)] transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-elevated)]"
     >
       <div className="flex items-start gap-4 p-5">
-        <Avatar name={name} url={p.profiles?.avatar_url ?? null} size={56} />
+        <Avatar name={name} url={p.avatar_url ?? null} size={56} />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
             <h3 className="truncate font-display text-base font-semibold text-navy">{name}</h3>
@@ -128,7 +150,9 @@ function RealProviderCard({ p }: { p: Row }) {
           <p className="text-sm text-muted-foreground">{p.subcategory}</p>
           <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground">
             {p.town && <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{p.town}</span>}
-            {p.trust_score != null && <span className="inline-flex items-center gap-1"><Star className="h-3 w-3 fill-orange text-orange" />{Number(p.trust_score).toFixed(1)}</span>}
+            {p.rating != null && p.rating > 0 && (
+              <span className="inline-flex items-center gap-1"><Star className="h-3 w-3 fill-orange text-orange" />{p.rating.toFixed(1)}</span>
+            )}
           </div>
         </div>
       </div>
