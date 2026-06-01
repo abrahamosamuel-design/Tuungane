@@ -272,6 +272,6 @@ function StatusBadge({ status }: { status: string }) {
     rejected:  { c: "bg-destructive/15 text-destructive", label: "Rejected",             icon: <XIcon className="h-3 w-3" /> },
     cancelled: { c: "bg-muted text-muted-foreground",   label: "Cancelled",              icon: <XIcon className="h-3 w-3" /> },
   };
-  const s = map[status] ?? map.pending;
+  const s = map[status] ?? { c: "bg-muted text-muted-foreground", label: status || "Unknown", icon: <Info className="h-3 w-3" /> };
   return <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold ${s.c}`}>{s.icon}{s.label}</span>;
 }
