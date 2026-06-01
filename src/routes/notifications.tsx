@@ -91,15 +91,31 @@ function NotificationsPage() {
       <section className="mx-auto max-w-2xl px-4 py-8">
         <h1 className="font-display text-3xl font-bold text-navy">Notifications</h1>
         <p className="mt-1 text-sm text-muted-foreground">Activity on your posts, profile, and follows.</p>
-        <div className="mt-6 space-y-2">
+        <p className="mt-1 text-sm text-muted-foreground">Activity on your posts, profile, follows, and service jobs.</p>
+
+        <div className="mt-4 inline-flex rounded-full border border-border bg-card p-1">
+          {([
+            { v: "all", label: "All" },
+            { v: "jobs", label: "Job updates" },
+            { v: "social", label: "Social" },
+          ] as const).map((o) => (
+            <button key={o.v} onClick={() => setFilter(o.v)} className={`rounded-full px-3 py-1 text-xs font-semibold ${filter === o.v ? "bg-orange text-orange-foreground" : "text-muted-foreground"}`}>{o.label}</button>
+          ))}
+        </div>
+
+        <div className="mt-5 space-y-2">
           {busy && <p className="text-sm text-muted-foreground">Loading…</p>}
-          {!busy && items.length === 0 && (
+          {!busy && filtered.length === 0 && (
             <div className="rounded-2xl border border-dashed border-border bg-card p-10 text-center">
-              <p className="font-semibold text-navy">No notifications yet</p>
-              <p className="mt-1 text-sm text-muted-foreground">When people follow you, like your posts, or recommend you, it'll show up here.</p>
+              <p className="font-semibold text-navy">{filter === "all" ? "No notifications yet" : filter === "jobs" ? "No job updates yet" : "No social updates yet"}</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {filter === "jobs"
+                  ? "Activity on your service requests and jobs will show up here."
+                  : "When people follow you, like your posts, or recommend you, it'll show up here."}
+              </p>
             </div>
           )}
-          {items.map((n) => (
+          {filtered.map((n) => (
             <a
               key={n.id}
               href={hrefFor(n)}
