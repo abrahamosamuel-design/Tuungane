@@ -6,6 +6,8 @@ import { useAuth } from "@/hooks/use-auth";
 import { Building2, BadgeCheck, MapPin, Phone, Mail, MessageCircle, Sparkles, Edit3, Users, Briefcase } from "lucide-react";
 import { toast } from "sonner";
 import { orgTypeLabel } from "@/data/businessTypes";
+import { SafetyNote, SAFETY_TIPS } from "@/components/SafetyNote";
+import { EmptyState } from "@/components/EmptyState";
 
 export const Route = createFileRoute("/businesses/$slug")({
   head: () => ({ meta: [{ title: "Business page — Tuungane" }] }),
@@ -142,7 +144,7 @@ function BusinessDetail() {
             <div className="rounded-2xl border border-border bg-card p-5">
               <h3 className="flex items-center gap-2 text-base font-bold text-navy"><Briefcase className="h-4 w-4 text-orange" /> Opportunities</h3>
               {opps.length === 0 ? (
-                <p className="mt-2 text-sm text-muted-foreground">No opportunities posted yet.</p>
+                <div className="mt-3"><EmptyState icon={Briefcase} title="No opportunities yet" description="This page hasn't posted any jobs, gigs, or volunteer roles." /></div>
               ) : (
                 <ul className="mt-3 space-y-2">
                   {opps.map((o) => (
@@ -169,6 +171,7 @@ function BusinessDetail() {
                 {!page.contact_phone && !page.whatsapp && !page.email && <li>No contact info provided.</li>}
               </ul>
             </div>
+            <SafetyNote>{SAFETY_TIPS.business}</SafetyNote>
           </aside>
         </div>
       </section>
