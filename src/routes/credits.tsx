@@ -159,6 +159,63 @@ function CreditsPage() {
   return (
     <Layout>
       <section className="mx-auto max-w-5xl px-4 py-8 space-y-8">
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={toggleDebug}
+            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground hover:text-navy hover:border-navy/40"
+            title="Toggle QA debug panel"
+          >
+            <Bug className="h-3.5 w-3.5" /> {debug ? "Hide debug" : "Debug"}
+          </button>
+        </div>
+
+        {debug && isLoggedIn && (
+          <div className="rounded-xl border border-dashed border-navy/40 bg-navy/5 p-4 text-sm">
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="flex items-center gap-2 font-bold text-navy"><Bug className="h-4 w-4" /> QA debug — Credits</h2>
+              <button onClick={() => { loadPersonal(); loadPackages(); toast.success("Reloaded"); }} className="inline-flex items-center gap-1 rounded-full bg-navy px-3 py-1 text-xs font-semibold text-white">
+                <RefreshCw className="h-3 w-3" /> Reload
+              </button>
+            </div>
+            <ul className="space-y-1">
+              {checks.map((c, i) => (
+                <li key={i} className="flex items-start gap-2">
+                  <span className={`mt-0.5 inline-flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full ${c.pass ? "bg-green/20 text-green" : "bg-destructive/20 text-destructive"}`}>
+                    {c.pass ? <Check className="h-3 w-3" /> : <XIcon className="h-3 w-3" />}
+                  </span>
+                  <span className="flex-1">
+                    <span className="font-medium text-navy">{c.label}</span>
+                    {c.detail && <span className="ml-2 text-xs text-muted-foreground">— {c.detail}</span>}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 text-xs">
+              <div className="rounded-md bg-background p-3">
+                <div className="font-semibold text-navy mb-1">Realtime</div>
+                <div>status: <code>{realtimeStatus}</code></div>
+                <div>last event: <code>{lastEventKind ?? "—"}</code></div>
+                <div>at: <code>{lastEventAt ?? "—"}</code></div>
+              </div>
+              <div className="rounded-md bg-background p-3">
+                <div className="font-semibold text-navy mb-1">Latest</div>
+                <div>request: <code>{latestReq ? `${latestReq.status} · ${latestReq.package_name}` : "—"}</code></div>
+                <div>transaction: <code>{latestTx ? `${latestTx.transaction_type} ${latestTx.amount > 0 ? "+" : ""}${latestTx.amount}` : "—"}</code></div>
+              </div>
+            </div>
+            <p className="mt-3 text-[11px] text-muted-foreground">
+              QA flow: request a package → check status flips to <strong>pending</strong> here within ~1s → admin marks paid → status flips to <strong>paid</strong> and a positive transaction appears, balance increases. Cancel a pending → status flips to <strong>cancelled</strong>, no transaction.
+            </p>
+          </div>
+        )}
+        {debug && !isLoggedIn && (
+          <div className="rounded-xl border border-dashed border-navy/40 bg-navy/5 p-4 text-sm text-muted-foreground">
+            Log in to run the QA checklist.
+          </div>
+        )}
+
+
         {/* Header */}
         <div className="rounded-2xl bg-gradient-to-br from-orange/15 via-orange/5 to-background border border-orange/20 p-6 sm:p-8">
           <div className="flex flex-wrap items-end justify-between gap-6">
