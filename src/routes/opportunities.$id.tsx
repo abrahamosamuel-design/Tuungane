@@ -41,6 +41,7 @@ function OpportunityDetails() {
   const nav = useNavigate();
   const [o, setO] = useState<OppFull | null>(null);
   const [author, setAuthor] = useState<{ full_name: string; avatar_url: string | null } | null>(null);
+  const [business, setBusiness] = useState<BusinessLite | null>(null);
   const [similar, setSimilar] = useState<OpportunityRow[]>([]);
   const [saved, setSaved] = useState(false);
   const [applyOpen, setApplyOpen] = useState(false);
@@ -53,8 +54,15 @@ function OpportunityDetails() {
     setO(data as OppFull);
     const { data: p } = await supabase.from("profiles").select("full_name,avatar_url").eq("id", data.poster_id).maybeSingle();
     setAuthor(p);
+    if (data.business_page_id) {
+      const { data: b } = await supabase.from("business_pages").select("id,slug,name,logo_url,verified").eq("id", data.business_page_id).maybeSingle();
+      setBusiness((b ?? null) as BusinessLite | null);
+    } else {
+      setBusiness(null);
+    }
     const { data: sim } = await supabase.from("opportunities").select("*").eq("category_slug", data.category_slug).neq("id", id).in("status", ["approved", "featured"]).limit(4);
     setSimilar((sim ?? []) as OpportunityRow[]);
+
     if (user) {
       const { data: s } = await supabase.from("saved_opportunities").select("id").eq("opportunity_id", id).eq("user_id", user.id).maybeSingle();
       setSaved(!!s);
