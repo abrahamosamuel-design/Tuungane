@@ -164,9 +164,17 @@ function Feed() {
         <div className="mt-6 space-y-4">
           {loading && <p className="text-sm text-muted-foreground">Loading...</p>}
 
-          {!loading && tab === "posts" && (posts.length === 0 ? (
-            <Empty title="No posts yet" hint={filter === "following" ? "Follow providers to see their work here." : "Be the first to share work."} />
-          ) : posts.map((p) => <PostCard key={p.id} post={p} onChanged={load} />))}
+          {!loading && tab === "posts" && (
+            <>
+              {officialToShow.map((p) => <OfficialPostCard key={`op-${p.id}`} post={p} account={officialAccount} />)}
+              {filter !== "official" && (posts.length === 0 ? (
+                <Empty title="No posts yet" hint={filter === "following" ? "Follow providers to see their work here." : "Be the first to share work."} />
+              ) : posts.map((p) => <PostCard key={p.id} post={p} onChanged={load} />))}
+              {filter === "official" && officialToShow.length === 0 && (
+                <Empty title="No official posts yet" hint="Tuungane Official will post curated updates here soon." />
+              )}
+            </>
+          )}
 
           {!loading && tab === "services" && (providers.length === 0 ? (
             <Empty title="No providers found" hint="Try a different category." />
