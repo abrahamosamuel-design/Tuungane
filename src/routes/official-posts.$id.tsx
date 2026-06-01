@@ -8,6 +8,7 @@ import { Avatar } from "@/components/social/Avatar";
 import { timeAgo } from "@/lib/format";
 import { toast } from "sonner";
 import type { OfficialAccountRow, OfficialPostRow } from "@/data/officialPostTypes";
+import { SafetyNote, SAFETY_TIPS } from "@/components/SafetyNote";
 
 export const Route = createFileRoute("/official-posts/$id")({
   head: () => ({ meta: [{ title: "Official post — Tuungane" }] }),
@@ -61,6 +62,8 @@ function OfficialPostDetail() {
         <div className="mt-4">
           <OfficialPostCard post={post} account={account} onChanged={load} />
         </div>
+
+        <div className="mt-4"><SafetyNote tone="info" title="From Tuungane Official">{SAFETY_TIPS.official}</SafetyNote></div>
 
         <div className="mt-6 rounded-2xl border border-border bg-card p-4">
           <h2 className="font-display text-sm font-bold text-navy">Comments ({comments.length})</h2>
