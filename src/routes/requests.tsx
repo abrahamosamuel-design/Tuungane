@@ -8,6 +8,8 @@ import { FeedbackDialog } from "@/components/FeedbackDialog";
 import { ReportDialog } from "@/components/social/ReportDialog";
 import { requestStatuses, type RequestStatusValue, type ServiceRequestRow } from "@/data/serviceRequestTypes";
 import { toast } from "sonner";
+import { EmptyState } from "@/components/EmptyState";
+import { Inbox } from "lucide-react";
 
 export const Route = createFileRoute("/requests")({
   head: () => ({ meta: [{ title: "Service requests — Tuungane" }] }),
@@ -94,15 +96,12 @@ function RequestsPage() {
 
         <div className="mt-5 space-y-3 pb-12">
           {filtered.length === 0 && (
-            <div className="rounded-2xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground">
-              <p>No requests {role === "customer" ? "sent" : "received"} yet.</p>
-              {role === "customer" && (
-                <p className="mt-3 flex flex-wrap items-center justify-center gap-2 text-xs">
-                  <Link to="/services" className="rounded-full bg-orange px-3 py-1 font-semibold text-orange-foreground">Browse services</Link>
-                  <Link to="/services/requests" className="rounded-full border border-border px-3 py-1 font-semibold text-navy hover:border-orange">See open requests</Link>
-                </p>
-              )}
-            </div>
+            <EmptyState
+              icon={Inbox}
+              title={`No requests ${role === "customer" ? "sent" : "received"} yet`}
+              description={role === "customer" ? "Find a verified provider and send your first service request." : "When customers send requests in your category, they'll show up here."}
+              action={role === "customer" ? { label: "Browse services", to: "/services" } : { label: "See open requests", to: "/services/requests" }}
+            />
           )}
           {filtered.map((r) => (
             <ServiceRequestCard

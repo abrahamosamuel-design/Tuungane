@@ -6,6 +6,7 @@ import { Avatar } from "@/components/social/Avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { useBoostedSet } from "@/hooks/use-boosted-set";
 import { useAuth } from "@/hooks/use-auth";
+import { EmptyState } from "@/components/EmptyState";
 import { categories } from "@/data/categories";
 import { urgencyOptions, requestStatusMap, type ServiceRequestRow } from "@/data/serviceRequestTypes";
 import { timeAgo } from "@/lib/format";
@@ -128,7 +129,7 @@ function ServiceRequestsFeed() {
         <h2 className="font-display text-xl font-bold text-navy">All open requests</h2>
         {loading && <p className="mt-3 text-sm text-muted-foreground">Loading…</p>}
         {!loading && filtered.length === 0 && (
-          <p className="mt-3 rounded-2xl border border-dashed border-border bg-card p-10 text-center text-sm text-muted-foreground">No open requests match these filters.</p>
+          <div className="mt-3"><EmptyState icon={Search} title="No open requests match these filters" description="Try clearing your category or location filter to see more nearby work." /></div>
         )}
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           {filtered.map((r) => <FeedCard key={r.id} r={r} highlight={isBoostedReq(r.id)} />)}

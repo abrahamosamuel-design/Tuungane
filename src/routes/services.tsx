@@ -7,6 +7,7 @@ import { categories } from "@/data/categories";
 import { providers } from "@/data/providers";
 import { supabase } from "@/integrations/supabase/client";
 import { useBoostedSet } from "@/hooks/use-boosted-set";
+import { EmptyState } from "@/components/EmptyState";
 
 const iconMap: Record<string, any> = { Wrench, Sparkles, Building2, Scissors, Truck, Car, GraduationCap, Camera, ChefHat, Laptop, HeartPulse, Sprout, MoreHorizontal };
 
@@ -211,9 +212,8 @@ function Services() {
             );
           })}
           {!loadingReal && realFiltered.length === 0 && (
-            <div className="col-span-full rounded-2xl border border-dashed border-border p-10 text-center">
-              <p className="font-semibold text-navy">No providers match your filters yet.</p>
-              <p className="mt-1 text-sm text-muted-foreground">Try a different filter, or check back as Tuungane Official adds more.</p>
+            <div className="col-span-full">
+              <EmptyState icon={Search} title="No providers match your filters yet" description="Try a different category or location, or check back as Tuungane Official adds more verified providers." action={{ label: "Browse all categories", to: "/services" }} />
             </div>
           )}
         </div>
