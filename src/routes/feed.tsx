@@ -5,6 +5,7 @@ import { BadgeCheck, MapPin, Sparkles } from "lucide-react";
 import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { useBoostedSet } from "@/hooks/use-boosted-set";
 import { PostCard, type PostRow } from "@/components/social/PostCard";
 import { OpportunityCard, type OpportunityRow } from "@/components/OpportunityCard";
 import { OfficialPostCard } from "@/components/OfficialPostCard";
@@ -35,6 +36,9 @@ function Feed() {
   const [officialPosts, setOfficialPosts] = useState<OfficialPostRow[]>([]);
   const [officialAccount, setOfficialAccount] = useState<OfficialAccountRow | null>(null);
   const [loading, setLoading] = useState(true);
+  const { has: isBoostedPost } = useBoostedSet("post", ["feature_post", "promoted_completed_work"]);
+  const { has: isBoostedProvider } = useBoostedSet("provider", ["boost_profile", "feature_business_page"]);
+  const { has: isBoostedOpp } = useBoostedSet("opportunity", ["feature_opportunity"]);
 
   const loadPosts = async () => {
     let providerIds: string[] | null = null;
