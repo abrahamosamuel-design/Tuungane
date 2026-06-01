@@ -6,6 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { categories } from "@/data/categories";
 import { opportunityTypes } from "@/data/opportunities";
 import { OpportunityCard, type OpportunityRow } from "@/components/OpportunityCard";
+import { OfficialPostCard } from "@/components/OfficialPostCard";
+import type { OfficialAccountRow, OfficialPostRow } from "@/data/officialPostTypes";
 
 export const Route = createFileRoute("/opportunities")({
   head: () => ({
@@ -27,6 +29,9 @@ function Opportunities() {
   const [withDeadline, setWithDeadline] = useState(false);
   const [items, setItems] = useState<OpportunityRow[]>([]);
   const [featured, setFeatured] = useState<OpportunityRow[]>([]);
+  const [officialOpps, setOfficialOpps] = useState<OfficialPostRow[]>([]);
+  const [officialAccount, setOfficialAccount] = useState<OfficialAccountRow | null>(null);
+  const [source, setSource] = useState<"all" | "official" | "users">("all");
   const [loading, setLoading] = useState(true);
 
   const category = categories.find((c) => c.slug === cat);
@@ -57,6 +62,19 @@ function Opportunities() {
       .order("created_at", { ascending: false })
       .limit(4);
     setFeatured((feats ?? []) as OpportunityRow[]);
+
+    // Official opportunities
+    const [{ data: acct }, { data: ops }] = await Promise.all([
+      supabase.from("official_accounts").select("*").eq("is_active", true).limit(1).maybeSingle(),
+      supabase.from("official_posts").select("*").eq("status", "published").eq("post_type", "opportunity").order("is_pinned", { ascending: false }).order("created_at", { ascending: false }).limit(20),
+    ]);
+    setOfficialAccount(acct as OfficialAccountRow | null);
+    let filteredOps = (ops ?? []) as OfficialPostRow[];
+    if (cat) filteredOps = filteredOps.filter((o) => o.category_slug === cat);
+    if (loc) filteredOps = filteredOps.filter((o) => (o.location ?? "").toLowerCase().includes(loc.toLowerCase()));
+    if (q) filteredOps = filteredOps.filter((o) => o.title.toLowerCase().includes(q.toLowerCase()));
+    setOfficialOpps(filteredOps);
+
     setLoading(false);
   };
 
@@ -122,7 +140,22 @@ function Opportunities() {
           </aside>
 
           <div>
-            {featured.length > 0 && (
+            <div className="mb-4 flex flex-wrap gap-2">
+              <Pill active={source === "all"} onClick={() => setSource("all")}>All sources</Pill>
+              <Pill active={source === "official"} onClick={() => setSource("official")}>Posted by Tuungane Official</Pill>
+              <Pill active={source === "users"} onClick={() => setSource("users")}>Posted by users</Pill>
+            </div>
+
+            {source !== "users" && officialOpps.length > 0 && (
+              <div className="mb-6">
+                <h2 className="mb-3 font-display text-lg font-bold text-navy">Posted by Tuungane Official</h2>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {officialOpps.map((o) => <OfficialPostCard key={o.id} post={o} account={officialAccount} />)}
+                </div>
+              </div>
+            )}
+
+            {source !== "official" && featured.length > 0 && (
               <div className="mb-6">
                 <h2 className="mb-3 font-display text-lg font-bold text-navy">Featured opportunities</h2>
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -130,17 +163,22 @@ function Opportunities() {
                 </div>
               </div>
             )}
-            <h2 className="mb-3 font-display text-lg font-bold text-navy">Recent opportunities</h2>
-            {loading && <p className="text-sm text-muted-foreground">Loading…</p>}
-            {!loading && items.length === 0 && (
-              <div className="rounded-2xl border border-dashed border-border bg-card p-10 text-center">
-                <p className="font-semibold text-navy">No opportunities yet</p>
-                <p className="mt-1 text-sm text-muted-foreground">Try clearing filters, or be the first to post one.</p>
-              </div>
+
+            {source !== "official" && (
+              <>
+                <h2 className="mb-3 font-display text-lg font-bold text-navy">Recent opportunities</h2>
+                {loading && <p className="text-sm text-muted-foreground">Loading…</p>}
+                {!loading && items.length === 0 && (
+                  <div className="rounded-2xl border border-dashed border-border bg-card p-10 text-center">
+                    <p className="font-semibold text-navy">No opportunities yet</p>
+                    <p className="mt-1 text-sm text-muted-foreground">Try clearing filters, or be the first to post one.</p>
+                  </div>
+                )}
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {items.map((o) => <OpportunityCard key={o.id} o={o} />)}
+                </div>
+              </>
             )}
-            <div className="grid gap-3 sm:grid-cols-2">
-              {items.map((o) => <OpportunityCard key={o.id} o={o} />)}
-            </div>
           </div>
         </div>
       </section>

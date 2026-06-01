@@ -23,6 +23,25 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const featured = featuredProviders();
+  const [officialAccount, setOfficialAccount] = useState<OfficialAccountRow | null>(null);
+  const [officialPosts, setOfficialPosts] = useState<OfficialPostRow[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      const { data: acct } = await supabase.from("official_accounts").select("*").eq("is_active", true).limit(1).maybeSingle();
+      setOfficialAccount(acct as OfficialAccountRow | null);
+      const { data: posts } = await supabase
+        .from("official_posts")
+        .select("*")
+        .eq("status", "published")
+        .or("is_homepage.eq.true,is_pinned.eq.true,is_featured.eq.true")
+        .order("is_pinned", { ascending: false })
+        .order("created_at", { ascending: false })
+        .limit(4);
+      setOfficialPosts((posts ?? []) as OfficialPostRow[]);
+    })();
+  }, []);
+
   return (
     <Layout>
       {/* Hero */}
@@ -103,8 +122,30 @@ function Index() {
         </div>
       </section>
 
+      {/* From Tuungane Official */}
+      {officialPosts.length > 0 && (
+        <section className="border-y border-orange/20 bg-gradient-to-b from-orange/5 to-transparent py-14">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="flex items-end justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-orange">From Tuungane Official</p>
+                <h2 className="mt-1 font-display text-3xl font-bold text-navy">Featured updates & opportunities</h2>
+                <p className="mt-1 text-sm text-muted-foreground">Curated by the Tuungane team to help you find work, services and stay safe.</p>
+              </div>
+              <Link to="/official" className="hidden text-sm font-semibold text-navy hover:text-orange sm:inline-flex">See all →</Link>
+            </div>
+            <div className="mt-8 grid gap-5 sm:grid-cols-2">
+              {officialPosts.map((p) => (
+                <OfficialPostCard key={p.id} post={p} account={officialAccount} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* How it works */}
       <section className="bg-surface py-16">
+
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <p className="text-xs font-semibold uppercase tracking-wider text-orange">How Tuungane works</p>

@@ -13,6 +13,7 @@ import { ReviewDialog } from "@/components/social/ReviewDialog";
 import { ReportDialog } from "@/components/social/ReportDialog";
 import { SaveButton } from "@/components/social/SaveButton";
 import { OpportunityCard, type OpportunityRow } from "@/components/OpportunityCard";
+import { ClaimProfileDialog } from "@/components/ClaimProfileDialog";
 import { uploadMedia } from "@/lib/upload";
 import { timeAgo } from "@/lib/format";
 import { getCategory } from "@/data/categories";
@@ -39,7 +40,7 @@ function UserProfile() {
   const { id } = useParams({ from: "/u/$id" });
   const { user } = useAuth();
   const [profile, setProfile] = useState<{ full_name: string; avatar_url: string | null; bio: string | null; town: string | null; district: string | null; is_provider: boolean } | null>(null);
-  const [sp, setSp] = useState<{ business_name: string | null; subcategory: string; bio: string; town: string; district: string; phone: string | null; whatsapp: string | null; email: string | null; verified: string; category_slug: string; years_experience: number; areas_served: string[]; availability: string; cover_url: string | null } | null>(null);
+  const [sp, setSp] = useState<{ business_name: string | null; subcategory: string; bio: string; town: string; district: string; phone: string | null; whatsapp: string | null; email: string | null; verified: string; category_slug: string; years_experience: number; areas_served: string[]; availability: string; cover_url: string | null; seeded_by_official: boolean; seeded_status: string | null } | null>(null);
   const [posts, setPosts] = useState<PostRow[]>([]);
   const [opps, setOpps] = useState<OpportunityRow[]>([]);
   const [followers, setFollowers] = useState(0);
@@ -50,11 +51,12 @@ function UserProfile() {
   const [revOpen, setRevOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
+  const [claimOpen, setClaimOpen] = useState(false);
 
   const load = async () => {
     const { data: p } = await supabase.from("profiles").select("full_name,avatar_url,bio,town,district,is_provider").eq("id", id).maybeSingle();
     setProfile(p);
-    const { data: s } = await supabase.from("service_profiles").select("business_name,subcategory,bio,town,district,phone,whatsapp,email,verified,category_slug,years_experience,areas_served,availability,cover_url").eq("user_id", id).maybeSingle();
+    const { data: s } = await supabase.from("service_profiles").select("business_name,subcategory,bio,town,district,phone,whatsapp,email,verified,category_slug,years_experience,areas_served,availability,cover_url,seeded_by_official,seeded_status").eq("user_id", id).maybeSingle();
     setSp(s);
     const { data: ps } = await supabase.from("timeline_posts").select("*").eq("provider_user_id", id).eq("hidden", false).order("created_at", { ascending: false });
     setPosts((ps ?? []).map((r) => ({ ...r, author: p ?? undefined })) as PostRow[]);
@@ -121,6 +123,25 @@ function UserProfile() {
       </div>
 
       <section className="mx-auto max-w-3xl px-4">
+        {sp?.seeded_by_official && sp.seeded_status !== "claimed" && (
+          <div className="-mt-6 mb-3 flex flex-col gap-3 rounded-2xl border border-orange/40 bg-orange/5 p-4 text-sm sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-3">
+              <BadgeCheck className="mt-0.5 h-5 w-5 shrink-0 text-orange" />
+              <div>
+                <p className="font-semibold text-navy">
+                  Added by Tuungane Official
+                  {sp.seeded_status === "claim_pending" && <span className="ml-2 rounded-full bg-orange/20 px-2 py-0.5 text-[10px] font-semibold text-orange">Claim under review</span>}
+                </p>
+                <p className="mt-0.5 text-xs text-muted-foreground">This profile was added by Tuungane to help customers discover this provider. If this is your business, claim it to manage it directly.</p>
+              </div>
+            </div>
+            {user && user.id !== id && sp.seeded_status === "unclaimed" && (
+              <button onClick={() => setClaimOpen(true)} className="shrink-0 rounded-full bg-orange px-4 py-2 text-xs font-semibold text-orange-foreground hover:brightness-110">
+                Claim this profile
+              </button>
+            )}
+          </div>
+        )}
         {/* Header card */}
         <div className="-mt-12 rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-elevated)] sm:p-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -321,6 +342,7 @@ function UserProfile() {
         <RecommendDialog open={recOpen} onClose={() => setRecOpen(false)} providerUserId={id} />
         <ReviewDialog open={revOpen} onClose={() => setRevOpen(false)} providerUserId={id} onPosted={load} />
         <ReportDialog open={reportOpen} onClose={() => setReportOpen(false)} targetType="provider" targetId={id} />
+        <ClaimProfileDialog serviceProfileUserId={id} open={claimOpen} onClose={() => setClaimOpen(false)} onSubmitted={load} />
       </section>
     </Layout>
   );

@@ -7,8 +7,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { PostCard, type PostRow } from "@/components/social/PostCard";
 import { OpportunityCard, type OpportunityRow } from "@/components/OpportunityCard";
+import { OfficialPostCard } from "@/components/OfficialPostCard";
 import { categories } from "@/data/categories";
 import { postTypes, type PostTypeValue } from "@/data/postTypes";
+import type { OfficialAccountRow, OfficialPostRow } from "@/data/officialPostTypes";
 
 export const Route = createFileRoute("/feed")({
   head: () => ({ meta: [{ title: "Activity Feed — Tuungane" }] }),
@@ -16,7 +18,7 @@ export const Route = createFileRoute("/feed")({
 });
 
 type Tab = "posts" | "services" | "opportunities";
-type PostFilter = "all" | "following" | "verified" | "popular" | "nearby";
+type PostFilter = "all" | "following" | "verified" | "popular" | "nearby" | "official";
 
 const avatar = (s: string) =>
   `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(s || "T")}&backgroundColor=1e3a8a,f97316,16a34a&fontFamily=Plus%20Jakarta%20Sans`;
@@ -30,6 +32,8 @@ function Feed() {
   const [posts, setPosts] = useState<PostRow[]>([]);
   const [providers, setProviders] = useState<any[]>([]);
   const [opps, setOpps] = useState<OpportunityRow[]>([]);
+  const [officialPosts, setOfficialPosts] = useState<OfficialPostRow[]>([]);
+  const [officialAccount, setOfficialAccount] = useState<OfficialAccountRow | null>(null);
   const [loading, setLoading] = useState(true);
 
   const loadPosts = async () => {
@@ -100,9 +104,18 @@ function Feed() {
     setOpps((data ?? []).map((o) => ({ ...o, author: profMap.get(o.poster_id) ?? null })) as OpportunityRow[]);
   };
 
+  const loadOfficial = async () => {
+    const [{ data: acct }, { data: ops }] = await Promise.all([
+      supabase.from("official_accounts").select("*").eq("is_active", true).limit(1).maybeSingle(),
+      supabase.from("official_posts").select("*").eq("status", "published").order("is_pinned", { ascending: false }).order("created_at", { ascending: false }).limit(filter === "official" ? 30 : 5),
+    ]);
+    setOfficialAccount(acct as OfficialAccountRow | null);
+    setOfficialPosts((ops ?? []) as OfficialPostRow[]);
+  };
+
   const load = async () => {
     setLoading(true);
-    if (tab === "posts") await loadPosts();
+    if (tab === "posts") { await Promise.all([loadPosts(), loadOfficial()]); }
     else if (tab === "services") await loadProviders();
     else await loadOpps();
     setLoading(false);
@@ -114,8 +127,11 @@ function Feed() {
     { id: "posts", label: "Posts" }, { id: "services", label: "Services" }, { id: "opportunities", label: "Opportunities" },
   ];
   const postFilters: { id: PostFilter; label: string }[] = [
-    { id: "all", label: "All" }, { id: "following", label: "Following" }, { id: "nearby", label: "Nearby" }, { id: "popular", label: "Popular" }, { id: "verified", label: "Verified" },
+    { id: "all", label: "All" }, { id: "following", label: "Following" }, { id: "nearby", label: "Nearby" }, { id: "popular", label: "Popular" }, { id: "verified", label: "Verified" }, { id: "official", label: "Official" },
   ];
+
+  const pinnedOfficial = officialPosts.filter((p) => p.is_pinned);
+  const officialToShow = filter === "official" ? officialPosts : pinnedOfficial;
 
   return (
     <Layout>
@@ -148,9 +164,17 @@ function Feed() {
         <div className="mt-6 space-y-4">
           {loading && <p className="text-sm text-muted-foreground">Loading...</p>}
 
-          {!loading && tab === "posts" && (posts.length === 0 ? (
-            <Empty title="No posts yet" hint={filter === "following" ? "Follow providers to see their work here." : "Be the first to share work."} />
-          ) : posts.map((p) => <PostCard key={p.id} post={p} onChanged={load} />))}
+          {!loading && tab === "posts" && (
+            <>
+              {officialToShow.map((p) => <OfficialPostCard key={`op-${p.id}`} post={p} account={officialAccount} />)}
+              {filter !== "official" && (posts.length === 0 ? (
+                <Empty title="No posts yet" hint={filter === "following" ? "Follow providers to see their work here." : "Be the first to share work."} />
+              ) : posts.map((p) => <PostCard key={p.id} post={p} onChanged={load} />))}
+              {filter === "official" && officialToShow.length === 0 && (
+                <Empty title="No official posts yet" hint="Tuungane Official will post curated updates here soon." />
+              )}
+            </>
+          )}
 
           {!loading && tab === "services" && (providers.length === 0 ? (
             <Empty title="No providers found" hint="Try a different category." />
