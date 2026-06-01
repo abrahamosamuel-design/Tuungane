@@ -50,10 +50,25 @@ export async function logContactClick(args: {
   method: "whatsapp" | "call" | "in_app";
 }) {
   try {
+    // If the request has progressed beyond "requested" it counts as an active job.
+    // Populate service_job_id so contact analytics can split request-phase vs
+    // job-phase contacts. (No separate service_jobs table — the request id
+    // doubles as the job id once status is accepted/in_progress/completed.)
+    let serviceJobId: string | null = null;
+    const { data: r } = await supabase
+      .from("service_requests")
+      .select("status")
+      .eq("id", args.serviceRequestId)
+      .maybeSingle();
+    if (r && ["accepted", "in_progress", "completed"].includes(r.status as string)) {
+      serviceJobId = args.serviceRequestId;
+    }
+
     await supabase.from("contact_logs").insert({
       customer_id: args.customerId,
       provider_id: args.providerId,
       service_request_id: args.serviceRequestId,
+      service_job_id: serviceJobId,
       contact_method: args.method,
       user_agent: typeof navigator !== "undefined" ? navigator.userAgent.slice(0, 500) : null,
     });
