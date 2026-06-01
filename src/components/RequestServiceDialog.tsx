@@ -142,6 +142,10 @@ export function RequestServiceDialog({ open, onClose, providerId, providerName, 
             </Field>
           </div>
 
+          <Field label="Short title">
+            <input maxLength={120} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className={input} placeholder="e.g. Leaking sink in Katabi" />
+          </Field>
+
           <Field label="Service needed *">
             <input maxLength={200} value={form.service_needed} onChange={(e) => setForm({ ...form, service_needed: e.target.value })} className={input} placeholder="e.g. Fix leaking kitchen sink" />
           </Field>
