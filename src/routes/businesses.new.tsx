@@ -75,6 +75,7 @@ function NewBusinessPage() {
 
   const cat = categories.find((c) => c.slug === form.category_slug);
 
+  if (loading) return <Layout><div className="mx-auto max-w-3xl px-4 py-16 text-center text-sm text-muted-foreground">Loading…</div></Layout>;
   if (!user) return null;
 
   return (

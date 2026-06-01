@@ -10,9 +10,13 @@ import { toast } from "sonner";
 import type { OfficialAccountRow, OfficialPostRow } from "@/data/officialPostTypes";
 import { SafetyNote, SAFETY_TIPS } from "@/components/SafetyNote";
 
+import { RouteErrorCard, RouteNotFoundCard } from "@/lib/route-boundaries";
+
 export const Route = createFileRoute("/official-posts/$id")({
   head: () => ({ meta: [{ title: "Official post — Tuungane" }] }),
   component: OfficialPostDetail,
+  errorComponent: ({ error, reset }) => <RouteErrorCard error={error} reset={reset} title="Couldn't load this post" />,
+  notFoundComponent: () => <RouteNotFoundCard title="Post not found" message="This official post may have been removed." homeHref="/official" homeLabel="Back to Official" />,
 });
 
 function OfficialPostDetail() {

@@ -9,9 +9,13 @@ import { orgTypeLabel } from "@/data/businessTypes";
 import { SafetyNote, SAFETY_TIPS } from "@/components/SafetyNote";
 import { EmptyState } from "@/components/EmptyState";
 
+import { RouteErrorCard, RouteNotFoundCard } from "@/lib/route-boundaries";
+
 export const Route = createFileRoute("/businesses/$slug")({
   head: () => ({ meta: [{ title: "Business page — Tuungane" }] }),
   component: BusinessDetail,
+  errorComponent: ({ error, reset }) => <RouteErrorCard error={error} reset={reset} title="Couldn't load this business" />,
+  notFoundComponent: () => <RouteNotFoundCard title="Business not found" message="This business page may have been removed." homeHref="/businesses" homeLabel="Browse businesses" />,
 });
 
 type BPage = {

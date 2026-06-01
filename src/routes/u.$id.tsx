@@ -31,9 +31,13 @@ import { useContactGate } from "@/hooks/use-contact-gate";
 import { Lock } from "lucide-react";
 
 
+import { RouteErrorCard, RouteNotFoundCard } from "@/lib/route-boundaries";
+
 export const Route = createFileRoute("/u/$id")({
   head: () => ({ meta: [{ title: "Profile — Tuungane" }] }),
   component: UserProfile,
+  errorComponent: ({ error, reset }) => <RouteErrorCard error={error} reset={reset} title="Couldn't load this profile" />,
+  notFoundComponent: () => <RouteNotFoundCard title="Profile not found" message="This user profile may have been removed." />,
 });
 
 type Tab = "timeline" | "portfolio" | "services" | "recommendations" | "reviews" | "opportunities" | "about";

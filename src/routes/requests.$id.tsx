@@ -16,9 +16,13 @@ import { MobileActionBar } from "@/components/MobileActionBar";
 import { ContactOptionsUnlocked } from "@/components/ContactOptionsUnlocked";
 
 
+import { RouteErrorCard, RouteNotFoundCard } from "@/lib/route-boundaries";
+
 export const Route = createFileRoute("/requests/$id")({
   head: () => ({ meta: [{ title: "Service request — Tuungane" }] }),
   component: RequestDetailsPage,
+  errorComponent: ({ error, reset }) => <RouteErrorCard error={error} reset={reset} title="Couldn't load this request" />,
+  notFoundComponent: () => <RouteNotFoundCard title="Request not found" message="This service request may have been removed." homeHref="/requests" homeLabel="My requests" />,
 });
 
 type Profile = { id: string; full_name: string; avatar_url: string | null };
