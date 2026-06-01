@@ -18,6 +18,7 @@ function NewOpportunity() {
   const { user, loading } = useAuth();
   const nav = useNavigate();
   const [busy, setBusy] = useState(false);
+  const [myBusinesses, setMyBusinesses] = useState<Array<{ id: string; name: string; verified: string }>>([]);
   const [f, setF] = useState({
     title: "",
     opportunity_type: "gig" as (typeof opportunityTypes)[number]["value"],
@@ -34,12 +35,27 @@ function NewOpportunity() {
     whatsapp_number: "",
     contact_email: "",
     poster_type: "individual" as (typeof posterTypes)[number]["value"],
+    business_page_id: "" as string,
   });
   const [file, setFile] = useState<File | null>(null);
 
   useEffect(() => {
     if (!loading && !user) nav({ to: "/login", search: { tab: "signup", redirect: "/opportunities/new" } as never });
   }, [loading, user, nav]);
+
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { data } = await supabase
+        .from("business_pages")
+        .select("id,name,verified")
+        .eq("owner_id", user.id)
+        .eq("suspended", false)
+        .order("name");
+      setMyBusinesses((data ?? []) as Array<{ id: string; name: string; verified: string }>);
+    })();
+  }, [user]);
+
 
   const cat = categories.find((c) => c.slug === f.category_slug)!;
 
