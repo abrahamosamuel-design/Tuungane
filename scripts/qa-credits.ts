@@ -1,33 +1,28 @@
 /**
- * QA runner: verify credit purchase requests & transactions are consistent for a user.
+ * QA runner: verify credit purchase requests & transactions are consistent.
  *
- * Usage:
+ * Single user:
  *   SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... bun run scripts/qa-credits.ts <user_id>
- *   # or
- *   bun run scripts/qa-credits.ts <user_id>   (if env vars already exported)
  *
- * Checks:
- *   1. Wallet row exists for user.
- *   2. Wallet balance equals SUM(credit_transactions.amount).
- *   3. Every `paid` purchase request has a matching `purchase_approved` transaction
- *      with amount === credits_requested and related_entity_id === request.id.
- *   4. No `purchase_approved` transaction exists without a corresponding paid request.
- *   5. No purchase request is stuck in `pending` for > 7 days.
- *   6. Every request has a valid status (pending|paid|rejected|cancelled).
- *   7. Rejected/cancelled requests have NO matching purchase_approved transaction.
+ * Batch mode:
+ *   bun run scripts/qa-credits.ts --batch <uid1> <uid2> <uid3> ...
  */
 import { createClient } from "@supabase/supabase-js";
 
 const url = process.env.SUPABASE_URL;
 const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-const userId = process.argv[2];
 
 if (!url || !key) {
   console.error("Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY env vars.");
   process.exit(2);
 }
-if (!userId) {
-  console.error("Usage: bun run scripts/qa-credits.ts <user_id>");
+
+const args = process.argv.slice(2);
+const batchMode = args.includes("--batch");
+const userIds = batchMode ? args.filter((a) => a !== "--batch") : args;
+
+if (userIds.length === 0) {
+  console.error("Usage: bun run scripts/qa-credits.ts [--batch] <user_id> [<user_id> ...]");
   process.exit(2);
 }
 
@@ -52,14 +47,26 @@ type Req = {
 };
 
 type Check = { name: string; pass: boolean; detail?: string };
-const checks: Check[] = [];
-const add = (name: string, pass: boolean, detail?: string) =>
-  checks.push({ name, pass, detail });
+
+type UserResult = {
+  userId: string;
+  walletBalance: number | null;
+  txCount: number;
+  reqCount: number;
+  paidCount: number;
+  pendingCount: number;
+  checks: Check[];
+  failed: number;
+};
 
 const VALID_STATUSES = new Set(["pending", "paid", "rejected", "cancelled"]);
 const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
 
-async function main() {
+async function runForUser(userId: string): Promise<UserResult> {
+  const checks: Check[] = [];
+  const add = (name: string, pass: boolean, detail?: string) =>
+    checks.push({ name, pass, detail });
+
   const [{ data: wallet, error: wErr }, { data: txs, error: tErr }, { data: reqs, error: rErr }] =
     await Promise.all([
       supabase.from("credit_wallets").select("*").eq("user_id", userId).maybeSingle(),
@@ -155,21 +162,112 @@ async function main() {
       : "ok",
   );
 
-  // Report
-  console.log(`\nQA report for user ${userId}`);
-  console.log(`  wallet balance: ${wallet?.balance ?? "—"}`);
-  console.log(`  transactions:   ${transactions.length}`);
-  console.log(`  requests:       ${requests.length} (paid=${paid.length}, pending=${requests.filter(r=>r.status==="pending").length})\n`);
+  const failed = checks.filter((c) => !c.pass).length;
+  return {
+    userId,
+    walletBalance: wallet?.balance ?? null,
+    txCount: transactions.length,
+    reqCount: requests.length,
+    paidCount: paid.length,
+    pendingCount: requests.filter((r) => r.status === "pending").length,
+    checks,
+    failed,
+  };
+}
 
-  let failed = 0;
-  for (const c of checks) {
+function printUserReport(res: UserResult) {
+  console.log(`\nQA report for user ${res.userId}`);
+  console.log(
+    `  wallet balance: ${res.walletBalance ?? "—"} | txs: ${res.txCount} | reqs: ${res.reqCount} (paid=${res.paidCount}, pending=${res.pendingCount})`,
+  );
+  for (const c of res.checks) {
     const mark = c.pass ? "PASS" : "FAIL";
-    console.log(`  [${mark}] ${c.name}${c.detail ? ` — ${c.detail}` : ""}`);
-    if (!c.pass) failed++;
+    console.log(`    [${mark}] ${c.name}${c.detail ? ` — ${c.detail}` : ""}`);
+  }
+  console.log(`  ${res.failed === 0 ? "All checks passed." : `${res.failed} check(s) failed.`}`);
+}
+
+function printSummary(results: UserResult[]) {
+  const total = results.length;
+  const allPassed = results.filter((r) => r.failed === 0).length;
+  const someFailed = total - allPassed;
+
+  console.log("\n========================================");
+  console.log("          CONSOLIDATED SUMMARY          ");
+  console.log("========================================");
+  console.log(`Users scanned:  ${total}`);
+  console.log(`All passed:     ${allPassed}`);
+  console.log(`With failures:  ${someFailed}`);
+  console.log("----------------------------------------");
+
+  if (someFailed > 0) {
+    console.log("\nMismatches / failures by user:");
+    for (const r of results.filter((x) => x.failed > 0)) {
+      const fails = r.checks.filter((c) => !c.pass);
+      console.log(`\n  ${r.userId} (${r.failed} fail(s)):`);
+      for (const c of fails) {
+        console.log(`    - ${c.name}: ${c.detail ?? ""}`);
+      }
+    }
   }
 
-  console.log(`\n${failed === 0 ? "All checks passed." : `${failed} check(s) failed.`}`);
-  process.exit(failed === 0 ? 0 : 1);
+  // Per-check aggregation
+  console.log("\nPer-check pass/fail across all users:");
+  const checkNames = results[0]?.checks.map((c) => c.name) ?? [];
+  for (const name of checkNames) {
+    let pass = 0;
+    let fail = 0;
+    for (const r of results) {
+      const c = r.checks.find((x) => x.name === name);
+      if (c?.pass) pass++;
+      else fail++;
+    }
+    const status = fail === 0 ? "✓" : "✗";
+    console.log(`  ${status} ${name}: ${pass} pass / ${fail} fail`);
+  }
+
+  console.log("\n========================================");
+}
+
+async function main() {
+  const results: UserResult[] = [];
+
+  for (const uid of userIds) {
+    try {
+      const res = await runForUser(uid);
+      results.push(res);
+      if (!batchMode) printUserReport(res);
+    } catch (err) {
+      console.error(`\nError processing user ${uid}:`, err);
+      results.push({
+        userId: uid,
+        walletBalance: null,
+        txCount: 0,
+        reqCount: 0,
+        paidCount: 0,
+        pendingCount: 0,
+        checks: [{ name: "Script execution", pass: false, detail: String(err) }],
+        failed: 1,
+      });
+    }
+  }
+
+  if (batchMode) {
+    // In batch mode, print a compact line per user first, then summary
+    console.log("\nQuick per-user overview:");
+    console.log("User ID                                 | Balance | Txs | Reqs | Paid | Pend | Fails");
+    console.log("-".repeat(90));
+    for (const r of results) {
+      const id = r.userId.padEnd(40);
+      const bal = (r.walletBalance ?? "—").toString().padStart(7);
+      console.log(`${id} | ${bal} | ${r.txCount.toString().padStart(3)} | ${r.reqCount.toString().padStart(4)} | ${r.paidCount.toString().padStart(4)} | ${r.pendingCount.toString().padStart(4)} | ${r.failed}`);
+    }
+  }
+
+  printSummary(results);
+
+  const anyFailed = results.some((r) => r.failed > 0);
+  process.exit(anyFailed ? 1 : 0);
 }
 
 main().catch((err) => {
