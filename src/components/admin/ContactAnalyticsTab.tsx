@@ -45,11 +45,21 @@ export function ContactAnalyticsTab() {
 
   const [statusFilter, setStatusFilter] = useState<ServiceRequestStatus | "all">("all");
   const [jobFilter, setJobFilter] = useState<"all" | "has_job" | "no_job">("all");
+  const [dateFrom, setDateFrom] = useState<string>("");
+  const [dateTo, setDateTo] = useState<string>("");
 
   const load = async () => {
+    let lq = supabase.from("contact_logs").select("*, service_requests!inner(status)").order("clicked_at", { ascending: false }).limit(200);
+    if (dateFrom) lq = lq.gte("clicked_at", `${dateFrom}T00:00:00Z`);
+    if (dateTo) lq = lq.lte("clicked_at", `${dateTo}T23:59:59Z`);
+
+    let rq = supabase.from("contact_reveals").select("*").order("created_at", { ascending: false }).limit(200);
+    if (dateFrom) rq = rq.gte("created_at", `${dateFrom}T00:00:00Z`);
+    if (dateTo) rq = rq.lte("created_at", `${dateTo}T23:59:59Z`);
+
     const [l, r, s] = await Promise.all([
-      supabase.from("contact_logs").select("*, service_requests!inner(status)").order("clicked_at", { ascending: false }).limit(200),
-      supabase.from("contact_reveals").select("*").order("created_at", { ascending: false }).limit(200),
+      lq,
+      rq,
       supabase.from("admin_settings").select("id,setting_value").eq("setting_key", SETTING_KEY).maybeSingle(),
     ]);
     const raw = (l.data ?? []) as unknown as Array<{
