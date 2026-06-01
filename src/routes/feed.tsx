@@ -104,9 +104,18 @@ function Feed() {
     setOpps((data ?? []).map((o) => ({ ...o, author: profMap.get(o.poster_id) ?? null })) as OpportunityRow[]);
   };
 
+  const loadOfficial = async () => {
+    const [{ data: acct }, { data: ops }] = await Promise.all([
+      supabase.from("official_accounts").select("*").eq("is_active", true).limit(1).maybeSingle(),
+      supabase.from("official_posts").select("*").eq("status", "published").order("is_pinned", { ascending: false }).order("created_at", { ascending: false }).limit(filter === "official" ? 30 : 5),
+    ]);
+    setOfficialAccount(acct as OfficialAccountRow | null);
+    setOfficialPosts((ops ?? []) as OfficialPostRow[]);
+  };
+
   const load = async () => {
     setLoading(true);
-    if (tab === "posts") await loadPosts();
+    if (tab === "posts") { await Promise.all([loadPosts(), loadOfficial()]); }
     else if (tab === "services") await loadProviders();
     else await loadOpps();
     setLoading(false);
