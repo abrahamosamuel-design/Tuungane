@@ -29,7 +29,11 @@ interface OppFull extends OpportunityRow {
   district: string | null;
   town: string | null;
   area: string | null;
+  business_page_id: string | null;
 }
+
+interface BusinessLite { id: string; slug: string; name: string; logo_url: string | null; verified: string; }
+
 
 function OpportunityDetails() {
   const { id } = Route.useParams();
