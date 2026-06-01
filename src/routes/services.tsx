@@ -36,7 +36,11 @@ type RealProvider = {
   seeded_status: string | null;
   updated_at: string;
   profile: { full_name: string; avatar_url: string | null } | null;
+  trust_score: number;
+  average_rating: number;
+  completed_jobs: number;
 };
+
 
 const avatar = (s: string) =>
   `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(s || "T")}&backgroundColor=1e3a8a,f97316,16a34a&fontFamily=Plus%20Jakarta%20Sans`;
