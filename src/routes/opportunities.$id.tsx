@@ -12,6 +12,8 @@ import { toast } from "sonner";
 import { useActiveBoosts } from "@/hooks/use-boosts";
 import { BoostBadge } from "@/components/BoostBadge";
 import { BoostButton } from "@/components/BoostButton";
+import { MobileActionBar } from "@/components/MobileActionBar";
+
 
 export const Route = createFileRoute("/opportunities/$id")({
   head: () => ({ meta: [{ title: "Opportunity — Tuungane" }] }),
