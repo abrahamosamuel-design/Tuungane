@@ -48,6 +48,7 @@ function NotificationsPage() {
   const nav = useNavigate();
   const [items, setItems] = useState<Notif[]>([]);
   const [busy, setBusy] = useState(true);
+  const [filter, setFilter] = useState<"all" | "jobs" | "social">("all");
 
   useEffect(() => {
     if (!loading && !user) nav({ to: "/login", search: { tab: "login", redirect: "/notifications" } as never });
