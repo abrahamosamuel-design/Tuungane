@@ -93,7 +93,17 @@ function RequestsPage() {
         </div>
 
         <div className="mt-5 space-y-3 pb-12">
-          {filtered.length === 0 && <p className="rounded-2xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground">No requests {role === "customer" ? "sent" : "received"} yet.</p>}
+          {filtered.length === 0 && (
+            <div className="rounded-2xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground">
+              <p>No requests {role === "customer" ? "sent" : "received"} yet.</p>
+              {role === "customer" && (
+                <p className="mt-3 flex flex-wrap items-center justify-center gap-2 text-xs">
+                  <Link to="/services" className="rounded-full bg-orange px-3 py-1 font-semibold text-orange-foreground">Browse services</Link>
+                  <Link to="/services/requests" className="rounded-full border border-border px-3 py-1 font-semibold text-navy hover:border-orange">See open requests</Link>
+                </p>
+              )}
+            </div>
+          )}
           {filtered.map((r) => (
             <ServiceRequestCard
               key={r.id}
