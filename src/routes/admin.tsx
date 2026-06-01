@@ -57,6 +57,7 @@ function Admin() {
   const { user, loading, isModerator, isAdmin } = useAuth();
   const nav = useNavigate();
   const [tab, setTab] = useState<Tab>("overview");
+  const [officialSub, setOfficialSub] = useState<"account" | "create" | "manage" | "seeded" | "claims" | undefined>(undefined);
 
   useEffect(() => {
     if (!loading) {
@@ -92,7 +93,7 @@ function Admin() {
         </nav>
 
         <div className="mt-6">
-          {tab === "overview" && <OverviewTab onJump={(t) => setTab(t as Tab)} />}
+          {tab === "overview" && <OverviewTab onJump={(t, sub) => { setTab(t as Tab); if (t === "official" && sub) setOfficialSub(sub as "account" | "create" | "manage" | "seeded" | "claims"); }} />}
           {tab === "users" && <UsersTab />}
           {tab === "providers" && <ProvidersTab />}
           {tab === "businesses" && <BusinessesAdminTab />}
@@ -103,7 +104,7 @@ function Admin() {
           {tab === "reports" && <ReportsTab />}
           {tab === "disputes" && <DisputesAdminTab />}
           {tab === "credits" && <CreditsAdminTab />}
-          {tab === "official" && <OfficialTabContent />}
+          {tab === "official" && <OfficialTabContent initialSub={officialSub} />}
           {tab === "contact" && <ContactAnalyticsTab />}
         </div>
       </section>
@@ -276,8 +277,8 @@ function ReportsTab() {
 // ───────── Official Account ─────────
 type SubTab = "account" | "create" | "manage" | "seeded" | "claims";
 
-function OfficialTabContent() {
-  const [sub, setSub] = useState<SubTab>("account");
+function OfficialTabContent({ initialSub }: { initialSub?: SubTab }) {
+  const [sub, setSub] = useState<SubTab>(initialSub ?? "account");
   const [account, setAccount] = useState<OfficialAccountRow | null>(null);
   const [posts, setPosts] = useState<OfficialPostRow[]>([]);
   const [editing, setEditing] = useState<OfficialPostRow | null>(null);

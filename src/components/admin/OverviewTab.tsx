@@ -20,7 +20,7 @@ const empty: Stats = {
   openReports: 0, openDisputes: 0, pendingClaims: 0, pendingPurchases: 0, pendingOpps: 0,
 };
 
-export function OverviewTab({ onJump }: { onJump: (tab: string) => void }) {
+export function OverviewTab({ onJump }: { onJump: (tab: string, subTab?: string) => void }) {
   const [s, setS] = useState<Stats>(empty);
   const [loading, setLoading] = useState(true);
 
@@ -62,11 +62,11 @@ export function OverviewTab({ onJump }: { onJump: (tab: string) => void }) {
     { label: "Live Opportunities", value: s.opportunities, tab: "opportunities" },
     { label: "Service Requests", value: s.requests, tab: "requests" },
   ];
-  const alerts: Array<{ label: string; value: number; tab: string; tone: string }> = [
+  const alerts: Array<{ label: string; value: number; tab: string; subTab?: string; tone: string }> = [
     { label: "Open Reports", value: s.openReports, tab: "reports", tone: "bg-destructive/10 text-destructive" },
     { label: "Open Disputes", value: s.openDisputes, tab: "disputes", tone: "bg-destructive/10 text-destructive" },
     { label: "Pending Opportunities", value: s.pendingOpps, tab: "opportunities", tone: "bg-orange/10 text-orange" },
-    { label: "Pending Claims", value: s.pendingClaims, tab: "official", tone: "bg-orange/10 text-orange" },
+    { label: "Pending Claims", value: s.pendingClaims, tab: "official", subTab: "claims", tone: "bg-orange/10 text-orange" },
     { label: "Pending Credit Purchases", value: s.pendingPurchases, tab: "credits", tone: "bg-orange/10 text-orange" },
   ];
 
@@ -90,7 +90,8 @@ export function OverviewTab({ onJump }: { onJump: (tab: string) => void }) {
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">Needs attention</h2>
         <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
           {alerts.map((c) => (
-            <button key={c.label} onClick={() => onJump(c.tab)} className={`rounded-xl border border-border bg-card p-4 text-left transition hover:border-navy ${c.value > 0 ? "" : "opacity-60"}`}>
+            <button key={c.label} onClick={() => onJump(c.tab, c.subTab)} className={`rounded-xl border border-border bg-card p-4 text-left transition hover:border-navy ${c.value > 0 ? "" : "opacity-60"}`}>
+
               <div className="flex items-center justify-between">
                 <p className="text-xs font-semibold uppercase text-muted-foreground">{c.label}</p>
                 <span className={`rounded-full px-2 py-0.5 text-xs font-bold ${c.value > 0 ? c.tone : "bg-muted text-muted-foreground"}`}>{c.value}</span>
