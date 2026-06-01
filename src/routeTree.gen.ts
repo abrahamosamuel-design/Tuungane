@@ -24,7 +24,9 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as UIdRouteImport } from './routes/u.$id'
+import { Route as ServicesRequestsRouteImport } from './routes/services.requests'
 import { Route as ServicesSlugRouteImport } from './routes/services.$slug'
+import { Route as RequestsIdRouteImport } from './routes/requests.$id'
 import { Route as ProvidersIdRouteImport } from './routes/providers.$id'
 import { Route as OpportunitiesNewRouteImport } from './routes/opportunities.new'
 import { Route as OpportunitiesIdRouteImport } from './routes/opportunities.$id'
@@ -105,10 +107,20 @@ const UIdRoute = UIdRouteImport.update({
   path: '/u/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ServicesRequestsRoute = ServicesRequestsRouteImport.update({
+  id: '/requests',
+  path: '/requests',
+  getParentRoute: () => ServicesRoute,
+} as any)
 const ServicesSlugRoute = ServicesSlugRouteImport.update({
   id: '/$slug',
   path: '/$slug',
   getParentRoute: () => ServicesRoute,
+} as any)
+const RequestsIdRoute = RequestsIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => RequestsRoute,
 } as any)
 const ProvidersIdRoute = ProvidersIdRouteImport.update({
   id: '/providers/$id',
@@ -143,14 +155,16 @@ export interface FileRoutesByFullPath {
   '/notifications': typeof NotificationsRoute
   '/official': typeof OfficialRoute
   '/opportunities': typeof OpportunitiesRouteWithChildren
-  '/requests': typeof RequestsRoute
+  '/requests': typeof RequestsRouteWithChildren
   '/services': typeof ServicesRouteWithChildren
   '/terms': typeof TermsRoute
   '/official-posts/$id': typeof OfficialPostsIdRoute
   '/opportunities/$id': typeof OpportunitiesIdRoute
   '/opportunities/new': typeof OpportunitiesNewRoute
   '/providers/$id': typeof ProvidersIdRoute
+  '/requests/$id': typeof RequestsIdRoute
   '/services/$slug': typeof ServicesSlugRoute
+  '/services/requests': typeof ServicesRequestsRoute
   '/u/$id': typeof UIdRoute
 }
 export interface FileRoutesByTo {
@@ -165,14 +179,16 @@ export interface FileRoutesByTo {
   '/notifications': typeof NotificationsRoute
   '/official': typeof OfficialRoute
   '/opportunities': typeof OpportunitiesRouteWithChildren
-  '/requests': typeof RequestsRoute
+  '/requests': typeof RequestsRouteWithChildren
   '/services': typeof ServicesRouteWithChildren
   '/terms': typeof TermsRoute
   '/official-posts/$id': typeof OfficialPostsIdRoute
   '/opportunities/$id': typeof OpportunitiesIdRoute
   '/opportunities/new': typeof OpportunitiesNewRoute
   '/providers/$id': typeof ProvidersIdRoute
+  '/requests/$id': typeof RequestsIdRoute
   '/services/$slug': typeof ServicesSlugRoute
+  '/services/requests': typeof ServicesRequestsRoute
   '/u/$id': typeof UIdRoute
 }
 export interface FileRoutesById {
@@ -188,14 +204,16 @@ export interface FileRoutesById {
   '/notifications': typeof NotificationsRoute
   '/official': typeof OfficialRoute
   '/opportunities': typeof OpportunitiesRouteWithChildren
-  '/requests': typeof RequestsRoute
+  '/requests': typeof RequestsRouteWithChildren
   '/services': typeof ServicesRouteWithChildren
   '/terms': typeof TermsRoute
   '/official-posts/$id': typeof OfficialPostsIdRoute
   '/opportunities/$id': typeof OpportunitiesIdRoute
   '/opportunities/new': typeof OpportunitiesNewRoute
   '/providers/$id': typeof ProvidersIdRoute
+  '/requests/$id': typeof RequestsIdRoute
   '/services/$slug': typeof ServicesSlugRoute
+  '/services/requests': typeof ServicesRequestsRoute
   '/u/$id': typeof UIdRoute
 }
 export interface FileRouteTypes {
@@ -219,7 +237,9 @@ export interface FileRouteTypes {
     | '/opportunities/$id'
     | '/opportunities/new'
     | '/providers/$id'
+    | '/requests/$id'
     | '/services/$slug'
+    | '/services/requests'
     | '/u/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -241,7 +261,9 @@ export interface FileRouteTypes {
     | '/opportunities/$id'
     | '/opportunities/new'
     | '/providers/$id'
+    | '/requests/$id'
     | '/services/$slug'
+    | '/services/requests'
     | '/u/$id'
   id:
     | '__root__'
@@ -263,7 +285,9 @@ export interface FileRouteTypes {
     | '/opportunities/$id'
     | '/opportunities/new'
     | '/providers/$id'
+    | '/requests/$id'
     | '/services/$slug'
+    | '/services/requests'
     | '/u/$id'
   fileRoutesById: FileRoutesById
 }
@@ -279,7 +303,7 @@ export interface RootRouteChildren {
   NotificationsRoute: typeof NotificationsRoute
   OfficialRoute: typeof OfficialRoute
   OpportunitiesRoute: typeof OpportunitiesRouteWithChildren
-  RequestsRoute: typeof RequestsRoute
+  RequestsRoute: typeof RequestsRouteWithChildren
   ServicesRoute: typeof ServicesRouteWithChildren
   TermsRoute: typeof TermsRoute
   OfficialPostsIdRoute: typeof OfficialPostsIdRoute
@@ -394,12 +418,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/services/requests': {
+      id: '/services/requests'
+      path: '/requests'
+      fullPath: '/services/requests'
+      preLoaderRoute: typeof ServicesRequestsRouteImport
+      parentRoute: typeof ServicesRoute
+    }
     '/services/$slug': {
       id: '/services/$slug'
       path: '/$slug'
       fullPath: '/services/$slug'
       preLoaderRoute: typeof ServicesSlugRouteImport
       parentRoute: typeof ServicesRoute
+    }
+    '/requests/$id': {
+      id: '/requests/$id'
+      path: '/$id'
+      fullPath: '/requests/$id'
+      preLoaderRoute: typeof RequestsIdRouteImport
+      parentRoute: typeof RequestsRoute
     }
     '/providers/$id': {
       id: '/providers/$id'
@@ -446,12 +484,26 @@ const OpportunitiesRouteWithChildren = OpportunitiesRoute._addFileChildren(
   OpportunitiesRouteChildren,
 )
 
+interface RequestsRouteChildren {
+  RequestsIdRoute: typeof RequestsIdRoute
+}
+
+const RequestsRouteChildren: RequestsRouteChildren = {
+  RequestsIdRoute: RequestsIdRoute,
+}
+
+const RequestsRouteWithChildren = RequestsRoute._addFileChildren(
+  RequestsRouteChildren,
+)
+
 interface ServicesRouteChildren {
   ServicesSlugRoute: typeof ServicesSlugRoute
+  ServicesRequestsRoute: typeof ServicesRequestsRoute
 }
 
 const ServicesRouteChildren: ServicesRouteChildren = {
   ServicesSlugRoute: ServicesSlugRoute,
+  ServicesRequestsRoute: ServicesRequestsRoute,
 }
 
 const ServicesRouteWithChildren = ServicesRoute._addFileChildren(
@@ -470,7 +522,7 @@ const rootRouteChildren: RootRouteChildren = {
   NotificationsRoute: NotificationsRoute,
   OfficialRoute: OfficialRoute,
   OpportunitiesRoute: OpportunitiesRouteWithChildren,
-  RequestsRoute: RequestsRoute,
+  RequestsRoute: RequestsRouteWithChildren,
   ServicesRoute: ServicesRouteWithChildren,
   TermsRoute: TermsRoute,
   OfficialPostsIdRoute: OfficialPostsIdRoute,

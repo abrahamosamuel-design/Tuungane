@@ -55,9 +55,9 @@ function RequestDetailsPage() {
       provIds.length ? supabase.from("profiles").select("id,full_name,avatar_url").in("id", provIds) : Promise.resolve({ data: [] as Profile[] } as any),
       provIds.length ? (supabase as any).from("provider_trust_stats").select("*").in("provider_id", provIds) : Promise.resolve({ data: [] as TrustStatsRow[] } as any),
     ]);
-    const pmap = new Map((provs ?? []).map((p: Profile) => [p.id, p]));
-    const smap = new Map((stats ?? []).map((s: TrustStatsRow) => [s.provider_id, s]));
-    setResponses(list.map((x) => ({ ...x, provider: pmap.get(x.provider_id), stats: smap.get(x.provider_id) })));
+    const pmap = new Map<string, Profile>((provs ?? []).map((p: Profile) => [p.id, p]));
+    const smap = new Map<string, TrustStatsRow>(((stats ?? []) as TrustStatsRow[]).map((s) => [s.provider_id, s]));
+    setResponses(list.map((x): ResponseWithProvider => ({ ...x, provider: pmap.get(x.provider_id), stats: smap.get(x.provider_id) })));
     const { count } = await (supabase as any).from("service_feedback").select("id", { count: "exact", head: true }).eq("service_request_id", id);
     setHasFeedback((count ?? 0) > 0);
   }, [id, user]);
