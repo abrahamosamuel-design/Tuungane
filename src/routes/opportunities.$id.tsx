@@ -9,6 +9,9 @@ import { reportReasons } from "@/data/opportunities";
 import { OpportunityCard, type OpportunityRow } from "@/components/OpportunityCard";
 import { timeAgo } from "@/lib/format";
 import { toast } from "sonner";
+import { useActiveBoosts } from "@/hooks/use-boosts";
+import { BoostBadge } from "@/components/BoostBadge";
+import { BoostButton } from "@/components/BoostButton";
 
 export const Route = createFileRoute("/opportunities/$id")({
   head: () => ({ meta: [{ title: "Opportunity — Tuungane" }] }),
@@ -36,6 +39,7 @@ function OpportunityDetails() {
   const [saved, setSaved] = useState(false);
   const [applyOpen, setApplyOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
+  const { boosts: oppBoosts } = useActiveBoosts("opportunity", id);
 
   const load = async () => {
     const { data } = await supabase.from("opportunities").select("*").eq("id", id).maybeSingle();
@@ -86,6 +90,7 @@ function OpportunityDetails() {
             <div className="flex flex-wrap items-center gap-2">
               <span className="rounded-full bg-orange/10 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-orange">{o.opportunity_type}</span>
               {o.is_featured && <span className="inline-flex items-center gap-1 rounded-full bg-orange/10 px-2 py-0.5 text-[10px] font-semibold text-orange"><BadgeCheck className="h-3 w-3" /> Featured</span>}
+              {oppBoosts.map((b) => <BoostBadge key={b.id} type={b.boost_type} />)}
               <span className="text-xs text-muted-foreground">{timeAgo(o.created_at)}</span>
             </div>
             <h1 className="mt-3 font-display text-2xl font-bold text-navy sm:text-3xl">{o.title}</h1>
@@ -113,6 +118,9 @@ function OpportunityDetails() {
               {o.contact_phone && <a href={`tel:${o.contact_phone}`} className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2.5 text-sm font-semibold text-navy"><Phone className="h-4 w-4" /> Call</a>}
               <button onClick={toggleSave} className={`inline-flex items-center gap-2 rounded-full border px-4 py-2.5 text-sm font-semibold ${saved ? "border-orange bg-orange/10 text-orange" : "border-border text-navy"}`}><Bookmark className="h-4 w-4" /> {saved ? "Saved" : "Save"}</button>
               <button onClick={share} className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2.5 text-sm font-semibold text-navy"><Share2 className="h-4 w-4" /> Share</button>
+              {user?.id === o.poster_id && (
+                <BoostButton boostType="feature_opportunity" entityType="opportunity" entityId={id} label="Feature opportunity" dialogTitle="Feature this opportunity" dialogDescription="Promote this opportunity to the top of the Opportunities page." />
+              )}
               <button onClick={() => setReportOpen(true)} className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2.5 text-sm font-semibold text-destructive"><Flag className="h-4 w-4" /> Report</button>
             </div>
           </article>
