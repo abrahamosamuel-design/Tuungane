@@ -150,6 +150,8 @@ function Admin() {
             </div>
           )}
 
+          {tab === "requests" && <RequestsAdminTab />}
+
           {tab === "official" && <OfficialTabContent />}
         </div>
       </section>
