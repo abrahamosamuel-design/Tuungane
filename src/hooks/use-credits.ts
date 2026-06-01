@@ -24,16 +24,25 @@ export function useCreditWallet() {
   // Realtime updates on wallet
   useEffect(() => {
     if (!user) return;
-    const ch = supabase
-      .channel(`wallet:${user.id}`)
-      .on("postgres_changes",
-        { event: "UPDATE", schema: "public", table: "credit_wallets", filter: `user_id=eq.${user.id}` },
-        (payload) => {
-          const next = (payload.new as { balance?: number })?.balance;
-          if (typeof next === "number") setBalance(next);
-        })
-      .subscribe();
-    return () => { supabase.removeChannel(ch); };
+    let ch: ReturnType<typeof supabase.channel> | undefined;
+    try {
+      const uniqueSuffix =
+        typeof crypto !== "undefined" && "randomUUID" in crypto
+          ? crypto.randomUUID()
+          : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      ch = supabase
+        .channel(`wallet:${user.id}:${uniqueSuffix}`)
+        .on("postgres_changes",
+          { event: "UPDATE", schema: "public", table: "credit_wallets", filter: `user_id=eq.${user.id}` },
+          (payload) => {
+            const next = (payload.new as { balance?: number })?.balance;
+            if (typeof next === "number") setBalance(next);
+          })
+        .subscribe();
+    } catch (err) {
+      console.warn("[use-credits] realtime subscription failed", err);
+    }
+    return () => { if (ch) { try { supabase.removeChannel(ch); } catch {} } };
   }, [user]);
 
   return { balance, loading, refresh };
