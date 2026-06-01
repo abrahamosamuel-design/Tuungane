@@ -4,7 +4,21 @@ import { toast } from "sonner";
 import { Activity, Phone, MessageCircle, Mail, Eye, AlertTriangle, Settings as SettingsIcon } from "lucide-react";
 import { timeAgo } from "@/lib/format";
 
-type LogRow = { id: string; customer_id: string; provider_id: string; service_request_id: string; contact_method: string; clicked_at: string };
+const STATUSES = ["requested", "accepted", "in_progress", "completed", "cancelled", "disputed"] as const;
+
+type ServiceRequestStatus = typeof STATUSES[number];
+
+interface LogRow {
+  id: string;
+  customer_id: string;
+  provider_id: string;
+  service_request_id: string;
+  service_job_id: string | null;
+  contact_method: string;
+  clicked_at: string;
+  request_status: ServiceRequestStatus;
+}
+
 type RevealRow = { id: string; customer_id: string; provider_id: string; service_request_id: string; reveal_reason: string | null; created_at: string };
 
 const SETTING_KEY = "contact_visibility";
@@ -29,13 +43,35 @@ export function ContactAnalyticsTab() {
   const [busy, setBusy] = useState(false);
   const [view, setView] = useState<"analytics" | "settings">("analytics");
 
+  const [statusFilter, setStatusFilter] = useState<ServiceRequestStatus | "all">("all");
+  const [jobFilter, setJobFilter] = useState<"all" | "has_job" | "no_job">("all");
+
   const load = async () => {
     const [l, r, s] = await Promise.all([
-      supabase.from("contact_logs").select("*").order("clicked_at", { ascending: false }).limit(200),
+      supabase.from("contact_logs").select("*, service_requests!inner(status)").order("clicked_at", { ascending: false }).limit(200),
       supabase.from("contact_reveals").select("*").order("created_at", { ascending: false }).limit(200),
       supabase.from("admin_settings").select("id,setting_value").eq("setting_key", SETTING_KEY).maybeSingle(),
     ]);
-    const ll = (l.data ?? []) as LogRow[];
+    const raw = (l.data ?? []) as unknown as Array<{
+      id: string;
+      customer_id: string;
+      provider_id: string;
+      service_request_id: string;
+      service_job_id: string | null;
+      contact_method: string;
+      clicked_at: string;
+      service_requests: { status: ServiceRequestStatus };
+    }>;
+    const ll: LogRow[] = raw.map((x) => ({
+      id: x.id,
+      customer_id: x.customer_id,
+      provider_id: x.provider_id,
+      service_request_id: x.service_request_id,
+      service_job_id: x.service_job_id,
+      contact_method: x.contact_method,
+      clicked_at: x.clicked_at,
+      request_status: x.service_requests.status,
+    }));
     const rr = (r.data ?? []) as RevealRow[];
     setLogs(ll);
     setReveals(rr);
@@ -53,14 +89,27 @@ export function ContactAnalyticsTab() {
 
   useEffect(() => { load(); }, []);
 
+  const filteredLogs = useMemo(() => {
+    return logs.filter((l) => {
+      if (statusFilter !== "all" && l.request_status !== statusFilter) return false;
+      if (jobFilter === "has_job" && l.service_job_id === null) return false;
+      if (jobFilter === "no_job" && l.service_job_id !== null) return false;
+      return true;
+    });
+  }, [logs, statusFilter, jobFilter]);
+
   const stats = useMemo(() => {
     const byMethod = new Map<string, number>();
-    for (const l of logs) byMethod.set(l.contact_method, (byMethod.get(l.contact_method) ?? 0) + 1);
-    const uniqueProviders = new Set(logs.map((l) => l.provider_id)).size;
-    const uniqueCustomers = new Set(logs.map((l) => l.customer_id)).size;
+    for (const l of filteredLogs) byMethod.set(l.contact_method, (byMethod.get(l.contact_method) ?? 0) + 1);
+    const byStatus = new Map<string, number>();
+    for (const l of filteredLogs) byStatus.set(l.request_status, (byStatus.get(l.request_status) ?? 0) + 1);
+    const uniqueProviders = new Set(filteredLogs.map((l) => l.provider_id)).size;
+    const uniqueCustomers = new Set(filteredLogs.map((l) => l.customer_id)).size;
+    const jobLinked = filteredLogs.filter((l) => l.service_job_id !== null).length;
+    const jobNull = filteredLogs.filter((l) => l.service_job_id === null).length;
     // suspicious: customers contacting many providers
     const perCust = new Map<string, Set<string>>();
-    for (const l of logs) {
+    for (const l of filteredLogs) {
       if (!perCust.has(l.customer_id)) perCust.set(l.customer_id, new Set());
       perCust.get(l.customer_id)!.add(l.provider_id);
     }
@@ -69,8 +118,8 @@ export function ContactAnalyticsTab() {
       .map(([cid, s]) => ({ customer_id: cid, providers: s.size }))
       .sort((a, b) => b.providers - a.providers)
       .slice(0, 10);
-    return { byMethod, uniqueProviders, uniqueCustomers, suspicious };
-  }, [logs]);
+    return { byMethod, byStatus, uniqueProviders, uniqueCustomers, suspicious, jobLinked, jobNull };
+  }, [filteredLogs]);
 
   const saveSettings = async () => {
     setBusy(true);
@@ -100,12 +149,37 @@ export function ContactAnalyticsTab() {
 
       {view === "analytics" && (
         <div className="space-y-5">
+          {/* Filters */}
+          <div className="rounded-xl border border-border bg-card p-4 space-y-3">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Filters</h3>
+            <div className="space-y-2">
+              <div className="flex flex-wrap gap-1 text-xs items-center">
+                <span className="text-muted-foreground mr-1">Request status:</span>
+                <button onClick={() => setStatusFilter("all")} className={`rounded-full px-2.5 py-1 font-semibold ${statusFilter === "all" ? "bg-navy text-navy-foreground" : "border border-border hover:border-navy"}`}>All</button>
+                {STATUSES.map((s) => (
+                  <button key={s} onClick={() => setStatusFilter(s)} className={`rounded-full px-2.5 py-1 font-semibold capitalize ${statusFilter === s ? "bg-navy text-navy-foreground" : "border border-border hover:border-navy"}`}>{s.replace("_", " ")}</button>
+                ))}
+              </div>
+              <div className="flex flex-wrap gap-1 text-xs items-center">
+                <span className="text-muted-foreground mr-1">Job link:</span>
+                <button onClick={() => setJobFilter("all")} className={`rounded-full px-2.5 py-1 font-semibold ${jobFilter === "all" ? "bg-navy text-navy-foreground" : "border border-border hover:border-navy"}`}>All</button>
+                <button onClick={() => setJobFilter("has_job")} className={`rounded-full px-2.5 py-1 font-semibold ${jobFilter === "has_job" ? "bg-navy text-navy-foreground" : "border border-border hover:border-navy"}`}>Has job ID</button>
+                <button onClick={() => setJobFilter("no_job")} className={`rounded-full px-2.5 py-1 font-semibold ${jobFilter === "no_job" ? "bg-navy text-navy-foreground" : "border border-border hover:border-navy"}`}>No job ID</button>
+              </div>
+            </div>
+          </div>
+
           <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
-            <Card label="Total contact clicks" value={logs.length} />
+            <Card label="Total contact clicks" value={filteredLogs.length} />
             <Card label="Unique customers" value={stats.uniqueCustomers} />
             <Card label="Unique providers" value={stats.uniqueProviders} />
             <Card label="Contact reveals" value={reveals.length} />
             <Card label="WhatsApp clicks" value={stats.byMethod.get("whatsapp") ?? 0} />
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
+            <Card label="Job linked" value={stats.jobLinked} />
+            <Card label="Job unlinked" value={stats.jobNull} />
           </div>
 
           <div>
@@ -114,7 +188,17 @@ export function ContactAnalyticsTab() {
               {Array.from(stats.byMethod.entries()).map(([m, n]) => (
                 <span key={m} className="inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1 text-xs font-semibold capitalize text-navy">{methodIcon(m)} {m} · {n}</span>
               ))}
-              {stats.byMethod.size === 0 && <span className="text-xs text-muted-foreground">No clicks yet.</span>}
+              {stats.byMethod.size === 0 && <span className="text-xs text-muted-foreground">No clicks in this view.</span>}
+            </div>
+          </div>
+
+          <div>
+            <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">Clicks by request status</h3>
+            <div className="flex flex-wrap gap-2">
+              {Array.from(stats.byStatus.entries()).map(([s, n]) => (
+                <span key={s} className="inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1 text-xs font-semibold capitalize text-navy">{s.replace("_", " ")} · {n}</span>
+              ))}
+              {stats.byStatus.size === 0 && <span className="text-xs text-muted-foreground">No data in this view.</span>}
             </div>
           </div>
 
@@ -151,18 +235,25 @@ export function ContactAnalyticsTab() {
           <div>
             <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">Recent contact clicks</h3>
             <div className="space-y-1">
-              {logs.slice(0, 15).map((l) => (
+              {filteredLogs.slice(0, 15).map((l) => (
                 <div key={l.id} className="flex items-center justify-between gap-3 rounded-lg border border-border bg-card p-2 text-xs">
                   <div className="min-w-0 flex items-center gap-2">
                     <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 capitalize">{methodIcon(l.contact_method)} {l.contact_method}</span>
                     <span className="text-navy">{profiles.get(l.customer_id) ?? "Customer"}</span>
                     <span className="text-muted-foreground">→</span>
                     <span className="text-navy">{profiles.get(l.provider_id) ?? "Provider"}</span>
+                    <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold capitalize ${
+                      l.request_status === "completed" ? "bg-green/10 text-green" :
+                      l.request_status === "accepted" || l.request_status === "in_progress" ? "bg-orange/10 text-orange" :
+                      l.request_status === "cancelled" || l.request_status === "disputed" ? "bg-destructive/10 text-destructive" :
+                      "bg-muted text-muted-foreground"
+                    }`}>{l.request_status.replace("_", " ")}</span>
+                    {l.service_job_id ? <span className="rounded-full bg-green/10 px-1.5 py-0.5 text-[10px] font-bold text-green">job</span> : <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-bold text-muted-foreground">no job</span>}
                   </div>
                   <span className="text-muted-foreground">{timeAgo(l.clicked_at)}</span>
                 </div>
               ))}
-              {logs.length === 0 && <p className="text-xs text-muted-foreground">No contact activity yet.</p>}
+              {filteredLogs.length === 0 && <p className="text-xs text-muted-foreground">No contact activity in this view.</p>}
             </div>
           </div>
         </div>
@@ -202,3 +293,4 @@ function Card({ label, value }: { label: string; value: number }) {
     </div>
   );
 }
+
