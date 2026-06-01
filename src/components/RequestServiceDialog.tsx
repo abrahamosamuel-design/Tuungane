@@ -21,6 +21,7 @@ export function RequestServiceDialog({ open, onClose, providerId, providerName, 
   const { user } = useAuth();
   const [busy, setBusy] = useState(false);
   const [form, setForm] = useState({
+    title: "",
     category_slug: defaultCategorySlug ?? "",
     subcategory: defaultSubcategory ?? "",
     service_needed: defaultSubcategory ?? "",
@@ -32,6 +33,7 @@ export function RequestServiceDialog({ open, onClose, providerId, providerName, 
     preferred_time: "",
     urgency: "normal" as UrgencyValue,
     budget_range: "",
+    visibility: "public" as VisibilityValue,
     preferred_contact_method: "any" as ContactMethodValue,
     customer_phone: "",
     customer_whatsapp: "",
