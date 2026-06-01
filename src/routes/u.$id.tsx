@@ -396,7 +396,16 @@ function UserProfile() {
         <ClaimProfileDialog serviceProfileUserId={id} open={claimOpen} onClose={() => setClaimOpen(false)} onSubmitted={load} />
         <RequestServiceDialog open={requestOpen} onClose={() => setRequestOpen(false)} providerId={id} providerName={sp?.business_name || profile.full_name} defaultCategorySlug={sp?.category_slug} defaultSubcategory={sp?.subcategory} onSubmitted={load} />
       </section>
+
+      {!isOwn && isProvider && user && (
+        <MobileActionBar>
+          <button onClick={() => setRequestOpen(true)} className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-orange px-4 py-3 text-sm font-semibold text-orange-foreground"><ClipboardList className="h-4 w-4" /> Request service</button>
+          {sp?.whatsapp && <a href={`https://wa.me/${sp.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noreferrer" aria-label="WhatsApp" className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-green text-white"><MessageCircle className="h-5 w-5" /></a>}
+          {sp?.phone && <a href={`tel:${sp.phone}`} aria-label="Call" className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-border text-navy"><Phone className="h-5 w-5" /></a>}
+        </MobileActionBar>
+      )}
     </Layout>
+
   );
 }
 
