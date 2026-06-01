@@ -67,12 +67,29 @@ export function ClaimProfileDialog({ serviceProfileUserId, open, onClose, onSubm
           </div>
           <button onClick={onClose} className="rounded-full p-1 hover:bg-muted"><X className="h-4 w-4" /></button>
         </div>
+        <div className="mt-3 rounded-xl border border-orange/30 bg-orange/5 p-3 text-[11px] text-foreground/80">
+          <p className="font-semibold text-navy">What admins look for</p>
+          <ul className="mt-1 list-disc pl-4 space-y-0.5">
+            <li>Your name and a phone we can call to verify</li>
+            <li>Your relationship to the business or service</li>
+            <li>Optional proof: ID, business card, trade licence, utility bill, social link</li>
+          </ul>
+        </div>
         <div className="mt-4 space-y-2">
           <Input label="Full name *" value={form.full_name} onChange={(v) => setForm({ ...form, full_name: v })} />
           <Input label="Phone number *" value={form.phone_number} onChange={(v) => setForm({ ...form, phone_number: v })} />
           <Input label="WhatsApp number" value={form.whatsapp_number} onChange={(v) => setForm({ ...form, whatsapp_number: v })} />
           <Input label="Email (optional)" value={form.email} onChange={(v) => setForm({ ...form, email: v })} />
-          <Input label="Relationship to the service/business *" value={form.relationship_to_profile} onChange={(v) => setForm({ ...form, relationship_to_profile: v })} />
+          <div>
+            <label className="text-xs font-medium text-navy">Relationship to the service/business *</label>
+            <select value={form.relationship_to_profile} onChange={(e) => setForm({ ...form, relationship_to_profile: e.target.value })} className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm">
+              <option>Owner of this business</option>
+              <option>Manager / Employee</option>
+              <option>I am this service provider</option>
+              <option>Family member (with permission)</option>
+              <option>Other</option>
+            </select>
+          </div>
           <div>
             <label className="text-xs font-medium text-navy">Proof or explanation</label>
             <textarea value={form.explanation} onChange={(e) => setForm({ ...form, explanation: e.target.value })} rows={3} className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm" placeholder="Briefly explain how this profile relates to you" />
