@@ -18,6 +18,7 @@ function NewOpportunity() {
   const { user, loading } = useAuth();
   const nav = useNavigate();
   const [busy, setBusy] = useState(false);
+  const [myBusinesses, setMyBusinesses] = useState<Array<{ id: string; name: string; verified: string }>>([]);
   const [f, setF] = useState({
     title: "",
     opportunity_type: "gig" as (typeof opportunityTypes)[number]["value"],
@@ -34,12 +35,27 @@ function NewOpportunity() {
     whatsapp_number: "",
     contact_email: "",
     poster_type: "individual" as (typeof posterTypes)[number]["value"],
+    business_page_id: "" as string,
   });
   const [file, setFile] = useState<File | null>(null);
 
   useEffect(() => {
     if (!loading && !user) nav({ to: "/login", search: { tab: "signup", redirect: "/opportunities/new" } as never });
   }, [loading, user, nav]);
+
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { data } = await supabase
+        .from("business_pages")
+        .select("id,name,verified")
+        .eq("owner_id", user.id)
+        .eq("suspended", false)
+        .order("name");
+      setMyBusinesses((data ?? []) as Array<{ id: string; name: string; verified: string }>);
+    })();
+  }, [user]);
+
 
   const cat = categories.find((c) => c.slug === f.category_slug)!;
 
@@ -73,8 +89,10 @@ function NewOpportunity() {
       contact_email: f.contact_email || null,
       image_url,
       poster_id: user.id,
-      poster_type: f.poster_type,
+      poster_type: f.business_page_id ? "business" : f.poster_type,
+      business_page_id: f.business_page_id || null,
       status: "pending",
+
     });
     setBusy(false);
     if (error) toast.error(error.message);
@@ -102,11 +120,20 @@ function NewOpportunity() {
               </select>
             </Field>
             <Field label="Posted as">
-              <select value={f.poster_type} onChange={(e) => update("poster_type", e.target.value as never)} className={inp}>
+              <select value={f.poster_type} onChange={(e) => update("poster_type", e.target.value as never)} className={inp} disabled={!!f.business_page_id}>
                 {posterTypes.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
               </select>
             </Field>
           </div>
+          {myBusinesses.length > 0 && (
+            <Field label="Post on behalf of a business page (optional)">
+              <select value={f.business_page_id} onChange={(e) => update("business_page_id", e.target.value)} className={inp}>
+                <option value="">Post as myself</option>
+                {myBusinesses.map((b) => <option key={b.id} value={b.id}>{b.name}{b.verified === "verified" || b.verified === "featured" ? " ✓" : ""}</option>)}
+              </select>
+            </Field>
+          )}
+
           <div className="grid grid-cols-2 gap-3">
             <Field label="Service category *">
               <select value={f.category_slug} onChange={(e) => { update("category_slug", e.target.value); update("subcategory", categories.find((c) => c.slug === e.target.value)!.subcategories[0]); }} className={inp}>

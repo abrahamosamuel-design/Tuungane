@@ -29,7 +29,11 @@ interface OppFull extends OpportunityRow {
   district: string | null;
   town: string | null;
   area: string | null;
+  business_page_id: string | null;
 }
+
+interface BusinessLite { id: string; slug: string; name: string; logo_url: string | null; verified: string; }
+
 
 function OpportunityDetails() {
   const { id } = Route.useParams();
@@ -37,6 +41,7 @@ function OpportunityDetails() {
   const nav = useNavigate();
   const [o, setO] = useState<OppFull | null>(null);
   const [author, setAuthor] = useState<{ full_name: string; avatar_url: string | null } | null>(null);
+  const [business, setBusiness] = useState<BusinessLite | null>(null);
   const [similar, setSimilar] = useState<OpportunityRow[]>([]);
   const [saved, setSaved] = useState(false);
   const [applyOpen, setApplyOpen] = useState(false);
@@ -49,8 +54,15 @@ function OpportunityDetails() {
     setO(data as OppFull);
     const { data: p } = await supabase.from("profiles").select("full_name,avatar_url").eq("id", data.poster_id).maybeSingle();
     setAuthor(p);
+    if (data.business_page_id) {
+      const { data: b } = await supabase.from("business_pages").select("id,slug,name,logo_url,verified").eq("id", data.business_page_id).maybeSingle();
+      setBusiness((b ?? null) as BusinessLite | null);
+    } else {
+      setBusiness(null);
+    }
     const { data: sim } = await supabase.from("opportunities").select("*").eq("category_slug", data.category_slug).neq("id", id).in("status", ["approved", "featured"]).limit(4);
     setSimilar((sim ?? []) as OpportunityRow[]);
+
     if (user) {
       const { data: s } = await supabase.from("saved_opportunities").select("id").eq("opportunity_id", id).eq("user_id", user.id).maybeSingle();
       setSaved(!!s);
@@ -92,9 +104,16 @@ function OpportunityDetails() {
             <div className="flex flex-wrap items-center gap-2">
               <span className="rounded-full bg-orange/10 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-orange">{o.opportunity_type}</span>
               {o.is_featured && <span className="inline-flex items-center gap-1 rounded-full bg-orange/10 px-2 py-0.5 text-[10px] font-semibold text-orange"><BadgeCheck className="h-3 w-3" /> Featured</span>}
+              {business && (business.verified === "verified" || business.verified === "featured") && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-green/10 px-2 py-0.5 text-[10px] font-semibold text-green"><BadgeCheck className="h-3 w-3" /> Verified business</span>
+              )}
+              {o.poster_type === "admin" && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-navy/10 px-2 py-0.5 text-[10px] font-semibold text-navy"><BadgeCheck className="h-3 w-3" /> Tuungane Official</span>
+              )}
               {oppBoosts.map((b) => <BoostBadge key={b.id} type={b.boost_type} />)}
               <span className="text-xs text-muted-foreground">{timeAgo(o.created_at)}</span>
             </div>
+
             <h1 className="mt-3 font-display text-2xl font-bold text-navy sm:text-3xl">{o.title}</h1>
             <p className="mt-1 text-sm text-muted-foreground"><Briefcase className="mr-1 inline h-3 w-3" />{cat?.name}{o.subcategory ? ` · ${o.subcategory}` : ""}</p>
             <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
@@ -130,10 +149,27 @@ function OpportunityDetails() {
           <aside className="space-y-4">
             <div className="rounded-2xl border border-border bg-card p-5">
               <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Posted by</p>
-              <p className="mt-1 font-semibold text-navy">{author?.full_name || "Tuungane user"}</p>
-              <p className="mt-0.5 text-xs capitalize text-muted-foreground">{o.poster_type}</p>
+              {business ? (
+                <Link to="/businesses/$slug" params={{ slug: business.slug }} className="mt-2 flex items-center gap-3 rounded-xl border border-border p-2 hover:border-orange">
+                  {business.logo_url ? (
+                    <img src={business.logo_url} alt="" className="h-10 w-10 rounded-lg object-cover" />
+                  ) : (
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-navy/10 text-navy"><Briefcase className="h-5 w-5" /></div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="flex items-center gap-1 truncate text-sm font-semibold text-navy">{business.name}{(business.verified === "verified" || business.verified === "featured") && <BadgeCheck className="h-3.5 w-3.5 text-green" />}</p>
+                    <p className="text-[11px] text-muted-foreground">Business page · {author?.full_name || "Tuungane user"}</p>
+                  </div>
+                </Link>
+              ) : (
+                <>
+                  <p className="mt-1 font-semibold text-navy">{author?.full_name || "Tuungane user"}</p>
+                  <p className="mt-0.5 text-xs capitalize text-muted-foreground">{o.poster_type}</p>
+                </>
+              )}
               {o.contact_email && <p className="mt-2 inline-flex items-center gap-1 text-xs text-muted-foreground"><Mail className="h-3 w-3" /> {o.contact_email}</p>}
             </div>
+
             <div className="rounded-2xl border border-orange/30 bg-orange/5 p-4 text-xs text-foreground/80">
               <p className="flex items-center gap-1 font-semibold text-orange"><ShieldAlert className="h-4 w-4" /> Safety note</p>
               <p className="mt-1">Please verify details before paying money, sharing sensitive information, or accepting work. Report suspicious opportunities to Tuungane.</p>
