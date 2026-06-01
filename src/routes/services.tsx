@@ -229,7 +229,15 @@ function Services() {
                     </div>
                     <p className="text-sm text-muted-foreground">{p.subcategory}</p>
                     <p className="mt-1 inline-flex items-center gap-1 text-xs text-muted-foreground"><MapPin className="h-3 w-3" />{p.town}, {p.district}</p>
+                    {(p.average_rating > 0 || p.completed_jobs > 0) && (
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {p.average_rating > 0 && <span className="font-semibold text-navy">★ {p.average_rating.toFixed(1)}</span>}
+                        {p.average_rating > 0 && p.completed_jobs > 0 && <span> · </span>}
+                        {p.completed_jobs > 0 && <span>{p.completed_jobs} completed</span>}
+                      </p>
+                    )}
                   </div>
+
                 </div>
                 <p className="line-clamp-2 px-5 text-sm text-foreground/70">{p.bio}</p>
                 <div className="mt-3 flex flex-wrap gap-1.5 px-5 pb-4">
