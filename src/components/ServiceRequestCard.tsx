@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { ExternalLink } from "lucide-react";
 import { Phone, MapPin, Flag, AlertTriangle } from "lucide-react";
 import { Avatar } from "@/components/social/Avatar";
 import { timeAgo } from "@/lib/format";
@@ -79,6 +80,7 @@ export function ServiceRequestCard({ r, viewerRole, onStatus, onFeedback, onDisp
             {canCancel && <Btn onClick={() => onStatus?.("cancelled")}>Cancel</Btn>}
             {canFeedback && <Btn onClick={onFeedback} variant="primary">Leave verified review</Btn>}
             {canDispute && onDispute && <Btn onClick={onDispute} variant="danger">Open dispute</Btn>}
+            <Link to="/requests/$id" params={{ id: r.id }} className="inline-flex items-center gap-1 rounded-full border border-border px-2 py-1 text-xs font-semibold text-navy hover:border-orange"><ExternalLink className="h-3 w-3" /> Open</Link>
             {onReport && (
               <button onClick={onReport} className="ml-auto inline-flex items-center gap-1 rounded-full px-2 py-1 text-muted-foreground hover:text-destructive">
                 <Flag className="h-3 w-3" /> Report

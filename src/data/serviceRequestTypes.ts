@@ -1,7 +1,7 @@
 export const requestStatuses = [
-  { value: "requested", label: "Requested", color: "bg-blue-100 text-blue-700" },
-  { value: "accepted", label: "Accepted", color: "bg-amber-100 text-amber-700" },
-  { value: "in_progress", label: "In progress", color: "bg-indigo-100 text-indigo-700" },
+  { value: "requested", label: "Open", color: "bg-blue-100 text-blue-700" },
+  { value: "accepted", label: "Provider Selected", color: "bg-amber-100 text-amber-700" },
+  { value: "in_progress", label: "In Progress", color: "bg-indigo-100 text-indigo-700" },
   { value: "completed", label: "Completed", color: "bg-green/10 text-green" },
   { value: "cancelled", label: "Cancelled", color: "bg-slate-100 text-slate-700" },
   { value: "disputed", label: "Disputed", color: "bg-destructive/10 text-destructive" },
@@ -12,20 +12,36 @@ export const requestStatusMap = Object.fromEntries(
   requestStatuses.map((s) => [s.value, s]),
 ) as Record<RequestStatusValue, (typeof requestStatuses)[number]>;
 
+// User-facing urgency labels mapped to the existing DB enum
 export const urgencyOptions = [
-  { value: "normal", label: "Normal" },
-  { value: "urgent", label: "Urgent" },
-  { value: "emergency", label: "Emergency" },
+  { value: "emergency", label: "Today" },
+  { value: "urgent", label: "This week" },
+  { value: "normal", label: "Flexible" },
 ] as const;
 export type UrgencyValue = (typeof urgencyOptions)[number]["value"];
 
+export const budgetBuckets = [
+  "Not sure",
+  "Under 50,000 UGX",
+  "50,000 – 100,000 UGX",
+  "100,000 – 300,000 UGX",
+  "Above 300,000 UGX",
+  "Negotiable",
+] as const;
+
 export const contactMethods = [
+  { value: "in_app", label: "Chat on Tuungane" },
   { value: "phone", label: "Phone call" },
   { value: "whatsapp", label: "WhatsApp" },
-  { value: "in_app", label: "In-app" },
   { value: "any", label: "Any" },
 ] as const;
 export type ContactMethodValue = (typeof contactMethods)[number]["value"];
+
+export const visibilityOptions = [
+  { value: "public", label: "Public in service feed", hint: "Anyone can see and respond." },
+  { value: "matching_only", label: "Only matching providers", hint: "Only providers in this category & area." },
+] as const;
+export type VisibilityValue = (typeof visibilityOptions)[number]["value"];
 
 export const reportReasons = [
   "Fake service provider",
@@ -47,6 +63,12 @@ export interface ServiceRequestRow {
   category_slug: string | null;
   subcategory: string | null;
   service_needed: string;
+  title: string | null;
+  visibility: VisibilityValue;
+  selected_provider_id: string | null;
+  completion_code: string | null;
+  provider_confirmed_completion: boolean;
+  customer_confirmed_completion: boolean;
   location: string;
   district: string | null;
   town: string | null;
@@ -68,6 +90,22 @@ export interface ServiceRequestRow {
   disputed_at: string | null;
 }
 
+export type ResponseStatus = "sent" | "viewed" | "shortlisted" | "chosen" | "declined" | "withdrawn";
+
+export interface ProviderResponseRow {
+  id: string;
+  request_id: string;
+  provider_id: string;
+  message: string;
+  quote_amount: number | null;
+  availability_note: string | null;
+  estimated_time: string | null;
+  portfolio_post_id: string | null;
+  status: ResponseStatus;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface ServiceFeedbackRow {
   id: string;
   service_request_id: string;
@@ -76,6 +114,10 @@ export interface ServiceFeedbackRow {
   did_use_provider: boolean;
   was_completed: boolean;
   rating: number;
+  quality_rating: number | null;
+  timekeeping_rating: number | null;
+  communication_rating: number | null;
+  price_fairness_rating: number | null;
   would_recommend: boolean;
   service_provided: string;
   review_text: string;
@@ -102,4 +144,12 @@ export interface TrustStatsRow {
   total_followers: number;
   response_rate: number;
   completion_rate: number;
+  trust_score: number;
+}
+
+export function trustScoreLabel(score: number): { label: string; color: string } {
+  if (score >= 85) return { label: "Highly Trusted", color: "bg-green/10 text-green" };
+  if (score >= 70) return { label: "Trusted Provider", color: "bg-emerald-100 text-emerald-700" };
+  if (score >= 55) return { label: "Building Trust", color: "bg-amber-100 text-amber-700" };
+  return { label: "New Provider", color: "bg-slate-100 text-slate-700" };
 }

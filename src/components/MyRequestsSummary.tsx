@@ -68,7 +68,7 @@ export function MyRequestsSummary({ limit = 5, title = "My service requests" }: 
         {items.map((r) => {
           const s = requestStatusMap[r.status];
           return (
-            <Link key={r.id} to="/requests" className="flex items-center justify-between gap-3 rounded-xl border border-border p-3 hover:border-orange">
+            <Link key={r.id} to="/requests/$id" params={{ id: r.id }} className="flex items-center justify-between gap-3 rounded-xl border border-border p-3 hover:border-orange">
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-semibold text-navy">{r.service_needed}</p>
                 <p className="truncate text-xs text-muted-foreground">with {r.counterparty?.full_name ?? "Someone"} · {new Date(r.created_at).toLocaleDateString()}</p>

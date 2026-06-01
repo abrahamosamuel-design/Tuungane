@@ -571,6 +571,56 @@ export type Database = {
         }
         Relationships: []
       }
+      provider_responses: {
+        Row: {
+          availability_note: string | null
+          created_at: string
+          estimated_time: string | null
+          id: string
+          message: string
+          portfolio_post_id: string | null
+          provider_id: string
+          quote_amount: number | null
+          request_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          availability_note?: string | null
+          created_at?: string
+          estimated_time?: string | null
+          id?: string
+          message?: string
+          portfolio_post_id?: string | null
+          provider_id: string
+          quote_amount?: number | null
+          request_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          availability_note?: string | null
+          created_at?: string
+          estimated_time?: string | null
+          id?: string
+          message?: string
+          portfolio_post_id?: string | null
+          provider_id?: string
+          quote_amount?: number | null
+          request_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_responses_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "service_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reports: {
         Row: {
           created_at: string
@@ -733,6 +783,7 @@ export type Database = {
       }
       service_feedback: {
         Row: {
+          communication_rating: number | null
           created_at: string
           customer_id: string
           did_use_provider: boolean
@@ -742,11 +793,14 @@ export type Database = {
           issue_description: string | null
           issue_reported: boolean
           price_fair: string | null
+          price_fairness_rating: number | null
           provider_id: string
+          quality_rating: number | null
           rating: number
           review_text: string
           service_provided: string
           service_request_id: string
+          timekeeping_rating: number | null
           updated_at: string
           was_completed: boolean
           was_on_time: string | null
@@ -755,6 +809,7 @@ export type Database = {
           would_use_again: string | null
         }
         Insert: {
+          communication_rating?: number | null
           created_at?: string
           customer_id: string
           did_use_provider?: boolean
@@ -764,11 +819,14 @@ export type Database = {
           issue_description?: string | null
           issue_reported?: boolean
           price_fair?: string | null
+          price_fairness_rating?: number | null
           provider_id: string
+          quality_rating?: number | null
           rating: number
           review_text?: string
           service_provided?: string
           service_request_id: string
+          timekeeping_rating?: number | null
           updated_at?: string
           was_completed?: boolean
           was_on_time?: string | null
@@ -777,6 +835,7 @@ export type Database = {
           would_use_again?: string | null
         }
         Update: {
+          communication_rating?: number | null
           created_at?: string
           customer_id?: string
           did_use_provider?: boolean
@@ -786,11 +845,14 @@ export type Database = {
           issue_description?: string | null
           issue_reported?: boolean
           price_fair?: string | null
+          price_fairness_rating?: number | null
           provider_id?: string
+          quality_rating?: number | null
           rating?: number
           review_text?: string
           service_provided?: string
           service_request_id?: string
+          timekeeping_rating?: number | null
           updated_at?: string
           was_completed?: boolean
           was_on_time?: string | null
@@ -938,7 +1000,9 @@ export type Database = {
           cancelled_at: string | null
           category_slug: string | null
           completed_at: string | null
+          completion_code: string | null
           created_at: string
+          customer_confirmed_completion: boolean
           customer_id: string
           customer_phone: string | null
           customer_whatsapp: string | null
@@ -950,14 +1014,18 @@ export type Database = {
           preferred_contact_method: Database["public"]["Enums"]["contact_method"]
           preferred_date: string | null
           preferred_time: string | null
+          provider_confirmed_completion: boolean
           provider_id: string
+          selected_provider_id: string | null
           service_needed: string
           service_profile_id: string | null
           status: Database["public"]["Enums"]["service_request_status"]
           subcategory: string | null
+          title: string | null
           town: string | null
           updated_at: string
           urgency: Database["public"]["Enums"]["service_urgency"]
+          visibility: string
         }
         Insert: {
           area?: string | null
@@ -966,7 +1034,9 @@ export type Database = {
           cancelled_at?: string | null
           category_slug?: string | null
           completed_at?: string | null
+          completion_code?: string | null
           created_at?: string
+          customer_confirmed_completion?: boolean
           customer_id: string
           customer_phone?: string | null
           customer_whatsapp?: string | null
@@ -978,14 +1048,18 @@ export type Database = {
           preferred_contact_method?: Database["public"]["Enums"]["contact_method"]
           preferred_date?: string | null
           preferred_time?: string | null
+          provider_confirmed_completion?: boolean
           provider_id: string
+          selected_provider_id?: string | null
           service_needed: string
           service_profile_id?: string | null
           status?: Database["public"]["Enums"]["service_request_status"]
           subcategory?: string | null
+          title?: string | null
           town?: string | null
           updated_at?: string
           urgency?: Database["public"]["Enums"]["service_urgency"]
+          visibility?: string
         }
         Update: {
           area?: string | null
@@ -994,7 +1068,9 @@ export type Database = {
           cancelled_at?: string | null
           category_slug?: string | null
           completed_at?: string | null
+          completion_code?: string | null
           created_at?: string
+          customer_confirmed_completion?: boolean
           customer_id?: string
           customer_phone?: string | null
           customer_whatsapp?: string | null
@@ -1006,14 +1082,18 @@ export type Database = {
           preferred_contact_method?: Database["public"]["Enums"]["contact_method"]
           preferred_date?: string | null
           preferred_time?: string | null
+          provider_confirmed_completion?: boolean
           provider_id?: string
+          selected_provider_id?: string | null
           service_needed?: string
           service_profile_id?: string | null
           status?: Database["public"]["Enums"]["service_request_status"]
           subcategory?: string | null
+          title?: string | null
           town?: string | null
           updated_at?: string
           urgency?: Database["public"]["Enums"]["service_urgency"]
+          visibility?: string
         }
         Relationships: []
       }
@@ -1095,6 +1175,7 @@ export type Database = {
           total_recommendations: number | null
           total_service_requests: number | null
           total_verified_reviews: number | null
+          trust_score: number | null
         }
         Relationships: []
       }
@@ -1117,6 +1198,49 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      matching_requests_for_provider: {
+        Args: { _provider: string }
+        Returns: {
+          area: string | null
+          attachment_url: string | null
+          budget_range: string | null
+          cancelled_at: string | null
+          category_slug: string | null
+          completed_at: string | null
+          completion_code: string | null
+          created_at: string
+          customer_confirmed_completion: boolean
+          customer_id: string
+          customer_phone: string | null
+          customer_whatsapp: string | null
+          description: string
+          disputed_at: string | null
+          district: string | null
+          id: string
+          location: string
+          preferred_contact_method: Database["public"]["Enums"]["contact_method"]
+          preferred_date: string | null
+          preferred_time: string | null
+          provider_confirmed_completion: boolean
+          provider_id: string
+          selected_provider_id: string | null
+          service_needed: string
+          service_profile_id: string | null
+          status: Database["public"]["Enums"]["service_request_status"]
+          subcategory: string | null
+          title: string | null
+          town: string | null
+          updated_at: string
+          urgency: Database["public"]["Enums"]["service_urgency"]
+          visibility: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "service_requests"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
     }
     Enums: {
