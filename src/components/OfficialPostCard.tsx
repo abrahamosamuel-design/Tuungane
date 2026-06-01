@@ -59,7 +59,7 @@ export function OfficialPostCard({ post, account, onChanged }: { post: OfficialP
   const isProviderHighlight = ["featured_provider", "verified_provider", "service_highlight"].includes(post.post_type);
 
   return (
-    <article className="overflow-hidden rounded-2xl border border-orange/30 bg-card shadow-[var(--shadow-card)]">
+    <article className={`overflow-hidden rounded-2xl border bg-card shadow-[var(--shadow-card)] ${post.is_pinned ? "border-orange ring-1 ring-orange/40" : "border-orange/30"}`}>
       <div className="flex items-center justify-between gap-3 border-b border-border bg-gradient-to-r from-orange/5 to-transparent px-4 py-3">
         <OfficialAttribution logoUrl={account?.profile_image_url} />
         <span className="text-[10px] text-muted-foreground">{timeAgo(post.created_at)}</span>
