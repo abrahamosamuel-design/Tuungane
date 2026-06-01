@@ -194,6 +194,9 @@ function Services() {
                 </div>
                 <p className="line-clamp-2 px-5 text-sm text-foreground/70">{p.bio}</p>
                 <div className="mt-3 flex flex-wrap gap-1.5 px-5 pb-4">
+                  {isBoostedProvider(p.user_id) && (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-orange/15 px-2 py-0.5 text-[10px] font-semibold text-orange"><Sparkles className="h-3 w-3" /> Featured</span>
+                  )}
                   {p.verified === "featured" && (
                     <span className="inline-flex items-center gap-1 rounded-full bg-orange/10 px-2 py-0.5 text-[10px] font-semibold text-orange"><Sparkles className="h-3 w-3" /> Highlighted by Tuungane Official</span>
                   )}
