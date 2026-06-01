@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { uploadMedia } from "@/lib/upload";
 import { categories } from "@/data/categories";
-import { urgencyOptions, contactMethods, type UrgencyValue, type ContactMethodValue } from "@/data/serviceRequestTypes";
+import { urgencyOptions, contactMethods, budgetBuckets, visibilityOptions, type UrgencyValue, type ContactMethodValue, type VisibilityValue } from "@/data/serviceRequestTypes";
 import { toast } from "sonner";
 
 interface Props {
