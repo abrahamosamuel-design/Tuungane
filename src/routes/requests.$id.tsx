@@ -65,6 +65,21 @@ function RequestDetailsPage() {
     setResponses(list.map((x): ResponseWithProvider => ({ ...x, provider: pmap.get(x.provider_id), stats: smap.get(x.provider_id) })));
     const { count } = await (supabase as any).from("service_feedback").select("id", { count: "exact", head: true }).eq("service_request_id", id);
     setHasFeedback((count ?? 0) > 0);
+
+    // Fetch contact info of the assigned provider (or original provider for direct requests)
+    const assigned = sr.selected_provider_id ?? sr.provider_id;
+    if (assigned) {
+      const { data: sp } = await supabase.from("service_profiles").select("phone,whatsapp,email,business_name").eq("user_id", assigned).maybeSingle();
+      const { data: pp } = await supabase.from("profiles").select("full_name").eq("id", assigned).maybeSingle();
+      setProviderContact({
+        phone: sp?.phone ?? null,
+        whatsapp: sp?.whatsapp ?? null,
+        email: sp?.email ?? null,
+        name: sp?.business_name || pp?.full_name || null,
+      });
+    } else {
+      setProviderContact(null);
+    }
   }, [id, user]);
 
   useEffect(() => { if (user) load(); }, [user, load]);
