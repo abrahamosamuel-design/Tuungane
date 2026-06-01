@@ -8,6 +8,8 @@ import { PostCard, type PostRow } from "@/components/social/PostCard";
 import { categories } from "@/data/categories";
 import { MyRequestsSummary } from "@/components/MyRequestsSummary";
 import { MatchingRequestsSection } from "@/components/MatchingRequestsSection";
+import { ContactedProvidersList } from "@/components/ContactedProvidersList";
+import { ProviderContactsList } from "@/components/ProviderContactsList";
 import { toast } from "sonner";
 
 
