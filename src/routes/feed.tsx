@@ -127,8 +127,11 @@ function Feed() {
     { id: "posts", label: "Posts" }, { id: "services", label: "Services" }, { id: "opportunities", label: "Opportunities" },
   ];
   const postFilters: { id: PostFilter; label: string }[] = [
-    { id: "all", label: "All" }, { id: "following", label: "Following" }, { id: "nearby", label: "Nearby" }, { id: "popular", label: "Popular" }, { id: "verified", label: "Verified" },
+    { id: "all", label: "All" }, { id: "following", label: "Following" }, { id: "nearby", label: "Nearby" }, { id: "popular", label: "Popular" }, { id: "verified", label: "Verified" }, { id: "official", label: "Official" },
   ];
+
+  const pinnedOfficial = officialPosts.filter((p) => p.is_pinned);
+  const officialToShow = filter === "official" ? officialPosts : pinnedOfficial;
 
   return (
     <Layout>
