@@ -51,6 +51,7 @@ function UserProfile() {
   const [revOpen, setRevOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
+  const [claimOpen, setClaimOpen] = useState(false);
 
   const load = async () => {
     const { data: p } = await supabase.from("profiles").select("full_name,avatar_url,bio,town,district,is_provider").eq("id", id).maybeSingle();
