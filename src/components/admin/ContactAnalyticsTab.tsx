@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Activity, Phone, MessageCircle, Mail, Eye, AlertTriangle, Settings as SettingsIcon } from "lucide-react";
+import { Activity, Phone, MessageCircle, Mail, Eye, AlertTriangle, Settings as SettingsIcon, Download } from "lucide-react";
 import { timeAgo } from "@/lib/format";
 
 const STATUSES = ["requested", "accepted", "in_progress", "completed", "cancelled", "disputed"] as const;
@@ -146,6 +146,41 @@ export function ContactAnalyticsTab() {
 
   const methodIcon = (m: string) => m === "whatsapp" ? <MessageCircle className="h-3 w-3" /> : m === "email" ? <Mail className="h-3 w-3" /> : <Phone className="h-3 w-3" />;
 
+  const exportCSV = () => {
+    if (filteredLogs.length === 0) { toast.info("No data to export"); return; }
+    const rows = filteredLogs.map((l) => ({
+      customer: (profiles.get(l.customer_id) ?? l.customer_id).replace(/"/g, '""'),
+      provider: (profiles.get(l.provider_id) ?? l.provider_id).replace(/"/g, '""'),
+      method: l.contact_method,
+      status: l.request_status,
+      job_linked: l.service_job_id ? "yes" : "no",
+      clicked_at: l.clicked_at,
+    }));
+    const headers = ["Customer", "Provider", "Method", "Request Status", "Job Linked", "Clicked At"];
+    const csv = [
+      headers.join(","),
+      ...rows.map((r) => [
+        `"${r.customer}"`,
+        `"${r.provider}"`,
+        r.method,
+        r.status,
+        r.job_linked,
+        r.clicked_at,
+      ].join(",")),
+    ].join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    const rangeLabel = dateFrom && dateTo ? `_${dateFrom}_to_${dateTo}` : dateFrom ? `_from_${dateFrom}` : dateTo ? `_to_${dateTo}` : "";
+    link.download = `contact_logs${rangeLabel}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+    toast.success(`Exported ${filteredLogs.length} rows to CSV`);
+  };
+
   return (
     <div className="space-y-5">
       <div className="flex gap-2">
@@ -193,6 +228,7 @@ export function ContactAnalyticsTab() {
                 />
                 <button onClick={load} className="rounded-full bg-navy px-3 py-1 text-[10px] font-bold text-navy-foreground uppercase tracking-wider">Apply</button>
                 <button onClick={() => { setDateFrom(""); setDateTo(""); }} className="rounded-full border border-border px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground hover:border-navy">Clear</button>
+                <button onClick={exportCSV} className="rounded-full bg-orange px-3 py-1 text-[10px] font-bold text-orange-foreground uppercase tracking-wider"><Download className="inline h-3 w-3 mr-0.5" />Export CSV</button>
               </div>
             </div>
           </div>
