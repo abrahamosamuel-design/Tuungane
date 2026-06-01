@@ -135,7 +135,7 @@ function UserProfile() {
                 <p className="mt-0.5 text-xs text-muted-foreground">This profile was added by Tuungane to help customers discover this provider. If this is your business, claim it to manage it directly.</p>
               </div>
             </div>
-            {!isOwnDisabled(user?.id, id) && sp.seeded_status === "unclaimed" && (
+            {user && user.id !== id && sp.seeded_status === "unclaimed" && (
               <button onClick={() => setClaimOpen(true)} className="shrink-0 rounded-full bg-orange px-4 py-2 text-xs font-semibold text-orange-foreground hover:brightness-110">
                 Claim this profile
               </button>
