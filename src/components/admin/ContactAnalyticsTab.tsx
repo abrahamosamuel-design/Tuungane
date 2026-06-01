@@ -45,11 +45,21 @@ export function ContactAnalyticsTab() {
 
   const [statusFilter, setStatusFilter] = useState<ServiceRequestStatus | "all">("all");
   const [jobFilter, setJobFilter] = useState<"all" | "has_job" | "no_job">("all");
+  const [dateFrom, setDateFrom] = useState<string>("");
+  const [dateTo, setDateTo] = useState<string>("");
 
   const load = async () => {
+    let lq = supabase.from("contact_logs").select("*, service_requests!inner(status)").order("clicked_at", { ascending: false }).limit(200);
+    if (dateFrom) lq = lq.gte("clicked_at", `${dateFrom}T00:00:00Z`);
+    if (dateTo) lq = lq.lte("clicked_at", `${dateTo}T23:59:59Z`);
+
+    let rq = supabase.from("contact_reveals").select("*").order("created_at", { ascending: false }).limit(200);
+    if (dateFrom) rq = rq.gte("created_at", `${dateFrom}T00:00:00Z`);
+    if (dateTo) rq = rq.lte("created_at", `${dateTo}T23:59:59Z`);
+
     const [l, r, s] = await Promise.all([
-      supabase.from("contact_logs").select("*, service_requests!inner(status)").order("clicked_at", { ascending: false }).limit(200),
-      supabase.from("contact_reveals").select("*").order("created_at", { ascending: false }).limit(200),
+      lq,
+      rq,
       supabase.from("admin_settings").select("id,setting_value").eq("setting_key", SETTING_KEY).maybeSingle(),
     ]);
     const raw = (l.data ?? []) as unknown as Array<{
@@ -165,6 +175,24 @@ export function ContactAnalyticsTab() {
                 <button onClick={() => setJobFilter("all")} className={`rounded-full px-2.5 py-1 font-semibold ${jobFilter === "all" ? "bg-navy text-navy-foreground" : "border border-border hover:border-navy"}`}>All</button>
                 <button onClick={() => setJobFilter("has_job")} className={`rounded-full px-2.5 py-1 font-semibold ${jobFilter === "has_job" ? "bg-navy text-navy-foreground" : "border border-border hover:border-navy"}`}>Has job ID</button>
                 <button onClick={() => setJobFilter("no_job")} className={`rounded-full px-2.5 py-1 font-semibold ${jobFilter === "no_job" ? "bg-navy text-navy-foreground" : "border border-border hover:border-navy"}`}>No job ID</button>
+              </div>
+              <div className="flex flex-wrap gap-2 text-xs items-center pt-1">
+                <span className="text-muted-foreground mr-1">Date range:</span>
+                <input
+                  type="date"
+                  value={dateFrom}
+                  onChange={(e) => setDateFrom(e.target.value)}
+                  className="rounded border border-border bg-background px-2 py-1 text-xs"
+                />
+                <span className="text-muted-foreground">to</span>
+                <input
+                  type="date"
+                  value={dateTo}
+                  onChange={(e) => setDateTo(e.target.value)}
+                  className="rounded border border-border bg-background px-2 py-1 text-xs"
+                />
+                <button onClick={load} className="rounded-full bg-navy px-3 py-1 text-[10px] font-bold text-navy-foreground uppercase tracking-wider">Apply</button>
+                <button onClick={() => { setDateFrom(""); setDateTo(""); }} className="rounded-full border border-border px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground hover:border-navy">Clear</button>
               </div>
             </div>
           </div>
