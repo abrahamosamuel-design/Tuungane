@@ -89,6 +89,23 @@ function Services() {
 
   const { has: isBoostedProvider } = useBoostedSet("provider", ["boost_profile", "feature_business_page"]);
 
+  const now = Date.now();
+  const scoreProvider = (p: RealProvider) => {
+    let s = 0;
+    if (isBoostedProvider(p.user_id)) s += 40; // boost helps but doesn't override trust
+    if (p.verified === "featured") s += 30;
+    else if (p.verified === "verified") s += 20;
+    s += Math.min(p.trust_score, 100) * 0.5;        // 0–50
+    s += Math.min(p.average_rating, 5) * 5;          // 0–25
+    s += Math.min(p.completed_jobs, 10) * 2;         // 0–20
+    if (loc && (p.town.toLowerCase().includes(loc.toLowerCase()) || p.district.toLowerCase().includes(loc.toLowerCase()))) s += 15;
+    const daysOld = (now - new Date(p.updated_at).getTime()) / 86400000;
+    if (daysOld < 30) s += 10;
+    else if (daysOld < 90) s += 5;
+    if (p.bio && p.bio.length > 40) s += 5;          // profile completeness
+    return s;
+  };
+
   const realFiltered = real
     .filter((p) => {
       const qm = q.toLowerCase();
@@ -97,8 +114,9 @@ function Services() {
       const matchesL = !loc || p.town.toLowerCase().includes(loc.toLowerCase()) || p.district.toLowerCase().includes(loc.toLowerCase());
       return matchesQ && matchesL;
     })
-    .sort((a, b) => Number(isBoostedProvider(b.user_id)) - Number(isBoostedProvider(a.user_id)));
+    .sort((a, b) => scoreProvider(b) - scoreProvider(a));
   const featuredProviders = realFiltered.filter((p) => isBoostedProvider(p.user_id));
+
 
   const demoFiltered = providers.filter((p) => {
     const qm = q.toLowerCase();
