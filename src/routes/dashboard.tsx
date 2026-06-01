@@ -7,6 +7,7 @@ import { PostComposer } from "@/components/social/PostComposer";
 import { PostCard, type PostRow } from "@/components/social/PostCard";
 import { categories } from "@/data/categories";
 import { MyRequestsSummary } from "@/components/MyRequestsSummary";
+import { MatchingRequestsSection } from "@/components/MatchingRequestsSection";
 import { toast } from "sonner";
 
 
@@ -99,8 +100,9 @@ function Dashboard() {
           </div>
         )}
 
-        <div className="mt-6">
+        <div className="mt-6 space-y-4">
           <MyRequestsSummary />
+          {profile?.is_provider && <MatchingRequestsSection />}
         </div>
 
 
