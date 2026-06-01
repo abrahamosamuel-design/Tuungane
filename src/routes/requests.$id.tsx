@@ -12,6 +12,8 @@ import { requestStatusMap, trustScoreLabel, type ProviderResponseRow, type Servi
 import { timeAgo } from "@/lib/format";
 import { toast } from "sonner";
 import { SafetyNote, SAFETY_TIPS } from "@/components/SafetyNote";
+import { MobileActionBar } from "@/components/MobileActionBar";
+
 
 export const Route = createFileRoute("/requests/$id")({
   head: () => ({ meta: [{ title: "Service request — Tuungane" }] }),
