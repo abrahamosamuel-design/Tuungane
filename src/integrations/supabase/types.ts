@@ -224,6 +224,75 @@ export type Database = {
         }
         Relationships: []
       }
+      contact_logs: {
+        Row: {
+          clicked_at: string
+          contact_method: string
+          created_at: string
+          customer_id: string
+          id: string
+          provider_id: string
+          service_job_id: string | null
+          service_request_id: string
+          user_agent: string | null
+        }
+        Insert: {
+          clicked_at?: string
+          contact_method: string
+          created_at?: string
+          customer_id: string
+          id?: string
+          provider_id: string
+          service_job_id?: string | null
+          service_request_id: string
+          user_agent?: string | null
+        }
+        Update: {
+          clicked_at?: string
+          contact_method?: string
+          created_at?: string
+          customer_id?: string
+          id?: string
+          provider_id?: string
+          service_job_id?: string | null
+          service_request_id?: string
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
+      contact_reveals: {
+        Row: {
+          created_at: string
+          customer_id: string
+          id: string
+          provider_id: string
+          reveal_reason: string | null
+          revealed_phone: string | null
+          revealed_whatsapp: string | null
+          service_request_id: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          id?: string
+          provider_id: string
+          reveal_reason?: string | null
+          revealed_phone?: string | null
+          revealed_whatsapp?: string | null
+          service_request_id: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          id?: string
+          provider_id?: string
+          reveal_reason?: string | null
+          revealed_phone?: string | null
+          revealed_whatsapp?: string | null
+          service_request_id?: string
+        }
+        Relationships: []
+      }
       credit_packages: {
         Row: {
           active: boolean
@@ -898,6 +967,24 @@ export type Database = {
         }
         Relationships: []
       }
+      provider_privacy_settings: {
+        Row: {
+          contact_reveal_policy: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          contact_reveal_policy?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          contact_reveal_policy?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       provider_recommendations: {
         Row: {
           created_at: string
@@ -1560,6 +1647,10 @@ export type Database = {
           _request_id: string
         }
         Returns: undefined
+      }
+      can_reveal_contact: {
+        Args: { _customer: string; _provider: string }
+        Returns: boolean
       }
       create_boost: {
         Args: { _entity_id: string; _entity_type: string; _pricing_id: string }
