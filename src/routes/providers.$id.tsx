@@ -1,8 +1,9 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { ArrowLeft, BadgeCheck, Sparkles, Star, MapPin, Phone, MessageCircle, Mail, Heart, Share2, Flag, Bookmark, Users } from "lucide-react";
+import { ArrowLeft, BadgeCheck, Sparkles, Star, MapPin, Phone, MessageCircle, Mail, Heart, Share2, Flag, Bookmark, Users, ClipboardList } from "lucide-react";
 import { Layout } from "@/components/Layout";
 import { getProvider, type Provider } from "@/data/providers";
 import { getCategory } from "@/data/categories";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/providers/$id")({
   loader: ({ params }) => {
@@ -68,6 +69,12 @@ function ProviderPage() {
               </div>
             </div>
             <div className="mt-6 flex flex-wrap gap-2">
+              <button
+                onClick={() => toast.info("This is a sample profile. To send a real service request, open a live provider profile from the Feed or Services.")}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-navy px-5 py-3 text-sm font-semibold text-white transition hover:brightness-110 sm:w-auto"
+              >
+                <ClipboardList className="h-4 w-4" /> Request service
+              </button>
               <a href={`https://wa.me/${p.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noreferrer" className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-green px-5 py-3 text-sm font-semibold text-green-foreground transition hover:brightness-110 sm:flex-none">
                 <MessageCircle className="h-4 w-4" /> WhatsApp
               </a>
