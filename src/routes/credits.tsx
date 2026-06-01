@@ -77,24 +77,34 @@ function CreditsPage() {
 
   // Realtime: refresh transactions & purchase requests when they change for this user
   useEffect(() => {
-    if (!user) return;
+    if (!user) { setRealtimeStatus("idle"); return; }
     const suffix =
       typeof crypto !== "undefined" && "randomUUID" in crypto
         ? crypto.randomUUID()
         : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
     let ch: ReturnType<typeof supabase.channel> | undefined;
+    setRealtimeStatus("subscribing");
     try {
       ch = supabase
         .channel(`credits-page:${user.id}:${suffix}`)
         .on("postgres_changes",
           { event: "*", schema: "public", table: "credit_purchase_requests", filter: `user_id=eq.${user.id}` },
-          () => { loadPersonal(); })
+          (payload) => {
+            setLastEventAt(new Date().toISOString());
+            setLastEventKind(`purchase_request.${payload.eventType}`);
+            loadPersonal();
+          })
         .on("postgres_changes",
           { event: "INSERT", schema: "public", table: "credit_transactions", filter: `user_id=eq.${user.id}` },
-          () => { loadPersonal(); })
-        .subscribe();
+          () => {
+            setLastEventAt(new Date().toISOString());
+            setLastEventKind("transaction.INSERT");
+            loadPersonal();
+          })
+        .subscribe((status) => setRealtimeStatus(String(status)));
     } catch (err) {
       console.warn("[credits] realtime subscription failed", err);
+      setRealtimeStatus("error");
     }
     return () => { if (ch) { try { supabase.removeChannel(ch); } catch {} } };
     // eslint-disable-next-line react-hooks/exhaustive-deps
