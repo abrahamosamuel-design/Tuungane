@@ -6,7 +6,9 @@ import { useAuth } from "@/hooks/use-auth";
 import { PostComposer } from "@/components/social/PostComposer";
 import { PostCard, type PostRow } from "@/components/social/PostCard";
 import { categories } from "@/data/categories";
+import { MyRequestsSummary } from "@/components/MyRequestsSummary";
 import { toast } from "sonner";
+
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({ meta: [{ title: "My Dashboard — Tuungane" }] }),
@@ -96,6 +98,11 @@ function Dashboard() {
             <Stat label="Recommendations" value={customerStats.recsGiven} />
           </div>
         )}
+
+        <div className="mt-6">
+          <MyRequestsSummary />
+        </div>
+
 
         {profile?.is_provider && !sp && (
           <ServiceProfileForm onSaved={load} />

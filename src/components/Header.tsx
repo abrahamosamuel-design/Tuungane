@@ -8,11 +8,13 @@ import { useAuth } from "@/hooks/use-auth";
 const nav = [
   { to: "/", label: "Home" },
   { to: "/services", label: "Services" },
+  { to: "/requests", label: "Requests" },
   { to: "/opportunities", label: "Opportunities" },
   { to: "/feed", label: "Feed" },
   { to: "/official", label: "Official" },
   { to: "/about", label: "About" },
 ];
+
 
 export function Header() {
   const [open, setOpen] = useState(false);

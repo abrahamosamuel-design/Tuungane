@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Home, Rss, Wrench, Plus, User as UserIcon, X, Briefcase, Camera } from "lucide-react";
+import { Home, Rss, Wrench, Plus, User as UserIcon, X, Briefcase, Camera, ClipboardList } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 
@@ -12,7 +12,7 @@ export function MobileBottomNav() {
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden">
         <div className="mx-auto flex max-w-md items-center justify-around px-2 py-1">
           <Tab to="/" icon={<Home className="h-5 w-5" />} label="Home" exact />
-          <Tab to="/feed" icon={<Rss className="h-5 w-5" />} label="Feed" />
+          <Tab to="/services" icon={<Wrench className="h-5 w-5" />} label="Services" />
           <button
             aria-label="Create"
             onClick={() => setOpen(true)}
@@ -20,7 +20,12 @@ export function MobileBottomNav() {
           >
             <Plus className="h-6 w-6" />
           </button>
-          <Tab to="/services" icon={<Wrench className="h-5 w-5" />} label="Services" />
+          {user ? (
+            <Tab to="/requests" icon={<ClipboardList className="h-5 w-5" />} label="Requests" />
+          ) : (
+            <Tab to="/feed" icon={<Rss className="h-5 w-5" />} label="Feed" />
+          )}
+
           {user ? (
             <Tab to="/u/$id" params={{ id: user.id }} icon={<UserIcon className="h-5 w-5" />} label="Me" />
           ) : (

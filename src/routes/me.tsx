@@ -5,7 +5,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { uploadMedia } from "@/lib/upload";
 import { Avatar } from "@/components/social/Avatar";
+import { MyRequestsSummary } from "@/components/MyRequestsSummary";
 import { toast } from "sonner";
+
 
 export const Route = createFileRoute("/me")({
   head: () => ({ meta: [{ title: "My profile — Tuungane" }] }),
@@ -95,8 +97,13 @@ function Me() {
           <Stat label="Recommendations made" value={recsCount} />
         </div>
 
+        <div className="mt-6">
+          <MyRequestsSummary limit={3} />
+        </div>
+
         <SubSection title="Providers you follow" items={following} empty="You don't follow anyone yet." />
         <SubSection title="Saved providers" items={saved} empty="No saved providers." />
+
       </section>
     </Layout>
   );
