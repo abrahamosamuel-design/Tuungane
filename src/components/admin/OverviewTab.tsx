@@ -32,7 +32,7 @@ export function OverviewTab({ onJump }: { onJump: (tab: string) => void }) {
         supabase.from("service_profiles").select("*", head),
         supabase.from("business_pages").select("*", head),
         supabase.from("opportunities").select("*", head).eq("archived", false),
-        supabase.from("service_requests" as never).select("*", head),
+        supabase.from("service_requests").select("*", head),
         supabase.from("reports").select("*", head).eq("status", "open"),
         supabase.from("service_disputes").select("*", head).eq("status", "open"),
         supabase.from("profile_claim_requests").select("*", head).eq("status", "pending"),

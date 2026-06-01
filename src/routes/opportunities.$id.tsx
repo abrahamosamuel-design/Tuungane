@@ -71,7 +71,16 @@ function OpportunityDetails() {
 
   useEffect(() => { load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [id, user?.id]);
 
-  if (!o) return <Layout><div className="mx-auto max-w-3xl px-4 py-16 text-center text-muted-foreground">Loading or not found…</div></Layout>;
+  if (o === null) return (
+    <Layout>
+      <div className="mx-auto max-w-2xl px-4 py-24 text-center">
+        <h1 className="font-display text-2xl font-bold text-navy">Opportunity not found</h1>
+        <p className="mt-2 text-sm text-muted-foreground">This opportunity may have been removed or is no longer available.</p>
+        <Link to="/opportunities" className="mt-6 inline-block rounded-full bg-orange px-5 py-2 text-sm font-semibold text-orange-foreground">Browse opportunities</Link>
+      </div>
+    </Layout>
+  );
+  if (!o) return <Layout><div className="mx-auto max-w-3xl px-4 py-16 text-center text-muted-foreground">Loading…</div></Layout>;
 
   const cat = getCategory(o.category_slug);
 
