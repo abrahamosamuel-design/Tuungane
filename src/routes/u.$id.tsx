@@ -14,6 +14,9 @@ import { ReportDialog } from "@/components/social/ReportDialog";
 import { SaveButton } from "@/components/social/SaveButton";
 import { OpportunityCard, type OpportunityRow } from "@/components/OpportunityCard";
 import { ClaimProfileDialog } from "@/components/ClaimProfileDialog";
+import { TrustStats } from "@/components/TrustStats";
+import { RequestServiceDialog } from "@/components/RequestServiceDialog";
+import { VerifiedReviewBadge } from "@/components/VerifiedReviewBadge";
 import { uploadMedia } from "@/lib/upload";
 import { timeAgo } from "@/lib/format";
 import { getCategory } from "@/data/categories";
@@ -52,6 +55,8 @@ function UserProfile() {
   const [reportOpen, setReportOpen] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
   const [claimOpen, setClaimOpen] = useState(false);
+  const [requestOpen, setRequestOpen] = useState(false);
+  const [feedback, setFeedback] = useState<Array<{ id: string; rating: number; review_text: string; service_provided: string; created_at: string; customer_id: string; would_recommend: boolean; profile?: { full_name: string; avatar_url: string | null } }>>([]);
 
   const load = async () => {
     const { data: p } = await supabase.from("profiles").select("full_name,avatar_url,bio,town,district,is_provider").eq("id", id).maybeSingle();
@@ -78,6 +83,17 @@ function UserProfile() {
     }
     setRecs((rRes.data ?? []).map((r) => ({ ...r, profile: pm.get(r.user_id) })));
     setReviews((vRes.data ?? []).map((r) => ({ ...r, profile: pm.get(r.user_id) })));
+
+    const { data: fbRes } = await (supabase as any).from("service_feedback")
+      .select("id,rating,review_text,service_provided,created_at,customer_id,would_recommend")
+      .eq("provider_id", id).eq("is_visible", true).order("created_at", { ascending: false });
+    const fbList = (fbRes ?? []) as Array<{ id: string; rating: number; review_text: string; service_provided: string; created_at: string; customer_id: string; would_recommend: boolean }>;
+    const fbIds = Array.from(new Set(fbList.map((f) => f.customer_id).filter((x) => !pm.has(x))));
+    if (fbIds.length) {
+      const { data: ps3 } = await supabase.from("profiles").select("id,full_name,avatar_url").in("id", fbIds);
+      (ps3 ?? []).forEach((p) => pm.set(p.id, { full_name: p.full_name, avatar_url: p.avatar_url }));
+    }
+    setFeedback(fbList.map((f) => ({ ...f, profile: pm.get(f.customer_id) })));
   };
 
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [id]);
@@ -173,6 +189,9 @@ function UserProfile() {
           </div>
 
           <div className="mt-4 flex flex-wrap items-center gap-2">
+            {!isOwn && user && isProvider && (
+              <button onClick={() => setRequestOpen(true)} className="rounded-full bg-navy px-4 py-2 text-xs font-semibold text-navy-foreground hover:brightness-110">Request service</button>
+            )}
             {!isOwn && isProvider && <FollowButton providerUserId={id} onChange={setFollowers} />}
             {!isOwn && isProvider && <SaveButton providerUserId={id} variant="full" />}
             {!isOwn && user && isProvider && (
@@ -188,6 +207,8 @@ function UserProfile() {
             {!isOwn && user && <button onClick={() => setReportOpen(true)} className="ml-auto text-muted-foreground hover:text-destructive"><Flag className="h-4 w-4" /></button>}
           </div>
         </div>
+
+        {isProvider && <div className="mt-4"><TrustStats providerId={id} /></div>}
 
         {/* Tabs */}
         <div className="sticky top-16 z-10 -mx-4 mt-4 overflow-x-auto border-b border-border bg-background/95 px-4 backdrop-blur">
@@ -289,7 +310,25 @@ function UserProfile() {
               {!isOwn && user && isProvider && (
                 <button onClick={() => setRevOpen(true)} className="w-full rounded-2xl border-2 border-dashed border-orange/40 bg-orange/5 p-4 text-sm font-semibold text-orange hover:bg-orange/10">+ Write a review</button>
               )}
-              {reviews.length === 0 && <p className="rounded-2xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground">No reviews yet.</p>}
+              {feedback.length > 0 && (
+                <div className="space-y-3">
+                  <h4 className="font-display text-sm font-bold text-navy">Verified service reviews</h4>
+                  {feedback.map((f) => (
+                    <div key={f.id} className="rounded-2xl border border-green/30 bg-green/5 p-4">
+                      <div className="flex items-center gap-3">
+                        <Avatar name={f.profile?.full_name ?? "Customer"} url={f.profile?.avatar_url ?? null} size={36} />
+                        <div>
+                          <p className="flex items-center gap-2 text-sm font-semibold text-navy">{f.profile?.full_name ?? "Customer"} <VerifiedReviewBadge /></p>
+                          <p className="text-xs text-muted-foreground">{f.service_provided} · {timeAgo(f.created_at)}</p>
+                        </div>
+                        <span className="ml-auto text-sm text-orange">{"★".repeat(f.rating)}{"☆".repeat(5 - f.rating)}</span>
+                      </div>
+                      {f.review_text && <p className="mt-3 text-sm text-foreground/90">{f.review_text}</p>}
+                    </div>
+                  ))}
+                </div>
+              )}
+              {reviews.length === 0 && feedback.length === 0 && <p className="rounded-2xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground">No reviews yet.</p>}
               {reviews.map((r) => (
                 <div key={r.id} className="rounded-2xl border border-border bg-card p-4">
                   <div className="flex items-center gap-3">
@@ -343,6 +382,7 @@ function UserProfile() {
         <ReviewDialog open={revOpen} onClose={() => setRevOpen(false)} providerUserId={id} onPosted={load} />
         <ReportDialog open={reportOpen} onClose={() => setReportOpen(false)} targetType="provider" targetId={id} />
         <ClaimProfileDialog serviceProfileUserId={id} open={claimOpen} onClose={() => setClaimOpen(false)} onSubmitted={load} />
+        <RequestServiceDialog open={requestOpen} onClose={() => setRequestOpen(false)} providerId={id} providerName={sp?.business_name || profile.full_name} defaultCategorySlug={sp?.category_slug} defaultSubcategory={sp?.subcategory} onSubmitted={load} />
       </section>
     </Layout>
   );
