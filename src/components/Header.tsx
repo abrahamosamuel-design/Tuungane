@@ -62,6 +62,7 @@ export function Header() {
                     <MenuItem to="/requests" icon={<ClipboardList className="h-4 w-4" />} label="My requests" onClick={() => setMenu(false)} />
                     <MenuItem to="/dashboard" icon={<Wrench className="h-4 w-4" />} label="Post a service" onClick={() => setMenu(false)} />
                     <MenuItem to="/opportunities/new" icon={<Briefcase className="h-4 w-4" />} label="Post an opportunity" onClick={() => setMenu(false)} />
+                    <MenuItem to="/businesses/new" icon={<Building2 className="h-4 w-4" />} label="Create business page" onClick={() => setMenu(false)} />
                     {isModerator && <MenuItem to="/admin" icon={<Shield className="h-4 w-4" />} label="Admin & moderation" onClick={() => setMenu(false)} />}
                     <button onClick={() => { setMenu(false); signOut(); }} className="flex w-full items-center gap-2 border-t border-border px-3 py-2.5 text-left text-sm text-destructive hover:bg-muted">
                       <LogOut className="h-4 w-4" /> Sign out
