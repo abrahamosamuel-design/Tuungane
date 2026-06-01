@@ -6,6 +6,7 @@ import { ProviderCard } from "@/components/ProviderCard";
 import { categories } from "@/data/categories";
 import { providers } from "@/data/providers";
 import { supabase } from "@/integrations/supabase/client";
+import { useBoostedSet } from "@/hooks/use-boosted-set";
 
 const iconMap: Record<string, any> = { Wrench, Sparkles, Building2, Scissors, Truck, Car, GraduationCap, Camera, ChefHat, Laptop, HeartPulse, Sprout, MoreHorizontal };
 
@@ -65,13 +66,18 @@ function Services() {
     })();
   }, [filter]);
 
-  const realFiltered = real.filter((p) => {
-    const qm = q.toLowerCase();
-    const name = p.business_name || p.profile?.full_name || "";
-    const matchesQ = !q || name.toLowerCase().includes(qm) || p.subcategory.toLowerCase().includes(qm);
-    const matchesL = !loc || p.town.toLowerCase().includes(loc.toLowerCase()) || p.district.toLowerCase().includes(loc.toLowerCase());
-    return matchesQ && matchesL;
-  });
+  const { has: isBoostedProvider } = useBoostedSet("provider", ["boost_profile", "feature_business_page"]);
+
+  const realFiltered = real
+    .filter((p) => {
+      const qm = q.toLowerCase();
+      const name = p.business_name || p.profile?.full_name || "";
+      const matchesQ = !q || name.toLowerCase().includes(qm) || p.subcategory.toLowerCase().includes(qm);
+      const matchesL = !loc || p.town.toLowerCase().includes(loc.toLowerCase()) || p.district.toLowerCase().includes(loc.toLowerCase());
+      return matchesQ && matchesL;
+    })
+    .sort((a, b) => Number(isBoostedProvider(b.user_id)) - Number(isBoostedProvider(a.user_id)));
+  const featuredProviders = realFiltered.filter((p) => isBoostedProvider(p.user_id));
 
   const demoFiltered = providers.filter((p) => {
     const qm = q.toLowerCase();
