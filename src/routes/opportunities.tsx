@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Search, Plus, ShieldAlert } from "lucide-react";
 import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
+import { useBoostedSet } from "@/hooks/use-boosted-set";
 import { categories } from "@/data/categories";
 import { opportunityTypes } from "@/data/opportunities";
 import { OpportunityCard, type OpportunityRow } from "@/components/OpportunityCard";
@@ -33,6 +34,7 @@ function Opportunities() {
   const [officialAccount, setOfficialAccount] = useState<OfficialAccountRow | null>(null);
   const [source, setSource] = useState<"all" | "official" | "users">("all");
   const [loading, setLoading] = useState(true);
+  const { has: isBoostedOpp, ids: boostedOppIds } = useBoostedSet("opportunity", ["feature_opportunity"]);
 
   const category = categories.find((c) => c.slug === cat);
 
