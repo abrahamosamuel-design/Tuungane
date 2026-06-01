@@ -398,6 +398,11 @@ function UserProfile() {
   );
 }
 
+function ProfileBoostBadges({ providerId }: { providerId: string }) {
+  const { boosts } = useActiveBoosts("provider_profile", providerId);
+  return <>{boosts.map((b) => <BoostBadge key={b.id} type={b.boost_type} />)}</>;
+}
+
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex justify-between gap-3 border-b border-border/50 py-2 last:border-0">
