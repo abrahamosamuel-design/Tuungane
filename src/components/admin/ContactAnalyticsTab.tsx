@@ -228,6 +228,7 @@ export function ContactAnalyticsTab() {
                 />
                 <button onClick={load} className="rounded-full bg-navy px-3 py-1 text-[10px] font-bold text-navy-foreground uppercase tracking-wider">Apply</button>
                 <button onClick={() => { setDateFrom(""); setDateTo(""); }} className="rounded-full border border-border px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground hover:border-navy">Clear</button>
+                <button onClick={exportCSV} className="rounded-full bg-orange px-3 py-1 text-[10px] font-bold text-orange-foreground uppercase tracking-wider"><Download className="inline h-3 w-3 mr-0.5" />Export CSV</button>
               </div>
             </div>
           </div>
