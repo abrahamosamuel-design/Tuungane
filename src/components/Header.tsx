@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Menu, X, User as UserIcon, LogOut, LayoutDashboard, Shield, Rss, Plus, Briefcase, Wrench, ClipboardList, Coins } from "lucide-react";
+import { Menu, X, User as UserIcon, LogOut, LayoutDashboard, Shield, Rss, Plus, Briefcase, Wrench, ClipboardList, Coins, Building2 } from "lucide-react";
 import { useState } from "react";
 import { Logo } from "./Logo";
 import { NotificationsBell } from "./NotificationsBell";
