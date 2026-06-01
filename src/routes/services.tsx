@@ -36,7 +36,11 @@ type RealProvider = {
   seeded_status: string | null;
   updated_at: string;
   profile: { full_name: string; avatar_url: string | null } | null;
+  trust_score: number;
+  average_rating: number;
+  completed_jobs: number;
 };
+
 
 const avatar = (s: string) =>
   `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(s || "T")}&backgroundColor=1e3a8a,f97316,16a34a&fontFamily=Plus%20Jakarta%20Sans`;
@@ -58,16 +62,49 @@ function Services() {
       const { data } = await qy;
       const ids = (data ?? []).map((p) => p.user_id);
       const profMap = new Map<string, { full_name: string; avatar_url: string | null }>();
+      const trustMap = new Map<string, { trust_score: number; average_rating: number; completed_jobs: number }>();
       if (ids.length) {
-        const { data: profs } = await supabase.from("profiles").select("id,full_name,avatar_url").in("id", ids);
-        (profs ?? []).forEach((p) => profMap.set(p.id, p));
+        const [profsRes, trustRes] = await Promise.all([
+          supabase.from("profiles").select("id,full_name,avatar_url").in("id", ids),
+          supabase.from("provider_trust_stats").select("provider_id,trust_score,average_rating,completed_service_requests").in("provider_id", ids),
+        ]);
+        (profsRes.data ?? []).forEach((p) => profMap.set(p.id, p));
+        (trustRes.data ?? []).forEach((t: any) => trustMap.set(t.provider_id, {
+          trust_score: Number(t.trust_score ?? 0),
+          average_rating: Number(t.average_rating ?? 0),
+          completed_jobs: Number(t.completed_service_requests ?? 0),
+        }));
       }
-      setReal((data ?? []).map((p) => ({ ...p, profile: profMap.get(p.user_id) ?? null })) as RealProvider[]);
+      setReal((data ?? []).map((p) => ({
+        ...p,
+        profile: profMap.get(p.user_id) ?? null,
+        trust_score: trustMap.get(p.user_id)?.trust_score ?? 0,
+        average_rating: trustMap.get(p.user_id)?.average_rating ?? 0,
+        completed_jobs: trustMap.get(p.user_id)?.completed_jobs ?? 0,
+      })) as RealProvider[]);
       setLoadingReal(false);
     })();
   }, [filter]);
 
+
   const { has: isBoostedProvider } = useBoostedSet("provider", ["boost_profile", "feature_business_page"]);
+
+  const now = Date.now();
+  const scoreProvider = (p: RealProvider) => {
+    let s = 0;
+    if (isBoostedProvider(p.user_id)) s += 40; // boost helps but doesn't override trust
+    if (p.verified === "featured") s += 30;
+    else if (p.verified === "verified") s += 20;
+    s += Math.min(p.trust_score, 100) * 0.5;        // 0–50
+    s += Math.min(p.average_rating, 5) * 5;          // 0–25
+    s += Math.min(p.completed_jobs, 10) * 2;         // 0–20
+    if (loc && (p.town.toLowerCase().includes(loc.toLowerCase()) || p.district.toLowerCase().includes(loc.toLowerCase()))) s += 15;
+    const daysOld = (now - new Date(p.updated_at).getTime()) / 86400000;
+    if (daysOld < 30) s += 10;
+    else if (daysOld < 90) s += 5;
+    if (p.bio && p.bio.length > 40) s += 5;          // profile completeness
+    return s;
+  };
 
   const realFiltered = real
     .filter((p) => {
@@ -77,8 +114,9 @@ function Services() {
       const matchesL = !loc || p.town.toLowerCase().includes(loc.toLowerCase()) || p.district.toLowerCase().includes(loc.toLowerCase());
       return matchesQ && matchesL;
     })
-    .sort((a, b) => Number(isBoostedProvider(b.user_id)) - Number(isBoostedProvider(a.user_id)));
+    .sort((a, b) => scoreProvider(b) - scoreProvider(a));
   const featuredProviders = realFiltered.filter((p) => isBoostedProvider(p.user_id));
+
 
   const demoFiltered = providers.filter((p) => {
     const qm = q.toLowerCase();
@@ -191,7 +229,15 @@ function Services() {
                     </div>
                     <p className="text-sm text-muted-foreground">{p.subcategory}</p>
                     <p className="mt-1 inline-flex items-center gap-1 text-xs text-muted-foreground"><MapPin className="h-3 w-3" />{p.town}, {p.district}</p>
+                    {(p.average_rating > 0 || p.completed_jobs > 0) && (
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {p.average_rating > 0 && <span className="font-semibold text-navy">★ {p.average_rating.toFixed(1)}</span>}
+                        {p.average_rating > 0 && p.completed_jobs > 0 && <span> · </span>}
+                        {p.completed_jobs > 0 && <span>{p.completed_jobs} completed</span>}
+                      </p>
+                    )}
                   </div>
+
                 </div>
                 <p className="line-clamp-2 px-5 text-sm text-foreground/70">{p.bio}</p>
                 <div className="mt-3 flex flex-wrap gap-1.5 px-5 pb-4">
