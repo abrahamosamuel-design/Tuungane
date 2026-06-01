@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Home, Rss, Wrench, Plus, User as UserIcon, X, Briefcase, Camera, ClipboardList } from "lucide-react";
+import { Home, Rss, Wrench, Plus, User as UserIcon, X, Briefcase, Camera, ClipboardList, Building2 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 
@@ -45,6 +45,7 @@ export function MobileBottomNav() {
             <div className="grid gap-2">
               <SheetLink to="/dashboard" icon={<Camera className="h-5 w-5 text-orange" />} title="Post a work update" desc="Share completed jobs, photos, or progress" onClose={() => setOpen(false)} />
               <SheetLink to="/dashboard" icon={<Wrench className="h-5 w-5 text-navy" />} title="Post a service" desc="Add or update your service profile" onClose={() => setOpen(false)} />
+              <SheetLink to="/businesses/new" icon={<Building2 className="h-5 w-5 text-orange" />} title="Create a business page" desc="School, shop, salon, NGO, church and more" onClose={() => setOpen(false)} />
               <SheetLink to="/opportunities/new" icon={<Briefcase className="h-5 w-5 text-green" />} title="Post an opportunity" desc="Gig, job, internship, or volunteer role" onClose={() => setOpen(false)} />
             </div>
           </div>
