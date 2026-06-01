@@ -21,6 +21,9 @@ import { uploadMedia } from "@/lib/upload";
 import { timeAgo } from "@/lib/format";
 import { getCategory } from "@/data/categories";
 import { toast } from "sonner";
+import { useActiveBoosts } from "@/hooks/use-boosts";
+import { BoostBadge } from "@/components/BoostBadge";
+import { BoostButton } from "@/components/BoostButton";
 
 export const Route = createFileRoute("/u/$id")({
   head: () => ({ meta: [{ title: "Profile — Tuungane" }] }),
@@ -171,6 +174,7 @@ function UserProfile() {
                   {(sp?.verified === "verified" || sp?.verified === "featured") && (
                     <span className="inline-flex items-center gap-1 rounded-full bg-green/10 px-2 py-0.5 text-xs font-semibold text-green"><BadgeCheck className="h-3 w-3" /> Verified</span>
                   )}
+                  <ProfileBoostBadges providerId={id} />
                 </h1>
                 {sp && <p className="text-sm font-medium text-orange">{sp.subcategory} {cat && <span className="text-muted-foreground">· {cat.name}</span>}</p>}
                 {!sp && <p className="text-sm text-muted-foreground">{isProvider ? "Service provider" : "Customer"}</p>}
@@ -203,6 +207,12 @@ function UserProfile() {
             {sp?.whatsapp && <a href={`https://wa.me/${sp.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-full bg-green px-4 py-2 text-xs font-semibold text-green-foreground"><Phone className="h-3 w-3" /> WhatsApp</a>}
             {sp?.phone && <a href={`tel:${sp.phone}`} className="inline-flex items-center gap-1 rounded-full bg-orange px-4 py-2 text-xs font-semibold text-orange-foreground"><Phone className="h-3 w-3" /> Call</a>}
             <button onClick={share} className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-3 py-2 text-xs font-semibold text-navy hover:border-orange"><Share2 className="h-3 w-3" /> Share</button>
+            {isOwn && isProvider && (
+              <>
+                <BoostButton boostType="boost_profile" entityType="provider_profile" entityId={id} label="Boost profile" dialogTitle="Boost your provider profile" dialogDescription="Increase your visibility across Tuungane for a set period." />
+                <BoostButton boostType="feature_business_page" entityType="provider_profile" entityId={id} label="Feature business" dialogTitle="Feature your business page" dialogDescription="Highlight your business page in featured rails." />
+              </>
+            )}
             {isOwn && <Link to="/dashboard" className="ml-auto rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-navy hover:border-orange">Edit profile</Link>}
             {!isOwn && user && <button onClick={() => setReportOpen(true)} className="ml-auto text-muted-foreground hover:text-destructive"><Flag className="h-4 w-4" /></button>}
           </div>
