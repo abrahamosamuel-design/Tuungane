@@ -34,7 +34,7 @@ export function CreditsAdminTab() {
 
   const approve = async (id: string) => {
     const ref = prompt("Payment reference (optional):") ?? undefined;
-    const { error } = await supabase.rpc("approve_purchase_request", { _request_id: id, _payment_reference: ref || null });
+    const { error } = await supabase.rpc("approve_purchase_request", { _request_id: id, _payment_reference: ref || undefined });
     if (error) toast.error(error.message); else { toast.success("Approved — credits added"); load(); }
   };
   const reject = async (id: string) => {
