@@ -12,6 +12,7 @@ import { OverviewTab } from "@/components/admin/OverviewTab";
 import { BusinessesAdminTab } from "@/components/admin/BusinessesAdminTab";
 import { DisputesAdminTab } from "@/components/admin/DisputesAdminTab";
 import { OpportunitiesAdminTab } from "@/components/admin/OpportunitiesAdminTab";
+import { ContactAnalyticsTab } from "@/components/admin/ContactAnalyticsTab";
 import { officialPostTypeMap, type OfficialAccountRow, type OfficialPostRow } from "@/data/officialPostTypes";
 import { timeAgo } from "@/lib/format";
 import { toast } from "sonner";
