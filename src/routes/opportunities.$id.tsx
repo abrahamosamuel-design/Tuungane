@@ -104,9 +104,16 @@ function OpportunityDetails() {
             <div className="flex flex-wrap items-center gap-2">
               <span className="rounded-full bg-orange/10 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-orange">{o.opportunity_type}</span>
               {o.is_featured && <span className="inline-flex items-center gap-1 rounded-full bg-orange/10 px-2 py-0.5 text-[10px] font-semibold text-orange"><BadgeCheck className="h-3 w-3" /> Featured</span>}
+              {business && (business.verified === "verified" || business.verified === "featured") && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-green/10 px-2 py-0.5 text-[10px] font-semibold text-green"><BadgeCheck className="h-3 w-3" /> Verified business</span>
+              )}
+              {o.poster_type === "admin" && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-navy/10 px-2 py-0.5 text-[10px] font-semibold text-navy"><BadgeCheck className="h-3 w-3" /> Tuungane Official</span>
+              )}
               {oppBoosts.map((b) => <BoostBadge key={b.id} type={b.boost_type} />)}
               <span className="text-xs text-muted-foreground">{timeAgo(o.created_at)}</span>
             </div>
+
             <h1 className="mt-3 font-display text-2xl font-bold text-navy sm:text-3xl">{o.title}</h1>
             <p className="mt-1 text-sm text-muted-foreground"><Briefcase className="mr-1 inline h-3 w-3" />{cat?.name}{o.subcategory ? ` · ${o.subcategory}` : ""}</p>
             <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
