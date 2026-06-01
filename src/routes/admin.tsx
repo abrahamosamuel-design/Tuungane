@@ -16,7 +16,7 @@ export const Route = createFileRoute("/admin")({
   component: Admin,
 });
 
-type Tab = "reports" | "posts" | "providers" | "recs" | "official";
+type Tab = "reports" | "posts" | "providers" | "recs" | "requests" | "official";
 
 function Admin() {
   const { user, loading, isModerator, isAdmin } = useAuth();
