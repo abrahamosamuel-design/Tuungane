@@ -89,8 +89,10 @@ function NewOpportunity() {
       contact_email: f.contact_email || null,
       image_url,
       poster_id: user.id,
-      poster_type: f.poster_type,
+      poster_type: f.business_page_id ? "business" : f.poster_type,
+      business_page_id: f.business_page_id || null,
       status: "pending",
+
     });
     setBusy(false);
     if (error) toast.error(error.message);
