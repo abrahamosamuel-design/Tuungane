@@ -105,6 +105,7 @@ function Dashboard() {
         <div className="mt-6 space-y-4">
           <MyRequestsSummary />
           {profile?.is_provider && <MatchingRequestsSection />}
+          {profile?.is_provider ? <ProviderContactsList /> : <ContactedProvidersList />}
         </div>
 
 
