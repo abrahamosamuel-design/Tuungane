@@ -27,7 +27,7 @@ type Tab =
   | "users" | "providers" | "businesses"
   | "opportunities" | "requests" | "posts" | "recs"
   | "reports" | "disputes"
-  | "credits" | "official";
+  | "credits" | "official" | "contact";
 
 const TAB_GROUPS: { label: string; tabs: { id: Tab; label: string }[] }[] = [
   { label: "Home", tabs: [{ id: "overview", label: "Overview" }] },
@@ -45,6 +45,7 @@ const TAB_GROUPS: { label: string; tabs: { id: Tab; label: string }[] }[] = [
   { label: "Trust & Safety", tabs: [
     { id: "reports", label: "Reports" },
     { id: "disputes", label: "Disputes" },
+    { id: "contact", label: "Contact gating" },
   ]},
   { label: "Operations", tabs: [
     { id: "credits", label: "Credits & Boosts" },
