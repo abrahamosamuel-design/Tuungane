@@ -68,7 +68,7 @@ export function OfficialPostCard({ post, account, onChanged }: { post: OfficialP
       <div className="p-4">
         <div className="flex flex-wrap items-center gap-2">
           <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${meta?.color ?? "bg-muted text-foreground"}`}>{meta?.label ?? post.post_type}</span>
-          {post.is_pinned && <span className="rounded-full bg-orange/10 px-2 py-0.5 text-[10px] font-semibold text-orange">📌 Pinned</span>}
+          {post.is_pinned && <span className="inline-flex items-center gap-1 rounded-full bg-orange/10 px-2 py-0.5 text-[10px] font-semibold text-orange"><Pin className="h-2.5 w-2.5" /> Pinned</span>}
           {post.is_featured && <span className="rounded-full bg-navy/10 px-2 py-0.5 text-[10px] font-semibold text-navy">⭐ Featured</span>}
           {post.source_verified && <span className="rounded-full bg-green/10 px-2 py-0.5 text-[10px] font-semibold text-green">Verified by Tuungane</span>}
         </div>
