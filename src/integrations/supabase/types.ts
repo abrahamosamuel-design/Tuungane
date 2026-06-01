@@ -116,6 +116,114 @@ export type Database = {
         }
         Relationships: []
       }
+      business_followers: {
+        Row: {
+          business_page_id: string
+          created_at: string
+          follower_id: string
+        }
+        Insert: {
+          business_page_id: string
+          created_at?: string
+          follower_id: string
+        }
+        Update: {
+          business_page_id?: string
+          created_at?: string
+          follower_id?: string
+        }
+        Relationships: []
+      }
+      business_pages: {
+        Row: {
+          address: string | null
+          area: string | null
+          category_slug: string | null
+          claim_status: string
+          contact_phone: string | null
+          cover_url: string | null
+          created_at: string
+          description: string
+          district: string | null
+          email: string | null
+          id: string
+          is_featured: boolean
+          logo_url: string | null
+          name: string
+          opening_hours: Json
+          org_type: string
+          owner_id: string
+          products: string[]
+          seeded_by_official: boolean
+          services: string[]
+          slug: string
+          subcategory: string | null
+          suspended: boolean
+          town: string | null
+          updated_at: string
+          verified: string
+          whatsapp: string | null
+        }
+        Insert: {
+          address?: string | null
+          area?: string | null
+          category_slug?: string | null
+          claim_status?: string
+          contact_phone?: string | null
+          cover_url?: string | null
+          created_at?: string
+          description?: string
+          district?: string | null
+          email?: string | null
+          id?: string
+          is_featured?: boolean
+          logo_url?: string | null
+          name: string
+          opening_hours?: Json
+          org_type?: string
+          owner_id: string
+          products?: string[]
+          seeded_by_official?: boolean
+          services?: string[]
+          slug: string
+          subcategory?: string | null
+          suspended?: boolean
+          town?: string | null
+          updated_at?: string
+          verified?: string
+          whatsapp?: string | null
+        }
+        Update: {
+          address?: string | null
+          area?: string | null
+          category_slug?: string | null
+          claim_status?: string
+          contact_phone?: string | null
+          cover_url?: string | null
+          created_at?: string
+          description?: string
+          district?: string | null
+          email?: string | null
+          id?: string
+          is_featured?: boolean
+          logo_url?: string | null
+          name?: string
+          opening_hours?: Json
+          org_type?: string
+          owner_id?: string
+          products?: string[]
+          seeded_by_official?: boolean
+          services?: string[]
+          slug?: string
+          subcategory?: string | null
+          suspended?: boolean
+          town?: string | null
+          updated_at?: string
+          verified?: string
+          whatsapp?: string | null
+        }
+        Relationships: []
+      }
       credit_packages: {
         Row: {
           active: boolean
@@ -481,7 +589,9 @@ export type Database = {
       }
       opportunities: {
         Row: {
+          archived: boolean
           area: string | null
+          business_page_id: string | null
           category_slug: string
           compensation: string | null
           contact_email: string | null
@@ -507,7 +617,9 @@ export type Database = {
           whatsapp_number: string | null
         }
         Insert: {
+          archived?: boolean
           area?: string | null
+          business_page_id?: string | null
           category_slug: string
           compensation?: string | null
           contact_email?: string | null
@@ -533,7 +645,9 @@ export type Database = {
           whatsapp_number?: string | null
         }
         Update: {
+          archived?: boolean
           area?: string | null
+          business_page_id?: string | null
           category_slug?: string
           compensation?: string | null
           contact_email?: string | null
@@ -1345,6 +1459,7 @@ export type Database = {
       }
       timeline_posts: {
         Row: {
+          business_page_id: string | null
           category_slug: string | null
           created_at: string
           featured: boolean
@@ -1358,6 +1473,7 @@ export type Database = {
           text: string
         }
         Insert: {
+          business_page_id?: string | null
           category_slug?: string | null
           created_at?: string
           featured?: boolean
@@ -1371,6 +1487,7 @@ export type Database = {
           text: string
         }
         Update: {
+          business_page_id?: string | null
           category_slug?: string | null
           created_at?: string
           featured?: boolean
