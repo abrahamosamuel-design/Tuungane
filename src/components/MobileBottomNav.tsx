@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Home, Rss, Wrench, Plus, User as UserIcon, X, Briefcase, Camera, ClipboardList } from "lucide-react";
+import { Home, Rss, Wrench, Plus, User as UserIcon, X, Briefcase, Camera, ClipboardList, Building2 } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 
