@@ -310,7 +310,25 @@ function UserProfile() {
               {!isOwn && user && isProvider && (
                 <button onClick={() => setRevOpen(true)} className="w-full rounded-2xl border-2 border-dashed border-orange/40 bg-orange/5 p-4 text-sm font-semibold text-orange hover:bg-orange/10">+ Write a review</button>
               )}
-              {reviews.length === 0 && <p className="rounded-2xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground">No reviews yet.</p>}
+              {feedback.length > 0 && (
+                <div className="space-y-3">
+                  <h4 className="font-display text-sm font-bold text-navy">Verified service reviews</h4>
+                  {feedback.map((f) => (
+                    <div key={f.id} className="rounded-2xl border border-green/30 bg-green/5 p-4">
+                      <div className="flex items-center gap-3">
+                        <Avatar name={f.profile?.full_name ?? "Customer"} url={f.profile?.avatar_url ?? null} size={36} />
+                        <div>
+                          <p className="flex items-center gap-2 text-sm font-semibold text-navy">{f.profile?.full_name ?? "Customer"} <VerifiedReviewBadge /></p>
+                          <p className="text-xs text-muted-foreground">{f.service_provided} · {timeAgo(f.created_at)}</p>
+                        </div>
+                        <span className="ml-auto text-sm text-orange">{"★".repeat(f.rating)}{"☆".repeat(5 - f.rating)}</span>
+                      </div>
+                      {f.review_text && <p className="mt-3 text-sm text-foreground/90">{f.review_text}</p>}
+                    </div>
+                  ))}
+                </div>
+              )}
+              {reviews.length === 0 && feedback.length === 0 && <p className="rounded-2xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground">No reviews yet.</p>}
               {reviews.map((r) => (
                 <div key={r.id} className="rounded-2xl border border-border bg-card p-4">
                   <div className="flex items-center gap-3">
