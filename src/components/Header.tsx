@@ -1,8 +1,9 @@
 import { Link } from "@tanstack/react-router";
-import { Menu, X, User as UserIcon, LogOut, LayoutDashboard, Shield, Rss, Plus, Briefcase, Wrench, ClipboardList } from "lucide-react";
+import { Menu, X, User as UserIcon, LogOut, LayoutDashboard, Shield, Rss, Plus, Briefcase, Wrench, ClipboardList, Coins } from "lucide-react";
 import { useState } from "react";
 import { Logo } from "./Logo";
 import { NotificationsBell } from "./NotificationsBell";
+import { CreditBalanceChip } from "./CreditBalanceChip";
 import { useAuth } from "@/hooks/use-auth";
 
 const nav = [
@@ -43,6 +44,7 @@ export function Header() {
         <div className="hidden items-center gap-3 md:flex">
           {loading ? null : user ? (
             <>
+            <CreditBalanceChip />
             <NotificationsBell />
             <div className="relative">
               <button onClick={() => setMenu((m) => !m)} className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1.5 text-sm font-medium text-navy hover:border-orange/60">
@@ -54,6 +56,7 @@ export function Header() {
                   <div className="absolute right-0 z-50 mt-2 w-56 overflow-hidden rounded-xl border border-border bg-card shadow-lg">
                     <MenuItem to="/dashboard" icon={<LayoutDashboard className="h-4 w-4" />} label="My dashboard" onClick={() => setMenu(false)} />
                     <MenuItem to="/me" icon={<UserIcon className="h-4 w-4" />} label="My profile" onClick={() => setMenu(false)} />
+                    <MenuItem to="/credits" icon={<Coins className="h-4 w-4" />} label="Tuungane Credits" onClick={() => setMenu(false)} />
                     <MenuItem to="/feed" icon={<Rss className="h-4 w-4" />} label="Activity feed" onClick={() => setMenu(false)} />
                     <MenuItem to="/requests" icon={<ClipboardList className="h-4 w-4" />} label="My requests" onClick={() => setMenu(false)} />
                     <MenuItem to="/dashboard" icon={<Wrench className="h-4 w-4" />} label="Post a service" onClick={() => setMenu(false)} />
