@@ -6,6 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { categories } from "@/data/categories";
 import { opportunityTypes } from "@/data/opportunities";
 import { OpportunityCard, type OpportunityRow } from "@/components/OpportunityCard";
+import { OfficialPostCard } from "@/components/OfficialPostCard";
+import type { OfficialAccountRow, OfficialPostRow } from "@/data/officialPostTypes";
 
 export const Route = createFileRoute("/opportunities")({
   head: () => ({
