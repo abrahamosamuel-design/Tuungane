@@ -130,10 +130,8 @@ export function OfficialPostCard({ post, account, onChanged }: { post: OfficialP
           <button onClick={share} className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-navy">
             <Share2 className="h-4 w-4" /> Share
           </button>
-          <button className="ml-auto inline-flex items-center gap-1.5 text-muted-foreground hover:text-navy" title="Save">
-            <Bookmark className="h-4 w-4" />
-          </button>
-          <button onClick={report} className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-destructive" title="Report">
+          <button onClick={report} className="ml-auto inline-flex items-center gap-1.5 text-muted-foreground hover:text-destructive" title="Report">
+
             <Flag className="h-4 w-4" />
           </button>
         </div>
