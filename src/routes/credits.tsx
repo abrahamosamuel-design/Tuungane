@@ -1,10 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useCreditWallet } from "@/hooks/use-credits";
-import { Coins, Info, Check, Clock, X as XIcon } from "lucide-react";
+import { Coins, Info, Check, Clock, X as XIcon, Bug, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { timeAgo } from "@/lib/format";
 
@@ -32,6 +32,14 @@ function CreditsPage() {
   const [submitting, setSubmitting] = useState<string | null>(null);
   const packagesLoadedRef = useRef(false);
   const personalLoadedForUserRef = useRef<string | null>(null);
+  const [debug, setDebug] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return new URLSearchParams(window.location.search).get("debug") === "1"
+      || window.localStorage.getItem("credits:debug") === "1";
+  });
+  const [realtimeStatus, setRealtimeStatus] = useState<string>("idle");
+  const [lastEventAt, setLastEventAt] = useState<string | null>(null);
+  const [lastEventKind, setLastEventKind] = useState<string | null>(null);
 
   const loadPackages = async () => {
     const { data } = await supabase.from("credit_packages").select("*").eq("active", true).order("sort_order");
@@ -69,24 +77,34 @@ function CreditsPage() {
 
   // Realtime: refresh transactions & purchase requests when they change for this user
   useEffect(() => {
-    if (!user) return;
+    if (!user) { setRealtimeStatus("idle"); return; }
     const suffix =
       typeof crypto !== "undefined" && "randomUUID" in crypto
         ? crypto.randomUUID()
         : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
     let ch: ReturnType<typeof supabase.channel> | undefined;
+    setRealtimeStatus("subscribing");
     try {
       ch = supabase
         .channel(`credits-page:${user.id}:${suffix}`)
         .on("postgres_changes",
           { event: "*", schema: "public", table: "credit_purchase_requests", filter: `user_id=eq.${user.id}` },
-          () => { loadPersonal(); })
+          (payload) => {
+            setLastEventAt(new Date().toISOString());
+            setLastEventKind(`purchase_request.${payload.eventType}`);
+            loadPersonal();
+          })
         .on("postgres_changes",
           { event: "INSERT", schema: "public", table: "credit_transactions", filter: `user_id=eq.${user.id}` },
-          () => { loadPersonal(); })
-        .subscribe();
+          () => {
+            setLastEventAt(new Date().toISOString());
+            setLastEventKind("transaction.INSERT");
+            loadPersonal();
+          })
+        .subscribe((status) => setRealtimeStatus(String(status)));
     } catch (err) {
       console.warn("[credits] realtime subscription failed", err);
+      setRealtimeStatus("error");
     }
     return () => { if (ch) { try { supabase.removeChannel(ch); } catch {} } };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -112,9 +130,92 @@ function CreditsPage() {
 
   const isLoggedIn = !!user;
 
+  const toggleDebug = () => {
+    setDebug((d) => {
+      const next = !d;
+      try { window.localStorage.setItem("credits:debug", next ? "1" : "0"); } catch {}
+      return next;
+    });
+  };
+
+  const txSum = useMemo(() => txs.reduce((s, t) => s + (t.amount || 0), 0), [txs]);
+  const latestReq = reqs[0];
+  const latestTx = txs[0];
+  const pendingReqs = useMemo(() => reqs.filter((r) => r.status === "pending"), [reqs]);
+  const paidReqs = useMemo(() => reqs.filter((r) => r.status === "paid"), [reqs]);
+
+  type Check = { label: string; pass: boolean; detail?: string };
+  const checks: Check[] = isLoggedIn ? [
+    { label: "User session loaded", pass: !!user, detail: user?.id },
+    { label: "Wallet balance loaded", pass: balance !== null && balance !== undefined, detail: `balance=${balance ?? "—"}` },
+    { label: "Realtime channel SUBSCRIBED", pass: realtimeStatus === "SUBSCRIBED", detail: `status=${realtimeStatus}` },
+    { label: "Transactions fetched", pass: txs.length >= 0, detail: `${txs.length} rows (sample of last 50)` },
+    { label: "Purchase requests fetched", pass: reqs.length >= 0, detail: `${reqs.length} rows` },
+    { label: "Every paid request has a matching credit", pass: paidReqs.every((r) => txs.some((t) => t.amount === r.credits_requested && t.amount > 0)), detail: `${paidReqs.length} paid` },
+    { label: "No stuck pending > 7 days", pass: pendingReqs.every((r) => (Date.now() - new Date(r.created_at).getTime()) < 7 * 86400_000), detail: `${pendingReqs.length} pending` },
+    { label: "Balance ≈ sum of transactions", pass: balance === undefined || balance === null || balance === txSum, detail: `wallet=${balance ?? "—"} vs sum=${txSum}` },
+  ] : [];
+
   return (
     <Layout>
       <section className="mx-auto max-w-5xl px-4 py-8 space-y-8">
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={toggleDebug}
+            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground hover:text-navy hover:border-navy/40"
+            title="Toggle QA debug panel"
+          >
+            <Bug className="h-3.5 w-3.5" /> {debug ? "Hide debug" : "Debug"}
+          </button>
+        </div>
+
+        {debug && isLoggedIn && (
+          <div className="rounded-xl border border-dashed border-navy/40 bg-navy/5 p-4 text-sm">
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="flex items-center gap-2 font-bold text-navy"><Bug className="h-4 w-4" /> QA debug — Credits</h2>
+              <button onClick={() => { loadPersonal(); loadPackages(); toast.success("Reloaded"); }} className="inline-flex items-center gap-1 rounded-full bg-navy px-3 py-1 text-xs font-semibold text-white">
+                <RefreshCw className="h-3 w-3" /> Reload
+              </button>
+            </div>
+            <ul className="space-y-1">
+              {checks.map((c, i) => (
+                <li key={i} className="flex items-start gap-2">
+                  <span className={`mt-0.5 inline-flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full ${c.pass ? "bg-green/20 text-green" : "bg-destructive/20 text-destructive"}`}>
+                    {c.pass ? <Check className="h-3 w-3" /> : <XIcon className="h-3 w-3" />}
+                  </span>
+                  <span className="flex-1">
+                    <span className="font-medium text-navy">{c.label}</span>
+                    {c.detail && <span className="ml-2 text-xs text-muted-foreground">— {c.detail}</span>}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 text-xs">
+              <div className="rounded-md bg-background p-3">
+                <div className="font-semibold text-navy mb-1">Realtime</div>
+                <div>status: <code>{realtimeStatus}</code></div>
+                <div>last event: <code>{lastEventKind ?? "—"}</code></div>
+                <div>at: <code>{lastEventAt ?? "—"}</code></div>
+              </div>
+              <div className="rounded-md bg-background p-3">
+                <div className="font-semibold text-navy mb-1">Latest</div>
+                <div>request: <code>{latestReq ? `${latestReq.status} · ${latestReq.package_name}` : "—"}</code></div>
+                <div>transaction: <code>{latestTx ? `${latestTx.transaction_type} ${latestTx.amount > 0 ? "+" : ""}${latestTx.amount}` : "—"}</code></div>
+              </div>
+            </div>
+            <p className="mt-3 text-[11px] text-muted-foreground">
+              QA flow: request a package → check status flips to <strong>pending</strong> here within ~1s → admin marks paid → status flips to <strong>paid</strong> and a positive transaction appears, balance increases. Cancel a pending → status flips to <strong>cancelled</strong>, no transaction.
+            </p>
+          </div>
+        )}
+        {debug && !isLoggedIn && (
+          <div className="rounded-xl border border-dashed border-navy/40 bg-navy/5 p-4 text-sm text-muted-foreground">
+            Log in to run the QA checklist.
+          </div>
+        )}
+
+
         {/* Header */}
         <div className="rounded-2xl bg-gradient-to-br from-orange/15 via-orange/5 to-background border border-orange/20 p-6 sm:p-8">
           <div className="flex flex-wrap items-end justify-between gap-6">
