@@ -45,7 +45,7 @@ function ServiceRequestsFeed() {
 
   const load = async () => {
     setLoading(true);
-    const { data } = await (supabase as any)
+    const { data } = await supabase
       .from("service_requests")
       .select("*")
       .eq("status", "requested")
@@ -60,7 +60,7 @@ function ServiceRequestsFeed() {
     const pmap = new Map((profs ?? []).map((p) => [p.id, { full_name: p.full_name, avatar_url: p.avatar_url }]));
     const reqIds = list.map((r) => r.id);
     const { data: counts } = reqIds.length
-      ? await (supabase as any).from("provider_responses").select("request_id").in("request_id", reqIds).neq("status", "withdrawn")
+      ? await supabase.from("provider_responses").select("request_id").in("request_id", reqIds).neq("status", "withdrawn")
       : { data: [] as Array<{ request_id: string }> };
     const cmap = new Map<string, number>();
     (counts ?? []).forEach((c: { request_id: string }) => cmap.set(c.request_id, (cmap.get(c.request_id) ?? 0) + 1));

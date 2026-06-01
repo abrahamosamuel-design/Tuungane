@@ -63,7 +63,7 @@ export function useActiveBoosts(entityType: string, entityId: string | null | un
 }
 
 export async function activateBoost(pricingId: string, entityType: string, entityId: string) {
-  const { data, error } = await (supabase as any).rpc("create_boost", {
+  const { data, error } = await supabase.rpc("create_boost", {
     _pricing_id: pricingId,
     _entity_type: entityType,
     _entity_id: entityId,

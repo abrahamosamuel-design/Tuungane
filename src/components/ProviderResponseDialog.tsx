@@ -51,8 +51,8 @@ export function ProviderResponseDialog({ open, onClose, requestId, existing, onS
       estimated_time: form.estimated_time.trim().slice(0, 100) || null,
     };
     const { error } = existing
-      ? await (supabase as any).from("provider_responses").update(payload).eq("id", existing.id)
-      : await (supabase as any).from("provider_responses").insert(payload);
+      ? await supabase.from("provider_responses").update(payload).eq("id", existing.id)
+      : await supabase.from("provider_responses").insert(payload);
     setBusy(false);
     if (error) return toast.error(error.message);
     toast.success(existing ? "Response updated" : "Response sent to the customer");
@@ -63,7 +63,7 @@ export function ProviderResponseDialog({ open, onClose, requestId, existing, onS
   const withdraw = async () => {
     if (!existing) return;
     setBusy(true);
-    const { error } = await (supabase as any).from("provider_responses").update({ status: "withdrawn" }).eq("id", existing.id);
+    const { error } = await supabase.from("provider_responses").update({ status: "withdrawn" }).eq("id", existing.id);
     setBusy(false);
     if (error) return toast.error(error.message);
     toast.success("Response withdrawn");

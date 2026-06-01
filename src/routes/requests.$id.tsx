@@ -44,7 +44,7 @@ function RequestDetailsPage() {
 
   const load = useCallback(async () => {
     if (!user) return;
-    const { data: r, error } = await (supabase as any).from("service_requests").select("*").eq("id", id).maybeSingle();
+    const { data: r, error } = await supabase.from("service_requests").select("*").eq("id", id).maybeSingle();
     if (error || !r) {
       toast.error("Request not found or you don't have access");
       return;
@@ -53,17 +53,17 @@ function RequestDetailsPage() {
     setReq(sr);
     const { data: c } = await supabase.from("profiles").select("id,full_name,avatar_url").eq("id", sr.customer_id).maybeSingle();
     setCustomer(c as Profile);
-    const { data: rsps } = await (supabase as any).from("provider_responses").select("*").eq("request_id", id).order("created_at", { ascending: false });
+    const { data: rsps } = await supabase.from("provider_responses").select("*").eq("request_id", id).order("created_at", { ascending: false });
     const list = (rsps ?? []) as ProviderResponseRow[];
     const provIds = Array.from(new Set(list.map((x) => x.provider_id)));
     const [{ data: provs }, { data: stats }] = await Promise.all([
       provIds.length ? supabase.from("profiles").select("id,full_name,avatar_url").in("id", provIds) : Promise.resolve({ data: [] as Profile[] } as any),
-      provIds.length ? (supabase as any).from("provider_trust_stats").select("*").in("provider_id", provIds) : Promise.resolve({ data: [] as TrustStatsRow[] } as any),
+      provIds.length ? supabase.from("provider_trust_stats").select("*").in("provider_id", provIds) : Promise.resolve({ data: [] as TrustStatsRow[] } as any),
     ]);
     const pmap = new Map<string, Profile>((provs ?? []).map((p: Profile) => [p.id, p]));
     const smap = new Map<string, TrustStatsRow>(((stats ?? []) as TrustStatsRow[]).map((s) => [s.provider_id, s]));
     setResponses(list.map((x): ResponseWithProvider => ({ ...x, provider: pmap.get(x.provider_id), stats: smap.get(x.provider_id) })));
-    const { count } = await (supabase as any).from("service_feedback").select("id", { count: "exact", head: true }).eq("service_request_id", id);
+    const { count } = await supabase.from("service_feedback").select("id", { count: "exact", head: true }).eq("service_request_id", id);
     setHasFeedback((count ?? 0) > 0);
 
     // Fetch contact info of the assigned provider (or original provider for direct requests)
@@ -97,7 +97,7 @@ function RequestDetailsPage() {
     if (!isCustomer) return;
     if (!confirm(`Choose ${resp.provider?.full_name} as your provider? Other responses will be declined.`)) return;
     setBusy(true);
-    const { error } = await (supabase as any).from("provider_responses").update({ status: "chosen" }).eq("id", resp.id);
+    const { error } = await supabase.from("provider_responses").update({ status: "chosen" }).eq("id", resp.id);
     setBusy(false);
     if (error) return toast.error(error.message);
     toast.success("Provider selected. A completion code was generated for the job.");
@@ -106,7 +106,7 @@ function RequestDetailsPage() {
 
   const declineResponse = async (resp: ResponseWithProvider) => {
     setBusy(true);
-    const { error } = await (supabase as any).from("provider_responses").update({ status: "declined" }).eq("id", resp.id);
+    const { error } = await supabase.from("provider_responses").update({ status: "declined" }).eq("id", resp.id);
     setBusy(false);
     if (error) return toast.error(error.message);
     load();
@@ -114,7 +114,7 @@ function RequestDetailsPage() {
 
   const updateStatus = async (status: ServiceRequestRow["status"]) => {
     setBusy(true);
-    const { error } = await (supabase as any).from("service_requests").update({ status }).eq("id", req.id);
+    const { error } = await supabase.from("service_requests").update({ status }).eq("id", req.id);
     setBusy(false);
     if (error) return toast.error(error.message);
     toast.success(`Marked ${status.replace("_", " ")}`);
@@ -127,9 +127,9 @@ function RequestDetailsPage() {
     if (!code) return toast.error("Enter the completion code");
     if (code !== (req.completion_code ?? "").toUpperCase()) return toast.error("Code does not match. Ask the customer for the correct code.");
     setBusy(true);
-    await (supabase as any).from("service_requests").update({ provider_confirmed_completion: true }).eq("id", req.id);
+    await supabase.from("service_requests").update({ provider_confirmed_completion: true }).eq("id", req.id);
     if (req.customer_confirmed_completion) {
-      await (supabase as any).from("service_requests").update({ status: "completed" }).eq("id", req.id);
+      await supabase.from("service_requests").update({ status: "completed" }).eq("id", req.id);
     }
     setBusy(false);
     toast.success("Code accepted. Waiting for customer confirmation.");
@@ -139,7 +139,7 @@ function RequestDetailsPage() {
   const customerConfirmCompletion = async () => {
     if (!isCustomer) return;
     setBusy(true);
-    await (supabase as any).from("service_requests").update({ customer_confirmed_completion: true, status: "completed" }).eq("id", req.id);
+    await supabase.from("service_requests").update({ customer_confirmed_completion: true, status: "completed" }).eq("id", req.id);
     setBusy(false);
     toast.success("Completion confirmed. Please leave a verified review.");
     load();
@@ -150,11 +150,11 @@ function RequestDetailsPage() {
     const reason = window.prompt("Briefly describe the issue:");
     if (!reason) return;
     const against = user.id === req.customer_id ? (req.selected_provider_id ?? req.provider_id) : req.customer_id;
-    await (supabase as any).from("service_disputes").insert({
+    await supabase.from("service_disputes").insert({
       service_request_id: req.id, raised_by_user_id: user.id, against_user_id: against,
       reason: reason.slice(0, 100), description: reason.slice(0, 1000),
     });
-    await (supabase as any).from("service_requests").update({ status: "disputed" }).eq("id", req.id);
+    await supabase.from("service_requests").update({ status: "disputed" }).eq("id", req.id);
     toast.success("Dispute opened. Tuungane will review.");
     load();
   };

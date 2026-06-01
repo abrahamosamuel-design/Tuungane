@@ -66,7 +66,7 @@ export function FeedbackDialog({ open, onClose, request, onSubmitted }: Props) {
       is_verified_review: true,
       is_visible: true,
     };
-    const { error } = await (supabase as any).from("service_feedback").insert(payload);
+    const { error } = await supabase.from("service_feedback").insert(payload);
     setBusy(false);
     if (error) return toast.error(error.message);
     toast.success("Thanks! Your verified review has been posted.");

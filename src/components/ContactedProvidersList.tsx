@@ -28,7 +28,7 @@ export function ContactedProvidersList({ limit = 5 }: { limit?: number }) {
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const { data } = await (supabase as any)
+      const { data } = await supabase
         .from("contact_logs")
         .select("provider_id,service_request_id,contact_method,clicked_at")
         .eq("customer_id", user.id)

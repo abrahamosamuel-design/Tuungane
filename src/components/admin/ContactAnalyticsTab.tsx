@@ -31,8 +31,8 @@ export function ContactAnalyticsTab() {
 
   const load = async () => {
     const [l, r, s] = await Promise.all([
-      (supabase as any).from("contact_logs").select("*").order("clicked_at", { ascending: false }).limit(200),
-      (supabase as any).from("contact_reveals").select("*").order("created_at", { ascending: false }).limit(200),
+      supabase.from("contact_logs").select("*").order("clicked_at", { ascending: false }).limit(200),
+      supabase.from("contact_reveals").select("*").order("created_at", { ascending: false }).limit(200),
       supabase.from("admin_settings").select("id,setting_value").eq("setting_key", SETTING_KEY).maybeSingle(),
     ]);
     const ll = (l.data ?? []) as LogRow[];

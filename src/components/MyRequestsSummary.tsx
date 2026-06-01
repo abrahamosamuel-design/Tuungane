@@ -19,7 +19,7 @@ export function MyRequestsSummary({ limit = 5, title = "My service requests" }: 
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const { data } = await (supabase as any)
+      const { data } = await supabase
         .from("service_requests")
         .select("*")
         .or(`customer_id.eq.${user.id},provider_id.eq.${user.id}`)
