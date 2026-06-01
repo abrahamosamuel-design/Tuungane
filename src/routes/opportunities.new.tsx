@@ -120,11 +120,20 @@ function NewOpportunity() {
               </select>
             </Field>
             <Field label="Posted as">
-              <select value={f.poster_type} onChange={(e) => update("poster_type", e.target.value as never)} className={inp}>
+              <select value={f.poster_type} onChange={(e) => update("poster_type", e.target.value as never)} className={inp} disabled={!!f.business_page_id}>
                 {posterTypes.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
               </select>
             </Field>
           </div>
+          {myBusinesses.length > 0 && (
+            <Field label="Post on behalf of a business page (optional)">
+              <select value={f.business_page_id} onChange={(e) => update("business_page_id", e.target.value)} className={inp}>
+                <option value="">Post as myself</option>
+                {myBusinesses.map((b) => <option key={b.id} value={b.id}>{b.name}{b.verified === "verified" || b.verified === "featured" ? " ✓" : ""}</option>)}
+              </select>
+            </Field>
+          )}
+
           <div className="grid grid-cols-2 gap-3">
             <Field label="Service category *">
               <select value={f.category_slug} onChange={(e) => { update("category_slug", e.target.value); update("subcategory", categories.find((c) => c.slug === e.target.value)!.subcategories[0]); }} className={inp}>
