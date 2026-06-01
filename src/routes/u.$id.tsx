@@ -94,7 +94,7 @@ function UserProfile() {
     setRecs((rRes.data ?? []).map((r) => ({ ...r, profile: pm.get(r.user_id) })));
     setReviews((vRes.data ?? []).map((r) => ({ ...r, profile: pm.get(r.user_id) })));
 
-    const { data: fbRes } = await (supabase as any).from("service_feedback")
+    const { data: fbRes } = await supabase.from("service_feedback")
       .select("id,rating,review_text,service_provided,created_at,customer_id,would_recommend")
       .eq("provider_id", id).eq("is_visible", true).order("created_at", { ascending: false });
     const fbList = (fbRes ?? []) as Array<{ id: string; rating: number; review_text: string; service_provided: string; created_at: string; customer_id: string; would_recommend: boolean }>;

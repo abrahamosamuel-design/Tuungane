@@ -8,7 +8,7 @@ export function TrustStats({ providerId }: { providerId: string }) {
 
   useEffect(() => {
     (async () => {
-      const { data } = await (supabase as any)
+      const { data } = await supabase
         .from("provider_trust_stats")
         .select("*")
         .eq("provider_id", providerId)

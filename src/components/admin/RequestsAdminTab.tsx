@@ -15,9 +15,9 @@ export function RequestsAdminTab() {
 
   const load = async () => {
     const [r, f, d] = await Promise.all([
-      (supabase as any).from("service_requests").select("*").order("created_at", { ascending: false }).limit(200),
-      (supabase as any).from("service_feedback").select("*").order("created_at", { ascending: false }).limit(100),
-      (supabase as any).from("service_disputes").select("*").order("created_at", { ascending: false }).limit(100),
+      supabase.from("service_requests").select("*").order("created_at", { ascending: false }).limit(200),
+      supabase.from("service_feedback").select("*").order("created_at", { ascending: false }).limit(100),
+      supabase.from("service_disputes").select("*").order("created_at", { ascending: false }).limit(100),
     ]);
     setRequests((r.data ?? []) as ServiceRequestRow[]);
     setFeedback((f.data ?? []) as ServiceFeedbackRow[]);
@@ -26,19 +26,19 @@ export function RequestsAdminTab() {
   useEffect(() => { load(); }, []);
 
   const setStatus = async (id: string, status: RequestStatusValue) => {
-    await (supabase as any).from("service_requests").update({ status }).eq("id", id);
+    await supabase.from("service_requests").update({ status }).eq("id", id);
     toast.success("Updated"); load();
   };
   const hideReview = async (id: string, v: boolean) => {
-    await (supabase as any).from("service_feedback").update({ is_visible: !v }).eq("id", id);
+    await supabase.from("service_feedback").update({ is_visible: !v }).eq("id", id);
     toast.success(!v ? "Hidden" : "Visible"); load();
   };
   const deleteReview = async (id: string) => {
     if (!confirm("Delete this review?")) return;
-    await (supabase as any).from("service_feedback").delete().eq("id", id); load();
+    await supabase.from("service_feedback").delete().eq("id", id); load();
   };
   const resolveDispute = async (id: string, status: "resolved" | "dismissed") => {
-    await (supabase as any).from("service_disputes").update({ status, resolved_at: new Date().toISOString() }).eq("id", id);
+    await supabase.from("service_disputes").update({ status, resolved_at: new Date().toISOString() }).eq("id", id);
     toast.success("Dispute updated"); load();
   };
 

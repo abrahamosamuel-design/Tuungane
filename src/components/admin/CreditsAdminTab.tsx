@@ -34,21 +34,21 @@ export function CreditsAdminTab() {
 
   const approve = async (id: string) => {
     const ref = prompt("Payment reference (optional):") ?? undefined;
-    const { error } = await (supabase as any).rpc("approve_purchase_request", { _request_id: id, _payment_reference: ref || null });
+    const { error } = await supabase.rpc("approve_purchase_request", { _request_id: id, _payment_reference: ref || undefined });
     if (error) toast.error(error.message); else { toast.success("Approved — credits added"); load(); }
   };
   const reject = async (id: string) => {
     const note = prompt("Reason for rejection (optional):") ?? undefined;
-    const { error } = await (supabase as any).rpc("reject_purchase_request", { _request_id: id, _admin_note: note || null });
+    const { error } = await supabase.rpc("reject_purchase_request", { _request_id: id, _admin_note: note || undefined });
     if (error) toast.error(error.message); else { toast.success("Rejected"); load(); }
   };
   const addCredits = async () => {
     if (!addUid || !addAmt) return toast.error("Enter user id and amount");
-    const { error } = await (supabase as any).rpc("admin_add_credits", { _user_id: addUid, _amount: Number(addAmt), _reason: addReason || "" });
+    const { error } = await supabase.rpc("admin_add_credits", { _user_id: addUid, _amount: Number(addAmt), _reason: addReason || "" });
     if (error) toast.error(error.message); else { toast.success("Added"); setAddUid(""); setAddAmt(""); setAddReason(""); load(); }
   };
   const expireBoost = async (id: string) => {
-    const { error } = await (supabase as any).rpc("admin_expire_boost", { _boost_id: id });
+    const { error } = await supabase.rpc("admin_expire_boost", { _boost_id: id });
     if (error) toast.error(error.message); else { toast.success("Expired"); load(); }
   };
 

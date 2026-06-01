@@ -24,7 +24,7 @@ export function useContactGate(providerId: string | null | undefined) {
       return;
     }
     setLoading(true);
-    const { data } = await (supabase as any)
+    const { data } = await supabase
       .from("service_requests")
       .select("id,status,selected_provider_id")
       .eq("customer_id", user.id)
@@ -50,7 +50,7 @@ export async function logContactClick(args: {
   method: "whatsapp" | "call" | "in_app";
 }) {
   try {
-    await (supabase as any).from("contact_logs").insert({
+    await supabase.from("contact_logs").insert({
       customer_id: args.customerId,
       provider_id: args.providerId,
       service_request_id: args.serviceRequestId,
@@ -71,7 +71,7 @@ export async function logContactReveal(args: {
   reason?: string;
 }) {
   try {
-    await (supabase as any).from("contact_reveals").insert({
+    await supabase.from("contact_reveals").insert({
       customer_id: args.customerId,
       provider_id: args.providerId,
       service_request_id: args.serviceRequestId,

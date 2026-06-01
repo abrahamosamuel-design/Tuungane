@@ -17,7 +17,7 @@ export function MatchingRequestsSection() {
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const { data, error } = await (supabase as any).rpc("matching_requests_for_provider", { _provider: user.id });
+      const { data, error } = await supabase.rpc("matching_requests_for_provider", { _provider: user.id });
       if (!error && data) setItems(data as ServiceRequestRow[]);
       setLoaded(true);
     })();

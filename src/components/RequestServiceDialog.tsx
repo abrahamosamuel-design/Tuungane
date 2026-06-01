@@ -98,7 +98,7 @@ export function RequestServiceDialog({ open, onClose, providerId, providerName, 
       customer_whatsapp: form.customer_whatsapp || null,
       attachment_url: form.attachment_url || null,
     };
-    const { error } = await (supabase as any).from("service_requests").insert(payload);
+    const { error } = await supabase.from("service_requests").insert(payload);
     setBusy(false);
     if (error) return toast.error(error.message);
     toast.success("Your service request has been sent. The provider can now contact you. Tuungane will ask for feedback after the service is completed.");

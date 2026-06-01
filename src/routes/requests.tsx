@@ -32,7 +32,7 @@ function RequestsPage() {
   const load = async () => {
     if (!user) return;
     const col = role === "customer" ? "customer_id" : "provider_id";
-    const { data: rs } = await (supabase as any)
+    const { data: rs } = await supabase
       .from("service_requests")
       .select("*")
       .eq(col, user.id)
@@ -45,7 +45,7 @@ function RequestsPage() {
     const pmap = new Map((profs ?? []).map((p) => [p.id, { full_name: p.full_name, avatar_url: p.avatar_url }]));
     const reqIds = list.map((r) => r.id);
     const { data: fb } = reqIds.length
-      ? await (supabase as any).from("service_feedback").select("service_request_id").in("service_request_id", reqIds)
+      ? await supabase.from("service_feedback").select("service_request_id").in("service_request_id", reqIds)
       : { data: [] as Array<{ service_request_id: string }> };
     const fbSet = new Set((fb ?? []).map((x: { service_request_id: string }) => x.service_request_id));
     setItems(list.map((r) => ({ ...r, customer: pmap.get(r.customer_id), provider: pmap.get(r.provider_id), has_feedback: fbSet.has(r.id) })));
@@ -54,7 +54,7 @@ function RequestsPage() {
   useEffect(() => { if (user) load(); /* eslint-disable-next-line */ }, [user, role]);
 
   const updateStatus = async (id: string, status: RequestStatusValue) => {
-    const { error } = await (supabase as any).from("service_requests").update({ status }).eq("id", id);
+    const { error } = await supabase.from("service_requests").update({ status }).eq("id", id);
     if (error) return toast.error(error.message);
     toast.success(`Marked ${status.replace("_", " ")}`);
     load();
@@ -64,12 +64,12 @@ function RequestsPage() {
     const reason = window.prompt("Briefly describe the issue:");
     if (!reason || !user) return;
     const against = user.id === r.customer_id ? r.provider_id : r.customer_id;
-    const { error } = await (supabase as any).from("service_disputes").insert({
+    const { error } = await supabase.from("service_disputes").insert({
       service_request_id: r.id, raised_by_user_id: user.id, against_user_id: against,
       reason: reason.slice(0, 100), description: reason.slice(0, 1000),
     });
     if (error) return toast.error(error.message);
-    await (supabase as any).from("service_requests").update({ status: "disputed" }).eq("id", r.id);
+    await supabase.from("service_requests").update({ status: "disputed" }).eq("id", r.id);
     toast.success("Dispute opened. Tuungane will review.");
     load();
   };
