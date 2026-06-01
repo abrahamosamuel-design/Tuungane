@@ -23,6 +23,25 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const featured = featuredProviders();
+  const [officialAccount, setOfficialAccount] = useState<OfficialAccountRow | null>(null);
+  const [officialPosts, setOfficialPosts] = useState<OfficialPostRow[]>([]);
+
+  useEffect(() => {
+    (async () => {
+      const { data: acct } = await supabase.from("official_accounts").select("*").eq("is_active", true).limit(1).maybeSingle();
+      setOfficialAccount(acct as OfficialAccountRow | null);
+      const { data: posts } = await supabase
+        .from("official_posts")
+        .select("*")
+        .eq("status", "published")
+        .or("is_homepage.eq.true,is_pinned.eq.true,is_featured.eq.true")
+        .order("is_pinned", { ascending: false })
+        .order("created_at", { ascending: false })
+        .limit(4);
+      setOfficialPosts((posts ?? []) as OfficialPostRow[]);
+    })();
+  }, []);
+
   return (
     <Layout>
       {/* Hero */}
