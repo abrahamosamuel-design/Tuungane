@@ -189,6 +189,9 @@ function UserProfile() {
           </div>
 
           <div className="mt-4 flex flex-wrap items-center gap-2">
+            {!isOwn && user && isProvider && (
+              <button onClick={() => setRequestOpen(true)} className="rounded-full bg-navy px-4 py-2 text-xs font-semibold text-navy-foreground hover:brightness-110">Request service</button>
+            )}
             {!isOwn && isProvider && <FollowButton providerUserId={id} onChange={setFollowers} />}
             {!isOwn && isProvider && <SaveButton providerUserId={id} variant="full" />}
             {!isOwn && user && isProvider && (
@@ -204,6 +207,8 @@ function UserProfile() {
             {!isOwn && user && <button onClick={() => setReportOpen(true)} className="ml-auto text-muted-foreground hover:text-destructive"><Flag className="h-4 w-4" /></button>}
           </div>
         </div>
+
+        {isProvider && <div className="mt-4"><TrustStats providerId={id} /></div>}
 
         {/* Tabs */}
         <div className="sticky top-16 z-10 -mx-4 mt-4 overflow-x-auto border-b border-border bg-background/95 px-4 backdrop-blur">
