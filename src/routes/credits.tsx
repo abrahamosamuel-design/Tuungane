@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
@@ -30,6 +30,8 @@ function CreditsPage() {
   const [txs, setTxs] = useState<Tx[]>([]);
   const [reqs, setReqs] = useState<Req[]>([]);
   const [submitting, setSubmitting] = useState<string | null>(null);
+  const packagesLoadedRef = useRef(false);
+  const personalLoadedForUserRef = useRef<string | null>(null);
 
   const loadPackages = async () => {
     const { data } = await supabase.from("credit_packages").select("*").eq("active", true).order("sort_order");
@@ -46,10 +48,47 @@ function CreditsPage() {
     setReqs(r ?? []);
   };
 
-  useEffect(() => { loadPackages(); }, []);
   useEffect(() => {
-    if (user) loadPersonal();
-    else { setTxs([]); setReqs([]); }
+    if (packagesLoadedRef.current) return;
+    packagesLoadedRef.current = true;
+    loadPackages();
+  }, []);
+
+  useEffect(() => {
+    if (!user) {
+      personalLoadedForUserRef.current = null;
+      setTxs([]);
+      setReqs([]);
+      return;
+    }
+    if (personalLoadedForUserRef.current === user.id) return;
+    personalLoadedForUserRef.current = user.id;
+    loadPersonal();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
+
+  // Realtime: refresh transactions & purchase requests when they change for this user
+  useEffect(() => {
+    if (!user) return;
+    const suffix =
+      typeof crypto !== "undefined" && "randomUUID" in crypto
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    let ch: ReturnType<typeof supabase.channel> | undefined;
+    try {
+      ch = supabase
+        .channel(`credits-page:${user.id}:${suffix}`)
+        .on("postgres_changes",
+          { event: "*", schema: "public", table: "credit_purchase_requests", filter: `user_id=eq.${user.id}` },
+          () => { loadPersonal(); })
+        .on("postgres_changes",
+          { event: "INSERT", schema: "public", table: "credit_transactions", filter: `user_id=eq.${user.id}` },
+          () => { loadPersonal(); })
+        .subscribe();
+    } catch (err) {
+      console.warn("[credits] realtime subscription failed", err);
+    }
+    return () => { if (ch) { try { supabase.removeChannel(ch); } catch {} } };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
