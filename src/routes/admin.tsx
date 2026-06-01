@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { PostCard, type PostRow } from "@/components/social/PostCard";
 import { OfficialAccountForm } from "@/components/admin/OfficialAccountForm";
 import { OfficialPostForm } from "@/components/admin/OfficialPostForm";
+import { RequestsAdminTab } from "@/components/admin/RequestsAdminTab";
 import { officialPostTypeMap, type OfficialAccountRow, type OfficialPostRow } from "@/data/officialPostTypes";
 import { timeAgo } from "@/lib/format";
 import { toast } from "sonner";
