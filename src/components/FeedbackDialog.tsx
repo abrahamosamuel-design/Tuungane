@@ -96,13 +96,23 @@ export function FeedbackDialog({ open, onClose, request, onSubmitted }: Props) {
           <YesNo label="Was the service completed?" value={form.was_completed} onChange={(v) => setForm({ ...form, was_completed: v })} />
 
           <div>
-            <label className="mb-1 block text-xs font-semibold text-navy">Rating</label>
+            <label className="mb-1 block text-xs font-semibold text-navy">Overall rating</label>
             <div className="flex gap-1">
               {[1, 2, 3, 4, 5].map((n) => (
                 <button key={n} onClick={() => setForm({ ...form, rating: n })} aria-label={`${n} stars`} type="button">
                   <Star className={`h-7 w-7 ${n <= form.rating ? "fill-orange text-orange" : "text-muted-foreground"}`} />
                 </button>
               ))}
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-border p-3">
+            <p className="mb-2 text-xs font-semibold text-navy">Rate specific areas</p>
+            <div className="grid gap-2 sm:grid-cols-2">
+              <StarRow label="Work quality" value={form.quality_rating} onChange={(v) => setForm({ ...form, quality_rating: v })} />
+              <StarRow label="Timekeeping" value={form.timekeeping_rating} onChange={(v) => setForm({ ...form, timekeeping_rating: v })} />
+              <StarRow label="Communication" value={form.communication_rating} onChange={(v) => setForm({ ...form, communication_rating: v })} />
+              <StarRow label="Price fairness" value={form.price_fairness_rating} onChange={(v) => setForm({ ...form, price_fairness_rating: v })} />
             </div>
           </div>
 
