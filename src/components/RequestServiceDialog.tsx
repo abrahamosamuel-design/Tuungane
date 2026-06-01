@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { uploadMedia } from "@/lib/upload";
 import { categories } from "@/data/categories";
-import { urgencyOptions, contactMethods, type UrgencyValue, type ContactMethodValue } from "@/data/serviceRequestTypes";
+import { urgencyOptions, contactMethods, budgetBuckets, visibilityOptions, type UrgencyValue, type ContactMethodValue, type VisibilityValue } from "@/data/serviceRequestTypes";
 import { toast } from "sonner";
 
 interface Props {
@@ -21,6 +21,7 @@ export function RequestServiceDialog({ open, onClose, providerId, providerName, 
   const { user } = useAuth();
   const [busy, setBusy] = useState(false);
   const [form, setForm] = useState({
+    title: "",
     category_slug: defaultCategorySlug ?? "",
     subcategory: defaultSubcategory ?? "",
     service_needed: defaultSubcategory ?? "",
@@ -32,6 +33,7 @@ export function RequestServiceDialog({ open, onClose, providerId, providerName, 
     preferred_time: "",
     urgency: "normal" as UrgencyValue,
     budget_range: "",
+    visibility: "public" as VisibilityValue,
     preferred_contact_method: "any" as ContactMethodValue,
     customer_phone: "",
     customer_whatsapp: "",
@@ -78,6 +80,7 @@ export function RequestServiceDialog({ open, onClose, providerId, providerName, 
     const payload = {
       customer_id: user.id,
       provider_id: providerId,
+      title: form.title.trim() ? form.title.trim().slice(0, 120) : null,
       category_slug: form.category_slug || null,
       subcategory: form.subcategory || null,
       service_needed: form.service_needed.trim().slice(0, 200),
@@ -89,6 +92,7 @@ export function RequestServiceDialog({ open, onClose, providerId, providerName, 
       preferred_time: form.preferred_time || null,
       urgency: form.urgency,
       budget_range: form.budget_range || null,
+      visibility: form.visibility,
       preferred_contact_method: form.preferred_contact_method,
       customer_phone: form.customer_phone || null,
       customer_whatsapp: form.customer_whatsapp || null,
@@ -138,6 +142,10 @@ export function RequestServiceDialog({ open, onClose, providerId, providerName, 
             </Field>
           </div>
 
+          <Field label="Short title">
+            <input maxLength={120} value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className={input} placeholder="e.g. Leaking sink in Katabi" />
+          </Field>
+
           <Field label="Service needed *">
             <input maxLength={200} value={form.service_needed} onChange={(e) => setForm({ ...form, service_needed: e.target.value })} className={input} placeholder="e.g. Fix leaking kitchen sink" />
           </Field>
@@ -166,7 +174,21 @@ export function RequestServiceDialog({ open, onClose, providerId, providerName, 
           </div>
 
           <Field label="Budget / expected price range">
-            <input value={form.budget_range} onChange={(e) => setForm({ ...form, budget_range: e.target.value })} className={input} placeholder="Optional — e.g. UGX 50,000 – 100,000" />
+            <select value={form.budget_range} onChange={(e) => setForm({ ...form, budget_range: e.target.value })} className={input}>
+              <option value="">— Select a range —</option>
+              {budgetBuckets.map((b) => <option key={b} value={b}>{b}</option>)}
+            </select>
+          </Field>
+
+          <Field label="Who can see this request?">
+            <div className="grid gap-2 sm:grid-cols-2">
+              {visibilityOptions.map((v) => (
+                <button key={v.value} type="button" onClick={() => setForm({ ...form, visibility: v.value })} className={`rounded-xl border p-3 text-left text-xs ${form.visibility === v.value ? "border-orange bg-orange/5" : "border-border"}`}>
+                  <p className="font-semibold text-navy">{v.label}</p>
+                  <p className="mt-0.5 text-muted-foreground">{v.hint}</p>
+                </button>
+              ))}
+            </div>
           </Field>
 
           <div className="grid gap-3 sm:grid-cols-3">

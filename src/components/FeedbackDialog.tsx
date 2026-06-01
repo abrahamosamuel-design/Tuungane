@@ -22,6 +22,10 @@ export function FeedbackDialog({ open, onClose, request, onSubmitted }: Props) {
     did_use_provider: true,
     was_completed: true,
     rating: 5,
+    quality_rating: 5,
+    timekeeping_rating: 5,
+    communication_rating: 5,
+    price_fairness_rating: 5,
     would_recommend: true,
     service_provided: "",
     review_text: "",
@@ -46,6 +50,10 @@ export function FeedbackDialog({ open, onClose, request, onSubmitted }: Props) {
       did_use_provider: form.did_use_provider,
       was_completed: form.was_completed,
       rating: form.rating,
+      quality_rating: form.quality_rating,
+      timekeeping_rating: form.timekeeping_rating,
+      communication_rating: form.communication_rating,
+      price_fairness_rating: form.price_fairness_rating,
       would_recommend: form.would_recommend,
       service_provided: (form.service_provided || request.service_needed).slice(0, 200),
       review_text: form.review_text.trim().slice(0, 2000),
@@ -88,13 +96,23 @@ export function FeedbackDialog({ open, onClose, request, onSubmitted }: Props) {
           <YesNo label="Was the service completed?" value={form.was_completed} onChange={(v) => setForm({ ...form, was_completed: v })} />
 
           <div>
-            <label className="mb-1 block text-xs font-semibold text-navy">Rating</label>
+            <label className="mb-1 block text-xs font-semibold text-navy">Overall rating</label>
             <div className="flex gap-1">
               {[1, 2, 3, 4, 5].map((n) => (
                 <button key={n} onClick={() => setForm({ ...form, rating: n })} aria-label={`${n} stars`} type="button">
                   <Star className={`h-7 w-7 ${n <= form.rating ? "fill-orange text-orange" : "text-muted-foreground"}`} />
                 </button>
               ))}
+            </div>
+          </div>
+
+          <div className="rounded-xl border border-border p-3">
+            <p className="mb-2 text-xs font-semibold text-navy">Rate specific areas</p>
+            <div className="grid gap-2 sm:grid-cols-2">
+              <StarRow label="Work quality" value={form.quality_rating} onChange={(v) => setForm({ ...form, quality_rating: v })} />
+              <StarRow label="Timekeeping" value={form.timekeeping_rating} onChange={(v) => setForm({ ...form, timekeeping_rating: v })} />
+              <StarRow label="Communication" value={form.communication_rating} onChange={(v) => setForm({ ...form, communication_rating: v })} />
+              <StarRow label="Price fairness" value={form.price_fairness_rating} onChange={(v) => setForm({ ...form, price_fairness_rating: v })} />
             </div>
           </div>
 
@@ -157,6 +175,21 @@ function Pick({ label, options, value, onChange }: { label: string; options: rea
       <div className="flex flex-wrap gap-1">
         {options.map((o) => (
           <button key={o} type="button" onClick={() => onChange(o)} className={`rounded-full px-3 py-1 text-xs font-semibold ${value === o ? "bg-navy text-navy-foreground" : "border border-border text-muted-foreground"}`}>{o}</button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function StarRow({ label, value, onChange }: { label: string; value: number; onChange: (v: number) => void }) {
+  return (
+    <div className="flex items-center justify-between gap-2">
+      <span className="text-xs text-navy">{label}</span>
+      <div className="flex gap-0.5">
+        {[1, 2, 3, 4, 5].map((n) => (
+          <button key={n} type="button" onClick={() => onChange(n)} aria-label={`${label} ${n} stars`}>
+            <Star className={`h-4 w-4 ${n <= value ? "fill-orange text-orange" : "text-muted-foreground"}`} />
+          </button>
         ))}
       </div>
     </div>
