@@ -36,7 +36,7 @@ function Feed() {
   const [officialPosts, setOfficialPosts] = useState<OfficialPostRow[]>([]);
   const [officialAccount, setOfficialAccount] = useState<OfficialAccountRow | null>(null);
   const [loading, setLoading] = useState(true);
-  const { has: isBoostedPost } = useBoostedSet("post", ["feature_post", "promoted_completed_work"]);
+  const { has: isBoostedPost } = useBoostedSet("post", ["feature_post", "promote_completed_work"]);
   const { has: isBoostedProvider } = useBoostedSet("provider", ["boost_profile", "feature_business_page"]);
   const { has: isBoostedOpp } = useBoostedSet("opportunity", ["feature_opportunity"]);
 
