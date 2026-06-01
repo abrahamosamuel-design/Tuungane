@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Heart, MessageCircle, Share2, Bookmark, Flag, MapPin, Calendar, ShieldAlert, ExternalLink } from "lucide-react";
+import { Heart, MessageCircle, Share2, Flag, MapPin, Calendar, ShieldAlert, ExternalLink, Pin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { timeAgo } from "@/lib/format";
