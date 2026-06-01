@@ -174,7 +174,21 @@ export function RequestServiceDialog({ open, onClose, providerId, providerName, 
           </div>
 
           <Field label="Budget / expected price range">
-            <input value={form.budget_range} onChange={(e) => setForm({ ...form, budget_range: e.target.value })} className={input} placeholder="Optional — e.g. UGX 50,000 – 100,000" />
+            <select value={form.budget_range} onChange={(e) => setForm({ ...form, budget_range: e.target.value })} className={input}>
+              <option value="">— Select a range —</option>
+              {budgetBuckets.map((b) => <option key={b} value={b}>{b}</option>)}
+            </select>
+          </Field>
+
+          <Field label="Who can see this request?">
+            <div className="grid gap-2 sm:grid-cols-2">
+              {visibilityOptions.map((v) => (
+                <button key={v.value} type="button" onClick={() => setForm({ ...form, visibility: v.value })} className={`rounded-xl border p-3 text-left text-xs ${form.visibility === v.value ? "border-orange bg-orange/5" : "border-border"}`}>
+                  <p className="font-semibold text-navy">{v.label}</p>
+                  <p className="mt-0.5 text-muted-foreground">{v.hint}</p>
+                </button>
+              ))}
+            </div>
           </Field>
 
           <div className="grid gap-3 sm:grid-cols-3">
