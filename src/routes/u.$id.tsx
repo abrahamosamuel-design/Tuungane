@@ -13,6 +13,7 @@ import { ReviewDialog } from "@/components/social/ReviewDialog";
 import { ReportDialog } from "@/components/social/ReportDialog";
 import { SaveButton } from "@/components/social/SaveButton";
 import { OpportunityCard, type OpportunityRow } from "@/components/OpportunityCard";
+import { ClaimProfileDialog } from "@/components/ClaimProfileDialog";
 import { uploadMedia } from "@/lib/upload";
 import { timeAgo } from "@/lib/format";
 import { getCategory } from "@/data/categories";
