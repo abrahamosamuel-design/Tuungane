@@ -14,6 +14,252 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_settings: {
+        Row: {
+          id: string
+          setting_key: string
+          setting_value: Json
+          updated_at: string
+          updated_by_admin_id: string | null
+        }
+        Insert: {
+          id?: string
+          setting_key: string
+          setting_value: Json
+          updated_at?: string
+          updated_by_admin_id?: string | null
+        }
+        Update: {
+          id?: string
+          setting_key?: string
+          setting_value?: Json
+          updated_at?: string
+          updated_by_admin_id?: string | null
+        }
+        Relationships: []
+      }
+      boost_pricing: {
+        Row: {
+          active: boolean
+          boost_type: string
+          created_at: string
+          credits_required: number
+          duration_hours: number
+          id: string
+          label: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          boost_type: string
+          created_at?: string
+          credits_required: number
+          duration_hours: number
+          id?: string
+          label: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          boost_type?: string
+          created_at?: string
+          credits_required?: number
+          duration_hours?: number
+          id?: string
+          label?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      boosts: {
+        Row: {
+          boost_type: string
+          created_at: string
+          credits_spent: number
+          entity_id: string
+          entity_type: string
+          expires_at: string
+          id: string
+          starts_at: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          boost_type: string
+          created_at?: string
+          credits_spent: number
+          entity_id: string
+          entity_type: string
+          expires_at: string
+          id?: string
+          starts_at?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          boost_type?: string
+          created_at?: string
+          credits_spent?: number
+          entity_id?: string
+          entity_type?: string
+          expires_at?: string
+          id?: string
+          starts_at?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      credit_packages: {
+        Row: {
+          active: boolean
+          amount_ugx: number
+          created_at: string
+          credits: number
+          id: string
+          name: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          amount_ugx: number
+          created_at?: string
+          credits: number
+          id?: string
+          name: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          amount_ugx?: number
+          created_at?: string
+          credits?: number
+          id?: string
+          name?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      credit_purchase_requests: {
+        Row: {
+          admin_note: string | null
+          amount_ugx: number
+          created_at: string
+          credits_requested: number
+          id: string
+          package_id: string | null
+          package_name: string
+          payment_reference: string | null
+          reviewed_at: string | null
+          reviewed_by_admin_id: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          admin_note?: string | null
+          amount_ugx: number
+          created_at?: string
+          credits_requested: number
+          id?: string
+          package_id?: string | null
+          package_name: string
+          payment_reference?: string | null
+          reviewed_at?: string | null
+          reviewed_by_admin_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          admin_note?: string | null
+          amount_ugx?: number
+          created_at?: string
+          credits_requested?: number
+          id?: string
+          package_id?: string | null
+          package_name?: string
+          payment_reference?: string | null
+          reviewed_at?: string | null
+          reviewed_by_admin_id?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      credit_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          created_by_admin_id: string | null
+          id: string
+          reason: string
+          related_entity_id: string | null
+          related_entity_type: string | null
+          transaction_type: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          created_by_admin_id?: string | null
+          id?: string
+          reason?: string
+          related_entity_id?: string | null
+          related_entity_type?: string | null
+          transaction_type: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          created_by_admin_id?: string | null
+          id?: string
+          reason?: string
+          related_entity_id?: string | null
+          related_entity_type?: string | null
+          transaction_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      credit_wallets: {
+        Row: {
+          balance: number
+          created_at: string
+          id: string
+          starter_credits_awarded: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          balance?: number
+          created_at?: string
+          id?: string
+          starter_credits_awarded?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          created_at?: string
+          id?: string
+          starter_credits_awarded?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       follows: {
         Row: {
           created_at: string
@@ -1181,6 +1427,22 @@ export type Database = {
       }
     }
     Functions: {
+      admin_add_credits: {
+        Args: { _amount: number; _reason?: string; _user_id: string }
+        Returns: undefined
+      }
+      admin_deduct_credits: {
+        Args: { _amount: number; _reason?: string; _user_id: string }
+        Returns: undefined
+      }
+      approve_purchase_request: {
+        Args: {
+          _admin_note?: string
+          _payment_reference?: string
+          _request_id: string
+        }
+        Returns: undefined
+      }
       create_notification: {
         Args: {
           _actor_id: string
@@ -1241,6 +1503,21 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      reject_purchase_request: {
+        Args: { _admin_note?: string; _request_id: string }
+        Returns: undefined
+      }
+      spend_credits: {
+        Args: {
+          _amount: number
+          _entity_id?: string
+          _entity_type?: string
+          _reason: string
+          _tx_type: string
+          _user_id: string
+        }
+        Returns: string
       }
     }
     Enums: {
