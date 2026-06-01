@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Heart, MessageCircle, Share2, Bookmark, Flag, MapPin, Calendar, ShieldAlert, ExternalLink } from "lucide-react";
+import { Heart, MessageCircle, Share2, Flag, MapPin, Calendar, ShieldAlert, ExternalLink, Pin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { timeAgo } from "@/lib/format";
@@ -59,7 +59,7 @@ export function OfficialPostCard({ post, account, onChanged }: { post: OfficialP
   const isProviderHighlight = ["featured_provider", "verified_provider", "service_highlight"].includes(post.post_type);
 
   return (
-    <article className="overflow-hidden rounded-2xl border border-orange/30 bg-card shadow-[var(--shadow-card)]">
+    <article className={`overflow-hidden rounded-2xl border bg-card shadow-[var(--shadow-card)] ${post.is_pinned ? "border-orange ring-1 ring-orange/40" : "border-orange/30"}`}>
       <div className="flex items-center justify-between gap-3 border-b border-border bg-gradient-to-r from-orange/5 to-transparent px-4 py-3">
         <OfficialAttribution logoUrl={account?.profile_image_url} />
         <span className="text-[10px] text-muted-foreground">{timeAgo(post.created_at)}</span>
@@ -68,7 +68,7 @@ export function OfficialPostCard({ post, account, onChanged }: { post: OfficialP
       <div className="p-4">
         <div className="flex flex-wrap items-center gap-2">
           <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${meta?.color ?? "bg-muted text-foreground"}`}>{meta?.label ?? post.post_type}</span>
-          {post.is_pinned && <span className="rounded-full bg-orange/10 px-2 py-0.5 text-[10px] font-semibold text-orange">📌 Pinned</span>}
+          {post.is_pinned && <span className="inline-flex items-center gap-1 rounded-full bg-orange/10 px-2 py-0.5 text-[10px] font-semibold text-orange"><Pin className="h-2.5 w-2.5" /> Pinned</span>}
           {post.is_featured && <span className="rounded-full bg-navy/10 px-2 py-0.5 text-[10px] font-semibold text-navy">⭐ Featured</span>}
           {post.source_verified && <span className="rounded-full bg-green/10 px-2 py-0.5 text-[10px] font-semibold text-green">Verified by Tuungane</span>}
         </div>
@@ -130,10 +130,8 @@ export function OfficialPostCard({ post, account, onChanged }: { post: OfficialP
           <button onClick={share} className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-navy">
             <Share2 className="h-4 w-4" /> Share
           </button>
-          <button className="ml-auto inline-flex items-center gap-1.5 text-muted-foreground hover:text-navy" title="Save">
-            <Bookmark className="h-4 w-4" />
-          </button>
-          <button onClick={report} className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-destructive" title="Report">
+          <button onClick={report} className="ml-auto inline-flex items-center gap-1.5 text-muted-foreground hover:text-destructive" title="Report">
+
             <Flag className="h-4 w-4" />
           </button>
         </div>
