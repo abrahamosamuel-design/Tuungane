@@ -13,6 +13,7 @@ import { timeAgo } from "@/lib/format";
 import { toast } from "sonner";
 import { SafetyNote, SAFETY_TIPS } from "@/components/SafetyNote";
 import { MobileActionBar } from "@/components/MobileActionBar";
+import { ContactOptionsUnlocked } from "@/components/ContactOptionsUnlocked";
 
 
 export const Route = createFileRoute("/requests/$id")({
@@ -31,6 +32,7 @@ function RequestDetailsPage() {
   const [customer, setCustomer] = useState<Profile | null>(null);
   const [responses, setResponses] = useState<ResponseWithProvider[]>([]);
   const [hasFeedback, setHasFeedback] = useState(false);
+  const [providerContact, setProviderContact] = useState<{ phone: string | null; whatsapp: string | null; email: string | null; name: string | null } | null>(null);
   const [responseDialogOpen, setResponseDialogOpen] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -63,6 +65,21 @@ function RequestDetailsPage() {
     setResponses(list.map((x): ResponseWithProvider => ({ ...x, provider: pmap.get(x.provider_id), stats: smap.get(x.provider_id) })));
     const { count } = await (supabase as any).from("service_feedback").select("id", { count: "exact", head: true }).eq("service_request_id", id);
     setHasFeedback((count ?? 0) > 0);
+
+    // Fetch contact info of the assigned provider (or original provider for direct requests)
+    const assigned = sr.selected_provider_id ?? sr.provider_id;
+    if (assigned) {
+      const { data: sp } = await supabase.from("service_profiles").select("phone,whatsapp,email,business_name").eq("user_id", assigned).maybeSingle();
+      const { data: pp } = await supabase.from("profiles").select("full_name").eq("id", assigned).maybeSingle();
+      setProviderContact({
+        phone: sp?.phone ?? null,
+        whatsapp: sp?.whatsapp ?? null,
+        email: sp?.email ?? null,
+        name: sp?.business_name || pp?.full_name || null,
+      });
+    } else {
+      setProviderContact(null);
+    }
   }, [id, user]);
 
   useEffect(() => { if (user) load(); }, [user, load]);
@@ -179,6 +196,33 @@ function RequestDetailsPage() {
         </div>
 
         <div className="mt-3"><SafetyNote>{SAFETY_TIPS.request}</SafetyNote></div>
+
+        {/* Unlocked contact options — only for the customer, only after a provider is associated */}
+        {isCustomer && providerContact && (providerContact.phone || providerContact.whatsapp || providerContact.email) && (
+          (req.selected_provider_id || (req.provider_id && req.status !== "requested")) && (
+            <div className="mt-4">
+              <p className="mb-2 text-xs font-semibold text-navy">
+                Contact {providerContact.name ?? "the provider"} <span className="font-normal text-muted-foreground">— your request is now tracked by Tuungane.</span>
+              </p>
+              <ContactOptionsUnlocked
+                customerId={user.id}
+                providerId={req.selected_provider_id ?? req.provider_id}
+                serviceRequestId={req.id}
+                phone={providerContact.phone}
+                whatsapp={providerContact.whatsapp}
+                email={providerContact.email}
+              />
+              <p className="mt-2 text-[11px] text-muted-foreground">After the service is completed, you'll be able to give verified feedback.</p>
+            </div>
+          )
+        )}
+
+        {/* Provider-side safety note */}
+        {!isCustomer && (
+          <div className="mt-3 rounded-2xl border border-border bg-surface p-3 text-xs text-foreground/80">
+            This customer contacted you through Tuungane. Please communicate clearly, agree on service details, and update the request status so feedback can be collected after completion.
+          </div>
+        )}
 
         {/* Customer view: comparison list */}
         {isCustomer && req.status === "requested" && (

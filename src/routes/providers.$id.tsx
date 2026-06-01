@@ -1,5 +1,5 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { ArrowLeft, BadgeCheck, Sparkles, Star, MapPin, Phone, MessageCircle, Mail, Heart, Share2, Flag, Bookmark, Users, ClipboardList } from "lucide-react";
+import { ArrowLeft, BadgeCheck, Sparkles, Star, MapPin, MessageCircle, Heart, Share2, Flag, Bookmark, Users, ClipboardList } from "lucide-react";
 import { Layout } from "@/components/Layout";
 import { getProvider, type Provider } from "@/data/providers";
 import { getCategory } from "@/data/categories";
@@ -75,23 +75,19 @@ function ProviderPage() {
               >
                 <ClipboardList className="h-4 w-4" /> Request service
               </button>
-              <a href={`https://wa.me/${p.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noreferrer" className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-green px-5 py-3 text-sm font-semibold text-green-foreground transition hover:brightness-110 sm:flex-none">
-                <MessageCircle className="h-4 w-4" /> WhatsApp
-              </a>
-              <a href={`tel:${p.phone}`} className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-orange px-5 py-3 text-sm font-semibold text-orange-foreground transition hover:brightness-110 sm:flex-none">
-                <Phone className="h-4 w-4" /> Call
-              </a>
-              {p.email && (
-                <a href={`mailto:${p.email}`} className="inline-flex items-center justify-center gap-2 rounded-full border border-border bg-card px-5 py-3 text-sm font-semibold text-navy transition hover:border-orange">
-                  <Mail className="h-4 w-4" /> Email
-                </a>
-              )}
-              <button className="inline-flex items-center justify-center gap-2 rounded-full border border-border bg-card px-4 py-3 text-sm font-semibold text-navy transition hover:border-orange">
-                <Bookmark className="h-4 w-4" />
+              <button className="inline-flex items-center justify-center gap-2 rounded-full border border-border bg-card px-5 py-3 text-sm font-semibold text-navy transition hover:border-orange">
+                <Bookmark className="h-4 w-4" /> Save
+              </button>
+              <button onClick={() => toast.info("Tuungane shows WhatsApp, Call, and in-app messaging only after a tracked service request is created. This helps protect both sides and enable verified reviews.")} className="inline-flex items-center justify-center gap-2 rounded-full border border-border bg-card px-5 py-3 text-sm font-semibold text-navy transition hover:border-orange">
+                <MessageCircle className="h-4 w-4" /> Contact provider
               </button>
               <button className="inline-flex items-center justify-center gap-2 rounded-full border border-border bg-card px-4 py-3 text-sm font-semibold text-navy transition hover:border-orange">
                 <Share2 className="h-4 w-4" />
               </button>
+            </div>
+            <div className="mt-3 flex items-start gap-2 rounded-xl border border-orange/30 bg-orange/5 p-3 text-xs text-foreground/80">
+              <ClipboardList className="mt-0.5 h-4 w-4 shrink-0 text-orange" />
+              <p>Request this service through Tuungane to unlock contact options (WhatsApp, Call, message) and help us track service quality.</p>
             </div>
           </div>
         </div>

@@ -25,6 +25,10 @@ import { useActiveBoosts } from "@/hooks/use-boosts";
 import { BoostBadge } from "@/components/BoostBadge";
 import { BoostButton } from "@/components/BoostButton";
 import { MobileActionBar } from "@/components/MobileActionBar";
+import { ContactProviderModal } from "@/components/ContactProviderModal";
+import { ContactOptionsUnlocked } from "@/components/ContactOptionsUnlocked";
+import { useContactGate } from "@/hooks/use-contact-gate";
+import { Lock } from "lucide-react";
 
 
 export const Route = createFileRoute("/u/$id")({
@@ -61,6 +65,7 @@ function UserProfile() {
   const [uploadingCover, setUploadingCover] = useState(false);
   const [claimOpen, setClaimOpen] = useState(false);
   const [requestOpen, setRequestOpen] = useState(false);
+  const [contactModalOpen, setContactModalOpen] = useState(false);
   const [feedback, setFeedback] = useState<Array<{ id: string; rating: number; review_text: string; service_provided: string; created_at: string; customer_id: string; would_recommend: boolean; profile?: { full_name: string; avatar_url: string | null } }>>([]);
 
   const load = async () => {
@@ -121,6 +126,8 @@ function UserProfile() {
     if (navigator.share) navigator.share({ title: profile?.full_name ?? "Profile", url }).catch(() => {});
     else { navigator.clipboard.writeText(url); toast.success("Profile link copied"); }
   };
+
+  const gate = useContactGate(id);
 
   if (!profile) return <Layout><div className="mx-auto max-w-2xl px-4 py-16 text-center text-muted-foreground">Loading…</div></Layout>;
 
@@ -206,8 +213,11 @@ function UserProfile() {
                 <button onClick={() => setRevOpen(true)} className="rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-navy hover:border-orange">Review</button>
               </>
             )}
-            {sp?.whatsapp && <a href={`https://wa.me/${sp.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-full bg-green px-4 py-2 text-xs font-semibold text-green-foreground"><Phone className="h-3 w-3" /> WhatsApp</a>}
-            {sp?.phone && <a href={`tel:${sp.phone}`} className="inline-flex items-center gap-1 rounded-full bg-orange px-4 py-2 text-xs font-semibold text-orange-foreground"><Phone className="h-3 w-3" /> Call</a>}
+            {!isOwn && isProvider && !gate.unlocked && (sp?.whatsapp || sp?.phone) && (
+              <button onClick={() => setContactModalOpen(true)} className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-navy hover:border-orange">
+                <Lock className="h-3 w-3" /> Contact provider
+              </button>
+            )}
             <button onClick={share} className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-3 py-2 text-xs font-semibold text-navy hover:border-orange"><Share2 className="h-3 w-3" /> Share</button>
             {isOwn && isProvider && (
               <>
@@ -219,6 +229,28 @@ function UserProfile() {
             {!isOwn && user && <button onClick={() => setReportOpen(true)} className="ml-auto text-muted-foreground hover:text-destructive"><Flag className="h-4 w-4" /></button>}
           </div>
         </div>
+
+        {!isOwn && isProvider && user && (
+          gate.unlocked && gate.requestId ? (
+            <div className="mt-4">
+              <ContactOptionsUnlocked
+                customerId={user.id}
+                providerId={id}
+                serviceRequestId={gate.requestId}
+                phone={sp?.phone ?? null}
+                whatsapp={sp?.whatsapp ?? null}
+                email={sp?.email ?? null}
+              />
+            </div>
+          ) : (
+            <div className="mt-4 flex items-start gap-2 rounded-2xl border border-orange/30 bg-orange/5 p-4 text-sm">
+              <Lock className="mt-0.5 h-4 w-4 shrink-0 text-orange" />
+              <p className="text-foreground/80">
+                Request this service through Tuungane to unlock contact options and help us track service quality.
+              </p>
+            </div>
+          )
+        )}
 
         {isProvider && <div className="mt-4"><TrustStats providerId={id} /></div>}
 
@@ -394,7 +426,8 @@ function UserProfile() {
         <ReviewDialog open={revOpen} onClose={() => setRevOpen(false)} providerUserId={id} onPosted={load} />
         <ReportDialog open={reportOpen} onClose={() => setReportOpen(false)} targetType="provider" targetId={id} />
         <ClaimProfileDialog serviceProfileUserId={id} open={claimOpen} onClose={() => setClaimOpen(false)} onSubmitted={load} />
-        <RequestServiceDialog open={requestOpen} onClose={() => setRequestOpen(false)} providerId={id} providerName={sp?.business_name || profile.full_name} defaultCategorySlug={sp?.category_slug} defaultSubcategory={sp?.subcategory} onSubmitted={load} />
+        <RequestServiceDialog open={requestOpen} onClose={() => setRequestOpen(false)} providerId={id} providerName={sp?.business_name || profile.full_name} defaultCategorySlug={sp?.category_slug} defaultSubcategory={sp?.subcategory} onSubmitted={() => { load(); gate.refresh(); }} />
+        <ContactProviderModal open={contactModalOpen} onClose={() => setContactModalOpen(false)} providerName={sp?.business_name || profile.full_name} onRequestService={() => setRequestOpen(true)} />
       </section>
 
       {!isOwn && isProvider && user && (
