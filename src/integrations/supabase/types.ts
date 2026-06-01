@@ -681,6 +681,133 @@ export type Database = {
         }
         Relationships: []
       }
+      service_disputes: {
+        Row: {
+          admin_notes: string | null
+          against_user_id: string
+          created_at: string
+          description: string
+          id: string
+          raised_by_user_id: string
+          reason: string
+          resolved_at: string | null
+          resolved_by_admin_id: string | null
+          service_request_id: string
+          status: Database["public"]["Enums"]["dispute_status"]
+        }
+        Insert: {
+          admin_notes?: string | null
+          against_user_id: string
+          created_at?: string
+          description?: string
+          id?: string
+          raised_by_user_id: string
+          reason: string
+          resolved_at?: string | null
+          resolved_by_admin_id?: string | null
+          service_request_id: string
+          status?: Database["public"]["Enums"]["dispute_status"]
+        }
+        Update: {
+          admin_notes?: string | null
+          against_user_id?: string
+          created_at?: string
+          description?: string
+          id?: string
+          raised_by_user_id?: string
+          reason?: string
+          resolved_at?: string | null
+          resolved_by_admin_id?: string | null
+          service_request_id?: string
+          status?: Database["public"]["Enums"]["dispute_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_disputes_service_request_id_fkey"
+            columns: ["service_request_id"]
+            isOneToOne: false
+            referencedRelation: "service_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_feedback: {
+        Row: {
+          created_at: string
+          customer_id: string
+          did_use_provider: boolean
+          id: string
+          is_verified_review: boolean
+          is_visible: boolean
+          issue_description: string | null
+          issue_reported: boolean
+          price_fair: string | null
+          provider_id: string
+          rating: number
+          review_text: string
+          service_provided: string
+          service_request_id: string
+          updated_at: string
+          was_completed: boolean
+          was_on_time: string | null
+          work_quality_good: string | null
+          would_recommend: boolean
+          would_use_again: string | null
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          did_use_provider?: boolean
+          id?: string
+          is_verified_review?: boolean
+          is_visible?: boolean
+          issue_description?: string | null
+          issue_reported?: boolean
+          price_fair?: string | null
+          provider_id: string
+          rating: number
+          review_text?: string
+          service_provided?: string
+          service_request_id: string
+          updated_at?: string
+          was_completed?: boolean
+          was_on_time?: string | null
+          work_quality_good?: string | null
+          would_recommend?: boolean
+          would_use_again?: string | null
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          did_use_provider?: boolean
+          id?: string
+          is_verified_review?: boolean
+          is_visible?: boolean
+          issue_description?: string | null
+          issue_reported?: boolean
+          price_fair?: string | null
+          provider_id?: string
+          rating?: number
+          review_text?: string
+          service_provided?: string
+          service_request_id?: string
+          updated_at?: string
+          was_completed?: boolean
+          was_on_time?: string | null
+          work_quality_good?: string | null
+          would_recommend?: boolean
+          would_use_again?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_feedback_service_request_id_fkey"
+            columns: ["service_request_id"]
+            isOneToOne: true
+            referencedRelation: "service_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       service_profiles: {
         Row: {
           area: string | null
@@ -759,6 +886,137 @@ export type Database = {
         }
         Relationships: []
       }
+      service_request_status_history: {
+        Row: {
+          changed_by_user_id: string | null
+          created_at: string
+          id: string
+          new_status: Database["public"]["Enums"]["service_request_status"]
+          note: string | null
+          old_status:
+            | Database["public"]["Enums"]["service_request_status"]
+            | null
+          service_request_id: string
+        }
+        Insert: {
+          changed_by_user_id?: string | null
+          created_at?: string
+          id?: string
+          new_status: Database["public"]["Enums"]["service_request_status"]
+          note?: string | null
+          old_status?:
+            | Database["public"]["Enums"]["service_request_status"]
+            | null
+          service_request_id: string
+        }
+        Update: {
+          changed_by_user_id?: string | null
+          created_at?: string
+          id?: string
+          new_status?: Database["public"]["Enums"]["service_request_status"]
+          note?: string | null
+          old_status?:
+            | Database["public"]["Enums"]["service_request_status"]
+            | null
+          service_request_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_request_status_history_service_request_id_fkey"
+            columns: ["service_request_id"]
+            isOneToOne: false
+            referencedRelation: "service_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_requests: {
+        Row: {
+          area: string | null
+          attachment_url: string | null
+          budget_range: string | null
+          cancelled_at: string | null
+          category_slug: string | null
+          completed_at: string | null
+          created_at: string
+          customer_id: string
+          customer_phone: string | null
+          customer_whatsapp: string | null
+          description: string
+          disputed_at: string | null
+          district: string | null
+          id: string
+          location: string
+          preferred_contact_method: Database["public"]["Enums"]["contact_method"]
+          preferred_date: string | null
+          preferred_time: string | null
+          provider_id: string
+          service_needed: string
+          service_profile_id: string | null
+          status: Database["public"]["Enums"]["service_request_status"]
+          subcategory: string | null
+          town: string | null
+          updated_at: string
+          urgency: Database["public"]["Enums"]["service_urgency"]
+        }
+        Insert: {
+          area?: string | null
+          attachment_url?: string | null
+          budget_range?: string | null
+          cancelled_at?: string | null
+          category_slug?: string | null
+          completed_at?: string | null
+          created_at?: string
+          customer_id: string
+          customer_phone?: string | null
+          customer_whatsapp?: string | null
+          description?: string
+          disputed_at?: string | null
+          district?: string | null
+          id?: string
+          location?: string
+          preferred_contact_method?: Database["public"]["Enums"]["contact_method"]
+          preferred_date?: string | null
+          preferred_time?: string | null
+          provider_id: string
+          service_needed: string
+          service_profile_id?: string | null
+          status?: Database["public"]["Enums"]["service_request_status"]
+          subcategory?: string | null
+          town?: string | null
+          updated_at?: string
+          urgency?: Database["public"]["Enums"]["service_urgency"]
+        }
+        Update: {
+          area?: string | null
+          attachment_url?: string | null
+          budget_range?: string | null
+          cancelled_at?: string | null
+          category_slug?: string | null
+          completed_at?: string | null
+          created_at?: string
+          customer_id?: string
+          customer_phone?: string | null
+          customer_whatsapp?: string | null
+          description?: string
+          disputed_at?: string | null
+          district?: string | null
+          id?: string
+          location?: string
+          preferred_contact_method?: Database["public"]["Enums"]["contact_method"]
+          preferred_date?: string | null
+          preferred_time?: string | null
+          provider_id?: string
+          service_needed?: string
+          service_profile_id?: string | null
+          status?: Database["public"]["Enums"]["service_request_status"]
+          subcategory?: string | null
+          town?: string | null
+          updated_at?: string
+          urgency?: Database["public"]["Enums"]["service_urgency"]
+        }
+        Relationships: []
+      }
       timeline_posts: {
         Row: {
           category_slug: string | null
@@ -824,7 +1082,22 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      provider_trust_stats: {
+        Row: {
+          average_rating: number | null
+          cancelled_service_requests: number | null
+          completed_service_requests: number | null
+          completion_rate: number | null
+          disputed_service_requests: number | null
+          provider_id: string | null
+          response_rate: number | null
+          total_followers: number | null
+          total_recommendations: number | null
+          total_service_requests: number | null
+          total_verified_reviews: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       create_notification: {
@@ -851,6 +1124,8 @@ export type Database = {
       application_status: "sent" | "viewed" | "accepted" | "rejected"
       availability_status: "available" | "busy" | "away"
       claim_status: "pending" | "approved" | "rejected"
+      contact_method: "phone" | "whatsapp" | "in_app" | "any"
+      dispute_status: "open" | "reviewing" | "resolved" | "dismissed"
       official_post_type:
         | "opportunity"
         | "featured_provider"
@@ -892,6 +1167,14 @@ export type Database = {
         | "admin"
       report_status: "open" | "reviewing" | "resolved" | "dismissed"
       seeded_profile_status: "unclaimed" | "claim_pending" | "claimed"
+      service_request_status:
+        | "requested"
+        | "accepted"
+        | "in_progress"
+        | "completed"
+        | "cancelled"
+        | "disputed"
+      service_urgency: "normal" | "urgent" | "emergency"
       verification_status: "none" | "pending" | "verified" | "featured"
     }
     CompositeTypes: {
@@ -1024,6 +1307,8 @@ export const Constants = {
       application_status: ["sent", "viewed", "accepted", "rejected"],
       availability_status: ["available", "busy", "away"],
       claim_status: ["pending", "approved", "rejected"],
+      contact_method: ["phone", "whatsapp", "in_app", "any"],
+      dispute_status: ["open", "reviewing", "resolved", "dismissed"],
       official_post_type: [
         "opportunity",
         "featured_provider",
@@ -1070,6 +1355,15 @@ export const Constants = {
       ],
       report_status: ["open", "reviewing", "resolved", "dismissed"],
       seeded_profile_status: ["unclaimed", "claim_pending", "claimed"],
+      service_request_status: [
+        "requested",
+        "accepted",
+        "in_progress",
+        "completed",
+        "cancelled",
+        "disputed",
+      ],
+      service_urgency: ["normal", "urgent", "emergency"],
       verification_status: ["none", "pending", "verified", "featured"],
     },
   },

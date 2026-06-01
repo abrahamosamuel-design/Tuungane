@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as ServicesRouteImport } from './routes/services'
+import { Route as RequestsRouteImport } from './routes/requests'
 import { Route as OpportunitiesRouteImport } from './routes/opportunities'
 import { Route as OfficialRouteImport } from './routes/official'
 import { Route as NotificationsRouteImport } from './routes/notifications'
@@ -37,6 +38,11 @@ const TermsRoute = TermsRouteImport.update({
 const ServicesRoute = ServicesRouteImport.update({
   id: '/services',
   path: '/services',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RequestsRoute = RequestsRouteImport.update({
+  id: '/requests',
+  path: '/requests',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OpportunitiesRoute = OpportunitiesRouteImport.update({
@@ -137,6 +143,7 @@ export interface FileRoutesByFullPath {
   '/notifications': typeof NotificationsRoute
   '/official': typeof OfficialRoute
   '/opportunities': typeof OpportunitiesRouteWithChildren
+  '/requests': typeof RequestsRoute
   '/services': typeof ServicesRouteWithChildren
   '/terms': typeof TermsRoute
   '/official-posts/$id': typeof OfficialPostsIdRoute
@@ -158,6 +165,7 @@ export interface FileRoutesByTo {
   '/notifications': typeof NotificationsRoute
   '/official': typeof OfficialRoute
   '/opportunities': typeof OpportunitiesRouteWithChildren
+  '/requests': typeof RequestsRoute
   '/services': typeof ServicesRouteWithChildren
   '/terms': typeof TermsRoute
   '/official-posts/$id': typeof OfficialPostsIdRoute
@@ -180,6 +188,7 @@ export interface FileRoutesById {
   '/notifications': typeof NotificationsRoute
   '/official': typeof OfficialRoute
   '/opportunities': typeof OpportunitiesRouteWithChildren
+  '/requests': typeof RequestsRoute
   '/services': typeof ServicesRouteWithChildren
   '/terms': typeof TermsRoute
   '/official-posts/$id': typeof OfficialPostsIdRoute
@@ -203,6 +212,7 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/official'
     | '/opportunities'
+    | '/requests'
     | '/services'
     | '/terms'
     | '/official-posts/$id'
@@ -224,6 +234,7 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/official'
     | '/opportunities'
+    | '/requests'
     | '/services'
     | '/terms'
     | '/official-posts/$id'
@@ -245,6 +256,7 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/official'
     | '/opportunities'
+    | '/requests'
     | '/services'
     | '/terms'
     | '/official-posts/$id'
@@ -267,6 +279,7 @@ export interface RootRouteChildren {
   NotificationsRoute: typeof NotificationsRoute
   OfficialRoute: typeof OfficialRoute
   OpportunitiesRoute: typeof OpportunitiesRouteWithChildren
+  RequestsRoute: typeof RequestsRoute
   ServicesRoute: typeof ServicesRouteWithChildren
   TermsRoute: typeof TermsRoute
   OfficialPostsIdRoute: typeof OfficialPostsIdRoute
@@ -288,6 +301,13 @@ declare module '@tanstack/react-router' {
       path: '/services'
       fullPath: '/services'
       preLoaderRoute: typeof ServicesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/requests': {
+      id: '/requests'
+      path: '/requests'
+      fullPath: '/requests'
+      preLoaderRoute: typeof RequestsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/opportunities': {
@@ -450,6 +470,7 @@ const rootRouteChildren: RootRouteChildren = {
   NotificationsRoute: NotificationsRoute,
   OfficialRoute: OfficialRoute,
   OpportunitiesRoute: OpportunitiesRouteWithChildren,
+  RequestsRoute: RequestsRoute,
   ServicesRoute: ServicesRouteWithChildren,
   TermsRoute: TermsRoute,
   OfficialPostsIdRoute: OfficialPostsIdRoute,
@@ -459,13 +480,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

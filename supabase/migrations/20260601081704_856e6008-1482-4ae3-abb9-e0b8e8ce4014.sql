@@ -1,0 +1,1 @@
+ALTER VIEW public.provider_trust_stats SET (security_invoker = on);

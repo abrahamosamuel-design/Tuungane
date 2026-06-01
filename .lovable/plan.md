@@ -1,96 +1,84 @@
-## Goal
-Add one official "Tuungane Official" account that admins can manage and use to seed/post official content (opportunities, featured providers, safety tips, platform updates). Build both backend + visible UI.
+# Service Requests & Verified Feedback
 
-## 1. Database migration
+Build an end-to-end request → status → completion → feedback → verified review loop on top of the existing Tuungane MVP, without payments/scheduling/escrow.
 
-**New enum** `official_post_type`: `opportunity, featured_provider, verified_provider, service_highlight, safety_tip, platform_update, user_education, new_feature, announcement`.
+## Database (new migration)
 
-**New enum** `claim_status`: `pending, approved, rejected`.
+New tables (all with GRANTs + RLS):
 
-**New enum** `seeded_status`: `unclaimed, claim_pending, claimed`.
+1. `service_requests` — full field set from spec (customer_id, provider_id, category, subcategory, service_needed, location/district/town/area, description, preferred_date/time, urgency, budget_range, preferred_contact_method, phone, whatsapp, attachment_url, status, timestamps).
+2. `service_request_status_history` — audit log (old_status, new_status, changed_by, note).
+3. `service_feedback` — verified-review fields (rating, would_recommend, was_on_time, work_quality_good, price_fair, would_use_again, issue_reported, is_verified_review, is_visible).
+4. `service_disputes` — raised_by, against, reason, description, status, admin_notes.
 
-**`official_accounts`** (singleton-ish, admin-only writes):
-- `id`, `name` (default "Tuungane Official"), `bio`, `tagline`, `profile_image_url`, `cover_image_url`, `is_official` (true), `is_verified` (true), `is_active`, `created_by_admin_id`, timestamps.
-- RLS: public read; admin insert/update.
+Enums: `service_request_status` (requested/accepted/in_progress/completed/cancelled/disputed), `service_urgency` (normal/urgent/emergency), `contact_method` (phone/whatsapp/in_app/any), `dispute_status` (open/reviewing/resolved/dismissed).
 
-**`official_posts`**:
-- `id`, `official_account_id`, `post_type` (official_post_type), `title`, `content`, `category_slug`, `subcategory`, `location`, `image_url`, `linked_provider_id` (uuid → service_profiles.user_id), `linked_opportunity_id` (uuid → opportunities.id), `is_featured`, `is_pinned`, `status` (text: draft/published), `expires_at`, timestamps.
-- RLS: public read where status='published'; admin all.
+Triggers/functions:
+- Trigger on `service_requests` UPDATE → insert into status_history when status changes.
+- Trigger on `service_requests` status→completed → create notification for customer asking for feedback.
+- Trigger on `service_requests` INSERT → notify provider.
+- Trigger on `service_requests` status changes → notify the other party.
+- Trigger on `service_feedback` INSERT → notify provider, set `is_verified_review=true` when linked to a completed request.
 
-**`profile_claim_requests`**:
-- `id`, `service_profile_user_id` (uuid), `requester_user_id`, `full_name`, `phone_number`, `whatsapp_number`, `email`, `relationship_to_profile`, `explanation`, `supporting_file_url`, `status` (claim_status), `reviewed_by_admin_id`, `reviewed_at`, `created_at`.
-- RLS: requester read own, admin read all; insert by authed user as self; admin update.
+`provider_trust_stats` modeled as a **VIEW** (simpler than a denormalized table for MVP) aggregating from `service_requests`, `service_feedback`, `provider_recommendations`, `follows`. Public SELECT.
 
-**`service_profiles`** additions:
-- `seeded_by_official` boolean default false
-- `seeded_status` seeded_status nullable
+RLS:
+- `service_requests`: customer or provider can read own rows; insert by customer (self); update by customer or provider party; admins/mods full.
+- `service_feedback`: customer (author) insert/update within 7 days; everyone can read where `is_visible=true`; admins/mods can update visibility.
+- `service_disputes`: raised_by or against can read; insert by either party; admin/mod can update.
+- Anti-self-review: CHECK / WITH CHECK that customer_id ≠ provider_id on requests and feedback.
 
-**Reuse existing**: `post_comments`, `post_likes`, `reports`, `saved_*` already exist. For likes/comments/saves/reports on official posts we'll keep them in their existing tables but use `target_type='official_post'` for reports; for likes/comments on official posts we'll add lightweight `official_post_likes` and `official_post_comments` (mirror existing patterns, RLS like timeline_posts).
+## UI
 
-Actually — to keep scope tight and reuse UI components, store official posts in the existing `timeline_posts` table is messier (different shape). I'll create dedicated `official_post_likes` and `official_post_comments` tables mirroring `post_likes`/`post_comments` schemas.
+**RequestServiceDialog** (new) — form per spec, opens from:
+- `ProviderCard` (services list)
+- `/u/$id` (provider profile)
+- `/providers/$id` sample profile (already redirects to feed)
+- Provider's timeline `PostCard` (new "Request" affordance)
 
-GRANTs on every new table for `authenticated` + `service_role`; public SELECT where appropriate.
+**FeedbackDialog** (new) — opens from "My Requests" when status=completed and no feedback yet, or from a notification CTA.
 
-## 2. Admin dashboard — `/admin` new tab "Official"
+**New routes**:
+- `/requests` (auth-only) — tabs: "As customer" / "As provider", filterable by status, with action buttons (Accept / In progress / Complete / Cancel / Dispute / Leave feedback / Report).
+- Admin tab "Requests & Feedback" added to `/admin` — list/filter all requests, view feedback, hide reviews, resolve disputes, stats summary.
 
-Adds a new top-level tab in the existing `src/routes/admin.tsx`. Sub-sections:
-1. **Account Setup**: form to create/update the singleton official account (name, bio, tagline, upload profile image, upload cover image, toggle active/official/verified).
-2. **Create Official Post**: form with post type select, title, content, category/subcategory, location, image upload, linked provider (search by id/name), linked opportunity (search), expires_at, featured, pinned, publish toggle.
-3. **Manage Official Posts**: list with edit/delete/pin/feature/unpublish.
-4. **Seeded Providers**: list `service_profiles` where `seeded_by_official=true`; let admin toggle seeded_status, edit, mark verified/featured.
-5. **Claim Requests**: list pending claims; approve (reassigns `service_profiles.user_id` to requester, sets seeded_status='claimed') / reject.
+**Profile / discovery integration**:
+- `/u/$id` shows a Trust Stats strip (avg rating, total verified reviews, completed services, recommendations, followers) and a "Verified Service Reviews" section.
+- `ProviderCard` gets a primary "Request service" CTA alongside existing contact.
+- `VerifiedReviewBadge` component + review card layout.
 
-## 3. Public UI
+**Notifications**: reuse existing `notifications` table; new `type` values: `request_new`, `request_accepted`, `request_in_progress`, `request_completed`, `request_cancelled`, `feedback_request`, `feedback_received`, `dispute_opened`. Wired via DB triggers calling `public.create_notification`.
 
-**New components**:
-- `src/components/OfficialBadge.tsx` — official + verified badges.
-- `src/components/OfficialPostCard.tsx` — renders official post with post-type label, image, like/comment/share/save/report, "View Profile" / "View Opportunity" buttons when linked.
-- `src/components/ClaimProfileDialog.tsx` — form on unclaimed seeded provider profiles.
-
-**New route**: `src/routes/official.tsx` — Tuungane Official profile page (cover, avatar, bio, tagline, official + verified badges, tabs: Posts, Opportunities, Featured Providers, Safety & Updates). Also `src/routes/official-posts.$id.tsx` for detail.
-
-**Homepage `src/routes/index.tsx`**: new "From Tuungane Official" section showing featured/pinned official posts (max 3-4 cards) with link to `/official`.
-
-**Feed `src/routes/feed.tsx`**: in Posts tab, prepend pinned official posts; add "Official" filter chip to show only Tuungane Official posts.
-
-**Opportunities `src/routes/opportunities.tsx`**: show official `post_type='opportunity'` posts alongside user opportunities (mapped into the same card list); filter chips: All / Posted by Tuungane Official / Posted by users / Featured / Verified. Add visible "Posted by Tuungane Official" label.
-
-**Services `src/routes/services.tsx`**: add filter chips "Featured by Tuungane", "Verified Providers", "Recently Added". Provider cards show "Highlighted by Tuungane Official" or "Added by Tuungane Official" labels where applicable.
-
-**Provider profile `src/routes/providers.$id.tsx`** (or `u.$id.tsx`): if profile is `seeded_by_official` and `seeded_status != 'claimed'`, show "Added by Tuungane Official" banner + "Claim this profile" button that opens `ClaimProfileDialog`. Show explanation text for unclaimed.
-
-## 4. Safety/transparency
-- Each official opportunity card includes a small safety note.
-- Unverified-source official opportunities show "Source not independently verified".
-- Verified opportunities show "Verified by Tuungane".
-
-## Out of scope
-- Multiple official accounts.
-- Hard-coded credentials (admin creates via UI).
-- Auto-seeding fixtures (admin posts content manually).
-- Migrating likes/comments on official posts into existing tables (separate dedicated tables).
-- Rich realtime — basic reads only.
+**Safety/help text** on request form and feedback form per spec.
 
 ## Files
-**Migration**: `supabase/migrations/<ts>_official_account.sql`
 
-**New code**:
-- `src/components/OfficialBadge.tsx`
-- `src/components/OfficialPostCard.tsx`
-- `src/components/ClaimProfileDialog.tsx`
-- `src/components/admin/OfficialAccountForm.tsx`
-- `src/components/admin/OfficialPostForm.tsx`
-- `src/routes/official.tsx`
-- `src/routes/official-posts.$id.tsx`
-- `src/data/officialPostTypes.ts`
+New:
+- `supabase/migrations/<ts>_service_requests.sql`
+- `src/data/serviceRequestTypes.ts` (enums, labels, status colors)
+- `src/components/RequestServiceDialog.tsx`
+- `src/components/FeedbackDialog.tsx`
+- `src/components/VerifiedReviewBadge.tsx`
+- `src/components/TrustStats.tsx`
+- `src/components/ServiceRequestCard.tsx`
+- `src/routes/requests.tsx`
+- `src/components/admin/RequestsAdminTab.tsx`
 
-**Edits**:
-- `src/routes/admin.tsx` — add "Official" tab + sub-tabs
-- `src/routes/index.tsx` — homepage "From Tuungane Official" section
-- `src/routes/feed.tsx` — pinned + filter
-- `src/routes/opportunities.tsx` — merge + filters + label
-- `src/routes/services.tsx` — filters + labels
-- `src/routes/providers.$id.tsx` — claim banner
-- `src/components/Header.tsx` — link to /official (optional small)
+Edited:
+- `src/components/ProviderCard.tsx` (Request CTA)
+- `src/routes/u.$id.tsx` (TrustStats + Verified Reviews + Request CTA)
+- `src/routes/services.tsx` (Request CTA on real provider cards)
+- `src/components/Header.tsx` & `MobileBottomNav.tsx` (link to `/requests`)
+- `src/routes/admin.tsx` (add "Requests" tab → RequestsAdminTab)
+- `src/routes/me.tsx` or `dashboard.tsx` (link to /requests)
 
-This is a big migration + ~10 new files + 6 edits. Approve and I'll run the migration first, then build the UI.
+## Out of scope (per MVP rule)
+Payments, escrow, contracts, scheduling, delivery tracking, automatic penalties.
+
+## Order of work
+1. Migration (tables, enums, triggers, view, RLS, GRANTs).
+2. Types file + shared components (Dialog, Badge, TrustStats, ServiceRequestCard).
+3. `/requests` route with both tabs.
+4. Integrate Request CTA into ProviderCard, `/u/$id`, services.
+5. Admin "Requests & Feedback" tab.
+6. Header/mobile-nav link + notification labels.
