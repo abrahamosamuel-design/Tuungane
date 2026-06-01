@@ -34,6 +34,7 @@ import { Route as OpportunitiesNewRouteImport } from './routes/opportunities.new
 import { Route as OpportunitiesIdRouteImport } from './routes/opportunities.$id'
 import { Route as OfficialPostsIdRouteImport } from './routes/official-posts.$id'
 import { Route as BusinessesNewRouteImport } from './routes/businesses.new'
+import { Route as BusinessesSlugRouteImport } from './routes/businesses.$slug'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -160,6 +161,11 @@ const BusinessesNewRoute = BusinessesNewRouteImport.update({
   path: '/new',
   getParentRoute: () => BusinessesRoute,
 } as any)
+const BusinessesSlugRoute = BusinessesSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => BusinessesRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -178,6 +184,7 @@ export interface FileRoutesByFullPath {
   '/requests': typeof RequestsRouteWithChildren
   '/services': typeof ServicesRouteWithChildren
   '/terms': typeof TermsRoute
+  '/businesses/$slug': typeof BusinessesSlugRoute
   '/businesses/new': typeof BusinessesNewRoute
   '/official-posts/$id': typeof OfficialPostsIdRoute
   '/opportunities/$id': typeof OpportunitiesIdRoute
@@ -205,6 +212,7 @@ export interface FileRoutesByTo {
   '/requests': typeof RequestsRouteWithChildren
   '/services': typeof ServicesRouteWithChildren
   '/terms': typeof TermsRoute
+  '/businesses/$slug': typeof BusinessesSlugRoute
   '/businesses/new': typeof BusinessesNewRoute
   '/official-posts/$id': typeof OfficialPostsIdRoute
   '/opportunities/$id': typeof OpportunitiesIdRoute
@@ -233,6 +241,7 @@ export interface FileRoutesById {
   '/requests': typeof RequestsRouteWithChildren
   '/services': typeof ServicesRouteWithChildren
   '/terms': typeof TermsRoute
+  '/businesses/$slug': typeof BusinessesSlugRoute
   '/businesses/new': typeof BusinessesNewRoute
   '/official-posts/$id': typeof OfficialPostsIdRoute
   '/opportunities/$id': typeof OpportunitiesIdRoute
@@ -262,6 +271,7 @@ export interface FileRouteTypes {
     | '/requests'
     | '/services'
     | '/terms'
+    | '/businesses/$slug'
     | '/businesses/new'
     | '/official-posts/$id'
     | '/opportunities/$id'
@@ -289,6 +299,7 @@ export interface FileRouteTypes {
     | '/requests'
     | '/services'
     | '/terms'
+    | '/businesses/$slug'
     | '/businesses/new'
     | '/official-posts/$id'
     | '/opportunities/$id'
@@ -316,6 +327,7 @@ export interface FileRouteTypes {
     | '/requests'
     | '/services'
     | '/terms'
+    | '/businesses/$slug'
     | '/businesses/new'
     | '/official-posts/$id'
     | '/opportunities/$id'
@@ -526,14 +538,23 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BusinessesNewRouteImport
       parentRoute: typeof BusinessesRoute
     }
+    '/businesses/$slug': {
+      id: '/businesses/$slug'
+      path: '/$slug'
+      fullPath: '/businesses/$slug'
+      preLoaderRoute: typeof BusinessesSlugRouteImport
+      parentRoute: typeof BusinessesRoute
+    }
   }
 }
 
 interface BusinessesRouteChildren {
+  BusinessesSlugRoute: typeof BusinessesSlugRoute
   BusinessesNewRoute: typeof BusinessesNewRoute
 }
 
 const BusinessesRouteChildren: BusinessesRouteChildren = {
+  BusinessesSlugRoute: BusinessesSlugRoute,
   BusinessesNewRoute: BusinessesNewRoute,
 }
 
