@@ -140,7 +140,22 @@ function Opportunities() {
           </aside>
 
           <div>
-            {featured.length > 0 && (
+            <div className="mb-4 flex flex-wrap gap-2">
+              <Pill active={source === "all"} onClick={() => setSource("all")}>All sources</Pill>
+              <Pill active={source === "official"} onClick={() => setSource("official")}>Posted by Tuungane Official</Pill>
+              <Pill active={source === "users"} onClick={() => setSource("users")}>Posted by users</Pill>
+            </div>
+
+            {source !== "users" && officialOpps.length > 0 && (
+              <div className="mb-6">
+                <h2 className="mb-3 font-display text-lg font-bold text-navy">Posted by Tuungane Official</h2>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {officialOpps.map((o) => <OfficialPostCard key={o.id} post={o} account={officialAccount} />)}
+                </div>
+              </div>
+            )}
+
+            {source !== "official" && featured.length > 0 && (
               <div className="mb-6">
                 <h2 className="mb-3 font-display text-lg font-bold text-navy">Featured opportunities</h2>
                 <div className="grid gap-3 sm:grid-cols-2">
@@ -148,17 +163,22 @@ function Opportunities() {
                 </div>
               </div>
             )}
-            <h2 className="mb-3 font-display text-lg font-bold text-navy">Recent opportunities</h2>
-            {loading && <p className="text-sm text-muted-foreground">Loading…</p>}
-            {!loading && items.length === 0 && (
-              <div className="rounded-2xl border border-dashed border-border bg-card p-10 text-center">
-                <p className="font-semibold text-navy">No opportunities yet</p>
-                <p className="mt-1 text-sm text-muted-foreground">Try clearing filters, or be the first to post one.</p>
-              </div>
+
+            {source !== "official" && (
+              <>
+                <h2 className="mb-3 font-display text-lg font-bold text-navy">Recent opportunities</h2>
+                {loading && <p className="text-sm text-muted-foreground">Loading…</p>}
+                {!loading && items.length === 0 && (
+                  <div className="rounded-2xl border border-dashed border-border bg-card p-10 text-center">
+                    <p className="font-semibold text-navy">No opportunities yet</p>
+                    <p className="mt-1 text-sm text-muted-foreground">Try clearing filters, or be the first to post one.</p>
+                  </div>
+                )}
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {items.map((o) => <OpportunityCard key={o.id} o={o} />)}
+                </div>
+              </>
             )}
-            <div className="grid gap-3 sm:grid-cols-2">
-              {items.map((o) => <OpportunityCard key={o.id} o={o} />)}
-            </div>
           </div>
         </div>
       </section>
