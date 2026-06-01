@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { Avatar } from "@/components/social/Avatar";
 import { timeAgo } from "@/lib/format";
-import { Heart, MessageCircle, ThumbsUp, Star, UserPlus } from "lucide-react";
+import { Heart, MessageCircle, ThumbsUp, Star, UserPlus, ClipboardList, CheckCircle2, PlayCircle, Send, ShieldCheck, AlertTriangle, XCircle } from "lucide-react";
 
 export const Route = createFileRoute("/notifications")({
   head: () => ({ meta: [{ title: "Notifications — Tuungane" }] }),
@@ -17,14 +17,29 @@ type Notif = {
   actor?: { full_name: string; avatar_url: string | null };
 };
 
+const JOB_TYPES = new Set([
+  "request_new", "request_accepted", "request_in_progress", "request_completed",
+  "request_cancelled", "request_response_new", "request_response_chosen",
+  "feedback_received", "dispute_opened",
+]);
+
 const iconFor = (t: string) => {
   switch (t) {
     case "follow": return <UserPlus className="h-4 w-4 text-navy" />;
     case "like": return <Heart className="h-4 w-4 text-orange" />;
     case "comment": return <MessageCircle className="h-4 w-4 text-navy" />;
     case "recommendation": return <ThumbsUp className="h-4 w-4 text-green" />;
-    case "review": return <Star className="h-4 w-4 text-orange" />;
-    default: return null;
+    case "review":
+    case "feedback_received": return <ShieldCheck className="h-4 w-4 text-green" />;
+    case "request_new":
+    case "request_response_new": return <Send className="h-4 w-4 text-orange" />;
+    case "request_accepted":
+    case "request_response_chosen": return <ClipboardList className="h-4 w-4 text-orange" />;
+    case "request_in_progress": return <PlayCircle className="h-4 w-4 text-navy" />;
+    case "request_completed": return <CheckCircle2 className="h-4 w-4 text-green" />;
+    case "request_cancelled": return <XCircle className="h-4 w-4 text-muted-foreground" />;
+    case "dispute_opened": return <AlertTriangle className="h-4 w-4 text-destructive" />;
+    default: return <Star className="h-4 w-4 text-muted-foreground" />;
   }
 };
 
