@@ -342,6 +342,7 @@ function UserProfile() {
         <RecommendDialog open={recOpen} onClose={() => setRecOpen(false)} providerUserId={id} />
         <ReviewDialog open={revOpen} onClose={() => setRevOpen(false)} providerUserId={id} onPosted={load} />
         <ReportDialog open={reportOpen} onClose={() => setReportOpen(false)} targetType="provider" targetId={id} />
+        <ClaimProfileDialog serviceProfileUserId={id} open={claimOpen} onClose={() => setClaimOpen(false)} onSubmitted={load} />
       </section>
     </Layout>
   );
