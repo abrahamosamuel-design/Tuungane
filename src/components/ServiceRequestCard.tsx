@@ -5,6 +5,9 @@ import { Avatar } from "@/components/social/Avatar";
 import { timeAgo } from "@/lib/format";
 import { requestStatusMap, type ServiceRequestRow } from "@/data/serviceRequestTypes";
 import { VerifiedReviewBadge } from "./VerifiedReviewBadge";
+import { useActiveBoosts } from "@/hooks/use-boosts";
+import { BoostBadge } from "./BoostBadge";
+import { BoostButton } from "./BoostButton";
 
 export interface RequestWithParty extends ServiceRequestRow {
   customer?: { full_name: string; avatar_url: string | null };
@@ -25,6 +28,7 @@ export function ServiceRequestCard({ r, viewerRole, onStatus, onFeedback, onDisp
   const meta = requestStatusMap[r.status];
   const counterpart = viewerRole === "customer" ? r.provider : r.customer;
   const counterpartId = viewerRole === "customer" ? r.provider_id : r.customer_id;
+  const { boosts: reqBoosts, refresh: refreshReqBoosts, has: hasReqBoost } = useActiveBoosts("service_request", r.id);
 
   const canAccept = viewerRole === "provider" && r.status === "requested";
   const canProgress = viewerRole === "provider" && r.status === "accepted";
@@ -48,6 +52,7 @@ export function ServiceRequestCard({ r, viewerRole, onStatus, onFeedback, onDisp
                 <AlertTriangle className="h-3 w-3" /> {r.urgency}
               </span>
             )}
+            {reqBoosts.map((b) => <BoostBadge key={b.id} type={b.boost_type} />)}
             {r.has_feedback && <VerifiedReviewBadge />}
             <span className="ml-auto text-[10px] text-muted-foreground">{timeAgo(r.created_at)}</span>
           </div>
@@ -81,6 +86,12 @@ export function ServiceRequestCard({ r, viewerRole, onStatus, onFeedback, onDisp
             {canFeedback && <Btn onClick={onFeedback} variant="primary">Leave verified review</Btn>}
             {canDispute && onDispute && <Btn onClick={onDispute} variant="danger">Open dispute</Btn>}
             <Link to="/requests/$id" params={{ id: r.id }} className="inline-flex items-center gap-1 rounded-full border border-border px-2 py-1 text-xs font-semibold text-navy hover:border-orange"><ExternalLink className="h-3 w-3" /> Open</Link>
+            {viewerRole === "customer" && (r.status === "requested" || r.status === "accepted") && (
+              <BoostButton boostType="urgent_request" entityType="service_request" entityId={r.id} label="Mark urgent" isActive={hasReqBoost("urgent_request")} dialogTitle="Mark this request as urgent" dialogDescription="Push this request to the top of providers' inboxes." onActivated={refreshReqBoosts} />
+            )}
+            {viewerRole === "provider" && r.status === "requested" && (
+              <BoostButton boostType="priority_response" entityType="service_request" entityId={r.id} label="Priority response" isActive={hasReqBoost("priority_response")} dialogTitle="Send a priority response" dialogDescription="Highlight your response above other providers on this request." onActivated={refreshReqBoosts} />
+            )}
             {onReport && (
               <button onClick={onReport} className="ml-auto inline-flex items-center gap-1 rounded-full px-2 py-1 text-muted-foreground hover:text-destructive">
                 <Flag className="h-3 w-3" /> Report

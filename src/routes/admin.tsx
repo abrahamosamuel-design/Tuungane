@@ -7,6 +7,7 @@ import { PostCard, type PostRow } from "@/components/social/PostCard";
 import { OfficialAccountForm } from "@/components/admin/OfficialAccountForm";
 import { OfficialPostForm } from "@/components/admin/OfficialPostForm";
 import { RequestsAdminTab } from "@/components/admin/RequestsAdminTab";
+import { CreditsAdminTab } from "@/components/admin/CreditsAdminTab";
 import { officialPostTypeMap, type OfficialAccountRow, type OfficialPostRow } from "@/data/officialPostTypes";
 import { timeAgo } from "@/lib/format";
 import { toast } from "sonner";
@@ -16,7 +17,7 @@ export const Route = createFileRoute("/admin")({
   component: Admin,
 });
 
-type Tab = "reports" | "posts" | "providers" | "recs" | "requests" | "official";
+type Tab = "reports" | "posts" | "providers" | "recs" | "requests" | "credits" | "official";
 
 function Admin() {
   const { user, loading, isModerator, isAdmin } = useAuth();
@@ -80,8 +81,8 @@ function Admin() {
       <section className="mx-auto max-w-5xl px-4 py-8">
         <h1 className="font-display text-3xl font-bold text-navy">Admin & moderation</h1>
         <div className="mt-4 flex flex-wrap gap-2 border-b border-border">
-          {(["reports", "posts", "providers", "recs", "requests", "official"] as Tab[]).map((t) => (
-            <button key={t} onClick={() => setTab(t)} className={`px-4 py-2 text-sm font-semibold capitalize ${tab === t ? "text-orange border-b-2 border-orange" : "text-muted-foreground"}`}>{t === "recs" ? "Recommendations" : t === "official" ? "Official Account" : t === "requests" ? "Requests & Feedback" : t}</button>
+          {(["reports", "posts", "providers", "recs", "requests", "credits", "official"] as Tab[]).map((t) => (
+            <button key={t} onClick={() => setTab(t)} className={`px-4 py-2 text-sm font-semibold capitalize ${tab === t ? "text-orange border-b-2 border-orange" : "text-muted-foreground"}`}>{t === "recs" ? "Recommendations" : t === "official" ? "Official Account" : t === "requests" ? "Requests & Feedback" : t === "credits" ? "Credits & Boosts" : t}</button>
           ))}
         </div>
 
@@ -151,6 +152,8 @@ function Admin() {
           )}
 
           {tab === "requests" && <RequestsAdminTab />}
+
+          {tab === "credits" && <CreditsAdminTab />}
 
           {tab === "official" && <OfficialTabContent />}
         </div>

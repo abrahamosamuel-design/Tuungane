@@ -1435,6 +1435,7 @@ export type Database = {
         Args: { _amount: number; _reason?: string; _user_id: string }
         Returns: undefined
       }
+      admin_expire_boost: { Args: { _boost_id: string }; Returns: undefined }
       approve_purchase_request: {
         Args: {
           _admin_note?: string
@@ -1442,6 +1443,10 @@ export type Database = {
           _request_id: string
         }
         Returns: undefined
+      }
+      create_boost: {
+        Args: { _entity_id: string; _entity_type: string; _pricing_id: string }
+        Returns: string
       }
       create_notification: {
         Args: {

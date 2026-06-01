@@ -9,6 +9,9 @@ import { toast } from "sonner";
 import { ReportDialog } from "./ReportDialog";
 import { RecommendDialog } from "./RecommendDialog";
 import { postTypeMap, type PostTypeValue } from "@/data/postTypes";
+import { useActiveBoosts } from "@/hooks/use-boosts";
+import { BoostBadge } from "@/components/BoostBadge";
+import { BoostButton } from "@/components/BoostButton";
 
 export interface PostRow {
   id: string;
@@ -37,6 +40,8 @@ export function PostCard({ post, onChanged }: Props) {
   const [newComment, setNewComment] = useState("");
   const [reportOpen, setReportOpen] = useState(false);
   const [recOpen, setRecOpen] = useState(false);
+  const { boosts, refresh: refreshBoosts, has: hasBoost } = useActiveBoosts("post", post.id);
+
 
   useEffect(() => {
     (async () => {
@@ -137,6 +142,7 @@ export function PostCard({ post, onChanged }: Props) {
         <div className="flex flex-wrap items-center gap-1">
           {ptMeta && <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${ptMeta.color}`}>{ptMeta.label}</span>}
           {post.featured && <span className="rounded-full bg-orange/10 px-2 py-0.5 text-xs font-medium text-orange">Featured</span>}
+          {boosts.map((b) => <BoostBadge key={b.id} type={b.boost_type} />)}
           {post.hidden && <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive">Hidden</span>}
         </div>
       </header>
@@ -168,6 +174,21 @@ export function PostCard({ post, onChanged }: Props) {
           <ActionBtn onClick={share} icon={<Share2 className="h-4 w-4" />} label="Share" />
         </div>
         <div className="flex items-center gap-1">
+          {user?.id === post.provider_user_id && (() => {
+            const isCompleted = post.post_type === "completed_job" || post.post_type === "before_after";
+            return (
+              <BoostButton
+                boostType={isCompleted ? "promote_completed_work" : "feature_post"}
+                entityType="post"
+                entityId={post.id}
+                label={isCompleted ? "Promote" : "Feature"}
+                isActive={hasBoost("feature_post") || hasBoost("promote_completed_work")}
+                dialogTitle={isCompleted ? "Promote this completed work" : "Feature this post"}
+                dialogDescription="Highlight this post across Tuungane so more people see it."
+                onActivated={refreshBoosts}
+              />
+            );
+          })()}
           <ActionBtn onClick={() => { if (requireAuth()) setReportOpen(true); }} icon={<Flag className="h-4 w-4" />} label="" small />
           {user?.id === post.provider_user_id && <ActionBtn onClick={deletePost} icon={<Trash2 className="h-4 w-4 text-destructive" />} label="" small />}
           {isModerator && <ActionBtn onClick={hidePost} icon={<EyeOff className="h-4 w-4 text-amber-600" />} label="" small />}
