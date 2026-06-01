@@ -83,6 +83,17 @@ function UserProfile() {
     }
     setRecs((rRes.data ?? []).map((r) => ({ ...r, profile: pm.get(r.user_id) })));
     setReviews((vRes.data ?? []).map((r) => ({ ...r, profile: pm.get(r.user_id) })));
+
+    const { data: fbRes } = await (supabase as any).from("service_feedback")
+      .select("id,rating,review_text,service_provided,created_at,customer_id,would_recommend")
+      .eq("provider_id", id).eq("is_visible", true).order("created_at", { ascending: false });
+    const fbList = (fbRes ?? []) as Array<{ id: string; rating: number; review_text: string; service_provided: string; created_at: string; customer_id: string; would_recommend: boolean }>;
+    const fbIds = Array.from(new Set(fbList.map((f) => f.customer_id).filter((x) => !pm.has(x))));
+    if (fbIds.length) {
+      const { data: ps3 } = await supabase.from("profiles").select("id,full_name,avatar_url").in("id", fbIds);
+      (ps3 ?? []).forEach((p) => pm.set(p.id, { full_name: p.full_name, avatar_url: p.avatar_url }));
+    }
+    setFeedback(fbList.map((f) => ({ ...f, profile: pm.get(f.customer_id) })));
   };
 
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [id]);
