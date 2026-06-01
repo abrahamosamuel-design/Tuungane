@@ -175,13 +175,13 @@ function UserProfile() {
           </div>
         )}
         {/* Header card */}
-        <div className="-mt-12 rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-elevated)] sm:p-6">
+        <div className="relative z-10 -mt-12 rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-elevated)] sm:-mt-16 sm:p-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div className="flex items-start gap-4">
-              <div className="-mt-12 rounded-full border-4 border-card bg-card sm:-mt-16">
+            <div className="flex flex-col items-center gap-3 text-center sm:flex-row sm:items-start sm:gap-4 sm:text-left">
+              <div className="-mt-16 shrink-0 rounded-full border-4 border-card bg-card sm:-mt-20">
                 <Avatar name={profile.full_name} url={profile.avatar_url} size={96} />
               </div>
-              <div className="flex-1">
+              <div className="flex-1 min-w-0">
                 <h1 className="flex flex-wrap items-center gap-2 font-display text-2xl font-bold text-navy">
                   {sp?.business_name || profile.full_name}
                   {(sp?.verified === "verified" || sp?.verified === "featured") && (
