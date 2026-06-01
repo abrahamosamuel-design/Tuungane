@@ -8,6 +8,8 @@ import { PostCard, type PostRow } from "@/components/social/PostCard";
 import { categories } from "@/data/categories";
 import { MyRequestsSummary } from "@/components/MyRequestsSummary";
 import { MatchingRequestsSection } from "@/components/MatchingRequestsSection";
+import { ContactedProvidersList } from "@/components/ContactedProvidersList";
+import { ProviderContactsList } from "@/components/ProviderContactsList";
 import { toast } from "sonner";
 
 
@@ -103,6 +105,7 @@ function Dashboard() {
         <div className="mt-6 space-y-4">
           <MyRequestsSummary />
           {profile?.is_provider && <MatchingRequestsSection />}
+          {profile?.is_provider ? <ProviderContactsList /> : <ContactedProvidersList />}
         </div>
 
 

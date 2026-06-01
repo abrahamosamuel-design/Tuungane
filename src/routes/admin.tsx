@@ -12,6 +12,7 @@ import { OverviewTab } from "@/components/admin/OverviewTab";
 import { BusinessesAdminTab } from "@/components/admin/BusinessesAdminTab";
 import { DisputesAdminTab } from "@/components/admin/DisputesAdminTab";
 import { OpportunitiesAdminTab } from "@/components/admin/OpportunitiesAdminTab";
+import { ContactAnalyticsTab } from "@/components/admin/ContactAnalyticsTab";
 import { officialPostTypeMap, type OfficialAccountRow, type OfficialPostRow } from "@/data/officialPostTypes";
 import { timeAgo } from "@/lib/format";
 import { toast } from "sonner";
@@ -26,7 +27,7 @@ type Tab =
   | "users" | "providers" | "businesses"
   | "opportunities" | "requests" | "posts" | "recs"
   | "reports" | "disputes"
-  | "credits" | "official";
+  | "credits" | "official" | "contact";
 
 const TAB_GROUPS: { label: string; tabs: { id: Tab; label: string }[] }[] = [
   { label: "Home", tabs: [{ id: "overview", label: "Overview" }] },
@@ -44,6 +45,7 @@ const TAB_GROUPS: { label: string; tabs: { id: Tab; label: string }[] }[] = [
   { label: "Trust & Safety", tabs: [
     { id: "reports", label: "Reports" },
     { id: "disputes", label: "Disputes" },
+    { id: "contact", label: "Contact gating" },
   ]},
   { label: "Operations", tabs: [
     { id: "credits", label: "Credits & Boosts" },
@@ -102,6 +104,7 @@ function Admin() {
           {tab === "disputes" && <DisputesAdminTab />}
           {tab === "credits" && <CreditsAdminTab />}
           {tab === "official" && <OfficialTabContent />}
+          {tab === "contact" && <ContactAnalyticsTab />}
         </div>
       </section>
     </Layout>
