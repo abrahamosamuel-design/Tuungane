@@ -383,21 +383,25 @@ function OfficialTabContent() {
       {sub === "claims" && (
         <div className="space-y-2">
           {claims.length === 0 && <p className="text-sm text-muted-foreground">No claim requests yet.</p>}
+          {claims.filter((c) => c.status === "pending").length === 0 && claims.length > 0 && (
+            <p className="text-xs text-muted-foreground">No pending claims. Showing history below.</p>
+          )}
           {claims.map((c) => (
-            <div key={c.id} className="rounded-xl border border-border bg-card p-3">
-              <div className="flex items-center justify-between">
-                <div>
+            <div key={c.id} className={`rounded-xl border bg-card p-3 ${c.status === "pending" ? "border-orange/50" : "border-border opacity-80"}`}>
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
                   <p className="font-semibold text-navy">{c.full_name} <span className="ml-2 text-xs text-muted-foreground">{c.phone_number}</span></p>
-                  <p className="text-xs text-muted-foreground">{c.relationship_to_profile} · {timeAgo(c.created_at)} · <span className="font-medium">{c.status}</span></p>
+                  <p className="text-xs text-muted-foreground">{c.relationship_to_profile} · {timeAgo(c.created_at)} · <span className={`font-medium ${c.status === "pending" ? "text-orange" : c.status === "approved" ? "text-green" : "text-destructive"}`}>{c.status}</span></p>
+                  <Link to="/u/$id" params={{ id: c.service_profile_user_id }} className="mt-1 inline-block text-[11px] text-orange underline">View claimed profile →</Link>
                 </div>
                 {c.status === "pending" && (
-                  <div className="flex gap-1 text-xs">
+                  <div className="flex shrink-0 gap-1 text-xs">
                     <button onClick={() => reviewClaim(c.id, c.requester_user_id, c.service_profile_user_id, "approved")} className="rounded bg-green/10 px-2 py-1 text-green">Approve</button>
                     <button onClick={() => reviewClaim(c.id, c.requester_user_id, c.service_profile_user_id, "rejected")} className="rounded bg-destructive/10 px-2 py-1 text-destructive">Reject</button>
                   </div>
                 )}
               </div>
-              {c.explanation && <p className="mt-1 text-xs text-foreground/80">{c.explanation}</p>}
+              {c.explanation && <p className="mt-2 text-xs text-foreground/80">{c.explanation}</p>}
               {c.supporting_file_url && <a href={c.supporting_file_url} target="_blank" rel="noreferrer" className="mt-1 inline-block text-[10px] text-orange underline">View supporting file</a>}
             </div>
           ))}
