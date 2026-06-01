@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,30 +21,37 @@ type Tx = { id: string; transaction_type: string; amount: number; reason: string
 type Req = { id: string; package_name: string; credits_requested: number; amount_ugx: number; status: string; admin_note: string | null; created_at: string };
 
 const fmtUgx = (n: number) => `${n.toLocaleString()} UGX`;
+const loginSearch = { tab: "login", redirect: "/credits" } as never;
 
 function CreditsPage() {
-  const { user, loading } = useAuth();
-  const nav = useNavigate();
-  const { balance, refresh } = useCreditWallet();
+  const { user } = useAuth();
+  const { balance } = useCreditWallet();
   const [pkgs, setPkgs] = useState<Pkg[]>([]);
   const [txs, setTxs] = useState<Tx[]>([]);
   const [reqs, setReqs] = useState<Req[]>([]);
   const [submitting, setSubmitting] = useState<string | null>(null);
 
-  useEffect(() => { if (!loading && !user) nav({ to: "/login", search: { tab: "login", redirect: "/credits" } as never }); }, [loading, user, nav]);
+  const loadPackages = async () => {
+    const { data } = await supabase.from("credit_packages").select("*").eq("active", true).order("sort_order");
+    setPkgs(data ?? []);
+  };
 
-  const load = async () => {
+  const loadPersonal = async () => {
     if (!user) return;
-    const [{ data: p }, { data: t }, { data: r }] = await Promise.all([
-      supabase.from("credit_packages").select("*").eq("active", true).order("sort_order"),
+    const [{ data: t }, { data: r }] = await Promise.all([
       supabase.from("credit_transactions").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(50),
       supabase.from("credit_purchase_requests").select("*").eq("user_id", user.id).order("created_at", { ascending: false }).limit(20),
     ]);
-    setPkgs(p ?? []);
     setTxs(t ?? []);
     setReqs(r ?? []);
   };
-  useEffect(() => { if (user) load(); }, [user]);
+
+  useEffect(() => { loadPackages(); }, []);
+  useEffect(() => {
+    if (user) loadPersonal();
+    else { setTxs([]); setReqs([]); }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   const requestPurchase = async (pkg: Pkg) => {
     if (!user) return;
@@ -56,15 +63,15 @@ function CreditsPage() {
     setSubmitting(null);
     if (error) { toast.error(error.message); return; }
     toast.success("Purchase request submitted. An admin will review it shortly.");
-    load();
+    loadPersonal();
   };
 
   const cancelRequest = async (id: string) => {
     const { error } = await supabase.from("credit_purchase_requests").update({ status: "cancelled" }).eq("id", id);
-    if (error) toast.error(error.message); else { toast.success("Request cancelled"); load(); }
+    if (error) toast.error(error.message); else { toast.success("Request cancelled"); loadPersonal(); }
   };
 
-  if (!user) return null;
+  const isLoggedIn = !!user;
 
   return (
     <Layout>
@@ -74,12 +81,22 @@ function CreditsPage() {
           <div className="flex flex-wrap items-end justify-between gap-6">
             <div>
               <div className="flex items-center gap-2 text-sm font-medium text-orange uppercase tracking-wide"><Coins className="h-4 w-4" /> Tuungane Credits</div>
-              <h1 className="mt-2 text-4xl font-bold text-navy">{(balance ?? 0).toLocaleString()} <span className="text-xl font-semibold text-muted-foreground">credits</span></h1>
+              {isLoggedIn ? (
+                <h1 className="mt-2 text-4xl font-bold text-navy">{(balance ?? 0).toLocaleString()} <span className="text-xl font-semibold text-muted-foreground">credits</span></h1>
+              ) : (
+                <h1 className="mt-2 text-4xl font-bold text-navy">Credits</h1>
+              )}
               <p className="mt-2 max-w-xl text-sm text-muted-foreground">Use credits to boost your profile, feature posts, mark requests urgent, and promote opportunities. <Link to="/credits" hash="how" className="text-orange underline">How to earn & spend</Link>.</p>
             </div>
             <div className="flex flex-col items-end gap-1">
               <span className="text-xs text-muted-foreground">Free to join · Basic use stays free</span>
-              <a href="#packages" className="inline-flex items-center rounded-full bg-orange px-5 py-2.5 text-sm font-semibold text-orange-foreground shadow-sm hover:brightness-110">Buy credits</a>
+              {isLoggedIn ? (
+                <a href="#packages" className="inline-flex items-center rounded-full bg-orange px-5 py-2.5 text-sm font-semibold text-orange-foreground shadow-sm hover:brightness-110">Buy credits</a>
+              ) : (
+                <Link to="/login" search={loginSearch} className="inline-flex items-center rounded-full bg-orange px-5 py-2.5 text-sm font-semibold text-orange-foreground shadow-sm hover:brightness-110">
+                  Log in to buy credits
+                </Link>
+              )}
             </div>
           </div>
         </div>
@@ -99,13 +116,19 @@ function CreditsPage() {
                 <div className="text-sm font-medium text-muted-foreground">{p.name}</div>
                 <div className="mt-2 text-3xl font-bold text-navy">{p.credits} <span className="text-base font-medium text-muted-foreground">credits</span></div>
                 <div className="mt-1 text-sm font-semibold text-orange">{fmtUgx(p.amount_ugx)}</div>
-                <button
-                  disabled={submitting === p.id}
-                  onClick={() => requestPurchase(p)}
-                  className="mt-4 w-full rounded-full bg-navy px-4 py-2 text-sm font-semibold text-white hover:bg-navy/90 disabled:opacity-60"
-                >
-                  {submitting === p.id ? "Submitting…" : "Request purchase"}
-                </button>
+                {isLoggedIn ? (
+                  <button
+                    disabled={submitting === p.id}
+                    onClick={() => requestPurchase(p)}
+                    className="mt-4 w-full rounded-full bg-navy px-4 py-2 text-sm font-semibold text-white hover:bg-navy/90 disabled:opacity-60"
+                  >
+                    {submitting === p.id ? "Submitting…" : "Request purchase"}
+                  </button>
+                ) : (
+                  <Link to="/login" search={loginSearch} className="mt-4 block w-full rounded-full bg-navy px-4 py-2 text-center text-sm font-semibold text-white hover:bg-navy/90">
+                    Log in to buy
+                  </Link>
+                )}
               </div>
             ))}
           </div>
@@ -113,7 +136,7 @@ function CreditsPage() {
         </div>
 
         {/* Purchase requests */}
-        {reqs.length > 0 && (
+        {isLoggedIn && reqs.length > 0 && (
           <div>
             <h2 className="mb-3 text-xl font-bold text-navy">Your purchase requests</h2>
             <div className="overflow-hidden rounded-xl border border-border">
@@ -169,7 +192,14 @@ function CreditsPage() {
         {/* Transactions */}
         <div>
           <h2 className="mb-3 text-xl font-bold text-navy">Transaction history</h2>
-          {txs.length === 0 ? (
+          {!isLoggedIn ? (
+            <div className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
+              <p className="mb-3">Log in to view your credit activity.</p>
+              <Link to="/login" search={loginSearch} className="inline-flex items-center rounded-full bg-navy px-4 py-2 text-sm font-semibold text-white hover:bg-navy/90">
+                Log in
+              </Link>
+            </div>
+          ) : txs.length === 0 ? (
             <div className="rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">No credit activity yet.</div>
           ) : (
             <div className="overflow-hidden rounded-xl border border-border">
