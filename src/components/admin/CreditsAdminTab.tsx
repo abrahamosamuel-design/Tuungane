@@ -39,7 +39,7 @@ export function CreditsAdminTab() {
   };
   const reject = async (id: string) => {
     const note = prompt("Reason for rejection (optional):") ?? undefined;
-    const { error } = await supabase.rpc("reject_purchase_request", { _request_id: id, _admin_note: note || null });
+    const { error } = await supabase.rpc("reject_purchase_request", { _request_id: id, _admin_note: note || undefined });
     if (error) toast.error(error.message); else { toast.success("Rejected"); load(); }
   };
   const addCredits = async () => {
