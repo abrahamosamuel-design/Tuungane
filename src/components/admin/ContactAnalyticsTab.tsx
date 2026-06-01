@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Activity, Phone, MessageCircle, Mail, Eye, AlertTriangle, Settings as SettingsIcon } from "lucide-react";
+import { Activity, Phone, MessageCircle, Mail, Eye, AlertTriangle, Settings as SettingsIcon, Download } from "lucide-react";
 import { timeAgo } from "@/lib/format";
 
 const STATUSES = ["requested", "accepted", "in_progress", "completed", "cancelled", "disputed"] as const;
