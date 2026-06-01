@@ -32,6 +32,14 @@ function CreditsPage() {
   const [submitting, setSubmitting] = useState<string | null>(null);
   const packagesLoadedRef = useRef(false);
   const personalLoadedForUserRef = useRef<string | null>(null);
+  const [debug, setDebug] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return new URLSearchParams(window.location.search).get("debug") === "1"
+      || window.localStorage.getItem("credits:debug") === "1";
+  });
+  const [realtimeStatus, setRealtimeStatus] = useState<string>("idle");
+  const [lastEventAt, setLastEventAt] = useState<string | null>(null);
+  const [lastEventKind, setLastEventKind] = useState<string | null>(null);
 
   const loadPackages = async () => {
     const { data } = await supabase.from("credit_packages").select("*").eq("active", true).order("sort_order");
