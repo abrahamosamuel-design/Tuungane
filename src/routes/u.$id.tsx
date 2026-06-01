@@ -123,6 +123,25 @@ function UserProfile() {
       </div>
 
       <section className="mx-auto max-w-3xl px-4">
+        {sp?.seeded_by_official && sp.seeded_status !== "claimed" && (
+          <div className="-mt-6 mb-3 flex flex-col gap-3 rounded-2xl border border-orange/40 bg-orange/5 p-4 text-sm sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-3">
+              <BadgeCheck className="mt-0.5 h-5 w-5 shrink-0 text-orange" />
+              <div>
+                <p className="font-semibold text-navy">
+                  Added by Tuungane Official
+                  {sp.seeded_status === "claim_pending" && <span className="ml-2 rounded-full bg-orange/20 px-2 py-0.5 text-[10px] font-semibold text-orange">Claim under review</span>}
+                </p>
+                <p className="mt-0.5 text-xs text-muted-foreground">This profile was added by Tuungane to help customers discover this provider. If this is your business, claim it to manage it directly.</p>
+              </div>
+            </div>
+            {!isOwnDisabled(user?.id, id) && sp.seeded_status === "unclaimed" && (
+              <button onClick={() => setClaimOpen(true)} className="shrink-0 rounded-full bg-orange px-4 py-2 text-xs font-semibold text-orange-foreground hover:brightness-110">
+                Claim this profile
+              </button>
+            )}
+          </div>
+        )}
         {/* Header card */}
         <div className="-mt-12 rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-elevated)] sm:p-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
