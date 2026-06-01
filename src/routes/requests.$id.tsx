@@ -278,7 +278,34 @@ function RequestDetailsPage() {
           <p>Customer: <span className="font-semibold text-navy">{customer?.full_name ?? "—"}</span></p>
         </div>
       </section>
+
+      {(() => {
+        // Choose the most relevant single primary CTA for mobile.
+        if (!isCustomer && canRespond) {
+          return (
+            <MobileActionBar>
+              <button onClick={() => setResponseDialogOpen(true)} className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-orange px-4 py-3 text-sm font-semibold text-orange-foreground"><Send className="h-4 w-4" /> Respond to request</button>
+            </MobileActionBar>
+          );
+        }
+        if (isCustomer && req.status === "in_progress" && !req.customer_confirmed_completion) {
+          return (
+            <MobileActionBar>
+              <button onClick={customerConfirmCompletion} className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-orange px-4 py-3 text-sm font-semibold text-orange-foreground"><CheckCircle2 className="h-4 w-4" /> Confirm completion</button>
+            </MobileActionBar>
+          );
+        }
+        if (isCustomer && req.status === "completed" && !hasFeedback) {
+          return (
+            <MobileActionBar>
+              <button onClick={() => setFeedbackOpen(true)} className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-orange px-4 py-3 text-sm font-semibold text-orange-foreground"><Star className="h-4 w-4" /> Leave verified review</button>
+            </MobileActionBar>
+          );
+        }
+        return null;
+      })()}
     </Layout>
+
   );
 }
 
