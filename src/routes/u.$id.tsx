@@ -213,8 +213,11 @@ function UserProfile() {
                 <button onClick={() => setRevOpen(true)} className="rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-navy hover:border-orange">Review</button>
               </>
             )}
-            {sp?.whatsapp && <a href={`https://wa.me/${sp.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-full bg-green px-4 py-2 text-xs font-semibold text-green-foreground"><Phone className="h-3 w-3" /> WhatsApp</a>}
-            {sp?.phone && <a href={`tel:${sp.phone}`} className="inline-flex items-center gap-1 rounded-full bg-orange px-4 py-2 text-xs font-semibold text-orange-foreground"><Phone className="h-3 w-3" /> Call</a>}
+            {!isOwn && isProvider && !gate.unlocked && (sp?.whatsapp || sp?.phone) && (
+              <button onClick={() => setContactModalOpen(true)} className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-navy hover:border-orange">
+                <Lock className="h-3 w-3" /> Contact provider
+              </button>
+            )}
             <button onClick={share} className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-3 py-2 text-xs font-semibold text-navy hover:border-orange"><Share2 className="h-3 w-3" /> Share</button>
             {isOwn && isProvider && (
               <>
