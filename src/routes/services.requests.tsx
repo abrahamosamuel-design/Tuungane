@@ -131,7 +131,7 @@ function ServiceRequestsFeed() {
           <p className="mt-3 rounded-2xl border border-dashed border-border bg-card p-10 text-center text-sm text-muted-foreground">No open requests match these filters.</p>
         )}
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          {filtered.map((r) => <FeedCard key={r.id} r={r} />)}
+          {filtered.map((r) => <FeedCard key={r.id} r={r} highlight={isBoostedReq(r.id)} />)}
         </div>
       </section>
     </Layout>
