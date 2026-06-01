@@ -29,6 +29,9 @@ function Opportunities() {
   const [withDeadline, setWithDeadline] = useState(false);
   const [items, setItems] = useState<OpportunityRow[]>([]);
   const [featured, setFeatured] = useState<OpportunityRow[]>([]);
+  const [officialOpps, setOfficialOpps] = useState<OfficialPostRow[]>([]);
+  const [officialAccount, setOfficialAccount] = useState<OfficialAccountRow | null>(null);
+  const [source, setSource] = useState<"all" | "official" | "users">("all");
   const [loading, setLoading] = useState(true);
 
   const category = categories.find((c) => c.slug === cat);
