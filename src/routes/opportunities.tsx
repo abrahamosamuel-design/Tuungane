@@ -9,6 +9,7 @@ import { opportunityTypes } from "@/data/opportunities";
 import { OpportunityCard, type OpportunityRow } from "@/components/OpportunityCard";
 import { OfficialPostCard } from "@/components/OfficialPostCard";
 import type { OfficialAccountRow, OfficialPostRow } from "@/data/officialPostTypes";
+import { EmptyState } from "@/components/EmptyState";
 
 export const Route = createFileRoute("/opportunities")({
   head: () => ({
@@ -183,10 +184,7 @@ function Opportunities() {
                       <h2 className="mb-3 font-display text-lg font-bold text-navy">Recent opportunities</h2>
                       {loading && <p className="text-sm text-muted-foreground">Loading…</p>}
                       {!loading && sortedItems.length === 0 && (
-                        <div className="rounded-2xl border border-dashed border-border bg-card p-10 text-center">
-                          <p className="font-semibold text-navy">No opportunities yet</p>
-                          <p className="mt-1 text-sm text-muted-foreground">Try clearing filters, or be the first to post one.</p>
-                        </div>
+                        <EmptyState icon={Plus} title="No opportunities yet" description="Try clearing filters, or be the first to post a job, gig, or volunteer role." action={{ label: "Post an opportunity", to: "/opportunities/new" }} />
                       )}
                       <div className="grid gap-3 sm:grid-cols-2">
                         {sortedItems.map((o) => <OpportunityCard key={o.id} o={o} />)}
