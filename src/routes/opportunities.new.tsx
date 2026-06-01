@@ -99,6 +99,7 @@ function NewOpportunity() {
     else { toast.success("Opportunity submitted for review"); nav({ to: "/dashboard" }); }
   };
 
+  if (loading) return <Layout><div className="mx-auto max-w-2xl px-4 py-16 text-center text-sm text-muted-foreground">Loading…</div></Layout>;
   if (!user) return null;
 
   return (
