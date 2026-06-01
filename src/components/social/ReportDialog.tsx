@@ -5,7 +5,7 @@ import { toast } from "sonner";
 
 const REASONS = ["Fake profile", "Fraud or scam", "Abusive content", "Wrong category", "Misleading information", "Other"];
 
-export function ReportDialog({ open, onClose, targetType, targetId }: { open: boolean; onClose: () => void; targetType: "post" | "comment" | "provider" | "recommendation" | "review"; targetId: string }) {
+export function ReportDialog({ open, onClose, targetType, targetId }: { open: boolean; onClose: () => void; targetType: "post" | "comment" | "provider" | "recommendation" | "review" | "service_request" | "service_feedback"; targetId: string }) {
   const { user } = useAuth();
   const [reason, setReason] = useState(REASONS[0]);
   const [details, setDetails] = useState("");
