@@ -15,9 +15,13 @@ import { BoostButton } from "@/components/BoostButton";
 import { MobileActionBar } from "@/components/MobileActionBar";
 
 
+import { RouteErrorCard, RouteNotFoundCard } from "@/lib/route-boundaries";
+
 export const Route = createFileRoute("/opportunities/$id")({
   head: () => ({ meta: [{ title: "Opportunity — Tuungane" }] }),
   component: OpportunityDetails,
+  errorComponent: ({ error, reset }) => <RouteErrorCard error={error} reset={reset} title="Couldn't load this opportunity" />,
+  notFoundComponent: () => <RouteNotFoundCard title="Opportunity not found" message="This opportunity may have been removed or is no longer available." homeHref="/opportunities" homeLabel="Browse opportunities" />,
 });
 
 interface OppFull extends OpportunityRow {
