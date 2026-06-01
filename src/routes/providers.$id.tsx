@@ -1,8 +1,9 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
-import { ArrowLeft, BadgeCheck, Sparkles, Star, MapPin, Phone, MessageCircle, Mail, Heart, Share2, Flag, Bookmark, Users } from "lucide-react";
+import { ArrowLeft, BadgeCheck, Sparkles, Star, MapPin, Phone, MessageCircle, Mail, Heart, Share2, Flag, Bookmark, Users, ClipboardList } from "lucide-react";
 import { Layout } from "@/components/Layout";
 import { getProvider, type Provider } from "@/data/providers";
 import { getCategory } from "@/data/categories";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/providers/$id")({
   loader: ({ params }) => {
