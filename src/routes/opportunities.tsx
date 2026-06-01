@@ -157,30 +157,45 @@ function Opportunities() {
               </div>
             )}
 
-            {source !== "official" && featured.length > 0 && (
-              <div className="mb-6">
-                <h2 className="mb-3 font-display text-lg font-bold text-navy">Featured opportunities</h2>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {featured.map((o) => <OpportunityCard key={o.id} o={o} />)}
-                </div>
-              </div>
-            )}
+            {(() => {
+              const boostedItems = items.filter((o) => isBoostedOpp(o.id));
+              const featuredMerged = [
+                ...boostedItems,
+                ...featured.filter((f) => !boostedOppIds.has(f.id) && !boostedItems.some((b) => b.id === f.id)),
+              ];
+              const sortedItems = [
+                ...items.filter((o) => isBoostedOpp(o.id)),
+                ...items.filter((o) => !isBoostedOpp(o.id)),
+              ];
+              return (
+                <>
+                  {source !== "official" && featuredMerged.length > 0 && (
+                    <div className="mb-6">
+                      <h2 className="mb-3 font-display text-lg font-bold text-navy">Featured opportunities</h2>
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        {featuredMerged.slice(0, 6).map((o) => <OpportunityCard key={o.id} o={o} />)}
+                      </div>
+                    </div>
+                  )}
 
-            {source !== "official" && (
-              <>
-                <h2 className="mb-3 font-display text-lg font-bold text-navy">Recent opportunities</h2>
-                {loading && <p className="text-sm text-muted-foreground">Loading…</p>}
-                {!loading && items.length === 0 && (
-                  <div className="rounded-2xl border border-dashed border-border bg-card p-10 text-center">
-                    <p className="font-semibold text-navy">No opportunities yet</p>
-                    <p className="mt-1 text-sm text-muted-foreground">Try clearing filters, or be the first to post one.</p>
-                  </div>
-                )}
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {items.map((o) => <OpportunityCard key={o.id} o={o} />)}
-                </div>
-              </>
-            )}
+                  {source !== "official" && (
+                    <>
+                      <h2 className="mb-3 font-display text-lg font-bold text-navy">Recent opportunities</h2>
+                      {loading && <p className="text-sm text-muted-foreground">Loading…</p>}
+                      {!loading && sortedItems.length === 0 && (
+                        <div className="rounded-2xl border border-dashed border-border bg-card p-10 text-center">
+                          <p className="font-semibold text-navy">No opportunities yet</p>
+                          <p className="mt-1 text-sm text-muted-foreground">Try clearing filters, or be the first to post one.</p>
+                        </div>
+                      )}
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        {sortedItems.map((o) => <OpportunityCard key={o.id} o={o} />)}
+                      </div>
+                    </>
+                  )}
+                </>
+              );
+            })()}
           </div>
         </div>
       </section>
