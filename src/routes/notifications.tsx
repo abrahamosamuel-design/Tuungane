@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { Avatar } from "@/components/social/Avatar";
 import { timeAgo } from "@/lib/format";
-import { Heart, MessageCircle, ThumbsUp, Star, UserPlus } from "lucide-react";
+import { Heart, MessageCircle, ThumbsUp, Star, UserPlus, ClipboardList, CheckCircle2, PlayCircle, Send, ShieldCheck, AlertTriangle, XCircle } from "lucide-react";
 
 export const Route = createFileRoute("/notifications")({
   head: () => ({ meta: [{ title: "Notifications — Tuungane" }] }),
@@ -17,14 +17,29 @@ type Notif = {
   actor?: { full_name: string; avatar_url: string | null };
 };
 
+const JOB_TYPES = new Set([
+  "request_new", "request_accepted", "request_in_progress", "request_completed",
+  "request_cancelled", "request_response_new", "request_response_chosen",
+  "feedback_received", "dispute_opened",
+]);
+
 const iconFor = (t: string) => {
   switch (t) {
     case "follow": return <UserPlus className="h-4 w-4 text-navy" />;
     case "like": return <Heart className="h-4 w-4 text-orange" />;
     case "comment": return <MessageCircle className="h-4 w-4 text-navy" />;
     case "recommendation": return <ThumbsUp className="h-4 w-4 text-green" />;
-    case "review": return <Star className="h-4 w-4 text-orange" />;
-    default: return null;
+    case "review":
+    case "feedback_received": return <ShieldCheck className="h-4 w-4 text-green" />;
+    case "request_new":
+    case "request_response_new": return <Send className="h-4 w-4 text-orange" />;
+    case "request_accepted":
+    case "request_response_chosen": return <ClipboardList className="h-4 w-4 text-orange" />;
+    case "request_in_progress": return <PlayCircle className="h-4 w-4 text-navy" />;
+    case "request_completed": return <CheckCircle2 className="h-4 w-4 text-green" />;
+    case "request_cancelled": return <XCircle className="h-4 w-4 text-muted-foreground" />;
+    case "dispute_opened": return <AlertTriangle className="h-4 w-4 text-destructive" />;
+    default: return <Star className="h-4 w-4 text-muted-foreground" />;
   }
 };
 
@@ -33,6 +48,7 @@ function NotificationsPage() {
   const nav = useNavigate();
   const [items, setItems] = useState<Notif[]>([]);
   const [busy, setBusy] = useState(true);
+  const [filter, setFilter] = useState<"all" | "jobs" | "social">("all");
 
   useEffect(() => {
     if (!loading && !user) nav({ to: "/login", search: { tab: "login", redirect: "/notifications" } as never });
@@ -56,10 +72,18 @@ function NotificationsPage() {
   useEffect(() => { if (user) load(); /* eslint-disable-next-line */ }, [user?.id]);
 
   const hrefFor = (n: Notif) => {
+    if (n.target_type === "service_request" && n.target_id) return `/requests/${n.target_id}`;
+    if (n.target_type === "service_feedback" && user) return `/u/${user.id}`;
     if (n.target_type === "profile" && n.target_id) return `/u/${n.target_id}`;
     if (n.target_type === "post" && user) return `/u/${user.id}`;
     return "/feed";
   };
+
+  const filtered = filter === "all"
+    ? items
+    : filter === "jobs"
+      ? items.filter((n) => JOB_TYPES.has(n.type))
+      : items.filter((n) => !JOB_TYPES.has(n.type));
 
   if (!user) return null;
   return (
@@ -67,15 +91,31 @@ function NotificationsPage() {
       <section className="mx-auto max-w-2xl px-4 py-8">
         <h1 className="font-display text-3xl font-bold text-navy">Notifications</h1>
         <p className="mt-1 text-sm text-muted-foreground">Activity on your posts, profile, and follows.</p>
-        <div className="mt-6 space-y-2">
+        <p className="mt-1 text-sm text-muted-foreground">Activity on your posts, profile, follows, and service jobs.</p>
+
+        <div className="mt-4 inline-flex rounded-full border border-border bg-card p-1">
+          {([
+            { v: "all", label: "All" },
+            { v: "jobs", label: "Job updates" },
+            { v: "social", label: "Social" },
+          ] as const).map((o) => (
+            <button key={o.v} onClick={() => setFilter(o.v)} className={`rounded-full px-3 py-1 text-xs font-semibold ${filter === o.v ? "bg-orange text-orange-foreground" : "text-muted-foreground"}`}>{o.label}</button>
+          ))}
+        </div>
+
+        <div className="mt-5 space-y-2">
           {busy && <p className="text-sm text-muted-foreground">Loading…</p>}
-          {!busy && items.length === 0 && (
+          {!busy && filtered.length === 0 && (
             <div className="rounded-2xl border border-dashed border-border bg-card p-10 text-center">
-              <p className="font-semibold text-navy">No notifications yet</p>
-              <p className="mt-1 text-sm text-muted-foreground">When people follow you, like your posts, or recommend you, it'll show up here.</p>
+              <p className="font-semibold text-navy">{filter === "all" ? "No notifications yet" : filter === "jobs" ? "No job updates yet" : "No social updates yet"}</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {filter === "jobs"
+                  ? "Activity on your service requests and jobs will show up here."
+                  : "When people follow you, like your posts, or recommend you, it'll show up here."}
+              </p>
             </div>
           )}
-          {items.map((n) => (
+          {filtered.map((n) => (
             <a
               key={n.id}
               href={hrefFor(n)}

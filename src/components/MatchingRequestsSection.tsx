@@ -32,9 +32,10 @@ export function MatchingRequestsSection() {
         <Link to="/services/requests" className="inline-flex items-center gap-1 text-xs font-semibold text-orange hover:underline">Open feed <ArrowRight className="h-3 w-3" /></Link>
       </div>
       {items.length === 0 ? (
-        <p className="mt-4 rounded-xl border border-dashed border-border p-4 text-center text-sm text-muted-foreground">
-          No matching requests yet. Make sure your service profile category and town are set so customers can find you.
-        </p>
+        <div className="mt-4 rounded-xl border border-dashed border-border p-4 text-center text-sm text-muted-foreground">
+          <p>No matching requests right now.</p>
+          <p className="mt-2 text-xs">Update your category or service areas so customers can find you. <Link to="/me" className="font-semibold text-orange hover:underline">Edit profile</Link></p>
+        </div>
       ) : (
         <div className="mt-4 space-y-2">
           {items.slice(0, 5).map((r) => {
