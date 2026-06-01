@@ -1,10 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useCreditWallet } from "@/hooks/use-credits";
-import { Coins, Info, Check, Clock, X as XIcon } from "lucide-react";
+import { Coins, Info, Check, Clock, X as XIcon, Bug, RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { timeAgo } from "@/lib/format";
 
