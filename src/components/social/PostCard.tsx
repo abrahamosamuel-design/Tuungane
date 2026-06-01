@@ -174,18 +174,21 @@ export function PostCard({ post, onChanged }: Props) {
           <ActionBtn onClick={share} icon={<Share2 className="h-4 w-4" />} label="Share" />
         </div>
         <div className="flex items-center gap-1">
-          {user?.id === post.provider_user_id && (
-            <BoostButton
-              boostType={post.post_type === "completed_work" ? "promote_completed_work" : "feature_post"}
-              entityType="post"
-              entityId={post.id}
-              label={post.post_type === "completed_work" ? "Promote" : "Feature"}
-              isActive={hasBoost("feature_post") || hasBoost("promote_completed_work")}
-              dialogTitle={post.post_type === "completed_work" ? "Promote this completed work" : "Feature this post"}
-              dialogDescription="Highlight this post across Tuungane so more people see it."
-              onActivated={refreshBoosts}
-            />
-          )}
+          {user?.id === post.provider_user_id && (() => {
+            const isCompleted = post.post_type === "completed_job" || post.post_type === "before_after";
+            return (
+              <BoostButton
+                boostType={isCompleted ? "promote_completed_work" : "feature_post"}
+                entityType="post"
+                entityId={post.id}
+                label={isCompleted ? "Promote" : "Feature"}
+                isActive={hasBoost("feature_post") || hasBoost("promote_completed_work")}
+                dialogTitle={isCompleted ? "Promote this completed work" : "Feature this post"}
+                dialogDescription="Highlight this post across Tuungane so more people see it."
+                onActivated={refreshBoosts}
+              />
+            );
+          })()}
           <ActionBtn onClick={() => { if (requireAuth()) setReportOpen(true); }} icon={<Flag className="h-4 w-4" />} label="" small />
           {user?.id === post.provider_user_id && <ActionBtn onClick={deletePost} icon={<Trash2 className="h-4 w-4 text-destructive" />} label="" small />}
           {isModerator && <ActionBtn onClick={hidePost} icon={<EyeOff className="h-4 w-4 text-amber-600" />} label="" small />}
