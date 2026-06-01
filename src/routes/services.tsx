@@ -150,6 +150,30 @@ function Services() {
           ))}
         </div>
 
+        {featuredProviders.length > 0 && (
+          <div className="mt-4 rounded-2xl border border-orange/30 bg-orange/5 p-4">
+            <div className="mb-3 flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-orange" />
+              <span className="text-xs font-bold uppercase tracking-wider text-orange">Featured providers</span>
+              <span className="text-[10px] text-muted-foreground">Boosted with Tuungane Credits</span>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {featuredProviders.slice(0, 6).map((p) => {
+                const name = p.business_name || p.profile?.full_name || "Provider";
+                return (
+                  <Link key={p.user_id} to="/u/$id" params={{ id: p.user_id }} className="flex items-start gap-3 rounded-xl border border-orange/40 bg-card p-3 hover:border-orange">
+                    <img src={p.profile?.avatar_url || avatar(name)} alt={name} className="h-10 w-10 rounded-lg border border-border" />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold text-navy">{name}</p>
+                      <p className="truncate text-xs text-muted-foreground">{p.subcategory} · {p.town}</p>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {loadingReal && <p className="text-sm text-muted-foreground">Loading providers…</p>}
           {!loadingReal && realFiltered.map((p) => {
