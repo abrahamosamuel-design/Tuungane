@@ -149,10 +149,27 @@ function OpportunityDetails() {
           <aside className="space-y-4">
             <div className="rounded-2xl border border-border bg-card p-5">
               <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Posted by</p>
-              <p className="mt-1 font-semibold text-navy">{author?.full_name || "Tuungane user"}</p>
-              <p className="mt-0.5 text-xs capitalize text-muted-foreground">{o.poster_type}</p>
+              {business ? (
+                <Link to="/businesses/$slug" params={{ slug: business.slug }} className="mt-2 flex items-center gap-3 rounded-xl border border-border p-2 hover:border-orange">
+                  {business.logo_url ? (
+                    <img src={business.logo_url} alt="" className="h-10 w-10 rounded-lg object-cover" />
+                  ) : (
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-navy/10 text-navy"><Briefcase className="h-5 w-5" /></div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="flex items-center gap-1 truncate text-sm font-semibold text-navy">{business.name}{(business.verified === "verified" || business.verified === "featured") && <BadgeCheck className="h-3.5 w-3.5 text-green" />}</p>
+                    <p className="text-[11px] text-muted-foreground">Business page · {author?.full_name || "Tuungane user"}</p>
+                  </div>
+                </Link>
+              ) : (
+                <>
+                  <p className="mt-1 font-semibold text-navy">{author?.full_name || "Tuungane user"}</p>
+                  <p className="mt-0.5 text-xs capitalize text-muted-foreground">{o.poster_type}</p>
+                </>
+              )}
               {o.contact_email && <p className="mt-2 inline-flex items-center gap-1 text-xs text-muted-foreground"><Mail className="h-3 w-3" /> {o.contact_email}</p>}
             </div>
+
             <div className="rounded-2xl border border-orange/30 bg-orange/5 p-4 text-xs text-foreground/80">
               <p className="flex items-center gap-1 font-semibold text-orange"><ShieldAlert className="h-4 w-4" /> Safety note</p>
               <p className="mt-1">Please verify details before paying money, sharing sensitive information, or accepting work. Report suspicious opportunities to Tuungane.</p>
