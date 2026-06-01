@@ -12,6 +12,8 @@ import { toast } from "sonner";
 import { useActiveBoosts } from "@/hooks/use-boosts";
 import { BoostBadge } from "@/components/BoostBadge";
 import { BoostButton } from "@/components/BoostButton";
+import { MobileActionBar } from "@/components/MobileActionBar";
+
 
 export const Route = createFileRoute("/opportunities/$id")({
   head: () => ({ meta: [{ title: "Opportunity — Tuungane" }] }),
@@ -149,11 +151,18 @@ function OpportunityDetails() {
         )}
       </section>
 
+      <MobileActionBar>
+        <button onClick={() => setApplyOpen(true)} className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-orange px-4 py-3 text-sm font-semibold text-orange-foreground"><Send className="h-4 w-4" /> Apply</button>
+        {waLink && <a href={waLink} target="_blank" rel="noreferrer" aria-label="WhatsApp" className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-green text-white"><MessageCircle className="h-5 w-5" /></a>}
+        {o.contact_phone && <a href={`tel:${o.contact_phone}`} aria-label="Call" className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-border text-navy"><Phone className="h-5 w-5" /></a>}
+      </MobileActionBar>
+
       {applyOpen && <ApplyDialog oppId={id} oppTitle={o.title} onClose={() => setApplyOpen(false)} />}
       {reportOpen && <ReportDialog oppId={id} onClose={() => setReportOpen(false)} />}
     </Layout>
   );
 }
+
 
 function ApplyDialog({ oppId, oppTitle, onClose }: { oppId: string; oppTitle: string; onClose: () => void }) {
   const { user } = useAuth();

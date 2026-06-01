@@ -14,9 +14,10 @@ export function RequestFab() {
     <Link
       to="/services"
       aria-label="Request a service"
-      className="fixed bottom-24 right-4 z-40 inline-flex items-center gap-2 rounded-full bg-orange px-5 py-3 text-sm font-semibold text-orange-foreground shadow-2xl shadow-orange/30 transition hover:brightness-110 sm:bottom-8 sm:right-8"
+      className="fixed bottom-8 right-8 z-40 hidden items-center gap-2 rounded-full bg-orange px-5 py-3 text-sm font-semibold text-orange-foreground shadow-2xl shadow-orange/30 transition hover:brightness-110 md:inline-flex"
     >
       <Plus className="h-5 w-5" /> Request a service
     </Link>
   );
 }
+
