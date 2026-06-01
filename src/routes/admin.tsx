@@ -104,6 +104,7 @@ function Admin() {
           {tab === "disputes" && <DisputesAdminTab />}
           {tab === "credits" && <CreditsAdminTab />}
           {tab === "official" && <OfficialTabContent />}
+          {tab === "contact" && <ContactAnalyticsTab />}
         </div>
       </section>
     </Layout>
