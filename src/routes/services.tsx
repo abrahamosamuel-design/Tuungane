@@ -6,6 +6,7 @@ import { ProviderCard } from "@/components/ProviderCard";
 import { categories } from "@/data/categories";
 import { providers } from "@/data/providers";
 import { supabase } from "@/integrations/supabase/client";
+import { useBoostedSet } from "@/hooks/use-boosted-set";
 
 const iconMap: Record<string, any> = { Wrench, Sparkles, Building2, Scissors, Truck, Car, GraduationCap, Camera, ChefHat, Laptop, HeartPulse, Sprout, MoreHorizontal };
 
@@ -65,13 +66,18 @@ function Services() {
     })();
   }, [filter]);
 
-  const realFiltered = real.filter((p) => {
-    const qm = q.toLowerCase();
-    const name = p.business_name || p.profile?.full_name || "";
-    const matchesQ = !q || name.toLowerCase().includes(qm) || p.subcategory.toLowerCase().includes(qm);
-    const matchesL = !loc || p.town.toLowerCase().includes(loc.toLowerCase()) || p.district.toLowerCase().includes(loc.toLowerCase());
-    return matchesQ && matchesL;
-  });
+  const { has: isBoostedProvider } = useBoostedSet("provider", ["boost_profile", "feature_business_page"]);
+
+  const realFiltered = real
+    .filter((p) => {
+      const qm = q.toLowerCase();
+      const name = p.business_name || p.profile?.full_name || "";
+      const matchesQ = !q || name.toLowerCase().includes(qm) || p.subcategory.toLowerCase().includes(qm);
+      const matchesL = !loc || p.town.toLowerCase().includes(loc.toLowerCase()) || p.district.toLowerCase().includes(loc.toLowerCase());
+      return matchesQ && matchesL;
+    })
+    .sort((a, b) => Number(isBoostedProvider(b.user_id)) - Number(isBoostedProvider(a.user_id)));
+  const featuredProviders = realFiltered.filter((p) => isBoostedProvider(p.user_id));
 
   const demoFiltered = providers.filter((p) => {
     const qm = q.toLowerCase();
@@ -144,6 +150,30 @@ function Services() {
           ))}
         </div>
 
+        {featuredProviders.length > 0 && (
+          <div className="mt-4 rounded-2xl border border-orange/30 bg-orange/5 p-4">
+            <div className="mb-3 flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-orange" />
+              <span className="text-xs font-bold uppercase tracking-wider text-orange">Featured providers</span>
+              <span className="text-[10px] text-muted-foreground">Boosted with Tuungane Credits</span>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {featuredProviders.slice(0, 6).map((p) => {
+                const name = p.business_name || p.profile?.full_name || "Provider";
+                return (
+                  <Link key={p.user_id} to="/u/$id" params={{ id: p.user_id }} className="flex items-start gap-3 rounded-xl border border-orange/40 bg-card p-3 hover:border-orange">
+                    <img src={p.profile?.avatar_url || avatar(name)} alt={name} className="h-10 w-10 rounded-lg border border-border" />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold text-navy">{name}</p>
+                      <p className="truncate text-xs text-muted-foreground">{p.subcategory} · {p.town}</p>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         <div className="mt-5 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {loadingReal && <p className="text-sm text-muted-foreground">Loading providers…</p>}
           {!loadingReal && realFiltered.map((p) => {
@@ -164,6 +194,9 @@ function Services() {
                 </div>
                 <p className="line-clamp-2 px-5 text-sm text-foreground/70">{p.bio}</p>
                 <div className="mt-3 flex flex-wrap gap-1.5 px-5 pb-4">
+                  {isBoostedProvider(p.user_id) && (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-orange/15 px-2 py-0.5 text-[10px] font-semibold text-orange"><Sparkles className="h-3 w-3" /> Featured</span>
+                  )}
                   {p.verified === "featured" && (
                     <span className="inline-flex items-center gap-1 rounded-full bg-orange/10 px-2 py-0.5 text-[10px] font-semibold text-orange"><Sparkles className="h-3 w-3" /> Highlighted by Tuungane Official</span>
                   )}

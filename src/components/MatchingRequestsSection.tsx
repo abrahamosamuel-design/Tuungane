@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { Briefcase, ArrowRight, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { useBoostedSet } from "@/hooks/use-boosted-set";
 import { urgencyOptions, type ServiceRequestRow } from "@/data/serviceRequestTypes";
 import { timeAgo } from "@/lib/format";
 
@@ -10,6 +11,8 @@ export function MatchingRequestsSection() {
   const { user } = useAuth();
   const [items, setItems] = useState<ServiceRequestRow[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const { has: isBoostedReq } = useBoostedSet("service_request", ["urgent_request"]);
+  const sorted = [...items].sort((a, b) => Number(isBoostedReq(b.id)) - Number(isBoostedReq(a.id)));
 
   useEffect(() => {
     if (!user) return;
@@ -38,14 +41,16 @@ export function MatchingRequestsSection() {
         </div>
       ) : (
         <div className="mt-4 space-y-2">
-          {items.slice(0, 5).map((r) => {
+          {sorted.slice(0, 5).map((r) => {
             const urg = urgencyOptions.find((u) => u.value === r.urgency)?.label ?? r.urgency;
+            const boosted = isBoostedReq(r.id);
             return (
-              <Link key={r.id} to="/requests/$id" params={{ id: r.id }} className="flex items-center justify-between gap-3 rounded-xl border border-border p-3 hover:border-orange">
+              <Link key={r.id} to="/requests/$id" params={{ id: r.id }} className={`flex items-center justify-between gap-3 rounded-xl border p-3 hover:border-orange ${boosted ? "border-orange/60 bg-orange/5" : "border-border"}`}>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold text-navy">{r.title || r.service_needed}</p>
                   <p className="truncate text-xs text-muted-foreground inline-flex items-center gap-1"><MapPin className="h-3 w-3" /> {r.town ?? r.location} · {timeAgo(r.created_at)}</p>
                 </div>
+                {boosted && <span className="shrink-0 rounded-full bg-orange/15 px-2 py-0.5 text-[10px] font-bold uppercase text-orange">Urgent</span>}
                 <span className="shrink-0 rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold text-navy">{urg}</span>
               </Link>
             );

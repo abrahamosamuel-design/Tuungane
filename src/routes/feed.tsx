@@ -5,6 +5,7 @@ import { BadgeCheck, MapPin, Sparkles } from "lucide-react";
 import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { useBoostedSet } from "@/hooks/use-boosted-set";
 import { PostCard, type PostRow } from "@/components/social/PostCard";
 import { OpportunityCard, type OpportunityRow } from "@/components/OpportunityCard";
 import { OfficialPostCard } from "@/components/OfficialPostCard";
@@ -35,6 +36,9 @@ function Feed() {
   const [officialPosts, setOfficialPosts] = useState<OfficialPostRow[]>([]);
   const [officialAccount, setOfficialAccount] = useState<OfficialAccountRow | null>(null);
   const [loading, setLoading] = useState(true);
+  const { has: isBoostedPost } = useBoostedSet("post", ["feature_post", "promote_completed_work"]);
+  const { has: isBoostedProvider } = useBoostedSet("provider", ["boost_profile", "feature_business_page"]);
+  const { has: isBoostedOpp } = useBoostedSet("opportunity", ["feature_opportunity"]);
 
   const loadPosts = async () => {
     let providerIds: string[] | null = null;
@@ -164,39 +168,49 @@ function Feed() {
         <div className="mt-6 space-y-4">
           {loading && <p className="text-sm text-muted-foreground">Loading...</p>}
 
-          {!loading && tab === "posts" && (
-            <>
-              {officialToShow.map((p) => <OfficialPostCard key={`op-${p.id}`} post={p} account={officialAccount} />)}
-              {filter !== "official" && (posts.length === 0 ? (
-                <Empty title="No posts yet" hint={filter === "following" ? "Follow providers to see their work here." : "Be the first to share work."} />
-              ) : posts.map((p) => <PostCard key={p.id} post={p} onChanged={load} />))}
-              {filter === "official" && officialToShow.length === 0 && (
-                <Empty title="No official posts yet" hint="Tuungane Official will post curated updates here soon." />
-              )}
-            </>
-          )}
+          {!loading && tab === "posts" && (() => {
+            const sortedPosts = [...posts].sort((a, b) => Number(isBoostedPost(b.id)) - Number(isBoostedPost(a.id)));
+            return (
+              <>
+                {officialToShow.map((p) => <OfficialPostCard key={`op-${p.id}`} post={p} account={officialAccount} />)}
+                {filter !== "official" && (sortedPosts.length === 0 ? (
+                  <Empty title="No posts yet" hint={filter === "following" ? "Follow providers to see their work here." : "Be the first to share work."} />
+                ) : sortedPosts.map((p) => <PostCard key={p.id} post={p} onChanged={load} />))}
+                {filter === "official" && officialToShow.length === 0 && (
+                  <Empty title="No official posts yet" hint="Tuungane Official will post curated updates here soon." />
+                )}
+              </>
+            );
+          })()}
 
-          {!loading && tab === "services" && (providers.length === 0 ? (
-            <Empty title="No providers found" hint="Try a different category." />
-          ) : providers.map((p) => (
-            <Link key={p.user_id} to="/u/$id" params={{ id: p.user_id }} className="flex items-start gap-3 rounded-2xl border border-border bg-card p-4 transition hover:border-orange">
-              <img src={p.profile?.avatar_url || avatar(p.profile?.full_name || "T")} alt="" className="h-12 w-12 rounded-xl border border-border" />
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-1.5">
-                  <p className="truncate font-semibold text-navy">{p.business_name || p.profile?.full_name}</p>
-                  {p.verified === "verified" && <BadgeCheck className="h-4 w-4 text-green" />}
-                  {p.verified === "featured" && <Sparkles className="h-4 w-4 text-orange" />}
+          {!loading && tab === "services" && (() => {
+            const sortedProviders = [...providers].sort((a, b) => Number(isBoostedProvider(b.user_id)) - Number(isBoostedProvider(a.user_id)));
+            return sortedProviders.length === 0 ? (
+              <Empty title="No providers found" hint="Try a different category." />
+            ) : sortedProviders.map((p) => (
+              <Link key={p.user_id} to="/u/$id" params={{ id: p.user_id }} className={`flex items-start gap-3 rounded-2xl border bg-card p-4 transition hover:border-orange ${isBoostedProvider(p.user_id) ? "border-orange/50" : "border-border"}`}>
+                <img src={p.profile?.avatar_url || avatar(p.profile?.full_name || "T")} alt="" className="h-12 w-12 rounded-xl border border-border" />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5">
+                    <p className="truncate font-semibold text-navy">{p.business_name || p.profile?.full_name}</p>
+                    {p.verified === "verified" && <BadgeCheck className="h-4 w-4 text-green" />}
+                    {p.verified === "featured" && <Sparkles className="h-4 w-4 text-orange" />}
+                    {isBoostedProvider(p.user_id) && <span className="ml-1 inline-flex items-center gap-0.5 rounded-full bg-orange/15 px-1.5 py-0 text-[10px] font-semibold text-orange"><Sparkles className="h-2.5 w-2.5" /> Featured</span>}
+                  </div>
+                  <p className="text-xs text-muted-foreground">{p.subcategory}</p>
+                  <p className="mt-1 line-clamp-2 text-sm text-foreground/70">{p.bio}</p>
+                  <p className="mt-1 inline-flex items-center gap-1 text-xs text-muted-foreground"><MapPin className="h-3 w-3" />{p.town}, {p.district}</p>
                 </div>
-                <p className="text-xs text-muted-foreground">{p.subcategory}</p>
-                <p className="mt-1 line-clamp-2 text-sm text-foreground/70">{p.bio}</p>
-                <p className="mt-1 inline-flex items-center gap-1 text-xs text-muted-foreground"><MapPin className="h-3 w-3" />{p.town}, {p.district}</p>
-              </div>
-            </Link>
-          )))}
+              </Link>
+            ));
+          })()}
 
-          {!loading && tab === "opportunities" && (opps.length === 0 ? (
-            <Empty title="No opportunities yet" hint={<>Post a gig, job, or apprenticeship from the <Link to="/opportunities/new" className="font-semibold text-orange">Opportunities</Link> page.</>} />
-          ) : opps.map((o) => <OpportunityCard key={o.id} o={o} />))}
+          {!loading && tab === "opportunities" && (() => {
+            const sortedOpps = [...opps].sort((a, b) => Number(isBoostedOpp(b.id)) - Number(isBoostedOpp(a.id)));
+            return sortedOpps.length === 0 ? (
+              <Empty title="No opportunities yet" hint={<>Post a gig, job, or apprenticeship from the <Link to="/opportunities/new" className="font-semibold text-orange">Opportunities</Link> page.</>} />
+            ) : sortedOpps.map((o) => <OpportunityCard key={o.id} o={o} />);
+          })()}
         </div>
       </section>
     </Layout>
