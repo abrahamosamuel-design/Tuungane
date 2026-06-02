@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Building2, Briefcase, Image as ImageIcon, Info, Sparkles, Trash2, Upload } from "lucide-react";
+import { Building2, Briefcase, Image as ImageIcon, Info, Trash2, Upload } from "lucide-react";
 
 import { BoostButton } from "@/components/BoostButton";
 import { categories } from "@/data/categories";
@@ -267,7 +267,7 @@ export function MyBusinessPagesPanel() {
 
               <div className="flex flex-wrap items-center gap-2">
                 <Link to="/businesses/$slug" params={{ slug: page.slug }} className="rounded-full border border-border px-3 py-1.5 text-xs font-semibold text-navy hover:border-orange">View page</Link>
-                <Link to="/businesses/$slug" params={{ slug: page.slug }} search={{ edit: "1" } as never} className="rounded-full border border-border px-3 py-1.5 text-xs font-semibold text-navy hover:border-orange">Edit page</Link>
+                <Link to="/businesses/$slug" params={{ slug: page.slug }} className="rounded-full border border-border px-3 py-1.5 text-xs font-semibold text-navy hover:border-orange">Edit page</Link>
                 <Link to="/dashboard" search={{ composeBusiness: page.id } as never} className="rounded-full border border-border px-3 py-1.5 text-xs font-semibold text-navy hover:border-orange">Post update</Link>
                 <Link to="/opportunities/new" search={{ businessPageId: page.id } as never} className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs font-semibold text-navy hover:border-orange"><Briefcase className="h-3.5 w-3.5" /> Post opportunity</Link>
                 <BoostButton boostType="feature_business_page" entityType="business_page" entityId={page.id} label="Feature page" dialogTitle="Feature this business page" dialogDescription="Highlight this page in business discovery areas across Tuungane." isActive={page.is_featured} className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs font-semibold text-navy hover:border-orange" />
