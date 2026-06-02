@@ -2,7 +2,6 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/hooks/use-auth";
 import { Building2, Plus, Sparkles, BadgeCheck } from "lucide-react";
 import { orgTypeLabel } from "@/data/businessTypes";
 import { categories } from "@/data/categories";
@@ -22,7 +21,6 @@ type BPage = {
 };
 
 function BusinessesPage() {
-  const { user, loading } = useAuth();
   const [pages, setPages] = useState<BPage[]>([]);
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<string>("");
