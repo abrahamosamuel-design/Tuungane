@@ -8,6 +8,9 @@ import { toast } from "sonner";
 import { OfficialAttribution } from "./OfficialBadge";
 import { officialPostTypeMap, type OfficialPostRow, type OfficialAccountRow } from "@/data/officialPostTypes";
 import { getCategory } from "@/data/categories";
+import { PostShell } from "./social/PostShell";
+import { PostText } from "./social/PostText";
+import { PostMedia } from "./social/PostMedia";
 
 export function OfficialPostCard({ post, account, onChanged }: { post: OfficialPostRow; account?: OfficialAccountRow | null; onChanged?: () => void }) {
   const { user } = useAuth();
@@ -59,83 +62,84 @@ export function OfficialPostCard({ post, account, onChanged }: { post: OfficialP
   const isProviderHighlight = ["featured_provider", "verified_provider", "service_highlight"].includes(post.post_type);
 
   return (
-    <article className={`overflow-hidden rounded-2xl border bg-card shadow-[var(--shadow-card)] ${post.is_pinned ? "border-orange ring-1 ring-orange/40" : "border-orange/30"}`}>
-      <div className="flex items-center justify-between gap-3 border-b border-border bg-gradient-to-r from-orange/5 to-transparent px-4 py-3">
-        <OfficialAttribution logoUrl={account?.profile_image_url} />
-        <span className="text-[10px] text-muted-foreground">{timeAgo(post.created_at)}</span>
-      </div>
-
-      <div className="p-4">
+    <PostShell
+      accent={post.is_pinned ? "pinned" : "official"}
+      header={
+        <div className="flex items-center justify-between gap-3">
+          <OfficialAttribution logoUrl={account?.profile_image_url} />
+          <span className="text-[10px] text-muted-foreground">{timeAgo(post.created_at)}</span>
+        </div>
+      }
+      categoryBadge={
         <div className="flex flex-wrap items-center gap-2">
           <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${meta?.color ?? "bg-muted text-foreground"}`}>{meta?.label ?? post.post_type}</span>
           {post.is_pinned && <span className="inline-flex items-center gap-1 rounded-full bg-orange/10 px-2 py-0.5 text-[10px] font-semibold text-orange"><Pin className="h-2.5 w-2.5" /> Pinned</span>}
           {post.is_featured && <span className="rounded-full bg-navy/10 px-2 py-0.5 text-[10px] font-semibold text-navy">⭐ Featured</span>}
           {post.source_verified && <span className="rounded-full bg-green/10 px-2 py-0.5 text-[10px] font-semibold text-green">Verified by Tuungane</span>}
         </div>
-
-        <Link to="/official-posts/$id" params={{ id: post.id }} className="mt-2 block">
+      }
+      title={
+        <Link to="/official-posts/$id" params={{ id: post.id }} className="block">
           <h3 className="font-display text-base font-bold text-navy hover:text-orange">{post.title}</h3>
         </Link>
-
-        {post.image_url && (
-          <Link to="/official-posts/$id" params={{ id: post.id }} className="mt-3 block overflow-hidden rounded-xl">
-            <img src={post.image_url} alt={post.title} className="aspect-video w-full object-cover" loading="lazy" />
-          </Link>
-        )}
-
-        {post.content && <p className="mt-3 line-clamp-4 whitespace-pre-wrap text-sm text-foreground/80">{post.content}</p>}
-
-        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
-          {cat && <span>{cat.name}{post.subcategory ? ` · ${post.subcategory}` : ""}</span>}
-          {post.location && <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{post.location}</span>}
-          {post.expires_at && <span className="inline-flex items-center gap-1"><Calendar className="h-3 w-3" />by {new Date(post.expires_at).toLocaleDateString()}</span>}
-        </div>
-
-        {(isOpportunity || isProviderHighlight) && (post.linked_provider_id || post.linked_opportunity_id || post.contact_info) && (
-          <div className="mt-3 flex flex-wrap gap-2">
-            {post.linked_provider_id && (
-              <Link to="/u/$id" params={{ id: post.linked_provider_id }} className="inline-flex items-center gap-1 rounded-full bg-navy px-3 py-1.5 text-xs font-semibold text-navy-foreground hover:brightness-110">
-                <ExternalLink className="h-3 w-3" /> View Profile
-              </Link>
-            )}
-            {post.linked_opportunity_id && (
-              <Link to="/opportunities/$id" params={{ id: post.linked_opportunity_id }} className="inline-flex items-center gap-1 rounded-full bg-orange px-3 py-1.5 text-xs font-semibold text-orange-foreground hover:brightness-110">
-                <ExternalLink className="h-3 w-3" /> View Opportunity
-              </Link>
-            )}
-            {post.contact_info && (
-              <span className="inline-flex items-center rounded-full border border-border bg-background px-3 py-1.5 text-xs text-navy">{post.contact_info}</span>
-            )}
+      }
+      message={post.content ? <PostText text={post.content} /> : null}
+      media={post.image_url ? <PostMedia urls={[post.image_url]} alt={post.title} /> : null}
+      meta={
+        (cat || post.location || post.expires_at) ? (
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+            {cat && <span>{cat.name}{post.subcategory ? ` · ${post.subcategory}` : ""}</span>}
+            {post.location && <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{post.location}</span>}
+            {post.expires_at && <span className="inline-flex items-center gap-1"><Calendar className="h-3 w-3" />by {new Date(post.expires_at).toLocaleDateString()}</span>}
           </div>
-        )}
-
-        {(isOpportunity || post.safety_note) && (
-          <div className="mt-3 flex items-start gap-2 rounded-xl border border-orange/30 bg-orange/5 p-3 text-[11px] text-foreground/80">
-            <ShieldAlert className="mt-0.5 h-3.5 w-3.5 shrink-0 text-orange" />
-            <p>{post.safety_note || "Please verify details before paying money, sharing sensitive information, or accepting work. Report suspicious opportunities to Tuungane."}</p>
-          </div>
-        )}
-
-        {isOpportunity && !post.source_verified && (
-          <p className="mt-2 text-[10px] italic text-muted-foreground">Source not independently verified.</p>
-        )}
-
-        <div className="mt-4 flex items-center gap-4 border-t border-border pt-3 text-xs">
+        ) : null
+      }
+      extras={
+        <>
+          {(isOpportunity || isProviderHighlight) && (post.linked_provider_id || post.linked_opportunity_id || post.contact_info) && (
+            <div className="flex flex-wrap gap-2">
+              {post.linked_provider_id && (
+                <Link to="/u/$id" params={{ id: post.linked_provider_id }} className="inline-flex items-center gap-1 rounded-full bg-navy px-3 py-1.5 text-xs font-semibold text-navy-foreground hover:brightness-110">
+                  <ExternalLink className="h-3 w-3" /> View Profile
+                </Link>
+              )}
+              {post.linked_opportunity_id && (
+                <Link to="/opportunities/$id" params={{ id: post.linked_opportunity_id }} className="inline-flex items-center gap-1 rounded-full bg-orange px-3 py-1.5 text-xs font-semibold text-orange-foreground hover:brightness-110">
+                  <ExternalLink className="h-3 w-3" /> View Opportunity
+                </Link>
+              )}
+              {post.contact_info && (
+                <span className="inline-flex items-center rounded-full border border-border bg-background px-3 py-1.5 text-xs text-navy">{post.contact_info}</span>
+              )}
+            </div>
+          )}
+          {(isOpportunity || post.safety_note) && (
+            <div className="mt-3 flex items-start gap-2 rounded-xl border border-orange/30 bg-orange/5 p-3 text-[11px] text-foreground/80">
+              <ShieldAlert className="mt-0.5 h-3.5 w-3.5 shrink-0 text-orange" />
+              <p>{post.safety_note || "Please verify details before paying money, sharing sensitive information, or accepting work. Report suspicious opportunities to Tuungane."}</p>
+            </div>
+          )}
+          {isOpportunity && !post.source_verified && (
+            <p className="mt-2 text-[10px] italic text-muted-foreground">Source not independently verified.</p>
+          )}
+        </>
+      }
+      actions={
+        <div className="flex items-center gap-4 text-xs">
           <button onClick={toggleLike} className={`inline-flex items-center gap-1.5 font-medium transition ${liked ? "text-orange" : "text-muted-foreground hover:text-orange"}`}>
-            <Heart className={`h-4 w-4 ${liked ? "fill-current" : ""}`} /> {likes}
+            <Heart className={`h-4 w-4 ${liked ? "fill-current" : ""}`} /> {likes} <span className="hidden sm:inline">Like</span>
           </button>
           <Link to="/official-posts/$id" params={{ id: post.id }} className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-navy">
-            <MessageCircle className="h-4 w-4" /> {comments}
+            <MessageCircle className="h-4 w-4" /> {comments} <span className="hidden sm:inline">Comment</span>
           </Link>
           <button onClick={share} className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-navy">
             <Share2 className="h-4 w-4" /> Share
           </button>
           <button onClick={report} className="ml-auto inline-flex items-center gap-1.5 text-muted-foreground hover:text-destructive" title="Report">
-
             <Flag className="h-4 w-4" />
           </button>
         </div>
-      </div>
-    </article>
+      }
+    />
   );
 }

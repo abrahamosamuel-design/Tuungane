@@ -12,6 +12,9 @@ import { postTypeMap, type PostTypeValue } from "@/data/postTypes";
 import { useActiveBoosts } from "@/hooks/use-boosts";
 import { BoostBadge } from "@/components/BoostBadge";
 import { BoostButton } from "@/components/BoostButton";
+import { PostShell } from "./PostShell";
+import { PostText } from "./PostText";
+import { PostMedia } from "./PostMedia";
 
 export interface PostRow {
   id: string;
@@ -24,6 +27,7 @@ export interface PostRow {
   featured: boolean;
   created_at: string;
   post_type?: PostTypeValue | null;
+  title?: string | null;
   author?: { full_name: string; avatar_url: string | null; is_provider: boolean };
 }
 
@@ -41,7 +45,6 @@ export function PostCard({ post, onChanged }: Props) {
   const [reportOpen, setReportOpen] = useState(false);
   const [recOpen, setRecOpen] = useState(false);
   const { boosts, refresh: refreshBoosts, has: hasBoost } = useActiveBoosts("post", post.id);
-
 
   useEffect(() => {
     (async () => {
@@ -124,104 +127,109 @@ export function PostCard({ post, onChanged }: Props) {
   };
 
   const ptMeta = post.post_type ? postTypeMap[post.post_type] : null;
+  const authorType = post.author?.is_provider ? "Service Provider" : null;
 
   return (
-    <article className="rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)]">
-      <header className="flex items-start justify-between gap-3">
-        <Link to="/u/$id" params={{ id: post.provider_user_id }} className="flex items-center gap-3">
-          <Avatar name={post.author?.full_name ?? "Provider"} url={post.author?.avatar_url ?? null} size={44} />
-          <div>
-            <p className="font-semibold text-navy">{post.author?.full_name ?? "Service Provider"}</p>
-            <p className="text-xs text-muted-foreground">
-              {post.category_slug && <span className="capitalize">{post.category_slug.replace(/-/g, " ")} · </span>}
-              {post.location && <><MapPin className="mr-0.5 inline h-3 w-3" />{post.location} · </>}
-              {timeAgo(post.created_at)}
-            </p>
-          </div>
-        </Link>
-        <div className="flex flex-wrap items-center gap-1">
-          {ptMeta && <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${ptMeta.color}`}>{ptMeta.label}</span>}
-          {post.featured && <span className="rounded-full bg-orange/10 px-2 py-0.5 text-xs font-medium text-orange">Featured</span>}
-          {boosts.map((b) => <BoostBadge key={b.id} type={b.boost_type} />)}
-          {post.hidden && <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive">Hidden</span>}
-        </div>
-      </header>
-
-      {post.text && <p className="mt-3 whitespace-pre-wrap text-sm text-foreground/90">{post.text}</p>}
-
-      {post.media_urls.length > 0 && (
-        <div className={`mt-3 grid gap-1 overflow-hidden rounded-xl ${post.media_urls.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
-          {post.media_urls.slice(0, 4).map((u, i) => (
-            <img key={i} src={u} alt="" className="aspect-square w-full object-cover" loading="lazy" />
-          ))}
-        </div>
-      )}
-
-      {(likes > 0 || commentCount > 0) && (
-        <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
-          <span>{likes > 0 && `${likes} like${likes === 1 ? "" : "s"}`}</span>
-          <button onClick={() => { setShowComments((v) => !v); if (!showComments) loadComments(); }} className="hover:text-orange">
-            {commentCount > 0 && `${commentCount} comment${commentCount === 1 ? "" : "s"}`}
-          </button>
-        </div>
-      )}
-
-      <div className="mt-2 flex flex-wrap items-center justify-between gap-2 border-t border-border pt-2">
-        <div className="flex flex-wrap items-center gap-1">
-          <ActionBtn onClick={toggleLike} active={liked} icon={<Heart className={`h-4 w-4 ${liked ? "fill-current" : ""}`} />} label="Like" />
-          <ActionBtn onClick={() => { setShowComments((v) => !v); if (!showComments) loadComments(); }} icon={<MessageCircle className="h-4 w-4" />} label="Comment" />
-          <ActionBtn onClick={() => { if (requireAuth()) setRecOpen(true); }} icon={<ThumbsUp className="h-4 w-4" />} label="Recommend" />
-          <ActionBtn onClick={share} icon={<Share2 className="h-4 w-4" />} label="Share" />
-        </div>
-        <div className="flex items-center gap-1">
-          {user?.id === post.provider_user_id && (() => {
-            const isCompleted = post.post_type === "completed_job" || post.post_type === "before_after";
-            return (
-              <BoostButton
-                boostType={isCompleted ? "promote_completed_work" : "feature_post"}
-                entityType="post"
-                entityId={post.id}
-                label={isCompleted ? "Promote" : "Feature"}
-                isActive={hasBoost("feature_post") || hasBoost("promote_completed_work")}
-                dialogTitle={isCompleted ? "Promote this completed work" : "Feature this post"}
-                dialogDescription="Highlight this post across Tuungane so more people see it."
-                onActivated={refreshBoosts}
-              />
-            );
-          })()}
-          <ActionBtn onClick={() => { if (requireAuth()) setReportOpen(true); }} icon={<Flag className="h-4 w-4" />} label="" small />
-          {user?.id === post.provider_user_id && <ActionBtn onClick={deletePost} icon={<Trash2 className="h-4 w-4 text-destructive" />} label="" small />}
-          {isModerator && <ActionBtn onClick={hidePost} icon={<EyeOff className="h-4 w-4 text-amber-600" />} label="" small />}
-        </div>
-      </div>
-
-      {showComments && (
-        <div className="mt-3 space-y-3 border-t border-border pt-3">
-          {comments.length === 0 && <p className="text-xs text-muted-foreground">No comments yet. Be the first to comment.</p>}
-          {comments.map((c) => (
-            <div key={c.id} className="flex items-start gap-2">
-              <Avatar name={c.profile?.full_name ?? "U"} url={c.profile?.avatar_url ?? null} size={32} />
-              <div className="flex-1 rounded-xl bg-surface px-3 py-2">
-                <p className="text-xs font-semibold text-navy">{c.profile?.full_name ?? "User"} <span className="ml-1 font-normal text-muted-foreground">· {timeAgo(c.created_at)}</span></p>
-                <p className="mt-0.5 text-sm">{c.text}</p>
+    <>
+      <PostShell
+        header={
+          <div className="flex items-start justify-between gap-3">
+            <Link to="/u/$id" params={{ id: post.provider_user_id }} className="flex items-center gap-3">
+              <Avatar name={post.author?.full_name ?? "Provider"} url={post.author?.avatar_url ?? null} size={44} />
+              <div className="leading-tight">
+                <p className="font-semibold text-navy">{post.author?.full_name ?? "Service Provider"}</p>
+                {authorType && <p className="text-[11px] font-medium text-orange">{authorType}</p>}
+                <p className="text-xs text-muted-foreground">
+                  {post.location && <><MapPin className="mr-0.5 inline h-3 w-3" />{post.location} · </>}
+                  {timeAgo(post.created_at)}
+                </p>
               </div>
-              {(user?.id === c.user_id || isModerator) && (
-                <button onClick={() => deleteComment(c.id)} className="text-muted-foreground hover:text-destructive"><Trash2 className="h-3.5 w-3.5" /></button>
-              )}
+            </Link>
+            <div className="flex flex-wrap items-center gap-1">
+              {post.featured && <span className="rounded-full bg-orange/10 px-2 py-0.5 text-xs font-medium text-orange">Featured</span>}
+              {boosts.map((b) => <BoostBadge key={b.id} type={b.boost_type} />)}
+              {post.hidden && <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive">Hidden</span>}
             </div>
-          ))}
-          {user && (
-            <div className="flex gap-2">
-              <input value={newComment} onChange={(e) => setNewComment(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addComment()} placeholder="Write a comment..." className="flex-1 rounded-full border border-border bg-background px-4 py-2 text-sm outline-none focus:border-orange" />
-              <button onClick={addComment} className="rounded-full bg-orange px-4 text-sm font-semibold text-orange-foreground">Post</button>
+          </div>
+        }
+        categoryBadge={
+          (ptMeta || post.category_slug) ? (
+            <div className="flex flex-wrap items-center gap-2">
+              {ptMeta && <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide ${ptMeta.color}`}>{ptMeta.label}</span>}
+              {post.category_slug && <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] capitalize text-muted-foreground">{post.category_slug.replace(/-/g, " ")}</span>}
             </div>
-          )}
-        </div>
-      )}
+          ) : null
+        }
+        title={post.title ? <h3 className="font-display text-base font-bold text-navy">{post.title}</h3> : null}
+        message={post.text ? <PostText text={post.text} /> : null}
+        media={post.media_urls?.length ? <PostMedia urls={post.media_urls} alt={post.author?.full_name ?? "Post"} /> : null}
+        actions={
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            {(likes > 0 || commentCount > 0) && (
+              <div className="flex w-full items-center justify-between pb-1 text-xs text-muted-foreground">
+                <span>{likes > 0 && `${likes} like${likes === 1 ? "" : "s"}`}</span>
+                <button onClick={() => { setShowComments((v) => !v); if (!showComments) loadComments(); }} className="hover:text-orange">
+                  {commentCount > 0 && `${commentCount} comment${commentCount === 1 ? "" : "s"}`}
+                </button>
+              </div>
+            )}
+            <div className="flex flex-wrap items-center gap-1">
+              <ActionBtn onClick={toggleLike} active={liked} icon={<Heart className={`h-4 w-4 ${liked ? "fill-current" : ""}`} />} label="Like" />
+              <ActionBtn onClick={() => { setShowComments((v) => !v); if (!showComments) loadComments(); }} icon={<MessageCircle className="h-4 w-4" />} label="Comment" />
+              <ActionBtn onClick={() => { if (requireAuth()) setRecOpen(true); }} icon={<ThumbsUp className="h-4 w-4" />} label="Recommend" />
+              <ActionBtn onClick={share} icon={<Share2 className="h-4 w-4" />} label="Share" />
+            </div>
+            <div className="flex items-center gap-1">
+              {user?.id === post.provider_user_id && (() => {
+                const isCompleted = post.post_type === "completed_job" || post.post_type === "before_after";
+                return (
+                  <BoostButton
+                    boostType={isCompleted ? "promote_completed_work" : "feature_post"}
+                    entityType="post"
+                    entityId={post.id}
+                    label={isCompleted ? "Promote" : "Feature"}
+                    isActive={hasBoost("feature_post") || hasBoost("promote_completed_work")}
+                    dialogTitle={isCompleted ? "Promote this completed work" : "Feature this post"}
+                    dialogDescription="Highlight this post across Tuungane so more people see it."
+                    onActivated={refreshBoosts}
+                  />
+                );
+              })()}
+              <ActionBtn onClick={() => { if (requireAuth()) setReportOpen(true); }} icon={<Flag className="h-4 w-4" />} label="" small />
+              {user?.id === post.provider_user_id && <ActionBtn onClick={deletePost} icon={<Trash2 className="h-4 w-4 text-destructive" />} label="" small />}
+              {isModerator && <ActionBtn onClick={hidePost} icon={<EyeOff className="h-4 w-4 text-amber-600" />} label="" small />}
+            </div>
+
+            {showComments && (
+              <div className="mt-2 w-full space-y-3 border-t border-border pt-3">
+                {comments.length === 0 && <p className="text-xs text-muted-foreground">No comments yet. Be the first to comment.</p>}
+                {comments.map((c) => (
+                  <div key={c.id} className="flex items-start gap-2">
+                    <Avatar name={c.profile?.full_name ?? "U"} url={c.profile?.avatar_url ?? null} size={32} />
+                    <div className="flex-1 rounded-xl bg-surface px-3 py-2">
+                      <p className="text-xs font-semibold text-navy">{c.profile?.full_name ?? "User"} <span className="ml-1 font-normal text-muted-foreground">· {timeAgo(c.created_at)}</span></p>
+                      <p className="mt-0.5 text-sm">{c.text}</p>
+                    </div>
+                    {(user?.id === c.user_id || isModerator) && (
+                      <button onClick={() => deleteComment(c.id)} className="text-muted-foreground hover:text-destructive"><Trash2 className="h-3.5 w-3.5" /></button>
+                    )}
+                  </div>
+                ))}
+                {user && (
+                  <div className="flex gap-2">
+                    <input value={newComment} onChange={(e) => setNewComment(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addComment()} placeholder="Write a comment..." className="flex-1 rounded-full border border-border bg-background px-4 py-2 text-sm outline-none focus:border-orange" />
+                    <button onClick={addComment} className="rounded-full bg-orange px-4 text-sm font-semibold text-orange-foreground">Post</button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        }
+      />
 
       <ReportDialog open={reportOpen} onClose={() => setReportOpen(false)} targetType="post" targetId={post.id} />
       <RecommendDialog open={recOpen} onClose={() => setRecOpen(false)} providerUserId={post.provider_user_id} />
-    </article>
+    </>
   );
 }
 
