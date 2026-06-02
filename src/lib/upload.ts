@@ -11,6 +11,10 @@ function toStorageObjectUrl(path: string) {
 }
 
 export async function uploadMedia(userId: string, file: File, folder = "posts"): Promise<string> {
+  if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
+    throw new Error("Upload is not configured correctly for this project.");
+  }
+
   const ext = file.name.split(".").pop() ?? "jpg";
   const path = `${userId}/${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
 
