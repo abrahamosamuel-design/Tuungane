@@ -44,9 +44,18 @@ export function BusinessPageCreateForm() {
   const [cover, setCover] = useState<File | null>(null);
 
   useEffect(() => {
-    if (!loading && !user) {
-      nav({ to: "/login", search: { tab: "login", redirect: "/businesses/create" } as never });
-    }
+    if (loading || user) return;
+    // Double-check directly with Supabase before redirecting — guards against
+    // a brief window where the auth context hasn't finished hydrating the
+    // session from storage on a fresh navigation.
+    let cancelled = false;
+    void supabase.auth.getSession().then(({ data }) => {
+      if (cancelled) return;
+      if (!data.session) {
+        nav({ to: "/login", search: { tab: "login", redirect: "/businesses/create" } as never });
+      }
+    });
+    return () => { cancelled = true; };
   }, [loading, user, nav]);
 
   const set = <K extends keyof typeof form>(key: K, value: (typeof form)[K]) => {
