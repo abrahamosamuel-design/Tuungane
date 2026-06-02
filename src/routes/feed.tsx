@@ -83,7 +83,7 @@ function Feed() {
   };
 
   const loadProviders = async () => {
-    let q = supabase.from("service_profiles").select("*").eq("suspended", false).order("updated_at", { ascending: false }).limit(50);
+    let q = supabase.from("service_profiles").select("user_id,business_name,subcategory,bio,town,district,category_slug,verified,years_experience,areas_served,availability,cover_url,seeded_by_official,seeded_status,suspended,updated_at").eq("suspended", false).order("updated_at", { ascending: false }).limit(50);
     if (category) q = q.eq("category_slug", category);
     const { data } = await q;
     const ids = (data ?? []).map((p) => p.user_id);
@@ -96,7 +96,7 @@ function Feed() {
   };
 
   const loadOpps = async () => {
-    let q = supabase.from("opportunities").select("*").in("status", ["approved", "featured"]).order("created_at", { ascending: false }).limit(50);
+    let q = supabase.from("opportunities").select("id,title,description,opportunity_type,category_slug,subcategory,location,district,town,area,requirements,compensation,deadline,image_url,business_page_id,poster_type,poster_id,status,is_featured,archived,expires_at,created_at,updated_at").in("status", ["approved", "featured"]).order("created_at", { ascending: false }).limit(50);
     if (category) q = q.eq("category_slug", category);
     const { data } = await q;
     const ids = Array.from(new Set((data ?? []).map((o) => o.poster_id)));

@@ -53,9 +53,11 @@ function OpportunityDetails() {
   const { boosts: oppBoosts } = useActiveBoosts("opportunity", id);
 
   const load = async () => {
-    const { data } = await supabase.from("opportunities").select("*").eq("id", id).maybeSingle();
+    const { data } = user
+      ? await supabase.from("opportunities").select("*").eq("id", id).maybeSingle()
+      : await supabase.from("opportunities").select("id,title,description,opportunity_type,category_slug,subcategory,location,district,town,area,requirements,compensation,deadline,image_url,business_page_id,poster_type,poster_id,status,is_featured,archived,expires_at,created_at,updated_at").eq("id", id).maybeSingle();
     if (!data) { setO(null); return; }
-    setO(data as OppFull);
+    setO(data as unknown as OppFull);
     const { data: p } = await supabase.from("profiles").select("full_name,avatar_url").eq("id", data.poster_id).maybeSingle();
     setAuthor(p);
     if (data.business_page_id) {
@@ -64,8 +66,8 @@ function OpportunityDetails() {
     } else {
       setBusiness(null);
     }
-    const { data: sim } = await supabase.from("opportunities").select("*").eq("category_slug", data.category_slug).neq("id", id).in("status", ["approved", "featured"]).limit(4);
-    setSimilar((sim ?? []) as OpportunityRow[]);
+    const { data: sim } = await supabase.from("opportunities").select("id,title,description,opportunity_type,category_slug,subcategory,location,district,town,area,image_url,business_page_id,poster_type,poster_id,status,is_featured,archived,compensation,deadline,created_at,updated_at").eq("category_slug", data.category_slug).neq("id", id).in("status", ["approved", "featured"]).limit(4);
+    setSimilar((sim ?? []) as unknown as OpportunityRow[]);
 
     if (user) {
       const { data: s } = await supabase.from("saved_opportunities").select("id").eq("opportunity_id", id).eq("user_id", user.id).maybeSingle();

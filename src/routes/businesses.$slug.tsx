@@ -41,9 +41,11 @@ function BusinessDetail() {
   const [editing, setEditing] = useState(false);
 
   const load = async () => {
-    const { data, error } = await supabase.from("business_pages").select("*").eq("slug", slug).maybeSingle();
+    const { data, error } = user
+      ? await supabase.from("business_pages").select("id,owner_id,slug,name,org_type,category_slug,subcategory,description,logo_url,cover_url,district,town,area,address,opening_hours,services,products,verified,is_featured,seeded_by_official,claim_status,suspended,contact_phone,whatsapp,email").eq("slug", slug).maybeSingle()
+      : await supabase.from("business_pages").select("id,owner_id,slug,name,org_type,category_slug,subcategory,description,logo_url,cover_url,district,town,area,address,opening_hours,services,products,verified,is_featured,seeded_by_official,claim_status,suspended").eq("slug", slug).maybeSingle();
     if (error || !data) { toast.error("Business page not found"); nav({ to: "/businesses" }); return; }
-    setPage(data as BPage);
+    setPage(data as unknown as BPage);
     const [{ count }, follow, { data: o }] = await Promise.all([
       supabase.from("business_followers").select("*", { count: "exact", head: true }).eq("business_page_id", data.id),
       user ? supabase.from("business_followers").select("follower_id").eq("business_page_id", data.id).eq("follower_id", user.id).maybeSingle() : Promise.resolve({ data: null }),

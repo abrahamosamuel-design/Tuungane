@@ -75,8 +75,10 @@ function UserProfile() {
   const load = async () => {
     const { data: p } = await supabase.from("profiles").select("full_name,avatar_url,bio,town,district,is_provider").eq("id", id).maybeSingle();
     setProfile(p);
-    const { data: s } = await supabase.from("service_profiles").select("business_name,subcategory,bio,town,district,phone,whatsapp,email,verified,category_slug,years_experience,areas_served,availability,cover_url,seeded_by_official,seeded_status").eq("user_id", id).maybeSingle();
-    setSp(s);
+    const { data: s } = user
+      ? await supabase.from("service_profiles").select("business_name,subcategory,bio,town,district,phone,whatsapp,email,verified,category_slug,years_experience,areas_served,availability,cover_url,seeded_by_official,seeded_status").eq("user_id", id).maybeSingle()
+      : await supabase.from("service_profiles").select("business_name,subcategory,bio,town,district,verified,category_slug,years_experience,areas_served,availability,cover_url,seeded_by_official,seeded_status").eq("user_id", id).maybeSingle();
+    setSp(s as typeof sp);
     const { data: ps } = await supabase.from("timeline_posts").select("*").eq("provider_user_id", id).eq("hidden", false).order("created_at", { ascending: false });
     setPosts((ps ?? []).map((r) => ({ ...r, author: p ?? undefined })) as PostRow[]);
 
@@ -84,7 +86,7 @@ function UserProfile() {
       supabase.from("follows").select("*", { count: "exact", head: true }).eq("provider_user_id", id),
       supabase.from("provider_recommendations").select("id,service,message,rating,created_at,user_id").eq("provider_user_id", id).eq("hidden", false).order("created_at", { ascending: false }),
       supabase.from("reviews").select("id,rating,text,created_at,user_id").eq("provider_user_id", id).eq("hidden", false).order("created_at", { ascending: false }),
-      supabase.from("opportunities").select("*").eq("poster_id", id).in("status", ["approved", "featured"]).order("created_at", { ascending: false }),
+      supabase.from("opportunities").select("id,title,description,opportunity_type,category_slug,subcategory,location,district,town,area,image_url,business_page_id,poster_type,poster_id,status,is_featured,archived,compensation,deadline,created_at,updated_at").eq("poster_id", id).in("status", ["approved", "featured"]).order("created_at", { ascending: false }),
     ]);
     setFollowers(fc ?? 0);
     setOpps((oRes.data ?? []) as OpportunityRow[]);
