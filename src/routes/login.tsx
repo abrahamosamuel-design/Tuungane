@@ -1,8 +1,9 @@
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Layout } from "@/components/Layout";
 import { Logo } from "@/components/Logo";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 
 type Search = { tab?: "login" | "signup"; redirect?: string };
@@ -19,6 +20,7 @@ export const Route = createFileRoute("/login")({
 function Login() {
   const search = useSearch({ from: "/login" });
   const nav = useNavigate();
+  const { user, loading } = useAuth();
   const [tab, setTab] = useState<"login" | "signup">(search.tab ?? "login");
   const [userType, setUserType] = useState<"customer" | "provider">("customer");
   const [fullName, setFullName] = useState("");
@@ -27,6 +29,14 @@ function Login() {
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!loading && user) {
+      void nav({ to: (search.redirect as never) ?? "/dashboard" });
+    }
+  }, [loading, user, search.redirect, nav]);
+
+  if (!loading && user) return null;
 
   const validatePhone = (v: string) => /^(\+256|256|0?7)\d{7,9}$/.test(v.replace(/\s/g, ""));
 

@@ -10,15 +10,20 @@ import { MyRequestsSummary } from "@/components/MyRequestsSummary";
 import { MatchingRequestsSection } from "@/components/MatchingRequestsSection";
 import { ContactedProvidersList } from "@/components/ContactedProvidersList";
 import { ProviderContactsList } from "@/components/ProviderContactsList";
+import { MyBusinessPagesPanel } from "@/components/business/BusinessPageManager";
 import { toast } from "sonner";
 
 
 export const Route = createFileRoute("/dashboard")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    composeBusiness: typeof search.composeBusiness === "string" ? search.composeBusiness : "",
+  }),
   head: () => ({ meta: [{ title: "My Dashboard — Tuungane" }] }),
   component: Dashboard,
 });
 
 function Dashboard() {
+  const search = Route.useSearch();
   const { user, loading } = useAuth();
   const nav = useNavigate();
   const [profile, setProfile] = useState<{ full_name: string; avatar_url: string | null; is_provider: boolean } | null>(null);
@@ -107,6 +112,15 @@ function Dashboard() {
           {profile?.is_provider && <MatchingRequestsSection />}
           {profile?.is_provider ? <ProviderContactsList /> : <ContactedProvidersList />}
         </div>
+
+        <MyBusinessPagesPanel />
+
+        {search.composeBusiness && (
+          <div className="mt-6">
+            <h2 className="mb-3 font-display text-lg font-bold text-navy">Post update</h2>
+            <PostComposer businessPageId={search.composeBusiness} onPosted={load} />
+          </div>
+        )}
 
 
         {profile?.is_provider && !sp && (

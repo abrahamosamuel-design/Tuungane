@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,11 +10,15 @@ import { toast } from "sonner";
 import { Info } from "lucide-react";
 
 export const Route = createFileRoute("/opportunities/new")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    businessPageId: typeof search.businessPageId === "string" ? search.businessPageId : "",
+  }),
   head: () => ({ meta: [{ title: "Post an Opportunity — Tuungane" }] }),
   component: NewOpportunity,
 });
 
 function NewOpportunity() {
+  const search = useSearch({ from: "/opportunities/new" });
   const { user, loading } = useAuth();
   const nav = useNavigate();
   const [busy, setBusy] = useState(false);
@@ -35,7 +39,7 @@ function NewOpportunity() {
     whatsapp_number: "",
     contact_email: "",
     poster_type: "individual" as (typeof posterTypes)[number]["value"],
-    business_page_id: "" as string,
+    business_page_id: search.businessPageId || "",
   });
   const [file, setFile] = useState<File | null>(null);
 

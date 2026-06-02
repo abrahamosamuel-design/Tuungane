@@ -7,7 +7,7 @@ import { categories } from "@/data/categories";
 import { postTypes, type PostTypeValue } from "@/data/postTypes";
 import { toast } from "sonner";
 
-export function PostComposer({ defaultCategory, defaultPostType, onPosted }: { defaultCategory?: string | null; defaultPostType?: PostTypeValue; onPosted?: () => void }) {
+export function PostComposer({ defaultCategory, defaultPostType, businessPageId, onPosted }: { defaultCategory?: string | null; defaultPostType?: PostTypeValue; businessPageId?: string | null; onPosted?: () => void }) {
   const { user } = useAuth();
   const [text, setText] = useState("");
   const [category, setCategory] = useState(defaultCategory ?? "");
@@ -55,6 +55,7 @@ export function PostComposer({ defaultCategory, defaultPostType, onPosted }: { d
     setBusy(true);
     const { error } = await supabase.from("timeline_posts").insert({
       provider_user_id: user.id,
+      business_page_id: businessPageId ?? null,
       text: text.trim(),
       category_slug: category || null,
       location: location.trim() || null,
