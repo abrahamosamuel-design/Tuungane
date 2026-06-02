@@ -67,17 +67,19 @@ function Login() {
         toast.success("Account created!");
         nav({ to: userType === "provider" ? "/dashboard" : (search.redirect as never) ?? "/feed" });
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
+        // Persist remember-me preference BEFORE sign-in so the auth state
+        // listener doesn't see a stale value and sign the user back out.
         if (rememberMe) {
           localStorage.setItem("tuungane_remember_me", "true");
-          sessionStorage.removeItem("tuungane_session_active");
+          sessionStorage.setItem("tuungane_session_active", "true");
         } else {
           localStorage.setItem("tuungane_remember_me", "false");
           sessionStorage.setItem("tuungane_session_active", "true");
         }
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
         toast.success("Welcome back!");
-        nav({ to: (search.redirect as never) ?? "/feed" });
+        nav({ to: (search.redirect as never) ?? "/services" });
       }
 
     } catch (err: unknown) {
