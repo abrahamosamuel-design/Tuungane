@@ -41,9 +41,9 @@ function BusinessDetail() {
   const [editing, setEditing] = useState(false);
 
   const load = async () => {
-    const baseCols = "id,owner_id,slug,name,org_type,category_slug,subcategory,description,logo_url,cover_url,district,town,area,address,opening_hours,services,products,verified,is_featured,seeded_by_official,claim_status,suspended";
-    const selectCols = user ? `${baseCols},contact_phone,whatsapp,email` : baseCols;
-    const { data, error } = await supabase.from("business_pages").select(selectCols).eq("slug", slug).maybeSingle();
+    const { data, error } = user
+      ? await supabase.from("business_pages").select("id,owner_id,slug,name,org_type,category_slug,subcategory,description,logo_url,cover_url,district,town,area,address,opening_hours,services,products,verified,is_featured,seeded_by_official,claim_status,suspended,contact_phone,whatsapp,email").eq("slug", slug).maybeSingle()
+      : await supabase.from("business_pages").select("id,owner_id,slug,name,org_type,category_slug,subcategory,description,logo_url,cover_url,district,town,area,address,opening_hours,services,products,verified,is_featured,seeded_by_official,claim_status,suspended").eq("slug", slug).maybeSingle();
     if (error || !data) { toast.error("Business page not found"); nav({ to: "/businesses" }); return; }
     setPage(data as unknown as BPage);
     const [{ count }, follow, { data: o }] = await Promise.all([
