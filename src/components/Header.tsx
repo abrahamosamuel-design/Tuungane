@@ -17,11 +17,20 @@ const nav = [
   { to: "/official", label: "Official" },
 ];
 
+const guestNav = [
+  { to: "/", label: "Home" },
+  { to: "/services", label: "Services" },
+  { to: "/opportunities", label: "Opportunities" },
+  { to: "/businesses", label: "Businesses" },
+  { to: "/feed", label: "Feed" },
+];
+
 
 export function Header() {
   const [open, setOpen] = useState(false);
   const [menu, setMenu] = useState(false);
   const { user, loading, isModerator, signOut } = useAuth();
+  const activeNav = user ? nav : guestNav;
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
@@ -30,7 +39,7 @@ export function Header() {
           <Logo className="h-9 w-auto" />
         </Link>
         <nav className="hidden items-center gap-8 md:flex">
-          {nav.map((n) => (
+          {activeNav.map((n) => (
             <Link
               key={n.to}
               to={n.to}
@@ -62,7 +71,7 @@ export function Header() {
                     <MenuItem to="/requests" icon={<ClipboardList className="h-4 w-4" />} label="My requests" onClick={() => setMenu(false)} />
                     <MenuItem to="/dashboard" icon={<Wrench className="h-4 w-4" />} label="Post a service" onClick={() => setMenu(false)} />
                     <MenuItem to="/opportunities/new" icon={<Briefcase className="h-4 w-4" />} label="Post an opportunity" onClick={() => setMenu(false)} />
-                    <MenuItem to="/businesses/new" icon={<Building2 className="h-4 w-4" />} label="Create business page" onClick={() => setMenu(false)} />
+                    <MenuItem to="/businesses/create" icon={<Building2 className="h-4 w-4" />} label="Create business page" onClick={() => setMenu(false)} />
                     {isModerator && <MenuItem to="/admin" icon={<Shield className="h-4 w-4" />} label="Admin & moderation" onClick={() => setMenu(false)} />}
                     <button onClick={() => { setMenu(false); signOut(); }} className="flex w-full items-center gap-2 border-t border-border px-3 py-2.5 text-left text-sm text-destructive hover:bg-muted">
                       <LogOut className="h-4 w-4" /> Sign out
@@ -74,9 +83,8 @@ export function Header() {
             </>
           ) : (
             <>
-              <Link to="/opportunities/new" className="hidden items-center gap-1 text-sm font-medium text-navy hover:text-orange lg:inline-flex"><Plus className="h-4 w-4" /> Post opportunity</Link>
               <Link to="/login" className="text-sm font-medium text-navy hover:text-orange">Log in</Link>
-              <Link to="/login" search={{ tab: "signup" } as never} className="inline-flex items-center rounded-full bg-orange px-4 py-2 text-sm font-semibold text-orange-foreground shadow-sm transition-all hover:brightness-110">
+              <Link to="/login" search={{ tab: "signup", redirect: "/dashboard" } as never} className="inline-flex items-center rounded-full bg-orange px-4 py-2 text-sm font-semibold text-orange-foreground shadow-sm transition-all hover:brightness-110">
                 Post a service
               </Link>
             </>
@@ -89,20 +97,20 @@ export function Header() {
       {open && (
         <div className="border-t border-border bg-background md:hidden">
           <div className="space-y-1 px-4 py-3">
-            {nav.map((n) => (
+            {activeNav.map((n) => (
               <Link key={n.to} to={n.to} onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted">{n.label}</Link>
             ))}
             {user ? (
               <>
                 <Link to="/dashboard" onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted">My dashboard</Link>
                 <Link to="/me" onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted">My profile</Link>
+                <Link to="/businesses/create" onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted">Create business page</Link>
                 <Link to="/opportunities/new" onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted">Post an opportunity</Link>
                 {isModerator && <Link to="/admin" onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted">Admin</Link>}
                 <button onClick={() => { setOpen(false); signOut(); }} className="block w-full rounded-md px-3 py-2 text-left text-sm font-medium text-destructive hover:bg-muted">Sign out</button>
               </>
             ) : (
               <>
-                <Link to="/opportunities/new" onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted">Post an opportunity</Link>
                 <Link to="/login" onClick={() => setOpen(false)} className="mt-2 block rounded-full bg-orange px-4 py-2 text-center text-sm font-semibold text-orange-foreground">
                   Log in or sign up
                 </Link>

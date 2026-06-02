@@ -22,7 +22,7 @@ type BPage = {
 };
 
 function BusinessesPage() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const [pages, setPages] = useState<BPage[]>([]);
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<string>("");
@@ -46,6 +46,11 @@ function BusinessesPage() {
 
   const featured = pages.filter((p) => p.is_featured);
   const rest = pages.filter((p) => !p.is_featured);
+  const createPageLink = loading
+    ? undefined
+    : user
+      ? { to: "/businesses/create" as const }
+      : { to: "/login" as const, search: { tab: "signup", redirect: "/businesses/create" } as never };
 
   return (
     <Layout>
@@ -57,8 +62,8 @@ function BusinessesPage() {
             <p className="mt-2 max-w-2xl text-sm text-muted-foreground">Discover and follow local businesses and organizations on Tuungane. See their services, posts and opportunities.</p>
           </div>
           <Link
-            to={user ? "/businesses/new" : "/login"}
-            search={user ? undefined : ({ tab: "signup", redirect: "/businesses/new" } as never)}
+            to={createPageLink?.to ?? "/login"}
+            search={createPageLink?.search}
             className="inline-flex items-center gap-2 rounded-full bg-orange px-5 py-2.5 text-sm font-semibold text-orange-foreground shadow-sm hover:brightness-110"
           >
             <Plus className="h-4 w-4" /> Create a page
@@ -95,8 +100,8 @@ function BusinessesPage() {
               <h3 className="mt-3 text-base font-bold text-navy">No business pages yet</h3>
               <p className="mt-1 text-sm text-muted-foreground">Create a business page to showcase your organization, services, opportunities, and updates.</p>
               <Link
-                to={user ? "/businesses/new" : "/login"}
-                search={user ? undefined : ({ tab: "signup", redirect: "/businesses/new" } as never)}
+                to={createPageLink?.to ?? "/login"}
+                search={createPageLink?.search}
                 className="mt-4 inline-flex items-center gap-2 rounded-full bg-orange px-5 py-2 text-sm font-semibold text-orange-foreground"
               >
                 <Plus className="h-4 w-4" /> Create a page

@@ -8,6 +8,7 @@ interface AuthCtx {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  isAuthenticated: boolean;
   roles: Role[];
   isAdmin: boolean;
   isModerator: boolean;
@@ -15,7 +16,7 @@ interface AuthCtx {
 }
 
 const Ctx = createContext<AuthCtx>({
-  user: null, session: null, loading: true, roles: [], isAdmin: false, isModerator: false,
+  user: null, session: null, loading: true, isAuthenticated: false, roles: [], isAdmin: false, isModerator: false,
   signOut: async () => {},
 });
 
@@ -26,30 +27,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [roles, setRoles] = useState<Role[]>([]);
 
   useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, sess) => {
+    const syncAuth = async (sess: Session | null) => {
       setSession(sess);
       setUser(sess?.user ?? null);
+
       if (sess?.user) {
-        setTimeout(() => {
-          supabase.from("user_roles").select("role").eq("user_id", sess.user.id).then(({ data }) => {
-            setRoles((data ?? []).map((r) => r.role as Role));
-          });
-        }, 0);
+        const { data } = await supabase.from("user_roles").select("role").eq("user_id", sess.user.id);
+        setRoles((data ?? []).map((r) => r.role as Role));
       } else {
         setRoles([]);
       }
-    });
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setUser(data.session?.user ?? null);
+
       setLoading(false);
+    };
+
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, sess) => {
+      void syncAuth(sess);
     });
+
+    void supabase.auth.getSession().then(({ data }) => syncAuth(data.session));
+
     return () => sub.subscription.unsubscribe();
   }, []);
 
   return (
     <Ctx.Provider value={{
-      user, session, loading, roles,
+      user, session, loading, isAuthenticated: !!session?.user, roles,
       isAdmin: roles.includes("admin"),
       isModerator: roles.includes("admin") || roles.includes("moderator"),
       signOut: async () => { await supabase.auth.signOut(); },
