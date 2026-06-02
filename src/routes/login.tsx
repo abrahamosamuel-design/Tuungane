@@ -29,6 +29,8 @@ function Login() {
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [rememberMe, setRememberMe] = useState(true);
+
 
   useEffect(() => {
     if (!loading && user) {
@@ -67,9 +69,17 @@ function Login() {
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
+        if (rememberMe) {
+          localStorage.setItem("tuungane_remember_me", "true");
+          sessionStorage.removeItem("tuungane_session_active");
+        } else {
+          localStorage.setItem("tuungane_remember_me", "false");
+          sessionStorage.setItem("tuungane_session_active", "true");
+        }
         toast.success("Welcome back!");
         nav({ to: (search.redirect as never) ?? "/feed" });
       }
+
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
@@ -118,7 +128,19 @@ function Login() {
               <Field label="Phone number" value={phone} onChange={setPhone} placeholder="+256 7xx xxx xxx" hint="Uganda numbers only (+256, 256, 07…)" />
             )}
             <Field label="Password" type="password" value={password} onChange={setPassword} required />
+            {tab === "login" && (
+              <label className="flex items-center gap-2 text-xs text-navy cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="h-4 w-4 rounded border-border accent-orange cursor-pointer"
+                />
+                Remember me / Stay signed in
+              </label>
+            )}
             {error && <p className="rounded-lg bg-destructive/10 px-3 py-2 text-xs text-destructive">{error}</p>}
+
             <button type="submit" disabled={busy} className="mt-2 w-full rounded-xl bg-orange py-3 text-sm font-semibold text-orange-foreground transition hover:brightness-110 disabled:opacity-50">
               {busy ? "Please wait..." : tab === "login" ? "Log in" : "Create account"}
             </button>

@@ -20,6 +20,9 @@ const Ctx = createContext<AuthCtx>({
   signOut: async () => {},
 });
 
+const REMEMBER_KEY = "tuungane_remember_me";
+const SESSION_ACTIVE_KEY = "tuungane_session_active";
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
@@ -27,12 +30,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [roles, setRoles] = useState<Role[]>([]);
 
   useEffect(() => {
-    const syncAuth = async (sess: Session | null) => {
-      setSession(sess);
-      setUser(sess?.user ?? null);
+    const enforceRememberMe = async (sess: Session | null): Promise<Session | null> => {
+      if (!sess || typeof window === "undefined") return sess;
+      const remember = localStorage.getItem(REMEMBER_KEY);
+      if (remember === "false") {
+        const active = sessionStorage.getItem(SESSION_ACTIVE_KEY);
+        if (!active) {
+          // Fresh browser session — user opted out of persistence
+          await supabase.auth.signOut();
+          localStorage.removeItem(REMEMBER_KEY);
+          return null;
+        }
+        sessionStorage.setItem(SESSION_ACTIVE_KEY, "true");
+      }
+      return sess;
+    };
 
-      if (sess?.user) {
-        const { data } = await supabase.from("user_roles").select("role").eq("user_id", sess.user.id);
+    const syncAuth = async (sess: Session | null) => {
+      const effective = await enforceRememberMe(sess);
+      setSession(effective);
+      setUser(effective?.user ?? null);
+
+      if (effective?.user) {
+        const { data } = await supabase.from("user_roles").select("role").eq("user_id", effective.user.id);
         setRoles((data ?? []).map((r) => r.role as Role));
       } else {
         setRoles([]);
@@ -55,7 +75,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user, session, loading, isAuthenticated: !!session?.user, roles,
       isAdmin: roles.includes("admin"),
       isModerator: roles.includes("admin") || roles.includes("moderator"),
-      signOut: async () => { await supabase.auth.signOut(); },
+      signOut: async () => {
+        await supabase.auth.signOut();
+        if (typeof window !== "undefined") {
+          localStorage.removeItem(REMEMBER_KEY);
+          sessionStorage.removeItem(SESSION_ACTIVE_KEY);
+        }
+      },
     }}>
       {children}
     </Ctx.Provider>
