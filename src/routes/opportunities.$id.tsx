@@ -66,7 +66,7 @@ function OpportunityDetails() {
     } else {
       setBusiness(null);
     }
-    const { data: sim } = await supabase.from("opportunities").select("id,title,description,opportunity_type,category_slug,subcategory,location,district,town,area,image_url,business_page_id,poster_type,poster_id,status,is_featured,archived,created_at,updated_at").eq("category_slug", data.category_slug).neq("id", id).in("status", ["approved", "featured"]).limit(4);
+    const { data: sim } = await supabase.from("opportunities").select("id,title,description,opportunity_type,category_slug,subcategory,location,district,town,area,image_url,business_page_id,poster_type,poster_id,status,is_featured,archived,compensation,deadline,created_at,updated_at").eq("category_slug", data.category_slug).neq("id", id).in("status", ["approved", "featured"]).limit(4);
     setSimilar((sim ?? []) as unknown as OpportunityRow[]);
 
     if (user) {
