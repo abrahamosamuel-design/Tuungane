@@ -30,24 +30,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [roles, setRoles] = useState<Role[]>([]);
 
   useEffect(() => {
-    const enforceRememberMe = async (sess: Session | null): Promise<Session | null> => {
+    let initialChecked = false;
+
+    const enforceRememberMeOnce = async (sess: Session | null): Promise<Session | null> => {
       if (!sess || typeof window === "undefined") return sess;
+      // Only enforce on the very first session check after app load.
+      // Token refreshes and other auth events must NOT trigger sign-out.
+      if (initialChecked) return sess;
+      initialChecked = true;
+
       const remember = localStorage.getItem(REMEMBER_KEY);
-      if (remember === "false") {
-        const active = sessionStorage.getItem(SESSION_ACTIVE_KEY);
-        if (!active) {
-          // Fresh browser session — user opted out of persistence
-          await supabase.auth.signOut();
-          localStorage.removeItem(REMEMBER_KEY);
-          return null;
-        }
+      // Default to "remember" when no preference is stored (legacy sessions).
+      if (remember !== "false") {
         sessionStorage.setItem(SESSION_ACTIVE_KEY, "true");
+        return sess;
+      }
+      const active = sessionStorage.getItem(SESSION_ACTIVE_KEY);
+      if (!active) {
+        // Fresh browser session and user opted out of persistence — sign out.
+        await supabase.auth.signOut();
+        return null;
       }
       return sess;
     };
 
     const syncAuth = async (sess: Session | null) => {
-      const effective = await enforceRememberMe(sess);
+      const effective = await enforceRememberMeOnce(sess);
       setSession(effective);
       setUser(effective?.user ?? null);
 
