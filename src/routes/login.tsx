@@ -34,7 +34,7 @@ function Login() {
 
   useEffect(() => {
     if (!loading && user) {
-      void nav({ to: (search.redirect as never) ?? "/dashboard" });
+      void nav({ to: (search.redirect as never) ?? "/services" });
     }
   }, [loading, user, search.redirect, nav]);
 
