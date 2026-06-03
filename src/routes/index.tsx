@@ -1,21 +1,17 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { ArrowRight, BadgeCheck, Search, Sparkles, ShieldCheck, Users, MapPin, Star, Wrench, Sparkles as SparklesIcon, Building2, Scissors, Truck, Car, GraduationCap, Camera, ChefHat, Laptop, HeartPulse, Sprout, MoreHorizontal } from "lucide-react";
+import { ArrowRight, BadgeCheck, Search, Sparkles, ShieldCheck, Users, MapPin, Star, Wrench, Sparkles as SparklesIcon, Building2, Scissors, Truck, Car, GraduationCap, Camera, ChefHat, Laptop, HeartPulse, Sprout, MoreHorizontal, ClipboardList, MessageSquare, Briefcase, Rss, Megaphone } from "lucide-react";
 import { Layout } from "@/components/Layout";
 import { ProviderCard } from "@/components/ProviderCard";
-import { OfficialPostCard } from "@/components/OfficialPostCard";
 import { categories } from "@/data/categories";
 import { featuredProviders, providers } from "@/data/providers";
-import { supabase } from "@/integrations/supabase/client";
-import type { OfficialAccountRow, OfficialPostRow } from "@/data/officialPostTypes";
 
 const iconMap: Record<string, any> = { Wrench, Sparkles: SparklesIcon, Building2, Scissors, Truck, Car, GraduationCap, Camera, ChefHat, Laptop, HeartPulse, Sprout, MoreHorizontal };
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Tuungane — Find Trusted Service Providers Near You" },
-      { name: "description", content: "Tuungane helps you find trusted plumbers, electricians, tutors, tailors and more across Uganda. Post your skill and get discovered." },
+      { title: "Tuungane — Request a Service. Get Matched With Trusted Providers." },
+      { name: "description", content: "Request a service in Uganda and get matched with verified providers. Track jobs, leave verified reviews, grow together on Tuungane." },
     ],
   }),
   component: Index,
@@ -23,24 +19,6 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const featured = featuredProviders();
-  const [officialAccount, setOfficialAccount] = useState<OfficialAccountRow | null>(null);
-  const [officialPosts, setOfficialPosts] = useState<OfficialPostRow[]>([]);
-
-  useEffect(() => {
-    (async () => {
-      const { data: acct } = await supabase.from("official_accounts").select("*").eq("is_active", true).limit(1).maybeSingle();
-      setOfficialAccount(acct as OfficialAccountRow | null);
-      const { data: posts } = await supabase
-        .from("official_posts")
-        .select("*")
-        .eq("status", "published")
-        .or("is_homepage.eq.true,is_pinned.eq.true,is_featured.eq.true")
-        .order("is_pinned", { ascending: false })
-        .order("created_at", { ascending: false })
-        .limit(4);
-      setOfficialPosts((posts ?? []) as OfficialPostRow[]);
-    })();
-  }, []);
 
   return (
     <Layout>
@@ -54,17 +32,17 @@ function Index() {
                 <Sparkles className="h-3 w-3 text-orange" /> Available in Uganda
               </span>
               <h1 className="mt-5 font-display text-4xl font-extrabold leading-[1.05] sm:text-5xl lg:text-6xl">
-                Find Trusted Service Providers <span className="text-orange">Near You</span>
+                Request a service. <span className="text-orange">Get matched</span> with trusted providers.
               </h1>
               <p className="mt-5 max-w-xl text-base text-white/80 sm:text-lg">
-                Tuungane helps people find trusted service providers and helps skilled people find gigs, jobs, internships, volunteer work, and apprenticeships. <span className="text-white">Find services. Find work. Grow through skill.</span>
+                Tell us what you need. Verified providers nearby respond. You pick the best one, track the job, and leave a verified review.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Link to="/services" className="inline-flex items-center justify-center gap-2 rounded-full bg-orange px-6 py-3 text-sm font-semibold text-orange-foreground shadow-lg transition hover:brightness-110">
-                  <Search className="h-4 w-4" /> Find a Service
+                  <ClipboardList className="h-4 w-4" /> Request a service
                 </Link>
-                <Link to="/opportunities" className="inline-flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/5 px-6 py-3 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/10">
-                  Find Work Opportunities <ArrowRight className="h-4 w-4" />
+                <Link to="/services" className="inline-flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/5 px-6 py-3 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/10">
+                  <Search className="h-4 w-4" /> Browse providers
                 </Link>
               </div>
               <div className="mt-10 flex flex-wrap items-center gap-6 text-sm text-white/70">
@@ -97,6 +75,32 @@ function Index() {
         </div>
       </section>
 
+      {/* How it works */}
+      <section className="bg-surface py-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <p className="text-xs font-semibold uppercase tracking-wider text-orange">How Tuungane works</p>
+            <h2 className="mt-1 font-display text-3xl font-bold text-navy">Three steps to getting it done</h2>
+          </div>
+          <div className="mt-12 grid gap-6 md:grid-cols-3">
+            {[
+              { n: "01", t: "Request", i: ClipboardList, d: "Tell us what you need — plumbing, tutoring, transport, anything. Set your location and budget." },
+              { n: "02", t: "Get matched", i: MessageSquare, d: "Verified providers nearby respond. Compare profiles, ratings and prices, then pick the best one." },
+              { n: "03", t: "Verified review", i: BadgeCheck, d: "Track the job to completion. Leave a verified review that helps the next person trust the provider." },
+            ].map(({ n, t, i: Icon, d }) => (
+              <div key={n} className="relative rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)]">
+                <div className="flex items-center justify-between">
+                  <span className="font-display text-5xl font-extrabold text-orange/20">{n}</span>
+                  <Icon className="h-6 w-6 text-orange" />
+                </div>
+                <h3 className="mt-2 font-display text-lg font-semibold text-navy">{t}</h3>
+                <p className="mt-2 text-sm text-muted-foreground">{d}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Popular categories */}
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <div className="flex items-end justify-between">
@@ -122,85 +126,25 @@ function Index() {
         </div>
       </section>
 
-      {/* From Tuungane Official */}
-      {officialPosts.length > 0 && (
-        <section className="border-y border-orange/20 bg-gradient-to-b from-orange/5 to-transparent py-14">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <div className="flex items-end justify-between">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-orange">From Tuungane Official</p>
-                <h2 className="mt-1 font-display text-3xl font-bold text-navy">Featured updates & opportunities</h2>
-                <p className="mt-1 text-sm text-muted-foreground">Curated by the Tuungane team to help you find work, services and stay safe.</p>
-              </div>
-              <Link to="/official" className="hidden text-sm font-semibold text-navy hover:text-orange sm:inline-flex">See all →</Link>
-            </div>
-            <div className="mt-8 grid gap-5 sm:grid-cols-2">
-              {officialPosts.map((p) => (
-                <OfficialPostCard key={p.id} post={p} account={officialAccount} />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* How it works */}
+      {/* Featured providers */}
       <section className="bg-surface py-16">
-
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <p className="text-xs font-semibold uppercase tracking-wider text-orange">How Tuungane works</p>
-            <h2 className="mt-1 font-display text-3xl font-bold text-navy">Three steps to opportunity</h2>
+          <div className="flex items-end justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wider text-orange">Featured</p>
+              <h2 className="mt-1 font-display text-3xl font-bold text-navy">Top-rated providers</h2>
+            </div>
+            <Link to="/services" className="hidden text-sm font-semibold text-navy hover:text-orange sm:inline-flex">Browse all →</Link>
           </div>
-          <div className="mt-12 grid gap-6 md:grid-cols-3">
-            {[
-              { n: "01", t: "Search", d: "Browse categories or search by skill, location and rating to find providers near you." },
-              { n: "02", t: "Connect", d: "Contact verified providers directly through WhatsApp or phone — no middlemen." },
-              { n: "03", t: "Grow", d: "Rate your experience. Providers grow their reputation. Everyone prospers together." },
-            ].map((s) => (
-              <div key={s.n} className="relative rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)]">
-                <span className="font-display text-5xl font-extrabold text-orange/20">{s.n}</span>
-                <h3 className="mt-2 font-display text-lg font-semibold text-navy">{s.t}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">{s.d}</p>
-              </div>
+          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {[...featured, ...providers.slice(0, 3)].slice(0, 6).map((p) => (
+              <ProviderCard key={p.id} p={p} />
             ))}
           </div>
         </div>
       </section>
 
-      {/* Featured providers */}
-      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="flex items-end justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-orange">Featured</p>
-            <h2 className="mt-1 font-display text-3xl font-bold text-navy">Top-rated providers</h2>
-          </div>
-          <Link to="/services" className="hidden text-sm font-semibold text-navy hover:text-orange sm:inline-flex">Browse all →</Link>
-        </div>
-        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {[...featured, ...providers.slice(0, 3)].slice(0, 6).map((p) => (
-            <ProviderCard key={p.id} p={p} />
-          ))}
-        </div>
-      </section>
-
-      {/* Opportunities */}
-      <section className="bg-surface py-16">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-orange">Skills-Based Opportunities</p>
-              <h2 className="mt-1 font-display text-3xl font-bold text-navy">Find work that fits your skills</h2>
-              <p className="mt-2 max-w-2xl text-sm text-muted-foreground">Find gigs, jobs, internships, volunteer work, and apprenticeships connected to your skills and services.</p>
-            </div>
-            <div className="flex gap-2">
-              <Link to="/opportunities" className="rounded-full bg-navy px-5 py-2.5 text-sm font-semibold text-navy-foreground hover:brightness-110">Browse Opportunities</Link>
-              <Link to="/opportunities/new" className="rounded-full bg-orange px-5 py-2.5 text-sm font-semibold text-orange-foreground hover:brightness-110">Post an Opportunity</Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Why Tuungane */}
+      {/* Why Tuungane / trust */}
       <section className="bg-navy py-16 text-navy-foreground">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid items-center gap-12 lg:grid-cols-2">
@@ -213,7 +157,7 @@ function Index() {
               <ul className="mt-6 space-y-3">
                 {[
                   { i: ShieldCheck, t: "Verified profiles", d: "Identity checks and document verification for every featured provider." },
-                  { i: Star, t: "Real reviews", d: "Ratings come from real customers — not bots, not fake accounts." },
+                  { i: Star, t: "Verified reviews", d: "Reviews only count after a real job. No bots, no fake accounts." },
                   { i: MapPin, t: "Local first", d: "Find providers serving your district, town and specific area." },
                 ].map(({ i: Icon, t, d }) => (
                   <li key={t} className="flex gap-3">
@@ -240,13 +184,36 @@ function Index() {
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="mx-auto max-w-5xl px-4 py-20 sm:px-6 lg:px-8">
+      {/* Also on Tuungane (demoted strip) */}
+      <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
+        <p className="text-xs font-semibold uppercase tracking-wider text-orange">Also on Tuungane</p>
+        <h2 className="mt-1 font-display text-2xl font-bold text-navy">More ways to connect & grow</h2>
+        <div className="mt-6 grid gap-3 sm:grid-cols-3">
+          {[
+            { to: "/opportunities", i: Briefcase, t: "Opportunities", d: "Gigs, jobs, internships and apprenticeships matched to your skills." },
+            { to: "/feed", i: Rss, t: "Community Feed", d: "See recent work from providers and discover skilled people nearby." },
+            { to: "/official", i: Megaphone, t: "Tuungane Official", d: "Updates, safety tips and curated opportunities from our team." },
+          ].map(({ to, i: Icon, t, d }) => (
+            <Link key={to} to={to} className="group flex gap-3 rounded-2xl border border-border bg-card p-4 transition hover:border-orange">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-navy/5 text-navy group-hover:bg-orange group-hover:text-orange-foreground">
+                <Icon className="h-4 w-4" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-navy">{t}</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">{d}</p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* CTA for providers */}
+      <section className="mx-auto max-w-5xl px-4 pb-20 sm:px-6 lg:px-8">
         <div className="overflow-hidden rounded-3xl border border-border bg-card p-10 text-center shadow-[var(--shadow-elevated)] sm:p-14">
           <p className="text-xs font-semibold uppercase tracking-wider text-orange">For skilled people</p>
           <h2 className="mt-2 font-display text-3xl font-bold text-navy sm:text-4xl">Post your skill. Get discovered.</h2>
           <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
-            Create a free service profile in minutes. Share your work, build trust through reviews, and grow your business.
+            Create a free service profile in minutes. Share your work, build trust through verified reviews, and grow your business.
           </p>
           <Link to="/login" className="mt-7 inline-flex items-center gap-2 rounded-full bg-orange px-7 py-3 text-sm font-semibold text-orange-foreground shadow-lg transition hover:brightness-110">
             Create your profile <ArrowRight className="h-4 w-4" />

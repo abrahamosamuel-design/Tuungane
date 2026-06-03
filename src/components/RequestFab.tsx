@@ -2,7 +2,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 
-const SHOW_ON = new Set<string>(["/", "/services", "/services/requests", "/feed"]);
+const SHOW_ON = new Set<string>(["/", "/services", "/services/requests", "/feed", "/businesses", "/opportunities", "/official"]);
 
 export function RequestFab() {
   const { user } = useAuth();

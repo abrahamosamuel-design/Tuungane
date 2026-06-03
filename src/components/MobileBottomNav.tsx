@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Home, Rss, Wrench, User as UserIcon, ClipboardList } from "lucide-react";
+import { Home, Wrench, User as UserIcon, ClipboardList, Search } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 
 export function MobileBottomNav() {
@@ -10,9 +10,13 @@ export function MobileBottomNav() {
       <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden">
         <div className="mx-auto flex max-w-md items-stretch justify-around px-1">
           <Tab to="/" icon={<Home className="h-5 w-5" />} label="Home" exact />
-          <Tab to="/feed" icon={<Rss className="h-5 w-5" />} label="Feed" />
-          <RequestTab />
           <Tab to="/services" icon={<Wrench className="h-5 w-5" />} label="Services" />
+          <RequestTab />
+          {user ? (
+            <Tab to="/requests" icon={<ClipboardList className="h-5 w-5" />} label="Requests" />
+          ) : (
+            <Tab to="/businesses" icon={<Search className="h-5 w-5" />} label="Browse" />
+          )}
           {user ? (
             <Tab to="/u/$id" params={{ id: user.id }} icon={<UserIcon className="h-5 w-5" />} label="Me" />
           ) : (
