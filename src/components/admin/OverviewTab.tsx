@@ -60,7 +60,6 @@ export function OverviewTab({ onJump }: { onJump: (tab: string, subTab?: string)
     { label: "Providers", value: s.providers, tab: "providers" },
     { label: "Business Pages", value: s.businesses, tab: "businesses" },
     { label: "Requests", value: s.requests, tab: "requests" },
-    { label: "Legacy opportunities", value: s.opportunities, tab: "opportunities" },
   ];
   const alerts: Array<{ label: string; value: number; tab: string; subTab?: string; tone: string }> = [
     { label: "Open Reports", value: s.openReports, tab: "reports", tone: "bg-destructive/10 text-destructive" },
