@@ -38,8 +38,8 @@ function Index() {
                 Tell us what you need. Verified providers nearby respond. You pick the best one, track the job, and leave a verified review.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Link to="/services" className="inline-flex items-center justify-center gap-2 rounded-full bg-orange px-6 py-3 text-sm font-semibold text-orange-foreground shadow-lg transition hover:brightness-110">
-                  <ClipboardList className="h-4 w-4" /> Request a service
+                <Link to="/requests/new" className="inline-flex items-center justify-center gap-2 rounded-full bg-orange px-6 py-3 text-sm font-semibold text-orange-foreground shadow-lg transition hover:brightness-110">
+                  <ClipboardList className="h-4 w-4" /> Create a Request
                 </Link>
                 <Link to="/services" className="inline-flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/5 px-6 py-3 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/10">
                   <Search className="h-4 w-4" /> Browse providers
@@ -137,7 +137,7 @@ function Index() {
             <Link to="/services" className="hidden text-sm font-semibold text-navy hover:text-orange sm:inline-flex">Browse all →</Link>
           </div>
           <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {[...featured, ...providers.slice(0, 3)].slice(0, 6).map((p) => (
+            {Array.from(new Map([...featured, ...providers].map((p) => [p.id, p])).values()).slice(0, 6).map((p) => (
               <ProviderCard key={p.id} p={p} />
             ))}
           </div>
