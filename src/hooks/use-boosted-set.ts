@@ -18,7 +18,7 @@ export function useBoostedSet(entityType: string, boostTypes: BoostType[]) {
     (async () => {
       if (boostTypes.length === 0) { setIds(new Set()); setLoaded(true); return; }
       const { data } = await supabase
-        .from("boosts")
+        .from("active_boosts_public" as never)
         .select("entity_id")
         .eq("entity_type", entityType)
         .in("boost_type", boostTypes)
