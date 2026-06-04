@@ -1,0 +1,89 @@
+import { Link } from "@tanstack/react-router";
+import { MapPin, Clock, Wallet, BadgeCheck, MessageSquare } from "lucide-react";
+import { timeAgo } from "@/lib/format";
+import { getCategory } from "@/data/categories";
+import { requestStatusMap, type ServiceRequestRow } from "@/data/serviceRequestTypes";
+
+export interface RequestRowLite extends ServiceRequestRow {
+  response_count?: number;
+  customer_name?: string | null;
+  customer_verified?: boolean;
+}
+
+const urgencyLabel: Record<string, { label: string; tone: string }> = {
+  emergency: { label: "Today", tone: "bg-orange/10 text-orange" },
+  urgent: { label: "This week", tone: "bg-amber-100 text-amber-700" },
+  normal: { label: "Flexible", tone: "bg-muted text-muted-foreground" },
+};
+
+export function RequestCard({ r }: { r: RequestRowLite }) {
+  const cat = r.category_slug ? getCategory(r.category_slug) : null;
+  const status = requestStatusMap[r.status];
+  const urgency = urgencyLabel[r.urgency] ?? urgencyLabel.normal;
+  const title = r.title?.trim() || r.service_needed || cat?.name || "Request";
+
+  return (
+    <Link
+      to="/requests/$id"
+      params={{ id: r.id }}
+      className="block rounded-2xl border border-border bg-card p-5 transition hover:border-orange hover:shadow-[var(--shadow-card)]"
+    >
+      <div className="flex flex-wrap items-center gap-2">
+        {r.urgent_flag && (
+          <span className="rounded-full bg-orange/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-orange">
+            Urgent
+          </span>
+        )}
+        <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${urgency.tone}`}>
+          {urgency.label}
+        </span>
+        {status && (
+          <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${status.color}`}>
+            {status.label}
+          </span>
+        )}
+        {r.customer_verified && (
+          <span className="inline-flex items-center gap-1 rounded-full bg-green/10 px-2 py-0.5 text-[10px] font-semibold text-green">
+            <BadgeCheck className="h-3 w-3" /> Verified
+          </span>
+        )}
+      </div>
+
+      <h3 className="mt-2 line-clamp-2 font-display text-base font-bold text-navy">{title}</h3>
+      {cat && (
+        <p className="mt-1 text-xs text-muted-foreground">
+          {cat.name}{r.subcategory ? ` · ${r.subcategory}` : ""}
+        </p>
+      )}
+
+      {r.description && (
+        <p className="mt-2 line-clamp-2 text-sm text-foreground/80">{r.description}</p>
+      )}
+
+      <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+        {(r.town || r.district || r.location) && (
+          <span className="inline-flex items-center gap-1">
+            <MapPin className="h-3 w-3" /> {r.town || r.district || r.location}
+          </span>
+        )}
+        {r.budget_range && (
+          <span className="inline-flex items-center gap-1 font-semibold text-navy">
+            <Wallet className="h-3 w-3" /> {r.budget_range}
+          </span>
+        )}
+        <span className="inline-flex items-center gap-1">
+          <Clock className="h-3 w-3" /> {timeAgo(r.created_at)}
+        </span>
+        {typeof r.response_count === "number" && (
+          <span className="inline-flex items-center gap-1">
+            <MessageSquare className="h-3 w-3" /> {r.response_count} response{r.response_count === 1 ? "" : "s"}
+          </span>
+        )}
+      </div>
+
+      {r.customer_name && (
+        <p className="mt-3 text-xs text-muted-foreground">Posted by {r.customer_name}</p>
+      )}
+    </Link>
+  );
+}
