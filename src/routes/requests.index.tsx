@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { EmptyState } from "@/components/EmptyState";
 import { Inbox } from "lucide-react";
 
-export const Route = createFileRoute("/requests")({
+export const Route = createFileRoute("/requests/")({
   head: () => ({ meta: [{ title: "Service requests — Tuungane" }] }),
   component: RequestsPage,
 });

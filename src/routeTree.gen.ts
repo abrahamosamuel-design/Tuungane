@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as ServicesRouteImport } from './routes/services'
-import { Route as RequestsRouteImport } from './routes/requests'
 import { Route as OpportunitiesRouteImport } from './routes/opportunities'
 import { Route as OfficialRouteImport } from './routes/official'
 import { Route as NotificationsRouteImport } from './routes/notifications'
@@ -25,6 +24,7 @@ import { Route as BusinessesRouteImport } from './routes/businesses'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as RequestsIndexRouteImport } from './routes/requests.index'
 import { Route as BusinessesIndexRouteImport } from './routes/businesses.index'
 import { Route as UIdRouteImport } from './routes/u.$id'
 import { Route as ServicesRequestsRouteImport } from './routes/services.requests'
@@ -48,11 +48,6 @@ const TermsRoute = TermsRouteImport.update({
 const ServicesRoute = ServicesRouteImport.update({
   id: '/services',
   path: '/services',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RequestsRoute = RequestsRouteImport.update({
-  id: '/requests',
-  path: '/requests',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OpportunitiesRoute = OpportunitiesRouteImport.update({
@@ -120,6 +115,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RequestsIndexRoute = RequestsIndexRouteImport.update({
+  id: '/requests/',
+  path: '/requests/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BusinessesIndexRoute = BusinessesIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -146,14 +146,14 @@ const RequestsNewRoute = RequestsNewRouteImport.update({
   getParentRoute: () => RequestsRoute,
 } as any)
 const RequestsBrowseRoute = RequestsBrowseRouteImport.update({
-  id: '/browse',
-  path: '/browse',
-  getParentRoute: () => RequestsRoute,
+  id: '/requests/browse',
+  path: '/requests/browse',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const RequestsIdRoute = RequestsIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => RequestsRoute,
+  id: '/requests/$id',
+  path: '/requests/$id',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ProvidersIdRoute = ProvidersIdRouteImport.update({
   id: '/providers/$id',
@@ -205,7 +205,6 @@ export interface FileRoutesByFullPath {
   '/notifications': typeof NotificationsRoute
   '/official': typeof OfficialRoute
   '/opportunities': typeof OpportunitiesRouteWithChildren
-  '/requests': typeof RequestsRouteWithChildren
   '/services': typeof ServicesRouteWithChildren
   '/terms': typeof TermsRoute
   '/businesses/$slug': typeof BusinessesSlugRoute
@@ -222,6 +221,7 @@ export interface FileRoutesByFullPath {
   '/services/requests': typeof ServicesRequestsRoute
   '/u/$id': typeof UIdRoute
   '/businesses/': typeof BusinessesIndexRoute
+  '/requests/': typeof RequestsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -236,7 +236,6 @@ export interface FileRoutesByTo {
   '/notifications': typeof NotificationsRoute
   '/official': typeof OfficialRoute
   '/opportunities': typeof OpportunitiesRouteWithChildren
-  '/requests': typeof RequestsRouteWithChildren
   '/services': typeof ServicesRouteWithChildren
   '/terms': typeof TermsRoute
   '/businesses/$slug': typeof BusinessesSlugRoute
@@ -253,6 +252,7 @@ export interface FileRoutesByTo {
   '/services/requests': typeof ServicesRequestsRoute
   '/u/$id': typeof UIdRoute
   '/businesses': typeof BusinessesIndexRoute
+  '/requests': typeof RequestsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -269,7 +269,6 @@ export interface FileRoutesById {
   '/notifications': typeof NotificationsRoute
   '/official': typeof OfficialRoute
   '/opportunities': typeof OpportunitiesRouteWithChildren
-  '/requests': typeof RequestsRouteWithChildren
   '/services': typeof ServicesRouteWithChildren
   '/terms': typeof TermsRoute
   '/businesses/$slug': typeof BusinessesSlugRoute
@@ -286,6 +285,7 @@ export interface FileRoutesById {
   '/services/requests': typeof ServicesRequestsRoute
   '/u/$id': typeof UIdRoute
   '/businesses/': typeof BusinessesIndexRoute
+  '/requests/': typeof RequestsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -303,7 +303,6 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/official'
     | '/opportunities'
-    | '/requests'
     | '/services'
     | '/terms'
     | '/businesses/$slug'
@@ -320,6 +319,7 @@ export interface FileRouteTypes {
     | '/services/requests'
     | '/u/$id'
     | '/businesses/'
+    | '/requests/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -334,7 +334,6 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/official'
     | '/opportunities'
-    | '/requests'
     | '/services'
     | '/terms'
     | '/businesses/$slug'
@@ -351,6 +350,7 @@ export interface FileRouteTypes {
     | '/services/requests'
     | '/u/$id'
     | '/businesses'
+    | '/requests'
   id:
     | '__root__'
     | '/'
@@ -366,7 +366,6 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/official'
     | '/opportunities'
-    | '/requests'
     | '/services'
     | '/terms'
     | '/businesses/$slug'
@@ -383,6 +382,7 @@ export interface FileRouteTypes {
     | '/services/requests'
     | '/u/$id'
     | '/businesses/'
+    | '/requests/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -399,12 +399,14 @@ export interface RootRouteChildren {
   NotificationsRoute: typeof NotificationsRoute
   OfficialRoute: typeof OfficialRoute
   OpportunitiesRoute: typeof OpportunitiesRouteWithChildren
-  RequestsRoute: typeof RequestsRouteWithChildren
   ServicesRoute: typeof ServicesRouteWithChildren
   TermsRoute: typeof TermsRoute
   OfficialPostsIdRoute: typeof OfficialPostsIdRoute
   ProvidersIdRoute: typeof ProvidersIdRoute
+  RequestsIdRoute: typeof RequestsIdRoute
+  RequestsBrowseRoute: typeof RequestsBrowseRoute
   UIdRoute: typeof UIdRoute
+  RequestsIndexRoute: typeof RequestsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -421,13 +423,6 @@ declare module '@tanstack/react-router' {
       path: '/services'
       fullPath: '/services'
       preLoaderRoute: typeof ServicesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/requests': {
-      id: '/requests'
-      path: '/requests'
-      fullPath: '/requests'
-      preLoaderRoute: typeof RequestsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/opportunities': {
@@ -521,6 +516,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/requests/': {
+      id: '/requests/'
+      path: '/requests'
+      fullPath: '/requests/'
+      preLoaderRoute: typeof RequestsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/businesses/': {
       id: '/businesses/'
       path: '/'
@@ -558,17 +560,17 @@ declare module '@tanstack/react-router' {
     }
     '/requests/browse': {
       id: '/requests/browse'
-      path: '/browse'
+      path: '/requests/browse'
       fullPath: '/requests/browse'
       preLoaderRoute: typeof RequestsBrowseRouteImport
-      parentRoute: typeof RequestsRoute
+      parentRoute: typeof rootRouteImport
     }
     '/requests/$id': {
       id: '/requests/$id'
-      path: '/$id'
+      path: '/requests/$id'
       fullPath: '/requests/$id'
       preLoaderRoute: typeof RequestsIdRouteImport
-      parentRoute: typeof RequestsRoute
+      parentRoute: typeof rootRouteImport
     }
     '/providers/$id': {
       id: '/providers/$id'
@@ -654,22 +656,6 @@ const OpportunitiesRouteWithChildren = OpportunitiesRoute._addFileChildren(
   OpportunitiesRouteChildren,
 )
 
-interface RequestsRouteChildren {
-  RequestsIdRoute: typeof RequestsIdRoute
-  RequestsBrowseRoute: typeof RequestsBrowseRoute
-  RequestsNewRoute: typeof RequestsNewRoute
-}
-
-const RequestsRouteChildren: RequestsRouteChildren = {
-  RequestsIdRoute: RequestsIdRoute,
-  RequestsBrowseRoute: RequestsBrowseRoute,
-  RequestsNewRoute: RequestsNewRoute,
-}
-
-const RequestsRouteWithChildren = RequestsRoute._addFileChildren(
-  RequestsRouteChildren,
-)
-
 interface ServicesRouteChildren {
   ServicesSlugRoute: typeof ServicesSlugRoute
   ServicesRequestsRoute: typeof ServicesRequestsRoute
@@ -698,13 +684,25 @@ const rootRouteChildren: RootRouteChildren = {
   NotificationsRoute: NotificationsRoute,
   OfficialRoute: OfficialRoute,
   OpportunitiesRoute: OpportunitiesRouteWithChildren,
-  RequestsRoute: RequestsRouteWithChildren,
   ServicesRoute: ServicesRouteWithChildren,
   TermsRoute: TermsRoute,
   OfficialPostsIdRoute: OfficialPostsIdRoute,
   ProvidersIdRoute: ProvidersIdRoute,
+  RequestsIdRoute: RequestsIdRoute,
+  RequestsBrowseRoute: RequestsBrowseRoute,
   UIdRoute: UIdRoute,
+  RequestsIndexRoute: RequestsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
