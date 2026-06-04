@@ -1615,6 +1615,36 @@ export type Database = {
       }
     }
     Views: {
+      active_boosts_public: {
+        Row: {
+          boost_type: string | null
+          entity_id: string | null
+          entity_type: string | null
+          expires_at: string | null
+          id: string | null
+          starts_at: string | null
+          status: string | null
+        }
+        Insert: {
+          boost_type?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          expires_at?: string | null
+          id?: string | null
+          starts_at?: string | null
+          status?: string | null
+        }
+        Update: {
+          boost_type?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          expires_at?: string | null
+          id?: string | null
+          starts_at?: string | null
+          status?: string | null
+        }
+        Relationships: []
+      }
       provider_trust_stats: {
         Row: {
           average_rating: number | null
