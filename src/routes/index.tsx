@@ -190,9 +190,9 @@ function Index() {
         <h2 className="mt-1 font-display text-2xl font-bold text-navy">More ways to connect & grow</h2>
         <div className="mt-6 grid gap-3 sm:grid-cols-3">
           {[
-            { to: "/opportunities", i: Briefcase, t: "Opportunities", d: "Gigs, jobs, internships and apprenticeships matched to your skills." },
+            { to: "/requests/browse", i: Briefcase, t: "Open Requests", d: "Browse real requests from people and businesses looking for skilled help nearby." },
             { to: "/feed", i: Rss, t: "Community Feed", d: "See recent work from providers and discover skilled people nearby." },
-            { to: "/official", i: Megaphone, t: "Tuungane Official", d: "Updates, safety tips and curated opportunities from our team." },
+            { to: "/official", i: Megaphone, t: "Tuungane Official", d: "Updates, safety tips and curated picks from our team." },
           ].map(({ to, i: Icon, t, d }) => (
             <Link key={to} to={to} className="group flex gap-3 rounded-2xl border border-border bg-card p-4 transition hover:border-orange">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-navy/5 text-navy group-hover:bg-orange group-hover:text-orange-foreground">

@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useBoostedSet } from "@/hooks/use-boosted-set";
 import { PostCard, type PostRow } from "@/components/social/PostCard";
-import { OpportunityCard, type OpportunityRow } from "@/components/OpportunityCard";
+
 import { OfficialPostCard } from "@/components/OfficialPostCard";
 import { categories } from "@/data/categories";
 import { postTypes, type PostTypeValue } from "@/data/postTypes";
@@ -18,7 +18,7 @@ export const Route = createFileRoute("/feed")({
   component: Feed,
 });
 
-type Tab = "posts" | "services" | "opportunities";
+type Tab = "posts" | "services";
 type PostFilter = "all" | "following" | "verified" | "popular" | "nearby" | "official";
 
 const avatar = (s: string) =>
@@ -32,13 +32,13 @@ function Feed() {
   const [postType, setPostType] = useState<PostTypeValue | "">("");
   const [posts, setPosts] = useState<PostRow[]>([]);
   const [providers, setProviders] = useState<any[]>([]);
-  const [opps, setOpps] = useState<OpportunityRow[]>([]);
+  
   const [officialPosts, setOfficialPosts] = useState<OfficialPostRow[]>([]);
   const [officialAccount, setOfficialAccount] = useState<OfficialAccountRow | null>(null);
   const [loading, setLoading] = useState(true);
   const { has: isBoostedPost } = useBoostedSet("post", ["feature_post", "promote_completed_work"]);
   const { has: isBoostedProvider } = useBoostedSet("provider", ["boost_profile", "feature_business_page"]);
-  const { has: isBoostedOpp } = useBoostedSet("opportunity", ["feature_opportunity"]);
+  
 
   const loadPosts = async () => {
     let providerIds: string[] | null = null;
@@ -95,18 +95,6 @@ function Feed() {
     setProviders((data ?? []).map((p) => ({ ...p, profile: profMap.get(p.user_id) })));
   };
 
-  const loadOpps = async () => {
-    let q = supabase.from("opportunities").select("id,title,description,opportunity_type,category_slug,subcategory,location,district,town,area,requirements,compensation,deadline,image_url,business_page_id,poster_type,poster_id,status,is_featured,archived,expires_at,created_at,updated_at").in("status", ["approved", "featured"]).order("created_at", { ascending: false }).limit(50);
-    if (category) q = q.eq("category_slug", category);
-    const { data } = await q;
-    const ids = Array.from(new Set((data ?? []).map((o) => o.poster_id)));
-    const profMap = new Map<string, { full_name: string; avatar_url: string | null }>();
-    if (ids.length) {
-      const { data: profs } = await supabase.from("profiles").select("id,full_name,avatar_url").in("id", ids);
-      (profs ?? []).forEach((p) => profMap.set(p.id, p));
-    }
-    setOpps((data ?? []).map((o) => ({ ...o, author: profMap.get(o.poster_id) ?? null })) as OpportunityRow[]);
-  };
 
   const loadOfficial = async () => {
     const [{ data: acct }, { data: ops }] = await Promise.all([
@@ -121,14 +109,13 @@ function Feed() {
     setLoading(true);
     if (tab === "posts") { await Promise.all([loadPosts(), loadOfficial()]); }
     else if (tab === "services") await loadProviders();
-    else await loadOpps();
     setLoading(false);
   };
 
   useEffect(() => { load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [tab, filter, category, postType, user?.id]);
 
   const tabs: { id: Tab; label: string }[] = [
-    { id: "posts", label: "Posts" }, { id: "services", label: "Services" }, { id: "opportunities", label: "Opportunities" },
+    { id: "posts", label: "Posts" }, { id: "services", label: "Services" },
   ];
   const postFilters: { id: PostFilter; label: string }[] = [
     { id: "all", label: "All" }, { id: "following", label: "Following" }, { id: "nearby", label: "Nearby" }, { id: "popular", label: "Popular" }, { id: "verified", label: "Verified" }, { id: "official", label: "Official" },
@@ -141,7 +128,7 @@ function Feed() {
     <Layout>
       <section className="mx-auto max-w-2xl px-4 py-8">
         <h1 className="font-display text-3xl font-bold text-navy">Activity feed</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Discover work, providers, and opportunities on Tuungane.</p>
+        <p className="mt-1 text-sm text-muted-foreground">Discover work, providers, and updates on Tuungane.</p>
 
         <div className="mt-5 flex gap-1 rounded-full border border-border bg-card p-1">
           {tabs.map((t) => (
@@ -205,12 +192,7 @@ function Feed() {
             ));
           })()}
 
-          {!loading && tab === "opportunities" && (() => {
-            const sortedOpps = [...opps].sort((a, b) => Number(isBoostedOpp(b.id)) - Number(isBoostedOpp(a.id)));
-            return sortedOpps.length === 0 ? (
-              <Empty title="No opportunities yet" hint={<>Post a gig, job, or apprenticeship from the <Link to="/opportunities/new" className="font-semibold text-orange">Opportunities</Link> page.</>} />
-            ) : sortedOpps.map((o) => <OpportunityCard key={o.id} o={o} />);
-          })()}
+          {/* opportunities tab removed — see /requests/browse */}
         </div>
       </section>
     </Layout>

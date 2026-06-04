@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Home, Wrench, User as UserIcon, ClipboardList, Search } from "lucide-react";
+import { Home, Wrench, User as UserIcon, ClipboardList, Plus } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 
 export function MobileBottomNav() {
@@ -11,14 +11,10 @@ export function MobileBottomNav() {
         <div className="mx-auto flex max-w-md items-stretch justify-around px-1">
           <Tab to="/" icon={<Home className="h-5 w-5" />} label="Home" exact />
           <Tab to="/services" icon={<Wrench className="h-5 w-5" />} label="Services" />
-          <RequestTab />
+          <CreateTab />
+          <Tab to="/requests/browse" icon={<ClipboardList className="h-5 w-5" />} label="Requests" />
           {user ? (
-            <Tab to="/requests" icon={<ClipboardList className="h-5 w-5" />} label="Requests" />
-          ) : (
-            <Tab to="/businesses" icon={<Search className="h-5 w-5" />} label="Browse" />
-          )}
-          {user ? (
-            <Tab to="/u/$id" params={{ id: user.id }} icon={<UserIcon className="h-5 w-5" />} label="Me" />
+            <Tab to="/u/$id" params={{ id: user.id }} icon={<UserIcon className="h-5 w-5" />} label="Profile" />
           ) : (
             <Tab to="/login" icon={<UserIcon className="h-5 w-5" />} label="Sign in" />
           )}
@@ -30,18 +26,18 @@ export function MobileBottomNav() {
   );
 }
 
-function RequestTab() {
+function CreateTab() {
   return (
     <Link
-      to="/services"
-      aria-label="Request a service"
+      to="/requests/new"
+      aria-label="Create a request"
       activeProps={{ className: "" }}
       className="relative flex flex-1 flex-col items-center justify-end gap-0.5 px-2 pb-2 pt-1 text-[10px] font-semibold text-orange-foreground"
     >
       <span className="-mt-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-orange text-orange-foreground shadow-lg shadow-orange/30">
-        <ClipboardList className="h-5 w-5" />
+        <Plus className="h-5 w-5" />
       </span>
-      <span className="text-orange">Request</span>
+      <span className="text-orange">Create</span>
     </Link>
   );
 }

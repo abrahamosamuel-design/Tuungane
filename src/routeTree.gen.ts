@@ -29,6 +29,8 @@ import { Route as BusinessesIndexRouteImport } from './routes/businesses.index'
 import { Route as UIdRouteImport } from './routes/u.$id'
 import { Route as ServicesRequestsRouteImport } from './routes/services.requests'
 import { Route as ServicesSlugRouteImport } from './routes/services.$slug'
+import { Route as RequestsNewRouteImport } from './routes/requests.new'
+import { Route as RequestsBrowseRouteImport } from './routes/requests.browse'
 import { Route as RequestsIdRouteImport } from './routes/requests.$id'
 import { Route as ProvidersIdRouteImport } from './routes/providers.$id'
 import { Route as OpportunitiesNewRouteImport } from './routes/opportunities.new'
@@ -138,6 +140,16 @@ const ServicesSlugRoute = ServicesSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => ServicesRoute,
 } as any)
+const RequestsNewRoute = RequestsNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => RequestsRoute,
+} as any)
+const RequestsBrowseRoute = RequestsBrowseRouteImport.update({
+  id: '/browse',
+  path: '/browse',
+  getParentRoute: () => RequestsRoute,
+} as any)
 const RequestsIdRoute = RequestsIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -204,6 +216,8 @@ export interface FileRoutesByFullPath {
   '/opportunities/new': typeof OpportunitiesNewRoute
   '/providers/$id': typeof ProvidersIdRoute
   '/requests/$id': typeof RequestsIdRoute
+  '/requests/browse': typeof RequestsBrowseRoute
+  '/requests/new': typeof RequestsNewRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/services/requests': typeof ServicesRequestsRoute
   '/u/$id': typeof UIdRoute
@@ -233,6 +247,8 @@ export interface FileRoutesByTo {
   '/opportunities/new': typeof OpportunitiesNewRoute
   '/providers/$id': typeof ProvidersIdRoute
   '/requests/$id': typeof RequestsIdRoute
+  '/requests/browse': typeof RequestsBrowseRoute
+  '/requests/new': typeof RequestsNewRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/services/requests': typeof ServicesRequestsRoute
   '/u/$id': typeof UIdRoute
@@ -264,6 +280,8 @@ export interface FileRoutesById {
   '/opportunities/new': typeof OpportunitiesNewRoute
   '/providers/$id': typeof ProvidersIdRoute
   '/requests/$id': typeof RequestsIdRoute
+  '/requests/browse': typeof RequestsBrowseRoute
+  '/requests/new': typeof RequestsNewRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/services/requests': typeof ServicesRequestsRoute
   '/u/$id': typeof UIdRoute
@@ -296,6 +314,8 @@ export interface FileRouteTypes {
     | '/opportunities/new'
     | '/providers/$id'
     | '/requests/$id'
+    | '/requests/browse'
+    | '/requests/new'
     | '/services/$slug'
     | '/services/requests'
     | '/u/$id'
@@ -325,6 +345,8 @@ export interface FileRouteTypes {
     | '/opportunities/new'
     | '/providers/$id'
     | '/requests/$id'
+    | '/requests/browse'
+    | '/requests/new'
     | '/services/$slug'
     | '/services/requests'
     | '/u/$id'
@@ -355,6 +377,8 @@ export interface FileRouteTypes {
     | '/opportunities/new'
     | '/providers/$id'
     | '/requests/$id'
+    | '/requests/browse'
+    | '/requests/new'
     | '/services/$slug'
     | '/services/requests'
     | '/u/$id'
@@ -525,6 +549,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ServicesSlugRouteImport
       parentRoute: typeof ServicesRoute
     }
+    '/requests/new': {
+      id: '/requests/new'
+      path: '/new'
+      fullPath: '/requests/new'
+      preLoaderRoute: typeof RequestsNewRouteImport
+      parentRoute: typeof RequestsRoute
+    }
+    '/requests/browse': {
+      id: '/requests/browse'
+      path: '/browse'
+      fullPath: '/requests/browse'
+      preLoaderRoute: typeof RequestsBrowseRouteImport
+      parentRoute: typeof RequestsRoute
+    }
     '/requests/$id': {
       id: '/requests/$id'
       path: '/$id'
@@ -618,10 +656,14 @@ const OpportunitiesRouteWithChildren = OpportunitiesRoute._addFileChildren(
 
 interface RequestsRouteChildren {
   RequestsIdRoute: typeof RequestsIdRoute
+  RequestsBrowseRoute: typeof RequestsBrowseRoute
+  RequestsNewRoute: typeof RequestsNewRoute
 }
 
 const RequestsRouteChildren: RequestsRouteChildren = {
   RequestsIdRoute: RequestsIdRoute,
+  RequestsBrowseRoute: RequestsBrowseRoute,
+  RequestsNewRoute: RequestsNewRoute,
 }
 
 const RequestsRouteWithChildren = RequestsRoute._addFileChildren(
@@ -666,13 +708,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

@@ -1,5 +1,5 @@
 export const officialPostTypes = [
-  { value: "opportunity", label: "Opportunity", color: "bg-orange/10 text-orange" },
+  { value: "opportunity", label: "Request", color: "bg-orange/10 text-orange" },
   { value: "featured_provider", label: "Featured Provider", color: "bg-navy/10 text-navy" },
   { value: "verified_provider", label: "Verified Provider", color: "bg-green/10 text-green" },
   { value: "service_highlight", label: "Service Highlight", color: "bg-blue-100 text-blue-700" },

@@ -37,8 +37,8 @@ const TAB_GROUPS: { label: string; tabs: { id: Tab; label: string }[] }[] = [
     { id: "businesses", label: "Businesses" },
   ]},
   { label: "Content", tabs: [
-    { id: "opportunities", label: "Opportunities" },
-    { id: "requests", label: "Requests & Feedback" },
+    { id: "requests", label: "Manage Requests" },
+    { id: "opportunities", label: "Legacy opportunities" },
     { id: "posts", label: "Posts" },
     { id: "recs", label: "Recommendations" },
   ]},

@@ -154,6 +154,7 @@ function RequestDetailsPage() {
     const reason = window.prompt("Briefly describe the issue:");
     if (!reason) return;
     const against = user.id === req.customer_id ? (req.selected_provider_id ?? req.provider_id) : req.customer_id;
+    if (!against) return toast.error("Cannot open dispute on an open request");
     await supabase.from("service_disputes").insert({
       service_request_id: req.id, raised_by_user_id: user.id, against_user_id: against,
       reason: reason.slice(0, 100), description: reason.slice(0, 1000),
@@ -210,7 +211,7 @@ function RequestDetailsPage() {
               </p>
               <ContactOptionsUnlocked
                 customerId={user.id}
-                providerId={req.selected_provider_id ?? req.provider_id}
+                providerId={(req.selected_provider_id ?? req.provider_id) as string}
                 serviceRequestId={req.id}
                 phone={providerContact.phone}
                 whatsapp={providerContact.whatsapp}

@@ -93,7 +93,7 @@ function Dashboard() {
             <Stat label="Recommendations" value={stats.recs} />
             <Stat label="Reviews" value={stats.reviews} />
             <Stat label="Saves" value={stats.saves} />
-            <Stat label="Opportunities" value={stats.opps} />
+            <Stat label="Requests posted" value={stats.opps} />
           </div>
         )}
 
@@ -101,7 +101,7 @@ function Dashboard() {
           <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-5">
             <Stat label="Following" value={customerStats.following} />
             <Stat label="Saved providers" value={customerStats.saved} />
-            <Stat label="Saved opps" value={customerStats.savedOpps} />
+            <Stat label="Saved requests" value={customerStats.savedOpps} />
             <Stat label="Reviews written" value={customerStats.reviewsWritten} />
             <Stat label="Recommendations" value={customerStats.recsGiven} />
           </div>

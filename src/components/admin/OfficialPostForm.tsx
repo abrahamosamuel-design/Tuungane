@@ -118,7 +118,7 @@ export function OfficialPostForm({ accountId, editing, onSaved }: { accountId: s
       </F>
       <div className="grid gap-3 sm:grid-cols-2">
         <F label="Linked provider user ID"><input placeholder="uuid (optional)" value={form.linked_provider_id} onChange={(e) => setForm({ ...form, linked_provider_id: e.target.value })} className={input} /></F>
-        <F label="Linked opportunity ID"><input placeholder="uuid (optional)" value={form.linked_opportunity_id} onChange={(e) => setForm({ ...form, linked_opportunity_id: e.target.value })} className={input} /></F>
+        <F label="Linked request ID"><input placeholder="uuid (optional)" value={form.linked_opportunity_id} onChange={(e) => setForm({ ...form, linked_opportunity_id: e.target.value })} className={input} /></F>
       </div>
       <F label="Contact info"><input placeholder="e.g. WhatsApp +256 700 000 000" value={form.contact_info} onChange={(e) => setForm({ ...form, contact_info: e.target.value })} className={input} /></F>
       <F label="Safety note (optional)"><textarea rows={2} value={form.safety_note} onChange={(e) => setForm({ ...form, safety_note: e.target.value })} className={input} /></F>

@@ -38,7 +38,7 @@ function RequestsPage() {
       .eq(col, user.id)
       .order("created_at", { ascending: false });
     const list = (rs ?? []) as ServiceRequestRow[];
-    const ids = Array.from(new Set(list.flatMap((r) => [r.customer_id, r.provider_id])));
+    const ids = Array.from(new Set(list.flatMap((r) => [r.customer_id, r.provider_id]).filter((id): id is string => !!id)));
     const { data: profs } = ids.length
       ? await supabase.from("profiles").select("id,full_name,avatar_url").in("id", ids)
       : { data: [] as Array<{ id: string; full_name: string; avatar_url: string | null }> };
@@ -48,7 +48,7 @@ function RequestsPage() {
       ? await supabase.from("service_feedback").select("service_request_id").in("service_request_id", reqIds)
       : { data: [] as Array<{ service_request_id: string }> };
     const fbSet = new Set((fb ?? []).map((x: { service_request_id: string }) => x.service_request_id));
-    setItems(list.map((r) => ({ ...r, customer: pmap.get(r.customer_id), provider: pmap.get(r.provider_id), has_feedback: fbSet.has(r.id) })));
+    setItems(list.map((r) => ({ ...r, customer: pmap.get(r.customer_id), provider: r.provider_id ? pmap.get(r.provider_id) : undefined, has_feedback: fbSet.has(r.id) })));
   };
 
   useEffect(() => { if (user) load(); /* eslint-disable-next-line */ }, [user, role]);
@@ -64,6 +64,7 @@ function RequestsPage() {
     const reason = window.prompt("Briefly describe the issue:");
     if (!reason || !user) return;
     const against = user.id === r.customer_id ? r.provider_id : r.customer_id;
+    if (!against) return toast.error("Cannot open dispute on an open (untaken) request");
     const { error } = await supabase.from("service_disputes").insert({
       service_request_id: r.id, raised_by_user_id: user.id, against_user_id: against,
       reason: reason.slice(0, 100), description: reason.slice(0, 1000),

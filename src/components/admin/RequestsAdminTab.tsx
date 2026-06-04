@@ -78,7 +78,7 @@ export function RequestsAdminTab() {
                   <span className="font-semibold text-navy">{r.service_needed}</span>
                   <span className="text-xs text-muted-foreground">{r.location} · {timeAgo(r.created_at)}</span>
                 </div>
-                <p className="mt-1 text-xs text-muted-foreground">customer {r.customer_id.slice(0, 8)} → provider {r.provider_id.slice(0, 8)}</p>
+                <p className="mt-1 text-xs text-muted-foreground">customer {r.customer_id.slice(0, 8)} → provider {r.provider_id ? r.provider_id.slice(0, 8) : "—"}</p>
                 <div className="mt-2 flex flex-wrap gap-1 text-xs">
                   {requestStatuses.map((s) => (
                     <button key={s.value} onClick={() => setStatus(r.id, s.value)} disabled={r.status === s.value} className="rounded px-2 py-1 hover:bg-muted disabled:opacity-40">→ {s.label}</button>

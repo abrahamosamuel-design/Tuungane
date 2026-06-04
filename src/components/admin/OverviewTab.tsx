@@ -59,13 +59,12 @@ export function OverviewTab({ onJump }: { onJump: (tab: string, subTab?: string)
     { label: "Users", value: s.users, tab: "users" },
     { label: "Providers", value: s.providers, tab: "providers" },
     { label: "Business Pages", value: s.businesses, tab: "businesses" },
-    { label: "Live Opportunities", value: s.opportunities, tab: "opportunities" },
-    { label: "Service Requests", value: s.requests, tab: "requests" },
+    { label: "Requests", value: s.requests, tab: "requests" },
+    { label: "Legacy opportunities", value: s.opportunities, tab: "opportunities" },
   ];
   const alerts: Array<{ label: string; value: number; tab: string; subTab?: string; tone: string }> = [
     { label: "Open Reports", value: s.openReports, tab: "reports", tone: "bg-destructive/10 text-destructive" },
     { label: "Open Disputes", value: s.openDisputes, tab: "disputes", tone: "bg-destructive/10 text-destructive" },
-    { label: "Pending Opportunities", value: s.pendingOpps, tab: "opportunities", tone: "bg-orange/10 text-orange" },
     { label: "Pending Claims", value: s.pendingClaims, tab: "official", subTab: "claims", tone: "bg-orange/10 text-orange" },
     { label: "Pending Credit Purchases", value: s.pendingPurchases, tab: "credits", tone: "bg-orange/10 text-orange" },
   ];
@@ -106,7 +105,7 @@ export function OverviewTab({ onJump }: { onJump: (tab: string, subTab?: string)
         <div className="flex flex-wrap gap-2 text-xs">
           <Link to="/businesses" className="rounded-full border border-border px-3 py-1.5 hover:border-navy">Business directory</Link>
           <Link to="/official" className="rounded-full border border-border px-3 py-1.5 hover:border-navy">Official page</Link>
-          <Link to="/opportunities" className="rounded-full border border-border px-3 py-1.5 hover:border-navy">Opportunities</Link>
+          <Link to="/requests/browse" className="rounded-full border border-border px-3 py-1.5 hover:border-navy">Requests</Link>
           <Link to="/services" className="rounded-full border border-border px-3 py-1.5 hover:border-navy">Services</Link>
         </div>
       </div>
