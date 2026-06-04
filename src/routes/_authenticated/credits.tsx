@@ -8,7 +8,7 @@ import { Coins, Info, Check, Clock, X as XIcon, Bug, RefreshCw } from "lucide-re
 import { toast } from "sonner";
 import { timeAgo } from "@/lib/format";
 
-export const Route = createFileRoute("/credits")({
+export const Route = createFileRoute("/_authenticated/credits")({
   head: () => ({ meta: [
     { title: "Tuungane Credits" },
     { name: "description", content: "Buy and manage Tuungane Credits — boost visibility, feature posts, and promote requests. Credits are not cash." },

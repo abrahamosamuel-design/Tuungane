@@ -9,7 +9,7 @@ import { MyRequestsSummary } from "@/components/MyRequestsSummary";
 import { toast } from "sonner";
 
 
-export const Route = createFileRoute("/me")({
+export const Route = createFileRoute("/_authenticated/me")({
   head: () => ({ meta: [{ title: "My profile — Tuungane" }] }),
   component: Me,
 });

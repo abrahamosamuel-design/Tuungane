@@ -18,7 +18,7 @@ import { toast } from "sonner";
 import { ShieldAlert } from "lucide-react";
 import { REQUESTS_SAFETY_TEXT } from "@/data/requestTypes";
 
-export const Route = createFileRoute("/requests/new")({
+export const Route = createFileRoute("/_authenticated/requests/new")({
   validateSearch: (search: Record<string, unknown>) => ({
     providerId: typeof search.providerId === "string" ? search.providerId : "",
   }),
