@@ -11,7 +11,7 @@ import { CreditsAdminTab } from "@/components/admin/CreditsAdminTab";
 import { OverviewTab } from "@/components/admin/OverviewTab";
 import { BusinessesAdminTab } from "@/components/admin/BusinessesAdminTab";
 import { DisputesAdminTab } from "@/components/admin/DisputesAdminTab";
-import { OpportunitiesAdminTab } from "@/components/admin/OpportunitiesAdminTab";
+
 import { ContactAnalyticsTab } from "@/components/admin/ContactAnalyticsTab";
 import { officialPostTypeMap, type OfficialAccountRow, type OfficialPostRow } from "@/data/officialPostTypes";
 import { timeAgo } from "@/lib/format";
@@ -25,7 +25,7 @@ export const Route = createFileRoute("/admin")({
 type Tab =
   | "overview"
   | "users" | "providers" | "businesses"
-  | "opportunities" | "requests" | "posts" | "recs"
+  | "requests" | "posts" | "recs"
   | "reports" | "disputes"
   | "credits" | "official" | "contact";
 
@@ -38,7 +38,6 @@ const TAB_GROUPS: { label: string; tabs: { id: Tab; label: string }[] }[] = [
   ]},
   { label: "Content", tabs: [
     { id: "requests", label: "Manage Requests" },
-    { id: "opportunities", label: "Legacy opportunities" },
     { id: "posts", label: "Posts" },
     { id: "recs", label: "Recommendations" },
   ]},
@@ -97,7 +96,6 @@ function Admin() {
           {tab === "users" && <UsersTab />}
           {tab === "providers" && <ProvidersTab />}
           {tab === "businesses" && <BusinessesAdminTab />}
-          {tab === "opportunities" && <OpportunitiesAdminTab />}
           {tab === "requests" && <RequestsAdminTab />}
           {tab === "posts" && <PostsTab />}
           {tab === "recs" && <RecsTab />}

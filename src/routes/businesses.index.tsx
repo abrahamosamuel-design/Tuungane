@@ -9,7 +9,7 @@ import { categories } from "@/data/categories";
 export const Route = createFileRoute("/businesses/")({
   head: () => ({ meta: [
     { title: "Business Pages — Tuungane" },
-    { name: "description", content: "Discover schools, shops, salons, NGOs and other organizations on Tuungane. Follow them, see their services, posts and opportunities." },
+    { name: "description", content: "Discover schools, shops, salons, NGOs and other organizations on Tuungane. Follow them and see their services, posts and requests." },
   ]}),
   component: BusinessesPage,
 });
@@ -52,7 +52,7 @@ function BusinessesPage() {
           <div>
             <div className="flex items-center gap-2 text-xs font-medium uppercase tracking-wide text-orange"><Building2 className="h-4 w-4" /> Business pages</div>
             <h1 className="mt-2 text-3xl font-bold text-navy sm:text-4xl">Schools, shops, salons & organizations</h1>
-            <p className="mt-2 max-w-2xl text-sm text-muted-foreground">Discover and follow local businesses and organizations on Tuungane. See their services, posts and opportunities.</p>
+            <p className="mt-2 max-w-2xl text-sm text-muted-foreground">Discover and follow local businesses and organizations on Tuungane. See their services, posts and requests.</p>
           </div>
           <Link
             to="/businesses/create"
@@ -90,7 +90,7 @@ function BusinessesPage() {
             <div className="rounded-2xl border border-dashed border-border p-10 text-center">
               <Building2 className="mx-auto h-10 w-10 text-muted-foreground" />
               <h3 className="mt-3 text-base font-bold text-navy">No business pages yet</h3>
-              <p className="mt-1 text-sm text-muted-foreground">Create a business page to showcase your organization, services, opportunities, and updates.</p>
+              <p className="mt-1 text-sm text-muted-foreground">Create a business page to showcase your organization, services, requests, and updates.</p>
               <Link
                  to="/businesses/create"
                 className="mt-4 inline-flex items-center gap-2 rounded-full bg-orange px-5 py-2 text-sm font-semibold text-orange-foreground"

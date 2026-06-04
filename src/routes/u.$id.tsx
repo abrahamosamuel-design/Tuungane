@@ -1,6 +1,6 @@
 import { createFileRoute, useParams, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { MapPin, Phone, BadgeCheck, Flag, Star, Share2, Camera, Briefcase, Users, ThumbsUp, MessageCircle, ClipboardList } from "lucide-react";
+import { MapPin, Phone, BadgeCheck, Flag, Star, Share2, Camera, Users, ThumbsUp, MessageCircle, ClipboardList } from "lucide-react";
 import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
@@ -12,7 +12,7 @@ import { RecommendDialog } from "@/components/social/RecommendDialog";
 import { ReviewDialog } from "@/components/social/ReviewDialog";
 import { ReportDialog } from "@/components/social/ReportDialog";
 import { SaveButton } from "@/components/social/SaveButton";
-import { OpportunityCard, type OpportunityRow } from "@/components/OpportunityCard";
+
 import { ClaimProfileDialog } from "@/components/ClaimProfileDialog";
 import { TrustStats } from "@/components/TrustStats";
 import { RequestServiceDialog } from "@/components/RequestServiceDialog";
@@ -40,7 +40,7 @@ export const Route = createFileRoute("/u/$id")({
   notFoundComponent: () => <RouteNotFoundCard title="Profile not found" message="This user profile may have been removed." />,
 });
 
-type Tab = "timeline" | "portfolio" | "services" | "recommendations" | "reviews" | "opportunities" | "about";
+type Tab = "timeline" | "portfolio" | "services" | "recommendations" | "reviews" | "about";
 
 const TABS: { id: Tab; label: string; providerOnly?: boolean }[] = [
   { id: "timeline", label: "Timeline" },
@@ -48,7 +48,6 @@ const TABS: { id: Tab; label: string; providerOnly?: boolean }[] = [
   { id: "services", label: "Services", providerOnly: true },
   { id: "recommendations", label: "Recommendations", providerOnly: true },
   { id: "reviews", label: "Reviews", providerOnly: true },
-  { id: "opportunities", label: "Opportunities" },
   { id: "about", label: "About" },
 ];
 
@@ -58,7 +57,7 @@ function UserProfile() {
   const [profile, setProfile] = useState<{ full_name: string; avatar_url: string | null; bio: string | null; town: string | null; district: string | null; is_provider: boolean } | null>(null);
   const [sp, setSp] = useState<{ business_name: string | null; subcategory: string; bio: string; town: string; district: string; phone: string | null; whatsapp: string | null; email: string | null; verified: string; category_slug: string; years_experience: number; areas_served: string[]; availability: string; cover_url: string | null; seeded_by_official: boolean; seeded_status: string | null } | null>(null);
   const [posts, setPosts] = useState<PostRow[]>([]);
-  const [opps, setOpps] = useState<OpportunityRow[]>([]);
+  
   const [followers, setFollowers] = useState(0);
   const [recs, setRecs] = useState<Array<{ id: string; service: string; message: string; rating: number | null; created_at: string; user_id: string; profile?: { full_name: string; avatar_url: string | null } }>>([]);
   const [reviews, setReviews] = useState<Array<{ id: string; rating: number; text: string; created_at: string; user_id: string; profile?: { full_name: string; avatar_url: string | null } }>>([]);
@@ -82,14 +81,12 @@ function UserProfile() {
     const { data: ps } = await supabase.from("timeline_posts").select("*").eq("provider_user_id", id).eq("hidden", false).order("created_at", { ascending: false });
     setPosts((ps ?? []).map((r) => ({ ...r, author: p ?? undefined })) as PostRow[]);
 
-    const [{ count: fc }, rRes, vRes, oRes] = await Promise.all([
+    const [{ count: fc }, rRes, vRes] = await Promise.all([
       supabase.from("follows").select("*", { count: "exact", head: true }).eq("provider_user_id", id),
       supabase.from("provider_recommendations").select("id,service,message,rating,created_at,user_id").eq("provider_user_id", id).eq("hidden", false).order("created_at", { ascending: false }),
       supabase.from("reviews").select("id,rating,text,created_at,user_id").eq("provider_user_id", id).eq("hidden", false).order("created_at", { ascending: false }),
-      supabase.from("opportunities").select("id,title,description,opportunity_type,category_slug,subcategory,location,district,town,area,image_url,business_page_id,poster_type,poster_id,status,is_featured,archived,compensation,deadline,created_at,updated_at").eq("poster_id", id).in("status", ["approved", "featured"]).order("created_at", { ascending: false }),
     ]);
     setFollowers(fc ?? 0);
-    setOpps((oRes.data ?? []) as OpportunityRow[]);
 
     const ids = Array.from(new Set([...(rRes.data ?? []).map((r) => r.user_id), ...(vRes.data ?? []).map((r) => r.user_id)]));
     let pm = new Map<string, { full_name: string; avatar_url: string | null }>();
@@ -395,19 +392,6 @@ function UserProfile() {
             </>
           )}
 
-          {tab === "opportunities" && (
-            <>
-              {isOwn && (
-                <Link to="/opportunities/new" className="flex items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-orange/40 bg-orange/5 p-4 text-sm font-semibold text-orange hover:bg-orange/10">
-                  <Briefcase className="h-4 w-4" /> Post an opportunity
-                </Link>
-              )}
-              {opps.length === 0 && <p className="rounded-2xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground">No opportunities posted.</p>}
-              <div className="grid gap-3 sm:grid-cols-2">
-                {opps.map((o) => <OpportunityCard key={o.id} o={{ ...o, author: { full_name: profile.full_name, avatar_url: profile.avatar_url } }} />)}
-              </div>
-            </>
-          )}
 
           {tab === "about" && (
             <div className="rounded-2xl border border-border bg-card p-5">
