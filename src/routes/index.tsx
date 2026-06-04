@@ -41,8 +41,8 @@ function Index() {
                 <Link to="/requests/new" className="inline-flex items-center justify-center gap-2 rounded-full bg-orange px-6 py-3 text-sm font-semibold text-orange-foreground shadow-lg transition hover:brightness-110">
                   <ClipboardList className="h-4 w-4" /> Create a Request
                 </Link>
-                <Link to="/services" className="inline-flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/5 px-6 py-3 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/10">
-                  <Search className="h-4 w-4" /> Browse providers
+                <Link to="/requests/browse" className="inline-flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/5 px-6 py-3 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/10">
+                  <Search className="h-4 w-4" /> Browse open requests
                 </Link>
               </div>
               <div className="mt-10 flex flex-wrap items-center gap-6 text-sm text-white/70">

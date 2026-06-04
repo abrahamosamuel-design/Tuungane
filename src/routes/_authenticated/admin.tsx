@@ -17,7 +17,7 @@ import { officialPostTypeMap, type OfficialAccountRow, type OfficialPostRow } fr
 import { timeAgo } from "@/lib/format";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/admin")({
+export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({ meta: [{ title: "Admin — Tuungane" }] }),
   component: Admin,
 });

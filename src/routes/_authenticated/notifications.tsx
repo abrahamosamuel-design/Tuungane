@@ -7,7 +7,7 @@ import { Avatar } from "@/components/social/Avatar";
 import { timeAgo } from "@/lib/format";
 import { Heart, MessageCircle, ThumbsUp, Star, UserPlus, ClipboardList, CheckCircle2, PlayCircle, Send, ShieldCheck, AlertTriangle, XCircle } from "lucide-react";
 
-export const Route = createFileRoute("/notifications")({
+export const Route = createFileRoute("/_authenticated/notifications")({
   head: () => ({ meta: [{ title: "Notifications — Tuungane" }] }),
   component: NotificationsPage,
 });

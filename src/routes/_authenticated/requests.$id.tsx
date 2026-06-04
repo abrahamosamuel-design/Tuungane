@@ -18,7 +18,7 @@ import { ContactOptionsUnlocked } from "@/components/ContactOptionsUnlocked";
 
 import { RouteErrorCard, RouteNotFoundCard } from "@/lib/route-boundaries";
 
-export const Route = createFileRoute("/requests/$id")({
+export const Route = createFileRoute("/_authenticated/requests/$id")({
   head: () => ({ meta: [{ title: "Service request — Tuungane" }] }),
   component: RequestDetailsPage,
   errorComponent: ({ error, reset }) => <RouteErrorCard error={error} reset={reset} title="Couldn't load this request" />,

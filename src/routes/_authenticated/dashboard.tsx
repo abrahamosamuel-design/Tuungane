@@ -14,7 +14,7 @@ import { MyBusinessPagesPanel } from "@/components/business/BusinessPageManager"
 import { toast } from "sonner";
 
 
-export const Route = createFileRoute("/dashboard")({
+export const Route = createFileRoute("/_authenticated/dashboard")({
   validateSearch: (search: Record<string, unknown>) => ({
     composeBusiness: typeof search.composeBusiness === "string" ? search.composeBusiness : "",
   }),
