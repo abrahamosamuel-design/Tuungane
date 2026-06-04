@@ -211,7 +211,7 @@ function RequestDetailsPage() {
               </p>
               <ContactOptionsUnlocked
                 customerId={user.id}
-                providerId={req.selected_provider_id ?? req.provider_id}
+                providerId={(req.selected_provider_id ?? req.provider_id) as string}
                 serviceRequestId={req.id}
                 phone={providerContact.phone}
                 whatsapp={providerContact.whatsapp}

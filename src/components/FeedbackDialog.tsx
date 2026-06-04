@@ -42,11 +42,13 @@ export function FeedbackDialog({ open, onClose, request, onSubmitted }: Props) {
   const submit = async () => {
     if (!user) return toast.error("Please sign in");
     if (!form.review_text.trim()) return toast.error("Please add a short review");
+    const providerId = request.selected_provider_id ?? request.provider_id;
+    if (!providerId) return toast.error("This request has no provider yet");
     setBusy(true);
     const payload = {
       service_request_id: request.id,
       customer_id: user.id,
-      provider_id: request.provider_id,
+      provider_id: providerId,
       did_use_provider: form.did_use_provider,
       was_completed: form.was_completed,
       rating: form.rating,
