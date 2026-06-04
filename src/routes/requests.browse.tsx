@@ -70,7 +70,7 @@ function BrowseRequests() {
     if ((chip === "nearby" || nearMe) && myDistrict) query = query.eq("district", myDistrict);
 
     const { data } = await query;
-    let list = (data ?? []) as RequestRowLite[];
+    let list = (data ?? []) as unknown as RequestRowLite[];
 
     // attach customer names + response counts in parallel
     const customerIds = Array.from(new Set(list.map((r) => r.customer_id)));

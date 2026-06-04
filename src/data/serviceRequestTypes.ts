@@ -58,7 +58,7 @@ export const reportReasons = [
 export interface ServiceRequestRow {
   id: string;
   customer_id: string;
-  provider_id: string;
+  provider_id: string | null;
   service_profile_id: string | null;
   category_slug: string | null;
   subcategory: string | null;
@@ -77,6 +77,7 @@ export interface ServiceRequestRow {
   preferred_date: string | null;
   preferred_time: string | null;
   urgency: UrgencyValue;
+  urgent_flag: boolean;
   budget_range: string | null;
   preferred_contact_method: ContactMethodValue;
   customer_phone: string | null;
