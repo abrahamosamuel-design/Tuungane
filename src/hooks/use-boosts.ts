@@ -50,13 +50,13 @@ export function useActiveBoosts(entityType: string, entityId: string | null | un
   const refresh = useCallback(async () => {
     if (!entityId) { setBoosts([]); return; }
     const { data } = await supabase
-      .from("boosts")
-      .select("*")
+      .from("active_boosts_public" as never)
+      .select("id,boost_type,entity_type,entity_id,starts_at,expires_at,status")
       .eq("entity_type", entityType)
       .eq("entity_id", entityId)
       .eq("status", "active")
       .gt("expires_at", new Date().toISOString());
-    setBoosts((data ?? []) as BoostRow[]);
+    setBoosts(((data ?? []) as unknown) as BoostRow[]);
   }, [entityType, entityId]);
   useEffect(() => { refresh(); }, [refresh]);
   return { boosts, refresh, has: (t: BoostType) => boosts.some((b) => b.boost_type === t) };
