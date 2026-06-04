@@ -29,7 +29,7 @@ export function SafetyNote({
 }
 
 export const SAFETY_TIPS = {
-  opportunity: "Never pay to apply for a job, internship, or gig. Tuungane never asks for application fees. Meet in safe public places and verify the poster before sharing personal documents.",
+  opportunity: "Verify the customer, location, and request details before starting work. Do not share sensitive information or make unsafe payments. Report suspicious requests.",
   service: "Agree on price and scope before work begins. Pay in person after the job is done where possible. Verified providers and verified reviews are more reliable signals than promises.",
   business: "Confirm the business is real before sending money. Check verified status, reviews, and visit the physical location for big purchases.",
   request: "Avoid sharing your full address publicly. Use Tuungane chat to vet providers before agreeing to meet.",

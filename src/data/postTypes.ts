@@ -5,7 +5,7 @@ export const postTypes = [
   { value: "before_after", label: "Before & after", color: "bg-purple-100 text-purple-700" },
   { value: "new_service", label: "New service", color: "bg-blue-100 text-blue-700" },
   { value: "promotion", label: "Promotion", color: "bg-pink-100 text-pink-700" },
-  { value: "opportunity_shared", label: "Opportunity", color: "bg-amber-100 text-amber-700" },
+  { value: "opportunity_shared", label: "Request shared", color: "bg-amber-100 text-amber-700" },
 ] as const;
 
 export type PostTypeValue = (typeof postTypes)[number]["value"];

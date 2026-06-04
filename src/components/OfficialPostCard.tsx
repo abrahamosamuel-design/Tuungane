@@ -104,8 +104,8 @@ export function OfficialPostCard({ post, account, onChanged }: { post: OfficialP
                 </Link>
               )}
               {post.linked_opportunity_id && (
-                <Link to="/opportunities/$id" params={{ id: post.linked_opportunity_id }} className="inline-flex items-center gap-1 rounded-full bg-orange px-3 py-1.5 text-xs font-semibold text-orange-foreground hover:brightness-110">
-                  <ExternalLink className="h-3 w-3" /> View Opportunity
+                <Link to="/requests/browse" className="inline-flex items-center gap-1 rounded-full bg-orange px-3 py-1.5 text-xs font-semibold text-orange-foreground hover:brightness-110">
+                  <ExternalLink className="h-3 w-3" /> View Request
                 </Link>
               )}
               {post.contact_info && (
@@ -116,7 +116,7 @@ export function OfficialPostCard({ post, account, onChanged }: { post: OfficialP
           {(isOpportunity || post.safety_note) && (
             <div className="mt-3 flex items-start gap-2 rounded-xl border border-orange/30 bg-orange/5 p-3 text-[11px] text-foreground/80">
               <ShieldAlert className="mt-0.5 h-3.5 w-3.5 shrink-0 text-orange" />
-              <p>{post.safety_note || "Please verify details before paying money, sharing sensitive information, or accepting work. Report suspicious opportunities to Tuungane."}</p>
+              <p>{post.safety_note || "Please verify details before paying money, sharing sensitive information, or accepting work. Report suspicious requests to Tuungane."}</p>
             </div>
           )}
           {isOpportunity && !post.source_verified && (
