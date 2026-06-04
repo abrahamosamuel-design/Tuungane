@@ -1,92 +1,97 @@
-ns# Focus Pass: Make Services the Core Loop
 
-Goal: a first-time visitor understands in 5 seconds that Tuungane = "request a service, get matched with trusted providers." Everything else becomes secondary.
+# Plan: Unify Opportunities + Service Requests into "Requests"
 
-No features are deleted. No database changes. Pure navigation, home page, and copy restructuring.
+## Strategy
 
-## 1. Home page (`src/routes/index.tsx`)
+Single concept across the app: **Requests**. Customers post what they need; providers respond; one provider is selected; the request runs through to a verified review. The existing `service_requests` + `provider_responses` + `service_feedback` tables already model this 1:many → 1:1 lifecycle — we extend it to support truly open posts (no specific provider targeted) and retire the broad `opportunities` feature.
 
-Rebuild around one clear primary action.
+Brand line "Tuungane — Connect to Opportunity" stays. Only the product surface changes.
 
-- **Hero**: single, dominant CTA — "Request a service" (and secondary "Browse providers"). Replace any mixed hero that gives equal weight to feed/opportunities/official.
-- **Section 1 — How it works (3 steps)**: Request → Get matched → Verified review. Visual, short.
-- **Section 2 — Popular service categories**: grid of top categories linking into `/services`.
-- **Section 3 — Featured providers / business pages**: trust-builder.
-- **Section 4 — Recent verified reviews**: social proof from the core loop.
-- **Section 5 (small, demoted)**: "Also on Tuungane" strip with 3 small cards: Opportunities, Community Feed, Official updates. One line each, no large imagery.
+## Data Model (one migration)
 
-Logged-in users see the same structure but with a personalized "Your active requests" strip above categories if any exist.
+1. `service_requests.provider_id` → **nullable**. Open requests have `provider_id = NULL` until a provider is selected (`selected_provider_id` set + status `accepted`). Existing `no_self_request` check tolerates NULL.
+2. Add `service_requests.urgent_flag boolean default false` (drives "Urgent" filter chip; also keep existing `urgency` enum: emergency=Today, urgent=This Week, normal=Flexible).
+3. Update `provider_responses` insert policy: drop the `r.provider_id <> auth.uid()` implicit reliance — allow any provider to respond when `r.status='requested'` and `r.customer_id <> auth.uid()`.
+4. Update `handle_service_request_status` trigger: on INSERT, only fire `request_new` notification to `NEW.provider_id` when it's NOT NULL (open posts notify nobody on creation).
+5. **Archive legacy data**: `UPDATE opportunities SET archived=true, status='rejected'`. Keep table + RLS as-is; just hidden from UI. (Data preserved per your answer.)
 
-## 2. Desktop header (`src/components/Header.tsx`)
+No table drops. `opportunities`, `opportunity_applications`, `saved_opportunities`, `opportunity_reports` remain in DB, removed from the UI in step 2.
 
-Trim the top nav from 8 items to 4 primary + a "More" dropdown.
+## Route Changes
 
-Primary nav (always visible):
-- Home
-- Services
-- Businesses
-- My Requests (logged in) / How it works (guest)
+- **Keep** `/requests` (My Requests dashboard) and `/requests/$id` (Request Details).
+- **New** `/requests/browse` → public open-requests board (replaces `/opportunities`). This is what the menu "Requests" links to.
+- **New** `/requests/new` → Create a Request form (replaces `/opportunities/new` and the current targeted RequestServiceDialog flow). Targeted-provider variant remains available from a provider profile (pre-fills `provider_id`).
+- **Redirects**: `/opportunities` → `/requests/browse`, `/opportunities/$id` → `/requests/$id` (component-level navigate on mount), `/opportunities/new` → `/requests/new`. Files become thin redirect shims so old links never 404.
+- `services.requests.tsx` (current "matching requests" for providers) folds into `/requests/browse?for=me`.
 
-"More" dropdown:
-- Service Feed (open requests for providers)
-- Opportunities
-- Community Feed
-- Official
+## File-by-file Changes
 
-Primary CTA button (right side) changes from "Post a service" to **"Request a service"** for guests — matches the core loop verb. Keep "Post a service" inside the user dropdown for providers.
+**New**
+- `src/routes/requests.browse.tsx` — open-requests board (hero, search, filters, list)
+- `src/routes/requests.new.tsx` — Create a Request form
+- `src/components/RequestCard.tsx` — replaces `OpportunityCard`
+- `src/data/requestTypes.ts` — filter chips, category list, copy constants
 
-## 3. Mobile bottom nav (`src/components/MobileBottomNav.tsx`)
+**Rename/rewrite content (no behavior change beyond copy)**
+- `src/components/Header.tsx` — nav: Home, Services, Requests, Businesses, Work Feed, Community Feed, Official; "More" menu trimmed. Primary CTA: "Create a Request" → `/requests/new`.
+- `src/components/MobileBottomNav.tsx` — Home · Services · Create (FAB → `/requests/new`) · Requests (`/requests`) · Me/Sign in.
+- `src/components/RequestFab.tsx` — link to `/requests/new`, label "Create a Request"; visible on home, services, requests, browse, businesses, feed, official.
+- `src/routes/index.tsx` — replace "Also on Tuungane → Opportunities" tile with "Open Requests" → `/requests/browse`.
+- `src/routes/requests.tsx` — page title "My Requests"; tab labels stay.
+- `src/routes/requests.$id.tsx` — page title "Request Details"; section header "Provider Responses".
+- `src/components/admin/OpportunitiesAdminTab.tsx` → archived; new `src/components/admin/RequestsBrowseAdminTab.tsx` shows open requests on the public board for moderation.
+- `src/routes/admin.tsx` — replace Opportunities tab with "Manage Requests" (existing RequestsAdminTab handles tracked requests; new tab handles open-board moderation).
+- `src/routes/feed.tsx`, `src/routes/dashboard.tsx`, `src/routes/credits.tsx`, `src/routes/businesses.*`, `src/routes/u.$id.tsx`, `src/routes/about.tsx`, `src/components/Footer.tsx`, `src/components/Logo.tsx`, `src/components/MobileActionBar.tsx`, `src/components/OfficialPostCard.tsx`, `src/components/admin/OverviewTab.tsx`, `src/components/admin/OfficialPostForm.tsx`, `src/components/social/PostComposer.tsx`, `src/components/business/BusinessPageManager.tsx`, `src/components/SafetyNote.tsx`, `src/hooks/use-boosts.ts`, `src/data/postTypes.ts`, `src/data/officialPostTypes.ts` — string sweep: replace "Opportunity/Opportunities" public-facing copy with "Request/Requests" per your wording table; drop gig/job/internship/volunteer/apprenticeship from filter options, type selectors, post-type pickers, boost-target labels. Keep brand tagline "Connect to Opportunity" intact.
 
-Already close to right. Adjust:
-- Home | Services | **Request (FAB)** | My Requests | Me
-- Replace "Feed" tab with "My Requests" (logged in) or "Browse" (guest). Feed moves to header "More" / profile menu.
-- The center FAB already routes to `/services` — keep, but rename label to "Request" (it is) and ensure it leads to the request flow, not just the browse page. Confirm `/services` opens the request dialog or change FAB target to the request entry point.
+**Redirect shims (replace existing file contents)**
+- `src/routes/opportunities.tsx`, `src/routes/opportunities.$id.tsx`, `src/routes/opportunities.new.tsx` — render a `<Navigate>` to the new path so existing links and notifications resolve.
 
-## 4. RequestFab (`src/components/RequestFab.tsx`)
+**Retire (UI only)**
+- `src/components/OpportunityCard.tsx` deleted (only consumer is the old opportunities route).
+- `src/data/opportunities.ts` deleted after import sweep.
 
-Show on more surfaces (currently only 4 routes). Add `/businesses`, `/opportunities`, `/feed` so the core action is never more than one click away.
+## Open Requests Board (`/requests/browse`)
 
-## 5. User dropdown (`src/components/Header.tsx`)
+- Hero eyebrow "OPEN REQUESTS"; heading "Find Open Requests Near You"; supporting copy and CTAs per your spec.
+- Search input ("Search requests…") and location input ("Location e.g. Entebbe, Kampala, Wakiso").
+- Filter chips: All · Urgent · Today · This Week · Nearby · Verified · Open. Mapped to: `urgent_flag=true`, `urgency='emergency'`, `urgency='urgent'`, district-match (uses profile.district), customer has verified flag (via `service_profiles`/badge), `status='requested'`.
+- Category select (placeholder "All categories") using your category list.
+- Checkboxes: Urgent only · Verified customer only · Budget shown · Near me.
+- Safety note copy replaced per your spec.
+- Card content: title (or `service_needed`), category, location, urgency badge, budget range, short description, poster name + verified badge, time posted, response count, status badge, View Details / Respond / Save buttons.
+- Query scope: `service_requests` where `visibility='public'` AND `status='requested'` AND `provider_id IS NULL` (true open posts) — plus optionally include targeted public ones if you want; default excludes those to keep the board clean.
 
-Reorder to put core-loop items first:
-1. My dashboard
-2. My requests
-3. Post a service (provider action)
-4. My profile
-5. Tuungane Credits
---- divider ---
-6. Create business page
-7. Post an opportunity
-8. Activity feed
-9. Admin (if moderator)
-10. Sign out
+## Create a Request (`/requests/new`)
 
-## 6. Copy sharpening
+Form fields per your spec: category, title, description, location (area/town/district), urgency (Today/This Week/Flexible → maps to existing enum), budget_range, preferred_date/time, photo (single attachment via existing `tuungane-media` bucket), contact preference, visibility. Inserts into `service_requests` with `provider_id=NULL` for open posts. Pre-filled `provider_id` path (from provider profile "Request this provider") sets `visibility='matching_only'` and targets that provider — same flow as today.
 
-- Tagline everywhere: **"Request a service. Get matched with trusted providers."**
-- Footer keeps all links (no removals).
-- Guest "Post a service" button → **"Request a service"** (CTA matches what 90% of visitors actually want).
+## Provider Response Flow
 
-## 7. What stays untouched
+Existing `provider_responses` table reused unchanged. UI labels: "Respond", "Provider Responses". When customer marks a response `chosen`, existing trigger sets `service_requests.selected_provider_id`, sets `status='accepted'`, copies the chosen provider into `provider_id` (extend trigger to backfill `provider_id` from the chosen response when it was NULL). From there the existing 1-to-1 status flow (accepted → in_progress → completed → verified review) runs untouched.
 
-- All routes, all data, all RLS, all components.
-- Opportunities, Feed, Official, Credits, Boosts — all still reachable, just demoted in IA.
-- No edits to business logic, auth, or backend.
+## Notifications Copy
 
-## Files to edit
+Updated message strings in the trigger functions (`handle_service_request_status`, `handle_provider_response`, `handle_service_feedback`) — already use "service request" / "feedback" wording; tweak to "request" / "verified review" per your spec.
 
-- `src/routes/index.tsx` — home page rebuild
-- `src/components/Header.tsx` — nav trim + More dropdown + CTA label + user menu reorder
-- `src/components/MobileBottomNav.tsx` — tab swap
-- `src/components/RequestFab.tsx` — broader visibility
+## Dashboards & Admin
 
-## Reversibility
+- Customer "My Requests" tab already exists at `/requests`. Add labels: Responses Received, Selected Provider, Request Status.
+- Provider view at `/requests` already exists (role toggle). Add "Open Requests" link → `/requests/browse?for=me` (uses `matching_requests_for_provider` RPC).
+- Admin: replace "Opportunities" tab with "Manage Requests" → reuses `RequestsAdminTab` + new browse moderation list. "Manage Provider Responses", "Manage Disputes", "Manage Verification", "Manage Reports" — existing tabs renamed.
 
-Every change is in 4 presentation files. Git revert restores the previous IA in one step.
+## Out of Scope
 
-## Out of scope (next phase)
+- Database column renames (`opportunities` → `requests`) — not safe per your instruction; left for a later cleanup.
+- Internal type names like `ServiceRequestRow` — kept for code stability; only UI copy changes.
+- Messaging/chat — not in this pass.
+- Saved requests UI on the browse page if `saved_opportunities` is the only saved store — added in a thin layer that writes to a small `saved_requests` table if needed, otherwise deferred (call out: I'll defer "Save" button wiring unless you want it included).
 
-- Database naming conflicts (`service_profiles` vs `profiles`)
-- Service request end-to-end flow audit
-- Empty states / mobile polish
-- Route + dead-button audit
+## Risks
+
+- Making `provider_id` nullable touches multiple RLS policies that join on it (`provider_responses`, `contact_logs`, `contact_reveals`, `service_feedback`). None of those policies will be reached for open requests because the joins require `provider_id` to match; behavior is unchanged for existing 1:1 requests. Verified in the schema dump.
+- The trigger backfill of `provider_id` on response selection is the critical correctness point; will include in the migration and add a SQL test path.
+
+## Estimated Surface
+
+~25 file edits, 2 new routes, 1 migration, 3 redirect shims, ~2 deletions. No teardown of working features.
