@@ -3,11 +3,10 @@ import { useEffect, useState } from "react";
 import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import { Building2, BadgeCheck, MapPin, Phone, Mail, MessageCircle, Sparkles, Edit3, Users, Briefcase } from "lucide-react";
+import { Building2, BadgeCheck, MapPin, Phone, Mail, MessageCircle, Sparkles, Edit3, Users } from "lucide-react";
 import { toast } from "sonner";
 import { orgTypeLabel } from "@/data/businessTypes";
 import { SafetyNote, SAFETY_TIPS } from "@/components/SafetyNote";
-import { EmptyState } from "@/components/EmptyState";
 
 import { RouteErrorCard, RouteNotFoundCard } from "@/lib/route-boundaries";
 
@@ -37,7 +36,7 @@ function BusinessDetail() {
   const [page, setPage] = useState<BPage | null>(null);
   const [followers, setFollowers] = useState(0);
   const [isFollowing, setIsFollowing] = useState(false);
-  const [opps, setOpps] = useState<Array<{ id: string; title: string; opportunity_type: string }>>([]);
+  
   const [editing, setEditing] = useState(false);
 
   const load = async () => {
@@ -46,14 +45,12 @@ function BusinessDetail() {
       : await supabase.from("business_pages").select("id,owner_id,slug,name,org_type,category_slug,subcategory,description,logo_url,cover_url,district,town,area,address,opening_hours,services,products,verified,is_featured,seeded_by_official,claim_status,suspended").eq("slug", slug).maybeSingle();
     if (error || !data) { toast.error("Business page not found"); nav({ to: "/businesses" }); return; }
     setPage(data as unknown as BPage);
-    const [{ count }, follow, { data: o }] = await Promise.all([
+    const [{ count }, follow] = await Promise.all([
       supabase.from("business_followers").select("*", { count: "exact", head: true }).eq("business_page_id", data.id),
       user ? supabase.from("business_followers").select("follower_id").eq("business_page_id", data.id).eq("follower_id", user.id).maybeSingle() : Promise.resolve({ data: null }),
-      supabase.from("opportunities").select("id,title,opportunity_type").eq("business_page_id", data.id).eq("archived", false).in("status", ["approved", "featured"]).order("created_at", { ascending: false }).limit(10),
     ]);
     setFollowers(count ?? 0);
     setIsFollowing(!!follow?.data);
-    setOpps(o ?? []);
   };
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [slug, user]);
 
@@ -147,23 +144,6 @@ function BusinessDetail() {
                 </div>
               </div>
             )}
-            <div className="rounded-2xl border border-border bg-card p-5">
-              <h3 className="flex items-center gap-2 text-base font-bold text-navy"><Briefcase className="h-4 w-4 text-orange" /> Opportunities</h3>
-              {opps.length === 0 ? (
-                <div className="mt-3"><EmptyState icon={Briefcase} title="No opportunities yet" description="This page hasn't posted any jobs, gigs, or volunteer roles." /></div>
-              ) : (
-                <ul className="mt-3 space-y-2">
-                  {opps.map((o) => (
-                    <li key={o.id}>
-                      <Link to="/opportunities/$id" params={{ id: o.id }} className="flex items-center justify-between rounded-lg border border-border p-3 hover:border-orange/60">
-                        <span className="text-sm font-medium text-navy">{o.title}</span>
-                        <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-semibold capitalize text-muted-foreground">{o.opportunity_type}</span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
           </div>
 
           <aside className="space-y-4">

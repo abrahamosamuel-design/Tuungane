@@ -139,7 +139,7 @@ export function BusinessPageCreateForm() {
     <section className="mx-auto max-w-3xl px-4 py-8">
       <div className="mb-6 flex items-center gap-2 text-sm font-medium uppercase tracking-wide text-orange"><Building2 className="h-4 w-4" /> Create a Business Page</div>
       <h1 className="text-3xl font-bold text-navy">Create a Business Page</h1>
-      <p className="mt-2 text-sm text-muted-foreground">Set up your page now, then use it for updates, opportunities, and business discovery across Tuungane.</p>
+      <p className="mt-2 text-sm text-muted-foreground">Set up your page now, then use it for updates, requests, and business discovery across Tuungane.</p>
 
       <form onSubmit={submit} className="mt-8 space-y-5">
         <Field label="Business name">
@@ -250,7 +250,7 @@ export function MyBusinessPagesPanel() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="font-display text-lg font-bold text-navy">My Business Pages</h2>
-          <p className="mt-1 text-sm text-muted-foreground">View, edit, post updates, post opportunities, or feature your pages as Tuungane grows.</p>
+          <p className="mt-1 text-sm text-muted-foreground">View, edit, post updates, create requests, or feature your pages as Tuungane grows.</p>
         </div>
         <Link to="/businesses/create" className="inline-flex items-center gap-2 rounded-full bg-orange px-4 py-2 text-sm font-semibold text-orange-foreground hover:brightness-110">
           <Building2 className="h-4 w-4" /> Create business page

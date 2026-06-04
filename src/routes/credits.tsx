@@ -11,7 +11,7 @@ import { timeAgo } from "@/lib/format";
 export const Route = createFileRoute("/credits")({
   head: () => ({ meta: [
     { title: "Tuungane Credits" },
-    { name: "description", content: "Buy and manage Tuungane Credits — boost visibility, feature posts, and promote opportunities. Credits are not cash." },
+    { name: "description", content: "Buy and manage Tuungane Credits — boost visibility, feature posts, and promote requests. Credits are not cash." },
   ]}),
   component: CreditsPage,
 });
@@ -226,7 +226,7 @@ function CreditsPage() {
               ) : (
                 <h1 className="mt-2 text-4xl font-bold text-navy">Credits</h1>
               )}
-              <p className="mt-2 max-w-xl text-sm text-muted-foreground">Use credits to boost your profile, feature posts, mark requests urgent, and promote opportunities. <Link to="/credits" hash="how" className="text-orange underline">How to earn & spend</Link>.</p>
+              <p className="mt-2 max-w-xl text-sm text-muted-foreground">Use credits to boost your profile, feature posts, mark requests urgent, and promote your services. <Link to="/credits" hash="how" className="text-orange underline">How to earn & spend</Link>.</p>
             </div>
             <div className="flex flex-col items-end gap-1">
               <span className="text-xs text-muted-foreground">Free to join · Basic use stays free</span>
@@ -244,7 +244,7 @@ function CreditsPage() {
         {/* Not-cash disclaimer */}
         <div className="flex gap-3 rounded-xl border border-border bg-muted/40 p-4 text-sm text-muted-foreground">
           <Info className="h-5 w-5 flex-shrink-0 text-navy" />
-          <p><strong className="text-navy">Credits are not cash.</strong> They are used inside Tuungane to boost visibility, feature posts, highlight opportunities, and promote services. Credits cannot be withdrawn as money.</p>
+          <p><strong className="text-navy">Credits are not cash.</strong> They are used inside Tuungane to boost visibility, feature posts, highlight requests, and promote services. Credits cannot be withdrawn as money.</p>
         </div>
 
         {/* Packages */}
@@ -323,7 +323,7 @@ function CreditsPage() {
               <li>• Mark a request urgent (5 credits)</li>
               <li>• Priority response (2 credits)</li>
               <li>• Feature a business page (15–40 credits)</li>
-              <li>• Featured opportunity (10 credits)</li>
+              <li>• Featured request (10 credits)</li>
               <li>• Promote a completed-work post (5 credits)</li>
             </ul>
           </div>

@@ -6,8 +6,8 @@ import { Logo } from "@/components/Logo";
 export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
-      { title: "About Tuungane — Connect to Opportunity" },
-      { name: "description", content: "Tuungane connects skilled people to opportunity. Learn about our mission to help Uganda — and Africa — prosper together." },
+      { title: "About Tuungane — Skilled Help, Trusted Connections" },
+      { name: "description", content: "Tuungane connects customers with skilled service providers nearby. Learn about our mission to help Uganda — and Africa — prosper together." },
     ],
   }),
   component: About,
@@ -21,7 +21,7 @@ function About() {
           <Logo className="mx-auto h-12" />
           <h1 className="mt-6 font-display text-4xl font-extrabold text-navy">Connect. Grow. Prosper Together.</h1>
           <p className="mt-4 text-lg text-muted-foreground">
-            Tuungane is a services-first opportunity platform. We help people find trusted service providers near them, while helping skilled people become visible, trusted, and connected to opportunity.
+            Tuungane is a services-first platform built around requests. Customers post what they need; skilled providers respond. It's the simplest way to find trusted help near you — and to be found.
           </p>
         </div>
       </section>
@@ -44,7 +44,7 @@ function About() {
         <div className="mt-12 rounded-3xl bg-navy p-10 text-navy-foreground">
           <h2 className="font-display text-2xl font-bold">Our mission</h2>
           <p className="mt-3 text-white/80">
-            We believe opportunity should be accessible to everyone with a skill — regardless of where they live, what school they attended, or who they know. Tuungane is the bridge: a simple, trusted way to find work and be found.
+            We believe skilled work should be accessible to everyone — regardless of where they live, what school they attended, or who they know. Tuungane is the bridge: a simple, trusted way to find work and be found.
           </p>
           <Link to="/services" className="mt-6 inline-flex rounded-full bg-orange px-5 py-2.5 text-sm font-semibold text-orange-foreground">Browse services →</Link>
         </div>
