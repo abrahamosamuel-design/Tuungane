@@ -1462,7 +1462,7 @@ export type Database = {
           preferred_date: string | null
           preferred_time: string | null
           provider_confirmed_completion: boolean
-          provider_id: string
+          provider_id: string | null
           selected_provider_id: string | null
           service_needed: string
           service_profile_id: string | null
@@ -1472,6 +1472,7 @@ export type Database = {
           town: string | null
           updated_at: string
           urgency: Database["public"]["Enums"]["service_urgency"]
+          urgent_flag: boolean
           visibility: string
         }
         Insert: {
@@ -1496,7 +1497,7 @@ export type Database = {
           preferred_date?: string | null
           preferred_time?: string | null
           provider_confirmed_completion?: boolean
-          provider_id: string
+          provider_id?: string | null
           selected_provider_id?: string | null
           service_needed: string
           service_profile_id?: string | null
@@ -1506,6 +1507,7 @@ export type Database = {
           town?: string | null
           updated_at?: string
           urgency?: Database["public"]["Enums"]["service_urgency"]
+          urgent_flag?: boolean
           visibility?: string
         }
         Update: {
@@ -1530,7 +1532,7 @@ export type Database = {
           preferred_date?: string | null
           preferred_time?: string | null
           provider_confirmed_completion?: boolean
-          provider_id?: string
+          provider_id?: string | null
           selected_provider_id?: string | null
           service_needed?: string
           service_profile_id?: string | null
@@ -1540,6 +1542,7 @@ export type Database = {
           town?: string | null
           updated_at?: string
           urgency?: Database["public"]["Enums"]["service_urgency"]
+          urgent_flag?: boolean
           visibility?: string
         }
         Relationships: []
@@ -1698,7 +1701,7 @@ export type Database = {
           preferred_date: string | null
           preferred_time: string | null
           provider_confirmed_completion: boolean
-          provider_id: string
+          provider_id: string | null
           selected_provider_id: string | null
           service_needed: string
           service_profile_id: string | null
@@ -1708,6 +1711,7 @@ export type Database = {
           town: string | null
           updated_at: string
           urgency: Database["public"]["Enums"]["service_urgency"]
+          urgent_flag: boolean
           visibility: string
         }[]
         SetofOptions: {
