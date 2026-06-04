@@ -128,7 +128,7 @@ function Feed() {
   useEffect(() => { load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [tab, filter, category, postType, user?.id]);
 
   const tabs: { id: Tab; label: string }[] = [
-    { id: "posts", label: "Posts" }, { id: "services", label: "Services" }, { id: "opportunities", label: "Opportunities" },
+    { id: "posts", label: "Posts" }, { id: "services", label: "Services" },
   ];
   const postFilters: { id: PostFilter; label: string }[] = [
     { id: "all", label: "All" }, { id: "following", label: "Following" }, { id: "nearby", label: "Nearby" }, { id: "popular", label: "Popular" }, { id: "verified", label: "Verified" }, { id: "official", label: "Official" },
@@ -141,7 +141,7 @@ function Feed() {
     <Layout>
       <section className="mx-auto max-w-2xl px-4 py-8">
         <h1 className="font-display text-3xl font-bold text-navy">Activity feed</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Discover work, providers, and opportunities on Tuungane.</p>
+        <p className="mt-1 text-sm text-muted-foreground">Discover work, providers, and updates on Tuungane.</p>
 
         <div className="mt-5 flex gap-1 rounded-full border border-border bg-card p-1">
           {tabs.map((t) => (
@@ -205,12 +205,7 @@ function Feed() {
             ));
           })()}
 
-          {!loading && tab === "opportunities" && (() => {
-            const sortedOpps = [...opps].sort((a, b) => Number(isBoostedOpp(b.id)) - Number(isBoostedOpp(a.id)));
-            return sortedOpps.length === 0 ? (
-              <Empty title="No opportunities yet" hint={<>Post a gig, job, or apprenticeship from the <Link to="/opportunities/new" className="font-semibold text-orange">Opportunities</Link> page.</>} />
-            ) : sortedOpps.map((o) => <OpportunityCard key={o.id} o={o} />);
-          })()}
+          {/* opportunities tab removed — see /requests/browse */}
         </div>
       </section>
     </Layout>
