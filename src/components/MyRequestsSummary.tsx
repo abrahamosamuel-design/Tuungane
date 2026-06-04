@@ -30,12 +30,12 @@ export function MyRequestsSummary({ limit = 5, title = "My service requests" }: 
       const disputed = list.filter((r) => r.status === "disputed").length;
       setCounts({ active, completed, disputed, total: list.length });
       const top = list.slice(0, limit);
-      const ids = Array.from(new Set(top.flatMap((r) => [r.customer_id, r.provider_id]).filter((id) => id !== user.id)));
+      const ids = Array.from(new Set(top.flatMap((r) => [r.customer_id, r.provider_id]).filter((id): id is string => !!id && id !== user.id)));
       const { data: profs } = ids.length
         ? await supabase.from("profiles").select("id,full_name,avatar_url").in("id", ids)
         : { data: [] as Array<{ id: string; full_name: string; avatar_url: string | null }> };
       const pmap = new Map((profs ?? []).map((p) => [p.id, { full_name: p.full_name, avatar_url: p.avatar_url }]));
-      setItems(top.map((r) => ({ ...r, counterparty: pmap.get(r.customer_id === user.id ? r.provider_id : r.customer_id) })));
+      setItems(top.map((r) => ({ ...r, counterparty: r.customer_id === user.id ? (r.provider_id ? pmap.get(r.provider_id) : undefined) : pmap.get(r.customer_id) })));
       setLoaded(true);
     })();
   }, [user, limit]);
