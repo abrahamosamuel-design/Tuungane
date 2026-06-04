@@ -27,7 +27,7 @@ export const Route = createFileRoute("/_authenticated/requests/new")({
 });
 
 function NewRequest() {
-  const search = useSearch({ from: "/requests/new" });
+  const search = useSearch({ from: "/_authenticated/requests/new" });
   const { user, loading } = useAuth();
   const nav = useNavigate();
   const [busy, setBusy] = useState(false);
