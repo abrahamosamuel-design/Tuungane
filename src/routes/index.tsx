@@ -319,7 +319,7 @@ function Index() {
               className="w-[78%] shrink-0 snap-start rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)] sm:w-auto sm:p-5"
             >
               <div className="flex items-center justify-between">
-                <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${r.badgeClass}`}>{r.badge}</span>
+                <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${r.badgeClass}`}>{r.badge === "New" ? "Tuungane Official Feed" : r.badge}</span>
                 <span className="text-[11px] text-muted-foreground">{r.ago}</span>
               </div>
               <div className="mt-3 flex gap-3">
