@@ -202,8 +202,7 @@ function Index() {
 
           {/* Hero network composition */}
           <div className="relative mx-auto mt-4 max-w-md sm:mt-10 sm:max-w-lg">
-
-            <div className="relative overflow-hidden rounded-3xl">
+            <div className="relative overflow-hidden rounded-3xl border border-border/60 shadow-[var(--shadow-elevated)]">
               <img
                 src={heroNetwork}
                 alt="A Ugandan customer connected to multiple trusted skilled providers on Tuungane"
@@ -211,12 +210,12 @@ function Index() {
                 height={1280}
                 className="block w-full"
               />
-              {/* Edge fade into navy */}
+              {/* Soft edge fade into light background */}
               <div
                 className="pointer-events-none absolute inset-0"
                 style={{
                   background:
-                    "radial-gradient(ellipse at center, transparent 60%, oklch(0.22 0.05 250 / 0.6) 88%, oklch(0.22 0.05 250) 100%)",
+                    "radial-gradient(ellipse at center, transparent 60%, oklch(0.95 0.01 250 / 0.45) 88%, oklch(0.98 0.01 250 / 0.75) 100%)",
                 }}
               />
 
