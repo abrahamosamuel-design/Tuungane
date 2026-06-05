@@ -133,13 +133,13 @@ function Feed() {
         </div>
 
 
-        <div className="mt-5 flex gap-1 rounded-full border border-border bg-card p-1">
+        <div className="mt-5 flex gap-1 rounded-full border border-border bg-card p-1 mx-4 sm:mx-0">
           {tabs.map((t) => (
             <button key={t.id} onClick={() => setTab(t.id)} className={`flex-1 rounded-full px-3 py-1.5 text-xs font-semibold transition ${tab === t.id ? "bg-navy text-navy-foreground" : "text-muted-foreground hover:text-navy"}`}>{t.label}</button>
           ))}
         </div>
 
-        <div className="mt-4 flex flex-wrap gap-2">
+        <div className="mt-4 flex flex-wrap gap-2 px-4 sm:px-0">
           {tab === "posts" && postFilters.map((f) => (
             <button key={f.id} onClick={() => setFilter(f.id)} className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${filter === f.id ? "bg-navy text-navy-foreground" : "border border-border bg-background text-muted-foreground hover:border-navy"}`}>{f.label}</button>
           ))}
@@ -155,7 +155,8 @@ function Feed() {
           )}
         </div>
 
-        <div className="mt-6 space-y-4">
+        <div className="mt-6 space-y-3 sm:space-y-4">
+
           {loading && <p className="text-sm text-muted-foreground">Loading...</p>}
 
           {!loading && tab === "posts" && (() => {
