@@ -172,7 +172,8 @@ function Dashboard() {
               load();
             }}
             className="mt-6 rounded-xl bg-orange px-4 py-3 text-sm font-semibold text-orange-foreground"
-          >Become a service provider</button>
+            className="mt-6 rounded-xl bg-green px-4 py-3 text-sm font-semibold text-white"
+          >List Your Skill</button>
         )}
       </section>
     </Layout>
