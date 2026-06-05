@@ -29,13 +29,6 @@ export function Header() {
   const [more, setMore] = useState(false);
   const { user, loading, isModerator, signOut } = useAuth();
 
-  useEffect(() => {
-    if (!open) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = prev; };
-  }, [open]);
-
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -125,8 +118,8 @@ export function Header() {
         </button>
       </div>
       {open && (
-        <div className="fixed inset-x-0 top-16 bottom-0 z-40 overflow-y-auto overscroll-contain border-t border-border bg-background md:hidden" style={{ WebkitOverflowScrolling: "touch" }}>
-          <div className="space-y-1 px-4 py-3 pb-[160px]">
+        <div className="border-t border-border bg-background md:hidden">
+          <div className="space-y-1 px-4 py-3">
             <p className="px-3 pt-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Main</p>
             {primaryNav.map((n) => (
               <Link key={n.to} to={n.to} onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-navy hover:bg-muted">{n.label}</Link>
