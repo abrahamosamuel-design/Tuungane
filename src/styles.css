@@ -129,3 +129,24 @@
     letter-spacing: -0.02em;
   }
 }
+
+/*
+ * Mobile-first global layout polish.
+ * Narrows side gutters and softens oversized radii on width-constrained
+ * top-level containers inside <main>, without touching forms, buttons,
+ * dialogs, or other components that rely on their own px-4.
+ * Desktop (sm+) layout is preserved because Tailwind's sm: utilities
+ * win via the @media (min-width: 640px) cascade.
+ */
+@media (max-width: 639px) {
+  /* Width-constrained section/page containers: reduce horizontal gutter */
+  main [class*="max-w-"].px-4,
+  main [class*="max-w-"].px-6 {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+  /* Soften oversized card radii so cards feel like a real mobile app */
+  main .rounded-3xl { border-radius: 1rem; }
+  main .rounded-2xl { border-radius: 0.875rem; }
+}
+
