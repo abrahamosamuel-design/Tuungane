@@ -6,13 +6,15 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 
-type Search = { tab?: "login" | "signup"; redirect?: string };
+type Intent = "customer" | "provider" | "both";
+type Search = { tab?: "login" | "signup"; redirect?: string; intent?: Intent };
 
 export const Route = createFileRoute("/login")({
   head: () => ({ meta: [{ title: "Log in or sign up — Tuungane" }] }),
   validateSearch: (s: Record<string, unknown>): Search => ({
     tab: s.tab === "signup" ? "signup" : "login",
     redirect: typeof s.redirect === "string" ? s.redirect : undefined,
+    intent: s.intent === "provider" || s.intent === "both" || s.intent === "customer" ? s.intent : undefined,
   }),
   component: Login,
 });
@@ -21,8 +23,8 @@ function Login() {
   const search = useSearch({ from: "/login" });
   const nav = useNavigate();
   const { user, loading } = useAuth();
-  const [tab, setTab] = useState<"login" | "signup">(search.tab ?? "login");
-  const [userType, setUserType] = useState<"customer" | "provider">("customer");
+  const [tab, setTab] = useState<"login" | "signup">(search.tab ?? (search.intent ? "signup" : "login"));
+  const [intent, setIntent] = useState<Intent>(search.intent ?? "customer");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -52,20 +54,20 @@ function Login() {
           throw new Error("Tuungane is currently available in Uganda only.");
         }
         if (password.length < 6) throw new Error("Password must be at least 6 characters.");
+        const isProvider = intent === "provider" || intent === "both";
         const { data, error } = await supabase.auth.signUp({
           email, password,
           options: {
             emailRedirectTo: `${window.location.origin}/`,
-            data: { full_name: fullName, is_provider: userType === "provider", phone },
+            data: { full_name: fullName, is_provider: isProvider, phone },
           },
         });
         if (error) throw error;
-        if (data.user && userType === "provider") {
-          // mark profile as provider (trigger handles default, but ensure)
+        if (data.user && isProvider) {
           await supabase.from("profiles").update({ is_provider: true, full_name: fullName }).eq("id", data.user.id);
         }
         toast.success("Account created!");
-        nav({ to: userType === "provider" ? "/dashboard" : (search.redirect as never) ?? "/feed" });
+        nav({ to: isProvider ? "/dashboard" : (search.redirect as never) ?? "/feed" });
       } else {
         // Persist remember-me preference BEFORE sign-in so the auth state
         // listener doesn't see a stale value and sign the user back out.
@@ -113,13 +115,27 @@ function Login() {
             {tab === "signup" && (
               <>
                 <div>
-                  <label className="text-xs font-medium text-navy">I am a</label>
-                  <div className="mt-1 grid grid-cols-2 gap-2">
-                    {(["customer", "provider"] as const).map((u) => (
-                      <button type="button" key={u} onClick={() => setUserType(u)} className={`rounded-xl border px-3 py-2 text-sm font-medium transition ${userType === u ? "border-orange bg-orange/5 text-orange" : "border-border text-muted-foreground"}`}>
-                        {u === "customer" ? "Customer" : "Service Provider"}
-                      </button>
-                    ))}
+                  <label className="text-xs font-medium text-navy">I want to…</label>
+                  <div className="mt-1 grid gap-2">
+                    {([
+                      { id: "customer" as const, title: "I need help", desc: "Create requests and find skilled people.", accent: "orange" },
+                      { id: "provider" as const, title: "I offer a skill", desc: "List your skill, show your work, and get discovered.", accent: "green" },
+                      { id: "both" as const, title: "Both", desc: "Create requests and also offer your skills.", accent: "navy" },
+                    ]).map((o) => {
+                      const active = intent === o.id;
+                      const ring = o.accent === "green" ? "border-green bg-green/5 text-green" : o.accent === "navy" ? "border-navy bg-navy/5 text-navy" : "border-orange bg-orange/5 text-orange";
+                      return (
+                        <button
+                          type="button"
+                          key={o.id}
+                          onClick={() => setIntent(o.id)}
+                          className={`rounded-xl border px-3 py-2.5 text-left transition ${active ? ring : "border-border text-muted-foreground hover:border-navy/40"}`}
+                        >
+                          <p className="text-sm font-semibold">{o.title}</p>
+                          <p className="mt-0.5 text-xs opacity-80">{o.desc}</p>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
                 <Field label="Full name" value={fullName} onChange={setFullName} required />
