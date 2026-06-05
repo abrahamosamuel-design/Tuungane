@@ -177,3 +177,15 @@ function MenuItem({ to, icon, label, onClick }: { to: string; icon: React.ReactN
   );
 }
 
+function MyCreditsLink({ onClick }: { onClick: () => void }) {
+  const { balance } = useCreditWallet();
+  const label = balance === null || balance === undefined ? "0 credits" : `${balance.toLocaleString()} credits`;
+  return (
+    <Link to="/credits" onClick={onClick} className="flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium text-navy hover:bg-muted">
+      <span>My Credits</span>
+      <span className="text-xs font-semibold text-orange">{label}</span>
+    </Link>
+  );
+}
+
+
