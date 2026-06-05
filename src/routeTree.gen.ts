@@ -32,6 +32,7 @@ import { Route as OfficialPostsIdRouteImport } from './routes/official-posts.$id
 import { Route as BusinessesNewRouteImport } from './routes/businesses.new'
 import { Route as BusinessesCreateRouteImport } from './routes/businesses.create'
 import { Route as BusinessesSlugRouteImport } from './routes/businesses.$slug'
+import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedMeRouteImport } from './routes/_authenticated/me'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
@@ -155,6 +156,11 @@ const BusinessesSlugRoute = BusinessesSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => BusinessesRoute,
 } as any)
+const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedNotificationsRoute =
   AuthenticatedNotificationsRouteImport.update({
     id: '/notifications',
@@ -215,6 +221,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/me': typeof AuthenticatedMeRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
+  '/settings': typeof AuthenticatedSettingsRoute
   '/businesses/$slug': typeof BusinessesSlugRoute
   '/businesses/create': typeof BusinessesCreateRoute
   '/businesses/new': typeof BusinessesNewRoute
@@ -246,6 +253,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/me': typeof AuthenticatedMeRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
+  '/settings': typeof AuthenticatedSettingsRoute
   '/businesses/$slug': typeof BusinessesSlugRoute
   '/businesses/create': typeof BusinessesCreateRoute
   '/businesses/new': typeof BusinessesNewRoute
@@ -280,6 +288,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/me': typeof AuthenticatedMeRoute
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
+  '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/businesses/$slug': typeof BusinessesSlugRoute
   '/businesses/create': typeof BusinessesCreateRoute
   '/businesses/new': typeof BusinessesNewRoute
@@ -314,6 +323,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/me'
     | '/notifications'
+    | '/settings'
     | '/businesses/$slug'
     | '/businesses/create'
     | '/businesses/new'
@@ -345,6 +355,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/me'
     | '/notifications'
+    | '/settings'
     | '/businesses/$slug'
     | '/businesses/create'
     | '/businesses/new'
@@ -378,6 +389,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/me'
     | '/_authenticated/notifications'
+    | '/_authenticated/settings'
     | '/businesses/$slug'
     | '/businesses/create'
     | '/businesses/new'
@@ -576,6 +588,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BusinessesSlugRouteImport
       parentRoute: typeof BusinessesRoute
     }
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/notifications': {
       id: '/_authenticated/notifications'
       path: '/notifications'
@@ -641,6 +660,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedMeRoute: typeof AuthenticatedMeRoute
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
+  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedRequestsIdRoute: typeof AuthenticatedRequestsIdRoute
   AuthenticatedRequestsNewRoute: typeof AuthenticatedRequestsNewRoute
   AuthenticatedRequestsIndexRoute: typeof AuthenticatedRequestsIndexRoute
@@ -652,6 +672,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedMeRoute: AuthenticatedMeRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
+  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedRequestsIdRoute: AuthenticatedRequestsIdRoute,
   AuthenticatedRequestsNewRoute: AuthenticatedRequestsNewRoute,
   AuthenticatedRequestsIndexRoute: AuthenticatedRequestsIndexRoute,
