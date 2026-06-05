@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Logo } from "./Logo";
 import { NotificationsBell } from "./NotificationsBell";
 import { CreditBalanceChip } from "./CreditBalanceChip";
+import { useCreditWallet } from "@/hooks/use-credits";
+
 import { useAuth } from "@/hooks/use-auth";
 import { listSkillHref } from "@/lib/cta";
 
@@ -117,32 +119,44 @@ export function Header() {
       {open && (
         <div className="border-t border-border bg-background md:hidden">
           <div className="space-y-1 px-4 py-3">
+            <p className="px-3 pt-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Main</p>
             {primaryNav.map((n) => (
-              <Link key={n.to} to={n.to} onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted">{n.label}</Link>
+              <Link key={n.to} to={n.to} onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-navy hover:bg-muted">{n.label}</Link>
             ))}
             <div className="my-2 border-t border-border" />
             <p className="px-3 pt-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">More</p>
             {moreNav.map((n) => (
-              <Link key={n.to} to={n.to} onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted">{n.label}</Link>
+              <Link key={n.to} to={n.to} onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-navy hover:bg-muted">{n.label}</Link>
             ))}
             {user ? (
               <>
                 <div className="my-2 border-t border-border" />
-                <Link to="/requests" onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted">My Requests</Link>
-                <Link to="/dashboard" onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted">My dashboard</Link>
-                <Link to="/me" onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted">My profile</Link>
-                <Link to="/businesses/create" onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted">Create business page</Link>
-                {isModerator && <Link to="/admin" onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-foreground/80 hover:bg-muted">Admin</Link>}
+                <p className="px-3 pt-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">My Account</p>
+                <Link to="/notifications" onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-navy hover:bg-muted">Notifications</Link>
+                <Link to="/requests" onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-navy hover:bg-muted">My Requests</Link>
+                <Link to="/dashboard" onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-navy hover:bg-muted">My Dashboard</Link>
+                <Link to="/me" onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-navy hover:bg-muted">My Profile</Link>
+                <MyCreditsLink onClick={() => setOpen(false)} />
+                <Link to="/businesses/create" onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-navy hover:bg-muted">Create Business Page</Link>
+                {isModerator && (
+                  <>
+                    <div className="my-2 border-t border-border" />
+                    <p className="px-3 pt-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Admin</p>
+                    <Link to="/admin" onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-navy hover:bg-muted">Admin</Link>
+                  </>
+                )}
+                <div className="my-2 border-t border-border" />
                 <Link to="/requests/new" onClick={() => setOpen(false)} className="mt-2 block rounded-full bg-orange px-4 py-2 text-center text-sm font-semibold text-orange-foreground">
                   Create a Request
                 </Link>
                 <Link to={listSkillHref(user) as never} onClick={() => setOpen(false)} className="mt-2 block rounded-full border border-green/40 bg-green/5 px-4 py-2 text-center text-sm font-semibold text-green">
                   List Your Skill
                 </Link>
-                <button onClick={() => { setOpen(false); signOut(); }} className="block w-full rounded-md px-3 py-2 text-left text-sm font-medium text-destructive hover:bg-muted">Sign out</button>
+                <button onClick={() => { setOpen(false); signOut(); }} className="mt-2 block w-full rounded-md px-3 py-2 text-left text-sm font-medium text-destructive hover:bg-muted">Sign out</button>
               </>
             ) : (
               <>
+                <div className="my-2 border-t border-border" />
                 <Link to="/requests/new" onClick={() => setOpen(false)} className="mt-2 block rounded-full bg-orange px-4 py-2 text-center text-sm font-semibold text-orange-foreground">
                   Create a Request
                 </Link>
@@ -154,6 +168,7 @@ export function Header() {
           </div>
         </div>
       )}
+
     </header>
   );
 }
@@ -163,4 +178,16 @@ function MenuItem({ to, icon, label, onClick }: { to: string; icon: React.ReactN
     <Link to={to} onClick={onClick} className="flex items-center gap-2 px-3 py-2.5 text-sm text-navy hover:bg-muted">{icon} {label}</Link>
   );
 }
+
+function MyCreditsLink({ onClick }: { onClick: () => void }) {
+  const { balance } = useCreditWallet();
+  const label = balance === null || balance === undefined ? "0 credits" : `${balance.toLocaleString()} credits`;
+  return (
+    <Link to="/credits" onClick={onClick} className="flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium text-navy hover:bg-muted">
+      <span>My Credits</span>
+      <span className="text-xs font-semibold text-orange">{label}</span>
+    </Link>
+  );
+}
+
 
