@@ -157,18 +157,18 @@ function Index() {
   return (
     <Layout>
       {/* HERO */}
-      <section className="relative overflow-hidden bg-[#F8FAFC] text-navy">
+      <section className="relative overflow-hidden bg-navy text-white">
         <div
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-48 opacity-40"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-48 opacity-25"
           style={{
             backgroundImage:
-              "radial-gradient(ellipse at 20% 100%, oklch(0.71 0.19 45 / 0.10), transparent 55%), radial-gradient(ellipse at 80% 100%, oklch(0.62 0.16 150 / 0.10), transparent 55%)",
+              "radial-gradient(ellipse at 20% 100%, oklch(0.71 0.19 45 / 0.35), transparent 55%), radial-gradient(ellipse at 80% 100%, oklch(0.62 0.16 150 / 0.3), transparent 55%)",
           }}
         />
         <div className="relative mx-auto max-w-5xl px-4 pb-28 pt-5 sm:px-6 sm:pb-36 sm:pt-12 lg:pb-40 lg:pt-16">
           {/* Headline */}
           <div className="mx-auto max-w-xl text-center">
-            <h1 className="font-display text-2xl font-extrabold leading-[1.15] text-navy sm:text-4xl lg:text-5xl">
+            <h1 className="font-display text-2xl font-extrabold leading-[1.15] sm:text-4xl lg:text-5xl">
               Find{" "}
               <span className="relative whitespace-nowrap">
                 trusted services
@@ -178,7 +178,7 @@ function Index() {
               <br />
               Grow your <span className="text-orange">customer base</span>.
             </h1>
-            <p className="mx-auto mt-2.5 max-w-md text-xs text-slate-600 sm:mt-4 sm:text-base">
+            <p className="mx-auto mt-2.5 max-w-md text-xs text-white/75 sm:mt-4 sm:text-base">
               Create requests, discover skilled people, or list your skill so customers near you can find you.
             </p>
           </div>
@@ -202,7 +202,8 @@ function Index() {
 
           {/* Hero network composition */}
           <div className="relative mx-auto mt-4 max-w-md sm:mt-10 sm:max-w-lg">
-            <div className="relative overflow-hidden rounded-3xl border border-border/60 shadow-[var(--shadow-elevated)]">
+
+            <div className="relative overflow-hidden rounded-3xl">
               <img
                 src={heroNetwork}
                 alt="A Ugandan customer connected to multiple trusted skilled providers on Tuungane"
@@ -210,12 +211,12 @@ function Index() {
                 height={1280}
                 className="block w-full"
               />
-              {/* Soft edge fade into light background */}
+              {/* Edge fade into navy */}
               <div
                 className="pointer-events-none absolute inset-0"
                 style={{
                   background:
-                    "radial-gradient(ellipse at center, transparent 60%, oklch(0.95 0.01 250 / 0.45) 88%, oklch(0.98 0.01 250 / 0.75) 100%)",
+                    "radial-gradient(ellipse at center, transparent 60%, oklch(0.22 0.05 250 / 0.6) 88%, oklch(0.22 0.05 250) 100%)",
                 }}
               />
 
