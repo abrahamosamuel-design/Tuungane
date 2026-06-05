@@ -1,9 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, BadgeCheck, Search, Sparkles, ShieldCheck, Users, MapPin, Star, Wrench, Sparkles as SparklesIcon, Building2, Scissors, Truck, Car, GraduationCap, Camera, ChefHat, Laptop, HeartPulse, Sprout, MoreHorizontal, ClipboardList, MessageSquare, Briefcase, Rss, Megaphone } from "lucide-react";
+import { ArrowRight, BadgeCheck, Sparkles, ShieldCheck, Users, MapPin, Star, Wrench, Sparkles as SparklesIcon, Building2, Scissors, Truck, Car, GraduationCap, Camera, ChefHat, Laptop, HeartPulse, Sprout, MoreHorizontal, ClipboardList, MessageSquare, Briefcase, Rss, Megaphone } from "lucide-react";
 import { Layout } from "@/components/Layout";
 import { ProviderCard } from "@/components/ProviderCard";
 import { categories } from "@/data/categories";
 import { featuredProviders, providers } from "@/data/providers";
+import { TwoSidedHeroCards } from "@/components/cta/TwoSidedHeroCards";
+import { ListYourSkillButton } from "@/components/cta/ListYourSkillButton";
+import { useAuth } from "@/hooks/use-auth";
+import { listSkillHref } from "@/lib/cta";
 
 const iconMap: Record<string, any> = { Wrench, Sparkles: SparklesIcon, Building2, Scissors, Truck, Car, GraduationCap, Camera, ChefHat, Laptop, HeartPulse, Sprout, MoreHorizontal };
 
@@ -19,6 +23,7 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const featured = featuredProviders();
+  const { user } = useAuth();
 
   return (
     <Layout>
@@ -41,10 +46,13 @@ function Index() {
                 <Link to="/requests/new" className="inline-flex items-center justify-center gap-2 rounded-full bg-orange px-6 py-3 text-sm font-semibold text-orange-foreground shadow-lg transition hover:brightness-110">
                   <ClipboardList className="h-4 w-4" /> Create a Request
                 </Link>
-                <Link to="/requests/browse" className="inline-flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/5 px-6 py-3 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/10">
-                  <Search className="h-4 w-4" /> Browse open requests
+                <Link to={listSkillHref(user) as never} className="inline-flex items-center justify-center gap-2 rounded-full bg-green px-6 py-3 text-sm font-semibold text-white shadow-lg transition hover:brightness-110">
+                  <Sparkles className="h-4 w-4" /> List Your Skill
                 </Link>
               </div>
+              <Link to="/requests/browse" className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-white/80 underline-offset-4 hover:text-white hover:underline">
+                Browse Requests <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
               <div className="mt-10 flex flex-wrap items-center gap-6 text-sm text-white/70">
                 <div className="flex items-center gap-2"><Users className="h-4 w-4 text-orange" /> 500+ providers</div>
                 <div className="flex items-center gap-2"><BadgeCheck className="h-4 w-4 text-green" /> Verified profiles</div>
@@ -74,6 +82,9 @@ function Index() {
           </div>
         </div>
       </section>
+
+      {/* Two-sided cards: Need help? / Have a skill? */}
+      <TwoSidedHeroCards />
 
       {/* How it works */}
       <section className="bg-surface py-16">
@@ -210,14 +221,14 @@ function Index() {
       {/* CTA for providers */}
       <section className="mx-auto max-w-5xl px-4 pb-20 sm:px-6 lg:px-8">
         <div className="overflow-hidden rounded-3xl border border-border bg-card p-10 text-center shadow-[var(--shadow-elevated)] sm:p-14">
-          <p className="text-xs font-semibold uppercase tracking-wider text-orange">For skilled people</p>
-          <h2 className="mt-2 font-display text-3xl font-bold text-navy sm:text-4xl">Post your skill. Get discovered.</h2>
+          <p className="text-xs font-semibold uppercase tracking-wider text-green">For skilled people</p>
+          <h2 className="mt-2 font-display text-3xl font-bold text-navy sm:text-4xl">List your skill. Get discovered.</h2>
           <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
-            Create a free service profile in minutes. Share your work, build trust through verified reviews, and grow your business.
+            Create a free provider profile in minutes. Share your work, build trust through verified reviews, and let customers near you find you.
           </p>
-          <Link to="/login" className="mt-7 inline-flex items-center gap-2 rounded-full bg-orange px-7 py-3 text-sm font-semibold text-orange-foreground shadow-lg transition hover:brightness-110">
-            Create your profile <ArrowRight className="h-4 w-4" />
-          </Link>
+          <div className="mt-7">
+            <ListYourSkillButton variant="solid" className="px-7 py-3" />
+          </div>
         </div>
       </section>
     </Layout>

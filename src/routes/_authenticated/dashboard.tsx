@@ -17,6 +17,7 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/_authenticated/dashboard")({
   validateSearch: (search: Record<string, unknown>) => ({
     composeBusiness: typeof search.composeBusiness === "string" ? search.composeBusiness : "",
+    becomeProvider: search.becomeProvider === "1" || search.becomeProvider === 1 || search.becomeProvider === true,
   }),
   head: () => ({ meta: [{ title: "My Dashboard — Tuungane" }] }),
   component: Dashboard,
@@ -71,6 +72,19 @@ function Dashboard() {
 
   useEffect(() => { if (user) load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [user]);
 
+  // Auto-flip to provider mode when arriving with ?becomeProvider=1
+  useEffect(() => {
+    if (!user || !search.becomeProvider) return;
+    if (profile && !profile.is_provider) {
+      (async () => {
+        await supabase.from("profiles").update({ is_provider: true }).eq("id", user.id);
+        toast.success("You're now a provider. Complete your profile to get discovered.");
+        load();
+      })();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, profile, search.becomeProvider]);
+
   if (!user) return null;
 
   return (
@@ -79,31 +93,30 @@ function Dashboard() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="font-display text-3xl font-bold text-navy">Hi, {profile?.full_name?.split(" ")[0] || "there"}</h1>
-            <p className="mt-1 text-sm text-muted-foreground">{profile?.is_provider ? "Manage your service profile, post your work, and grow your reputation." : "You're signed in as a customer. Switch to a provider to start posting work."}</p>
+            <p className="mt-1 text-sm text-muted-foreground">{profile?.is_provider ? "Manage your skills, post your work, and respond to nearby requests." : "Manage your requests and connect with skilled people near you."}</p>
           </div>
           <Link to="/u/$id" params={{ id: user.id }} className="rounded-full border border-border px-4 py-2 text-sm font-semibold text-navy hover:border-orange">View public profile</Link>
         </div>
 
         {profile?.is_provider && (
           <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <Stat label="My Skills" value={sp ? 1 : 0} />
+            <Stat label="My Work" value={stats.posts} />
             <Stat label="Followers" value={stats.followers} />
-            <Stat label="Posts" value={stats.posts} />
-            <Stat label="Likes" value={stats.likes} />
-            <Stat label="Comments" value={stats.comments} />
-            <Stat label="Recommendations" value={stats.recs} />
+            <Stat label="Profile likes" value={stats.likes} />
             <Stat label="Reviews" value={stats.reviews} />
+            <Stat label="Recommendations" value={stats.recs} />
             <Stat label="Saves" value={stats.saves} />
-            <Stat label="Requests posted" value={stats.opps} />
+            <Stat label="My Responses" value={stats.opps} />
           </div>
         )}
 
         {!profile?.is_provider && (
-          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-5">
+          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
             <Stat label="Following" value={customerStats.following} />
             <Stat label="Saved providers" value={customerStats.saved} />
             <Stat label="Saved requests" value={customerStats.savedOpps} />
             <Stat label="Reviews written" value={customerStats.reviewsWritten} />
-            <Stat label="Recommendations" value={customerStats.recsGiven} />
           </div>
         )}
 
@@ -158,8 +171,8 @@ function Dashboard() {
               toast.success("You're now a service provider. Complete your profile to start posting.");
               load();
             }}
-            className="mt-6 rounded-xl bg-orange px-4 py-3 text-sm font-semibold text-orange-foreground"
-          >Become a service provider</button>
+            className="mt-6 rounded-xl bg-green px-4 py-3 text-sm font-semibold text-white"
+          >List Your Skill</button>
         )}
       </section>
     </Layout>

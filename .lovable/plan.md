@@ -1,77 +1,104 @@
-# Plan: End-to-end audit of Tuungane
+# Two-Sided Journey: Add the Provider Track
 
-Goal: verify every page, button, and user flow works as expected in the current preview, then deliver a single findings report with severity-ranked issues and recommended fixes. No code changes in this pass — fixes happen in a follow-up after you approve the findings.
+Goal: make Tuungane feel like a two-sided platform. Customer side stays untouched in behavior; provider side ("List Your Skill → show work → get discovered → respond → get hired") becomes visible in every key surface.
 
-## Scope
+No backend / schema changes. All edits are copy, routing, navigation, and presentation.
 
-All public + authenticated surfaces currently in the app:
+## 1. Shared language + helpers
 
-1. **Public marketing / discovery**
-   - `/` Home (hero, "Create a Request" CTA, Open Requests tile, popular services, recommended providers, categories)
-   - `/services` + `/services/$slug`
-   - `/requests/browse` (filters, chips, category select, checkboxes, search, location, cards)
-   - `/businesses` + `/businesses/$slug`
-   - `/official` + `/official-posts/$id`
-   - `/feed`
-   - `/about`, `/contact`, `/terms`
+Create `src/lib/cta.ts` exporting:
+- `CTA = { createRequest, listSkill, browseRequests, postYourWork, becomeProvider }` with label/href.
+- `LIST_SKILL_HREF` → if signed-in & is_provider → `/dashboard`; else if signed-in → `/dashboard?becomeProvider=1`; else `/login?tab=signup&intent=provider`.
 
-2. **Auth**
-   - `/login` (email + Google), sign-out from header menu, session persistence after refresh
+Add small reusable components in `src/components/cta/`:
+- `<ListYourSkillButton variant="solid|outline|ghost" />` (green for provider track, per brand).
+- `<TwoSidedHeroCards />` — the "Need help?" + "Have a skill?" pair used on home/services/requests pages.
+- `<ProviderTrackCTA title text />` — compact banner for Services / Requests / empty states.
 
-3. **Customer flows**
-   - `/requests/new` — create open request (provider_id null), create targeted request from provider page
-   - `/requests` — My Requests tabs (as customer)
-   - `/requests/$id` — request details, provider responses list, mark response as "chosen" → verify trigger sets `provider_id`, `selected_provider_id`, status=`accepted`
-   - Status transitions: accepted → in_progress → completed → verified review (FeedbackDialog)
-   - Contact reveal / credits gating on a provider
+## 2. Homepage hero (`src/routes/index.tsx`)
 
-4. **Provider flows**
-   - `/services/requests` and `/requests/browse?for=me` — matching requests
-   - Respond to an open request via ProviderResponseDialog
-   - `/requests` (provider view) — incoming requests, status updates
+- Heading: "Find trusted help. Grow your work." (already present — keep).
+- Sub: "Create requests, discover skilled people, or list your skill so customers near you can find you."
+- Primary CTA: orange "Create a Request" → `/requests/new`.
+- Secondary CTA: green "List Your Skill" → `LIST_SKILL_HREF` (replaces current "Browse open requests").
+- Tertiary text link "Browse Requests" → `/requests/browse`.
+- Insert `<TwoSidedHeroCards />` immediately below hero (Need help? / Have a skill?).
+- Replace bottom CTA "Post your skill. Get discovered." button target with `LIST_SKILL_HREF` and label "List Your Skill".
 
-5. **Business owner flow**
-   - `/businesses/create`, `/businesses/new`, BusinessPageManager edits, claim profile dialog
+## 3. Header (`src/components/Header.tsx`)
 
-6. **Admin (only if your account has the role)**
-   - `/admin` tabs: Overview, Manage Requests, Provider Responses (if present), Disputes, Verification, Businesses, Reports, Credits, Contact Analytics, Official posts
+- Desktop nav: Home, Services, Requests, Work Feed, Businesses (Work Feed promoted out of "More"; keep Community Feed / Official under More).
+- Desktop right side (signed-out): "Sign in" + orange "Create a Request" + green outline "List Your Skill".
+- Desktop right side (signed-in): keep orange "Create a Request"; add green outline "List Your Skill" pill.
+- Mobile menu: order Home / Services / Requests / Work Feed / Businesses / Official; primary orange "Create a Request" + secondary green outline "List Your Skill".
+- User dropdown: rename "Post a service" → "List Your Skill" pointing to `LIST_SKILL_HREF`.
 
-7. **Navigation chrome**
-   - Header (desktop): primary nav, "More" menu, user menu items, NotificationsBell, CreditBalanceChip
-   - MobileBottomNav: Home / Services / Create FAB / Requests / Profile, active states
-   - RequestFab visibility rules
-   - Footer links
-   - Redirects: `/opportunities`, `/opportunities/$id`, `/opportunities/new` → new `/requests/*` paths
+## 4. Mobile bottom nav + create modal
 
-8. **Known signals to investigate first**
-   - Console warning: duplicate React key `p2` (appears twice in current logs) — locate the list rendering and confirm root cause
-   - Verify no leftover "Opportunity / Gig / Internship / Volunteer / Apprenticeship" copy in user-facing UI
-   - Verify the migration that made `service_requests.provider_id` nullable + the trigger backfill behaves correctly when a customer picks a response on an open request
+- `MobileBottomNav.tsx`: tabs Home / Services / Create / Requests / Profile (already close; rename labels if needed).
+- New `src/components/CreateChoiceSheet.tsx`: bottom sheet with two big options
+  - "Create a Request — For customers who need help" → `/requests/new`
+  - "List Your Skill — For skilled people who want to offer their work" → `LIST_SKILL_HREF`
+- Wire the center "+" button to open the sheet instead of linking directly. `RequestFab` (desktop floating) opens the same sheet.
 
-## Method
+## 5. Services page (`src/routes/services.tsx`)
 
-1. Use the in-sandbox browser tool at both mobile (390x844) and desktop (1366x768) viewports.
-2. For each page: screenshot → click every visible interactive element → observe console + network → note any 4xx/5xx, blank states, broken links, dead buttons, broken active styles, wrong copy, layout breakage.
-3. For destructive or irreversible actions (delete request, dispute, admin moderation actions), do NOT execute — just verify the UI opens and validation behaves; note them as "skipped, manual verification needed".
-4. For DB-trigger correctness on the response-chosen flow, run a read-only query against `service_requests` + `provider_responses` after the test interaction to confirm `provider_id` was backfilled and status moved to `accepted`.
-5. Track issues in the task tracker grouped by surface, with severity: **blocker / major / minor / polish**.
+- Add `<ProviderTrackCTA title="Offer what you do" text="Create your provider profile, list your skills, add photos of your work, and let customers find you." button="List Your Skill" />` near the top (above Popular services).
+- Replace the orange "Request a Service" mini-banner copy to keep customer track, but balance with the new provider banner.
+- Provider list empty state ("No providers match your filters"): swap to the spec'd copy "No providers listed yet / Be among the first … / List Your Skill".
 
-## Deliverable
+## 6. Requests page (`src/routes/requests.browse.tsx`)
 
-A single report message containing:
-- Per-surface pass/fail table
-- Full list of issues with severity, reproduction steps, and suggested fix
-- A short prioritized fix list you can approve to implement next
+- Below hero, add `<ProviderTrackCTA title="Want customers to find you too?" text="List your skill and show your work so people can discover you even before you respond to requests." button="List Your Skill" />`.
+- Keep primary purpose (browsing requests) and the existing "Create a Request" CTA.
 
-## Questions before I start
+## 7. Work Feed (`src/routes/services.requests.tsx` is the current Work Feed entry; verify)
 
-1. **Which test account(s) should I use?** I need at least one signed-in customer account and ideally one provider account to exercise both sides of the request flow. Should I use the account already logged into your preview, or do you have specific test credentials?
-2. **Is it OK to create test data** (a couple of throwaway requests + provider responses) in the live preview DB? I will clean them up after, but they will briefly appear on the public Requests board.
-3. **Do you want admin surfaces audited?** If yes and your current preview account doesn't have the `admin`/`moderator` role, say so and I'll skip those tabs.
+- Reframe header: "Work Feed — Show your work so customers can trust you."
+- Provider post-type chips already exist; add a green "List Your Skill" CTA in the header for non-provider viewers.
+- (No new data model; just copy + CTA placement.)
 
-## Out of scope for this audit
+## 8. Empty states (`src/components/EmptyState.tsx` consumers)
 
-- Visual redesign suggestions beyond bugs/polish
-- Performance profiling
-- Penetration testing of RLS policies (separate task)
-- Code refactors — this pass is observation only; fixes land in a follow-up after you approve the findings.
+Add a second `secondaryAction` prop for a provider-track CTA where relevant. Apply provider-track text to:
+- Services provider list (already covered in §5)
+- Work feed empty: "No work posts yet / Post photos or updates about your work to build trust with customers. — Post Your Work"
+- Dashboard provider tiles when empty.
+
+## 9. Dashboard (`src/routes/_authenticated/dashboard.tsx`)
+
+Split layout by `profile.is_provider`:
+- Customer view tiles: My Requests, Responses Received, Selected Providers, Completed Requests (derive from existing `service_requests` queries already loaded by `MyRequestsSummary`; add counts here).
+- Provider view tiles: My Skills, My Work (posts), Open Requests (matching), My Responses, Profile Views (use existing stat if any; otherwise hide), Reviews, Completed Work.
+- Honor `?becomeProvider=1` search param: auto-scroll/open the existing "Become a service provider" toggle and the `ServiceProfileForm`.
+
+## 10. Sign-up flow (`src/routes/login.tsx`)
+
+When `tab === "signup"`, replace the 2-option chooser with a 3-option chooser:
+- "I need help — Create requests and find skilled people." → sets `userType=customer`.
+- "I offer a skill — List your skill, show your work, get discovered." → sets `userType=provider`.
+- "Both — Create requests and also offer your skills." → sets `userType=provider` and flags `intent=both` (provider profile + customer surfaces both available).
+
+After signup:
+- Customer → `/feed` or `redirect`.
+- Provider / Both → `/dashboard?becomeProvider=1` to land directly on profile setup.
+
+Pre-select option from `?intent=provider` in search params (so the homepage "List Your Skill" deep-link lands on the right option).
+
+## 11. Footer (`src/components/Footer.tsx`)
+
+Add a "For providers" mini-column with "List Your Skill", "Work Feed", "How to get discovered" (link to /about or /services).
+
+## Technical notes
+
+- All new copy lives in `src/lib/cta.ts` for single-source-of-truth — no scattered strings.
+- Brand: orange for customer CTAs ("Create a Request"), green for provider CTAs ("List Your Skill"), navy for surfaces — matches existing tokens in `src/styles.css`.
+- No DB migrations. No new tables. No changes to RLS or RPCs.
+- Routing is unchanged except adding `?becomeProvider=1` (validated search param on `/dashboard`) and `?intent=provider|customer|both` (validated on `/login`).
+- Verification: click through Home → Services → Requests → Work Feed → mobile bottom Create sheet; sign up as each of the 3 options; confirm provider dashboard surfaces.
+
+## Out of scope (for a follow-up)
+
+- New provider onboarding fields (years of experience, availability, price guidance, portfolio uploader) beyond what `service_profiles` already supports.
+- Profile Views analytics (no counter exists yet).
+- "Both" account merging UX beyond setting `is_provider=true`.

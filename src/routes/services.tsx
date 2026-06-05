@@ -6,6 +6,8 @@ import { categories } from "@/data/categories";
 import { supabase } from "@/integrations/supabase/client";
 import { useBoostedSet } from "@/hooks/use-boosted-set";
 import { EmptyState } from "@/components/EmptyState";
+import { ProviderTrackCTA } from "@/components/cta/ProviderTrackCTA";
+import { ListYourSkillButton } from "@/components/cta/ListYourSkillButton";
 
 const iconMap: Record<string, any> = { Wrench, Sparkles, Building2, Scissors, Truck, Car, GraduationCap, Camera, ChefHat, Laptop, HeartPulse, Sprout, MoreHorizontal };
 
@@ -192,6 +194,16 @@ function Services() {
         </div>
       </section>
 
+      {/* PROVIDER TRACK CTA */}
+      <section className="px-4 pt-6 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl">
+          <ProviderTrackCTA
+            title="Offer what you do"
+            text="Create your provider profile, list your skills, add photos of your work, and let customers find you."
+          />
+        </div>
+      </section>
+
       {/* SECTION 2: POPULAR SERVICES */}
       <section className="px-4 pt-6 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
@@ -224,7 +236,11 @@ function Services() {
             {loadingReal && <p className="text-sm text-muted-foreground">Loading providers…</p>}
             {!loadingReal && recommended.length === 0 && (
               <div className="col-span-full">
-                <EmptyState icon={Search} title="No providers yet" description="Check back soon as more verified providers join Tuungane." />
+                <div className="rounded-2xl border border-dashed border-border bg-card p-8 text-center">
+                  <h3 className="font-display text-lg font-bold text-navy">No providers listed yet</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">Be among the first skilled people to list your skill and get discovered by customers near you.</p>
+                  <div className="mt-4 inline-flex"><ListYourSkillButton variant="solid" /></div>
+                </div>
               </div>
             )}
             {!loadingReal && recommended.map((p) => <ProviderRow key={p.user_id} p={p} isBoosted={isBoostedProvider(p.user_id)} onRequest={() => nav({ to: "/u/$id", params: { id: p.user_id } })} />)}
@@ -288,7 +304,11 @@ function Services() {
             {!loadingReal && realFiltered.map((p) => <ProviderRow key={p.user_id} p={p} isBoosted={isBoostedProvider(p.user_id)} onRequest={() => nav({ to: "/u/$id", params: { id: p.user_id } })} />)}
             {!loadingReal && realFiltered.length === 0 && (
               <div className="col-span-full">
-                <EmptyState icon={Search} title="No providers match your filters yet" description="Try a different category or location, or check back as Tuungane Official adds more verified providers." action={{ label: "Browse all categories", to: "/services" }} />
+                <div className="rounded-2xl border border-dashed border-border bg-card p-8 text-center">
+                  <h3 className="font-display text-lg font-bold text-navy">No providers listed yet</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">Be among the first skilled people to list your skill and get discovered by customers near you.</p>
+                  <div className="mt-4 inline-flex"><ListYourSkillButton variant="solid" /></div>
+                </div>
               </div>
             )}
           </div>

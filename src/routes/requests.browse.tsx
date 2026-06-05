@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { categories } from "@/data/categories";
 import { RequestCard, type RequestRowLite } from "@/components/RequestCard";
 import { EmptyState } from "@/components/EmptyState";
+import { ProviderTrackCTA } from "@/components/cta/ProviderTrackCTA";
 import {
   REQUESTS_COPY,
   REQUESTS_SAFETY_TEXT,
@@ -151,6 +152,13 @@ function BrowseRequests() {
             </button>
           </form>
         </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
+        <ProviderTrackCTA
+          title="Want customers to find you too?"
+          text="List your skill and show your work so people can discover you even before you respond to requests."
+        />
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
