@@ -179,7 +179,7 @@ function Feed() {
             return sortedProviders.length === 0 ? (
               <Empty title="No providers found" hint="Try a different category." />
             ) : sortedProviders.map((p) => (
-              <Link key={p.user_id} to="/u/$id" params={{ id: p.user_id }} className={`flex items-start gap-3 rounded-2xl border bg-card p-4 transition hover:border-orange ${isBoostedProvider(p.user_id) ? "border-orange/50" : "border-border"}`}>
+              <Link key={p.user_id} to="/u/$id" params={{ id: p.user_id }} className={`mx-4 sm:mx-0 flex items-start gap-3 rounded-2xl border bg-card p-4 transition hover:border-orange ${isBoostedProvider(p.user_id) ? "border-orange/50" : "border-border"}`}>
                 <img src={p.profile?.avatar_url || avatar(p.profile?.full_name || "T")} alt="" className="h-12 w-12 rounded-xl border border-border" />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5">
