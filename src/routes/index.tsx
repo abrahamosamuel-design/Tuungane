@@ -46,7 +46,7 @@ const homeCategoryLabels: Record<string, string> = {
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Tuungane — Connect to trusted help nearby" },
+      { title: "Tuungane — Connect to trusted service providers nearby" },
       {
         name: "description",
         content:
@@ -148,10 +148,11 @@ function Index() {
             <h1 className="font-display text-3xl font-extrabold leading-[1.1] sm:text-4xl lg:text-5xl">
               Connect to{" "}
               <span className="relative whitespace-nowrap">
-                trusted help
+                trusted service providers
                 <span className="absolute -bottom-1 left-0 h-1 w-full rounded-full bg-green/80" />
               </span>{" "}
-              nearby.
+              <br className="hidden sm:block" />
+              near you!
             </h1>
             <p className="mx-auto mt-4 max-w-md text-sm text-white/75 sm:text-base">
               Create requests or list your skill to reach more people.
