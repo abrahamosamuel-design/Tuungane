@@ -1,10 +1,11 @@
 import { Link } from "@tanstack/react-router";
 import { Menu, X, User as UserIcon, LogOut, LayoutDashboard, Shield, Rss, Wrench, ClipboardList, Coins, Building2, ChevronDown, Megaphone, Plus, Sparkles } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Logo } from "./Logo";
 import { NotificationsBell } from "./NotificationsBell";
 import { CreditBalanceChip } from "./CreditBalanceChip";
 import { useCreditWallet } from "@/hooks/use-credits";
+import { supabase } from "@/integrations/supabase/client";
 
 import { useAuth } from "@/hooks/use-auth";
 import { listSkillHref } from "@/lib/cta";
