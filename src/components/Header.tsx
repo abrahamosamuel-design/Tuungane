@@ -118,8 +118,8 @@ export function Header() {
         </button>
       </div>
       {open && (
-        <div className="border-t border-border bg-background md:hidden">
-          <div className="space-y-1 px-4 py-3">
+        <div className="border-t border-border bg-background md:hidden max-h-[calc(100vh-4rem)] overflow-y-auto overscroll-contain">
+          <div className="space-y-1 px-4 py-3 pb-24">
             <p className="px-3 pt-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Main</p>
             {primaryNav.map((n) => (
               <Link key={n.to} to={n.to} onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-navy hover:bg-muted">{n.label}</Link>
