@@ -126,7 +126,30 @@ const openRequests = [
     Icon: SparklesIcon,
     iconBg: "bg-amber-100 text-amber-700",
   },
+  {
+    badge: "Open",
+    badgeClass: "bg-green/15 text-green",
+    title: "Tutor needed for Math",
+    location: "Nkumba, Entebbe",
+    budget: "UGX 30,000 – 70,000",
+    responses: 2,
+    ago: "2h ago",
+    Icon: GraduationCap,
+    iconBg: "bg-green/10 text-green",
+  },
+  {
+    badge: "Open",
+    badgeClass: "bg-green/15 text-green",
+    title: "TV wall mounting",
+    location: "Ntinda, Kampala",
+    budget: "UGX 50,000 – 100,000",
+    responses: 3,
+    ago: "3h ago",
+    Icon: Wrench,
+    iconBg: "bg-green/10 text-green",
+  },
 ];
+
 
 function Index() {
   const { user } = useAuth();
@@ -142,10 +165,10 @@ function Index() {
               "radial-gradient(ellipse at 20% 100%, oklch(0.71 0.19 45 / 0.35), transparent 55%), radial-gradient(ellipse at 80% 100%, oklch(0.62 0.16 150 / 0.3), transparent 55%)",
           }}
         />
-        <div className="relative mx-auto max-w-5xl px-4 pb-32 pt-8 sm:px-6 sm:pb-36 sm:pt-12 lg:pb-40 lg:pt-16">
+        <div className="relative mx-auto max-w-5xl px-4 pb-28 pt-5 sm:px-6 sm:pb-36 sm:pt-12 lg:pb-40 lg:pt-16">
           {/* Headline */}
           <div className="mx-auto max-w-xl text-center">
-            <h1 className="font-display text-3xl font-extrabold leading-[1.1] sm:text-4xl lg:text-5xl">
+            <h1 className="font-display text-2xl font-extrabold leading-[1.15] sm:text-4xl lg:text-5xl">
               Find{" "}
               <span className="relative whitespace-nowrap">
                 trusted services
@@ -155,29 +178,31 @@ function Index() {
               <br />
               Grow your <span className="text-orange">customer base</span>.
             </h1>
-            <p className="mx-auto mt-4 max-w-md text-sm text-white/75 sm:text-base">
+            <p className="mx-auto mt-2.5 max-w-md text-xs text-white/75 sm:mt-4 sm:text-base">
               Create requests, discover skilled people, or list your skill so customers near you can find you.
             </p>
           </div>
 
+
           {/* CTAs */}
-          <div className="mx-auto mt-6 flex w-full max-w-md flex-col gap-2.5 sm:mt-7 sm:max-w-lg sm:flex-row sm:justify-center">
+          <div className="mx-auto mt-4 flex w-full max-w-md flex-col gap-2 sm:mt-7 sm:max-w-lg sm:flex-row sm:justify-center sm:gap-2.5">
             <Link
               to="/requests/new"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-orange px-5 py-3 text-sm font-semibold text-orange-foreground shadow-lg shadow-orange/30 transition hover:brightness-110 sm:w-auto sm:px-7"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-orange px-5 py-2.5 text-sm font-semibold text-orange-foreground shadow-lg shadow-orange/30 transition hover:brightness-110 sm:w-auto sm:px-7 sm:py-3"
             >
               <ClipboardList className="h-4 w-4" /> Create a Request
             </Link>
             <Link
               to={listSkillHref(user) as never}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-green px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-green/30 transition hover:brightness-110 sm:w-auto sm:px-7"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-green px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-green/30 transition hover:brightness-110 sm:w-auto sm:px-7 sm:py-3"
             >
               <UserIcon className="h-4 w-4" /> List Your Skill
             </Link>
           </div>
 
           {/* Hero network composition */}
-          <div className="relative mx-auto mt-8 max-w-md sm:mt-10 sm:max-w-lg">
+          <div className="relative mx-auto mt-4 max-w-md sm:mt-10 sm:max-w-lg">
+
             <div className="relative overflow-hidden rounded-3xl">
               <img
                 src={heroNetwork}
@@ -284,10 +309,11 @@ function Index() {
       <section className="mx-auto max-w-6xl px-4 pt-10 sm:px-6">
         <div className="flex items-end justify-between">
           <div>
-            <h2 className="font-display text-lg font-bold text-navy sm:text-xl">Show your work</h2>
+            <h2 className="font-display text-lg font-bold text-navy sm:text-xl">Show your work. Get discovered.</h2>
             <p className="mt-1 max-w-md text-xs text-muted-foreground sm:text-sm">
-              List your skill, add photos of your work, and get discovered by customers near you.
+              List your skill, add photos of your work, and let customers near you find you.
             </p>
+
           </div>
           <Link to="/feed" className="hidden text-sm font-semibold text-navy hover:text-orange sm:inline">
             See all →
@@ -359,7 +385,7 @@ function Index() {
                   <p className="mt-0.5 inline-flex items-center gap-1 text-[11px] text-muted-foreground">
                     <MapPin className="h-3 w-3" /> {r.location}
                   </p>
-                  <p className="mt-1 text-xs font-semibold text-green">{r.budget}</p>
+                  <p className="mt-1 text-xs font-semibold text-orange">{r.budget}</p>
                 </div>
               </div>
               <div className="mt-3 flex items-center justify-between border-t border-border pt-2 text-[11px] text-muted-foreground">
@@ -376,7 +402,7 @@ function Index() {
       </section>
 
       {/* Provider CTA banner */}
-      <section className="mx-auto max-w-6xl px-4 pb-16 pt-10 sm:px-6">
+      <section className="mx-auto max-w-6xl px-4 pb-28 pt-10 sm:px-6 sm:pb-16">
         <div className="overflow-hidden rounded-3xl border border-border bg-card p-6 text-center shadow-[var(--shadow-elevated)] sm:p-10">
           <p className="text-xs font-semibold uppercase tracking-wider text-green">For skilled people</p>
           <h2 className="mt-2 font-display text-2xl font-bold text-navy sm:text-3xl">
