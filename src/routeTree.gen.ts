@@ -11,9 +11,11 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as ServicesRouteImport } from './routes/services'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as OpportunitiesRouteImport } from './routes/opportunities'
 import { Route as OfficialRouteImport } from './routes/official'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as FeedRouteImport } from './routes/feed'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as BusinessesRouteImport } from './routes/businesses'
@@ -52,6 +54,11 @@ const ServicesRoute = ServicesRouteImport.update({
   path: '/services',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OpportunitiesRoute = OpportunitiesRouteImport.update({
   id: '/opportunities',
   path: '/opportunities',
@@ -65,6 +72,11 @@ const OfficialRoute = OfficialRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
+  id: '/forgot-password',
+  path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const FeedRoute = FeedRouteImport.update({
@@ -211,9 +223,11 @@ export interface FileRoutesByFullPath {
   '/businesses': typeof BusinessesRouteWithChildren
   '/contact': typeof ContactRoute
   '/feed': typeof FeedRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/official': typeof OfficialRoute
   '/opportunities': typeof OpportunitiesRouteWithChildren
+  '/reset-password': typeof ResetPasswordRoute
   '/services': typeof ServicesRouteWithChildren
   '/terms': typeof TermsRoute
   '/admin': typeof AuthenticatedAdminRoute
@@ -243,9 +257,11 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/contact': typeof ContactRoute
   '/feed': typeof FeedRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/official': typeof OfficialRoute
   '/opportunities': typeof OpportunitiesRouteWithChildren
+  '/reset-password': typeof ResetPasswordRoute
   '/services': typeof ServicesRouteWithChildren
   '/terms': typeof TermsRoute
   '/admin': typeof AuthenticatedAdminRoute
@@ -278,9 +294,11 @@ export interface FileRoutesById {
   '/businesses': typeof BusinessesRouteWithChildren
   '/contact': typeof ContactRoute
   '/feed': typeof FeedRoute
+  '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/official': typeof OfficialRoute
   '/opportunities': typeof OpportunitiesRouteWithChildren
+  '/reset-password': typeof ResetPasswordRoute
   '/services': typeof ServicesRouteWithChildren
   '/terms': typeof TermsRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
@@ -313,9 +331,11 @@ export interface FileRouteTypes {
     | '/businesses'
     | '/contact'
     | '/feed'
+    | '/forgot-password'
     | '/login'
     | '/official'
     | '/opportunities'
+    | '/reset-password'
     | '/services'
     | '/terms'
     | '/admin'
@@ -345,9 +365,11 @@ export interface FileRouteTypes {
     | '/about'
     | '/contact'
     | '/feed'
+    | '/forgot-password'
     | '/login'
     | '/official'
     | '/opportunities'
+    | '/reset-password'
     | '/services'
     | '/terms'
     | '/admin'
@@ -379,9 +401,11 @@ export interface FileRouteTypes {
     | '/businesses'
     | '/contact'
     | '/feed'
+    | '/forgot-password'
     | '/login'
     | '/official'
     | '/opportunities'
+    | '/reset-password'
     | '/services'
     | '/terms'
     | '/_authenticated/admin'
@@ -414,9 +438,11 @@ export interface RootRouteChildren {
   BusinessesRoute: typeof BusinessesRouteWithChildren
   ContactRoute: typeof ContactRoute
   FeedRoute: typeof FeedRoute
+  ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
   OfficialRoute: typeof OfficialRoute
   OpportunitiesRoute: typeof OpportunitiesRouteWithChildren
+  ResetPasswordRoute: typeof ResetPasswordRoute
   ServicesRoute: typeof ServicesRouteWithChildren
   TermsRoute: typeof TermsRoute
   OfficialPostsIdRoute: typeof OfficialPostsIdRoute
@@ -441,6 +467,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ServicesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/opportunities': {
       id: '/opportunities'
       path: '/opportunities'
@@ -460,6 +493,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/forgot-password': {
+      id: '/forgot-password'
+      path: '/forgot-password'
+      fullPath: '/forgot-password'
+      preLoaderRoute: typeof ForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/feed': {
@@ -734,9 +774,11 @@ const rootRouteChildren: RootRouteChildren = {
   BusinessesRoute: BusinessesRouteWithChildren,
   ContactRoute: ContactRoute,
   FeedRoute: FeedRoute,
+  ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
   OfficialRoute: OfficialRoute,
   OpportunitiesRoute: OpportunitiesRouteWithChildren,
+  ResetPasswordRoute: ResetPasswordRoute,
   ServicesRoute: ServicesRouteWithChildren,
   TermsRoute: TermsRoute,
   OfficialPostsIdRoute: OfficialPostsIdRoute,
@@ -747,13 +789,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
