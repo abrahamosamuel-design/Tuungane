@@ -9,16 +9,9 @@ import {
   UserCheck,
   Wrench,
   Sparkles as SparklesIcon,
-  Building2,
   Scissors,
-  Truck,
   Car,
   GraduationCap,
-  Camera,
-  ChefHat,
-  Laptop,
-  HeartPulse,
-  Sprout,
   MoreHorizontal,
   Star,
   BadgeCheck,
@@ -28,27 +21,26 @@ import {
 } from "lucide-react";
 import { Layout } from "@/components/Layout";
 import { categories } from "@/data/categories";
-import { providers } from "@/data/providers";
 import { ListYourSkillButton } from "@/components/cta/ListYourSkillButton";
 import { useAuth } from "@/hooks/use-auth";
 import { listSkillHref } from "@/lib/cta";
-import heroCustomer from "@/assets/hero-customer.png.asset.json";
-import heroProvider from "@/assets/hero-provider.png.asset.json";
+import heroUganda from "@/assets/hero-uganda.jpg.asset.json";
 
-const iconMap: Record<string, any> = {
-  Wrench,
-  Sparkles: SparklesIcon,
-  Building2,
-  Scissors,
-  Truck,
-  Car,
-  GraduationCap,
-  Camera,
-  ChefHat,
-  Laptop,
-  HeartPulse,
-  Sprout,
-  MoreHorizontal,
+// Curated category set for the homepage tile grid
+const HOME_CATEGORY_SLUGS = ["home-repair", "cleaning", "automotive", "beauty", "education"];
+const homeCategoryIcons: Record<string, any> = {
+  "home-repair": Wrench,
+  cleaning: SparklesIcon,
+  automotive: Car,
+  beauty: Scissors,
+  education: GraduationCap,
+};
+const homeCategoryLabels: Record<string, string> = {
+  "home-repair": "Plumbing",
+  cleaning: "Cleaning",
+  automotive: "Mechanics",
+  beauty: "Beauty",
+  education: "Tutoring",
 };
 
 export const Route = createFileRoute("/")({
@@ -58,7 +50,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Create a request and get matched with skilled providers near you, or list your skill and get discovered by customers in Uganda.",
+          "Create a request and get matched with skilled providers in Entebbe, Kampala and across Uganda — or list your skill and get discovered.",
       },
     ],
   }),
@@ -92,8 +84,8 @@ const showcase = [
   },
   {
     cat: "Cleaning",
-    name: "Aisha N.",
-    work: "Deep home cleaning",
+    name: "Sarah N.",
+    work: "Home cleaning services",
     rating: 4.9,
     reviews: 142,
     img: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=600&q=70&auto=format&fit=crop",
@@ -105,8 +97,8 @@ const openRequests = [
     badge: "New",
     badgeClass: "bg-green/15 text-green",
     title: "Fix leaking tap",
-    location: "Kilimani, Nairobi",
-    budget: "KSh 800 – 1,200",
+    location: "Kitoro, Entebbe",
+    budget: "UGX 30,000 – 60,000",
     responses: 3,
     ago: "10m ago",
     Icon: Wrench,
@@ -116,8 +108,8 @@ const openRequests = [
     badge: "Urgent",
     badgeClass: "bg-orange/15 text-orange",
     title: "Power outage fix",
-    location: "Westlands, Nairobi",
-    budget: "KSh 1,000 – 1,800",
+    location: "Katabi, Entebbe",
+    budget: "UGX 50,000 – 120,000",
     responses: 5,
     ago: "25m ago",
     Icon: Zap,
@@ -127,8 +119,8 @@ const openRequests = [
     badge: "Soon",
     badgeClass: "bg-amber-100 text-amber-700",
     title: "House cleaning",
-    location: "Ngong Road, Nairobi",
-    budget: "KSh 1,200 – 1,600",
+    location: "Kigungu, Entebbe",
+    budget: "UGX 40,000 – 80,000",
     responses: 4,
     ago: "1h ago",
     Icon: SparklesIcon,
@@ -143,15 +135,14 @@ function Index() {
     <Layout>
       {/* HERO */}
       <section className="relative overflow-hidden bg-navy text-white">
-        {/* subtle skyline */}
         <div
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-40 opacity-20"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-48 opacity-25"
           style={{
             backgroundImage:
-              "radial-gradient(ellipse at 20% 100%, oklch(0.71 0.19 45 / 0.3), transparent 50%), radial-gradient(ellipse at 80% 100%, oklch(0.62 0.16 150 / 0.25), transparent 50%)",
+              "radial-gradient(ellipse at 20% 100%, oklch(0.71 0.19 45 / 0.35), transparent 55%), radial-gradient(ellipse at 80% 100%, oklch(0.62 0.16 150 / 0.3), transparent 55%)",
           }}
         />
-        <div className="relative mx-auto max-w-6xl px-4 pb-28 pt-6 sm:px-6 sm:pt-10 lg:pb-36 lg:pt-14">
+        <div className="relative mx-auto max-w-5xl px-4 pb-32 pt-8 sm:px-6 sm:pb-36 sm:pt-12 lg:pb-40 lg:pt-16">
           {/* Headline */}
           <div className="mx-auto max-w-xl text-center">
             <h1 className="font-display text-3xl font-extrabold leading-[1.1] sm:text-4xl lg:text-5xl">
@@ -167,45 +158,46 @@ function Index() {
             </p>
           </div>
 
-          {/* Two people + CTAs */}
-          <div className="relative mt-6 grid grid-cols-[1fr_auto_1fr] items-end gap-2 sm:mt-8 sm:gap-4">
-            <div className="relative h-44 sm:h-64 lg:h-80">
+          {/* CTAs */}
+          <div className="mx-auto mt-6 flex w-full max-w-md flex-col gap-2.5 sm:mt-7 sm:max-w-lg sm:flex-row sm:justify-center">
+            <Link
+              to="/requests/new"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-orange px-5 py-3 text-sm font-semibold text-orange-foreground shadow-lg shadow-orange/30 transition hover:brightness-110 sm:w-auto sm:px-7"
+            >
+              <ClipboardList className="h-4 w-4" /> Create a Request
+            </Link>
+            <Link
+              to={listSkillHref(user) as never}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-navy shadow-lg transition hover:bg-white/90 sm:w-auto sm:px-7"
+            >
+              <UserIcon className="h-4 w-4" /> List Your Skill
+            </Link>
+          </div>
+
+          {/* Hero image */}
+          <div className="relative mx-auto mt-8 max-w-md sm:mt-10 sm:max-w-lg">
+            <div className="relative overflow-hidden rounded-3xl">
               <img
-                src={heroCustomer.url}
-                alt="Customer using Tuungane"
-                className="absolute inset-0 h-full w-full object-contain object-bottom"
-                style={{ filter: "drop-shadow(0 12px 24px rgba(0,0,0,0.35))" }}
+                src={heroUganda.url}
+                alt="A customer and a skilled provider on Tuungane"
+                width={1280}
+                height={896}
+                className="block w-full"
               />
-            </div>
-
-            <div className="flex w-full max-w-[220px] flex-col gap-2.5 pb-2 sm:max-w-[260px]">
-              <Link
-                to="/requests/new"
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-orange px-5 py-3 text-sm font-semibold text-orange-foreground shadow-lg shadow-orange/30 transition hover:brightness-110"
-              >
-                <ClipboardList className="h-4 w-4" /> Create a Request
-              </Link>
-              <Link
-                to={listSkillHref(user) as never}
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-navy shadow-lg transition hover:bg-white/90"
-              >
-                <UserIcon className="h-4 w-4" /> List Your Skill
-              </Link>
-            </div>
-
-            <div className="relative h-44 sm:h-64 lg:h-80">
-              <img
-                src={heroProvider.url}
-                alt="Provider on Tuungane"
-                className="absolute inset-0 h-full w-full object-contain object-bottom"
-                style={{ filter: "drop-shadow(0 12px 24px rgba(0,0,0,0.35))" }}
+              {/* Soft navy fade to blend into hero background */}
+              <div
+                className="pointer-events-none absolute inset-0"
+                style={{
+                  background:
+                    "radial-gradient(ellipse at center, transparent 55%, oklch(0.22 0.05 250 / 0.55) 85%, oklch(0.22 0.05 250) 100%)",
+                }}
               />
             </div>
           </div>
         </div>
 
         {/* Trust strip overlapping hero */}
-        <div className="relative mx-auto -mt-20 max-w-5xl px-4 sm:px-6">
+        <div className="relative mx-auto -mt-20 max-w-5xl px-4 sm:-mt-24 sm:px-6">
           <div className="rounded-2xl border border-border bg-card p-3 shadow-[var(--shadow-elevated)] sm:p-4">
             <div className="grid grid-cols-3 gap-2 text-center sm:gap-4">
               <TrustItem Icon={ShieldCheck} label="Verified providers" />
@@ -230,19 +222,23 @@ function Index() {
       <section className="mx-auto max-w-6xl px-4 pt-10 sm:px-6">
         <SectionHeader title="Popular categories" link={{ label: "View all", to: "/services" }} />
         <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-6">
-          {categories.slice(0, 5).map((c) => {
-            const Icon = iconMap[c.icon] ?? Wrench;
+          {HOME_CATEGORY_SLUGS.map((slug) => {
+            const cat = categories.find((c) => c.slug === slug);
+            if (!cat) return null;
+            const Icon = homeCategoryIcons[slug] ?? Wrench;
             return (
               <Link
-                key={c.slug}
+                key={slug}
                 to="/services/$slug"
-                params={{ slug: c.slug }}
+                params={{ slug }}
                 className="group flex flex-col items-center gap-2"
               >
                 <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-navy/5 text-navy transition group-hover:bg-orange group-hover:text-orange-foreground">
                   <Icon className="h-7 w-7" />
                 </div>
-                <span className="text-xs font-semibold text-navy text-center line-clamp-1">{c.name.split(" ")[0]}</span>
+                <span className="text-xs font-semibold text-navy text-center line-clamp-1">
+                  {homeCategoryLabels[slug] ?? cat.name}
+                </span>
               </Link>
             );
           })}
@@ -319,7 +315,7 @@ function Index() {
           {openRequests.map((r) => (
             <article
               key={r.title}
-              className="w-[78%] shrink-0 snap-start rounded-2xl border border-border bg-card p-3 shadow-[var(--shadow-card)] sm:w-auto"
+              className="w-[78%] shrink-0 snap-start rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)] sm:w-auto sm:p-5"
             >
               <div className="flex items-center justify-between">
                 <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${r.badgeClass}`}>{r.badge}</span>
