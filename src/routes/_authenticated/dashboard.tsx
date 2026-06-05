@@ -112,12 +112,11 @@ function Dashboard() {
         )}
 
         {!profile?.is_provider && (
-          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-5">
-            <Stat label="My Requests" value={customerStats.savedOpps + customerStats.reviewsWritten /* placeholder if needed */} />
+          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
             <Stat label="Following" value={customerStats.following} />
             <Stat label="Saved providers" value={customerStats.saved} />
+            <Stat label="Saved requests" value={customerStats.savedOpps} />
             <Stat label="Reviews written" value={customerStats.reviewsWritten} />
-            <Stat label="Recommendations" value={customerStats.recsGiven} />
           </div>
         )}
 
