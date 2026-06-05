@@ -221,14 +221,14 @@ function Index() {
       {/* CTA for providers */}
       <section className="mx-auto max-w-5xl px-4 pb-20 sm:px-6 lg:px-8">
         <div className="overflow-hidden rounded-3xl border border-border bg-card p-10 text-center shadow-[var(--shadow-elevated)] sm:p-14">
-          <p className="text-xs font-semibold uppercase tracking-wider text-orange">For skilled people</p>
-          <h2 className="mt-2 font-display text-3xl font-bold text-navy sm:text-4xl">Post your skill. Get discovered.</h2>
+          <p className="text-xs font-semibold uppercase tracking-wider text-green">For skilled people</p>
+          <h2 className="mt-2 font-display text-3xl font-bold text-navy sm:text-4xl">List your skill. Get discovered.</h2>
           <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
-            Create a free service profile in minutes. Share your work, build trust through verified reviews, and grow your business.
+            Create a free provider profile in minutes. Share your work, build trust through verified reviews, and let customers near you find you.
           </p>
-          <Link to="/login" className="mt-7 inline-flex items-center gap-2 rounded-full bg-orange px-7 py-3 text-sm font-semibold text-orange-foreground shadow-lg transition hover:brightness-110">
-            Create your profile <ArrowRight className="h-4 w-4" />
-          </Link>
+          <div className="mt-7">
+            <ListYourSkillButton variant="solid" className="px-7 py-3" />
+          </div>
         </div>
       </section>
     </Layout>
