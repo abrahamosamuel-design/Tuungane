@@ -111,10 +111,26 @@ function Admin() {
 }
 
 // ───────── Users ─────────
+type ManageableRole = "admin" | "moderator" | "finance_admin";
+const ROLE_LABEL: Record<ManageableRole, string> = {
+  admin: "Admin",
+  moderator: "Moderator",
+  finance_admin: "Finance Admin",
+};
+const ROLE_HINT: Record<ManageableRole, string> = {
+  admin: "Full access — manage users, roles, and all settings",
+  moderator: "Moderate posts, reports, disputes, and content",
+  finance_admin: "Approve credit purchases, adjust wallets, manage boosts",
+};
+
 function UsersTab() {
+  const { isAdmin, user: me } = useAuth();
   const [rows, setRows] = useState<Array<{ id: string; full_name: string; district: string | null; town: string | null; is_provider: boolean; created_at: string }>>([]);
   const [contacts, setContacts] = useState<Record<string, { email: string | null; phone: string | null }>>({});
+  const [roles, setRoles] = useState<Record<string, ManageableRole[]>>({});
   const [q, setQ] = useState("");
+  const [busy, setBusy] = useState<string | null>(null);
+
   useEffect(() => {
     (async () => {
       const { data } = await supabase.from("profiles").select("id,full_name,district,town,is_provider,created_at").order("created_at", { ascending: false }).limit(200);
@@ -123,14 +139,44 @@ function UsersTab() {
       const ids = list.map((r) => r.id);
       if (ids.length) {
         const { data: cs } = await supabase.rpc("admin_list_user_contacts", { _ids: ids });
-        const map: Record<string, { email: string | null; phone: string | null }> = {};
+        const cmap: Record<string, { email: string | null; phone: string | null }> = {};
         for (const c of (cs ?? []) as Array<{ id: string; email: string | null; phone: string | null }>) {
-          map[c.id] = { email: c.email, phone: c.phone };
+          cmap[c.id] = { email: c.email, phone: c.phone };
         }
-        setContacts(map);
+        setContacts(cmap);
+        if (isAdmin) {
+          const { data: rs } = await supabase.rpc("admin_list_user_roles", { _ids: ids });
+          const rmap: Record<string, ManageableRole[]> = {};
+          for (const r of (rs ?? []) as Array<{ user_id: string; role: string }>) {
+            if (r.role === "admin" || r.role === "moderator" || r.role === "finance_admin") {
+              (rmap[r.user_id] ||= []).push(r.role);
+            }
+          }
+          setRoles(rmap);
+        }
       }
     })();
-  }, []);
+  }, [isAdmin]);
+
+  const toggleRole = async (userId: string, role: ManageableRole, has: boolean) => {
+    if (!isAdmin) return;
+    if (role === "admin" && has && userId === me?.id) {
+      toast.error("You can't remove your own admin role");
+      return;
+    }
+    setBusy(`${userId}:${role}`);
+    const fn = has ? "admin_revoke_role" : "admin_grant_role";
+    const { error } = await supabase.rpc(fn as never, { _user_id: userId, _role: role } as never);
+    setBusy(null);
+    if (error) { toast.error(error.message); return; }
+    setRoles((prev) => {
+      const cur = new Set(prev[userId] ?? []);
+      if (has) cur.delete(role); else cur.add(role);
+      return { ...prev, [userId]: Array.from(cur) as ManageableRole[] };
+    });
+    toast.success(has ? `${ROLE_LABEL[role]} revoked` : `${ROLE_LABEL[role]} granted`);
+  };
+
   const filtered = q
     ? rows.filter((r) => {
         const needle = q.toLowerCase();
@@ -140,15 +186,34 @@ function UsersTab() {
           || (c?.phone || "").toLowerCase().includes(needle);
       })
     : rows;
+
   return (
     <div className="space-y-3">
+      {isAdmin && (
+        <div className="rounded-xl border border-border bg-muted/40 p-3 text-xs text-muted-foreground">
+          <p className="font-semibold text-navy">Roles & access</p>
+          <ul className="mt-1 space-y-0.5">
+            {(Object.keys(ROLE_LABEL) as ManageableRole[]).map((r) => (
+              <li key={r}><span className="font-semibold text-foreground">{ROLE_LABEL[r]}:</span> {ROLE_HINT[r]}</li>
+            ))}
+          </ul>
+          <p className="mt-2">Search for a user below, then tap a role chip to grant or revoke.</p>
+        </div>
+      )}
       <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search by name, email, or phone…" className="w-full max-w-sm rounded-md border border-border bg-background px-3 py-2 text-sm" />
       {filtered.map((u) => {
         const c = contacts[u.id];
+        const userRoles = roles[u.id] ?? [];
         return (
-          <div key={u.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-card p-3">
-            <div className="min-w-0">
-              <p className="font-semibold text-navy">{u.full_name || "Unnamed"} {u.is_provider && <span className="ml-2 rounded-full bg-orange/10 px-2 py-0.5 text-[10px] font-bold text-orange">PROVIDER</span>}</p>
+          <div key={u.id} className="flex flex-col gap-2 rounded-xl border border-border bg-card p-3 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
+            <div className="min-w-0 flex-1">
+              <p className="font-semibold text-navy">
+                {u.full_name || "Unnamed"}
+                {u.is_provider && <span className="ml-2 rounded-full bg-orange/10 px-2 py-0.5 text-[10px] font-bold text-orange">PROVIDER</span>}
+                {userRoles.map((r) => (
+                  <span key={r} className="ml-2 rounded-full bg-navy/10 px-2 py-0.5 text-[10px] font-bold text-navy">{ROLE_LABEL[r].toUpperCase()}</span>
+                ))}
+              </p>
               <p className="text-xs text-muted-foreground">{[u.district, u.town].filter(Boolean).join(" · ") || "—"} · joined {timeAgo(u.created_at)}</p>
               <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-xs">
                 {c?.email ? (
@@ -158,8 +223,28 @@ function UsersTab() {
                   <a href={`tel:${c.phone}`} className="text-navy hover:text-orange">{c.phone}</a>
                 ) : <span className="text-muted-foreground">no phone</span>}
               </div>
+              {isAdmin && (
+                <div className="mt-2 flex flex-wrap gap-1">
+                  {(Object.keys(ROLE_LABEL) as ManageableRole[]).map((role) => {
+                    const has = userRoles.includes(role);
+                    const isMe = u.id === me?.id;
+                    const disabled = busy === `${u.id}:${role}` || (role === "admin" && has && isMe);
+                    return (
+                      <button
+                        key={role}
+                        onClick={() => toggleRole(u.id, role, has)}
+                        disabled={disabled}
+                        title={disabled && isMe && role === "admin" ? "You can't remove your own admin role" : ROLE_HINT[role]}
+                        className={`rounded-full px-2.5 py-1 text-[11px] font-semibold transition disabled:opacity-50 ${has ? "bg-navy text-navy-foreground" : "border border-border bg-background text-muted-foreground hover:border-navy"}`}
+                      >
+                        {has ? `✓ ${ROLE_LABEL[role]}` : `+ ${ROLE_LABEL[role]}`}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
-            <Link to="/u/$id" params={{ id: u.id }} className="rounded border border-border px-2 py-1 text-xs">View</Link>
+            <Link to="/u/$id" params={{ id: u.id }} className="self-start rounded border border-border px-2 py-1 text-xs">View</Link>
           </div>
         );
       })}
