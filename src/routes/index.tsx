@@ -46,7 +46,7 @@ function Index() {
                 <Link to="/requests/new" className="inline-flex items-center justify-center gap-2 rounded-full bg-orange px-6 py-3 text-sm font-semibold text-orange-foreground shadow-lg transition hover:brightness-110">
                   <ClipboardList className="h-4 w-4" /> Create a Request
                 </Link>
-                <Link to={listSkillHref(user)} className="inline-flex items-center justify-center gap-2 rounded-full bg-green px-6 py-3 text-sm font-semibold text-white shadow-lg transition hover:brightness-110">
+                <Link to={listSkillHref(user) as never} className="inline-flex items-center justify-center gap-2 rounded-full bg-green px-6 py-3 text-sm font-semibold text-white shadow-lg transition hover:brightness-110">
                   <Sparkles className="h-4 w-4" /> List Your Skill
                 </Link>
               </div>

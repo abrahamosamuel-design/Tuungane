@@ -47,7 +47,7 @@ export function CreateChoiceSheet({
           </Link>
 
           <Link
-            to={listSkillHref(user)}
+            to={listSkillHref(user) as never}
             onClick={onClose}
             className="flex items-start gap-3 rounded-2xl border border-green/30 bg-green/5 p-4 transition hover:border-green"
           >
