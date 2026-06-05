@@ -24,7 +24,7 @@ import { categories } from "@/data/categories";
 import { ListYourSkillButton } from "@/components/cta/ListYourSkillButton";
 import { useAuth } from "@/hooks/use-auth";
 import { listSkillHref } from "@/lib/cta";
-import heroUganda from "@/assets/hero-uganda.jpg.asset.json";
+import heroNetwork from "@/assets/hero-network.jpg";
 
 // Curated category set for the homepage tile grid
 const HOME_CATEGORY_SLUGS = ["home-repair", "cleaning", "automotive", "beauty", "education"];
