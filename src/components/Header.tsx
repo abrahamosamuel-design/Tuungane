@@ -191,4 +191,50 @@ function MyCreditsLink({ onClick }: { onClick: () => void }) {
   );
 }
 
+function CountedLink({ to, label, count, onClick }: { to: string; label: string; count: React.ReactNode; onClick: () => void }) {
+  return (
+    <Link to={to} onClick={onClick} className="flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium text-navy hover:bg-muted">
+      <span>{label}</span>
+      <span className="text-xs font-semibold text-orange">{count}</span>
+    </Link>
+  );
+}
+
+function NotifCount() {
+  const { user } = useAuth();
+  const [n, setN] = useState(0);
+  useEffect(() => {
+    if (!user) { setN(0); return; }
+    let active = true;
+    const load = async () => {
+      const { count } = await supabase.from("notifications").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("read", false);
+      if (active) setN(count ?? 0);
+    };
+    load();
+    const ch = supabase.channel(`hdr-notif-${user.id}`).on("postgres_changes", { event: "*", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` }, load).subscribe();
+    return () => { active = false; supabase.removeChannel(ch); };
+  }, [user?.id]);
+  return <>{n}</>;
+}
+
+function ActiveRequestsCount() {
+  const { user } = useAuth();
+  const [n, setN] = useState(0);
+  useEffect(() => {
+    if (!user) { setN(0); return; }
+    let active = true;
+    const load = async () => {
+      const { count } = await supabase
+        .from("service_requests")
+        .select("*", { count: "exact", head: true })
+        .eq("customer_id", user.id)
+        .not("status", "in", "(completed,cancelled)");
+      if (active) setN(count ?? 0);
+    };
+    load();
+  }, [user?.id]);
+  return <>{n}</>;
+}
+
+
 
