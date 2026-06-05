@@ -126,7 +126,30 @@ const openRequests = [
     Icon: SparklesIcon,
     iconBg: "bg-amber-100 text-amber-700",
   },
+  {
+    badge: "Open",
+    badgeClass: "bg-green/15 text-green",
+    title: "Tutor needed for Math",
+    location: "Nkumba, Entebbe",
+    budget: "UGX 30,000 – 70,000",
+    responses: 2,
+    ago: "2h ago",
+    Icon: GraduationCap,
+    iconBg: "bg-green/10 text-green",
+  },
+  {
+    badge: "Open",
+    badgeClass: "bg-green/15 text-green",
+    title: "TV wall mounting",
+    location: "Ntinda, Kampala",
+    budget: "UGX 50,000 – 100,000",
+    responses: 3,
+    ago: "3h ago",
+    Icon: Wrench,
+    iconBg: "bg-green/10 text-green",
+  },
 ];
+
 
 function Index() {
   const { user } = useAuth();
