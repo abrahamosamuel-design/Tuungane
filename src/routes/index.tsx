@@ -1,236 +1,432 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight, BadgeCheck, Sparkles, ShieldCheck, Users, MapPin, Star, Wrench, Sparkles as SparklesIcon, Building2, Scissors, Truck, Car, GraduationCap, Camera, ChefHat, Laptop, HeartPulse, Sprout, MoreHorizontal, ClipboardList, MessageSquare, Briefcase, Rss, Megaphone } from "lucide-react";
+import {
+  ArrowRight,
+  ShieldCheck,
+  MapPin,
+  Zap,
+  ClipboardList,
+  MessageSquare,
+  UserCheck,
+  Wrench,
+  Sparkles as SparklesIcon,
+  Building2,
+  Scissors,
+  Truck,
+  Car,
+  GraduationCap,
+  Camera,
+  ChefHat,
+  Laptop,
+  HeartPulse,
+  Sprout,
+  MoreHorizontal,
+  Star,
+  BadgeCheck,
+  Bookmark,
+  Users,
+  User as UserIcon,
+} from "lucide-react";
 import { Layout } from "@/components/Layout";
-import { ProviderCard } from "@/components/ProviderCard";
 import { categories } from "@/data/categories";
-import { featuredProviders, providers } from "@/data/providers";
-import { TwoSidedHeroCards } from "@/components/cta/TwoSidedHeroCards";
+import { providers } from "@/data/providers";
 import { ListYourSkillButton } from "@/components/cta/ListYourSkillButton";
 import { useAuth } from "@/hooks/use-auth";
 import { listSkillHref } from "@/lib/cta";
+import heroCustomer from "@/assets/hero-customer.png.asset.json";
+import heroProvider from "@/assets/hero-provider.png.asset.json";
 
-const iconMap: Record<string, any> = { Wrench, Sparkles: SparklesIcon, Building2, Scissors, Truck, Car, GraduationCap, Camera, ChefHat, Laptop, HeartPulse, Sprout, MoreHorizontal };
+const iconMap: Record<string, any> = {
+  Wrench,
+  Sparkles: SparklesIcon,
+  Building2,
+  Scissors,
+  Truck,
+  Car,
+  GraduationCap,
+  Camera,
+  ChefHat,
+  Laptop,
+  HeartPulse,
+  Sprout,
+  MoreHorizontal,
+};
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Tuungane — Request a Service. Get Matched With Trusted Providers." },
-      { name: "description", content: "Request a service in Uganda and get matched with verified providers. Track jobs, leave verified reviews, grow together on Tuungane." },
+      { title: "Tuungane — Connect to trusted help nearby" },
+      {
+        name: "description",
+        content:
+          "Create a request and get matched with skilled providers near you, or list your skill and get discovered by customers in Uganda.",
+      },
     ],
   }),
   component: Index,
 });
 
+const showcase = [
+  {
+    cat: "Plumbing",
+    name: "David M.",
+    work: "Pipe fitting & repairs",
+    rating: 4.8,
+    reviews: 126,
+    img: "https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=600&q=70&auto=format&fit=crop",
+  },
+  {
+    cat: "Electrical",
+    name: "Grace W.",
+    work: "Wiring & installations",
+    rating: 4.9,
+    reviews: 98,
+    img: "https://images.unsplash.com/photo-1621905251918-48416bd8575a?w=600&q=70&auto=format&fit=crop",
+  },
+  {
+    cat: "Mechanics",
+    name: "Brian K.",
+    work: "Engine diagnostics",
+    rating: 4.7,
+    reviews: 76,
+    img: "https://images.unsplash.com/photo-1632823471565-1ecdf5c6da77?w=600&q=70&auto=format&fit=crop",
+  },
+  {
+    cat: "Cleaning",
+    name: "Aisha N.",
+    work: "Deep home cleaning",
+    rating: 4.9,
+    reviews: 142,
+    img: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=600&q=70&auto=format&fit=crop",
+  },
+];
+
+const openRequests = [
+  {
+    badge: "New",
+    badgeClass: "bg-green/15 text-green",
+    title: "Fix leaking tap",
+    location: "Kilimani, Nairobi",
+    budget: "KSh 800 – 1,200",
+    responses: 3,
+    ago: "10m ago",
+    Icon: Wrench,
+    iconBg: "bg-green/10 text-green",
+  },
+  {
+    badge: "Urgent",
+    badgeClass: "bg-orange/15 text-orange",
+    title: "Power outage fix",
+    location: "Westlands, Nairobi",
+    budget: "KSh 1,000 – 1,800",
+    responses: 5,
+    ago: "25m ago",
+    Icon: Zap,
+    iconBg: "bg-orange/10 text-orange",
+  },
+  {
+    badge: "Soon",
+    badgeClass: "bg-amber-100 text-amber-700",
+    title: "House cleaning",
+    location: "Ngong Road, Nairobi",
+    budget: "KSh 1,200 – 1,600",
+    responses: 4,
+    ago: "1h ago",
+    Icon: SparklesIcon,
+    iconBg: "bg-amber-100 text-amber-700",
+  },
+];
+
 function Index() {
-  const featured = featuredProviders();
   const { user } = useAuth();
 
   return (
     <Layout>
-      {/* Hero */}
-      <section className="relative overflow-hidden" style={{ background: "var(--gradient-hero)" }}>
-        <div className="absolute inset-0 opacity-30" style={{ backgroundImage: "radial-gradient(circle at 20% 30%, oklch(0.71 0.19 45 / 0.4), transparent 40%), radial-gradient(circle at 80% 70%, oklch(0.62 0.16 150 / 0.3), transparent 40%)" }} />
-        <div className="relative mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
-          <div className="grid items-center gap-12 lg:grid-cols-2">
-            <div className="text-white">
-              <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-medium backdrop-blur">
-                <Sparkles className="h-3 w-3 text-orange" /> Available in Uganda
-              </span>
-              <h1 className="mt-5 font-display text-4xl font-extrabold leading-[1.05] sm:text-5xl lg:text-6xl">
-                Request a service. <span className="text-orange">Get matched</span> with trusted providers.
-              </h1>
-              <p className="mt-5 max-w-xl text-base text-white/80 sm:text-lg">
-                Tell us what you need. Verified providers nearby respond. You pick the best one, track the job, and leave a verified review.
-              </p>
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Link to="/requests/new" className="inline-flex items-center justify-center gap-2 rounded-full bg-orange px-6 py-3 text-sm font-semibold text-orange-foreground shadow-lg transition hover:brightness-110">
-                  <ClipboardList className="h-4 w-4" /> Create a Request
-                </Link>
-                <Link to={listSkillHref(user) as never} className="inline-flex items-center justify-center gap-2 rounded-full bg-green px-6 py-3 text-sm font-semibold text-white shadow-lg transition hover:brightness-110">
-                  <Sparkles className="h-4 w-4" /> List Your Skill
-                </Link>
-              </div>
-              <Link to="/requests/browse" className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-white/80 underline-offset-4 hover:text-white hover:underline">
-                Browse Requests <ArrowRight className="h-3.5 w-3.5" />
+      {/* HERO */}
+      <section className="relative overflow-hidden bg-navy text-white">
+        {/* subtle skyline */}
+        <div
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-40 opacity-20"
+          style={{
+            backgroundImage:
+              "radial-gradient(ellipse at 20% 100%, oklch(0.71 0.19 45 / 0.3), transparent 50%), radial-gradient(ellipse at 80% 100%, oklch(0.62 0.16 150 / 0.25), transparent 50%)",
+          }}
+        />
+        <div className="relative mx-auto max-w-6xl px-4 pb-28 pt-6 sm:px-6 sm:pt-10 lg:pb-36 lg:pt-14">
+          {/* Headline */}
+          <div className="mx-auto max-w-xl text-center">
+            <h1 className="font-display text-3xl font-extrabold leading-[1.1] sm:text-4xl lg:text-5xl">
+              Connect to{" "}
+              <span className="relative whitespace-nowrap">
+                trusted help
+                <span className="absolute -bottom-1 left-0 h-1 w-full rounded-full bg-green/80" />
+              </span>{" "}
+              nearby.
+            </h1>
+            <p className="mx-auto mt-4 max-w-md text-sm text-white/75 sm:text-base">
+              Create requests or list your skill to reach more people.
+            </p>
+          </div>
+
+          {/* Two people + CTAs */}
+          <div className="relative mt-6 grid grid-cols-[1fr_auto_1fr] items-end gap-2 sm:mt-8 sm:gap-4">
+            <div className="relative h-44 sm:h-64 lg:h-80">
+              <img
+                src={heroCustomer.url}
+                alt="Customer using Tuungane"
+                className="absolute inset-0 h-full w-full object-contain object-bottom"
+                style={{ filter: "drop-shadow(0 12px 24px rgba(0,0,0,0.35))" }}
+              />
+            </div>
+
+            <div className="flex w-full max-w-[220px] flex-col gap-2.5 pb-2 sm:max-w-[260px]">
+              <Link
+                to="/requests/new"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-orange px-5 py-3 text-sm font-semibold text-orange-foreground shadow-lg shadow-orange/30 transition hover:brightness-110"
+              >
+                <ClipboardList className="h-4 w-4" /> Create a Request
               </Link>
-              <div className="mt-10 flex flex-wrap items-center gap-6 text-sm text-white/70">
-                <div className="flex items-center gap-2"><Users className="h-4 w-4 text-orange" /> 500+ providers</div>
-                <div className="flex items-center gap-2"><BadgeCheck className="h-4 w-4 text-green" /> Verified profiles</div>
-                <div className="flex items-center gap-2"><MapPin className="h-4 w-4 text-orange" /> Across Uganda</div>
-              </div>
+              <Link
+                to={listSkillHref(user) as never}
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-navy shadow-lg transition hover:bg-white/90"
+              >
+                <UserIcon className="h-4 w-4" /> List Your Skill
+              </Link>
             </div>
-            <div className="relative hidden lg:block">
-              <div className="absolute -inset-6 rounded-3xl bg-white/5 blur-2xl" />
-              <div className="relative grid grid-cols-2 gap-4">
-                {providers.slice(0, 4).map((p, i) => (
-                  <div key={p.id} className={`rounded-2xl bg-white p-4 shadow-xl ${i % 2 ? "translate-y-6" : ""}`}>
-                    <div className="flex items-center gap-3">
-                      <img src={`https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(p.avatarSeed)}&backgroundColor=1e3a8a,f97316,16a34a`} className="h-10 w-10 rounded-lg" alt="" />
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-semibold text-navy">{p.businessName ?? p.name}</p>
-                        <p className="truncate text-xs text-muted-foreground">{p.subcategory}</p>
-                      </div>
-                    </div>
-                    <div className="mt-3 flex items-center justify-between text-xs">
-                      <span className="inline-flex items-center gap-1 text-muted-foreground"><MapPin className="h-3 w-3" />{p.town}</span>
-                      <span className="inline-flex items-center gap-1 font-semibold text-navy"><Star className="h-3 w-3 fill-orange text-orange" />{p.rating}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
+
+            <div className="relative h-44 sm:h-64 lg:h-80">
+              <img
+                src={heroProvider.url}
+                alt="Provider on Tuungane"
+                className="absolute inset-0 h-full w-full object-contain object-bottom"
+                style={{ filter: "drop-shadow(0 12px 24px rgba(0,0,0,0.35))" }}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Trust strip overlapping hero */}
+        <div className="relative mx-auto -mt-20 max-w-5xl px-4 sm:px-6">
+          <div className="rounded-2xl border border-border bg-card p-3 shadow-[var(--shadow-elevated)] sm:p-4">
+            <div className="grid grid-cols-3 gap-2 text-center sm:gap-4">
+              <TrustItem Icon={ShieldCheck} label="Verified providers" />
+              <TrustItem Icon={MapPin} label="Local & nearby" />
+              <TrustItem Icon={Zap} label="Fast responses" />
             </div>
           </div>
         </div>
       </section>
 
-      {/* Two-sided cards: Need help? / Have a skill? */}
-      <TwoSidedHeroCards />
-
-      {/* How it works */}
-      <section className="bg-surface py-16">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <p className="text-xs font-semibold uppercase tracking-wider text-orange">How Tuungane works</p>
-            <h2 className="mt-1 font-display text-3xl font-bold text-navy">Three steps to getting it done</h2>
-          </div>
-          <div className="mt-12 grid gap-6 md:grid-cols-3">
-            {[
-              { n: "01", t: "Request", i: ClipboardList, d: "Tell us what you need — plumbing, tutoring, transport, anything. Set your location and budget." },
-              { n: "02", t: "Get matched", i: MessageSquare, d: "Verified providers nearby respond. Compare profiles, ratings and prices, then pick the best one." },
-              { n: "03", t: "Verified review", i: BadgeCheck, d: "Track the job to completion. Leave a verified review that helps the next person trust the provider." },
-            ].map(({ n, t, i: Icon, d }) => (
-              <div key={n} className="relative rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)]">
-                <div className="flex items-center justify-between">
-                  <span className="font-display text-5xl font-extrabold text-orange/20">{n}</span>
-                  <Icon className="h-6 w-6 text-orange" />
-                </div>
-                <h3 className="mt-2 font-display text-lg font-semibold text-navy">{t}</h3>
-                <p className="mt-2 text-sm text-muted-foreground">{d}</p>
-              </div>
-            ))}
-          </div>
+      {/* HOW IT WORKS */}
+      <section className="mx-auto max-w-6xl px-4 pt-12 sm:px-6 lg:pt-16">
+        <SectionHeader title="How Tuungane works" link={{ label: "See all", to: "/about" }} />
+        <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-6">
+          <Step n={1} title="Create a Request" desc="Tell us what you need and where." Icon={ClipboardList} tint="green" />
+          <Step n={2} title="Get Responses" desc="Skilled providers respond to your request." Icon={MessageSquare} tint="navy" />
+          <Step n={3} title="Choose & Get It Done" desc="Pick the best fit and get it done." Icon={UserCheck} tint="orange" />
         </div>
       </section>
 
-      {/* Popular categories */}
-      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="flex items-end justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-wider text-orange">Browse</p>
-            <h2 className="mt-1 font-display text-3xl font-bold text-navy">Popular service categories</h2>
-          </div>
-          <Link to="/services" className="hidden text-sm font-semibold text-navy hover:text-orange sm:inline-flex">View all →</Link>
-        </div>
-        <div className="mt-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-          {categories.slice(0, 8).map((c) => {
+      {/* CATEGORIES */}
+      <section className="mx-auto max-w-6xl px-4 pt-10 sm:px-6">
+        <SectionHeader title="Popular categories" link={{ label: "View all", to: "/services" }} />
+        <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-6">
+          {categories.slice(0, 5).map((c) => {
             const Icon = iconMap[c.icon] ?? Wrench;
             return (
-              <Link key={c.slug} to="/services/$slug" params={{ slug: c.slug }} className="group rounded-2xl border border-border bg-card p-5 transition hover:border-orange hover:shadow-[var(--shadow-card)]">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-navy/5 text-navy transition group-hover:bg-orange group-hover:text-orange-foreground">
-                  <Icon className="h-5 w-5" />
+              <Link
+                key={c.slug}
+                to="/services/$slug"
+                params={{ slug: c.slug }}
+                className="group flex flex-col items-center gap-2"
+              >
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-navy/5 text-navy transition group-hover:bg-orange group-hover:text-orange-foreground">
+                  <Icon className="h-7 w-7" />
                 </div>
-                <h3 className="mt-3 font-display text-sm font-semibold text-navy">{c.name}</h3>
-                <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{c.blurb}</p>
+                <span className="text-xs font-semibold text-navy text-center line-clamp-1">{c.name.split(" ")[0]}</span>
               </Link>
             );
           })}
+          <Link to="/services" className="group flex flex-col items-center gap-2">
+            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-navy/5 text-navy transition group-hover:bg-orange group-hover:text-orange-foreground">
+              <MoreHorizontal className="h-7 w-7" />
+            </div>
+            <span className="text-xs font-semibold text-navy">More</span>
+          </Link>
         </div>
       </section>
 
-      {/* Featured providers */}
-      <section className="bg-surface py-16">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex items-end justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-orange">Featured</p>
-              <h2 className="mt-1 font-display text-3xl font-bold text-navy">Top-rated providers</h2>
-            </div>
-            <Link to="/services" className="hidden text-sm font-semibold text-navy hover:text-orange sm:inline-flex">Browse all →</Link>
+      {/* SHOW YOUR WORK */}
+      <section className="mx-auto max-w-6xl px-4 pt-10 sm:px-6">
+        <div className="flex items-end justify-between">
+          <div>
+            <h2 className="font-display text-lg font-bold text-navy sm:text-xl">Show your work</h2>
+            <p className="mt-1 max-w-md text-xs text-muted-foreground sm:text-sm">
+              List your skill, add photos of your work, and get discovered by customers near you.
+            </p>
           </div>
-          <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {Array.from(new Map([...featured, ...providers].map((p) => [p.id, p])).values()).slice(0, 6).map((p) => (
-              <ProviderCard key={p.id} p={p} />
-            ))}
-          </div>
+          <Link to="/feed" className="hidden text-sm font-semibold text-navy hover:text-orange sm:inline">
+            See all →
+          </Link>
+        </div>
+        <div className="-mx-4 mt-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-3 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-2 sm:overflow-visible lg:grid-cols-4">
+          {showcase.map((s) => (
+            <article
+              key={s.name}
+              className="w-[78%] shrink-0 snap-start overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)] sm:w-auto"
+            >
+              <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+                <img src={s.img} alt={s.work} className="h-full w-full object-cover" loading="lazy" />
+                <span className="absolute left-2 top-2 rounded-md bg-navy px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-white">
+                  {s.cat}
+                </span>
+                <button
+                  aria-label="Save"
+                  className="absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-md bg-white/95 text-navy shadow"
+                >
+                  <Bookmark className="h-3.5 w-3.5" />
+                </button>
+              </div>
+              <div className="p-3">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <span className="text-sm font-semibold text-navy truncate">{s.name}</span>
+                    <BadgeCheck className="h-3.5 w-3.5 shrink-0 text-green" />
+                  </div>
+                  <span className="inline-flex items-center gap-1 text-xs font-semibold text-navy">
+                    <Star className="h-3 w-3 fill-orange text-orange" />
+                    {s.rating} <span className="text-muted-foreground">({s.reviews})</span>
+                  </span>
+                </div>
+                <p className="mt-0.5 text-xs text-muted-foreground">{s.work}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+        <div className="mt-4 flex justify-center sm:hidden">
+          <ListYourSkillButton variant="solid" className="px-6 py-2.5 text-sm" />
         </div>
       </section>
 
-      {/* Why Tuungane / trust */}
-      <section className="bg-navy py-16 text-navy-foreground">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="grid items-center gap-12 lg:grid-cols-2">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-orange">Why Tuungane</p>
-              <h2 className="mt-1 font-display text-3xl font-bold">Built on trust, not luck.</h2>
-              <p className="mt-3 max-w-lg text-white/70">
-                We verify identities, surface real reviews, and put community safety first. Every connection on Tuungane is an opportunity to grow.
-              </p>
-              <ul className="mt-6 space-y-3">
-                {[
-                  { i: ShieldCheck, t: "Verified profiles", d: "Identity checks and document verification for every featured provider." },
-                  { i: Star, t: "Verified reviews", d: "Reviews only count after a real job. No bots, no fake accounts." },
-                  { i: MapPin, t: "Local first", d: "Find providers serving your district, town and specific area." },
-                ].map(({ i: Icon, t, d }) => (
-                  <li key={t} className="flex gap-3">
-                    <Icon className="h-5 w-5 shrink-0 text-green" />
-                    <div>
-                      <p className="font-semibold text-white">{t}</p>
-                      <p className="text-sm text-white/60">{d}</p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="rounded-3xl border border-white/10 bg-white/5 p-8 backdrop-blur">
-              <p className="font-display text-2xl font-bold leading-snug">"Tuungane changed how my plumbing business gets new clients. People find me, see my work, and call me directly."</p>
-              <div className="mt-6 flex items-center gap-3">
-                <img src="https://api.dicebear.com/7.x/initials/svg?seed=Joseph%20Mukasa&backgroundColor=f97316" className="h-12 w-12 rounded-full" alt="" />
-                <div>
-                  <p className="font-semibold text-white">Joseph Mukasa</p>
-                  <p className="text-sm text-white/60">Plumber · Entebbe</p>
+      {/* OPEN REQUESTS */}
+      <section className="mx-auto max-w-6xl px-4 pt-10 sm:px-6">
+        <div className="flex items-end justify-between">
+          <h2 className="font-display text-lg font-bold text-navy sm:text-xl">Open Requests near you</h2>
+          <Link to="/requests/browse" className="text-sm font-semibold text-navy hover:text-orange">
+            See all →
+          </Link>
+        </div>
+        <div className="-mx-4 mt-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-3 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-3 sm:overflow-visible">
+          {openRequests.map((r) => (
+            <article
+              key={r.title}
+              className="w-[78%] shrink-0 snap-start rounded-2xl border border-border bg-card p-3 shadow-[var(--shadow-card)] sm:w-auto"
+            >
+              <div className="flex items-center justify-between">
+                <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${r.badgeClass}`}>{r.badge}</span>
+                <span className="text-[11px] text-muted-foreground">{r.ago}</span>
+              </div>
+              <div className="mt-3 flex gap-3">
+                <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${r.iconBg}`}>
+                  <r.Icon className="h-6 w-6" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <h3 className="text-sm font-bold text-navy">{r.title}</h3>
+                  <p className="mt-0.5 inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+                    <MapPin className="h-3 w-3" /> {r.location}
+                  </p>
+                  <p className="mt-1 text-xs font-semibold text-green">{r.budget}</p>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Also on Tuungane (demoted strip) */}
-      <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-        <p className="text-xs font-semibold uppercase tracking-wider text-orange">Also on Tuungane</p>
-        <h2 className="mt-1 font-display text-2xl font-bold text-navy">More ways to connect & grow</h2>
-        <div className="mt-6 grid gap-3 sm:grid-cols-3">
-          {[
-            { to: "/requests/browse", i: Briefcase, t: "Open Requests", d: "Browse real requests from people and businesses looking for skilled help nearby." },
-            { to: "/feed", i: Rss, t: "Community Feed", d: "See recent work from providers and discover skilled people nearby." },
-            { to: "/official", i: Megaphone, t: "Tuungane Official", d: "Updates, safety tips and curated picks from our team." },
-          ].map(({ to, i: Icon, t, d }) => (
-            <Link key={to} to={to} className="group flex gap-3 rounded-2xl border border-border bg-card p-4 transition hover:border-orange">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-navy/5 text-navy group-hover:bg-orange group-hover:text-orange-foreground">
-                <Icon className="h-4 w-4" />
+              <div className="mt-3 flex items-center justify-between border-t border-border pt-2 text-[11px] text-muted-foreground">
+                <span className="inline-flex items-center gap-1">
+                  <Users className="h-3 w-3" /> {r.responses} responses
+                </span>
+                <Link to="/requests/browse" className="font-semibold text-navy hover:text-orange">
+                  View →
+                </Link>
               </div>
-              <div className="min-w-0">
-                <p className="text-sm font-semibold text-navy">{t}</p>
-                <p className="mt-0.5 text-xs text-muted-foreground">{d}</p>
-              </div>
-            </Link>
+            </article>
           ))}
         </div>
       </section>
 
-      {/* CTA for providers */}
-      <section className="mx-auto max-w-5xl px-4 pb-20 sm:px-6 lg:px-8">
-        <div className="overflow-hidden rounded-3xl border border-border bg-card p-10 text-center shadow-[var(--shadow-elevated)] sm:p-14">
+      {/* Provider CTA banner */}
+      <section className="mx-auto max-w-6xl px-4 pb-16 pt-10 sm:px-6">
+        <div className="overflow-hidden rounded-3xl border border-border bg-card p-6 text-center shadow-[var(--shadow-elevated)] sm:p-10">
           <p className="text-xs font-semibold uppercase tracking-wider text-green">For skilled people</p>
-          <h2 className="mt-2 font-display text-3xl font-bold text-navy sm:text-4xl">List your skill. Get discovered.</h2>
-          <p className="mx-auto mt-3 max-w-xl text-muted-foreground">
-            Create a free provider profile in minutes. Share your work, build trust through verified reviews, and let customers near you find you.
+          <h2 className="mt-2 font-display text-2xl font-bold text-navy sm:text-3xl">
+            List your skill. Get discovered.
+          </h2>
+          <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
+            Create a free provider profile, show your work, and let customers near you find you.
           </p>
-          <div className="mt-7">
-            <ListYourSkillButton variant="solid" className="px-7 py-3" />
+          <div className="mt-5">
+            <ListYourSkillButton variant="solid" className="px-6 py-3" />
           </div>
+          <Link to="/requests/browse" className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-navy hover:text-orange">
+            Or browse open requests <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
         </div>
       </section>
     </Layout>
+  );
+}
+
+function SectionHeader({ title, link }: { title: string; link?: { label: string; to: string } }) {
+  return (
+    <div className="flex items-end justify-between">
+      <h2 className="font-display text-lg font-bold text-navy sm:text-xl">
+        {title}
+        <span className="mt-1 block h-1 w-10 rounded-full bg-green/80" />
+      </h2>
+      {link ? (
+        <Link to={link.to} className="text-sm font-semibold text-navy hover:text-orange">
+          {link.label}
+        </Link>
+      ) : null}
+    </div>
+  );
+}
+
+function TrustItem({ Icon, label }: { Icon: any; label: string }) {
+  return (
+    <div className="flex items-center justify-center gap-2 px-1 py-1 text-left">
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-green/10 text-green">
+        <Icon className="h-4 w-4" />
+      </span>
+      <span className="text-[11px] font-semibold leading-tight text-navy sm:text-sm">{label}</span>
+    </div>
+  );
+}
+
+function Step({
+  n,
+  title,
+  desc,
+  Icon,
+  tint,
+}: {
+  n: number;
+  title: string;
+  desc: string;
+  Icon: any;
+  tint: "green" | "navy" | "orange";
+}) {
+  const tints = {
+    green: { bg: "bg-green/10", fg: "text-green", num: "bg-green text-white" },
+    navy: { bg: "bg-navy/5", fg: "text-navy", num: "bg-navy text-white" },
+    orange: { bg: "bg-orange/10", fg: "text-orange", num: "bg-orange text-orange-foreground" },
+  }[tint];
+  return (
+    <div className="rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)]">
+      <div className="flex items-center gap-3">
+        <span className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold ${tints.num}`}>{n}</span>
+        <span className={`flex h-12 w-12 items-center justify-center rounded-xl ${tints.bg} ${tints.fg}`}>
+          <Icon className="h-6 w-6" />
+        </span>
+      </div>
+      <h3 className="mt-3 font-display text-sm font-bold text-navy">{title}</h3>
+      <p className="mt-1 text-xs text-muted-foreground">{desc}</p>
+    </div>
   );
 }
