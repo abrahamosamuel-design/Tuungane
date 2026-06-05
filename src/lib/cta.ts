@@ -12,7 +12,19 @@ export const CTA = {
   becomeProvider: { label: "Become a Provider" },
 } as const;
 
-/** Where the "List Your Skill" CTA should send a user. */
+/**
+ * Where the "List Your Skill" CTA should send a user.
+ * Returns an object compatible with TanStack `<Link to=... search=...>`.
+ */
+export function listSkillLink(user: User | null | undefined): {
+  to: string;
+  search?: Record<string, string>;
+} {
+  if (user) return { to: "/dashboard", search: { becomeProvider: "1" } };
+  return { to: "/login", search: { tab: "signup", intent: "provider" } };
+}
+
+/** Plain-string href fallback (anchors, server links). */
 export function listSkillHref(user: User | null | undefined): string {
   if (user) return "/dashboard?becomeProvider=1";
   return "/login?tab=signup&intent=provider";
