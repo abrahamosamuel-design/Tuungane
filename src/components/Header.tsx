@@ -1,10 +1,11 @@
 import { Link } from "@tanstack/react-router";
 import { Menu, X, User as UserIcon, LogOut, LayoutDashboard, Shield, Rss, Wrench, ClipboardList, Coins, Building2, ChevronDown, Megaphone, Plus, Sparkles } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Logo } from "./Logo";
 import { NotificationsBell } from "./NotificationsBell";
 import { CreditBalanceChip } from "./CreditBalanceChip";
 import { useCreditWallet } from "@/hooks/use-credits";
+import { supabase } from "@/integrations/supabase/client";
 
 import { useAuth } from "@/hooks/use-auth";
 import { listSkillHref } from "@/lib/cta";
@@ -132,8 +133,8 @@ export function Header() {
               <>
                 <div className="my-2 border-t border-border" />
                 <p className="px-3 pt-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">My Account</p>
-                <Link to="/notifications" onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-navy hover:bg-muted">Notifications</Link>
-                <Link to="/requests" onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-navy hover:bg-muted">My Requests</Link>
+                <CountedLink to="/notifications" label="Notifications" count={<NotifCount />} onClick={() => setOpen(false)} />
+                <CountedLink to="/requests" label="My Requests" count={<ActiveRequestsCount />} onClick={() => setOpen(false)} />
                 <Link to="/dashboard" onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-navy hover:bg-muted">My Dashboard</Link>
                 <Link to="/me" onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-navy hover:bg-muted">My Profile</Link>
                 <MyCreditsLink onClick={() => setOpen(false)} />
@@ -189,5 +190,51 @@ function MyCreditsLink({ onClick }: { onClick: () => void }) {
     </Link>
   );
 }
+
+function CountedLink({ to, label, count, onClick }: { to: string; label: string; count: React.ReactNode; onClick: () => void }) {
+  return (
+    <Link to={to} onClick={onClick} className="flex items-center justify-between rounded-md px-3 py-2 text-sm font-medium text-navy hover:bg-muted">
+      <span>{label}</span>
+      <span className="text-xs font-semibold text-orange">{count}</span>
+    </Link>
+  );
+}
+
+function NotifCount() {
+  const { user } = useAuth();
+  const [n, setN] = useState(0);
+  useEffect(() => {
+    if (!user) { setN(0); return; }
+    let active = true;
+    const load = async () => {
+      const { count } = await supabase.from("notifications").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("read", false);
+      if (active) setN(count ?? 0);
+    };
+    load();
+    const ch = supabase.channel(`hdr-notif-${user.id}`).on("postgres_changes", { event: "*", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` }, load).subscribe();
+    return () => { active = false; supabase.removeChannel(ch); };
+  }, [user?.id]);
+  return <>{n}</>;
+}
+
+function ActiveRequestsCount() {
+  const { user } = useAuth();
+  const [n, setN] = useState(0);
+  useEffect(() => {
+    if (!user) { setN(0); return; }
+    let active = true;
+    const load = async () => {
+      const { count } = await supabase
+        .from("service_requests")
+        .select("*", { count: "exact", head: true })
+        .eq("customer_id", user.id)
+        .not("status", "in", "(completed,cancelled)");
+      if (active) setN(count ?? 0);
+    };
+    load();
+  }, [user?.id]);
+  return <>{n}</>;
+}
+
 
 
