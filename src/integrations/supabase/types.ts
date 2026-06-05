@@ -1673,6 +1673,14 @@ export type Database = {
         Returns: undefined
       }
       admin_expire_boost: { Args: { _boost_id: string }; Returns: undefined }
+      admin_list_user_contacts: {
+        Args: { _ids: string[] }
+        Returns: {
+          email: string
+          id: string
+          phone: string
+        }[]
+      }
       approve_purchase_request: {
         Args: {
           _admin_note?: string
