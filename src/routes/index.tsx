@@ -24,7 +24,7 @@ import { categories } from "@/data/categories";
 import { ListYourSkillButton } from "@/components/cta/ListYourSkillButton";
 import { useAuth } from "@/hooks/use-auth";
 import { listSkillHref } from "@/lib/cta";
-import heroUganda from "@/assets/hero-uganda.jpg.asset.json";
+import heroNetwork from "@/assets/hero-network.jpg";
 
 // Curated category set for the homepage tile grid
 const HOME_CATEGORY_SLUGS = ["home-repair", "cleaning", "automotive", "beauty", "education"];
@@ -146,16 +146,17 @@ function Index() {
           {/* Headline */}
           <div className="mx-auto max-w-xl text-center">
             <h1 className="font-display text-3xl font-extrabold leading-[1.1] sm:text-4xl lg:text-5xl">
-              Connect to{" "}
+              Find{" "}
               <span className="relative whitespace-nowrap">
-                trusted services
+                trusted help
                 <span className="absolute -bottom-1 left-0 h-1 w-full rounded-full bg-green/80" />
-              </span>{" "}
-              <br className="hidden sm:block" />
-              near you!
+              </span>
+              .
+              <br />
+              Grow your <span className="text-orange">work</span>.
             </h1>
             <p className="mx-auto mt-4 max-w-md text-sm text-white/75 sm:text-base">
-              Create requests or list your skill to reach more people.
+              Create requests, discover skilled people, or list your skill so customers near you can find you.
             </p>
           </div>
 
@@ -169,30 +170,56 @@ function Index() {
             </Link>
             <Link
               to={listSkillHref(user) as never}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-navy shadow-lg transition hover:bg-white/90 sm:w-auto sm:px-7"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-green px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-green/30 transition hover:brightness-110 sm:w-auto sm:px-7"
             >
               <UserIcon className="h-4 w-4" /> List Your Skill
             </Link>
           </div>
 
-          {/* Hero image */}
+          {/* Hero network composition */}
           <div className="relative mx-auto mt-8 max-w-md sm:mt-10 sm:max-w-lg">
             <div className="relative overflow-hidden rounded-3xl">
               <img
-                src={heroUganda.url}
-                alt="A customer and a skilled provider on Tuungane"
-                width={1280}
-                height={896}
+                src={heroNetwork}
+                alt="A Ugandan customer connected to multiple trusted skilled providers on Tuungane"
+                width={1024}
+                height={1280}
                 className="block w-full"
               />
-              {/* Soft navy fade to blend into hero background */}
+              {/* Edge fade into navy */}
               <div
                 className="pointer-events-none absolute inset-0"
                 style={{
                   background:
-                    "radial-gradient(ellipse at center, transparent 55%, oklch(0.22 0.05 250 / 0.55) 85%, oklch(0.22 0.05 250) 100%)",
+                    "radial-gradient(ellipse at center, transparent 60%, oklch(0.22 0.05 250 / 0.6) 88%, oklch(0.22 0.05 250) 100%)",
                 }}
               />
+
+              {/* Floating provider badges */}
+              <span className="absolute left-2 top-[18%] rounded-full bg-white/95 px-2 py-1 text-[10px] font-semibold text-navy shadow-md backdrop-blur sm:left-4 sm:px-2.5 sm:text-[11px]">
+                <span className="mr-1 inline-block h-1.5 w-1.5 rounded-full bg-green align-middle" />
+                Electrician
+              </span>
+              <span className="absolute right-2 top-[14%] rounded-full bg-white/95 px-2 py-1 text-[10px] font-semibold text-navy shadow-md backdrop-blur sm:right-4 sm:px-2.5 sm:text-[11px]">
+                <span className="mr-1 inline-block h-1.5 w-1.5 rounded-full bg-green align-middle" />
+                Tutor
+              </span>
+              <span className="absolute left-1 top-[42%] rounded-full bg-white/95 px-2 py-1 text-[10px] font-semibold text-navy shadow-md backdrop-blur sm:left-3 sm:px-2.5 sm:text-[11px]">
+                <span className="mr-1 inline-block h-1.5 w-1.5 rounded-full bg-green align-middle" />
+                Cleaner
+              </span>
+              <span className="absolute right-1 top-[44%] rounded-full bg-white/95 px-2 py-1 text-[10px] font-semibold text-navy shadow-md backdrop-blur sm:right-3 sm:px-2.5 sm:text-[11px]">
+                <span className="mr-1 inline-block h-1.5 w-1.5 rounded-full bg-green align-middle" />
+                Tailor
+              </span>
+              <span className="absolute left-4 bottom-[14%] rounded-full bg-white/95 px-2 py-1 text-[10px] font-semibold text-navy shadow-md backdrop-blur sm:left-8 sm:px-2.5 sm:text-[11px]">
+                <span className="mr-1 inline-block h-1.5 w-1.5 rounded-full bg-orange align-middle" />
+                House Help
+              </span>
+              <span className="absolute right-4 bottom-[14%] rounded-full bg-white/95 px-2 py-1 text-[10px] font-semibold text-navy shadow-md backdrop-blur sm:right-8 sm:px-2.5 sm:text-[11px]">
+                <span className="mr-1 inline-block h-1.5 w-1.5 rounded-full bg-orange align-middle" />
+                Web Designer
+              </span>
             </div>
           </div>
         </div>
@@ -200,10 +227,11 @@ function Index() {
         {/* Trust strip overlapping hero */}
         <div className="relative mx-auto -mt-20 max-w-5xl px-4 sm:-mt-24 sm:px-6">
           <div className="rounded-2xl border border-border bg-card p-3 shadow-[var(--shadow-elevated)] sm:p-4">
-            <div className="grid grid-cols-3 gap-2 text-center sm:gap-4">
+            <div className="grid grid-cols-2 gap-2 text-center sm:grid-cols-4 sm:gap-4">
               <TrustItem Icon={ShieldCheck} label="Verified providers" />
               <TrustItem Icon={MapPin} label="Local & nearby" />
               <TrustItem Icon={Zap} label="Fast responses" />
+              <TrustItem Icon={ShieldCheck} label="Safe connections" />
             </div>
           </div>
         </div>
