@@ -90,10 +90,14 @@ function ServiceRequestsFeed() {
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <div className="flex items-start justify-between gap-3 flex-wrap">
             <div>
-              <h1 className="font-display text-3xl font-bold text-navy sm:text-4xl">Service Requests Feed</h1>
-              <p className="mt-2 text-sm text-muted-foreground">Open jobs from customers nearby. Send a response or quote to get the work.</p>
+              <p className="text-xs font-semibold uppercase tracking-wider text-green">For providers</p>
+              <h1 className="mt-1 font-display text-3xl font-bold text-navy sm:text-4xl">Work Feed</h1>
+              <p className="mt-2 text-sm text-muted-foreground">Show your work so customers can trust you. Browse open requests, post your previous work, and respond to nearby jobs.</p>
             </div>
-            <Link to="/services" className="rounded-full bg-orange px-5 py-2.5 text-sm font-semibold text-orange-foreground hover:brightness-110">Request a service</Link>
+            <div className="flex flex-wrap gap-2">
+              <Link to="/dashboard" className="rounded-full border border-green/40 bg-green/5 px-5 py-2.5 text-sm font-semibold text-green hover:bg-green/10">List Your Skill</Link>
+              <Link to="/services" className="rounded-full bg-orange px-5 py-2.5 text-sm font-semibold text-orange-foreground hover:brightness-110">Request a service</Link>
+            </div>
           </div>
 
           <div className="mt-5 grid gap-2 sm:grid-cols-[1fr_180px_180px_160px]">
