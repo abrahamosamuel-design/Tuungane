@@ -126,9 +126,12 @@ function Feed() {
 
   return (
     <Layout>
-      <section className="mx-auto max-w-2xl px-4 py-8">
+      <section className="mx-auto max-w-2xl px-0 py-6 sm:px-4 sm:py-8">
+        <div className="px-4 sm:px-0">
         <h1 className="font-display text-3xl font-bold text-navy">Activity feed</h1>
         <p className="mt-1 text-sm text-muted-foreground">Discover work, providers, and updates on Tuungane.</p>
+        </div>
+
 
         <div className="mt-5 flex gap-1 rounded-full border border-border bg-card p-1">
           {tabs.map((t) => (
