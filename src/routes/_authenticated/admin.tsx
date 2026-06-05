@@ -113,23 +113,56 @@ function Admin() {
 // ───────── Users ─────────
 function UsersTab() {
   const [rows, setRows] = useState<Array<{ id: string; full_name: string; district: string | null; town: string | null; is_provider: boolean; created_at: string }>>([]);
+  const [contacts, setContacts] = useState<Record<string, { email: string | null; phone: string | null }>>({});
   const [q, setQ] = useState("");
   useEffect(() => {
-    supabase.from("profiles").select("id,full_name,district,town,is_provider,created_at").order("created_at", { ascending: false }).limit(200).then(({ data }) => setRows(data ?? []));
+    (async () => {
+      const { data } = await supabase.from("profiles").select("id,full_name,district,town,is_provider,created_at").order("created_at", { ascending: false }).limit(200);
+      const list = data ?? [];
+      setRows(list);
+      const ids = list.map((r) => r.id);
+      if (ids.length) {
+        const { data: cs } = await supabase.rpc("admin_list_user_contacts", { _ids: ids });
+        const map: Record<string, { email: string | null; phone: string | null }> = {};
+        for (const c of (cs ?? []) as Array<{ id: string; email: string | null; phone: string | null }>) {
+          map[c.id] = { email: c.email, phone: c.phone };
+        }
+        setContacts(map);
+      }
+    })();
   }, []);
-  const filtered = q ? rows.filter((r) => (r.full_name || "").toLowerCase().includes(q.toLowerCase())) : rows;
+  const filtered = q
+    ? rows.filter((r) => {
+        const needle = q.toLowerCase();
+        const c = contacts[r.id];
+        return (r.full_name || "").toLowerCase().includes(needle)
+          || (c?.email || "").toLowerCase().includes(needle)
+          || (c?.phone || "").toLowerCase().includes(needle);
+      })
+    : rows;
   return (
     <div className="space-y-3">
-      <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search by name…" className="w-full max-w-sm rounded-md border border-border bg-background px-3 py-2 text-sm" />
-      {filtered.map((u) => (
-        <div key={u.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-card p-3">
-          <div>
-            <p className="font-semibold text-navy">{u.full_name || "Unnamed"} {u.is_provider && <span className="ml-2 rounded-full bg-orange/10 px-2 py-0.5 text-[10px] font-bold text-orange">PROVIDER</span>}</p>
-            <p className="text-xs text-muted-foreground">{[u.district, u.town].filter(Boolean).join(" · ") || "—"} · joined {timeAgo(u.created_at)}</p>
+      <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search by name, email, or phone…" className="w-full max-w-sm rounded-md border border-border bg-background px-3 py-2 text-sm" />
+      {filtered.map((u) => {
+        const c = contacts[u.id];
+        return (
+          <div key={u.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-card p-3">
+            <div className="min-w-0">
+              <p className="font-semibold text-navy">{u.full_name || "Unnamed"} {u.is_provider && <span className="ml-2 rounded-full bg-orange/10 px-2 py-0.5 text-[10px] font-bold text-orange">PROVIDER</span>}</p>
+              <p className="text-xs text-muted-foreground">{[u.district, u.town].filter(Boolean).join(" · ") || "—"} · joined {timeAgo(u.created_at)}</p>
+              <div className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-xs">
+                {c?.email ? (
+                  <a href={`mailto:${c.email}`} className="text-navy hover:text-orange break-all">{c.email}</a>
+                ) : <span className="text-muted-foreground">no email</span>}
+                {c?.phone ? (
+                  <a href={`tel:${c.phone}`} className="text-navy hover:text-orange">{c.phone}</a>
+                ) : <span className="text-muted-foreground">no phone</span>}
+              </div>
+            </div>
+            <Link to="/u/$id" params={{ id: u.id }} className="rounded border border-border px-2 py-1 text-xs">View</Link>
           </div>
-          <Link to="/u/$id" params={{ id: u.id }} className="rounded border border-border px-2 py-1 text-xs">View</Link>
-        </div>
-      ))}
+        );
+      })}
       {filtered.length === 0 && <p className="text-sm text-muted-foreground">No users.</p>}
     </div>
   );
