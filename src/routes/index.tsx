@@ -83,6 +83,9 @@ function Index() {
         </div>
       </section>
 
+      {/* Two-sided cards: Need help? / Have a skill? */}
+      <TwoSidedHeroCards />
+
       {/* How it works */}
       <section className="bg-surface py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
