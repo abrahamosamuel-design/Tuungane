@@ -1673,6 +1673,13 @@ export type Database = {
         Returns: undefined
       }
       admin_expire_boost: { Args: { _boost_id: string }; Returns: undefined }
+      admin_grant_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: undefined
+      }
       admin_list_user_contacts: {
         Args: { _ids: string[] }
         Returns: {
@@ -1680,6 +1687,20 @@ export type Database = {
           id: string
           phone: string
         }[]
+      }
+      admin_list_user_roles: {
+        Args: { _ids: string[] }
+        Returns: {
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }[]
+      }
+      admin_revoke_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: undefined
       }
       approve_purchase_request: {
         Args: {
