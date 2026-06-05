@@ -165,10 +165,10 @@ function Index() {
               "radial-gradient(ellipse at 20% 100%, oklch(0.71 0.19 45 / 0.35), transparent 55%), radial-gradient(ellipse at 80% 100%, oklch(0.62 0.16 150 / 0.3), transparent 55%)",
           }}
         />
-        <div className="relative mx-auto max-w-5xl px-4 pb-32 pt-8 sm:px-6 sm:pb-36 sm:pt-12 lg:pb-40 lg:pt-16">
+        <div className="relative mx-auto max-w-5xl px-4 pb-28 pt-5 sm:px-6 sm:pb-36 sm:pt-12 lg:pb-40 lg:pt-16">
           {/* Headline */}
           <div className="mx-auto max-w-xl text-center">
-            <h1 className="font-display text-3xl font-extrabold leading-[1.1] sm:text-4xl lg:text-5xl">
+            <h1 className="font-display text-2xl font-extrabold leading-[1.15] sm:text-4xl lg:text-5xl">
               Find{" "}
               <span className="relative whitespace-nowrap">
                 trusted services
@@ -178,10 +178,11 @@ function Index() {
               <br />
               Grow your <span className="text-orange">customer base</span>.
             </h1>
-            <p className="mx-auto mt-4 max-w-md text-sm text-white/75 sm:text-base">
+            <p className="mx-auto mt-2.5 max-w-md text-xs text-white/75 sm:mt-4 sm:text-base">
               Create requests, discover skilled people, or list your skill so customers near you can find you.
             </p>
           </div>
+
 
           {/* CTAs */}
           <div className="mx-auto mt-6 flex w-full max-w-md flex-col gap-2.5 sm:mt-7 sm:max-w-lg sm:flex-row sm:justify-center">
