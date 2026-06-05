@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Logo } from "./Logo";
 import { NotificationsBell } from "./NotificationsBell";
 import { CreditBalanceChip } from "./CreditBalanceChip";
+import { useCreditWallet } from "@/hooks/use-credits";
+
 import { useAuth } from "@/hooks/use-auth";
 import { listSkillHref } from "@/lib/cta";
 
