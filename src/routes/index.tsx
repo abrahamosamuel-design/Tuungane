@@ -235,19 +235,6 @@ function Index() {
             </div>
           </div>
         </div>
-
-        </div>
-
-        {/* Trust strip overlapping hero */}
-        <div className="relative mx-auto -mt-20 max-w-5xl px-4 sm:-mt-24 sm:px-6">
-          <div className="rounded-2xl border border-border bg-card p-3 shadow-[var(--shadow-elevated)] sm:p-4">
-            <div className="grid grid-cols-3 gap-2 text-center sm:gap-4">
-              <TrustItem Icon={ShieldCheck} label="Verified providers" />
-              <TrustItem Icon={MapPin} label="Local & nearby" />
-              <TrustItem Icon={Zap} label="Fast responses" />
-            </div>
-          </div>
-        </div>
       </section>
 
       {/* HOW IT WORKS */}
