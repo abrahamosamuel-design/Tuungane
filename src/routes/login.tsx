@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 import { Layout } from "@/components/Layout";
 import { Logo } from "@/components/Logo";
 import { supabase } from "@/integrations/supabase/client";
@@ -29,10 +30,10 @@ function Login() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [rememberMe, setRememberMe] = useState(true);
-
 
   useEffect(() => {
     if (!loading && user) {
@@ -54,6 +55,7 @@ function Login() {
           throw new Error("Tuungane is currently available in Uganda only.");
         }
         if (password.length < 6) throw new Error("Password must be at least 6 characters.");
+        if (password !== confirmPassword) throw new Error("Passwords do not match.");
         const isProvider = intent === "provider" || intent === "both";
         const { data, error } = await supabase.auth.signUp({
           email, password,
@@ -69,8 +71,6 @@ function Login() {
         toast.success("Account created!");
         nav({ to: isProvider ? "/dashboard" : (search.redirect as never) ?? "/feed" });
       } else {
-        // Persist remember-me preference BEFORE sign-in so the auth state
-        // listener doesn't see a stale value and sign the user back out.
         if (rememberMe) {
           localStorage.setItem("tuungane_remember_me", "true");
           sessionStorage.setItem("tuungane_session_active", "true");
@@ -83,7 +83,6 @@ function Login() {
         toast.success("Welcome back!");
         nav({ to: (search.redirect as never) ?? "/services" });
       }
-
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
@@ -138,14 +137,24 @@ function Login() {
                     })}
                   </div>
                 </div>
-                <Field label="Full name" value={fullName} onChange={setFullName} required />
+                <TextField label="Full name" value={fullName} onChange={setFullName} required />
               </>
             )}
-            <Field label="Email" type="email" value={email} onChange={setEmail} required />
+            <TextField label="Email" type="email" value={email} onChange={setEmail} required />
             {tab === "signup" && (
-              <Field label="Phone number" value={phone} onChange={setPhone} placeholder="+256 7xx xxx xxx" hint="Uganda numbers only (+256, 256, 07…)" />
+              <TextField label="Phone number" value={phone} onChange={setPhone} placeholder="+256 7xx xxx xxx" hint="Uganda numbers only (+256, 256, 07…)" />
             )}
-            <Field label="Password" type="password" value={password} onChange={setPassword} required />
+            <PasswordField label="Password" value={password} onChange={setPassword} required autoComplete={tab === "login" ? "current-password" : "new-password"} />
+            {tab === "login" && (
+              <div className="flex justify-end">
+                <Link to="/forgot-password" className="text-xs font-semibold text-orange hover:underline">
+                  Forgot password?
+                </Link>
+              </div>
+            )}
+            {tab === "signup" && (
+              <PasswordField label="Confirm password" value={confirmPassword} onChange={setConfirmPassword} required autoComplete="new-password" />
+            )}
             {tab === "login" && (
               <label className="flex items-center gap-2 text-xs text-navy cursor-pointer select-none">
                 <input
@@ -172,7 +181,7 @@ function Login() {
   );
 }
 
-function Field({ label, type = "text", placeholder, hint, value, onChange, required }: { label: string; type?: string; placeholder?: string; hint?: string; value: string; onChange: (v: string) => void; required?: boolean }) {
+function TextField({ label, type = "text", placeholder, hint, value, onChange, required }: { label: string; type?: string; placeholder?: string; hint?: string; value: string; onChange: (v: string) => void; required?: boolean }) {
   return (
     <div>
       <label className="text-xs font-medium text-navy">{label}</label>
@@ -185,6 +194,34 @@ function Field({ label, type = "text", placeholder, hint, value, onChange, requi
         className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-orange focus:ring-2 focus:ring-orange/20"
       />
       {hint && <p className="mt-1 text-[11px] text-muted-foreground">{hint}</p>}
+    </div>
+  );
+}
+
+export function PasswordField({ label, value, onChange, required, autoComplete }: { label: string; value: string; onChange: (v: string) => void; required?: boolean; autoComplete?: string }) {
+  const [show, setShow] = useState(false);
+  return (
+    <div>
+      <label className="text-xs font-medium text-navy">{label}</label>
+      <div className="relative mt-1">
+        <input
+          type={show ? "text" : "password"}
+          value={value}
+          required={required}
+          autoComplete={autoComplete}
+          onChange={(e) => onChange(e.target.value)}
+          className="w-full rounded-xl border border-border bg-background px-3 py-2.5 pr-10 text-sm outline-none focus:border-orange focus:ring-2 focus:ring-orange/20"
+        />
+        <button
+          type="button"
+          onClick={() => setShow((s) => !s)}
+          aria-label={show ? "Hide password" : "Show password"}
+          className="absolute inset-y-0 right-0 flex items-center px-3 text-muted-foreground hover:text-navy"
+          tabIndex={-1}
+        >
+          {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+        </button>
+      </div>
     </div>
   );
 }
