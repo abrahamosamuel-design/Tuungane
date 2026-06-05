@@ -309,10 +309,11 @@ function Index() {
       <section className="mx-auto max-w-6xl px-4 pt-10 sm:px-6">
         <div className="flex items-end justify-between">
           <div>
-            <h2 className="font-display text-lg font-bold text-navy sm:text-xl">Show your work</h2>
+            <h2 className="font-display text-lg font-bold text-navy sm:text-xl">Show your work. Get discovered.</h2>
             <p className="mt-1 max-w-md text-xs text-muted-foreground sm:text-sm">
-              List your skill, add photos of your work, and get discovered by customers near you.
+              List your skill, add photos of your work, and let customers near you find you.
             </p>
+
           </div>
           <Link to="/feed" className="hidden text-sm font-semibold text-navy hover:text-orange sm:inline">
             See all →
