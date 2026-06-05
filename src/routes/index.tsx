@@ -148,7 +148,7 @@ function Index() {
             <h1 className="font-display text-3xl font-extrabold leading-[1.1] sm:text-4xl lg:text-5xl">
               Find{" "}
               <span className="relative whitespace-nowrap">
-                trusted help
+                trusted services
                 <span className="absolute -bottom-1 left-0 h-1 w-full rounded-full bg-green/80" />
               </span>
               .
