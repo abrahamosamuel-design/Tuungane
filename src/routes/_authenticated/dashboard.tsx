@@ -171,7 +171,6 @@ function Dashboard() {
               toast.success("You're now a service provider. Complete your profile to start posting.");
               load();
             }}
-            className="mt-6 rounded-xl bg-orange px-4 py-3 text-sm font-semibold text-orange-foreground"
             className="mt-6 rounded-xl bg-green px-4 py-3 text-sm font-semibold text-white"
           >List Your Skill</button>
         )}
