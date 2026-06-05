@@ -385,7 +385,7 @@ function Index() {
                   <p className="mt-0.5 inline-flex items-center gap-1 text-[11px] text-muted-foreground">
                     <MapPin className="h-3 w-3" /> {r.location}
                   </p>
-                  <p className="mt-1 text-xs font-semibold text-green">{r.budget}</p>
+                  <p className="mt-1 text-xs font-semibold text-orange">{r.budget}</p>
                 </div>
               </div>
               <div className="mt-3 flex items-center justify-between border-t border-border pt-2 text-[11px] text-muted-foreground">
