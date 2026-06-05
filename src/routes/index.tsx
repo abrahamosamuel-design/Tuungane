@@ -153,7 +153,7 @@ function Index() {
               </span>
               .
               <br />
-              Grow your <span className="text-orange">work</span>.
+              Grow your <span className="text-orange">customer base</span>.
             </h1>
             <p className="mx-auto mt-4 max-w-md text-sm text-white/75 sm:text-base">
               Create requests, discover skilled people, or list your skill so customers near you can find you.
