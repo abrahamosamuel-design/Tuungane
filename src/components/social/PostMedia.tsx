@@ -22,18 +22,18 @@ export function PostMedia({ urls, alt }: { urls: string[]; alt: string }) {
         <button
           type="button"
           onClick={() => open(0)}
-          className="block w-full overflow-hidden rounded-xl bg-muted/40"
+          className="block w-full overflow-hidden bg-muted/40 sm:rounded-xl"
           aria-label="Open image"
         >
           <img
             src={urls[0]}
             alt={alt}
             loading="lazy"
-            className="mx-auto block max-h-[560px] w-full object-contain"
+            className="mx-auto block max-h-[640px] w-full object-contain"
           />
         </button>
       ) : (
-        <div className={`grid gap-1 overflow-hidden rounded-xl ${urls.length === 2 ? "grid-cols-2" : "grid-cols-2"}`}>
+        <div className={`grid gap-1 overflow-hidden sm:rounded-xl ${urls.length === 2 ? "grid-cols-2" : "grid-cols-2"}`}>
           {urls.slice(0, 4).map((u, i) => (
             <button
               key={i}

@@ -126,17 +126,20 @@ function Feed() {
 
   return (
     <Layout>
-      <section className="mx-auto max-w-2xl px-4 py-8">
+      <section className="mx-auto max-w-2xl px-0 py-6 sm:px-4 sm:py-8">
+        <div className="px-4 sm:px-0">
         <h1 className="font-display text-3xl font-bold text-navy">Activity feed</h1>
         <p className="mt-1 text-sm text-muted-foreground">Discover work, providers, and updates on Tuungane.</p>
+        </div>
 
-        <div className="mt-5 flex gap-1 rounded-full border border-border bg-card p-1">
+
+        <div className="mt-5 flex gap-1 rounded-full border border-border bg-card p-1 mx-4 sm:mx-0">
           {tabs.map((t) => (
             <button key={t.id} onClick={() => setTab(t.id)} className={`flex-1 rounded-full px-3 py-1.5 text-xs font-semibold transition ${tab === t.id ? "bg-navy text-navy-foreground" : "text-muted-foreground hover:text-navy"}`}>{t.label}</button>
           ))}
         </div>
 
-        <div className="mt-4 flex flex-wrap gap-2">
+        <div className="mt-4 flex flex-wrap gap-2 px-4 sm:px-0">
           {tab === "posts" && postFilters.map((f) => (
             <button key={f.id} onClick={() => setFilter(f.id)} className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${filter === f.id ? "bg-navy text-navy-foreground" : "border border-border bg-background text-muted-foreground hover:border-navy"}`}>{f.label}</button>
           ))}
@@ -152,7 +155,8 @@ function Feed() {
           )}
         </div>
 
-        <div className="mt-6 space-y-4">
+        <div className="mt-6 space-y-3 sm:space-y-4">
+
           {loading && <p className="text-sm text-muted-foreground">Loading...</p>}
 
           {!loading && tab === "posts" && (() => {
@@ -175,7 +179,7 @@ function Feed() {
             return sortedProviders.length === 0 ? (
               <Empty title="No providers found" hint="Try a different category." />
             ) : sortedProviders.map((p) => (
-              <Link key={p.user_id} to="/u/$id" params={{ id: p.user_id }} className={`flex items-start gap-3 rounded-2xl border bg-card p-4 transition hover:border-orange ${isBoostedProvider(p.user_id) ? "border-orange/50" : "border-border"}`}>
+              <Link key={p.user_id} to="/u/$id" params={{ id: p.user_id }} className={`mx-4 sm:mx-0 flex items-start gap-3 rounded-2xl border bg-card p-4 transition hover:border-orange ${isBoostedProvider(p.user_id) ? "border-orange/50" : "border-border"}`}>
                 <img src={p.profile?.avatar_url || avatar(p.profile?.full_name || "T")} alt="" className="h-12 w-12 rounded-xl border border-border" />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5">

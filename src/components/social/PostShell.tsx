@@ -49,31 +49,31 @@ export function PostShell({
 
   return (
     <article
-      className={`overflow-hidden rounded-2xl border bg-card shadow-[var(--shadow-card)] ${accentClass} ${className}`}
+      className={`overflow-hidden border-y bg-card shadow-[var(--shadow-card)] sm:rounded-2xl sm:border ${accentClass} ${className}`}
     >
       {/* 1. Header */}
-      <header className="px-4 pt-4">{header}</header>
+      <header className="px-3 pt-3 sm:px-4 sm:pt-4">{header}</header>
 
       {/* 2. Category badge */}
-      {categoryBadge && <div className="mt-3 px-4">{categoryBadge}</div>}
+      {categoryBadge && <div className="mt-2 px-3 sm:mt-3 sm:px-4">{categoryBadge}</div>}
 
       {/* 3. Title */}
-      {title && <div className="mt-2 px-4">{title}</div>}
+      {title && <div className="mt-2 px-3 sm:px-4">{title}</div>}
 
       {/* 4. Message (above media) */}
-      {message && <div className="mt-2 px-4">{message}</div>}
+      {message && <div className="mt-2 px-3 sm:px-4">{message}</div>}
 
-      {/* 5. Media */}
-      {media && <div className="mt-3 px-4">{media}</div>}
+      {/* 5. Media — full-bleed on mobile */}
+      {media && <div className="mt-3 sm:px-4">{media}</div>}
 
       {/* 6. Meta */}
-      {meta && <div className="mt-3 px-4 text-xs text-muted-foreground">{meta}</div>}
+      {meta && <div className="mt-3 px-3 text-xs text-muted-foreground sm:px-4">{meta}</div>}
 
       {/* 7. Extras */}
-      {extras && <div className="mt-3 px-4">{extras}</div>}
+      {extras && <div className="mt-3 px-3 sm:px-4">{extras}</div>}
 
       {/* 8. Engagement actions */}
-      <div className="mt-3 border-t border-border px-4 py-2">{actions}</div>
+      <div className="mt-3 border-t border-border px-3 py-2 sm:px-4">{actions}</div>
     </article>
   );
 }
