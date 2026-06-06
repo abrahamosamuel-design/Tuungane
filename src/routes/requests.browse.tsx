@@ -227,7 +227,7 @@ function BrowseRequests() {
               {REQUESTS_COPY.listTitle}
             </h2>
             {loading && <p className="text-sm text-muted-foreground">Loading…</p>}
-            {!loading && items.length === 0 && (
+            {!loading && rankedItems.length === 0 && (
               <EmptyState
                 icon={Plus}
                 title={REQUESTS_COPY.emptyTitle}
@@ -236,7 +236,7 @@ function BrowseRequests() {
               />
             )}
             <div className="grid gap-3 sm:grid-cols-2">
-              {items.map((r) => (
+              {rankedItems.map((r) => (
                 <RequestCard key={r.id} r={r} />
               ))}
             </div>
