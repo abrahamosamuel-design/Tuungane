@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { MapPin, Loader2 } from "lucide-react";
 import { AreaAutocomplete } from "@/components/AreaAutocomplete";
 import { MapPicker } from "@/components/MapPicker";
+import { findDistrictBounds, type Bounds } from "@/lib/geocoding";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({ meta: [{ title: "Settings — Tuungane" }] }),
