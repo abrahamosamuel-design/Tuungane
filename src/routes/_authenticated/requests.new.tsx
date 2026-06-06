@@ -37,6 +37,7 @@ function NewRequest() {
   const [busy, setBusy] = useState(false);
   const [autofilled, setAutofilled] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [f, setF] = useState({
     title: "",
     category_slug: categories[0].slug,
