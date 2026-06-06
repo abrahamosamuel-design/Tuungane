@@ -21,18 +21,32 @@ type LogRow = {
 
 export function ActivityLogTab() {
   const [q, setQ] = useState("");
+  const [fromDate, setFromDate] = useState(""); // YYYY-MM-DD
+  const [toDate, setToDate] = useState("");
   const [rows, setRows] = useState<LogRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [exportingAll, setExportingAll] = useState(false);
+
+  // Convert local YYYY-MM-DD inputs into ISO bounds (inclusive day range)
+  const range = () => {
+    const fromIso = fromDate ? new Date(`${fromDate}T00:00:00`).toISOString() : undefined;
+    const toIso = toDate
+      ? new Date(new Date(`${toDate}T00:00:00`).getTime() + 24 * 60 * 60 * 1000).toISOString()
+      : undefined;
+    return { fromIso, toIso };
+  };
 
   useEffect(() => {
     let cancelled = false;
     const handle = setTimeout(async () => {
       setLoading(true);
+      const { fromIso, toIso } = range();
       const { data, error } = await supabase.rpc("admin_search_activity_log", {
         _q: q || undefined,
         _limit: 200,
         _offset: 0,
+        _from: fromIso,
+        _to: toIso,
       });
       if (cancelled) return;
       if (error) toast.error(error.message);
@@ -43,7 +57,8 @@ export function ActivityLogTab() {
       cancelled = true;
       clearTimeout(handle);
     };
-  }, [q]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [q, fromDate, toDate]);
 
   const rowsToCsv = (data: LogRow[]) => {
     const headers = [
@@ -93,18 +108,20 @@ export function ActivityLogTab() {
     download(rowsToCsv(rows), "filtered");
   };
 
-  const exportAll = async () => {
+  const exportRange = async (ignoreDates: boolean) => {
     setExportingAll(true);
     try {
       const pageSize = 500;
       let offset = 0;
       const all: LogRow[] = [];
-      // Paginate until we get less than a full page
+      const { fromIso, toIso } = ignoreDates ? { fromIso: undefined, toIso: undefined } : range();
       while (true) {
         const { data, error } = await supabase.rpc("admin_search_activity_log", {
           _q: undefined,
           _limit: pageSize,
           _offset: offset,
+          _from: fromIso,
+          _to: toIso,
         });
         if (error) {
           toast.error(error.message);
@@ -114,18 +131,23 @@ export function ActivityLogTab() {
         all.push(...page);
         if (page.length < pageSize) break;
         offset += pageSize;
-        if (all.length >= 100000) break; // safety cap
+        if (all.length >= 100000) break;
       }
       if (all.length === 0) {
         toast.info("Nothing to export");
         return;
       }
-      download(rowsToCsv(all), "all");
+      const suffix = ignoreDates
+        ? "all"
+        : `${fromDate || "start"}_to_${toDate || "now"}`;
+      download(rowsToCsv(all), suffix);
       toast.success(`Exported ${all.length} entries`);
     } finally {
       setExportingAll(false);
     }
   };
+
+  const hasRange = !!(fromDate || toDate);
 
   return (
     <div className="space-y-4">
@@ -141,20 +163,58 @@ export function ActivityLogTab() {
             Export filtered
           </button>
           <button
-            onClick={exportAll}
+            onClick={() => exportRange(false)}
+            disabled={exportingAll || !hasRange}
+            className="rounded-full border border-border bg-background px-3 py-1.5 text-xs font-semibold text-foreground transition hover:border-navy disabled:opacity-50"
+            title={hasRange ? "Export entries in the selected date range" : "Pick a from/to date first"}
+          >
+            {exportingAll ? "Exporting…" : "Export date range"}
+          </button>
+          <button
+            onClick={() => exportRange(true)}
             disabled={exportingAll}
             className="rounded-full bg-navy px-3 py-1.5 text-xs font-semibold text-navy-foreground transition hover:opacity-90 disabled:opacity-50"
           >
             {exportingAll ? "Exporting…" : "Export all"}
           </button>
         </div>
-
       </div>
       <Input
         placeholder="Search by action, admin, target user, email, phone…"
         value={q}
         onChange={(e) => setQ(e.target.value)}
       />
+      <div className="flex flex-wrap items-end gap-2">
+        <label className="flex flex-col text-xs text-muted-foreground">
+          From
+          <Input
+            type="date"
+            value={fromDate}
+            max={toDate || undefined}
+            onChange={(e) => setFromDate(e.target.value)}
+            className="w-[10rem]"
+          />
+        </label>
+        <label className="flex flex-col text-xs text-muted-foreground">
+          To
+          <Input
+            type="date"
+            value={toDate}
+            min={fromDate || undefined}
+            onChange={(e) => setToDate(e.target.value)}
+            className="w-[10rem]"
+          />
+        </label>
+        {hasRange && (
+          <button
+            onClick={() => { setFromDate(""); setToDate(""); }}
+            className="text-xs font-semibold text-muted-foreground underline-offset-2 hover:underline"
+          >
+            Clear dates
+          </button>
+        )}
+      </div>
+
 
       <div className="overflow-hidden rounded-xl border border-border bg-card">
         {loading && rows.length === 0 ? (
