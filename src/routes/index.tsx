@@ -158,8 +158,10 @@ function Index() {
 
   return (
     <Layout>
+      <SetLocationNudge />
       {/* HERO */}
       <section className="relative overflow-hidden bg-navy text-white">
+
         <div
           className="pointer-events-none absolute inset-x-0 bottom-0 h-48 opacity-25"
           style={{
