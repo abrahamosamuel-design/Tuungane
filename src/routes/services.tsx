@@ -38,6 +38,11 @@ type RealProvider = {
   seeded_status: string | null;
   updated_at: string;
   availability?: string | null;
+  area?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  areas_served?: string[] | null;
+  service_radius_km?: number | null;
   profile: { full_name: string; avatar_url: string | null } | null;
   trust_score: number;
   average_rating: number;
