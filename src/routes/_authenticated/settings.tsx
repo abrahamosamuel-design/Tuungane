@@ -211,7 +211,7 @@ function LocationSection() {
     setVisibility((location.location_visibility as "area" | "town" | "district" | "hidden") ?? "area");
   }, [location]);
 
-  const save = async (patch: Record<string, string>) => {
+  const save = async (patch: Partial<import("@/lib/location").UserLocation>) => {
     await updateLocation(patch);
     toast.success("Location saved");
   };
