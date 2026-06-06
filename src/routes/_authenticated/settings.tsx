@@ -26,6 +26,7 @@ function SettingsPage() {
   const [notif, setNotif] = useState({ requests: true, messages: true, credits: true, official: true });
   const [privacy, setPrivacy] = useState({ showPhone: true, whatsapp: true, calls: true, chatOnly: false });
   const [provider, setProvider] = useState({ availability: "", areas: "", category: "", contactPref: "" });
+  const [districtBounds, setDistrictBounds] = useState<Bounds | null>(null);
 
   useEffect(() => {
     if (!user) return;
