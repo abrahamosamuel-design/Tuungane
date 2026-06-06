@@ -93,6 +93,9 @@ function SettingsPage() {
           </button>
         </Section>
 
+        <LocationSection />
+
+
         <Section title="Notifications">
           <Toggle label="Request responses" checked={notif.requests} onChange={(v) => persist({ notif: { ...notif, requests: v } })} />
           <Toggle label="Messages" checked={notif.messages} onChange={(v) => persist({ notif: { ...notif, messages: v } })} />
