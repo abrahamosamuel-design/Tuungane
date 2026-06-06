@@ -12,6 +12,7 @@ import { useUserLocation } from "@/hooks/use-user-location";
 import { filterByRadius, proximityScore, type UserLocation } from "@/lib/location";
 import { NearYouBadge } from "@/components/NearYouBadge";
 import { RadiusFilter } from "@/components/RadiusFilter";
+import { useFeaturedLocations, isFeaturedTarget } from "@/hooks/use-featured-locations";
 
 const iconMap: Record<string, any> = { Wrench, Sparkles, Building2, Scissors, Truck, Car, GraduationCap, Camera, ChefHat, Laptop, HeartPulse, Sprout, MoreHorizontal };
 
