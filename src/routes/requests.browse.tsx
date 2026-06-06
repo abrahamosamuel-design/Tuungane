@@ -33,6 +33,7 @@ export const Route = createFileRoute("/requests/browse")({
 
 function BrowseRequests() {
   const { user } = useAuth();
+  const { location: userLoc } = useUserLocation();
   const [q, setQ] = useState("");
   const [loc, setLoc] = useState("");
   const [cat, setCat] = useState("");
