@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import "leaflet/dist/leaflet.css";
-import { Maximize2, Minimize2 } from "lucide-react";
-import { reverseGeocode, type ReverseGeocodeResult } from "@/lib/geocoding";
+import { Maximize2, Minimize2, Target } from "lucide-react";
+import { reverseGeocode, type ReverseGeocodeResult, type PrecisionInfo } from "@/lib/geocoding";
 
 type Props = {
   latitude?: number | null;
