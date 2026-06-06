@@ -85,7 +85,7 @@ function BusinessesPage() {
           <div className="mt-8">
             <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-navy"><Sparkles className="h-4 w-4 text-orange" /> Featured businesses</div>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {featured.map((p) => <BPageCard key={p.id} p={p} featured />)}
+              {featured.map((p) => <BPageCard key={p.id} p={p} featured userLoc={userLoc} />)}
             </div>
           </div>
         )}
