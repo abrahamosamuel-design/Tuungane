@@ -315,10 +315,24 @@ function Services() {
             ))}
           </div>
 
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+            <RadiusFilter value={radiusKm} onChange={setRadiusKm} disabled={!userLoc} />
+            {!userLoc && (
+              <span className="text-[11px] text-muted-foreground">Set your location in Settings to filter by distance.</span>
+            )}
+          </div>
+
+          {!loadingReal && radiusExpanded && (
+            <div className="mt-3 rounded-xl border border-orange/30 bg-orange/5 p-3 text-xs text-foreground/80">
+              Not many providers within {radiusKm} km yet.{" "}
+              <button onClick={() => setRadiusKm(null)} className="font-semibold text-orange underline">Show all providers</button>
+            </div>
+          )}
+
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {loadingReal && <p className="text-sm text-muted-foreground">Loading providers…</p>}
-            {!loadingReal && realFiltered.map((p) => <ProviderRow key={p.user_id} p={p} isBoosted={isBoostedProvider(p.user_id)} onRequest={() => nav({ to: "/u/$id", params: { id: p.user_id } })} />)}
-            {!loadingReal && realFiltered.length === 0 && (
+            {!loadingReal && realFiltered.map((p) => <ProviderRow key={p.user_id} p={p} isBoosted={isBoostedProvider(p.user_id)} userLoc={userLoc} onRequest={() => nav({ to: "/u/$id", params: { id: p.user_id } })} />)}
+            {!loadingReal && realFiltered.length === 0 && !radiusExpanded && (
               <div className="col-span-full">
                 <div className="rounded-2xl border border-dashed border-border bg-card p-8 text-center">
                   <h3 className="font-display text-lg font-bold text-navy">No providers listed yet</h3>
