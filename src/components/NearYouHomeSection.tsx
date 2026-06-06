@@ -49,22 +49,56 @@ export function NearYouHomeSection() {
     let cancelled = false;
     (async () => {
       setLoading(true);
-      const [{ data: reqs }, { data: provs }] = await Promise.all([
-        supabase
-          .from("service_requests")
-          .select("id,title,service_needed,description,budget_range,urgent_flag,created_at,district,town,area,location,latitude,longitude")
-          .eq("visibility", "public")
-          .eq("status", "requested")
-          .is("provider_id", null)
-          .order("created_at", { ascending: false })
-          .limit(40),
-        supabase
-          .from("service_profiles")
-          .select("user_id,business_name,subcategory,town,district,area,latitude,longitude,service_radius_km,areas_served,verified")
-          .eq("suspended", false)
-          .order("updated_at", { ascending: false })
-          .limit(40),
-      ]);
+      const hasCoords = userLoc?.latitude != null && userLoc?.longitude != null;
+      let reqs: NearbyRequest[] | null = null;
+      let provs: NearbyProvider[] | null = null;
+
+      if (hasCoords) {
+        // Server-side ranked, distance-bounded queries (scales beyond 40 rows).
+        const [{ data: rpcReqs }, { data: rpcProvs }] = await Promise.all([
+          supabase.rpc("nearby_service_requests", {
+            in_lat: userLoc!.latitude,
+            in_lng: userLoc!.longitude,
+            in_radius_km: 50,
+            in_limit: 20,
+          }),
+          supabase.rpc("nearby_service_profiles", {
+            in_lat: userLoc!.latitude,
+            in_lng: userLoc!.longitude,
+            in_radius_km: 50,
+            in_limit: 20,
+          }),
+        ]);
+        reqs = (rpcReqs ?? null) as NearbyRequest[] | null;
+        provs = (rpcProvs ?? null) as NearbyProvider[] | null;
+      }
+
+      // Fallback (no coords, or RPC returned nothing): recent activity, text-hierarchy ranking client-side.
+      if (!reqs || !provs) {
+        const [{ data: rRows }, { data: pRows }] = await Promise.all([
+          reqs
+            ? Promise.resolve({ data: reqs })
+            : supabase
+                .from("service_requests")
+                .select("id,title,service_needed,description,budget_range,urgent_flag,created_at,district,town,area,location,latitude,longitude")
+                .eq("visibility", "public")
+                .eq("status", "requested")
+                .is("provider_id", null)
+                .order("created_at", { ascending: false })
+                .limit(40),
+          provs
+            ? Promise.resolve({ data: provs })
+            : supabase
+                .from("service_profiles")
+                .select("user_id,business_name,subcategory,town,district,area,latitude,longitude,service_radius_km,areas_served,verified")
+                .eq("suspended", false)
+                .order("updated_at", { ascending: false })
+                .limit(40),
+        ]);
+        reqs = (rRows ?? []) as NearbyRequest[];
+        provs = (pRows ?? []) as NearbyProvider[];
+      }
+
       if (cancelled) return;
       const provIds = (provs ?? []).map((p) => p.user_id);
       const profMap = new Map<string, { full_name: string; avatar_url: string | null }>();
@@ -72,7 +106,7 @@ export function NearYouHomeSection() {
         const { data: profs } = await supabase.from("profiles").select("id,full_name,avatar_url").in("id", provIds);
         (profs ?? []).forEach((p) => profMap.set(p.id, p));
       }
-      setRequests((reqs ?? []) as NearbyRequest[]);
+      setRequests(reqs ?? []);
       setProviders(
         (provs ?? []).map((p: NearbyProvider) => ({ ...p, profile: profMap.get(p.user_id) ?? null })),
       );
@@ -81,7 +115,8 @@ export function NearYouHomeSection() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [userLoc?.latitude, userLoc?.longitude]);
+
 
   const topRequests = useMemo(() => {
     const sorted = sortByProximity(requests, userLoc, (r) => r);
