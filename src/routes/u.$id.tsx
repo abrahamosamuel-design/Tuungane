@@ -19,6 +19,7 @@ import { RequestServiceDialog } from "@/components/RequestServiceDialog";
 import { VerifiedReviewBadge } from "@/components/VerifiedReviewBadge";
 import { uploadMedia } from "@/lib/upload";
 import { timeAgo } from "@/lib/format";
+import { maskProfileLocation } from "@/lib/location-visibility";
 import { getCategory } from "@/data/categories";
 import { toast } from "sonner";
 import { useActiveBoosts } from "@/hooks/use-boosts";
@@ -54,7 +55,7 @@ const TABS: { id: Tab; label: string; providerOnly?: boolean }[] = [
 function UserProfile() {
   const { id } = useParams({ from: "/u/$id" });
   const { user } = useAuth();
-  const [profile, setProfile] = useState<{ full_name: string; avatar_url: string | null; bio: string | null; town: string | null; district: string | null; is_provider: boolean } | null>(null);
+  const [profile, setProfile] = useState<{ full_name: string; avatar_url: string | null; bio: string | null; town: string | null; district: string | null; area: string | null; location_visibility: string | null; is_provider: boolean } | null>(null);
   const [sp, setSp] = useState<{ business_name: string | null; subcategory: string; bio: string; town: string; district: string; phone: string | null; whatsapp: string | null; email: string | null; verified: string; category_slug: string; years_experience: number; areas_served: string[]; availability: string; cover_url: string | null; seeded_by_official: boolean; seeded_status: string | null } | null>(null);
   const [posts, setPosts] = useState<PostRow[]>([]);
   
@@ -72,8 +73,10 @@ function UserProfile() {
   const [feedback, setFeedback] = useState<Array<{ id: string; rating: number; review_text: string; service_provided: string; created_at: string; customer_id: string; would_recommend: boolean; profile?: { full_name: string; avatar_url: string | null } }>>([]);
 
   const load = async () => {
-    const { data: p } = await supabase.from("profiles").select("full_name,avatar_url,bio,town,district,is_provider").eq("id", id).maybeSingle();
-    setProfile(p);
+    const { data: p } = await supabase.from("profiles").select("full_name,avatar_url,bio,town,district,area,location_visibility,is_provider").eq("id", id).maybeSingle();
+    // Enforce profile.location_visibility for non-owners.
+    const masked = p ? maskProfileLocation(p, user?.id === id) : null;
+    setProfile(masked as typeof profile);
     const { data: s } = user
       ? await supabase.from("service_profiles").select("business_name,subcategory,bio,town,district,phone,whatsapp,email,verified,category_slug,years_experience,areas_served,availability,cover_url,seeded_by_official,seeded_status").eq("user_id", id).maybeSingle()
       : await supabase.from("service_profiles").select("business_name,subcategory,bio,town,district,verified,category_slug,years_experience,areas_served,availability,cover_url,seeded_by_official,seeded_status").eq("user_id", id).maybeSingle();
