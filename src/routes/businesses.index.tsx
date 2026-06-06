@@ -106,7 +106,7 @@ function BusinessesPage() {
             </div>
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {rest.map((p) => <BPageCard key={p.id} p={p} />)}
+              {rest.map((p) => <BPageCard key={p.id} p={p} userLoc={userLoc} />)}
             </div>
           )}
         </div>
@@ -115,13 +115,17 @@ function BusinessesPage() {
   );
 }
 
-function BPageCard({ p, featured }: { p: BPage; featured?: boolean }) {
+function BPageCard({ p, featured, userLoc }: { p: BPage; featured?: boolean; userLoc?: UserLocation | null }) {
+  const near = proximityLabel(userLoc ?? null, p);
   return (
     <Link to="/businesses/$slug" params={{ slug: p.slug }} className="group block overflow-hidden rounded-2xl border border-border bg-card transition hover:border-orange/60 hover:shadow-[var(--shadow-card)]">
       <div className="relative h-28 w-full bg-gradient-to-br from-orange/20 via-orange/5 to-navy/10">
         {p.cover_url && <img src={p.cover_url} alt="" className="h-full w-full object-cover" />}
         {featured && (
           <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-full bg-orange px-2 py-0.5 text-xs font-semibold text-orange-foreground"><Sparkles className="h-3 w-3" /> Featured</span>
+        )}
+        {near && (
+          <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full bg-green px-2 py-0.5 text-[11px] font-semibold text-white"><MapPin className="h-3 w-3" /> {near}</span>
         )}
       </div>
       <div className="-mt-6 flex items-end gap-3 px-4">
