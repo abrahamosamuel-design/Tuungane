@@ -68,10 +68,23 @@ export function useUserLocation() {
     return new Promise<UserLocation | null>((resolve) => {
       navigator.geolocation.getCurrentPosition(
         async (pos) => {
-          const next = await updateLocation({
-            latitude: pos.coords.latitude,
-            longitude: pos.coords.longitude,
-          });
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+          // Reverse-geocode so text-hierarchy ranking also works,
+          // not just lat/lng. Failure here is non-fatal — we still save coords.
+          const geo = await reverseGeocode(lat, lng);
+          const patch: Partial<UserLocation> = { latitude: lat, longitude: lng };
+          if (geo) {
+            // Only overwrite empty fields, so user-typed values aren't clobbered.
+            const cur = location ?? {};
+            if (!cur.country && geo.country) patch.country = geo.country;
+            if (!cur.region && geo.region) patch.region = geo.region;
+            if (!cur.district && geo.district) patch.district = geo.district;
+            if (!cur.city && geo.city) patch.city = geo.city;
+            if (!cur.town && geo.town) patch.town = geo.town;
+            if (!cur.area && geo.area) patch.area = geo.area;
+          }
+          const next = await updateLocation(patch);
           setRequestingGeo(false);
           resolve(next);
         },
@@ -82,7 +95,7 @@ export function useUserLocation() {
         { enableHighAccuracy: false, timeout: 8000, maximumAge: 60000 },
       );
     });
-  }, [updateLocation]);
+  }, [updateLocation, location]);
 
   return { location, loading, requestingGeo, updateLocation, requestBrowserLocation };
 }
