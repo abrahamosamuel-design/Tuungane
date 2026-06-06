@@ -42,6 +42,7 @@ function BrowseRequests() {
   const [urgentOnly, setUrgentOnly] = useState(false);
   const [budgetShown, setBudgetShown] = useState(false);
   const [nearMe, setNearMe] = useState(false);
+  const [radiusKm, setRadiusKm] = useState<number | null>(null);
   const [myDistrict, setMyDistrict] = useState<string | null>(null);
   const [items, setItems] = useState<RequestRowLite[]>([]);
   const [loading, setLoading] = useState(true);
