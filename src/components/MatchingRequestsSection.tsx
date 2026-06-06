@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Briefcase, ArrowRight, MapPin, Star } from "lucide-react";
+import { Briefcase, ArrowRight, MapPin, Star, Info } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useBoostedSet } from "@/hooks/use-boosted-set";
@@ -12,6 +12,7 @@ import { proximityScore, haversineKm, type TargetLocation } from "@/lib/location
 import { NearYouBadge } from "@/components/NearYouBadge";
 import { RadiusFilter, RADIUS_OPTIONS } from "@/components/RadiusFilter";
 import { useOnlineStatus } from "@/components/OfflineBanner";
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/components/ui/tooltip";
 
 const targetOf = (r: ServiceRequestRow): TargetLocation => ({
   district: r.district,
