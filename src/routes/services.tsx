@@ -77,6 +77,7 @@ function Avatar({ name, src, size = 56 }: { name: string; src?: string | null; s
 
 function Services() {
   const nav = useNavigate();
+  const { location: userLoc } = useUserLocation();
   const [q, setQ] = useState("");
   const [loc, setLoc] = useState("");
   const [filter, setFilter] = useState<RealFilter>("all");
@@ -86,7 +87,7 @@ function Services() {
   useEffect(() => {
     (async () => {
       setLoadingReal(true);
-      let qy = supabase.from("service_profiles").select("user_id,business_name,subcategory,bio,town,district,category_slug,verified,seeded_by_official,seeded_status,updated_at,availability").eq("suspended", false).order("updated_at", { ascending: false }).limit(60);
+      let qy = supabase.from("service_profiles").select("user_id,business_name,subcategory,bio,town,district,area,latitude,longitude,areas_served,service_radius_km,category_slug,verified,seeded_by_official,seeded_status,updated_at,availability").eq("suspended", false).order("updated_at", { ascending: false }).limit(60);
       if (filter === "featured") qy = qy.eq("verified", "featured");
       if (filter === "verified") qy = qy.in("verified", ["verified", "featured"]);
       if (filter === "available") qy = qy.eq("availability", "available");
