@@ -27,7 +27,7 @@ export function SetLocationNudge() {
 
   const hasLocation = !!(
     location &&
-    (location.district || location.town || location.area || (location.lat && location.lng))
+    (location.district || location.town || location.area || (location.latitude && location.longitude))
   );
   if (hasLocation) return null;
 
