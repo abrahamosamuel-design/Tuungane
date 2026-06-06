@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useUserLocation } from "@/hooks/use-user-location";
 import { toast } from "sonner";
 import { MapPin, Loader2 } from "lucide-react";
+import { AreaAutocomplete } from "@/components/AreaAutocomplete";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({ meta: [{ title: "Settings — Tuungane" }] }),
