@@ -9,7 +9,9 @@ import { EmptyState } from "@/components/EmptyState";
 import { ProviderTrackCTA } from "@/components/cta/ProviderTrackCTA";
 import { ListYourSkillButton } from "@/components/cta/ListYourSkillButton";
 import { useUserLocation } from "@/hooks/use-user-location";
-import { proximityScore } from "@/lib/location";
+import { filterByRadius, proximityScore, type UserLocation } from "@/lib/location";
+import { NearYouBadge } from "@/components/NearYouBadge";
+import { RadiusFilter } from "@/components/RadiusFilter";
 
 const iconMap: Record<string, any> = { Wrench, Sparkles, Building2, Scissors, Truck, Car, GraduationCap, Camera, ChefHat, Laptop, HeartPulse, Sprout, MoreHorizontal };
 
