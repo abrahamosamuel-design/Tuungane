@@ -12,6 +12,7 @@ import { useUserLocation } from "@/hooks/use-user-location";
 import { filterByRadius, proximityScore, type UserLocation } from "@/lib/location";
 import { NearYouBadge } from "@/components/NearYouBadge";
 import { RadiusFilter } from "@/components/RadiusFilter";
+import { useFeaturedLocations, isFeaturedTarget } from "@/hooks/use-featured-locations";
 
 const iconMap: Record<string, any> = { Wrench, Sparkles, Building2, Scissors, Truck, Car, GraduationCap, Camera, ChefHat, Laptop, HeartPulse, Sprout, MoreHorizontal };
 
@@ -80,6 +81,7 @@ function Avatar({ name, src, size = 56 }: { name: string; src?: string | null; s
 function Services() {
   const nav = useNavigate();
   const { location: userLoc } = useUserLocation();
+  const { locations: featuredLocs } = useFeaturedLocations();
   const [q, setQ] = useState("");
   const [loc, setLoc] = useState("");
   const [filter, setFilter] = useState<RealFilter>("all");
@@ -135,6 +137,9 @@ function Services() {
     if (loc && (p.town.toLowerCase().includes(loc.toLowerCase()) || p.district.toLowerCase().includes(loc.toLowerCase()))) s += 15;
     // Proximity bonus: heavily weight closeness to the signed-in user's location.
     s += proximityScore(userLoc, p) * 0.6;
+    // Admin-curated featured location bonus
+    const feat = isFeaturedTarget(p, featuredLocs, p.category_slug);
+    if (feat) s += 25 + Math.max(0, feat.priority);
     const daysOld = (now - new Date(p.updated_at).getTime()) / 86400000;
     if (daysOld < 30) s += 10;
     else if (daysOld < 90) s += 5;
@@ -153,7 +158,7 @@ function Services() {
       })
       .sort((a, b) => scoreProvider(b) - scoreProvider(a));
     return filterByRadius(base, userLoc, (p) => p, radiusKm);
-  }, [real, q, loc, filter, radiusKm, userLoc]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [real, q, loc, filter, radiusKm, userLoc, featuredLocs]); // eslint-disable-line react-hooks/exhaustive-deps
   const radiusExpanded = radiusKm != null && userLoc && realFiltered.length === 0 && real.length > 0;
 
   const recommended = useMemo(() => {

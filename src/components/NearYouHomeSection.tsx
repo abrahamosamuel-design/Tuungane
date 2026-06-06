@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { MapPin, ArrowRight, ClipboardList, BadgeCheck } from "lucide-react";
+import { MapPin, ArrowRight, ClipboardList, BadgeCheck, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserLocation } from "@/hooks/use-user-location";
 import { filterByRadius, proximityLabel, sortByProximity } from "@/lib/location";
+import { useFeaturedLocations, isFeaturedTarget } from "@/hooks/use-featured-locations";
 import { timeAgo } from "@/lib/format";
 
 type NearbyRequest = {
@@ -39,6 +40,7 @@ type NearbyProvider = {
 
 export function NearYouHomeSection() {
   const { location: userLoc } = useUserLocation();
+  const { locations: featured } = useFeaturedLocations();
   const [requests, setRequests] = useState<NearbyRequest[]>([]);
   const [providers, setProviders] = useState<NearbyProvider[]>([]);
   const [loading, setLoading] = useState(true);
@@ -83,18 +85,29 @@ export function NearYouHomeSection() {
 
   const topRequests = useMemo(() => {
     const sorted = sortByProximity(requests, userLoc, (r) => r);
-    const withinDefault = filterByRadius(sorted, userLoc, (r) => r, 20);
-    return (withinDefault.length >= 2 ? withinDefault : sorted).slice(0, 3);
-  }, [requests, userLoc]);
+    // Featured-location boost: items in featured locations float to the top of the list.
+    const boosted = [...sorted].sort((a, b) => {
+      const af = isFeaturedTarget(a, featured) ? 1 : 0;
+      const bf = isFeaturedTarget(b, featured) ? 1 : 0;
+      return bf - af;
+    });
+    const withinDefault = filterByRadius(boosted, userLoc, (r) => r, 20);
+    return (withinDefault.length >= 2 ? withinDefault : boosted).slice(0, 3);
+  }, [requests, userLoc, featured]);
 
   const expandedRequests = userLoc && requests.length > 0 && topRequests.length > 0 &&
     filterByRadius(requests, userLoc, (r) => r, 20).length < 2;
 
   const topProviders = useMemo(() => {
     const sorted = sortByProximity(providers, userLoc, (p) => p);
-    const withinDefault = filterByRadius(sorted, userLoc, (p) => p, 20);
-    return (withinDefault.length >= 2 ? withinDefault : sorted).slice(0, 3);
-  }, [providers, userLoc]);
+    const boosted = [...sorted].sort((a, b) => {
+      const af = isFeaturedTarget(a, featured) ? 1 : 0;
+      const bf = isFeaturedTarget(b, featured) ? 1 : 0;
+      return bf - af;
+    });
+    const withinDefault = filterByRadius(boosted, userLoc, (p) => p, 20);
+    return (withinDefault.length >= 2 ? withinDefault : boosted).slice(0, 3);
+  }, [providers, userLoc, featured]);
 
   if (loading) return null;
 
@@ -131,6 +144,7 @@ export function NearYouHomeSection() {
               const near = proximityLabel(userLoc, r);
               const title = r.title?.trim() || r.service_needed || "Request";
               const loc = r.area || r.town || r.district || r.location || "Uganda";
+              const feat = isFeaturedTarget(r, featured);
               return (
                 <Link
                   to="/requests/$id"
@@ -153,11 +167,18 @@ export function NearYouHomeSection() {
                   {r.budget_range && (
                     <p className="mt-1 text-xs font-semibold text-orange">{r.budget_range}</p>
                   )}
-                  {near && (
-                    <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-green/10 px-2 py-0.5 text-[10px] font-semibold text-green">
-                      <MapPin className="h-3 w-3" /> {near}
-                    </span>
-                  )}
+                  <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                    {near && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-green/10 px-2 py-0.5 text-[10px] font-semibold text-green">
+                        <MapPin className="h-3 w-3" /> {near}
+                      </span>
+                    )}
+                    {feat && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-orange/10 px-2 py-0.5 text-[10px] font-semibold text-orange">
+                        <Star className="h-3 w-3" /> Featured area
+                      </span>
+                    )}
+                  </div>
                 </Link>
               );
             })}
@@ -178,6 +199,7 @@ export function NearYouHomeSection() {
               const near = proximityLabel(userLoc, p);
               const name = p.business_name || p.profile?.full_name || "Provider";
               const verified = p.verified === "verified" || p.verified === "featured";
+              const feat = isFeaturedTarget(p, featured);
               return (
                 <Link
                   to="/u/$id"
@@ -193,11 +215,18 @@ export function NearYouHomeSection() {
                   <p className="mt-1 inline-flex items-center gap-1 text-[11px] text-muted-foreground">
                     <MapPin className="h-3 w-3" /> {p.area || p.town || p.district || "Uganda"}
                   </p>
-                  {near && (
-                    <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-green/10 px-2 py-0.5 text-[10px] font-semibold text-green">
-                      <MapPin className="h-3 w-3" /> {near}
-                    </span>
-                  )}
+                  <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                    {near && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-green/10 px-2 py-0.5 text-[10px] font-semibold text-green">
+                        <MapPin className="h-3 w-3" /> {near}
+                      </span>
+                    )}
+                    {feat && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-orange/10 px-2 py-0.5 text-[10px] font-semibold text-orange">
+                        <Star className="h-3 w-3" /> Featured area
+                      </span>
+                    )}
+                  </div>
                 </Link>
               );
             })}
