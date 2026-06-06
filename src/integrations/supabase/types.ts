@@ -482,6 +482,60 @@ export type Database = {
         }
         Relationships: []
       }
+      featured_locations: {
+        Row: {
+          active: boolean
+          area: string | null
+          category_slug: string | null
+          country: string
+          created_at: string
+          created_by_admin_id: string | null
+          district: string | null
+          id: string
+          latitude: number | null
+          longitude: number | null
+          note: string | null
+          priority: number
+          region: string | null
+          town: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          area?: string | null
+          category_slug?: string | null
+          country?: string
+          created_at?: string
+          created_by_admin_id?: string | null
+          district?: string | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          note?: string | null
+          priority?: number
+          region?: string | null
+          town?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          area?: string | null
+          category_slug?: string | null
+          country?: string
+          created_at?: string
+          created_by_admin_id?: string | null
+          district?: string | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          note?: string | null
+          priority?: number
+          region?: string | null
+          town?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       follows: {
         Row: {
           created_at: string
