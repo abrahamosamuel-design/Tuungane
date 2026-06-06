@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { MapPin, ArrowRight, ClipboardList, BadgeCheck } from "lucide-react";
+import { MapPin, ArrowRight, ClipboardList, BadgeCheck, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserLocation } from "@/hooks/use-user-location";
 import { filterByRadius, proximityLabel, sortByProximity } from "@/lib/location";
+import { useFeaturedLocations, isFeaturedTarget } from "@/hooks/use-featured-locations";
 import { timeAgo } from "@/lib/format";
 
 type NearbyRequest = {
