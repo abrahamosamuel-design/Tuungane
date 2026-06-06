@@ -164,7 +164,18 @@ function Feed() {
           {loading && <p className="text-sm text-muted-foreground">Loading...</p>}
 
           {!loading && tab === "posts" && (() => {
-            const sortedPosts = [...posts].sort((a, b) => Number(isBoostedPost(b.id)) - Number(isBoostedPost(a.id)));
+            const byProx = sortByProximity(posts, userLoc, (p) => {
+              const a = (p as PostRow & { author?: { district?: string | null; town?: string | null; area?: string | null; latitude?: number | null; longitude?: number | null } }).author;
+              const t: TargetLocation = {
+                district: (p as PostRow & { district?: string | null }).district ?? a?.district ?? null,
+                town: (p as PostRow & { town?: string | null }).town ?? a?.town ?? null,
+                area: (p as PostRow & { area?: string | null }).area ?? a?.area ?? null,
+                latitude: (p as PostRow & { latitude?: number | null }).latitude ?? a?.latitude ?? null,
+                longitude: (p as PostRow & { longitude?: number | null }).longitude ?? a?.longitude ?? null,
+              };
+              return t;
+            });
+            const sortedPosts = [...byProx].sort((a, b) => Number(isBoostedPost(b.id)) - Number(isBoostedPost(a.id)));
             return (
               <>
                 {officialToShow.map((p) => <OfficialPostCard key={`op-${p.id}`} post={p} account={officialAccount} />)}
