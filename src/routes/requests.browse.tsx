@@ -14,6 +14,8 @@ import {
   type RequestFilterChip,
 } from "@/data/requestTypes";
 import { useAuth } from "@/hooks/use-auth";
+import { useUserLocation } from "@/hooks/use-user-location";
+import { sortByProximity } from "@/lib/location";
 
 export const Route = createFileRoute("/requests/browse")({
   head: () => ({
