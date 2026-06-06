@@ -1735,23 +1735,47 @@ export type Database = {
         }
         Returns: undefined
       }
-      admin_search_activity_log: {
-        Args: { _limit?: number; _offset?: number; _q?: string }
-        Returns: {
-          action: string
-          actor_email: string
-          actor_name: string
-          actor_user_id: string
-          created_at: string
-          details: Json
-          id: string
-          target_email: string
-          target_id: string
-          target_name: string
-          target_type: string
-          target_user_id: string
-        }[]
-      }
+      admin_search_activity_log:
+        | {
+            Args: { _limit?: number; _offset?: number; _q?: string }
+            Returns: {
+              action: string
+              actor_email: string
+              actor_name: string
+              actor_user_id: string
+              created_at: string
+              details: Json
+              id: string
+              target_email: string
+              target_id: string
+              target_name: string
+              target_type: string
+              target_user_id: string
+            }[]
+          }
+        | {
+            Args: {
+              _from?: string
+              _limit?: number
+              _offset?: number
+              _q?: string
+              _to?: string
+            }
+            Returns: {
+              action: string
+              actor_email: string
+              actor_name: string
+              actor_user_id: string
+              created_at: string
+              details: Json
+              id: string
+              target_email: string
+              target_id: string
+              target_name: string
+              target_type: string
+              target_user_id: string
+            }[]
+          }
       approve_purchase_request: {
         Args: {
           _admin_note?: string
