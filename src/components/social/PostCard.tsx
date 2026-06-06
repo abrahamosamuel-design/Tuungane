@@ -162,6 +162,18 @@ export function PostCard({ post, onChanged, userLoc }: Props) {
               </div>
             </Link>
             <div className="flex flex-wrap items-center gap-1">
+              {userLoc && (
+                <NearYouBadge
+                  user={userLoc}
+                  target={{
+                    district: post.district ?? post.author?.district ?? null,
+                    town: post.town ?? post.author?.town ?? null,
+                    area: post.area ?? post.author?.area ?? null,
+                    latitude: post.latitude ?? post.author?.latitude ?? null,
+                    longitude: post.longitude ?? post.author?.longitude ?? null,
+                  } as TargetLocation}
+                />
+              )}
               {post.featured && <span className="rounded-full bg-orange/10 px-2 py-0.5 text-xs font-medium text-orange">Featured</span>}
               {boosts.map((b) => <BoostBadge key={b.id} type={b.boost_type} />)}
               {post.hidden && <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive">Hidden</span>}
