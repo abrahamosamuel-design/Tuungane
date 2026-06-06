@@ -1832,6 +1832,10 @@ export type Database = {
       }
     }
     Functions: {
+      _haversine_km: {
+        Args: { lat1: number; lat2: number; lon1: number; lon2: number }
+        Returns: number
+      }
       admin_add_credits: {
         Args: { _amount: number; _reason?: string; _user_id: string }
         Returns: undefined
@@ -2016,6 +2020,53 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      nearby_service_profiles: {
+        Args: {
+          in_lat: number
+          in_limit?: number
+          in_lng: number
+          in_radius_km?: number
+        }
+        Returns: {
+          area: string
+          areas_served: string[]
+          business_name: string
+          category_slug: string
+          distance_km: number
+          district: string
+          latitude: number
+          longitude: number
+          service_radius_km: number
+          subcategory: string
+          town: string
+          user_id: string
+          verified: string
+        }[]
+      }
+      nearby_service_requests: {
+        Args: {
+          in_lat: number
+          in_limit?: number
+          in_lng: number
+          in_radius_km?: number
+        }
+        Returns: {
+          area: string
+          budget_range: string
+          created_at: string
+          description: string
+          distance_km: number
+          district: string
+          id: string
+          latitude: number
+          location: string
+          longitude: number
+          service_needed: string
+          title: string
+          town: string
+          urgent_flag: boolean
+        }[]
       }
       reject_purchase_request: {
         Args: { _admin_note?: string; _request_id: string }
