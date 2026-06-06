@@ -85,18 +85,29 @@ export function NearYouHomeSection() {
 
   const topRequests = useMemo(() => {
     const sorted = sortByProximity(requests, userLoc, (r) => r);
-    const withinDefault = filterByRadius(sorted, userLoc, (r) => r, 20);
-    return (withinDefault.length >= 2 ? withinDefault : sorted).slice(0, 3);
-  }, [requests, userLoc]);
+    // Featured-location boost: items in featured locations float to the top of the list.
+    const boosted = [...sorted].sort((a, b) => {
+      const af = isFeaturedTarget(a, featured) ? 1 : 0;
+      const bf = isFeaturedTarget(b, featured) ? 1 : 0;
+      return bf - af;
+    });
+    const withinDefault = filterByRadius(boosted, userLoc, (r) => r, 20);
+    return (withinDefault.length >= 2 ? withinDefault : boosted).slice(0, 3);
+  }, [requests, userLoc, featured]);
 
   const expandedRequests = userLoc && requests.length > 0 && topRequests.length > 0 &&
     filterByRadius(requests, userLoc, (r) => r, 20).length < 2;
 
   const topProviders = useMemo(() => {
     const sorted = sortByProximity(providers, userLoc, (p) => p);
-    const withinDefault = filterByRadius(sorted, userLoc, (p) => p, 20);
-    return (withinDefault.length >= 2 ? withinDefault : sorted).slice(0, 3);
-  }, [providers, userLoc]);
+    const boosted = [...sorted].sort((a, b) => {
+      const af = isFeaturedTarget(a, featured) ? 1 : 0;
+      const bf = isFeaturedTarget(b, featured) ? 1 : 0;
+      return bf - af;
+    });
+    const withinDefault = filterByRadius(boosted, userLoc, (p) => p, 20);
+    return (withinDefault.length >= 2 ? withinDefault : boosted).slice(0, 3);
+  }, [providers, userLoc, featured]);
 
   if (loading) return null;
 
