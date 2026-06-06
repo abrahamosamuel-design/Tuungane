@@ -19,22 +19,47 @@ const targetOf = (r: ServiceRequestRow): TargetLocation => ({
 });
 
 const DEFAULT_RADIUS = 10;
-const CACHE_TTL = 60_000; // 1 min — cached across remounts/navigation
+const MEM_TTL = 60_000; // 1 min — fresh, no refetch
+const DISK_TTL = 10 * 60_000; // 10 min — instant render after refresh, then revalidate
 
 type CacheEntry = { at: number; rows: ServiceRequestRow[] };
-const _cache = new Map<string, CacheEntry>();
+const _mem = new Map<string, CacheEntry>();
+const storageKey = (uid: string) => `tuungane:matching_requests:${uid}`;
+
+function readDisk(uid: string): CacheEntry | null {
+  try {
+    const raw = localStorage.getItem(storageKey(uid));
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as CacheEntry;
+    if (!parsed?.at || !Array.isArray(parsed.rows)) return null;
+    if (Date.now() - parsed.at > DISK_TTL) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function writeDisk(uid: string, entry: CacheEntry) {
+  try {
+    localStorage.setItem(storageKey(uid), JSON.stringify(entry));
+  } catch {
+    // Quota or private mode — non-fatal.
+  }
+}
+
+function readCache(uid: string): CacheEntry | null {
+  return _mem.get(uid) ?? readDisk(uid);
+}
 
 export function MatchingRequestsSection() {
   const { user } = useAuth();
   const [items, setItems] = useState<ServiceRequestRow[]>(() => {
     if (!user) return [];
-    const c = _cache.get(user.id);
-    return c && Date.now() - c.at < CACHE_TTL ? c.rows : [];
+    return readCache(user.id)?.rows ?? [];
   });
   const [loaded, setLoaded] = useState(() => {
     if (!user) return false;
-    const c = _cache.get(user.id);
-    return !!(c && Date.now() - c.at < CACHE_TTL);
+    return !!readCache(user.id);
   });
   const [radius, setRadius] = useState<number | null>(DEFAULT_RADIUS);
   const { has: isBoostedReq } = useBoostedSet("service_request", ["urgent_request"]);
@@ -43,11 +68,12 @@ export function MatchingRequestsSection() {
 
   useEffect(() => {
     if (!user) return;
-    const c = _cache.get(user.id);
-    if (c && Date.now() - c.at < CACHE_TTL) {
-      setItems(c.rows);
+    const cached = readCache(user.id);
+    if (cached) {
+      setItems(cached.rows);
       setLoaded(true);
-      return;
+      // Stale-while-revalidate: skip network if memory copy is still fresh.
+      if (Date.now() - cached.at < MEM_TTL) return;
     }
     let cancelled = false;
     (async () => {
@@ -55,7 +81,9 @@ export function MatchingRequestsSection() {
       if (cancelled) return;
       if (!error && data) {
         const rows = data as ServiceRequestRow[];
-        _cache.set(user.id, { at: Date.now(), rows });
+        const entry: CacheEntry = { at: Date.now(), rows };
+        _mem.set(user.id, entry);
+        writeDisk(user.id, entry);
         setItems(rows);
       }
       setLoaded(true);
