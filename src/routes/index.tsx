@@ -26,6 +26,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { listSkillHref } from "@/lib/cta";
 import heroNetwork from "@/assets/hero-network.jpg";
 import { NearYouHomeSection } from "@/components/NearYouHomeSection";
+import { SetLocationNudge } from "@/components/SetLocationNudge";
 
 // Curated category set for the homepage tile grid
 const HOME_CATEGORY_SLUGS = ["home-repair", "cleaning", "automotive", "beauty", "education"];
