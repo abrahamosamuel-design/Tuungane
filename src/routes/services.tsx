@@ -137,6 +137,9 @@ function Services() {
     if (loc && (p.town.toLowerCase().includes(loc.toLowerCase()) || p.district.toLowerCase().includes(loc.toLowerCase()))) s += 15;
     // Proximity bonus: heavily weight closeness to the signed-in user's location.
     s += proximityScore(userLoc, p) * 0.6;
+    // Admin-curated featured location bonus
+    const feat = isFeaturedTarget(p, featuredLocs, p.category_slug);
+    if (feat) s += 25 + Math.max(0, feat.priority);
     const daysOld = (now - new Date(p.updated_at).getTime()) / 86400000;
     if (daysOld < 30) s += 10;
     else if (daysOld < 90) s += 5;
