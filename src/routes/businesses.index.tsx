@@ -30,6 +30,7 @@ function BusinessesPage() {
   const [pages, setPages] = useState<BPage[]>([]);
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<string>("");
+  const [radiusKm, setRadiusKm] = useState<number | null>(null);
 
   useEffect(() => {
     (async () => {
