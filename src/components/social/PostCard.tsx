@@ -15,6 +15,8 @@ import { BoostButton } from "@/components/BoostButton";
 import { PostShell } from "./PostShell";
 import { PostText } from "./PostText";
 import { PostMedia } from "./PostMedia";
+import { NearYouBadge } from "@/components/NearYouBadge";
+import type { TargetLocation, UserLocation } from "@/lib/location";
 
 export interface PostRow {
   id: string;
@@ -28,10 +30,24 @@ export interface PostRow {
   created_at: string;
   post_type?: PostTypeValue | null;
   title?: string | null;
-  author?: { full_name: string; avatar_url: string | null; is_provider: boolean };
+  district?: string | null;
+  town?: string | null;
+  area?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  author?: {
+    full_name: string;
+    avatar_url: string | null;
+    is_provider: boolean;
+    district?: string | null;
+    town?: string | null;
+    area?: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
+  };
 }
 
-interface Props { post: PostRow; onChanged?: () => void; }
+interface Props { post: PostRow; onChanged?: () => void; userLoc?: UserLocation | null }
 
 export function PostCard({ post, onChanged }: Props) {
   const { user, isModerator } = useAuth();
