@@ -57,6 +57,8 @@ export function MatchingRequestsSection() {
   const { user } = useAuth();
   const online = useOnlineStatus();
   const [now, setNow] = useState(Date.now());
+  const [tipOpen, setTipOpen] = useState(false);
+  const tipTriggerRef = useRef<HTMLButtonElement>(null);
   const [items, setItems] = useState<ServiceRequestRow[]>(() => {
     if (!user) return [];
     return readCache(user.id)?.rows ?? [];
@@ -73,6 +75,31 @@ export function MatchingRequestsSection() {
   const { has: isBoostedReq } = useBoostedSet("service_request", ["urgent_request"]);
   const { location: userLoc } = useUserLocation();
   const { locations: featured } = useFeaturedLocations();
+
+  // Auto-dismiss tooltip after 3s, on scroll, or on outside tap/click.
+  useEffect(() => {
+    if (!tipOpen) return;
+    const close = () => setTipOpen(false);
+    const timer = setTimeout(close, 3000);
+    const onScroll = () => close();
+    const onClick = (e: MouseEvent) => {
+      if (tipTriggerRef.current?.contains(e.target as Node)) return;
+      close();
+    };
+    const onTouch = (e: TouchEvent) => {
+      if (tipTriggerRef.current?.contains(e.target as Node)) return;
+      close();
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    document.addEventListener("click", onClick);
+    document.addEventListener("touchstart", onTouch);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("scroll", onScroll);
+      document.removeEventListener("click", onClick);
+      document.removeEventListener("touchstart", onTouch);
+    };
+  }, [tipOpen]);
 
   // Keep the displayed age exact by updating `now` every 15 s while mounted.
   useEffect(() => {
