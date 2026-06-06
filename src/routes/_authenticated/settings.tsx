@@ -200,6 +200,7 @@ function LocationSection() {
   const [city, setCity] = useState("");
   const [town, setTown] = useState("");
   const [area, setArea] = useState("");
+  const [districtBounds, setDistrictBounds] = useState<Bounds | null>(null);
   const [visibility, setVisibility] = useState<"area" | "town" | "district" | "hidden">("area");
 
   useEffect(() => {
