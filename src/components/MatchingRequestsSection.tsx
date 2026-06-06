@@ -171,9 +171,20 @@ export function MatchingRequestsSection() {
         <Link to="/services/requests" className="inline-flex items-center gap-1 text-xs font-semibold text-orange hover:underline">Open feed <ArrowRight className="h-3 w-3" /></Link>
       </div>
       {!online && cachedAt && (
-        <p className="mt-2 text-[11px] font-medium text-amber-700">
-          Offline · showing saved results from {Math.max(1, Math.round((now - cachedAt) / 60_000))} min ago
-        </p>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <p className="mt-2 inline-flex items-center gap-1 text-[11px] font-medium text-amber-700 cursor-help">
+                Offline · showing saved results from {Math.max(1, Math.round((now - cachedAt) / 60_000))} min ago
+                <Info className="h-3 w-3 opacity-70" />
+              </p>
+            </TooltipTrigger>
+            <TooltipContent side="bottom" className="space-y-1 text-[11px]">
+              <p><span className="font-semibold">Fetched:</span> {new Date(cachedAt).toLocaleTimeString()}</p>
+              <p><span className="font-semibold">Revalidates:</span> {new Date(cachedAt + MEM_TTL).toLocaleTimeString()}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       )}
       {userLoc && (
         <div className="mt-3">
