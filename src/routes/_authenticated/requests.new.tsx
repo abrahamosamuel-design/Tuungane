@@ -30,8 +30,10 @@ export const Route = createFileRoute("/_authenticated/requests/new")({
 function NewRequest() {
   const search = useSearch({ from: "/_authenticated/requests/new" });
   const { user, loading } = useAuth();
+  const { location: profileLoc, requestingGeo, requestBrowserLocation } = useUserLocation();
   const nav = useNavigate();
   const [busy, setBusy] = useState(false);
+  const [autofilled, setAutofilled] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [f, setF] = useState({
     title: "",
