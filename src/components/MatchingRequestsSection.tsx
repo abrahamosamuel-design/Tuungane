@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Briefcase, ArrowRight, MapPin, Star, Info } from "lucide-react";
+import { Briefcase, ArrowRight, MapPin, Star, Info, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useBoostedSet } from "@/hooks/use-boosted-set";
@@ -107,6 +107,27 @@ export function MatchingRequestsSection() {
     return () => clearInterval(id);
   }, []);
 
+  const [refreshing, setRefreshing] = useState(false);
+
+  const fetchFresh = useCallback(async () => {
+    if (!user) return;
+    try {
+      const { data, error } = await supabase.rpc("matching_requests_for_provider", { _provider: user.id });
+      if (!error && data) {
+        const rows = data as ServiceRequestRow[];
+        const entry: CacheEntry = { at: Date.now(), rows };
+        _mem.set(user.id, entry);
+        writeDisk(user.id, entry);
+        setItems(rows);
+        setCachedAt(entry.at);
+      }
+    } catch {
+      // Network blew up mid-request — keep cached items visible.
+    } finally {
+      setLoaded(true);
+    }
+  }, [user]);
+
   useEffect(() => {
     if (!user) return;
     const cached = readCache(user.id);
@@ -142,6 +163,42 @@ export function MatchingRequestsSection() {
     })();
     return () => { cancelled = true; };
   }, [user, online]);
+
+  const handleRefresh = useCallback(async () => {
+    if (refreshing || !online) return;
+    setRefreshing(true);
+    setNow(Date.now());
+    await fetchFresh();
+    setRefreshing(false);
+  }, [refreshing, online, fetchFresh]);
+
+  // Pull-to-refresh: track touch drag from the top of the section.
+  const containerRef = useRef<HTMLDivElement>(null);
+  const pullStartY = useRef<number | null>(null);
+  const [pullDist, setPullDist] = useState(0);
+  const PULL_THRESHOLD = 64;
+  const PULL_MAX = 96;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    if (refreshing) return;
+    // Only engage when section is scrolled into view near top of page
+    if (window.scrollY > (containerRef.current?.offsetTop ?? 0)) return;
+    pullStartY.current = e.touches[0].clientY;
+  };
+  const onTouchMove = (e: React.TouchEvent) => {
+    if (pullStartY.current == null) return;
+    const dy = e.touches[0].clientY - pullStartY.current;
+    if (dy <= 0) { setPullDist(0); return; }
+    setPullDist(Math.min(PULL_MAX, dy * 0.5));
+  };
+  const onTouchEnd = () => {
+    if (pullStartY.current == null) return;
+    const dist = pullDist;
+    pullStartY.current = null;
+    setPullDist(0);
+    if (dist >= PULL_THRESHOLD) handleRefresh();
+  };
+
 
   // Annotate each item once per data change — avoids recomputing on radius changes.
   const annotated = useMemo(() => {
@@ -189,14 +246,50 @@ export function MatchingRequestsSection() {
   const filteredOut = empty && items.length > 0 && userLoc && radius !== null;
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-5">
+    <div
+      ref={containerRef}
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+      className="relative rounded-2xl border border-border bg-card p-5 overflow-hidden"
+    >
+      {(pullDist > 0 || refreshing) && (
+        <div
+          className="pointer-events-none absolute left-0 right-0 top-0 flex items-center justify-center text-muted-foreground"
+          style={{ height: refreshing ? PULL_THRESHOLD : pullDist, transition: refreshing ? "height 150ms ease" : undefined }}
+        >
+          <RefreshCw
+            className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
+            style={!refreshing ? { transform: `rotate(${Math.min(360, pullDist * 4)}deg)`, opacity: Math.min(1, pullDist / PULL_THRESHOLD) } : undefined}
+          />
+          <span className="ml-2 text-[11px] font-medium">
+            {refreshing ? "Refreshing…" : pullDist >= PULL_THRESHOLD ? "Release to refresh" : "Pull to refresh"}
+          </span>
+        </div>
+      )}
+      <div
+        style={{ transform: `translateY(${refreshing ? PULL_THRESHOLD : pullDist}px)`, transition: pullStartY.current == null ? "transform 150ms ease" : undefined }}
+      >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <div className="rounded-lg bg-navy/10 p-2 text-navy"><Briefcase className="h-4 w-4" /></div>
           <h2 className="font-display text-lg font-bold text-navy">Matching service requests</h2>
         </div>
-        <Link to="/services/requests" className="inline-flex items-center gap-1 text-xs font-semibold text-orange hover:underline">Open feed <ArrowRight className="h-3 w-3" /></Link>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleRefresh}
+            disabled={!online || refreshing}
+            aria-label="Refresh recommendations"
+            className="inline-flex items-center gap-1 rounded-full border border-border px-2 py-1 text-[11px] font-semibold text-navy hover:bg-muted disabled:opacity-50"
+          >
+            <RefreshCw className={`h-3 w-3 ${refreshing ? "animate-spin" : ""}`} />
+            Refresh
+          </button>
+          <Link to="/services/requests" className="inline-flex items-center gap-1 text-xs font-semibold text-orange hover:underline">Open feed <ArrowRight className="h-3 w-3" /></Link>
+        </div>
       </div>
+
       {!online && cachedAt && (
         <TooltipProvider>
           <Tooltip open={tipOpen} onOpenChange={setTipOpen}>
@@ -270,6 +363,7 @@ export function MatchingRequestsSection() {
           })}
         </div>
       )}
+      </div>
     </div>
   );
 }
