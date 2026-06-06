@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useUserLocation } from "@/hooks/use-user-location";
 import { toast } from "sonner";
 import { MapPin, Loader2 } from "lucide-react";
+import { AreaAutocomplete } from "@/components/AreaAutocomplete";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({ meta: [{ title: "Settings — Tuungane" }] }),
@@ -210,7 +211,7 @@ function LocationSection() {
     setVisibility((location.location_visibility as "area" | "town" | "district" | "hidden") ?? "area");
   }, [location]);
 
-  const save = async (patch: Record<string, string>) => {
+  const save = async (patch: Partial<import("@/lib/location").UserLocation>) => {
     await updateLocation(patch);
     toast.success("Location saved");
   };
@@ -232,6 +233,34 @@ function LocationSection() {
       <p className="text-xs text-muted-foreground">
         Tuungane shows you what's closest first. Set your location so we can rank requests, providers, businesses, and posts near you.
       </p>
+
+      <div>
+        <label className="text-xs font-medium text-navy">Search and pick your location</label>
+        <AreaAutocomplete
+          className="mt-1"
+          onSelect={(p) => {
+            const patch = {
+              country: p.country ?? undefined,
+              region: p.region ?? undefined,
+              district: p.district ?? undefined,
+              city: p.city ?? undefined,
+              town: p.town ?? undefined,
+              area: p.area ?? undefined,
+              latitude: p.latitude,
+              longitude: p.longitude,
+            };
+            if (p.country) setCountry(p.country);
+            if (p.region) setRegion(p.region);
+            if (p.district) setDistrict(p.district);
+            if (p.city) setCity(p.city);
+            if (p.town) setTown(p.town);
+            if (p.area) setArea(p.area);
+            save(patch);
+            toast.success("Location updated");
+          }}
+        />
+        <p className="mt-1 text-[11px] text-muted-foreground">Pick a precise neighbourhood or district to auto-fill the fields below.</p>
+      </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Field label="Country" defaultValue={country} onSave={(v) => save({ country: v })} />
