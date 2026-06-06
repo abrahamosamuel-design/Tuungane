@@ -76,7 +76,9 @@ export function MapPicker({
 
       const handlePosition = async (lat: number, lng: number) => {
         marker.setLatLng([lat, lng]);
-        const place = await reverseGeocode(lat, lng);
+        const place = await reverseGeocode(lat, lng, undefined, {
+          bounds: boundsRef.current ?? undefined,
+        });
         setPrecision(place?.precision ?? null);
         onChange(lat, lng, place);
       };
