@@ -162,6 +162,11 @@ export function MatchingRequestsSection() {
         </div>
         <Link to="/services/requests" className="inline-flex items-center gap-1 text-xs font-semibold text-orange hover:underline">Open feed <ArrowRight className="h-3 w-3" /></Link>
       </div>
+      {!online && cachedAt && (
+        <p className="mt-2 text-[11px] font-medium text-amber-700">
+          Offline · showing saved results from {Math.max(1, Math.round((Date.now() - cachedAt) / 60_000))} min ago
+        </p>
+      )}
       {userLoc && (
         <div className="mt-3">
           <RadiusFilter value={radius} onChange={setRadius} />
