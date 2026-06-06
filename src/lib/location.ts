@@ -92,18 +92,23 @@ export function proximityScore(user: UserLocation | null | undefined, target: Ta
     area: norm(target.area),
   };
 
-  // Provider-style "areas served" coverage of user's town/area.
+  // Provider-style "areas served" coverage. Weighted BELOW a literal area/town
+  // match (the provider is physically there) but ABOVE a same-district match —
+  // the provider explicitly opted in to serve this place.
   const served = (target.areas_served ?? []).map(norm).filter(Boolean);
-  if (u.town && served.includes(u.town)) return 80;
-  if (u.area && served.includes(u.area)) return 80;
+  const servesArea = !!(u.area && served.includes(u.area));
+  const servesTown = !!(u.town && served.includes(u.town));
 
   if (u.area && t.area && u.area === t.area) return 95;
   if (u.town && t.town && u.town === t.town) return 80;
+  if (servesArea) return 72; // serves your area, but not based there
+  if (servesTown) return 65; // serves your town
   if (u.district && t.district && u.district === t.district) return 55;
   if (u.region && t.region && u.region === t.region) return 35;
   if (u.country && t.country && u.country === t.country) return 20;
   return 0;
 }
+
 
 export function proximityLabel(user: UserLocation | null | undefined, target: TargetLocation | null | undefined): string | null {
   if (!user || !target) return null;
