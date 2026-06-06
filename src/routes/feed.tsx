@@ -12,6 +12,8 @@ import { OfficialPostCard } from "@/components/OfficialPostCard";
 import { categories } from "@/data/categories";
 import { postTypes, type PostTypeValue } from "@/data/postTypes";
 import type { OfficialAccountRow, OfficialPostRow } from "@/data/officialPostTypes";
+import { useUserLocation } from "@/hooks/use-user-location";
+import { sortByProximity, type TargetLocation } from "@/lib/location";
 
 export const Route = createFileRoute("/feed")({
   head: () => ({ meta: [{ title: "Activity Feed — Tuungane" }] }),
