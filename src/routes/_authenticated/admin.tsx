@@ -80,17 +80,21 @@ function Admin() {
         </div>
 
         <nav className="mt-6 space-y-2 border-b border-border pb-3">
-          {TAB_GROUPS.map((g) => (
-            <div key={g.label} className="flex flex-wrap items-center gap-1">
-              <span className="mr-2 w-32 shrink-0 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{g.label}</span>
-              {g.tabs.map((t) => (
-                <button key={t.id} onClick={() => setTab(t.id)}
-                  className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${tab === t.id ? "bg-navy text-navy-foreground" : "border border-border bg-background text-muted-foreground hover:border-navy"}`}>
-                  {t.label}
-                </button>
-              ))}
-            </div>
-          ))}
+          {TAB_GROUPS.map((g) => {
+            const visible = g.tabs.filter((t) => !t.adminOnly || isAdmin);
+            if (visible.length === 0) return null;
+            return (
+              <div key={g.label} className="flex flex-wrap items-center gap-1">
+                <span className="mr-2 w-32 shrink-0 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{g.label}</span>
+                {visible.map((t) => (
+                  <button key={t.id} onClick={() => setTab(t.id)}
+                    className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${tab === t.id ? "bg-navy text-navy-foreground" : "border border-border bg-background text-muted-foreground hover:border-navy"}`}>
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+            );
+          })}
         </nav>
 
         <div className="mt-6">
