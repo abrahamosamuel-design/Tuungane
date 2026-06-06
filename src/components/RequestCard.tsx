@@ -3,6 +3,8 @@ import { MapPin, Clock, Wallet, BadgeCheck, MessageSquare } from "lucide-react";
 import { timeAgo } from "@/lib/format";
 import { getCategory } from "@/data/categories";
 import { requestStatusMap, type ServiceRequestRow } from "@/data/serviceRequestTypes";
+import { NearYouBadge } from "@/components/NearYouBadge";
+import type { UserLocation } from "@/lib/location";
 
 export interface RequestRowLite extends ServiceRequestRow {
   response_count?: number;
@@ -16,7 +18,7 @@ const urgencyLabel: Record<string, { label: string; tone: string }> = {
   normal: { label: "Flexible", tone: "bg-muted text-muted-foreground" },
 };
 
-export function RequestCard({ r }: { r: RequestRowLite }) {
+export function RequestCard({ r, userLoc }: { r: RequestRowLite; userLoc?: UserLocation | null }) {
   const cat = r.category_slug ? getCategory(r.category_slug) : null;
   const status = requestStatusMap[r.status];
   const urgency = urgencyLabel[r.urgency] ?? urgencyLabel.normal;
@@ -47,6 +49,7 @@ export function RequestCard({ r }: { r: RequestRowLite }) {
             <BadgeCheck className="h-3 w-3" /> Verified
           </span>
         )}
+        <NearYouBadge user={userLoc} target={r} />
       </div>
 
       <h3 className="mt-2 line-clamp-2 font-display text-base font-bold text-navy">{title}</h3>

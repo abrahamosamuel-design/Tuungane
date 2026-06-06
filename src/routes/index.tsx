@@ -16,7 +16,7 @@ import {
   Star,
   BadgeCheck,
   Bookmark,
-  Users,
+  
   User as UserIcon,
 } from "lucide-react";
 import { Layout } from "@/components/Layout";
@@ -25,6 +25,7 @@ import { ListYourSkillButton } from "@/components/cta/ListYourSkillButton";
 import { useAuth } from "@/hooks/use-auth";
 import { listSkillHref } from "@/lib/cta";
 import heroNetwork from "@/assets/hero-network.jpg";
+import { NearYouHomeSection } from "@/components/NearYouHomeSection";
 
 // Curated category set for the homepage tile grid
 const HOME_CATEGORY_SLUGS = ["home-repair", "cleaning", "automotive", "beauty", "education"];
@@ -358,48 +359,9 @@ function Index() {
         </div>
       </section>
 
-      {/* OPEN REQUESTS */}
-      <section className="mx-auto max-w-6xl px-4 pt-10 sm:px-6">
-        <div className="flex items-end justify-between">
-          <h2 className="font-display text-lg font-bold text-navy sm:text-xl">Open Requests near you</h2>
-          <Link to="/requests/browse" className="text-sm font-semibold text-navy hover:text-orange">
-            See all →
-          </Link>
-        </div>
-        <div className="-mx-4 mt-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-3 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-3 sm:overflow-visible">
-          {openRequests.map((r) => (
-            <article
-              key={r.title}
-              className="w-[78%] shrink-0 snap-start rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)] sm:w-auto sm:p-5"
-            >
-              <div className="flex items-center justify-between">
-                <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${r.badgeClass}`}>{r.badge === "New" ? "Tuungane Official Feed" : r.badge}</span>
-                <span className="text-[11px] text-muted-foreground">{r.ago}</span>
-              </div>
-              <div className="mt-3 flex gap-3">
-                <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${r.iconBg}`}>
-                  <r.Icon className="h-6 w-6" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <h3 className="text-sm font-bold text-navy">{r.title}</h3>
-                  <p className="mt-0.5 inline-flex items-center gap-1 text-[11px] text-muted-foreground">
-                    <MapPin className="h-3 w-3" /> {r.location}
-                  </p>
-                  <p className="mt-1 text-xs font-semibold text-orange">{r.budget}</p>
-                </div>
-              </div>
-              <div className="mt-3 flex items-center justify-between border-t border-border pt-2 text-[11px] text-muted-foreground">
-                <span className="inline-flex items-center gap-1">
-                  <Users className="h-3 w-3" /> {r.responses} responses
-                </span>
-                <Link to="/requests/browse" className="font-semibold text-navy hover:text-orange">
-                  View →
-                </Link>
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
+      {/* OPEN REQUESTS / PROVIDERS NEAR YOU (dynamic) */}
+      <NearYouHomeSection />
+
 
       {/* Provider CTA banner */}
       <section className="mx-auto max-w-6xl px-4 pb-28 pt-10 sm:px-6 sm:pb-16">

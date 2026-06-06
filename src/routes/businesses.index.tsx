@@ -6,7 +6,8 @@ import { Building2, Plus, Sparkles, BadgeCheck, MapPin } from "lucide-react";
 import { orgTypeLabel } from "@/data/businessTypes";
 import { categories } from "@/data/categories";
 import { useUserLocation } from "@/hooks/use-user-location";
-import { proximityLabel, sortByProximity, type UserLocation } from "@/lib/location";
+import { filterByRadius, proximityLabel, sortByProximity, type UserLocation } from "@/lib/location";
+import { RadiusFilter } from "@/components/RadiusFilter";
 
 export const Route = createFileRoute("/businesses/")({
   head: () => ({ meta: [
@@ -29,6 +30,7 @@ function BusinessesPage() {
   const [pages, setPages] = useState<BPage[]>([]);
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<string>("");
+  const [radiusKm, setRadiusKm] = useState<number | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -47,9 +49,11 @@ function BusinessesPage() {
     })();
   }, [q, cat]);
 
-  const ranked = useMemo(() => sortByProximity(pages, userLoc, (p) => p), [pages, userLoc]);
+  const sorted = useMemo(() => sortByProximity(pages, userLoc, (p) => p), [pages, userLoc]);
+  const ranked = useMemo(() => filterByRadius(sorted, userLoc, (p) => p, radiusKm), [sorted, userLoc, radiusKm]);
   const featured = ranked.filter((p) => p.is_featured);
   const rest = ranked.filter((p) => !p.is_featured);
+  const radiusExpanded = radiusKm != null && userLoc && ranked.length === 0 && pages.length > 0;
 
   return (
     <Layout>
@@ -79,7 +83,15 @@ function BusinessesPage() {
             <option value="">All categories</option>
             {categories.map((c) => <option key={c.slug} value={c.slug}>{c.name}</option>)}
           </select>
+          <RadiusFilter value={radiusKm} onChange={setRadiusKm} disabled={!userLoc} />
         </div>
+
+        {radiusExpanded && (
+          <div className="mt-4 rounded-xl border border-orange/30 bg-orange/5 p-3 text-xs text-foreground/80">
+            Not many businesses within {radiusKm} km yet.{" "}
+            <button onClick={() => setRadiusKm(null)} className="font-semibold text-orange underline">Show all businesses</button>
+          </div>
+        )}
 
         {featured.length > 0 && (
           <div className="mt-8">

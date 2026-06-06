@@ -128,3 +128,48 @@ export function sortByProximity<T>(
     .sort((a, b) => b.score - a.score || a.idx - b.idx)
     .map((x) => x.item);
 }
+
+/**
+ * Filter items to those within `radiusKm` of the user.
+ * Items without coordinates fall back to the text hierarchy:
+ *  - radius <= 5km  → only same area or town counts as nearby
+ *  - radius <= 20km → also accepts same town
+ *  - radius > 20km  → also accepts same district
+ * Returns the original list unchanged when no radius or no user location.
+ */
+export function filterByRadius<T>(
+  items: T[],
+  user: UserLocation | null | undefined,
+  getLocation: (item: T) => TargetLocation | null | undefined,
+  radiusKm: number | null,
+): T[] {
+  if (!user || radiusKm == null) return items;
+  return items.filter((item) => {
+    const t = getLocation(item);
+    if (!t) return false;
+    const km = haversineKm(user, t);
+    if (km != null) {
+      const reach = (t.service_radius_km ?? 0) > 0 ? Math.max(radiusKm, t.service_radius_km!) : radiusKm;
+      return km <= reach;
+    }
+    // Text hierarchy fallback
+    const u = {
+      district: norm(user.district),
+      town: norm(user.town || user.city),
+      area: norm(user.area),
+    };
+    const tt = {
+      district: norm(t.district),
+      town: norm(t.town),
+      area: norm(t.area),
+    };
+    const served = (t.areas_served ?? []).map(norm).filter(Boolean);
+    if (u.area && (tt.area === u.area || served.includes(u.area))) return true;
+    if (radiusKm <= 5) return false;
+    if (u.town && (tt.town === u.town || served.includes(u.town))) return true;
+    if (radiusKm <= 20) return false;
+    if (u.district && tt.district === u.district) return true;
+    return false;
+  });
+}
+

@@ -15,7 +15,8 @@ import {
 } from "@/data/requestTypes";
 import { useAuth } from "@/hooks/use-auth";
 import { useUserLocation } from "@/hooks/use-user-location";
-import { sortByProximity } from "@/lib/location";
+import { filterByRadius, sortByProximity } from "@/lib/location";
+import { RadiusFilter } from "@/components/RadiusFilter";
 
 export const Route = createFileRoute("/requests/browse")({
   head: () => ({
@@ -41,6 +42,7 @@ function BrowseRequests() {
   const [urgentOnly, setUrgentOnly] = useState(false);
   const [budgetShown, setBudgetShown] = useState(false);
   const [nearMe, setNearMe] = useState(false);
+  const [radiusKm, setRadiusKm] = useState<number | null>(null);
   const [myDistrict, setMyDistrict] = useState<string | null>(null);
   const [items, setItems] = useState<RequestRowLite[]>([]);
   const [loading, setLoading] = useState(true);
@@ -106,7 +108,12 @@ function BrowseRequests() {
   }, [cat, chip, urgentOnly, budgetShown, nearMe, myDistrict]);
 
   const category = useMemo(() => categories.find((c) => c.slug === cat), [cat]);
-  const rankedItems = useMemo(() => sortByProximity(items, userLoc, (r) => r), [items, userLoc]);
+  const rankedItems = useMemo(() => {
+    const sorted = sortByProximity(items, userLoc, (r) => r);
+    const filtered = filterByRadius(sorted, userLoc, (r) => r, radiusKm);
+    return filtered;
+  }, [items, userLoc, radiusKm]);
+  const radiusExpanded = radiusKm != null && userLoc && rankedItems.length === 0 && items.length > 0;
 
   return (
     <Layout>
@@ -216,6 +223,14 @@ function BrowseRequests() {
               </label>
             </div>
 
+            <div>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Distance</p>
+              <RadiusFilter value={radiusKm} onChange={setRadiusKm} disabled={!userLoc} />
+              {!userLoc && (
+                <p className="mt-1 text-[11px] text-muted-foreground">Set your location in Settings to filter by distance.</p>
+              )}
+            </div>
+
             <div className="flex gap-3 rounded-xl border border-orange/30 bg-orange/5 p-3 text-xs text-foreground/80">
               <ShieldAlert className="h-4 w-4 shrink-0 text-orange" />
               <p>{REQUESTS_SAFETY_TEXT}</p>
@@ -227,7 +242,13 @@ function BrowseRequests() {
               {REQUESTS_COPY.listTitle}
             </h2>
             {loading && <p className="text-sm text-muted-foreground">Loading…</p>}
-            {!loading && rankedItems.length === 0 && (
+            {!loading && radiusExpanded && (
+              <div className="mb-3 rounded-xl border border-orange/30 bg-orange/5 p-3 text-xs text-foreground/80">
+                Not many results in your area within {radiusKm} km yet.{" "}
+                <button onClick={() => setRadiusKm(null)} className="font-semibold text-orange underline">Show all results</button>
+              </div>
+            )}
+            {!loading && rankedItems.length === 0 && !radiusExpanded && (
               <EmptyState
                 icon={Plus}
                 title={REQUESTS_COPY.emptyTitle}
@@ -237,7 +258,7 @@ function BrowseRequests() {
             )}
             <div className="grid gap-3 sm:grid-cols-2">
               {rankedItems.map((r) => (
-                <RequestCard key={r.id} r={r} />
+                <RequestCard key={r.id} r={r} userLoc={userLoc} />
               ))}
             </div>
           </div>

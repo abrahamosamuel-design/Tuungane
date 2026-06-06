@@ -9,7 +9,9 @@ import { EmptyState } from "@/components/EmptyState";
 import { ProviderTrackCTA } from "@/components/cta/ProviderTrackCTA";
 import { ListYourSkillButton } from "@/components/cta/ListYourSkillButton";
 import { useUserLocation } from "@/hooks/use-user-location";
-import { proximityScore } from "@/lib/location";
+import { filterByRadius, proximityScore, type UserLocation } from "@/lib/location";
+import { NearYouBadge } from "@/components/NearYouBadge";
+import { RadiusFilter } from "@/components/RadiusFilter";
 
 const iconMap: Record<string, any> = { Wrench, Sparkles, Building2, Scissors, Truck, Car, GraduationCap, Camera, ChefHat, Laptop, HeartPulse, Sprout, MoreHorizontal };
 
@@ -81,6 +83,7 @@ function Services() {
   const [q, setQ] = useState("");
   const [loc, setLoc] = useState("");
   const [filter, setFilter] = useState<RealFilter>("all");
+  const [radiusKm, setRadiusKm] = useState<number | null>(null);
   const [real, setReal] = useState<RealProvider[]>([]);
   const [loadingReal, setLoadingReal] = useState(true);
 
@@ -139,16 +142,19 @@ function Services() {
     return s;
   };
 
-  const realFiltered = useMemo(() => real
-    .filter((p) => {
-      const qm = q.toLowerCase();
-      const name = p.business_name || p.profile?.full_name || "";
-      const matchesQ = !q || name.toLowerCase().includes(qm) || p.subcategory.toLowerCase().includes(qm);
-      const matchesL = !loc || p.town.toLowerCase().includes(loc.toLowerCase()) || p.district.toLowerCase().includes(loc.toLowerCase());
-      return matchesQ && matchesL;
-    })
-    .sort((a, b) => scoreProvider(b) - scoreProvider(a)),
-    [real, q, loc, filter]); // eslint-disable-line react-hooks/exhaustive-deps
+  const realFiltered = useMemo(() => {
+    const base = real
+      .filter((p) => {
+        const qm = q.toLowerCase();
+        const name = p.business_name || p.profile?.full_name || "";
+        const matchesQ = !q || name.toLowerCase().includes(qm) || p.subcategory.toLowerCase().includes(qm);
+        const matchesL = !loc || p.town.toLowerCase().includes(loc.toLowerCase()) || p.district.toLowerCase().includes(loc.toLowerCase());
+        return matchesQ && matchesL;
+      })
+      .sort((a, b) => scoreProvider(b) - scoreProvider(a));
+    return filterByRadius(base, userLoc, (p) => p, radiusKm);
+  }, [real, q, loc, filter, radiusKm, userLoc]); // eslint-disable-line react-hooks/exhaustive-deps
+  const radiusExpanded = radiusKm != null && userLoc && realFiltered.length === 0 && real.length > 0;
 
   const recommended = useMemo(() => {
     // Top recommended = highest scoring, prefer verified + with rating
@@ -253,7 +259,7 @@ function Services() {
                 </div>
               </div>
             )}
-            {!loadingReal && recommended.map((p) => <ProviderRow key={p.user_id} p={p} isBoosted={isBoostedProvider(p.user_id)} onRequest={() => nav({ to: "/u/$id", params: { id: p.user_id } })} />)}
+            {!loadingReal && recommended.map((p) => <ProviderRow key={p.user_id} p={p} isBoosted={isBoostedProvider(p.user_id)} userLoc={userLoc} onRequest={() => nav({ to: "/u/$id", params: { id: p.user_id } })} />)}
           </div>
         </div>
       </section>
@@ -309,10 +315,24 @@ function Services() {
             ))}
           </div>
 
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
+            <RadiusFilter value={radiusKm} onChange={setRadiusKm} disabled={!userLoc} />
+            {!userLoc && (
+              <span className="text-[11px] text-muted-foreground">Set your location in Settings to filter by distance.</span>
+            )}
+          </div>
+
+          {!loadingReal && radiusExpanded && (
+            <div className="mt-3 rounded-xl border border-orange/30 bg-orange/5 p-3 text-xs text-foreground/80">
+              Not many providers within {radiusKm} km yet.{" "}
+              <button onClick={() => setRadiusKm(null)} className="font-semibold text-orange underline">Show all providers</button>
+            </div>
+          )}
+
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {loadingReal && <p className="text-sm text-muted-foreground">Loading providers…</p>}
-            {!loadingReal && realFiltered.map((p) => <ProviderRow key={p.user_id} p={p} isBoosted={isBoostedProvider(p.user_id)} onRequest={() => nav({ to: "/u/$id", params: { id: p.user_id } })} />)}
-            {!loadingReal && realFiltered.length === 0 && (
+            {!loadingReal && realFiltered.map((p) => <ProviderRow key={p.user_id} p={p} isBoosted={isBoostedProvider(p.user_id)} userLoc={userLoc} onRequest={() => nav({ to: "/u/$id", params: { id: p.user_id } })} />)}
+            {!loadingReal && realFiltered.length === 0 && !radiusExpanded && (
               <div className="col-span-full">
                 <div className="rounded-2xl border border-dashed border-border bg-card p-8 text-center">
                   <h3 className="font-display text-lg font-bold text-navy">No providers listed yet</h3>
@@ -328,7 +348,7 @@ function Services() {
   );
 }
 
-function ProviderRow({ p, isBoosted, onRequest }: { p: RealProvider; isBoosted: boolean; onRequest: () => void }) {
+function ProviderRow({ p, isBoosted, userLoc, onRequest }: { p: RealProvider; isBoosted: boolean; userLoc?: UserLocation | null; onRequest: () => void }) {
   const name = p.business_name || p.profile?.full_name || "Provider";
   const verified = p.verified === "verified" || p.verified === "featured";
   const available = (p.availability ?? "").toLowerCase() === "available";
@@ -354,6 +374,7 @@ function ProviderRow({ p, isBoosted, onRequest }: { p: RealProvider; isBoosted: 
       </Link>
       {p.bio && <p className="line-clamp-2 px-4 text-sm text-foreground/70">{p.bio}</p>}
       <div className="mt-3 flex flex-wrap items-center gap-1.5 px-4">
+        <NearYouBadge user={userLoc} target={p} />
         {p.seeded_by_official && p.seeded_status !== "claimed" && (
           <span className="inline-flex items-center gap-1 rounded-full bg-navy/10 px-2 py-0.5 text-[10px] font-semibold text-navy"><ShieldCheck className="h-3 w-3" /> Added by Tuungane Official</span>
         )}
