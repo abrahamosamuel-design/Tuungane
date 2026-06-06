@@ -51,7 +51,8 @@ export function useUserLocation() {
       setLocation(next);
       writeLocal(next);
       if (user) {
-        const dbPatch: Record<string, unknown> = { ...patch, location_updated_at: new Date().toISOString() };
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const dbPatch: any = { ...patch, location_updated_at: new Date().toISOString() };
         if (dbPatch.location_visibility === null) delete dbPatch.location_visibility;
         await supabase.from("profiles").update(dbPatch).eq("id", user.id);
       }
