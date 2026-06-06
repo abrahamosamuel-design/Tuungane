@@ -7,6 +7,7 @@ import { useUserLocation } from "@/hooks/use-user-location";
 import { toast } from "sonner";
 import { MapPin, Loader2 } from "lucide-react";
 import { AreaAutocomplete } from "@/components/AreaAutocomplete";
+import { MapPicker } from "@/components/MapPicker";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({ meta: [{ title: "Settings — Tuungane" }] }),
@@ -261,6 +262,26 @@ function LocationSection() {
         />
         <p className="mt-1 text-[11px] text-muted-foreground">Pick a precise neighbourhood or district to auto-fill the fields below.</p>
       </div>
+
+      <MapPicker
+        latitude={location?.latitude ?? null}
+        longitude={location?.longitude ?? null}
+        onChange={(lat, lng, place) => {
+          const patch: Partial<import("@/lib/location").UserLocation> = {
+            latitude: lat,
+            longitude: lng,
+          };
+          if (place) {
+            if (place.country) { patch.country = place.country; setCountry(place.country); }
+            if (place.region) { patch.region = place.region; setRegion(place.region); }
+            if (place.district) { patch.district = place.district; setDistrict(place.district); }
+            if (place.city) { patch.city = place.city; setCity(place.city); }
+            if (place.town) { patch.town = place.town; setTown(place.town); }
+            if (place.area) { patch.area = place.area; setArea(place.area); }
+          }
+          save(patch);
+        }}
+      />
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Field label="Country" defaultValue={country} onSave={(v) => save({ country: v })} />

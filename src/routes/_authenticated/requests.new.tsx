@@ -19,6 +19,7 @@ import { Loader2, MapPin, ShieldAlert } from "lucide-react";
 import { REQUESTS_SAFETY_TEXT } from "@/data/requestTypes";
 import { useUserLocation } from "@/hooks/use-user-location";
 import { AreaAutocomplete } from "@/components/AreaAutocomplete";
+import { MapPicker } from "@/components/MapPicker";
 
 export const Route = createFileRoute("/_authenticated/requests/new")({
   validateSearch: (search: Record<string, unknown>) => ({
