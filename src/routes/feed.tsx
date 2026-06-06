@@ -14,6 +14,7 @@ import { postTypes, type PostTypeValue } from "@/data/postTypes";
 import type { OfficialAccountRow, OfficialPostRow } from "@/data/officialPostTypes";
 import { useUserLocation } from "@/hooks/use-user-location";
 import { sortByProximity, type TargetLocation } from "@/lib/location";
+import { NearYouBadge } from "@/components/NearYouBadge";
 
 export const Route = createFileRoute("/feed")({
   head: () => ({ meta: [{ title: "Activity Feed — Tuungane" }] }),
@@ -181,7 +182,7 @@ function Feed() {
                 {officialToShow.map((p) => <OfficialPostCard key={`op-${p.id}`} post={p} account={officialAccount} />)}
                 {filter !== "official" && (sortedPosts.length === 0 ? (
                   <Empty title="No posts yet" hint={filter === "following" ? "Follow providers to see their work here." : "Be the first to share work."} />
-                ) : sortedPosts.map((p) => <PostCard key={p.id} post={p} onChanged={load} />))}
+                ) : sortedPosts.map((p) => <PostCard key={p.id} post={p} onChanged={load} userLoc={userLoc} />))}
                 {filter === "official" && officialToShow.length === 0 && (
                   <Empty title="No official posts yet" hint="Tuungane Official will post curated updates here soon." />
                 )}
@@ -203,6 +204,7 @@ function Feed() {
                     {p.verified === "verified" && <BadgeCheck className="h-4 w-4 text-green" />}
                     {p.verified === "featured" && <Sparkles className="h-4 w-4 text-orange" />}
                     {isBoostedProvider(p.user_id) && <span className="ml-1 inline-flex items-center gap-0.5 rounded-full bg-orange/15 px-1.5 py-0 text-[10px] font-semibold text-orange"><Sparkles className="h-2.5 w-2.5" /> Featured</span>}
+                    <NearYouBadge user={userLoc} target={p as TargetLocation} className="ml-1" />
                   </div>
                   <p className="text-xs text-muted-foreground">{p.subcategory}</p>
                   <p className="mt-1 line-clamp-2 text-sm text-foreground/70">{p.bio}</p>

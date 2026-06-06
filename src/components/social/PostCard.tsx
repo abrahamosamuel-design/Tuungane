@@ -15,6 +15,8 @@ import { BoostButton } from "@/components/BoostButton";
 import { PostShell } from "./PostShell";
 import { PostText } from "./PostText";
 import { PostMedia } from "./PostMedia";
+import { NearYouBadge } from "@/components/NearYouBadge";
+import type { TargetLocation, UserLocation } from "@/lib/location";
 
 export interface PostRow {
   id: string;
@@ -28,12 +30,26 @@ export interface PostRow {
   created_at: string;
   post_type?: PostTypeValue | null;
   title?: string | null;
-  author?: { full_name: string; avatar_url: string | null; is_provider: boolean };
+  district?: string | null;
+  town?: string | null;
+  area?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  author?: {
+    full_name: string;
+    avatar_url: string | null;
+    is_provider: boolean;
+    district?: string | null;
+    town?: string | null;
+    area?: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
+  };
 }
 
-interface Props { post: PostRow; onChanged?: () => void; }
+interface Props { post: PostRow; onChanged?: () => void; userLoc?: UserLocation | null }
 
-export function PostCard({ post, onChanged }: Props) {
+export function PostCard({ post, onChanged, userLoc }: Props) {
   const { user, isModerator } = useAuth();
   const nav = useNavigate();
   const [likes, setLikes] = useState(0);
@@ -146,6 +162,18 @@ export function PostCard({ post, onChanged }: Props) {
               </div>
             </Link>
             <div className="flex flex-wrap items-center gap-1">
+              {userLoc && (
+                <NearYouBadge
+                  user={userLoc}
+                  target={{
+                    district: post.district ?? post.author?.district ?? null,
+                    town: post.town ?? post.author?.town ?? null,
+                    area: post.area ?? post.author?.area ?? null,
+                    latitude: post.latitude ?? post.author?.latitude ?? null,
+                    longitude: post.longitude ?? post.author?.longitude ?? null,
+                  } as TargetLocation}
+                />
+              )}
               {post.featured && <span className="rounded-full bg-orange/10 px-2 py-0.5 text-xs font-medium text-orange">Featured</span>}
               {boosts.map((b) => <BoostBadge key={b.id} type={b.boost_type} />)}
               {post.hidden && <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive">Hidden</span>}
