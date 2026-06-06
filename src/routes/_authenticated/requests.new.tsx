@@ -232,12 +232,25 @@ function NewRequest() {
           </Field>
 
           <Field label="Where is the request located? *">
+            <AreaAutocomplete
+              placeholder="Search for a town, area, or neighbourhood…"
+              onSelect={(p) => {
+                const composed = [p.area, p.town, p.district].filter(Boolean).join(", ");
+                setF((s) => ({
+                  ...s,
+                  location: composed || p.display_name,
+                  district: p.district ?? s.district,
+                  town: p.town ?? s.town,
+                  area: p.area ?? s.area,
+                }));
+              }}
+            />
             <input
               required
               value={f.location}
               onChange={(e) => update("location", e.target.value)}
-              placeholder="e.g. Entebbe, Kampala, Wakiso"
-              className={inp}
+              placeholder="Or type it manually (e.g. Entebbe, Kampala, Wakiso)"
+              className={`${inp} mt-2`}
             />
           </Field>
           <div className="grid grid-cols-3 gap-3">
