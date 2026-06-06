@@ -81,6 +81,7 @@ function Avatar({ name, src, size = 56 }: { name: string; src?: string | null; s
 function Services() {
   const nav = useNavigate();
   const { location: userLoc } = useUserLocation();
+  const { locations: featuredLocs } = useFeaturedLocations();
   const [q, setQ] = useState("");
   const [loc, setLoc] = useState("");
   const [filter, setFilter] = useState<RealFilter>("all");
