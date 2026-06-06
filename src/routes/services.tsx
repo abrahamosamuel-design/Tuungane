@@ -322,9 +322,6 @@ function Services() {
 
           <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
             <RadiusFilter value={radiusKm} onChange={setRadiusKm} disabled={!userLoc} />
-            {!userLoc && (
-              <span className="text-[11px] text-muted-foreground">Set your location in Settings to filter by distance.</span>
-            )}
           </div>
 
           {!loadingReal && radiusExpanded && (
