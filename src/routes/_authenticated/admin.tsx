@@ -29,7 +29,7 @@ type Tab =
   | "users" | "providers" | "businesses"
   | "requests" | "posts" | "recs"
   | "reports" | "disputes"
-  | "credits" | "official" | "contact" | "activity";
+  | "credits" | "official" | "contact" | "activity" | "locations";
 
 const TAB_GROUPS: { label: string; tabs: { id: Tab; label: string; adminOnly?: boolean }[] }[] = [
   { label: "Home", tabs: [{ id: "overview", label: "Overview" }] },
