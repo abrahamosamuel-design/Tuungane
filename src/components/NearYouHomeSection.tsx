@@ -54,21 +54,26 @@ export function NearYouHomeSection() {
       let provs: NearbyProvider[] | null = null;
 
       if (hasCoords) {
-        // Server-side ranked, distance-bounded queries (scales beyond 40 rows).
+        const lat = userLoc!.latitude as number;
+        const lng = userLoc!.longitude as number;
         const [{ data: rpcReqs }, { data: rpcProvs }] = await Promise.all([
           supabase.rpc("nearby_service_requests", {
-            in_lat: userLoc!.latitude,
-            in_lng: userLoc!.longitude,
+            in_lat: lat,
+            in_lng: lng,
             in_radius_km: 50,
             in_limit: 20,
           }),
           supabase.rpc("nearby_service_profiles", {
-            in_lat: userLoc!.latitude,
-            in_lng: userLoc!.longitude,
+            in_lat: lat,
+            in_lng: lng,
             in_radius_km: 50,
             in_limit: 20,
           }),
         ]);
+        reqs = (rpcReqs ?? null) as NearbyRequest[] | null;
+        provs = (rpcProvs ?? null) as NearbyProvider[] | null;
+      }
+
         reqs = (rpcReqs ?? null) as NearbyRequest[] | null;
         provs = (rpcProvs ?? null) as NearbyProvider[] | null;
       }
