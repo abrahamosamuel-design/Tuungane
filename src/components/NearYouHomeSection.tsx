@@ -40,6 +40,7 @@ type NearbyProvider = {
 
 export function NearYouHomeSection() {
   const { location: userLoc } = useUserLocation();
+  const { locations: featured } = useFeaturedLocations();
   const [requests, setRequests] = useState<NearbyRequest[]>([]);
   const [providers, setProviders] = useState<NearbyProvider[]>([]);
   const [loading, setLoading] = useState(true);
