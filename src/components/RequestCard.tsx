@@ -3,6 +3,8 @@ import { MapPin, Clock, Wallet, BadgeCheck, MessageSquare } from "lucide-react";
 import { timeAgo } from "@/lib/format";
 import { getCategory } from "@/data/categories";
 import { requestStatusMap, type ServiceRequestRow } from "@/data/serviceRequestTypes";
+import { NearYouBadge } from "@/components/NearYouBadge";
+import type { UserLocation } from "@/lib/location";
 
 export interface RequestRowLite extends ServiceRequestRow {
   response_count?: number;
