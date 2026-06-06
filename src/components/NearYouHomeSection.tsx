@@ -1,0 +1,225 @@
+import { useEffect, useMemo, useState } from "react";
+import { Link } from "@tanstack/react-router";
+import { MapPin, Users, ArrowRight, ClipboardList, Star, BadgeCheck } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useUserLocation } from "@/hooks/use-user-location";
+import { filterByRadius, proximityLabel, sortByProximity } from "@/lib/location";
+import { timeAgo } from "@/lib/format";
+
+type NearbyRequest = {
+  id: string;
+  title: string | null;
+  service_needed: string | null;
+  description: string | null;
+  budget_range: string | null;
+  urgent_flag: boolean;
+  created_at: string;
+  district: string | null;
+  town: string | null;
+  area: string | null;
+  location: string | null;
+  latitude: number | null;
+  longitude: number | null;
+};
+
+type NearbyProvider = {
+  user_id: string;
+  business_name: string | null;
+  subcategory: string;
+  town: string | null;
+  district: string | null;
+  area: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  service_radius_km: number | null;
+  areas_served: string[] | null;
+  verified: string;
+  profile?: { full_name: string; avatar_url: string | null } | null;
+};
+
+export function NearYouHomeSection() {
+  const { location: userLoc } = useUserLocation();
+  const [requests, setRequests] = useState<NearbyRequest[]>([]);
+  const [providers, setProviders] = useState<NearbyProvider[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      const [{ data: reqs }, { data: provs }] = await Promise.all([
+        supabase
+          .from("service_requests")
+          .select("id,title,service_needed,description,budget_range,urgent_flag,created_at,district,town,area,location,latitude,longitude")
+          .eq("visibility", "public")
+          .eq("status", "requested")
+          .is("provider_id", null)
+          .order("created_at", { ascending: false })
+          .limit(40),
+        supabase
+          .from("service_profiles")
+          .select("user_id,business_name,subcategory,town,district,area,latitude,longitude,service_radius_km,areas_served,verified")
+          .eq("suspended", false)
+          .order("updated_at", { ascending: false })
+          .limit(40),
+      ]);
+      if (cancelled) return;
+      const provIds = (provs ?? []).map((p) => p.user_id);
+      const profMap = new Map<string, { full_name: string; avatar_url: string | null }>();
+      if (provIds.length) {
+        const { data: profs } = await supabase.from("profiles").select("id,full_name,avatar_url").in("id", provIds);
+        (profs ?? []).forEach((p) => profMap.set(p.id, p));
+      }
+      setRequests((reqs ?? []) as NearbyRequest[]);
+      setProviders(
+        (provs ?? []).map((p: NearbyProvider) => ({ ...p, profile: profMap.get(p.user_id) ?? null })),
+      );
+      setLoading(false);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const topRequests = useMemo(() => {
+    const sorted = sortByProximity(requests, userLoc, (r) => r);
+    const withinDefault = filterByRadius(sorted, userLoc, (r) => r, 20);
+    return (withinDefault.length >= 2 ? withinDefault : sorted).slice(0, 3);
+  }, [requests, userLoc]);
+
+  const expandedRequests = userLoc && requests.length > 0 && topRequests.length > 0 &&
+    filterByRadius(requests, userLoc, (r) => r, 20).length < 2;
+
+  const topProviders = useMemo(() => {
+    const sorted = sortByProximity(providers, userLoc, (p) => p);
+    const withinDefault = filterByRadius(sorted, userLoc, (p) => p, 20);
+    return (withinDefault.length >= 2 ? withinDefault : sorted).slice(0, 3);
+  }, [providers, userLoc]);
+
+  if (loading) return null;
+
+  const hasAnything = topRequests.length > 0 || topProviders.length > 0;
+  if (!hasAnything) return null;
+
+  return (
+    <section className="mx-auto max-w-6xl px-4 pt-10 sm:px-6">
+      <div className="flex items-end justify-between gap-3">
+        <div>
+          <h2 className="font-display text-lg font-bold text-navy sm:text-xl">Near you</h2>
+          <p className="mt-0.5 text-xs text-muted-foreground sm:text-sm">
+            {userLoc
+              ? "Open requests and trusted providers close to your location."
+              : "Set your location in Settings to see results near you. Showing recent activity."}
+          </p>
+        </div>
+        <Link to="/requests/browse" className="hidden text-sm font-semibold text-navy hover:text-orange sm:inline">
+          See all →
+        </Link>
+      </div>
+
+      {expandedRequests && (
+        <p className="mt-3 rounded-xl border border-orange/30 bg-orange/5 px-3 py-2 text-xs text-foreground/80">
+          Not many results in your area yet. Showing nearby results.
+        </p>
+      )}
+
+      {topRequests.length > 0 && (
+        <>
+          <h3 className="mt-5 text-xs font-bold uppercase tracking-wide text-navy/70">Open requests</h3>
+          <div className="-mx-4 mt-3 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-3 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-3 sm:overflow-visible">
+            {topRequests.map((r) => {
+              const near = proximityLabel(userLoc, r);
+              const title = r.title?.trim() || r.service_needed || "Request";
+              const loc = r.area || r.town || r.district || r.location || "Uganda";
+              return (
+                <Link
+                  to="/requests/$id"
+                  params={{ id: r.id }}
+                  key={r.id}
+                  className="block w-[78%] shrink-0 snap-start rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)] transition hover:border-orange sm:w-auto sm:p-5"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    {r.urgent_flag ? (
+                      <span className="rounded-full bg-orange/15 px-2 py-0.5 text-[11px] font-semibold text-orange">Urgent</span>
+                    ) : (
+                      <span className="rounded-full bg-green/15 px-2 py-0.5 text-[11px] font-semibold text-green">Open</span>
+                    )}
+                    <span className="text-[11px] text-muted-foreground">{timeAgo(r.created_at)}</span>
+                  </div>
+                  <h4 className="mt-2 line-clamp-2 text-sm font-bold text-navy">{title}</h4>
+                  <p className="mt-1 inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+                    <MapPin className="h-3 w-3" /> {loc}
+                  </p>
+                  {r.budget_range && (
+                    <p className="mt-1 text-xs font-semibold text-orange">{r.budget_range}</p>
+                  )}
+                  {near && (
+                    <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-green/10 px-2 py-0.5 text-[10px] font-semibold text-green">
+                      <MapPin className="h-3 w-3" /> {near}
+                    </span>
+                  )}
+                </Link>
+              );
+            })}
+          </div>
+        </>
+      )}
+
+      {topProviders.length > 0 && (
+        <>
+          <h3 className="mt-6 flex items-center justify-between text-xs font-bold uppercase tracking-wide text-navy/70">
+            <span>Skilled providers near you</span>
+            <Link to="/services" className="text-[11px] font-semibold normal-case tracking-normal text-navy hover:text-orange">
+              See all <ArrowRight className="inline h-3 w-3" />
+            </Link>
+          </h3>
+          <div className="-mx-4 mt-3 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-3 sm:mx-0 sm:px-0 sm:grid sm:grid-cols-3 sm:overflow-visible">
+            {topProviders.map((p) => {
+              const near = proximityLabel(userLoc, p);
+              const name = p.business_name || p.profile?.full_name || "Provider";
+              const verified = p.verified === "verified" || p.verified === "featured";
+              return (
+                <Link
+                  to="/u/$id"
+                  params={{ id: p.user_id }}
+                  key={p.user_id}
+                  className="block w-[78%] shrink-0 snap-start rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)] transition hover:border-orange sm:w-auto sm:p-5"
+                >
+                  <div className="flex items-center gap-1.5">
+                    <h4 className="truncate text-sm font-bold text-navy">{name}</h4>
+                    {verified && <BadgeCheck className="h-4 w-4 shrink-0 text-green" />}
+                  </div>
+                  <p className="mt-0.5 text-xs text-muted-foreground">{p.subcategory}</p>
+                  <p className="mt-1 inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+                    <MapPin className="h-3 w-3" /> {p.area || p.town || p.district || "Uganda"}
+                  </p>
+                  {near && (
+                    <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-green/10 px-2 py-0.5 text-[10px] font-semibold text-green">
+                      <MapPin className="h-3 w-3" /> {near}
+                    </span>
+                  )}
+                </Link>
+              );
+            })}
+          </div>
+        </>
+      )}
+
+      <div className="mt-5 flex flex-wrap items-center gap-3">
+        <Link
+          to="/requests/new"
+          className="inline-flex items-center gap-2 rounded-full bg-orange px-5 py-2 text-sm font-semibold text-orange-foreground hover:brightness-110"
+        >
+          <ClipboardList className="h-4 w-4" /> Create a request
+        </Link>
+        <Link to="/services" className="text-sm font-semibold text-navy hover:text-orange">
+          Browse providers <ArrowRight className="inline h-3 w-3" />
+        </Link>
+      </div>
+    </section>
+  );
+}
+
+// Avoid unused-import warning when only Star/Users would be unused.
+void Star;
+void Users;
