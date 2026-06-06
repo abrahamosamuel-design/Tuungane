@@ -19,6 +19,7 @@ import { RequestServiceDialog } from "@/components/RequestServiceDialog";
 import { VerifiedReviewBadge } from "@/components/VerifiedReviewBadge";
 import { uploadMedia } from "@/lib/upload";
 import { timeAgo } from "@/lib/format";
+import { maskProfileLocation } from "@/lib/location-visibility";
 import { getCategory } from "@/data/categories";
 import { toast } from "sonner";
 import { useActiveBoosts } from "@/hooks/use-boosts";
