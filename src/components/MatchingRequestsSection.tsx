@@ -199,12 +199,17 @@ export function MatchingRequestsSection() {
       </div>
       {!online && cachedAt && (
         <TooltipProvider>
-          <Tooltip>
+          <Tooltip open={tipOpen} onOpenChange={setTipOpen}>
             <TooltipTrigger asChild>
-              <p className="mt-2 inline-flex items-center gap-1 text-[11px] font-medium text-amber-700 cursor-help">
+              <button
+                ref={tipTriggerRef}
+                type="button"
+                onClick={() => setTipOpen((v) => !v)}
+                className="mt-2 inline-flex items-center gap-1 text-[11px] font-medium text-amber-700 cursor-help bg-transparent border-none p-0"
+              >
                 Offline · showing saved results from {Math.max(1, Math.round((now - cachedAt) / 60_000))} min ago
                 <Info className="h-3 w-3 opacity-70" />
-              </p>
+              </button>
             </TooltipTrigger>
             <TooltipContent side="bottom" className="space-y-1 text-[11px]">
               <p><span className="font-semibold">Fetched:</span> {new Date(cachedAt).toLocaleTimeString()}</p>
