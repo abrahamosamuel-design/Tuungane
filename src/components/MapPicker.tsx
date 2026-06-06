@@ -1,13 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import "leaflet/dist/leaflet.css";
 import { Maximize2, Minimize2, Target } from "lucide-react";
-import { reverseGeocode, type ReverseGeocodeResult, type PrecisionInfo } from "@/lib/geocoding";
+import { reverseGeocode, type Bounds, type ReverseGeocodeResult, type PrecisionInfo } from "@/lib/geocoding";
 
 type Props = {
   latitude?: number | null;
   longitude?: number | null;
   onChange: (lat: number, lng: number, place: ReverseGeocodeResult | null) => void;
   className?: string;
+  /** Selected district bounds — refines reverse-geocode precision/confidence. */
+  bounds?: Bounds | null;
 };
 
 // Default to Kampala when nothing is selected yet.
