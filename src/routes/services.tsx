@@ -83,6 +83,7 @@ function Services() {
   const [q, setQ] = useState("");
   const [loc, setLoc] = useState("");
   const [filter, setFilter] = useState<RealFilter>("all");
+  const [radiusKm, setRadiusKm] = useState<number | null>(null);
   const [real, setReal] = useState<RealProvider[]>([]);
   const [loadingReal, setLoadingReal] = useState(true);
 
