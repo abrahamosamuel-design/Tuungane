@@ -25,6 +25,7 @@ export function MapPicker({
   longitude,
   onChange,
   className,
+  bounds,
   collapsedHeight = 120,
   expandedHeight = 320,
 }: Props & { collapsedHeight?: number; expandedHeight?: number }) {
@@ -32,9 +33,15 @@ export function MapPicker({
   const mapRef = useRef<import("leaflet").Map | null>(null);
   const markerRef = useRef<import("leaflet").Marker | null>(null);
   const LRef = useRef<typeof import("leaflet") | null>(null);
+  const boundsRef = useRef<Bounds | null>(bounds ?? null);
   const [mounted, setMounted] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [precision, setPrecision] = useState<PrecisionInfo | null>(null);
+
+  // Keep the latest district bounds available to the dragend/click closure.
+  useEffect(() => {
+    boundsRef.current = bounds ?? null;
+  }, [bounds]);
 
   // Initialise Leaflet on mount (client-only).
   useEffect(() => {
