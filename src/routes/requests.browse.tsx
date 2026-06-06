@@ -226,9 +226,6 @@ function BrowseRequests() {
             <div>
               <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Distance</p>
               <RadiusFilter value={radiusKm} onChange={setRadiusKm} disabled={!userLoc} />
-              {!userLoc && (
-                <p className="mt-1 text-[11px] text-muted-foreground">Set your location in Settings to filter by distance.</p>
-              )}
             </div>
 
             <div className="flex gap-3 rounded-xl border border-orange/30 bg-orange/5 p-3 text-xs text-foreground/80">

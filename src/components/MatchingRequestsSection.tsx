@@ -311,9 +311,13 @@ export function MatchingRequestsSection() {
           </Tooltip>
         </TooltipProvider>
       )}
-      {userLoc && (
+      {userLoc ? (
         <div className="mt-3">
           <RadiusFilter value={radius} onChange={setRadius} />
+        </div>
+      ) : (
+        <div className="mt-3">
+          <RadiusFilter value={radius} onChange={setRadius} disabled />
         </div>
       )}
       {empty ? (
