@@ -49,9 +49,11 @@ function BusinessesPage() {
     })();
   }, [q, cat]);
 
-  const ranked = useMemo(() => sortByProximity(pages, userLoc, (p) => p), [pages, userLoc]);
+  const sorted = useMemo(() => sortByProximity(pages, userLoc, (p) => p), [pages, userLoc]);
+  const ranked = useMemo(() => filterByRadius(sorted, userLoc, (p) => p, radiusKm), [sorted, userLoc, radiusKm]);
   const featured = ranked.filter((p) => p.is_featured);
   const rest = ranked.filter((p) => !p.is_featured);
+  const radiusExpanded = radiusKm != null && userLoc && ranked.length === 0 && pages.length > 0;
 
   return (
     <Layout>
