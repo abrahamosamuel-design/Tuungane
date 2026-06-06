@@ -8,8 +8,9 @@ import { urgencyOptions, type ServiceRequestRow } from "@/data/serviceRequestTyp
 import { timeAgo } from "@/lib/format";
 import { useUserLocation } from "@/hooks/use-user-location";
 import { useFeaturedLocations, isFeaturedTarget } from "@/hooks/use-featured-locations";
-import { proximityScore, type TargetLocation } from "@/lib/location";
+import { proximityScore, filterByRadius, type TargetLocation } from "@/lib/location";
 import { NearYouBadge } from "@/components/NearYouBadge";
+import { RadiusFilter, RADIUS_OPTIONS } from "@/components/RadiusFilter";
 
 const targetOf = (r: ServiceRequestRow): TargetLocation => ({
   district: r.district,
@@ -17,23 +18,16 @@ const targetOf = (r: ServiceRequestRow): TargetLocation => ({
   area: r.area,
 });
 
+const DEFAULT_RADIUS = 10;
+
 export function MatchingRequestsSection() {
   const { user } = useAuth();
   const [items, setItems] = useState<ServiceRequestRow[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const [radius, setRadius] = useState<number | null>(DEFAULT_RADIUS);
   const { has: isBoostedReq } = useBoostedSet("service_request", ["urgent_request"]);
   const { location: userLoc } = useUserLocation();
   const { locations: featured } = useFeaturedLocations();
-
-  const sorted = [...items].sort((a, b) => {
-    const fa = isFeaturedTarget(targetOf(a), featured, a.category_slug) ? 1 : 0;
-    const fb = isFeaturedTarget(targetOf(b), featured, b.category_slug) ? 1 : 0;
-    const boostA = Number(isBoostedReq(a.id));
-    const boostB = Number(isBoostedReq(b.id));
-    const scoreA = boostA * 200 + fa * 100 + (userLoc ? proximityScore(userLoc, targetOf(a)) : 0);
-    const scoreB = boostB * 200 + fb * 100 + (userLoc ? proximityScore(userLoc, targetOf(b)) : 0);
-    return scoreB - scoreA;
-  });
 
   useEffect(() => {
     if (!user) return;
@@ -44,21 +38,64 @@ export function MatchingRequestsSection() {
     })();
   }, [user]);
 
+  const filtered = userLoc ? filterByRadius(items, userLoc, targetOf, radius) : items;
+
+  const sorted = [...filtered].sort((a, b) => {
+    const fa = isFeaturedTarget(targetOf(a), featured, a.category_slug) ? 1 : 0;
+    const fb = isFeaturedTarget(targetOf(b), featured, b.category_slug) ? 1 : 0;
+    const boostA = Number(isBoostedReq(a.id));
+    const boostB = Number(isBoostedReq(b.id));
+    const scoreA = boostA * 200 + fa * 100 + (userLoc ? proximityScore(userLoc, targetOf(a)) : 0);
+    const scoreB = boostB * 200 + fb * 100 + (userLoc ? proximityScore(userLoc, targetOf(b)) : 0);
+    return scoreB - scoreA;
+  });
+
+  const expandRadius = () => {
+    const radii = RADIUS_OPTIONS.map((o) => o.km).filter((k): k is number => k !== null);
+    if (radius === null) return;
+    const next = radii.find((k) => k > radius);
+    setRadius(next ?? null);
+  };
+
   if (!user || !loaded) return null;
+
+  const empty = sorted.length === 0;
+  const filteredOut = empty && items.length > 0 && userLoc && radius !== null;
 
   return (
     <div className="rounded-2xl border border-border bg-card p-5">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <div className="rounded-lg bg-navy/10 p-2 text-navy"><Briefcase className="h-4 w-4" /></div>
           <h2 className="font-display text-lg font-bold text-navy">Matching service requests</h2>
         </div>
         <Link to="/services/requests" className="inline-flex items-center gap-1 text-xs font-semibold text-orange hover:underline">Open feed <ArrowRight className="h-3 w-3" /></Link>
       </div>
-      {items.length === 0 ? (
+      {userLoc && (
+        <div className="mt-3">
+          <RadiusFilter value={radius} onChange={setRadius} />
+        </div>
+      )}
+      {empty ? (
         <div className="mt-4 rounded-xl border border-dashed border-border p-4 text-center text-sm text-muted-foreground">
-          <p>No matching requests right now.</p>
-          <p className="mt-2 text-xs">Update your category or service areas so customers can find you. <Link to="/me" className="font-semibold text-orange hover:underline">Edit profile</Link></p>
+          {filteredOut ? (
+            <>
+              <p>Not many results in your area yet. Showing nearby results.</p>
+              <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
+                <button onClick={expandRadius} className="rounded-full bg-orange px-3 py-1 text-xs font-semibold text-orange-foreground hover:bg-orange/90">
+                  Expand radius
+                </button>
+                <button onClick={() => setRadius(null)} className="rounded-full border border-border px-3 py-1 text-xs font-semibold text-navy hover:bg-muted">
+                  Show all
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <p>No matching requests right now.</p>
+              <p className="mt-2 text-xs">Update your category or service areas so customers can find you. <Link to="/me" className="font-semibold text-orange hover:underline">Edit profile</Link></p>
+            </>
+          )}
         </div>
       ) : (
         <div className="mt-4 space-y-2">
