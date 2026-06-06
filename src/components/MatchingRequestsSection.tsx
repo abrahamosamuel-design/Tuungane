@@ -171,7 +171,7 @@ export function MatchingRequestsSection() {
       </div>
       {!online && cachedAt && (
         <p className="mt-2 text-[11px] font-medium text-amber-700">
-          Offline · showing saved results from {Math.max(1, Math.round((Date.now() - cachedAt) / 60_000))} min ago
+          Offline · showing saved results from {Math.max(1, Math.round((now - cachedAt) / 60_000))} min ago
         </p>
       )}
       {userLoc && (
