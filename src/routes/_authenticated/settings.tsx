@@ -219,9 +219,10 @@ function LocationSection() {
     const next = await requestBrowserLocation();
     if (!next || next.latitude == null) {
       toast.error("Location permission denied or unavailable");
-    } else {
-      toast.success("Using your current location");
+      return;
     }
+    const filled = [next.district, next.town, next.area].filter(Boolean).length > 0;
+    toast.success(filled ? "Location detected — fields autofilled" : "Using your current location");
   };
 
   const hasCoords = location?.latitude != null && location?.longitude != null;
