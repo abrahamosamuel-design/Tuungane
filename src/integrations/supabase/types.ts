@@ -174,6 +174,7 @@ export type Database = {
           category_slug: string | null
           claim_status: string
           contact_phone: string | null
+          country: string | null
           cover_url: string | null
           created_at: string
           description: string
@@ -181,12 +182,15 @@ export type Database = {
           email: string | null
           id: string
           is_featured: boolean
+          latitude: number | null
           logo_url: string | null
+          longitude: number | null
           name: string
           opening_hours: Json
           org_type: string
           owner_id: string
           products: string[]
+          region: string | null
           seeded_by_official: boolean
           services: string[]
           slug: string
@@ -203,6 +207,7 @@ export type Database = {
           category_slug?: string | null
           claim_status?: string
           contact_phone?: string | null
+          country?: string | null
           cover_url?: string | null
           created_at?: string
           description?: string
@@ -210,12 +215,15 @@ export type Database = {
           email?: string | null
           id?: string
           is_featured?: boolean
+          latitude?: number | null
           logo_url?: string | null
+          longitude?: number | null
           name: string
           opening_hours?: Json
           org_type?: string
           owner_id: string
           products?: string[]
+          region?: string | null
           seeded_by_official?: boolean
           services?: string[]
           slug: string
@@ -232,6 +240,7 @@ export type Database = {
           category_slug?: string | null
           claim_status?: string
           contact_phone?: string | null
+          country?: string | null
           cover_url?: string | null
           created_at?: string
           description?: string
@@ -239,12 +248,15 @@ export type Database = {
           email?: string | null
           id?: string
           is_featured?: boolean
+          latitude?: number | null
           logo_url?: string | null
+          longitude?: number | null
           name?: string
           opening_hours?: Json
           org_type?: string
           owner_id?: string
           products?: string[]
+          region?: string | null
           seeded_by_official?: boolean
           services?: string[]
           slug?: string
@@ -966,35 +978,62 @@ export type Database = {
       }
       profiles: {
         Row: {
+          address_description: string | null
+          area: string | null
           avatar_url: string | null
           bio: string | null
+          city: string | null
+          country: string | null
           created_at: string
           district: string | null
           full_name: string
           id: string
           is_provider: boolean
+          latitude: number | null
+          location_updated_at: string | null
+          location_visibility: string
+          longitude: number | null
+          region: string | null
           town: string | null
           updated_at: string
         }
         Insert: {
+          address_description?: string | null
+          area?: string | null
           avatar_url?: string | null
           bio?: string | null
+          city?: string | null
+          country?: string | null
           created_at?: string
           district?: string | null
           full_name?: string
           id: string
           is_provider?: boolean
+          latitude?: number | null
+          location_updated_at?: string | null
+          location_visibility?: string
+          longitude?: number | null
+          region?: string | null
           town?: string | null
           updated_at?: string
         }
         Update: {
+          address_description?: string | null
+          area?: string | null
           avatar_url?: string | null
           bio?: string | null
+          city?: string | null
+          country?: string | null
           created_at?: string
           district?: string | null
           full_name?: string
           id?: string
           is_provider?: boolean
+          latitude?: number | null
+          location_updated_at?: string | null
+          location_visibility?: string
+          longitude?: number | null
+          region?: string | null
           town?: string | null
           updated_at?: string
         }
@@ -1358,15 +1397,20 @@ export type Database = {
           bio: string
           business_name: string | null
           category_slug: string
+          country: string | null
           cover_url: string | null
           created_at: string
           district: string
           email: string | null
+          latitude: number | null
+          longitude: number | null
           phone: string | null
+          region: string | null
           seeded_by_official: boolean
           seeded_status:
             | Database["public"]["Enums"]["seeded_profile_status"]
             | null
+          service_radius_km: number | null
           subcategory: string
           suspended: boolean
           town: string
@@ -1383,15 +1427,20 @@ export type Database = {
           bio?: string
           business_name?: string | null
           category_slug: string
+          country?: string | null
           cover_url?: string | null
           created_at?: string
           district?: string
           email?: string | null
+          latitude?: number | null
+          longitude?: number | null
           phone?: string | null
+          region?: string | null
           seeded_by_official?: boolean
           seeded_status?:
             | Database["public"]["Enums"]["seeded_profile_status"]
             | null
+          service_radius_km?: number | null
           subcategory: string
           suspended?: boolean
           town?: string
@@ -1408,15 +1457,20 @@ export type Database = {
           bio?: string
           business_name?: string | null
           category_slug?: string
+          country?: string | null
           cover_url?: string | null
           created_at?: string
           district?: string
           email?: string | null
+          latitude?: number | null
+          longitude?: number | null
           phone?: string | null
+          region?: string | null
           seeded_by_official?: boolean
           seeded_status?:
             | Database["public"]["Enums"]["seeded_profile_status"]
             | null
+          service_radius_km?: number | null
           subcategory?: string
           suspended?: boolean
           town?: string
@@ -1481,6 +1535,7 @@ export type Database = {
           category_slug: string | null
           completed_at: string | null
           completion_code: string | null
+          country: string | null
           created_at: string
           customer_confirmed_completion: boolean
           customer_id: string
@@ -1490,12 +1545,15 @@ export type Database = {
           disputed_at: string | null
           district: string | null
           id: string
+          latitude: number | null
           location: string
+          longitude: number | null
           preferred_contact_method: Database["public"]["Enums"]["contact_method"]
           preferred_date: string | null
           preferred_time: string | null
           provider_confirmed_completion: boolean
           provider_id: string | null
+          region: string | null
           selected_provider_id: string | null
           service_needed: string
           service_profile_id: string | null
@@ -1516,6 +1574,7 @@ export type Database = {
           category_slug?: string | null
           completed_at?: string | null
           completion_code?: string | null
+          country?: string | null
           created_at?: string
           customer_confirmed_completion?: boolean
           customer_id: string
@@ -1525,12 +1584,15 @@ export type Database = {
           disputed_at?: string | null
           district?: string | null
           id?: string
+          latitude?: number | null
           location?: string
+          longitude?: number | null
           preferred_contact_method?: Database["public"]["Enums"]["contact_method"]
           preferred_date?: string | null
           preferred_time?: string | null
           provider_confirmed_completion?: boolean
           provider_id?: string | null
+          region?: string | null
           selected_provider_id?: string | null
           service_needed: string
           service_profile_id?: string | null
@@ -1551,6 +1613,7 @@ export type Database = {
           category_slug?: string | null
           completed_at?: string | null
           completion_code?: string | null
+          country?: string | null
           created_at?: string
           customer_confirmed_completion?: boolean
           customer_id?: string
@@ -1560,12 +1623,15 @@ export type Database = {
           disputed_at?: string | null
           district?: string | null
           id?: string
+          latitude?: number | null
           location?: string
+          longitude?: number | null
           preferred_contact_method?: Database["public"]["Enums"]["contact_method"]
           preferred_date?: string | null
           preferred_time?: string | null
           provider_confirmed_completion?: boolean
           provider_id?: string | null
+          region?: string | null
           selected_provider_id?: string | null
           service_needed?: string
           service_profile_id?: string | null
@@ -1582,46 +1648,61 @@ export type Database = {
       }
       timeline_posts: {
         Row: {
+          area: string | null
           business_page_id: string | null
           category_slug: string | null
           created_at: string
+          district: string | null
           featured: boolean
           hidden: boolean
           hidden_reason: string | null
           id: string
+          latitude: number | null
           location: string | null
+          longitude: number | null
           media_urls: string[]
           post_type: Database["public"]["Enums"]["post_type"]
           provider_user_id: string
           text: string
+          town: string | null
         }
         Insert: {
+          area?: string | null
           business_page_id?: string | null
           category_slug?: string | null
           created_at?: string
+          district?: string | null
           featured?: boolean
           hidden?: boolean
           hidden_reason?: string | null
           id?: string
+          latitude?: number | null
           location?: string | null
+          longitude?: number | null
           media_urls?: string[]
           post_type?: Database["public"]["Enums"]["post_type"]
           provider_user_id: string
           text: string
+          town?: string | null
         }
         Update: {
+          area?: string | null
           business_page_id?: string | null
           category_slug?: string | null
           created_at?: string
+          district?: string | null
           featured?: boolean
           hidden?: boolean
           hidden_reason?: string | null
           id?: string
+          latitude?: number | null
           location?: string | null
+          longitude?: number | null
           media_urls?: string[]
           post_type?: Database["public"]["Enums"]["post_type"]
           provider_user_id?: string
           text?: string
+          town?: string | null
         }
         Relationships: []
       }
@@ -1830,6 +1911,7 @@ export type Database = {
           category_slug: string | null
           completed_at: string | null
           completion_code: string | null
+          country: string | null
           created_at: string
           customer_confirmed_completion: boolean
           customer_id: string
@@ -1839,12 +1921,15 @@ export type Database = {
           disputed_at: string | null
           district: string | null
           id: string
+          latitude: number | null
           location: string
+          longitude: number | null
           preferred_contact_method: Database["public"]["Enums"]["contact_method"]
           preferred_date: string | null
           preferred_time: string | null
           provider_confirmed_completion: boolean
           provider_id: string | null
+          region: string | null
           selected_provider_id: string | null
           service_needed: string
           service_profile_id: string | null
