@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Briefcase, ArrowRight, MapPin, Star } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,7 +8,7 @@ import { urgencyOptions, type ServiceRequestRow } from "@/data/serviceRequestTyp
 import { timeAgo } from "@/lib/format";
 import { useUserLocation } from "@/hooks/use-user-location";
 import { useFeaturedLocations, isFeaturedTarget } from "@/hooks/use-featured-locations";
-import { proximityScore, filterByRadius, type TargetLocation } from "@/lib/location";
+import { proximityScore, haversineKm, type TargetLocation } from "@/lib/location";
 import { NearYouBadge } from "@/components/NearYouBadge";
 import { RadiusFilter, RADIUS_OPTIONS } from "@/components/RadiusFilter";
 
@@ -19,11 +19,23 @@ const targetOf = (r: ServiceRequestRow): TargetLocation => ({
 });
 
 const DEFAULT_RADIUS = 10;
+const CACHE_TTL = 60_000; // 1 min — cached across remounts/navigation
+
+type CacheEntry = { at: number; rows: ServiceRequestRow[] };
+const _cache = new Map<string, CacheEntry>();
 
 export function MatchingRequestsSection() {
   const { user } = useAuth();
-  const [items, setItems] = useState<ServiceRequestRow[]>([]);
-  const [loaded, setLoaded] = useState(false);
+  const [items, setItems] = useState<ServiceRequestRow[]>(() => {
+    if (!user) return [];
+    const c = _cache.get(user.id);
+    return c && Date.now() - c.at < CACHE_TTL ? c.rows : [];
+  });
+  const [loaded, setLoaded] = useState(() => {
+    if (!user) return false;
+    const c = _cache.get(user.id);
+    return !!(c && Date.now() - c.at < CACHE_TTL);
+  });
   const [radius, setRadius] = useState<number | null>(DEFAULT_RADIUS);
   const { has: isBoostedReq } = useBoostedSet("service_request", ["urgent_request"]);
   const { location: userLoc } = useUserLocation();
@@ -31,24 +43,58 @@ export function MatchingRequestsSection() {
 
   useEffect(() => {
     if (!user) return;
+    const c = _cache.get(user.id);
+    if (c && Date.now() - c.at < CACHE_TTL) {
+      setItems(c.rows);
+      setLoaded(true);
+      return;
+    }
+    let cancelled = false;
     (async () => {
       const { data, error } = await supabase.rpc("matching_requests_for_provider", { _provider: user.id });
-      if (!error && data) setItems(data as ServiceRequestRow[]);
+      if (cancelled) return;
+      if (!error && data) {
+        const rows = data as ServiceRequestRow[];
+        _cache.set(user.id, { at: Date.now(), rows });
+        setItems(rows);
+      }
       setLoaded(true);
     })();
+    return () => { cancelled = true; };
   }, [user]);
 
-  const filtered = userLoc ? filterByRadius(items, userLoc, targetOf, radius) : items;
+  // Annotate each item once per data change — avoids recomputing on radius changes.
+  const annotated = useMemo(() => {
+    return items.map((r) => {
+      const t = targetOf(r);
+      const km = userLoc ? haversineKm(userLoc, t) : null;
+      const feat = isFeaturedTarget(t, featured, r.category_slug);
+      const score = (userLoc ? proximityScore(userLoc, t) : 0) + (feat ? 100 : 0);
+      return { r, t, km, feat, score };
+    });
+  }, [items, userLoc, featured]);
 
-  const sorted = [...filtered].sort((a, b) => {
-    const fa = isFeaturedTarget(targetOf(a), featured, a.category_slug) ? 1 : 0;
-    const fb = isFeaturedTarget(targetOf(b), featured, b.category_slug) ? 1 : 0;
-    const boostA = Number(isBoostedReq(a.id));
-    const boostB = Number(isBoostedReq(b.id));
-    const scoreA = boostA * 200 + fa * 100 + (userLoc ? proximityScore(userLoc, targetOf(a)) : 0);
-    const scoreB = boostB * 200 + fb * 100 + (userLoc ? proximityScore(userLoc, targetOf(b)) : 0);
-    return scoreB - scoreA;
-  });
+  // Filter + sort recompute only when radius / boost set / annotations change. No network hit.
+  const sorted = useMemo(() => {
+    const userTown = userLoc?.town || userLoc?.city || null;
+    const within = annotated.filter(({ km, t }) => {
+      if (!userLoc || radius == null) return true;
+      if (km != null) return km <= radius;
+      if (userLoc.area && t.area && userLoc.area === t.area) return true;
+      if (radius <= 5) return false;
+      if (userTown && t.town && userTown === t.town) return true;
+      if (radius <= 20) return false;
+      if (userLoc.district && t.district && userLoc.district === t.district) return true;
+      return false;
+    });
+    return within
+      .sort((a, b) => {
+        const ba = Number(isBoostedReq(a.r.id));
+        const bb = Number(isBoostedReq(b.r.id));
+        return bb * 200 + b.score - (ba * 200 + a.score);
+      })
+      .slice(0, 5);
+  }, [annotated, radius, userLoc, isBoostedReq]);
 
   const expandRadius = () => {
     const radii = RADIUS_OPTIONS.map((o) => o.km).filter((k): k is number => k !== null);
@@ -99,18 +145,16 @@ export function MatchingRequestsSection() {
         </div>
       ) : (
         <div className="mt-4 space-y-2">
-          {sorted.slice(0, 5).map((r) => {
+          {sorted.map(({ r, t, feat }) => {
             const urg = urgencyOptions.find((u) => u.value === r.urgency)?.label ?? r.urgency;
             const boosted = isBoostedReq(r.id);
-            const target = targetOf(r);
-            const feat = isFeaturedTarget(target, featured, r.category_slug);
             return (
               <Link key={r.id} to="/requests/$id" params={{ id: r.id }} className={`flex items-center justify-between gap-3 rounded-xl border p-3 hover:border-orange ${boosted ? "border-orange/60 bg-orange/5" : "border-border"}`}>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-semibold text-navy">{r.title || r.service_needed}</p>
                   <p className="truncate text-xs text-muted-foreground inline-flex items-center gap-1"><MapPin className="h-3 w-3" /> {r.town ?? r.location} · {timeAgo(r.created_at)}</p>
                   <div className="mt-1 flex flex-wrap items-center gap-1">
-                    {userLoc && <NearYouBadge user={userLoc} target={target} />}
+                    {userLoc && <NearYouBadge user={userLoc} target={t} />}
                     {feat && (
                       <span className="inline-flex items-center gap-1 rounded-full bg-orange/10 px-2 py-0.5 text-[10px] font-semibold text-orange">
                         <Star className="h-3 w-3" /> Featured area
