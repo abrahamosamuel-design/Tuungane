@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { MapPin, Loader2 } from "lucide-react";
 import { AreaAutocomplete } from "@/components/AreaAutocomplete";
 import { MapPicker } from "@/components/MapPicker";
+import { findDistrictBounds, type Bounds } from "@/lib/geocoding";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({ meta: [{ title: "Settings — Tuungane" }] }),
@@ -199,6 +200,7 @@ function LocationSection() {
   const [city, setCity] = useState("");
   const [town, setTown] = useState("");
   const [area, setArea] = useState("");
+  const [districtBounds, setDistrictBounds] = useState<Bounds | null>(null);
   const [visibility, setVisibility] = useState<"area" | "town" | "district" | "hidden">("area");
 
   useEffect(() => {
@@ -239,6 +241,7 @@ function LocationSection() {
         <label className="text-xs font-medium text-navy">Search and pick your location</label>
         <AreaAutocomplete
           className="mt-1"
+          bounds={districtBounds}
           onSelect={(p) => {
             const patch = {
               country: p.country ?? undefined,
@@ -257,6 +260,12 @@ function LocationSection() {
             if (p.town) setTown(p.town);
             if (p.area) setArea(p.area);
             save(patch);
+            if (p.bounds) setDistrictBounds(p.bounds);
+            if (p.district) {
+              findDistrictBounds(p.district).then((b) => {
+                if (b) setDistrictBounds(b);
+              });
+            }
             toast.success("Location updated");
           }}
         />
@@ -266,6 +275,7 @@ function LocationSection() {
       <MapPicker
         latitude={location?.latitude ?? null}
         longitude={location?.longitude ?? null}
+        bounds={districtBounds}
         onChange={(lat, lng, place) => {
           const patch: Partial<import("@/lib/location").UserLocation> = {
             latitude: lat,
@@ -278,6 +288,11 @@ function LocationSection() {
             if (place.city) { patch.city = place.city; setCity(place.city); }
             if (place.town) { patch.town = place.town; setTown(place.town); }
             if (place.area) { patch.area = place.area; setArea(place.area); }
+            if (place.district) {
+              findDistrictBounds(place.district).then((b) => {
+                if (b) setDistrictBounds(b);
+              });
+            }
           }
           save(patch);
         }}

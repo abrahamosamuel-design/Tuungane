@@ -1,18 +1,22 @@
 import { useEffect, useRef, useState } from "react";
 import { Loader2, MapPin, Search } from "lucide-react";
-import { searchPlaces, type PlaceSuggestion } from "@/lib/geocoding";
+import { searchPlaces, type Bounds, type PlaceSuggestion } from "@/lib/geocoding";
 
 type Props = {
   placeholder?: string;
   onSelect: (place: PlaceSuggestion) => void;
   className?: string;
+  /** When supplied, biases (and optionally restricts) results to within these bounds. */
+  bounds?: Bounds | null;
+  /** When true with `bounds`, hard-restrict results to the bounding box. */
+  strict?: boolean;
 };
 
 /**
  * Debounced place search input. Uses OSM Nominatim, biased to Uganda.
  * Lets users pick a precise area/neighbourhood/district rather than free-typing.
  */
-export function AreaAutocomplete({ placeholder = "Search for a town, area, or neighbourhood…", onSelect, className }: Props) {
+export function AreaAutocomplete({ placeholder = "Search for a town, area, or neighbourhood…", onSelect, className, bounds, strict }: Props) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<PlaceSuggestion[]>([]);
   const [loading, setLoading] = useState(false);
@@ -30,7 +34,10 @@ export function AreaAutocomplete({ placeholder = "Search for a town, area, or ne
     setLoading(true);
     const controller = new AbortController();
     const t = setTimeout(async () => {
-      const r = await searchPlaces(q, controller.signal);
+      const r = await searchPlaces(q, controller.signal, {
+        bounds: bounds ?? undefined,
+        strict: strict ?? false,
+      });
       setResults(r);
       setLoading(false);
       setOpen(true);
@@ -39,7 +46,7 @@ export function AreaAutocomplete({ placeholder = "Search for a town, area, or ne
       controller.abort();
       clearTimeout(t);
     };
-  }, [query]);
+  }, [query, bounds, strict]);
 
   // Close on outside click
   useEffect(() => {

@@ -28,6 +28,9 @@ type NominatimResponse = {
   type?: string;
 };
 
+// [minLat, maxLat, minLon, maxLon]
+export type Bounds = [number, number, number, number];
+
 export type PrecisionInfo = {
   radiusMeters: number;
   label: string;
@@ -40,6 +43,7 @@ export type ReverseGeocodeResult = Pick<
 > & {
   display_name?: string;
   precision?: PrecisionInfo;
+  bounds?: Bounds;
 };
 
 
@@ -60,6 +64,13 @@ function mapAddress(addr: NominatimAddress): ReverseGeocodeResult {
   };
 }
 
+function parseBbox(bbox?: [string, string, string, string]): Bounds | undefined {
+  if (!bbox) return undefined;
+  const n = bbox.map(Number) as Bounds;
+  if (n.some((v) => Number.isNaN(v))) return undefined;
+  return n;
+}
+
 /**
  * Approximate metres between two lat/lon points using the haversine formula.
  */
@@ -74,33 +85,73 @@ function haversineM(lat1: number, lon1: number, lat2: number, lon2: number): num
   return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-function computePrecision(bbox?: [string, string, string, string], osmType?: string): PrecisionInfo | undefined {
-  if (bbox) {
-    const [minLat, maxLat, minLon, maxLon] = bbox.map(Number);
-    const h = haversineM(minLat, minLon, minLat, maxLon); // horizontal span
-    const v = haversineM(minLat, minLon, maxLat, minLon); // vertical span
-    const radius = Math.round(Math.sqrt(h * h + v * v) / 2); // half-diagonal
-    if (radius < 100) return { radiusMeters: radius, label: `~${radius} m`, confidence: "high" };
-    if (radius < 1000) return { radiusMeters: radius, label: `~${Math.round(radius / 100) / 10} km`, confidence: "high" };
-    if (radius < 5000) return { radiusMeters: radius, label: `~${Math.round(radius / 1000)} km`, confidence: "medium" };
-    if (radius < 50000) return { radiusMeters: radius, label: `~${Math.round(radius / 1000)} km`, confidence: "medium" };
-    return { radiusMeters: radius, label: `~${Math.round(radius / 1000)} km`, confidence: "low" };
-  }
-
-  // Fallback based on OSM feature type
-  const fine = new Set(["house", "building", "residential", "suburb", "neighbourhood", "quarter"]);
-  const medium = new Set(["village", "hamlet", "town", "municipality", "city_district"]);
-  const coarse = new Set(["city", "county", "state_district", "district"]);
-  if (fine.has(osmType ?? "")) return { radiusMeters: 500, label: "~500 m", confidence: "high" };
-  if (medium.has(osmType ?? "")) return { radiusMeters: 3000, label: "~3 km", confidence: "medium" };
-  if (coarse.has(osmType ?? "")) return { radiusMeters: 25000, label: "~25 km", confidence: "low" };
-  return undefined;
+function boundsRadiusM(b: Bounds): number {
+  const [minLat, maxLat, minLon, maxLon] = b;
+  const h = haversineM(minLat, minLon, minLat, maxLon);
+  const v = haversineM(minLat, minLon, maxLat, minLon);
+  return Math.sqrt(h * h + v * v) / 2;
 }
+
+function pointInBounds(lat: number, lon: number, b: Bounds): boolean {
+  const [minLat, maxLat, minLon, maxLon] = b;
+  return lat >= minLat && lat <= maxLat && lon >= minLon && lon <= maxLon;
+}
+
+function labelFor(radius: number): string {
+  if (radius < 1000) return `~${Math.max(50, Math.round(radius / 10) * 10)} m`;
+  return `~${Math.round(radius / 100) / 10} km`;
+}
+
+function computePrecision(
+  bbox?: [string, string, string, string],
+  osmType?: string,
+  districtBounds?: Bounds,
+  lat?: number,
+  lon?: number,
+): PrecisionInfo | undefined {
+  let radius: number | undefined;
+  if (bbox) {
+    const parsed = parseBbox(bbox)!;
+    radius = boundsRadiusM(parsed);
+    // If Nominatim returned a bbox larger than the district, clamp to district radius.
+    if (districtBounds) {
+      const dRadius = boundsRadiusM(districtBounds);
+      if (radius > dRadius) radius = dRadius;
+    }
+  } else {
+    const fine = new Set(["house", "building", "residential", "suburb", "neighbourhood", "quarter"]);
+    const medium = new Set(["village", "hamlet", "town", "municipality", "city_district"]);
+    const coarse = new Set(["city", "county", "state_district", "district"]);
+    if (fine.has(osmType ?? "")) radius = 500;
+    else if (medium.has(osmType ?? "")) radius = 3000;
+    else if (coarse.has(osmType ?? "")) radius = 25000;
+  }
+  if (radius == null) return undefined;
+
+  // Confidence: tighter if inside known district bounds.
+  const inside = districtBounds && lat != null && lon != null
+    ? pointInBounds(lat, lon, districtBounds)
+    : true;
+  let confidence: PrecisionInfo["confidence"];
+  if (radius < 1500 && inside) confidence = "high";
+  else if (radius < 8000 && inside) confidence = "medium";
+  else if (radius < 30000) confidence = inside ? "medium" : "low";
+  else confidence = "low";
+
+  return { radiusMeters: Math.round(radius), label: labelFor(radius), confidence };
+}
+
+export type ReverseGeocodeOptions = {
+  /** When supplied, refines the estimated radius and confidence using the
+   *  selected district bounds (e.g. when the user picked a district first). */
+  bounds?: Bounds;
+};
 
 export async function reverseGeocode(
   latitude: number,
   longitude: number,
   signal?: AbortSignal,
+  options?: ReverseGeocodeOptions,
 ): Promise<ReverseGeocodeResult | null> {
   try {
     const url = new URL("https://nominatim.openstreetmap.org/reverse");
@@ -119,7 +170,8 @@ export async function reverseGeocode(
     return {
       ...mapAddress(json.address),
       display_name: json.display_name,
-      precision: computePrecision(json.boundingbox, json.type),
+      bounds: parseBbox(json.boundingbox),
+      precision: computePrecision(json.boundingbox, json.type, options?.bounds, latitude, longitude),
     };
   } catch {
     return null;
@@ -131,6 +183,7 @@ export type PlaceSuggestion = ReverseGeocodeResult & {
   latitude: number;
   longitude: number;
   place_id: string;
+  bounds?: Bounds;
 };
 
 type NominatimSearchItem = {
@@ -139,6 +192,14 @@ type NominatimSearchItem = {
   lon: string;
   display_name: string;
   address?: NominatimAddress;
+  boundingbox?: [string, string, string, string];
+};
+
+export type SearchPlacesOptions = {
+  /** Restrict results to within these bounds (e.g. the user's selected district). */
+  bounds?: Bounds;
+  /** When true with `bounds`, hard-restrict (Nominatim `bounded=1`). */
+  strict?: boolean;
 };
 
 /**
@@ -148,6 +209,7 @@ type NominatimSearchItem = {
 export async function searchPlaces(
   query: string,
   signal?: AbortSignal,
+  options?: SearchPlacesOptions,
 ): Promise<PlaceSuggestion[]> {
   const q = query.trim();
   if (q.length < 3) return [];
@@ -158,6 +220,12 @@ export async function searchPlaces(
     url.searchParams.set("addressdetails", "1");
     url.searchParams.set("limit", "5");
     url.searchParams.set("countrycodes", "ug");
+    if (options?.bounds) {
+      const [minLat, maxLat, minLon, maxLon] = options.bounds;
+      // Nominatim viewbox order: left,top,right,bottom (lon,lat,lon,lat)
+      url.searchParams.set("viewbox", `${minLon},${maxLat},${maxLon},${minLat}`);
+      if (options.strict) url.searchParams.set("bounded", "1");
+    }
     const res = await fetch(url.toString(), {
       headers: { Accept: "application/json" },
       signal,
@@ -170,8 +238,44 @@ export async function searchPlaces(
       latitude: parseFloat(it.lat),
       longitude: parseFloat(it.lon),
       place_id: String(it.place_id),
+      bounds: parseBbox(it.boundingbox),
     }));
   } catch {
     return [];
+  }
+}
+
+// In-memory cache of district name → bounds to avoid hammering Nominatim.
+const districtBoundsCache = new Map<string, Bounds | null>();
+
+/**
+ * Look up the bounding box of a Uganda district by name. Cached.
+ * Returns null when the district can't be resolved.
+ */
+export async function findDistrictBounds(
+  districtName: string,
+  signal?: AbortSignal,
+): Promise<Bounds | null> {
+  const key = districtName.trim().toLowerCase();
+  if (!key) return null;
+  if (districtBoundsCache.has(key)) return districtBoundsCache.get(key) ?? null;
+  try {
+    const url = new URL("https://nominatim.openstreetmap.org/search");
+    url.searchParams.set("format", "jsonv2");
+    url.searchParams.set("q", `${districtName}, Uganda`);
+    url.searchParams.set("countrycodes", "ug");
+    url.searchParams.set("limit", "1");
+    url.searchParams.set("featuretype", "settlement");
+    const res = await fetch(url.toString(), { headers: { Accept: "application/json" }, signal });
+    if (!res.ok) {
+      districtBoundsCache.set(key, null);
+      return null;
+    }
+    const items = (await res.json()) as NominatimSearchItem[];
+    const bounds = parseBbox(items[0]?.boundingbox) ?? null;
+    districtBoundsCache.set(key, bounds);
+    return bounds;
+  } catch {
+    return null;
   }
 }

@@ -20,6 +20,7 @@ import { REQUESTS_SAFETY_TEXT } from "@/data/requestTypes";
 import { useUserLocation } from "@/hooks/use-user-location";
 import { AreaAutocomplete } from "@/components/AreaAutocomplete";
 import { MapPicker } from "@/components/MapPicker";
+import { findDistrictBounds, type Bounds } from "@/lib/geocoding";
 
 export const Route = createFileRoute("/_authenticated/requests/new")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -38,6 +39,7 @@ function NewRequest() {
   const [autofilled, setAutofilled] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [districtBounds, setDistrictBounds] = useState<Bounds | null>(null);
   const [f, setF] = useState({
     title: "",
     category_slug: categories[0].slug,
@@ -236,6 +238,7 @@ function NewRequest() {
           <Field label="Where is the request located? *">
             <AreaAutocomplete
               placeholder="Search for a town, area, or neighbourhood…"
+              bounds={districtBounds}
               onSelect={(p) => {
                 const composed = [p.area, p.town, p.district].filter(Boolean).join(", ");
                 setF((s) => ({
@@ -246,6 +249,13 @@ function NewRequest() {
                   area: p.area ?? s.area,
                 }));
                 setCoords({ lat: p.latitude, lng: p.longitude });
+                // Prefer the pick's own bbox; otherwise resolve the district bounds.
+                if (p.bounds) setDistrictBounds(p.bounds);
+                if (p.district) {
+                  findDistrictBounds(p.district).then((b) => {
+                    if (b) setDistrictBounds(b);
+                  });
+                }
               }}
             />
             <input
@@ -260,6 +270,7 @@ function NewRequest() {
           <MapPicker
             latitude={coords?.lat ?? profileLoc?.latitude ?? null}
             longitude={coords?.lng ?? profileLoc?.longitude ?? null}
+            bounds={districtBounds}
             onChange={(lat, lng, place) => {
               setCoords({ lat, lng });
               if (!place) return;
@@ -271,6 +282,11 @@ function NewRequest() {
                 town: place.town ?? s.town,
                 area: place.area ?? s.area,
               }));
+              if (place.district) {
+                findDistrictBounds(place.district).then((b) => {
+                  if (b) setDistrictBounds(b);
+                });
+              }
             }}
           />
 

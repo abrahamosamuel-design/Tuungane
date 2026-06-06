@@ -1,13 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import "leaflet/dist/leaflet.css";
 import { Maximize2, Minimize2, Target } from "lucide-react";
-import { reverseGeocode, type ReverseGeocodeResult, type PrecisionInfo } from "@/lib/geocoding";
+import { reverseGeocode, type Bounds, type ReverseGeocodeResult, type PrecisionInfo } from "@/lib/geocoding";
 
 type Props = {
   latitude?: number | null;
   longitude?: number | null;
   onChange: (lat: number, lng: number, place: ReverseGeocodeResult | null) => void;
   className?: string;
+  /** Selected district bounds — refines reverse-geocode precision/confidence. */
+  bounds?: Bounds | null;
 };
 
 // Default to Kampala when nothing is selected yet.
@@ -23,6 +25,7 @@ export function MapPicker({
   longitude,
   onChange,
   className,
+  bounds,
   collapsedHeight = 120,
   expandedHeight = 320,
 }: Props & { collapsedHeight?: number; expandedHeight?: number }) {
@@ -30,9 +33,15 @@ export function MapPicker({
   const mapRef = useRef<import("leaflet").Map | null>(null);
   const markerRef = useRef<import("leaflet").Marker | null>(null);
   const LRef = useRef<typeof import("leaflet") | null>(null);
+  const boundsRef = useRef<Bounds | null>(bounds ?? null);
   const [mounted, setMounted] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [precision, setPrecision] = useState<PrecisionInfo | null>(null);
+
+  // Keep the latest district bounds available to the dragend/click closure.
+  useEffect(() => {
+    boundsRef.current = bounds ?? null;
+  }, [bounds]);
 
   // Initialise Leaflet on mount (client-only).
   useEffect(() => {
@@ -67,7 +76,9 @@ export function MapPicker({
 
       const handlePosition = async (lat: number, lng: number) => {
         marker.setLatLng([lat, lng]);
-        const place = await reverseGeocode(lat, lng);
+        const place = await reverseGeocode(lat, lng, undefined, {
+          bounds: boundsRef.current ?? undefined,
+        });
         setPrecision(place?.precision ?? null);
         onChange(lat, lng, place);
       };
