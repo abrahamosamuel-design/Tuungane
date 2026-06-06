@@ -107,6 +107,27 @@ export function MatchingRequestsSection() {
     return () => clearInterval(id);
   }, []);
 
+  const [refreshing, setRefreshing] = useState(false);
+
+  const fetchFresh = useCallback(async () => {
+    if (!user) return;
+    try {
+      const { data, error } = await supabase.rpc("matching_requests_for_provider", { _provider: user.id });
+      if (!error && data) {
+        const rows = data as ServiceRequestRow[];
+        const entry: CacheEntry = { at: Date.now(), rows };
+        _mem.set(user.id, entry);
+        writeDisk(user.id, entry);
+        setItems(rows);
+        setCachedAt(entry.at);
+      }
+    } catch {
+      // Network blew up mid-request — keep cached items visible.
+    } finally {
+      setLoaded(true);
+    }
+  }, [user]);
+
   useEffect(() => {
     if (!user) return;
     const cached = readCache(user.id);
@@ -142,6 +163,42 @@ export function MatchingRequestsSection() {
     })();
     return () => { cancelled = true; };
   }, [user, online]);
+
+  const handleRefresh = useCallback(async () => {
+    if (refreshing || !online) return;
+    setRefreshing(true);
+    setNow(Date.now());
+    await fetchFresh();
+    setRefreshing(false);
+  }, [refreshing, online, fetchFresh]);
+
+  // Pull-to-refresh: track touch drag from the top of the section.
+  const containerRef = useRef<HTMLDivElement>(null);
+  const pullStartY = useRef<number | null>(null);
+  const [pullDist, setPullDist] = useState(0);
+  const PULL_THRESHOLD = 64;
+  const PULL_MAX = 96;
+
+  const onTouchStart = (e: React.TouchEvent) => {
+    if (refreshing) return;
+    // Only engage when section is scrolled into view near top of page
+    if (window.scrollY > (containerRef.current?.offsetTop ?? 0)) return;
+    pullStartY.current = e.touches[0].clientY;
+  };
+  const onTouchMove = (e: React.TouchEvent) => {
+    if (pullStartY.current == null) return;
+    const dy = e.touches[0].clientY - pullStartY.current;
+    if (dy <= 0) { setPullDist(0); return; }
+    setPullDist(Math.min(PULL_MAX, dy * 0.5));
+  };
+  const onTouchEnd = () => {
+    if (pullStartY.current == null) return;
+    const dist = pullDist;
+    pullStartY.current = null;
+    setPullDist(0);
+    if (dist >= PULL_THRESHOLD) handleRefresh();
+  };
+
 
   // Annotate each item once per data change — avoids recomputing on radius changes.
   const annotated = useMemo(() => {
