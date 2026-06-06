@@ -49,7 +49,7 @@ export interface PostRow {
 
 interface Props { post: PostRow; onChanged?: () => void; userLoc?: UserLocation | null }
 
-export function PostCard({ post, onChanged }: Props) {
+export function PostCard({ post, onChanged, userLoc }: Props) {
   const { user, isModerator } = useAuth();
   const nav = useNavigate();
   const [likes, setLikes] = useState(0);
