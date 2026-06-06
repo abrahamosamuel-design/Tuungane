@@ -4,31 +4,47 @@ import { useAuth } from "@/hooks/use-auth";
 import type { UserLocation } from "@/lib/location";
 import { reverseGeocode } from "@/lib/geocoding";
 
-const STORAGE_KEY = "tuungane_user_location";
+const LEGACY_KEY = "tuungane_user_location";
+const ANON_KEY = "tuungane_user_location:anon";
+const userKey = (uid?: string | null) => (uid ? `tuungane_user_location:${uid}` : ANON_KEY);
 
-function readLocal(): UserLocation | null {
+function readLocalFor(uid?: string | null): UserLocation | null {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(userKey(uid));
     return raw ? (JSON.parse(raw) as UserLocation) : null;
   } catch {
     return null;
   }
 }
 
-function writeLocal(loc: UserLocation) {
+function writeLocalFor(uid: string | null | undefined, loc: UserLocation) {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(loc));
+    localStorage.setItem(userKey(uid), JSON.stringify(loc));
+  } catch {}
+}
+
+function clearLegacy() {
+  // The legacy non-scoped key leaked between users on shared devices.
+  try {
+    localStorage.removeItem(LEGACY_KEY);
   } catch {}
 }
 
 export function useUserLocation() {
   const { user } = useAuth();
-  const [location, setLocation] = useState<UserLocation | null>(() => readLocal());
+  // On first mount auth may not be resolved yet — start from anon cache.
+  // The effect below swaps to the user-scoped cache once auth resolves.
+  const [location, setLocation] = useState<UserLocation | null>(() => readLocalFor(null));
   const [loading, setLoading] = useState(false);
   const [requestingGeo, setRequestingGeo] = useState(false);
 
-  // Load from profile when signed in.
+  // Swap cache + load from profile when signed-in user changes.
   useEffect(() => {
+    clearLegacy();
+
+    // Re-seed from the cache that belongs to THIS user (or anon on sign-out).
+    setLocation(readLocalFor(user?.id ?? null));
+
     if (!user) return;
     setLoading(true);
     (async () => {
@@ -40,7 +56,7 @@ export function useUserLocation() {
       if (data) {
         const next = data as UserLocation;
         setLocation(next);
-        writeLocal(next);
+        writeLocalFor(user.id, next);
       }
       setLoading(false);
     })();
@@ -64,7 +80,7 @@ export function useUserLocation() {
       }
       const next: UserLocation = { ...(location ?? {}), ...cleanPatch };
       setLocation(next);
-      writeLocal(next);
+      writeLocalFor(user?.id ?? null, next);
       if (user) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const dbPatch: any = { ...cleanPatch, location_updated_at: new Date().toISOString() };
