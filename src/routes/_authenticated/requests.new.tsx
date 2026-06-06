@@ -19,6 +19,7 @@ import { Loader2, MapPin, ShieldAlert } from "lucide-react";
 import { REQUESTS_SAFETY_TEXT } from "@/data/requestTypes";
 import { useUserLocation } from "@/hooks/use-user-location";
 import { AreaAutocomplete } from "@/components/AreaAutocomplete";
+import { MapPicker } from "@/components/MapPicker";
 
 export const Route = createFileRoute("/_authenticated/requests/new")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -36,6 +37,7 @@ function NewRequest() {
   const [busy, setBusy] = useState(false);
   const [autofilled, setAutofilled] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [f, setF] = useState({
     title: "",
     category_slug: categories[0].slug,
@@ -243,6 +245,7 @@ function NewRequest() {
                   town: p.town ?? s.town,
                   area: p.area ?? s.area,
                 }));
+                setCoords({ lat: p.latitude, lng: p.longitude });
               }}
             />
             <input
@@ -253,6 +256,24 @@ function NewRequest() {
               className={`${inp} mt-2`}
             />
           </Field>
+
+          <MapPicker
+            latitude={coords?.lat ?? profileLoc?.latitude ?? null}
+            longitude={coords?.lng ?? profileLoc?.longitude ?? null}
+            onChange={(lat, lng, place) => {
+              setCoords({ lat, lng });
+              if (!place) return;
+              const composed = [place.area, place.town, place.district].filter(Boolean).join(", ");
+              setF((s) => ({
+                ...s,
+                location: composed || s.location,
+                district: place.district ?? s.district,
+                town: place.town ?? s.town,
+                area: place.area ?? s.area,
+              }));
+            }}
+          />
+
           <div className="grid grid-cols-3 gap-3">
             <Field label="District">
               <input value={f.district} onChange={(e) => update("district", e.target.value)} className={inp} />
