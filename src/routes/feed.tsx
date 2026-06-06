@@ -181,7 +181,7 @@ function Feed() {
                 {officialToShow.map((p) => <OfficialPostCard key={`op-${p.id}`} post={p} account={officialAccount} />)}
                 {filter !== "official" && (sortedPosts.length === 0 ? (
                   <Empty title="No posts yet" hint={filter === "following" ? "Follow providers to see their work here." : "Be the first to share work."} />
-                ) : sortedPosts.map((p) => <PostCard key={p.id} post={p} onChanged={load} />))}
+                ) : sortedPosts.map((p) => <PostCard key={p.id} post={p} onChanged={load} userLoc={userLoc} />))}
                 {filter === "official" && officialToShow.length === 0 && (
                   <Empty title="No official posts yet" hint="Tuungane Official will post curated updates here soon." />
                 )}
