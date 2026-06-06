@@ -142,16 +142,19 @@ function Services() {
     return s;
   };
 
-  const realFiltered = useMemo(() => real
-    .filter((p) => {
-      const qm = q.toLowerCase();
-      const name = p.business_name || p.profile?.full_name || "";
-      const matchesQ = !q || name.toLowerCase().includes(qm) || p.subcategory.toLowerCase().includes(qm);
-      const matchesL = !loc || p.town.toLowerCase().includes(loc.toLowerCase()) || p.district.toLowerCase().includes(loc.toLowerCase());
-      return matchesQ && matchesL;
-    })
-    .sort((a, b) => scoreProvider(b) - scoreProvider(a)),
-    [real, q, loc, filter]); // eslint-disable-line react-hooks/exhaustive-deps
+  const realFiltered = useMemo(() => {
+    const base = real
+      .filter((p) => {
+        const qm = q.toLowerCase();
+        const name = p.business_name || p.profile?.full_name || "";
+        const matchesQ = !q || name.toLowerCase().includes(qm) || p.subcategory.toLowerCase().includes(qm);
+        const matchesL = !loc || p.town.toLowerCase().includes(loc.toLowerCase()) || p.district.toLowerCase().includes(loc.toLowerCase());
+        return matchesQ && matchesL;
+      })
+      .sort((a, b) => scoreProvider(b) - scoreProvider(a));
+    return filterByRadius(base, userLoc, (p) => p, radiusKm);
+  }, [real, q, loc, filter, radiusKm, userLoc]); // eslint-disable-line react-hooks/exhaustive-deps
+  const radiusExpanded = radiusKm != null && userLoc && realFiltered.length === 0 && real.length > 0;
 
   const recommended = useMemo(() => {
     // Top recommended = highest scoring, prefer verified + with rating
