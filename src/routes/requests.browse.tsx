@@ -242,7 +242,13 @@ function BrowseRequests() {
               {REQUESTS_COPY.listTitle}
             </h2>
             {loading && <p className="text-sm text-muted-foreground">Loading…</p>}
-            {!loading && rankedItems.length === 0 && (
+            {!loading && radiusExpanded && (
+              <div className="mb-3 rounded-xl border border-orange/30 bg-orange/5 p-3 text-xs text-foreground/80">
+                Not many results in your area within {radiusKm} km yet.{" "}
+                <button onClick={() => setRadiusKm(null)} className="font-semibold text-orange underline">Show all results</button>
+              </div>
+            )}
+            {!loading && rankedItems.length === 0 && !radiusExpanded && (
               <EmptyState
                 icon={Plus}
                 title={REQUESTS_COPY.emptyTitle}
@@ -252,7 +258,7 @@ function BrowseRequests() {
             )}
             <div className="grid gap-3 sm:grid-cols-2">
               {rankedItems.map((r) => (
-                <RequestCard key={r.id} r={r} />
+                <RequestCard key={r.id} r={r} userLoc={userLoc} />
               ))}
             </div>
           </div>
