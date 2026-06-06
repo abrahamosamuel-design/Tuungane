@@ -374,6 +374,7 @@ function ProviderRow({ p, isBoosted, userLoc, onRequest }: { p: RealProvider; is
       </Link>
       {p.bio && <p className="line-clamp-2 px-4 text-sm text-foreground/70">{p.bio}</p>}
       <div className="mt-3 flex flex-wrap items-center gap-1.5 px-4">
+        <NearYouBadge user={userLoc} target={p} />
         {p.seeded_by_official && p.seeded_status !== "claimed" && (
           <span className="inline-flex items-center gap-1 rounded-full bg-navy/10 px-2 py-0.5 text-[10px] font-semibold text-navy"><ShieldCheck className="h-3 w-3" /> Added by Tuungane Official</span>
         )}
