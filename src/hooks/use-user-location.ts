@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import type { UserLocation } from "@/lib/location";
 import { reverseGeocode } from "@/lib/geocoding";
+import { toast } from "sonner";
 
 const LEGACY_KEY = "tuungane_user_location";
 const ANON_KEY = "tuungane_user_location:anon";
@@ -93,7 +94,12 @@ export function useUserLocation() {
   );
 
   const requestBrowserLocation = useCallback(async (): Promise<UserLocation | null> => {
-    if (typeof navigator === "undefined" || !navigator.geolocation) return null;
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
+      toast.error("Location not supported", {
+        description: "Your browser doesn't support geolocation. Enter your area manually.",
+      });
+      return null;
+    }
     setRequestingGeo(true);
     return new Promise<UserLocation | null>((resolve) => {
       navigator.geolocation.getCurrentPosition(
@@ -116,10 +122,29 @@ export function useUserLocation() {
           }
           const next = await updateLocation(patch);
           setRequestingGeo(false);
+          toast.success("Location updated");
           resolve(next);
         },
-        () => {
+        (err) => {
           setRequestingGeo(false);
+          // err.code: 1=PERMISSION_DENIED, 2=POSITION_UNAVAILABLE, 3=TIMEOUT
+          if (err.code === 1) {
+            toast.error("Location permission denied", {
+              description: "Allow location access in your browser settings, or enter your area manually.",
+            });
+          } else if (err.code === 2) {
+            toast.error("Location unavailable", {
+              description: "We couldn't determine your location. Enter your area manually.",
+            });
+          } else if (err.code === 3) {
+            toast.error("Location request timed out", {
+              description: "Try again or enter your area manually.",
+            });
+          } else {
+            toast.error("Couldn't get your location", {
+              description: "Enter your area manually instead.",
+            });
+          }
           resolve(null);
         },
         { enableHighAccuracy: false, timeout: 8000, maximumAge: 60000 },
