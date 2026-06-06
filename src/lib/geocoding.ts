@@ -60,6 +60,43 @@ function mapAddress(addr: NominatimAddress): ReverseGeocodeResult {
   };
 }
 
+/**
+ * Approximate metres between two lat/lon points using the haversine formula.
+ */
+function haversineM(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371000; // Earth radius in metres
+  const toRad = (d: number) => (d * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+  return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function computePrecision(bbox?: [string, string, string, string], osmType?: string): PrecisionInfo | undefined {
+  if (bbox) {
+    const [minLat, maxLat, minLon, maxLon] = bbox.map(Number);
+    const h = haversineM(minLat, minLon, minLat, maxLon); // horizontal span
+    const v = haversineM(minLat, minLon, maxLat, minLon); // vertical span
+    const radius = Math.round(Math.sqrt(h * h + v * v) / 2); // half-diagonal
+    if (radius < 100) return { radiusMeters: radius, label: `~${radius} m`, confidence: "high" };
+    if (radius < 1000) return { radiusMeters: radius, label: `~${Math.round(radius / 100) / 10} km`, confidence: "high" };
+    if (radius < 5000) return { radiusMeters: radius, label: `~${Math.round(radius / 1000)} km`, confidence: "medium" };
+    if (radius < 50000) return { radiusMeters: radius, label: `~${Math.round(radius / 1000)} km`, confidence: "medium" };
+    return { radiusMeters: radius, label: `~${Math.round(radius / 1000)} km`, confidence: "low" };
+  }
+
+  // Fallback based on OSM feature type
+  const fine = new Set(["house", "building", "residential", "suburb", "neighbourhood", "quarter"]);
+  const medium = new Set(["village", "hamlet", "town", "municipality", "city_district"]);
+  const coarse = new Set(["city", "county", "state_district", "district"]);
+  if (fine.has(osmType ?? "")) return { radiusMeters: 500, label: "~500 m", confidence: "high" };
+  if (medium.has(osmType ?? "")) return { radiusMeters: 3000, label: "~3 km", confidence: "medium" };
+  if (coarse.has(osmType ?? "")) return { radiusMeters: 25000, label: "~25 km", confidence: "low" };
+  return undefined;
+}
+
 export async function reverseGeocode(
   latitude: number,
   longitude: number,
@@ -79,7 +116,11 @@ export async function reverseGeocode(
     if (!res.ok) return null;
     const json = (await res.json()) as NominatimResponse;
     if (!json.address) return null;
-    return { ...mapAddress(json.address), display_name: json.display_name };
+    return {
+      ...mapAddress(json.address),
+      display_name: json.display_name,
+      precision: computePrecision(json.boundingbox, json.type),
+    };
   } catch {
     return null;
   }
