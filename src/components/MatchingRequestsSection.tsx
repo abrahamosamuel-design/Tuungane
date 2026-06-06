@@ -246,14 +246,50 @@ export function MatchingRequestsSection() {
   const filteredOut = empty && items.length > 0 && userLoc && radius !== null;
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-5">
+    <div
+      ref={containerRef}
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+      className="relative rounded-2xl border border-border bg-card p-5 overflow-hidden"
+    >
+      {(pullDist > 0 || refreshing) && (
+        <div
+          className="pointer-events-none absolute left-0 right-0 top-0 flex items-center justify-center text-muted-foreground"
+          style={{ height: refreshing ? PULL_THRESHOLD : pullDist, transition: refreshing ? "height 150ms ease" : undefined }}
+        >
+          <RefreshCw
+            className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
+            style={!refreshing ? { transform: `rotate(${Math.min(360, pullDist * 4)}deg)`, opacity: Math.min(1, pullDist / PULL_THRESHOLD) } : undefined}
+          />
+          <span className="ml-2 text-[11px] font-medium">
+            {refreshing ? "Refreshing…" : pullDist >= PULL_THRESHOLD ? "Release to refresh" : "Pull to refresh"}
+          </span>
+        </div>
+      )}
+      <div
+        style={{ transform: `translateY(${refreshing ? PULL_THRESHOLD : pullDist}px)`, transition: pullStartY.current == null ? "transform 150ms ease" : undefined }}
+      >
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-center gap-2">
           <div className="rounded-lg bg-navy/10 p-2 text-navy"><Briefcase className="h-4 w-4" /></div>
           <h2 className="font-display text-lg font-bold text-navy">Matching service requests</h2>
         </div>
-        <Link to="/services/requests" className="inline-flex items-center gap-1 text-xs font-semibold text-orange hover:underline">Open feed <ArrowRight className="h-3 w-3" /></Link>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={handleRefresh}
+            disabled={!online || refreshing}
+            aria-label="Refresh recommendations"
+            className="inline-flex items-center gap-1 rounded-full border border-border px-2 py-1 text-[11px] font-semibold text-navy hover:bg-muted disabled:opacity-50"
+          >
+            <RefreshCw className={`h-3 w-3 ${refreshing ? "animate-spin" : ""}`} />
+            Refresh
+          </button>
+          <Link to="/services/requests" className="inline-flex items-center gap-1 text-xs font-semibold text-orange hover:underline">Open feed <ArrowRight className="h-3 w-3" /></Link>
+        </div>
       </div>
+
       {!online && cachedAt && (
         <TooltipProvider>
           <Tooltip open={tipOpen} onOpenChange={setTipOpen}>
