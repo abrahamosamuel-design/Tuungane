@@ -154,19 +154,31 @@ function Field({
   disabled?: boolean;
   readOnly?: boolean;
 }) {
+  // Controlled so external updates (e.g. GPS autofill of district/town/area)
+  // visibly refresh the input. We still only persist on blur via onSave.
+  const [value, setValue] = useState(defaultValue);
+  const lastExternal = useRef(defaultValue);
+  useEffect(() => {
+    if (defaultValue !== lastExternal.current) {
+      lastExternal.current = defaultValue;
+      setValue(defaultValue);
+    }
+  }, [defaultValue]);
   return (
     <div>
       <label className="text-xs font-medium text-navy">{label}</label>
       <input
-        defaultValue={defaultValue}
+        value={value}
         readOnly={readOnly}
         disabled={disabled}
+        onChange={(e) => setValue(e.target.value)}
         onBlur={(e) => onSave && e.target.value !== defaultValue && onSave(e.target.value)}
         className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-orange disabled:opacity-60"
       />
     </div>
   );
 }
+
 
 function Toggle({ label, checked, onChange }: { label: string; checked: boolean; onChange: (v: boolean) => void }) {
   return (
