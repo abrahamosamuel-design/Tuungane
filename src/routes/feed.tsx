@@ -77,11 +77,10 @@ function Feed() {
       // Anon visitors don't have column-level SELECT on location fields
       // (DB-level enforcement of profiles.location_visibility). Fetch the
       // safe subset for anon, full set for signed-in users.
-      const cols = user
-        ? "id,full_name,avatar_url,is_provider,district,town,area,latitude,longitude"
-        : "id,full_name,avatar_url,is_provider";
-      const { data: profs } = await supabase.from("profiles").select(cols).in("id", ids);
-      (profs ?? []).forEach((p) => profMap.set((p as { id: string }).id, p as unknown as AuthorLoc));
+      const { data: profs } = user
+        ? await supabase.from("profiles").select("id,full_name,avatar_url,is_provider,district,town,area,latitude,longitude").in("id", ids)
+        : await supabase.from("profiles").select("id,full_name,avatar_url,is_provider").in("id", ids);
+      (profs ?? []).forEach((p) => profMap.set(p.id, p as unknown as AuthorLoc));
     }
     let mapped = (rows ?? []).map((r) => ({ ...r, author: profMap.get(r.provider_user_id) })) as PostRow[];
     if (filter === "popular") {
