@@ -49,16 +49,34 @@ export function proximityScore(user: UserLocation | null | undefined, target: Ta
   if (!user || !target) return 0;
   const km = haversineKm(user, target);
   if (km != null) {
-    if (km < 1) return 100;
-    if (km < 3) return 92;
-    if (km < 5) return 85;
-    if (km < 10) return 75;
-    if (km < 20) return 65;
-    if (km < 50) return 50;
-    if (km < 150) return 35;
-    if (km < 500) return 22;
-    return 10;
+    // Base score from raw distance.
+    let base: number;
+    if (km < 1) base = 100;
+    else if (km < 3) base = 92;
+    else if (km < 5) base = 85;
+    else if (km < 10) base = 75;
+    else if (km < 20) base = 65;
+    else if (km < 50) base = 50;
+    else if (km < 150) base = 35;
+    else if (km < 500) base = 22;
+    else base = 10;
+
+    // Service-radius boost: if the user falls within the provider's declared
+    // service radius, treat them as effectively "reachable" and lift the score
+    // proportionally to how comfortably they're inside that radius.
+    const reach = target.service_radius_km;
+    if (reach != null && reach > 0 && km <= reach) {
+      // Deep inside radius (≤50% of reach) → strong boost; near edge → mild boost.
+      const ratio = km / reach; // 0 (center) → 1 (edge)
+      const boost = Math.round(20 * (1 - ratio)); // up to +20
+      base = Math.min(100, base + boost);
+      // Ensure providers who explicitly serve this distance never score below
+      // "same district" tier — they've opted in to cover this user.
+      base = Math.max(base, 60);
+    }
+    return base;
   }
+
   const u = {
     country: norm(user.country),
     region: norm(user.region),
