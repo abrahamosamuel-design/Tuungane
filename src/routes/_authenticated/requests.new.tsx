@@ -15,8 +15,9 @@ import {
 } from "@/data/serviceRequestTypes";
 import { uploadMedia } from "@/lib/upload";
 import { toast } from "sonner";
-import { ShieldAlert } from "lucide-react";
+import { Loader2, MapPin, ShieldAlert } from "lucide-react";
 import { REQUESTS_SAFETY_TEXT } from "@/data/requestTypes";
+import { useUserLocation } from "@/hooks/use-user-location";
 
 export const Route = createFileRoute("/_authenticated/requests/new")({
   validateSearch: (search: Record<string, unknown>) => ({
