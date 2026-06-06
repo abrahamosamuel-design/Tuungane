@@ -29,7 +29,7 @@ export function ActivityLogTab() {
     const handle = setTimeout(async () => {
       setLoading(true);
       const { data, error } = await supabase.rpc("admin_search_activity_log", {
-        _q: q || null,
+        _q: q || undefined,
         _limit: 200,
         _offset: 0,
       });
