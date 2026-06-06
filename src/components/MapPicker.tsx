@@ -32,6 +32,7 @@ export function MapPicker({
   const LRef = useRef<typeof import("leaflet") | null>(null);
   const [mounted, setMounted] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [precision, setPrecision] = useState<PrecisionInfo | null>(null);
 
   // Initialise Leaflet on mount (client-only).
   useEffect(() => {
