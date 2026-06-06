@@ -23,6 +23,7 @@ export function ActivityLogTab() {
   const [q, setQ] = useState("");
   const [rows, setRows] = useState<LogRow[]>([]);
   const [loading, setLoading] = useState(false);
+  const [exportingAll, setExportingAll] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -44,11 +45,7 @@ export function ActivityLogTab() {
     };
   }, [q]);
 
-  const exportCsv = () => {
-    if (rows.length === 0) {
-      toast.info("Nothing to export");
-      return;
-    }
+  const rowsToCsv = (data: LogRow[]) => {
     const headers = [
       "timestamp", "action", "actor_name", "actor_email", "actor_user_id",
       "target_name", "target_email", "target_user_id", "target_type", "target_id", "details",
@@ -58,7 +55,7 @@ export function ActivityLogTab() {
       return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
     };
     const lines = [headers.join(",")];
-    for (const r of rows) {
+    for (const r of data) {
       lines.push([
         new Date(r.created_at).toISOString(),
         r.action,
@@ -73,31 +70,85 @@ export function ActivityLogTab() {
         r.details ?? {},
       ].map(escape).join(","));
     }
-    const blob = new Blob(["\uFEFF" + lines.join("\n")], { type: "text/csv;charset=utf-8;" });
+    return lines.join("\n");
+  };
+
+  const download = (csv: string, suffix: string) => {
+    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `tuungane-activity-log-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}.csv`;
+    a.download = `tuungane-activity-log-${suffix}-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}.csv`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
   };
 
+  const exportCsv = () => {
+    if (rows.length === 0) {
+      toast.info("Nothing to export");
+      return;
+    }
+    download(rowsToCsv(rows), "filtered");
+  };
+
+  const exportAll = async () => {
+    setExportingAll(true);
+    try {
+      const pageSize = 500;
+      let offset = 0;
+      const all: LogRow[] = [];
+      // Paginate until we get less than a full page
+      while (true) {
+        const { data, error } = await supabase.rpc("admin_search_activity_log", {
+          _q: undefined,
+          _limit: pageSize,
+          _offset: offset,
+        });
+        if (error) {
+          toast.error(error.message);
+          return;
+        }
+        const page = (data as LogRow[] | null) ?? [];
+        all.push(...page);
+        if (page.length < pageSize) break;
+        offset += pageSize;
+        if (all.length >= 100000) break; // safety cap
+      }
+      if (all.length === 0) {
+        toast.info("Nothing to export");
+        return;
+      }
+      download(rowsToCsv(all), "all");
+      toast.success(`Exported ${all.length} entries`);
+    } finally {
+      setExportingAll(false);
+    }
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h2 className="font-display text-xl font-semibold text-navy">Admin activity log</h2>
-        <div className="flex items-center gap-3">
-          <span className="text-xs text-muted-foreground">{rows.length} entries</span>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs text-muted-foreground">{rows.length} shown</span>
           <button
             onClick={exportCsv}
             disabled={rows.length === 0}
+            className="rounded-full border border-border bg-background px-3 py-1.5 text-xs font-semibold text-foreground transition hover:border-navy disabled:opacity-50"
+          >
+            Export filtered
+          </button>
+          <button
+            onClick={exportAll}
+            disabled={exportingAll}
             className="rounded-full bg-navy px-3 py-1.5 text-xs font-semibold text-navy-foreground transition hover:opacity-90 disabled:opacity-50"
           >
-            Export CSV
+            {exportingAll ? "Exporting…" : "Export all"}
           </button>
         </div>
+
       </div>
       <Input
         placeholder="Search by action, admin, target user, email, phone…"
