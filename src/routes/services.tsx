@@ -130,6 +130,8 @@ function Services() {
     s += Math.min(p.average_rating, 5) * 5;
     s += Math.min(p.completed_jobs, 10) * 2;
     if (loc && (p.town.toLowerCase().includes(loc.toLowerCase()) || p.district.toLowerCase().includes(loc.toLowerCase()))) s += 15;
+    // Proximity bonus: heavily weight closeness to the signed-in user's location.
+    s += proximityScore(userLoc, p) * 0.6;
     const daysOld = (now - new Date(p.updated_at).getTime()) / 86400000;
     if (daysOld < 30) s += 10;
     else if (daysOld < 90) s += 5;
