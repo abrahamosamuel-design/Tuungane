@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import type { UserLocation } from "@/lib/location";
+import { reverseGeocode } from "@/lib/geocoding";
 
 const STORAGE_KEY = "tuungane_user_location";
 
