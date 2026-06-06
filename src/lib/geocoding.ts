@@ -20,12 +20,28 @@ type NominatimAddress = {
   city_district?: string;
 };
 
-type NominatimResponse = { address?: NominatimAddress; display_name?: string };
+type NominatimResponse = {
+  address?: NominatimAddress;
+  display_name?: string;
+  boundingbox?: [string, string, string, string]; // [min_lat, max_lat, min_lon, max_lon]
+  class?: string;
+  type?: string;
+};
+
+export type PrecisionInfo = {
+  radiusMeters: number;
+  label: string;
+  confidence: "high" | "medium" | "low";
+};
 
 export type ReverseGeocodeResult = Pick<
   UserLocation,
   "country" | "region" | "district" | "city" | "town" | "area"
-> & { display_name?: string };
+> & {
+  display_name?: string;
+  precision?: PrecisionInfo;
+};
+
 
 const cleanText = (s?: string | null) => (s ?? "").trim() || null;
 
