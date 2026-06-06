@@ -363,6 +363,7 @@ export function MatchingRequestsSection() {
           })}
         </div>
       )}
+      </div>
     </div>
   );
 }
