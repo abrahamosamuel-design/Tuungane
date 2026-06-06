@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Briefcase, ArrowRight, MapPin, Star, Info } from "lucide-react";
+import { Briefcase, ArrowRight, MapPin, Star, Info, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useBoostedSet } from "@/hooks/use-boosted-set";
