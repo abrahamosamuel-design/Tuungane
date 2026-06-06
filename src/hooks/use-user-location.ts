@@ -80,7 +80,7 @@ export function useUserLocation() {
       }
       const next: UserLocation = { ...(location ?? {}), ...cleanPatch };
       setLocation(next);
-      writeLocal(next);
+      writeLocalFor(user?.id ?? null, next);
       if (user) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const dbPatch: any = { ...cleanPatch, location_updated_at: new Date().toISOString() };
