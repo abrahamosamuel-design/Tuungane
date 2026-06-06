@@ -28,9 +28,9 @@ type Tab =
   | "users" | "providers" | "businesses"
   | "requests" | "posts" | "recs"
   | "reports" | "disputes"
-  | "credits" | "official" | "contact";
+  | "credits" | "official" | "contact" | "activity";
 
-const TAB_GROUPS: { label: string; tabs: { id: Tab; label: string }[] }[] = [
+const TAB_GROUPS: { label: string; tabs: { id: Tab; label: string; adminOnly?: boolean }[] }[] = [
   { label: "Home", tabs: [{ id: "overview", label: "Overview" }] },
   { label: "People & Pages", tabs: [
     { id: "users", label: "Users" },
@@ -50,6 +50,7 @@ const TAB_GROUPS: { label: string; tabs: { id: Tab; label: string }[] }[] = [
   { label: "Operations", tabs: [
     { id: "credits", label: "Credits & Boosts" },
     { id: "official", label: "Official Account" },
+    { id: "activity", label: "Activity Log", adminOnly: true },
   ]},
 ];
 
