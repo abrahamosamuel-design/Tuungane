@@ -144,6 +144,7 @@ export function NearYouHomeSection() {
               const near = proximityLabel(userLoc, r);
               const title = r.title?.trim() || r.service_needed || "Request";
               const loc = r.area || r.town || r.district || r.location || "Uganda";
+              const feat = isFeaturedTarget(r, featured);
               return (
                 <Link
                   to="/requests/$id"
@@ -166,11 +167,18 @@ export function NearYouHomeSection() {
                   {r.budget_range && (
                     <p className="mt-1 text-xs font-semibold text-orange">{r.budget_range}</p>
                   )}
-                  {near && (
-                    <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-green/10 px-2 py-0.5 text-[10px] font-semibold text-green">
-                      <MapPin className="h-3 w-3" /> {near}
-                    </span>
-                  )}
+                  <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                    {near && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-green/10 px-2 py-0.5 text-[10px] font-semibold text-green">
+                        <MapPin className="h-3 w-3" /> {near}
+                      </span>
+                    )}
+                    {feat && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-orange/10 px-2 py-0.5 text-[10px] font-semibold text-orange">
+                        <Star className="h-3 w-3" /> Featured area
+                      </span>
+                    )}
+                  </div>
                 </Link>
               );
             })}
