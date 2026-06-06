@@ -14,6 +14,8 @@ import {
   type RequestFilterChip,
 } from "@/data/requestTypes";
 import { useAuth } from "@/hooks/use-auth";
+import { useUserLocation } from "@/hooks/use-user-location";
+import { sortByProximity } from "@/lib/location";
 
 export const Route = createFileRoute("/requests/browse")({
   head: () => ({
@@ -31,6 +33,7 @@ export const Route = createFileRoute("/requests/browse")({
 
 function BrowseRequests() {
   const { user } = useAuth();
+  const { location: userLoc } = useUserLocation();
   const [q, setQ] = useState("");
   const [loc, setLoc] = useState("");
   const [cat, setCat] = useState("");
@@ -54,7 +57,7 @@ function BrowseRequests() {
     setLoading(true);
     let query = supabase
       .from("service_requests")
-      .select("id,customer_id,provider_id,category_slug,subcategory,service_needed,title,visibility,location,district,town,area,description,preferred_date,preferred_time,urgency,budget_range,preferred_contact_method,attachment_url,status,urgent_flag,created_at,updated_at,completed_at,cancelled_at,disputed_at,service_profile_id,selected_provider_id,completion_code,provider_confirmed_completion,customer_confirmed_completion")
+      .select("id,customer_id,provider_id,category_slug,subcategory,service_needed,title,visibility,location,district,town,area,latitude,longitude,description,preferred_date,preferred_time,urgency,budget_range,preferred_contact_method,attachment_url,status,urgent_flag,created_at,updated_at,completed_at,cancelled_at,disputed_at,service_profile_id,selected_provider_id,completion_code,provider_confirmed_completion,customer_confirmed_completion")
       .eq("visibility", "public")
       .eq("status", "requested")
       .is("provider_id", null)
@@ -103,6 +106,7 @@ function BrowseRequests() {
   }, [cat, chip, urgentOnly, budgetShown, nearMe, myDistrict]);
 
   const category = useMemo(() => categories.find((c) => c.slug === cat), [cat]);
+  const rankedItems = useMemo(() => sortByProximity(items, userLoc, (r) => r), [items, userLoc]);
 
   return (
     <Layout>
@@ -223,7 +227,7 @@ function BrowseRequests() {
               {REQUESTS_COPY.listTitle}
             </h2>
             {loading && <p className="text-sm text-muted-foreground">Loading…</p>}
-            {!loading && items.length === 0 && (
+            {!loading && rankedItems.length === 0 && (
               <EmptyState
                 icon={Plus}
                 title={REQUESTS_COPY.emptyTitle}
@@ -232,7 +236,7 @@ function BrowseRequests() {
               />
             )}
             <div className="grid gap-3 sm:grid-cols-2">
-              {items.map((r) => (
+              {rankedItems.map((r) => (
                 <RequestCard key={r.id} r={r} />
               ))}
             </div>

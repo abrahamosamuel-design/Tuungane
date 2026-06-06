@@ -8,6 +8,8 @@ import { useBoostedSet } from "@/hooks/use-boosted-set";
 import { EmptyState } from "@/components/EmptyState";
 import { ProviderTrackCTA } from "@/components/cta/ProviderTrackCTA";
 import { ListYourSkillButton } from "@/components/cta/ListYourSkillButton";
+import { useUserLocation } from "@/hooks/use-user-location";
+import { proximityScore } from "@/lib/location";
 
 const iconMap: Record<string, any> = { Wrench, Sparkles, Building2, Scissors, Truck, Car, GraduationCap, Camera, ChefHat, Laptop, HeartPulse, Sprout, MoreHorizontal };
 
@@ -36,6 +38,11 @@ type RealProvider = {
   seeded_status: string | null;
   updated_at: string;
   availability?: string | null;
+  area?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  areas_served?: string[] | null;
+  service_radius_km?: number | null;
   profile: { full_name: string; avatar_url: string | null } | null;
   trust_score: number;
   average_rating: number;
@@ -70,6 +77,7 @@ function Avatar({ name, src, size = 56 }: { name: string; src?: string | null; s
 
 function Services() {
   const nav = useNavigate();
+  const { location: userLoc } = useUserLocation();
   const [q, setQ] = useState("");
   const [loc, setLoc] = useState("");
   const [filter, setFilter] = useState<RealFilter>("all");
@@ -79,7 +87,7 @@ function Services() {
   useEffect(() => {
     (async () => {
       setLoadingReal(true);
-      let qy = supabase.from("service_profiles").select("user_id,business_name,subcategory,bio,town,district,category_slug,verified,seeded_by_official,seeded_status,updated_at,availability").eq("suspended", false).order("updated_at", { ascending: false }).limit(60);
+      let qy = supabase.from("service_profiles").select("user_id,business_name,subcategory,bio,town,district,area,latitude,longitude,areas_served,service_radius_km,category_slug,verified,seeded_by_official,seeded_status,updated_at,availability").eq("suspended", false).order("updated_at", { ascending: false }).limit(60);
       if (filter === "featured") qy = qy.eq("verified", "featured");
       if (filter === "verified") qy = qy.in("verified", ["verified", "featured"]);
       if (filter === "available") qy = qy.eq("availability", "available");
@@ -122,6 +130,8 @@ function Services() {
     s += Math.min(p.average_rating, 5) * 5;
     s += Math.min(p.completed_jobs, 10) * 2;
     if (loc && (p.town.toLowerCase().includes(loc.toLowerCase()) || p.district.toLowerCase().includes(loc.toLowerCase()))) s += 15;
+    // Proximity bonus: heavily weight closeness to the signed-in user's location.
+    s += proximityScore(userLoc, p) * 0.6;
     const daysOld = (now - new Date(p.updated_at).getTime()) / 86400000;
     if (daysOld < 30) s += 10;
     else if (daysOld < 90) s += 5;

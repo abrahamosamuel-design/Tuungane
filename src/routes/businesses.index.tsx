@@ -1,10 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
-import { Building2, Plus, Sparkles, BadgeCheck } from "lucide-react";
+import { Building2, Plus, Sparkles, BadgeCheck, MapPin } from "lucide-react";
 import { orgTypeLabel } from "@/data/businessTypes";
 import { categories } from "@/data/categories";
+import { useUserLocation } from "@/hooks/use-user-location";
+import { proximityLabel, sortByProximity, type UserLocation } from "@/lib/location";
 
 export const Route = createFileRoute("/businesses/")({
   head: () => ({ meta: [
@@ -17,17 +19,20 @@ export const Route = createFileRoute("/businesses/")({
 type BPage = {
   id: string; slug: string; name: string; org_type: string; category_slug: string | null;
   description: string; logo_url: string | null; cover_url: string | null;
-  district: string | null; town: string | null; verified: string; is_featured: boolean;
+  district: string | null; town: string | null; area: string | null;
+  latitude: number | null; longitude: number | null;
+  verified: string; is_featured: boolean;
 };
 
 function BusinessesPage() {
+  const { location: userLoc } = useUserLocation();
   const [pages, setPages] = useState<BPage[]>([]);
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<string>("");
 
   useEffect(() => {
     (async () => {
-      let query = supabase.from("business_pages").select("id,slug,name,org_type,category_slug,description,logo_url,cover_url,district,town,verified,is_featured")
+      let query = supabase.from("business_pages").select("id,slug,name,org_type,category_slug,description,logo_url,cover_url,district,town,area,latitude,longitude,verified,is_featured")
         .eq("suspended", false)
         .order("is_featured", { ascending: false })
         .order("created_at", { ascending: false });
@@ -42,8 +47,9 @@ function BusinessesPage() {
     })();
   }, [q, cat]);
 
-  const featured = pages.filter((p) => p.is_featured);
-  const rest = pages.filter((p) => !p.is_featured);
+  const ranked = useMemo(() => sortByProximity(pages, userLoc, (p) => p), [pages, userLoc]);
+  const featured = ranked.filter((p) => p.is_featured);
+  const rest = ranked.filter((p) => !p.is_featured);
 
   return (
     <Layout>
@@ -79,7 +85,7 @@ function BusinessesPage() {
           <div className="mt-8">
             <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-navy"><Sparkles className="h-4 w-4 text-orange" /> Featured businesses</div>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {featured.map((p) => <BPageCard key={p.id} p={p} featured />)}
+              {featured.map((p) => <BPageCard key={p.id} p={p} featured userLoc={userLoc} />)}
             </div>
           </div>
         )}
@@ -100,7 +106,7 @@ function BusinessesPage() {
             </div>
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {rest.map((p) => <BPageCard key={p.id} p={p} />)}
+              {rest.map((p) => <BPageCard key={p.id} p={p} userLoc={userLoc} />)}
             </div>
           )}
         </div>
@@ -109,13 +115,17 @@ function BusinessesPage() {
   );
 }
 
-function BPageCard({ p, featured }: { p: BPage; featured?: boolean }) {
+function BPageCard({ p, featured, userLoc }: { p: BPage; featured?: boolean; userLoc?: UserLocation | null }) {
+  const near = proximityLabel(userLoc ?? null, p);
   return (
     <Link to="/businesses/$slug" params={{ slug: p.slug }} className="group block overflow-hidden rounded-2xl border border-border bg-card transition hover:border-orange/60 hover:shadow-[var(--shadow-card)]">
       <div className="relative h-28 w-full bg-gradient-to-br from-orange/20 via-orange/5 to-navy/10">
         {p.cover_url && <img src={p.cover_url} alt="" className="h-full w-full object-cover" />}
         {featured && (
           <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-full bg-orange px-2 py-0.5 text-xs font-semibold text-orange-foreground"><Sparkles className="h-3 w-3" /> Featured</span>
+        )}
+        {near && (
+          <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-full bg-green px-2 py-0.5 text-[11px] font-semibold text-white"><MapPin className="h-3 w-3" /> {near}</span>
         )}
       </div>
       <div className="-mt-6 flex items-end gap-3 px-4">

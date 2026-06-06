@@ -12,6 +12,8 @@ import { OfficialPostCard } from "@/components/OfficialPostCard";
 import { categories } from "@/data/categories";
 import { postTypes, type PostTypeValue } from "@/data/postTypes";
 import type { OfficialAccountRow, OfficialPostRow } from "@/data/officialPostTypes";
+import { useUserLocation } from "@/hooks/use-user-location";
+import { sortByProximity, type TargetLocation } from "@/lib/location";
 
 export const Route = createFileRoute("/feed")({
   head: () => ({ meta: [{ title: "Activity Feed — Tuungane" }] }),
@@ -26,6 +28,7 @@ const avatar = (s: string) =>
 
 function Feed() {
   const { user } = useAuth();
+  const { location: userLoc } = useUserLocation();
   const [tab, setTab] = useState<Tab>("posts");
   const [filter, setFilter] = useState<PostFilter>("all");
   const [category, setCategory] = useState<string>("");
@@ -67,10 +70,11 @@ function Feed() {
     if (postType) q = q.eq("post_type", postType);
     const { data: rows } = await q;
     const ids = Array.from(new Set((rows ?? []).map((r) => r.provider_user_id)));
-    const profMap = new Map<string, { full_name: string; avatar_url: string | null; is_provider: boolean }>();
+    type AuthorLoc = { full_name: string; avatar_url: string | null; is_provider: boolean; district: string | null; town: string | null; area: string | null; latitude: number | null; longitude: number | null };
+    const profMap = new Map<string, AuthorLoc>();
     if (ids.length) {
-      const { data: profs } = await supabase.from("profiles").select("id,full_name,avatar_url,is_provider").in("id", ids);
-      (profs ?? []).forEach((p) => profMap.set(p.id, p));
+      const { data: profs } = await supabase.from("profiles").select("id,full_name,avatar_url,is_provider,district,town,area,latitude,longitude").in("id", ids);
+      (profs ?? []).forEach((p) => profMap.set(p.id, p as unknown as AuthorLoc));
     }
     let mapped = (rows ?? []).map((r) => ({ ...r, author: profMap.get(r.provider_user_id) })) as PostRow[];
     if (filter === "popular") {
@@ -83,7 +87,7 @@ function Feed() {
   };
 
   const loadProviders = async () => {
-    let q = supabase.from("service_profiles").select("user_id,business_name,subcategory,bio,town,district,category_slug,verified,years_experience,areas_served,availability,cover_url,seeded_by_official,seeded_status,suspended,updated_at").eq("suspended", false).order("updated_at", { ascending: false }).limit(50);
+    let q = supabase.from("service_profiles").select("user_id,business_name,subcategory,bio,town,district,area,latitude,longitude,service_radius_km,category_slug,verified,years_experience,areas_served,availability,cover_url,seeded_by_official,seeded_status,suspended,updated_at").eq("suspended", false).order("updated_at", { ascending: false }).limit(50);
     if (category) q = q.eq("category_slug", category);
     const { data } = await q;
     const ids = (data ?? []).map((p) => p.user_id);
@@ -160,7 +164,18 @@ function Feed() {
           {loading && <p className="text-sm text-muted-foreground">Loading...</p>}
 
           {!loading && tab === "posts" && (() => {
-            const sortedPosts = [...posts].sort((a, b) => Number(isBoostedPost(b.id)) - Number(isBoostedPost(a.id)));
+            const byProx = sortByProximity(posts, userLoc, (p) => {
+              const a = (p as PostRow & { author?: { district?: string | null; town?: string | null; area?: string | null; latitude?: number | null; longitude?: number | null } }).author;
+              const t: TargetLocation = {
+                district: (p as PostRow & { district?: string | null }).district ?? a?.district ?? null,
+                town: (p as PostRow & { town?: string | null }).town ?? a?.town ?? null,
+                area: (p as PostRow & { area?: string | null }).area ?? a?.area ?? null,
+                latitude: (p as PostRow & { latitude?: number | null }).latitude ?? a?.latitude ?? null,
+                longitude: (p as PostRow & { longitude?: number | null }).longitude ?? a?.longitude ?? null,
+              };
+              return t;
+            });
+            const sortedPosts = [...byProx].sort((a, b) => Number(isBoostedPost(b.id)) - Number(isBoostedPost(a.id)));
             return (
               <>
                 {officialToShow.map((p) => <OfficialPostCard key={`op-${p.id}`} post={p} account={officialAccount} />)}
@@ -175,7 +190,8 @@ function Feed() {
           })()}
 
           {!loading && tab === "services" && (() => {
-            const sortedProviders = [...providers].sort((a, b) => Number(isBoostedProvider(b.user_id)) - Number(isBoostedProvider(a.user_id)));
+            const byProx = sortByProximity(providers, userLoc, (p) => p as TargetLocation);
+            const sortedProviders = [...byProx].sort((a, b) => Number(isBoostedProvider(b.user_id)) - Number(isBoostedProvider(a.user_id)));
             return sortedProviders.length === 0 ? (
               <Empty title="No providers found" hint="Try a different category." />
             ) : sortedProviders.map((p) => (

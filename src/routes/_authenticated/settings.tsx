@@ -3,7 +3,9 @@ import { useEffect, useState } from "react";
 import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { useUserLocation } from "@/hooks/use-user-location";
 import { toast } from "sonner";
+import { MapPin, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({ meta: [{ title: "Settings — Tuungane" }] }),
@@ -91,6 +93,9 @@ function SettingsPage() {
           </button>
         </Section>
 
+        <LocationSection />
+
+
         <Section title="Notifications">
           <Toggle label="Request responses" checked={notif.requests} onChange={(v) => persist({ notif: { ...notif, requests: v } })} />
           <Toggle label="Messages" checked={notif.messages} onChange={(v) => persist({ notif: { ...notif, messages: v } })} />
@@ -169,5 +174,98 @@ function Toggle({ label, checked, onChange }: { label: string; checked: boolean;
       <span className="text-sm text-navy">{label}</span>
       <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="h-4 w-4 accent-orange" />
     </label>
+  );
+}
+
+function LocationSection() {
+  const { location, requestingGeo, updateLocation, requestBrowserLocation } = useUserLocation();
+  const [country, setCountry] = useState("");
+  const [region, setRegion] = useState("");
+  const [district, setDistrict] = useState("");
+  const [city, setCity] = useState("");
+  const [town, setTown] = useState("");
+  const [area, setArea] = useState("");
+  const [visibility, setVisibility] = useState<"area" | "town" | "district" | "hidden">("area");
+
+  useEffect(() => {
+    if (!location) return;
+    setCountry(location.country ?? "Uganda");
+    setRegion(location.region ?? "");
+    setDistrict(location.district ?? "");
+    setCity(location.city ?? "");
+    setTown(location.town ?? "");
+    setArea(location.area ?? "");
+    setVisibility((location.location_visibility as "area" | "town" | "district" | "hidden") ?? "area");
+  }, [location]);
+
+  const save = async (patch: Record<string, string>) => {
+    await updateLocation(patch);
+    toast.success("Location saved");
+  };
+
+  const useBrowserGeo = async () => {
+    const next = await requestBrowserLocation();
+    if (!next || next.latitude == null) {
+      toast.error("Location permission denied or unavailable");
+    } else {
+      toast.success("Using your current location");
+    }
+  };
+
+  const hasCoords = location?.latitude != null && location?.longitude != null;
+
+  return (
+    <Section title="Location">
+      <p className="text-xs text-muted-foreground">
+        Tuungane shows you what's closest first. Set your location so we can rank requests, providers, businesses, and posts near you.
+      </p>
+
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <Field label="Country" defaultValue={country} onSave={(v) => save({ country: v })} />
+        <Field label="Region" defaultValue={region} onSave={(v) => save({ region: v })} />
+        <Field label="District" defaultValue={district} onSave={(v) => save({ district: v })} />
+        <Field label="City / municipality" defaultValue={city} onSave={(v) => save({ city: v })} />
+        <Field label="Town" defaultValue={town} onSave={(v) => save({ town: v })} />
+        <Field label="Area / neighbourhood" defaultValue={area} onSave={(v) => save({ area: v })} />
+      </div>
+
+      <div className="flex flex-col gap-2 rounded-xl border border-border bg-background p-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-2 text-sm text-navy">
+          <MapPin className="h-4 w-4 text-orange" />
+          {hasCoords ? (
+            <span>Precise location set ({location?.latitude?.toFixed(3)}, {location?.longitude?.toFixed(3)})</span>
+          ) : (
+            <span>Optional: use your device's location for more accurate ranking.</span>
+          )}
+        </div>
+        <button
+          onClick={useBrowserGeo}
+          disabled={requestingGeo}
+          className="inline-flex items-center gap-2 rounded-full bg-navy px-4 py-2 text-xs font-semibold text-white hover:brightness-110 disabled:opacity-60"
+        >
+          {requestingGeo ? <Loader2 className="h-3 w-3 animate-spin" /> : <MapPin className="h-3 w-3" />}
+          {hasCoords ? "Refresh device location" : "Use my current location"}
+        </button>
+      </div>
+
+      <div>
+        <label className="text-xs font-medium text-navy">Public location visibility</label>
+        <select
+          value={visibility}
+          onChange={(e) => {
+            const v = e.target.value as "area" | "town" | "district" | "hidden";
+            setVisibility(v);
+            updateLocation({ location_visibility: v });
+          }}
+          className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm"
+        >
+          <option value="area">Show my area (e.g. Kitoro, Entebbe)</option>
+          <option value="town">Show only my town</option>
+          <option value="district">Show only my district</option>
+          <option value="hidden">Hide my location publicly</option>
+        </select>
+        <p className="mt-1 text-[11px] text-muted-foreground">Exact coordinates are never shown publicly — they are only used to rank nearby content.</p>
+      </div>
+    </Section>
   );
 }
