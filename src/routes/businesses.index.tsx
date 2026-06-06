@@ -1,10 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
-import { Building2, Plus, Sparkles, BadgeCheck } from "lucide-react";
+import { Building2, Plus, Sparkles, BadgeCheck, MapPin } from "lucide-react";
 import { orgTypeLabel } from "@/data/businessTypes";
 import { categories } from "@/data/categories";
+import { useUserLocation } from "@/hooks/use-user-location";
+import { proximityLabel, sortByProximity, type UserLocation } from "@/lib/location";
 
 export const Route = createFileRoute("/businesses/")({
   head: () => ({ meta: [
@@ -17,17 +19,20 @@ export const Route = createFileRoute("/businesses/")({
 type BPage = {
   id: string; slug: string; name: string; org_type: string; category_slug: string | null;
   description: string; logo_url: string | null; cover_url: string | null;
-  district: string | null; town: string | null; verified: string; is_featured: boolean;
+  district: string | null; town: string | null; area: string | null;
+  latitude: number | null; longitude: number | null;
+  verified: string; is_featured: boolean;
 };
 
 function BusinessesPage() {
+  const { location: userLoc } = useUserLocation();
   const [pages, setPages] = useState<BPage[]>([]);
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<string>("");
 
   useEffect(() => {
     (async () => {
-      let query = supabase.from("business_pages").select("id,slug,name,org_type,category_slug,description,logo_url,cover_url,district,town,verified,is_featured")
+      let query = supabase.from("business_pages").select("id,slug,name,org_type,category_slug,description,logo_url,cover_url,district,town,area,latitude,longitude,verified,is_featured")
         .eq("suspended", false)
         .order("is_featured", { ascending: false })
         .order("created_at", { ascending: false });
@@ -42,8 +47,9 @@ function BusinessesPage() {
     })();
   }, [q, cat]);
 
-  const featured = pages.filter((p) => p.is_featured);
-  const rest = pages.filter((p) => !p.is_featured);
+  const ranked = useMemo(() => sortByProximity(pages, userLoc, (p) => p), [pages, userLoc]);
+  const featured = ranked.filter((p) => p.is_featured);
+  const rest = ranked.filter((p) => !p.is_featured);
 
   return (
     <Layout>
