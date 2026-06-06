@@ -108,7 +108,12 @@ function BrowseRequests() {
   }, [cat, chip, urgentOnly, budgetShown, nearMe, myDistrict]);
 
   const category = useMemo(() => categories.find((c) => c.slug === cat), [cat]);
-  const rankedItems = useMemo(() => sortByProximity(items, userLoc, (r) => r), [items, userLoc]);
+  const rankedItems = useMemo(() => {
+    const sorted = sortByProximity(items, userLoc, (r) => r);
+    const filtered = filterByRadius(sorted, userLoc, (r) => r, radiusKm);
+    return filtered;
+  }, [items, userLoc, radiusKm]);
+  const radiusExpanded = radiusKm != null && userLoc && rankedItems.length === 0 && items.length > 0;
 
   return (
     <Layout>
