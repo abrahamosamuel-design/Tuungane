@@ -6,7 +6,8 @@ import { Building2, Plus, Sparkles, BadgeCheck, MapPin } from "lucide-react";
 import { orgTypeLabel } from "@/data/businessTypes";
 import { categories } from "@/data/categories";
 import { useUserLocation } from "@/hooks/use-user-location";
-import { proximityLabel, sortByProximity, type UserLocation } from "@/lib/location";
+import { filterByRadius, proximityLabel, sortByProximity, type UserLocation } from "@/lib/location";
+import { RadiusFilter } from "@/components/RadiusFilter";
 
 export const Route = createFileRoute("/businesses/")({
   head: () => ({ meta: [
