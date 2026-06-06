@@ -251,6 +251,16 @@ function NewRequest() {
             </Field>
           </div>
 
+          <button
+            type="button"
+            onClick={useBrowserGeo}
+            disabled={requestingGeo}
+            className="inline-flex items-center gap-2 self-start rounded-full border border-orange/40 bg-orange/5 px-3 py-1.5 text-xs font-medium text-orange hover:bg-orange/10 disabled:opacity-60"
+          >
+            {requestingGeo ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <MapPin className="h-3.5 w-3.5" />}
+            {requestingGeo ? "Detecting…" : "Use my current location"}
+          </button>
+
           <div className="grid grid-cols-2 gap-3">
             <Field label="When do you need help?">
               <select value={f.urgency} onChange={(e) => update("urgency", e.target.value as UrgencyValue)} className={inp}>
