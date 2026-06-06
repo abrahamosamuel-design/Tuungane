@@ -49,6 +49,7 @@ export function RequestCard({ r, userLoc }: { r: RequestRowLite; userLoc?: UserL
             <BadgeCheck className="h-3 w-3" /> Verified
           </span>
         )}
+        <NearYouBadge user={userLoc} target={r} />
       </div>
 
       <h3 className="mt-2 line-clamp-2 font-display text-base font-bold text-navy">{title}</h3>
