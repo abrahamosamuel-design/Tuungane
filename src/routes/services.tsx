@@ -348,7 +348,7 @@ function Services() {
   );
 }
 
-function ProviderRow({ p, isBoosted, onRequest }: { p: RealProvider; isBoosted: boolean; onRequest: () => void }) {
+function ProviderRow({ p, isBoosted, userLoc, onRequest }: { p: RealProvider; isBoosted: boolean; userLoc?: UserLocation | null; onRequest: () => void }) {
   const name = p.business_name || p.profile?.full_name || "Provider";
   const verified = p.verified === "verified" || p.verified === "featured";
   const available = (p.availability ?? "").toLowerCase() === "available";
