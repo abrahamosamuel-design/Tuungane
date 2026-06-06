@@ -83,7 +83,15 @@ function BusinessesPage() {
             <option value="">All categories</option>
             {categories.map((c) => <option key={c.slug} value={c.slug}>{c.name}</option>)}
           </select>
+          <RadiusFilter value={radiusKm} onChange={setRadiusKm} disabled={!userLoc} />
         </div>
+
+        {radiusExpanded && (
+          <div className="mt-4 rounded-xl border border-orange/30 bg-orange/5 p-3 text-xs text-foreground/80">
+            Not many businesses within {radiusKm} km yet.{" "}
+            <button onClick={() => setRadiusKm(null)} className="font-semibold text-orange underline">Show all businesses</button>
+          </div>
+        )}
 
         {featured.length > 0 && (
           <div className="mt-8">
