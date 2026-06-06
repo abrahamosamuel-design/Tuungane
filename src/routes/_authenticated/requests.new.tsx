@@ -61,6 +61,48 @@ function NewRequest() {
     }
   }, [loading, user, nav]);
 
+  // Autofill location fields from the user's saved profile location the first
+  // time it becomes available — but never clobber anything the user has typed.
+  useEffect(() => {
+    if (autofilled || !profileLoc) return;
+    setF((s) => {
+      const composed = [profileLoc.area, profileLoc.town, profileLoc.district]
+        .map((v) => (v ?? "").trim())
+        .filter(Boolean)
+        .join(", ");
+      return {
+        ...s,
+        location: s.location || composed,
+        district: s.district || (profileLoc.district ?? ""),
+        town: s.town || (profileLoc.town ?? ""),
+        area: s.area || (profileLoc.area ?? ""),
+      };
+    });
+    setAutofilled(true);
+  }, [profileLoc, autofilled]);
+
+  const useBrowserGeo = async () => {
+    const next = await requestBrowserLocation();
+    if (!next || next.latitude == null) {
+      toast.error("Location permission denied or unavailable");
+      return;
+    }
+    setF((s) => {
+      const composed = [next.area, next.town, next.district]
+        .map((v) => (v ?? "").trim())
+        .filter(Boolean)
+        .join(", ");
+      return {
+        ...s,
+        location: s.location || composed,
+        district: s.district || (next.district ?? ""),
+        town: s.town || (next.town ?? ""),
+        area: s.area || (next.area ?? ""),
+      };
+    });
+    toast.success("Location detected");
+  };
+
   const update = <K extends keyof typeof f>(k: K, v: (typeof f)[K]) => setF((s) => ({ ...s, [k]: v }));
 
   const cat = categories.find((c) => c.slug === f.category_slug)!;
