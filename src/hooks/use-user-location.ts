@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import type { UserLocation } from "@/lib/location";
 import { reverseGeocode } from "@/lib/geocoding";
+import { toast } from "sonner";
 
 const LEGACY_KEY = "tuungane_user_location";
 const ANON_KEY = "tuungane_user_location:anon";
