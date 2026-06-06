@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import "leaflet/dist/leaflet.css";
-import { Maximize2, Minimize2 } from "lucide-react";
-import { reverseGeocode, type ReverseGeocodeResult } from "@/lib/geocoding";
+import { Maximize2, Minimize2, Target } from "lucide-react";
+import { reverseGeocode, type ReverseGeocodeResult, type PrecisionInfo } from "@/lib/geocoding";
 
 type Props = {
   latitude?: number | null;
@@ -32,6 +32,7 @@ export function MapPicker({
   const LRef = useRef<typeof import("leaflet") | null>(null);
   const [mounted, setMounted] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [precision, setPrecision] = useState<PrecisionInfo | null>(null);
 
   // Initialise Leaflet on mount (client-only).
   useEffect(() => {
@@ -67,6 +68,7 @@ export function MapPicker({
       const handlePosition = async (lat: number, lng: number) => {
         marker.setLatLng([lat, lng]);
         const place = await reverseGeocode(lat, lng);
+        setPrecision(place?.precision ?? null);
         onChange(lat, lng, place);
       };
 
@@ -134,11 +136,27 @@ export function MapPicker({
           {expanded ? "Collapse" : "Expand map"}
         </button>
       </div>
-      <p className="mt-1 text-[11px] text-muted-foreground">
-        {expanded
-          ? "Drag the pin or tap the map to fine-tune your exact spot."
-          : "Tap “Expand map” to drag the pin and fine-tune your spot."}
-      </p>
+      <div className="mt-1 flex items-center gap-2">
+        {precision ? (
+          <span
+            className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold ${
+              precision.confidence === "high"
+                ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400"
+                : precision.confidence === "medium"
+                  ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400"
+                  : "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400"
+            }`}
+          >
+            <Target className="h-3 w-3" />
+            {precision.label}
+          </span>
+        ) : null}
+        <p className="text-[11px] text-muted-foreground">
+          {expanded
+            ? "Drag the pin or tap the map to fine-tune your exact spot."
+            : 'Tap "Expand map" to drag the pin and fine-tune your spot.'}
+        </p>
+      </div>
     </div>
   );
 }
