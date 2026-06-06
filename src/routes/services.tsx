@@ -259,7 +259,7 @@ function Services() {
                 </div>
               </div>
             )}
-            {!loadingReal && recommended.map((p) => <ProviderRow key={p.user_id} p={p} isBoosted={isBoostedProvider(p.user_id)} onRequest={() => nav({ to: "/u/$id", params: { id: p.user_id } })} />)}
+            {!loadingReal && recommended.map((p) => <ProviderRow key={p.user_id} p={p} isBoosted={isBoostedProvider(p.user_id)} userLoc={userLoc} onRequest={() => nav({ to: "/u/$id", params: { id: p.user_id } })} />)}
           </div>
         </div>
       </section>
