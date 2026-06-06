@@ -74,9 +74,6 @@ export function NearYouHomeSection() {
         provs = (rpcProvs ?? null) as NearbyProvider[] | null;
       }
 
-        reqs = (rpcReqs ?? null) as NearbyRequest[] | null;
-        provs = (rpcProvs ?? null) as NearbyProvider[] | null;
-      }
 
       // Fallback (no coords, or RPC returned nothing): recent activity, text-hierarchy ranking client-side.
       if (!reqs || !provs) {
