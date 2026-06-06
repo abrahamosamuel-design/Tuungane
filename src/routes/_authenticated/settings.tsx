@@ -3,7 +3,9 @@ import { useEffect, useState } from "react";
 import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { useUserLocation } from "@/hooks/use-user-location";
 import { toast } from "sonner";
+import { MapPin, Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({ meta: [{ title: "Settings — Tuungane" }] }),
