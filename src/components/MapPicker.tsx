@@ -8,7 +8,6 @@ type Props = {
   longitude?: number | null;
   onChange: (lat: number, lng: number, place: ReverseGeocodeResult | null) => void;
   className?: string;
-  height?: number;
 };
 
 // Default to Kampala when nothing is selected yet.
