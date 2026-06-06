@@ -48,12 +48,26 @@ export function useUserLocation() {
 
   const updateLocation = useCallback(
     async (patch: Partial<UserLocation>) => {
-      const next: UserLocation = { ...(location ?? {}), ...patch };
+      // Trim free-text fields so admin queries / group-bys aren't polluted by
+      // trailing whitespace (e.g. "Wakiso " vs "Wakiso").
+      const TEXT_KEYS: (keyof UserLocation)[] = ["country", "region", "district", "city", "town", "area"];
+      const cleanPatch: Partial<UserLocation> = { ...patch };
+      for (const k of TEXT_KEYS) {
+        if (k in cleanPatch) {
+          const v = cleanPatch[k];
+          if (typeof v === "string") {
+            const trimmed = v.trim();
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (cleanPatch as any)[k] = trimmed.length ? trimmed : null;
+          }
+        }
+      }
+      const next: UserLocation = { ...(location ?? {}), ...cleanPatch };
       setLocation(next);
       writeLocal(next);
       if (user) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const dbPatch: any = { ...patch, location_updated_at: new Date().toISOString() };
+        const dbPatch: any = { ...cleanPatch, location_updated_at: new Date().toISOString() };
         if (dbPatch.location_visibility === null) delete dbPatch.location_visibility;
         await supabase.from("profiles").update(dbPatch).eq("id", user.id);
       }
