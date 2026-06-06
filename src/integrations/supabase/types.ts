@@ -1938,6 +1938,20 @@ export type Database = {
         }
         Returns: undefined
       }
+      get_profile_card: {
+        Args: { _id: string }
+        Returns: {
+          area: string
+          avatar_url: string
+          bio: string
+          district: string
+          full_name: string
+          id: string
+          is_provider: boolean
+          location_visibility: string
+          town: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

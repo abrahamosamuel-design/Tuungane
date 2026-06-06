@@ -19,7 +19,7 @@ import { RequestServiceDialog } from "@/components/RequestServiceDialog";
 import { VerifiedReviewBadge } from "@/components/VerifiedReviewBadge";
 import { uploadMedia } from "@/lib/upload";
 import { timeAgo } from "@/lib/format";
-import { maskProfileLocation } from "@/lib/location-visibility";
+
 import { getCategory } from "@/data/categories";
 import { toast } from "sonner";
 import { useActiveBoosts } from "@/hooks/use-boosts";
@@ -73,10 +73,13 @@ function UserProfile() {
   const [feedback, setFeedback] = useState<Array<{ id: string; rating: number; review_text: string; service_provided: string; created_at: string; customer_id: string; would_recommend: boolean; profile?: { full_name: string; avatar_url: string | null } }>>([]);
 
   const load = async () => {
-    const { data: p } = await supabase.from("profiles").select("full_name,avatar_url,bio,town,district,area,location_visibility,is_provider").eq("id", id).maybeSingle();
-    // Enforce profile.location_visibility for non-owners.
-    const masked = p ? maskProfileLocation(p, user?.id === id) : null;
-    setProfile(masked as typeof profile);
+    // Use the masked RPC so anon visitors and non-owners can never see
+    // location columns they shouldn't (DB-level enforcement of
+    // profiles.location_visibility). Owners/admins get unmasked rows.
+    const { data: p } = await supabase
+      .rpc("get_profile_card", { _id: id })
+      .maybeSingle();
+    setProfile(p as typeof profile);
     const { data: s } = user
       ? await supabase.from("service_profiles").select("business_name,subcategory,bio,town,district,phone,whatsapp,email,verified,category_slug,years_experience,areas_served,availability,cover_url,seeded_by_official,seeded_status").eq("user_id", id).maybeSingle()
       : await supabase.from("service_profiles").select("business_name,subcategory,bio,town,district,verified,category_slug,years_experience,areas_served,availability,cover_url,seeded_by_official,seeded_status").eq("user_id", id).maybeSingle();
