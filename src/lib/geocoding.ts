@@ -68,3 +68,53 @@ export async function reverseGeocode(
     return null;
   }
 }
+
+export type PlaceSuggestion = ReverseGeocodeResult & {
+  display_name: string;
+  latitude: number;
+  longitude: number;
+  place_id: string;
+};
+
+type NominatimSearchItem = {
+  place_id: number;
+  lat: string;
+  lon: string;
+  display_name: string;
+  address?: NominatimAddress;
+};
+
+/**
+ * Forward geocoding via Nominatim. Returns up to 5 suggestions, biased to Uganda.
+ * Caller is responsible for debouncing — Nominatim's fair-use is ~1 req/sec.
+ */
+export async function searchPlaces(
+  query: string,
+  signal?: AbortSignal,
+): Promise<PlaceSuggestion[]> {
+  const q = query.trim();
+  if (q.length < 3) return [];
+  try {
+    const url = new URL("https://nominatim.openstreetmap.org/search");
+    url.searchParams.set("format", "jsonv2");
+    url.searchParams.set("q", q);
+    url.searchParams.set("addressdetails", "1");
+    url.searchParams.set("limit", "5");
+    url.searchParams.set("countrycodes", "ug");
+    const res = await fetch(url.toString(), {
+      headers: { Accept: "application/json" },
+      signal,
+    });
+    if (!res.ok) return [];
+    const items = (await res.json()) as NominatimSearchItem[];
+    return items.map((it) => ({
+      ...mapAddress(it.address ?? {}),
+      display_name: it.display_name,
+      latitude: parseFloat(it.lat),
+      longitude: parseFloat(it.lon),
+      place_id: String(it.place_id),
+    }));
+  } catch {
+    return [];
+  }
+}
