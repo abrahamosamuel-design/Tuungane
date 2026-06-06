@@ -54,9 +54,14 @@ function readCache(uid: string): CacheEntry | null {
 
 export function MatchingRequestsSection() {
   const { user } = useAuth();
+  const online = useOnlineStatus();
   const [items, setItems] = useState<ServiceRequestRow[]>(() => {
     if (!user) return [];
     return readCache(user.id)?.rows ?? [];
+  });
+  const [cachedAt, setCachedAt] = useState<number | null>(() => {
+    if (!user) return null;
+    return readCache(user.id)?.at ?? null;
   });
   const [loaded, setLoaded] = useState(() => {
     if (!user) return false;
@@ -72,25 +77,36 @@ export function MatchingRequestsSection() {
     const cached = readCache(user.id);
     if (cached) {
       setItems(cached.rows);
+      setCachedAt(cached.at);
       setLoaded(true);
-      // Stale-while-revalidate: skip network if memory copy is still fresh.
       if (Date.now() - cached.at < MEM_TTL) return;
+    }
+    // Skip network when offline — render whatever cache we have.
+    if (!online) {
+      setLoaded(true);
+      return;
     }
     let cancelled = false;
     (async () => {
-      const { data, error } = await supabase.rpc("matching_requests_for_provider", { _provider: user.id });
-      if (cancelled) return;
-      if (!error && data) {
-        const rows = data as ServiceRequestRow[];
-        const entry: CacheEntry = { at: Date.now(), rows };
-        _mem.set(user.id, entry);
-        writeDisk(user.id, entry);
-        setItems(rows);
+      try {
+        const { data, error } = await supabase.rpc("matching_requests_for_provider", { _provider: user.id });
+        if (cancelled) return;
+        if (!error && data) {
+          const rows = data as ServiceRequestRow[];
+          const entry: CacheEntry = { at: Date.now(), rows };
+          _mem.set(user.id, entry);
+          writeDisk(user.id, entry);
+          setItems(rows);
+          setCachedAt(entry.at);
+        }
+      } catch {
+        // Network blew up mid-request — keep cached items visible.
+      } finally {
+        if (!cancelled) setLoaded(true);
       }
-      setLoaded(true);
     })();
     return () => { cancelled = true; };
-  }, [user]);
+  }, [user, online]);
 
   // Annotate each item once per data change — avoids recomputing on radius changes.
   const annotated = useMemo(() => {
