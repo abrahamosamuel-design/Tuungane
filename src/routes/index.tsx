@@ -26,6 +26,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { listSkillHref } from "@/lib/cta";
 import heroNetwork from "@/assets/hero-network.jpg";
 import { NearYouHomeSection } from "@/components/NearYouHomeSection";
+import { SetLocationNudge } from "@/components/SetLocationNudge";
 
 // Curated category set for the homepage tile grid
 const HOME_CATEGORY_SLUGS = ["home-repair", "cleaning", "automotive", "beauty", "education"];
@@ -157,8 +158,10 @@ function Index() {
 
   return (
     <Layout>
+      <SetLocationNudge />
       {/* HERO */}
       <section className="relative overflow-hidden bg-navy text-white">
+
         <div
           className="pointer-events-none absolute inset-x-0 bottom-0 h-48 opacity-25"
           style={{
