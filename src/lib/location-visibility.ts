@@ -11,7 +11,7 @@
 // view that emits already-masked location columns) since the publishable
 // key can still fetch raw rows. Tracked separately.
 
-export type LocationVisibility = "area" | "town" | "district" | "hidden" | null | undefined;
+export type LocationVisibility = "area" | "town" | "district" | "hidden" | string | null | undefined;
 
 export type LocationFields = {
   area?: string | null;
