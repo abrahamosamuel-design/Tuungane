@@ -70,10 +70,11 @@ function Feed() {
     if (postType) q = q.eq("post_type", postType);
     const { data: rows } = await q;
     const ids = Array.from(new Set((rows ?? []).map((r) => r.provider_user_id)));
-    const profMap = new Map<string, { full_name: string; avatar_url: string | null; is_provider: boolean }>();
+    type AuthorLoc = { full_name: string; avatar_url: string | null; is_provider: boolean; district: string | null; town: string | null; area: string | null; latitude: number | null; longitude: number | null };
+    const profMap = new Map<string, AuthorLoc>();
     if (ids.length) {
-      const { data: profs } = await supabase.from("profiles").select("id,full_name,avatar_url,is_provider").in("id", ids);
-      (profs ?? []).forEach((p) => profMap.set(p.id, p));
+      const { data: profs } = await supabase.from("profiles").select("id,full_name,avatar_url,is_provider,district,town,area,latitude,longitude").in("id", ids);
+      (profs ?? []).forEach((p) => profMap.set(p.id, p as unknown as AuthorLoc));
     }
     let mapped = (rows ?? []).map((r) => ({ ...r, author: profMap.get(r.provider_user_id) })) as PostRow[];
     if (filter === "popular") {
