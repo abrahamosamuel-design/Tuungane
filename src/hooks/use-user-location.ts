@@ -51,10 +51,9 @@ export function useUserLocation() {
       setLocation(next);
       writeLocal(next);
       if (user) {
-        await supabase
-          .from("profiles")
-          .update({ ...patch, location_updated_at: new Date().toISOString() })
-          .eq("id", user.id);
+        const dbPatch: Record<string, unknown> = { ...patch, location_updated_at: new Date().toISOString() };
+        if (dbPatch.location_visibility === null) delete dbPatch.location_visibility;
+        await supabase.from("profiles").update(dbPatch).eq("id", user.id);
       }
       return next;
     },
