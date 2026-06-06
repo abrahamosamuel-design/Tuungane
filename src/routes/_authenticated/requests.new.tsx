@@ -238,6 +238,7 @@ function NewRequest() {
           <Field label="Where is the request located? *">
             <AreaAutocomplete
               placeholder="Search for a town, area, or neighbourhood…"
+              bounds={districtBounds}
               onSelect={(p) => {
                 const composed = [p.area, p.town, p.district].filter(Boolean).join(", ");
                 setF((s) => ({
@@ -248,6 +249,13 @@ function NewRequest() {
                   area: p.area ?? s.area,
                 }));
                 setCoords({ lat: p.latitude, lng: p.longitude });
+                // Prefer the pick's own bbox; otherwise resolve the district bounds.
+                if (p.bounds) setDistrictBounds(p.bounds);
+                if (p.district) {
+                  findDistrictBounds(p.district).then((b) => {
+                    if (b) setDistrictBounds(b);
+                  });
+                }
               }}
             />
             <input
@@ -262,6 +270,7 @@ function NewRequest() {
           <MapPicker
             latitude={coords?.lat ?? profileLoc?.latitude ?? null}
             longitude={coords?.lng ?? profileLoc?.longitude ?? null}
+            bounds={districtBounds}
             onChange={(lat, lng, place) => {
               setCoords({ lat, lng });
               if (!place) return;
@@ -273,6 +282,11 @@ function NewRequest() {
                 town: place.town ?? s.town,
                 area: place.area ?? s.area,
               }));
+              if (place.district) {
+                findDistrictBounds(place.district).then((b) => {
+                  if (b) setDistrictBounds(b);
+                });
+              }
             }}
           />
 
