@@ -158,7 +158,7 @@ function Services() {
       })
       .sort((a, b) => scoreProvider(b) - scoreProvider(a));
     return filterByRadius(base, userLoc, (p) => p, radiusKm);
-  }, [real, q, loc, filter, radiusKm, userLoc]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [real, q, loc, filter, radiusKm, userLoc, featuredLocs]); // eslint-disable-line react-hooks/exhaustive-deps
   const radiusExpanded = radiusKm != null && userLoc && realFiltered.length === 0 && real.length > 0;
 
   const recommended = useMemo(() => {
