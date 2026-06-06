@@ -15,8 +15,9 @@ import {
 } from "@/data/serviceRequestTypes";
 import { uploadMedia } from "@/lib/upload";
 import { toast } from "sonner";
-import { ShieldAlert } from "lucide-react";
+import { Loader2, MapPin, ShieldAlert } from "lucide-react";
 import { REQUESTS_SAFETY_TEXT } from "@/data/requestTypes";
+import { useUserLocation } from "@/hooks/use-user-location";
 
 export const Route = createFileRoute("/_authenticated/requests/new")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -29,8 +30,10 @@ export const Route = createFileRoute("/_authenticated/requests/new")({
 function NewRequest() {
   const search = useSearch({ from: "/_authenticated/requests/new" });
   const { user, loading } = useAuth();
+  const { location: profileLoc, requestingGeo, requestBrowserLocation } = useUserLocation();
   const nav = useNavigate();
   const [busy, setBusy] = useState(false);
+  const [autofilled, setAutofilled] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [f, setF] = useState({
     title: "",
@@ -57,6 +60,48 @@ function NewRequest() {
       nav({ to: "/login", search: { tab: "signup", redirect: "/requests/new" } as never });
     }
   }, [loading, user, nav]);
+
+  // Autofill location fields from the user's saved profile location the first
+  // time it becomes available — but never clobber anything the user has typed.
+  useEffect(() => {
+    if (autofilled || !profileLoc) return;
+    setF((s) => {
+      const composed = [profileLoc.area, profileLoc.town, profileLoc.district]
+        .map((v) => (v ?? "").trim())
+        .filter(Boolean)
+        .join(", ");
+      return {
+        ...s,
+        location: s.location || composed,
+        district: s.district || (profileLoc.district ?? ""),
+        town: s.town || (profileLoc.town ?? ""),
+        area: s.area || (profileLoc.area ?? ""),
+      };
+    });
+    setAutofilled(true);
+  }, [profileLoc, autofilled]);
+
+  const useBrowserGeo = async () => {
+    const next = await requestBrowserLocation();
+    if (!next || next.latitude == null) {
+      toast.error("Location permission denied or unavailable");
+      return;
+    }
+    setF((s) => {
+      const composed = [next.area, next.town, next.district]
+        .map((v) => (v ?? "").trim())
+        .filter(Boolean)
+        .join(", ");
+      return {
+        ...s,
+        location: s.location || composed,
+        district: s.district || (next.district ?? ""),
+        town: s.town || (next.town ?? ""),
+        area: s.area || (next.area ?? ""),
+      };
+    });
+    toast.success("Location detected");
+  };
 
   const update = <K extends keyof typeof f>(k: K, v: (typeof f)[K]) => setF((s) => ({ ...s, [k]: v }));
 
@@ -205,6 +250,16 @@ function NewRequest() {
               <input value={f.area} onChange={(e) => update("area", e.target.value)} className={inp} />
             </Field>
           </div>
+
+          <button
+            type="button"
+            onClick={useBrowserGeo}
+            disabled={requestingGeo}
+            className="inline-flex items-center gap-2 self-start rounded-full border border-orange/40 bg-orange/5 px-3 py-1.5 text-xs font-medium text-orange hover:bg-orange/10 disabled:opacity-60"
+          >
+            {requestingGeo ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <MapPin className="h-3.5 w-3.5" />}
+            {requestingGeo ? "Detecting…" : "Use my current location"}
+          </button>
 
           <div className="grid grid-cols-2 gap-3">
             <Field label="When do you need help?">
