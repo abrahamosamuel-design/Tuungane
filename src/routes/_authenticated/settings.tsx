@@ -234,6 +234,34 @@ function LocationSection() {
         Tuungane shows you what's closest first. Set your location so we can rank requests, providers, businesses, and posts near you.
       </p>
 
+      <div>
+        <label className="text-xs font-medium text-navy">Search and pick your location</label>
+        <AreaAutocomplete
+          className="mt-1"
+          onSelect={(p) => {
+            const patch = {
+              country: p.country ?? undefined,
+              region: p.region ?? undefined,
+              district: p.district ?? undefined,
+              city: p.city ?? undefined,
+              town: p.town ?? undefined,
+              area: p.area ?? undefined,
+              latitude: p.latitude,
+              longitude: p.longitude,
+            };
+            if (p.country) setCountry(p.country);
+            if (p.region) setRegion(p.region);
+            if (p.district) setDistrict(p.district);
+            if (p.city) setCity(p.city);
+            if (p.town) setTown(p.town);
+            if (p.area) setArea(p.area);
+            save(patch);
+            toast.success("Location updated");
+          }}
+        />
+        <p className="mt-1 text-[11px] text-muted-foreground">Pick a precise neighbourhood or district to auto-fill the fields below.</p>
+      </div>
+
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Field label="Country" defaultValue={country} onSave={(v) => save({ country: v })} />
         <Field label="Region" defaultValue={region} onSave={(v) => save({ region: v })} />
