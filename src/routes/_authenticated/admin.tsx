@@ -113,6 +113,7 @@ function Admin() {
           {tab === "official" && <OfficialTabContent initialSub={officialSub} />}
           {tab === "contact" && <ContactAnalyticsTab />}
           {tab === "activity" && isAdmin && <ActivityLogTab />}
+          {tab === "locations" && isAdmin && <LocationsTab />}
         </div>
       </section>
     </Layout>
