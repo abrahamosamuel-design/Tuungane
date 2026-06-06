@@ -106,6 +106,7 @@ function BrowseRequests() {
   }, [cat, chip, urgentOnly, budgetShown, nearMe, myDistrict]);
 
   const category = useMemo(() => categories.find((c) => c.slug === cat), [cat]);
+  const rankedItems = useMemo(() => sortByProximity(items, userLoc, (r) => r), [items, userLoc]);
 
   return (
     <Layout>
