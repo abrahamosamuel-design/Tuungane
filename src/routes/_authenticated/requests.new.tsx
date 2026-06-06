@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { Loader2, MapPin, ShieldAlert } from "lucide-react";
 import { REQUESTS_SAFETY_TEXT } from "@/data/requestTypes";
 import { useUserLocation } from "@/hooks/use-user-location";
+import { AreaAutocomplete } from "@/components/AreaAutocomplete";
 
 export const Route = createFileRoute("/_authenticated/requests/new")({
   validateSearch: (search: Record<string, unknown>) => ({
