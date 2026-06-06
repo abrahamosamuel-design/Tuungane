@@ -190,7 +190,8 @@ function Feed() {
           })()}
 
           {!loading && tab === "services" && (() => {
-            const sortedProviders = [...providers].sort((a, b) => Number(isBoostedProvider(b.user_id)) - Number(isBoostedProvider(a.user_id)));
+            const byProx = sortByProximity(providers, userLoc, (p) => p as TargetLocation);
+            const sortedProviders = [...byProx].sort((a, b) => Number(isBoostedProvider(b.user_id)) - Number(isBoostedProvider(a.user_id)));
             return sortedProviders.length === 0 ? (
               <Empty title="No providers found" hint="Try a different category." />
             ) : sortedProviders.map((p) => (
