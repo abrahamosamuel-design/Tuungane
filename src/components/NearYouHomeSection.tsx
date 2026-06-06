@@ -219,7 +219,3 @@ export function NearYouHomeSection() {
     </section>
   );
 }
-
-// Avoid unused-import warning when only Star/Users would be unused.
-void Star;
-void Users;
