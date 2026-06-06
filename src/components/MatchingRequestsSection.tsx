@@ -11,6 +11,7 @@ import { useFeaturedLocations, isFeaturedTarget } from "@/hooks/use-featured-loc
 import { proximityScore, haversineKm, type TargetLocation } from "@/lib/location";
 import { NearYouBadge } from "@/components/NearYouBadge";
 import { RadiusFilter, RADIUS_OPTIONS } from "@/components/RadiusFilter";
+import { useOnlineStatus } from "@/components/OfflineBanner";
 
 const targetOf = (r: ServiceRequestRow): TargetLocation => ({
   district: r.district,
