@@ -13,6 +13,7 @@ import { BusinessesAdminTab } from "@/components/admin/BusinessesAdminTab";
 import { DisputesAdminTab } from "@/components/admin/DisputesAdminTab";
 
 import { ContactAnalyticsTab } from "@/components/admin/ContactAnalyticsTab";
+import { ActivityLogTab } from "@/components/admin/ActivityLogTab";
 import { officialPostTypeMap, type OfficialAccountRow, type OfficialPostRow } from "@/data/officialPostTypes";
 import { timeAgo } from "@/lib/format";
 import { toast } from "sonner";
@@ -27,9 +28,9 @@ type Tab =
   | "users" | "providers" | "businesses"
   | "requests" | "posts" | "recs"
   | "reports" | "disputes"
-  | "credits" | "official" | "contact";
+  | "credits" | "official" | "contact" | "activity";
 
-const TAB_GROUPS: { label: string; tabs: { id: Tab; label: string }[] }[] = [
+const TAB_GROUPS: { label: string; tabs: { id: Tab; label: string; adminOnly?: boolean }[] }[] = [
   { label: "Home", tabs: [{ id: "overview", label: "Overview" }] },
   { label: "People & Pages", tabs: [
     { id: "users", label: "Users" },
@@ -49,6 +50,7 @@ const TAB_GROUPS: { label: string; tabs: { id: Tab; label: string }[] }[] = [
   { label: "Operations", tabs: [
     { id: "credits", label: "Credits & Boosts" },
     { id: "official", label: "Official Account" },
+    { id: "activity", label: "Activity Log", adminOnly: true },
   ]},
 ];
 
@@ -78,17 +80,21 @@ function Admin() {
         </div>
 
         <nav className="mt-6 space-y-2 border-b border-border pb-3">
-          {TAB_GROUPS.map((g) => (
-            <div key={g.label} className="flex flex-wrap items-center gap-1">
-              <span className="mr-2 w-32 shrink-0 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{g.label}</span>
-              {g.tabs.map((t) => (
-                <button key={t.id} onClick={() => setTab(t.id)}
-                  className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${tab === t.id ? "bg-navy text-navy-foreground" : "border border-border bg-background text-muted-foreground hover:border-navy"}`}>
-                  {t.label}
-                </button>
-              ))}
-            </div>
-          ))}
+          {TAB_GROUPS.map((g) => {
+            const visible = g.tabs.filter((t) => !t.adminOnly || isAdmin);
+            if (visible.length === 0) return null;
+            return (
+              <div key={g.label} className="flex flex-wrap items-center gap-1">
+                <span className="mr-2 w-32 shrink-0 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{g.label}</span>
+                {visible.map((t) => (
+                  <button key={t.id} onClick={() => setTab(t.id)}
+                    className={`rounded-full px-3 py-1.5 text-xs font-semibold transition ${tab === t.id ? "bg-navy text-navy-foreground" : "border border-border bg-background text-muted-foreground hover:border-navy"}`}>
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+            );
+          })}
         </nav>
 
         <div className="mt-6">
@@ -104,6 +110,7 @@ function Admin() {
           {tab === "credits" && <CreditsAdminTab />}
           {tab === "official" && <OfficialTabContent initialSub={officialSub} />}
           {tab === "contact" && <ContactAnalyticsTab />}
+          {tab === "activity" && isAdmin && <ActivityLogTab />}
         </div>
       </section>
     </Layout>

@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_activity_log: {
+        Row: {
+          action: string
+          actor_user_id: string | null
+          created_at: string
+          details: Json
+          id: string
+          target_id: string | null
+          target_type: string | null
+          target_user_id: string | null
+        }
+        Insert: {
+          action: string
+          actor_user_id?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          target_id?: string | null
+          target_type?: string | null
+          target_user_id?: string | null
+        }
+        Update: {
+          action?: string
+          actor_user_id?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          target_id?: string | null
+          target_type?: string | null
+          target_user_id?: string | null
+        }
+        Relationships: []
+      }
       admin_settings: {
         Row: {
           id: string
@@ -1702,6 +1735,23 @@ export type Database = {
         }
         Returns: undefined
       }
+      admin_search_activity_log: {
+        Args: { _limit?: number; _offset?: number; _q?: string }
+        Returns: {
+          action: string
+          actor_email: string
+          actor_name: string
+          actor_user_id: string
+          created_at: string
+          details: Json
+          id: string
+          target_email: string
+          target_id: string
+          target_name: string
+          target_type: string
+          target_user_id: string
+        }[]
+      }
       approve_purchase_request: {
         Args: {
           _admin_note?: string
@@ -1735,6 +1785,16 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      log_admin_activity: {
+        Args: {
+          _action: string
+          _details: Json
+          _target_id: string
+          _target_type: string
+          _target_user_id: string
+        }
+        Returns: undefined
       }
       matching_requests_for_provider: {
         Args: { _provider: string }
