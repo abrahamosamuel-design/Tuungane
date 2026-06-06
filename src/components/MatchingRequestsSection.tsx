@@ -55,6 +55,7 @@ function readCache(uid: string): CacheEntry | null {
 export function MatchingRequestsSection() {
   const { user } = useAuth();
   const online = useOnlineStatus();
+  const [now, setNow] = useState(Date.now());
   const [items, setItems] = useState<ServiceRequestRow[]>(() => {
     if (!user) return [];
     return readCache(user.id)?.rows ?? [];
@@ -71,6 +72,12 @@ export function MatchingRequestsSection() {
   const { has: isBoostedReq } = useBoostedSet("service_request", ["urgent_request"]);
   const { location: userLoc } = useUserLocation();
   const { locations: featured } = useFeaturedLocations();
+
+  // Keep the displayed age exact by updating `now` every 15 s while mounted.
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 15_000);
+    return () => clearInterval(id);
+  }, []);
 
   useEffect(() => {
     if (!user) return;
