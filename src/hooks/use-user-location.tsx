@@ -49,6 +49,14 @@ export function UserLocationProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(false);
   const [requestingGeo, setRequestingGeo] = useState(false);
 
+  // Refs mirror state so callbacks can read latest values without depending on them.
+  // This keeps `updateLocation`/`requestBrowserLocation` referentially stable across
+  // renders, so consumer effects that depend on them don't re-run unnecessarily.
+  const locationRef = useRef(location);
+  const userIdRef = useRef<string | null>(user?.id ?? null);
+  useEffect(() => { locationRef.current = location; }, [location]);
+  useEffect(() => { userIdRef.current = user?.id ?? null; }, [user?.id]);
+
   // Swap cache + load from profile when signed-in user changes.
   useEffect(() => {
     clearLegacy();
@@ -75,33 +83,32 @@ export function UserLocationProvider({ children }: { children: ReactNode }) {
     };
   }, [user?.id]);
 
-  const updateLocation = useCallback(
-    async (patch: Partial<UserLocation>) => {
-      const TEXT_KEYS: (keyof UserLocation)[] = ["country", "region", "district", "city", "town", "area"];
-      const cleanPatch: Partial<UserLocation> = { ...patch };
-      for (const k of TEXT_KEYS) {
-        if (k in cleanPatch) {
-          const v = cleanPatch[k];
-          if (typeof v === "string") {
-            const trimmed = v.trim();
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (cleanPatch as any)[k] = trimmed.length ? trimmed : null;
-          }
+  const updateLocation = useCallback(async (patch: Partial<UserLocation>) => {
+    const TEXT_KEYS: (keyof UserLocation)[] = ["country", "region", "district", "city", "town", "area"];
+    const cleanPatch: Partial<UserLocation> = { ...patch };
+    for (const k of TEXT_KEYS) {
+      if (k in cleanPatch) {
+        const v = cleanPatch[k];
+        if (typeof v === "string") {
+          const trimmed = v.trim();
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (cleanPatch as any)[k] = trimmed.length ? trimmed : null;
         }
       }
-      const next: UserLocation = { ...(location ?? {}), ...cleanPatch };
-      setLocation(next);
-      writeLocalFor(user?.id ?? null, next);
-      if (user) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const dbPatch: any = { ...cleanPatch, location_updated_at: new Date().toISOString() };
-        if (dbPatch.location_visibility === null) delete dbPatch.location_visibility;
-        await supabase.from("profiles").update(dbPatch).eq("id", user.id);
-      }
-      return next;
-    },
-    [user?.id, location],
-  );
+    }
+    const uid = userIdRef.current;
+    const next: UserLocation = { ...(locationRef.current ?? {}), ...cleanPatch };
+    locationRef.current = next;
+    setLocation(next);
+    writeLocalFor(uid, next);
+    if (uid) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const dbPatch: any = { ...cleanPatch, location_updated_at: new Date().toISOString() };
+      if (dbPatch.location_visibility === null) delete dbPatch.location_visibility;
+      await supabase.from("profiles").update(dbPatch).eq("id", uid);
+    }
+    return next;
+  }, []);
 
   const requestBrowserLocation = useCallback(async (): Promise<UserLocation | null> => {
     if (typeof navigator === "undefined" || !navigator.geolocation) {
@@ -119,7 +126,7 @@ export function UserLocationProvider({ children }: { children: ReactNode }) {
           const geo = await reverseGeocode(lat, lng);
           const patch: Partial<UserLocation> = { latitude: lat, longitude: lng };
           if (geo) {
-            const cur = location ?? {};
+            const cur = locationRef.current ?? {};
             if (!cur.country && geo.country) patch.country = geo.country;
             if (!cur.region && geo.region) patch.region = geo.region;
             if (!cur.district && geo.district) patch.district = geo.district;
@@ -156,15 +163,13 @@ export function UserLocationProvider({ children }: { children: ReactNode }) {
         { enableHighAccuracy: false, timeout: 8000, maximumAge: 60000 },
       );
     });
-  }, [updateLocation, location]);
+  }, [updateLocation]);
 
-  const value: UserLocationContextValue = {
-    location,
-    loading,
-    requestingGeo,
-    updateLocation,
-    requestBrowserLocation,
-  };
+  // Memoize context value so identity only changes when state actually changes.
+  const value = useMemo<UserLocationContextValue>(
+    () => ({ location, loading, requestingGeo, updateLocation, requestBrowserLocation }),
+    [location, loading, requestingGeo, updateLocation, requestBrowserLocation],
+  );
 
   return <UserLocationContext.Provider value={value}>{children}</UserLocationContext.Provider>;
 }
