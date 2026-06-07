@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import type { UserLocation } from "@/lib/location";
@@ -31,7 +31,17 @@ function clearLegacy() {
   } catch {}
 }
 
-export function useUserLocation() {
+type UserLocationContextValue = {
+  location: UserLocation | null;
+  loading: boolean;
+  requestingGeo: boolean;
+  updateLocation: (patch: Partial<UserLocation>) => Promise<UserLocation>;
+  requestBrowserLocation: () => Promise<UserLocation | null>;
+};
+
+const UserLocationContext = createContext<UserLocationContextValue | null>(null);
+
+export function UserLocationProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   // On first mount auth may not be resolved yet — start from anon cache.
   // The effect below swaps to the user-scoped cache once auth resolves.
@@ -42,11 +52,9 @@ export function useUserLocation() {
   // Swap cache + load from profile when signed-in user changes.
   useEffect(() => {
     clearLegacy();
-
-    // Re-seed from the cache that belongs to THIS user (or anon on sign-out).
     setLocation(readLocalFor(user?.id ?? null));
-
     if (!user) return;
+    let cancelled = false;
     setLoading(true);
     (async () => {
       const { data } = await supabase
@@ -54,6 +62,7 @@ export function useUserLocation() {
         .select("country,region,district,city,town,area,latitude,longitude,location_visibility")
         .eq("id", user.id)
         .maybeSingle();
+      if (cancelled) return;
       if (data) {
         const next = data as UserLocation;
         setLocation(next);
@@ -61,12 +70,13 @@ export function useUserLocation() {
       }
       setLoading(false);
     })();
+    return () => {
+      cancelled = true;
+    };
   }, [user?.id]);
 
   const updateLocation = useCallback(
     async (patch: Partial<UserLocation>) => {
-      // Trim free-text fields so admin queries / group-bys aren't polluted by
-      // trailing whitespace (e.g. "Wakiso " vs "Wakiso").
       const TEXT_KEYS: (keyof UserLocation)[] = ["country", "region", "district", "city", "town", "area"];
       const cleanPatch: Partial<UserLocation> = { ...patch };
       for (const k of TEXT_KEYS) {
@@ -106,12 +116,9 @@ export function useUserLocation() {
         async (pos) => {
           const lat = pos.coords.latitude;
           const lng = pos.coords.longitude;
-          // Reverse-geocode so text-hierarchy ranking also works,
-          // not just lat/lng. Failure here is non-fatal — we still save coords.
           const geo = await reverseGeocode(lat, lng);
           const patch: Partial<UserLocation> = { latitude: lat, longitude: lng };
           if (geo) {
-            // Only overwrite empty fields, so user-typed values aren't clobbered.
             const cur = location ?? {};
             if (!cur.country && geo.country) patch.country = geo.country;
             if (!cur.region && geo.region) patch.region = geo.region;
@@ -127,7 +134,6 @@ export function useUserLocation() {
         },
         (err) => {
           setRequestingGeo(false);
-          // err.code: 1=PERMISSION_DENIED, 2=POSITION_UNAVAILABLE, 3=TIMEOUT
           if (err.code === 1) {
             toast.error("Location permission denied", {
               description: "Allow location access in your browser settings, or enter your area manually.",
@@ -152,5 +158,21 @@ export function useUserLocation() {
     });
   }, [updateLocation, location]);
 
-  return { location, loading, requestingGeo, updateLocation, requestBrowserLocation };
+  const value: UserLocationContextValue = {
+    location,
+    loading,
+    requestingGeo,
+    updateLocation,
+    requestBrowserLocation,
+  };
+
+  return <UserLocationContext.Provider value={value}>{children}</UserLocationContext.Provider>;
+}
+
+export function useUserLocation(): UserLocationContextValue {
+  const ctx = useContext(UserLocationContext);
+  if (!ctx) {
+    throw new Error("useUserLocation must be used within a UserLocationProvider");
+  }
+  return ctx;
 }
