@@ -16,7 +16,7 @@ import { useFeaturedLocations, isFeaturedTarget } from "@/hooks/use-featured-loc
 
 const iconMap: Record<string, any> = { Wrench, Sparkles, Building2, Scissors, Truck, Car, GraduationCap, Camera, ChefHat, Laptop, HeartPulse, Sprout, MoreHorizontal };
 
-export const Route = createFileRoute("/services")({
+export const Route = createFileRoute("/services/")({
   head: () => ({
     meta: [
       { title: "Find Trusted Services Near You — Tuungane" },

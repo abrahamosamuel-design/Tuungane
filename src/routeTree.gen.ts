@@ -10,7 +10,6 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
-import { Route as ServicesRouteImport } from './routes/services'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as OpportunitiesRouteImport } from './routes/opportunities'
 import { Route as OfficialRouteImport } from './routes/official'
@@ -22,6 +21,7 @@ import { Route as BusinessesRouteImport } from './routes/businesses'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ServicesIndexRouteImport } from './routes/services.index'
 import { Route as BusinessesIndexRouteImport } from './routes/businesses.index'
 import { Route as UIdRouteImport } from './routes/u.$id'
 import { Route as ServicesRequestsRouteImport } from './routes/services.requests'
@@ -48,11 +48,6 @@ import { Route as AuthenticatedRequestsIdRouteImport } from './routes/_authentic
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ServicesRoute = ServicesRouteImport.update({
-  id: '/services',
-  path: '/services',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -107,6 +102,11 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServicesIndexRoute = ServicesIndexRouteImport.update({
+  id: '/services/',
+  path: '/services/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BusinessesIndexRoute = BusinessesIndexRouteImport.update({
@@ -234,7 +234,6 @@ export interface FileRoutesByFullPath {
   '/official': typeof OfficialRoute
   '/opportunities': typeof OpportunitiesRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
-  '/services': typeof ServicesRouteWithChildren
   '/terms': typeof TermsRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/credits': typeof AuthenticatedCreditsRoute
@@ -255,6 +254,7 @@ export interface FileRoutesByFullPath {
   '/services/requests': typeof ServicesRequestsRoute
   '/u/$id': typeof UIdRoute
   '/businesses/': typeof BusinessesIndexRoute
+  '/services/': typeof ServicesIndexRoute
   '/requests/$id': typeof AuthenticatedRequestsIdRoute
   '/requests/new': typeof AuthenticatedRequestsNewRoute
   '/requests/': typeof AuthenticatedRequestsIndexRoute
@@ -269,7 +269,6 @@ export interface FileRoutesByTo {
   '/official': typeof OfficialRoute
   '/opportunities': typeof OpportunitiesRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
-  '/services': typeof ServicesRouteWithChildren
   '/terms': typeof TermsRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/credits': typeof AuthenticatedCreditsRoute
@@ -290,6 +289,7 @@ export interface FileRoutesByTo {
   '/services/requests': typeof ServicesRequestsRoute
   '/u/$id': typeof UIdRoute
   '/businesses': typeof BusinessesIndexRoute
+  '/services': typeof ServicesIndexRoute
   '/requests/$id': typeof AuthenticatedRequestsIdRoute
   '/requests/new': typeof AuthenticatedRequestsNewRoute
   '/requests': typeof AuthenticatedRequestsIndexRoute
@@ -307,7 +307,6 @@ export interface FileRoutesById {
   '/official': typeof OfficialRoute
   '/opportunities': typeof OpportunitiesRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
-  '/services': typeof ServicesRouteWithChildren
   '/terms': typeof TermsRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/credits': typeof AuthenticatedCreditsRoute
@@ -328,6 +327,7 @@ export interface FileRoutesById {
   '/services/requests': typeof ServicesRequestsRoute
   '/u/$id': typeof UIdRoute
   '/businesses/': typeof BusinessesIndexRoute
+  '/services/': typeof ServicesIndexRoute
   '/_authenticated/requests/$id': typeof AuthenticatedRequestsIdRoute
   '/_authenticated/requests/new': typeof AuthenticatedRequestsNewRoute
   '/_authenticated/requests/': typeof AuthenticatedRequestsIndexRoute
@@ -345,7 +345,6 @@ export interface FileRouteTypes {
     | '/official'
     | '/opportunities'
     | '/reset-password'
-    | '/services'
     | '/terms'
     | '/admin'
     | '/credits'
@@ -366,6 +365,7 @@ export interface FileRouteTypes {
     | '/services/requests'
     | '/u/$id'
     | '/businesses/'
+    | '/services/'
     | '/requests/$id'
     | '/requests/new'
     | '/requests/'
@@ -380,7 +380,6 @@ export interface FileRouteTypes {
     | '/official'
     | '/opportunities'
     | '/reset-password'
-    | '/services'
     | '/terms'
     | '/admin'
     | '/credits'
@@ -401,6 +400,7 @@ export interface FileRouteTypes {
     | '/services/requests'
     | '/u/$id'
     | '/businesses'
+    | '/services'
     | '/requests/$id'
     | '/requests/new'
     | '/requests'
@@ -417,7 +417,6 @@ export interface FileRouteTypes {
     | '/official'
     | '/opportunities'
     | '/reset-password'
-    | '/services'
     | '/terms'
     | '/_authenticated/admin'
     | '/_authenticated/credits'
@@ -438,6 +437,7 @@ export interface FileRouteTypes {
     | '/services/requests'
     | '/u/$id'
     | '/businesses/'
+    | '/services/'
     | '/_authenticated/requests/$id'
     | '/_authenticated/requests/new'
     | '/_authenticated/requests/'
@@ -455,12 +455,12 @@ export interface RootRouteChildren {
   OfficialRoute: typeof OfficialRoute
   OpportunitiesRoute: typeof OpportunitiesRouteWithChildren
   ResetPasswordRoute: typeof ResetPasswordRoute
-  ServicesRoute: typeof ServicesRouteWithChildren
   TermsRoute: typeof TermsRoute
   OfficialPostsIdRoute: typeof OfficialPostsIdRoute
   ProvidersIdRoute: typeof ProvidersIdRoute
   RequestsBrowseRoute: typeof RequestsBrowseRoute
   UIdRoute: typeof UIdRoute
+  ServicesIndexRoute: typeof ServicesIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -470,13 +470,6 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/services': {
-      id: '/services'
-      path: '/services'
-      fullPath: '/services'
-      preLoaderRoute: typeof ServicesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reset-password': {
@@ -554,6 +547,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/services/': {
+      id: '/services/'
+      path: '/services'
+      fullPath: '/services/'
+      preLoaderRoute: typeof ServicesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/businesses/': {
@@ -774,20 +774,6 @@ const OpportunitiesRouteWithChildren = OpportunitiesRoute._addFileChildren(
   OpportunitiesRouteChildren,
 )
 
-interface ServicesRouteChildren {
-  ServicesSlugRoute: typeof ServicesSlugRoute
-  ServicesRequestsRoute: typeof ServicesRequestsRoute
-}
-
-const ServicesRouteChildren: ServicesRouteChildren = {
-  ServicesSlugRoute: ServicesSlugRoute,
-  ServicesRequestsRoute: ServicesRequestsRoute,
-}
-
-const ServicesRouteWithChildren = ServicesRoute._addFileChildren(
-  ServicesRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
@@ -800,13 +786,23 @@ const rootRouteChildren: RootRouteChildren = {
   OfficialRoute: OfficialRoute,
   OpportunitiesRoute: OpportunitiesRouteWithChildren,
   ResetPasswordRoute: ResetPasswordRoute,
-  ServicesRoute: ServicesRouteWithChildren,
   TermsRoute: TermsRoute,
   OfficialPostsIdRoute: OfficialPostsIdRoute,
   ProvidersIdRoute: ProvidersIdRoute,
   RequestsBrowseRoute: RequestsBrowseRoute,
   UIdRoute: UIdRoute,
+  ServicesIndexRoute: ServicesIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
