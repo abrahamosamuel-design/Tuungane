@@ -3,12 +3,13 @@ import { Image as ImageIcon, X, Loader2, Ban } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { uploadMedia } from "@/lib/upload";
-import { categories } from "@/data/categories";
+import { useCategories } from "@/hooks/use-categories";
 import { postTypes, type PostTypeValue } from "@/data/postTypes";
 import { toast } from "sonner";
 
 export function PostComposer({ defaultCategory, defaultPostType, businessPageId, onPosted }: { defaultCategory?: string | null; defaultPostType?: PostTypeValue; businessPageId?: string | null; onPosted?: () => void }) {
   const { user } = useAuth();
+  const { categories } = useCategories();
   const [text, setText] = useState("");
   const [category, setCategory] = useState(defaultCategory ?? "");
   const [location, setLocation] = useState("");

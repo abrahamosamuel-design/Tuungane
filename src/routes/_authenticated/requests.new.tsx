@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import { categories } from "@/data/categories";
+import { categories as staticCategories } from "@/data/categories";
+import { useCategories } from "@/hooks/use-categories";
 import {
   budgetBuckets,
   contactMethods,
@@ -34,6 +35,7 @@ function NewRequest() {
   const search = useSearch({ from: "/_authenticated/requests/new" });
   const { user, loading } = useAuth();
   const { location: profileLoc, requestingGeo, requestBrowserLocation } = useUserLocation();
+  const { categories } = useCategories();
   const nav = useNavigate();
   const [busy, setBusy] = useState(false);
   const [autofilled, setAutofilled] = useState(false);
@@ -42,8 +44,8 @@ function NewRequest() {
   const [districtBounds, setDistrictBounds] = useState<Bounds | null>(null);
   const [f, setF] = useState({
     title: "",
-    category_slug: categories[0].slug,
-    subcategory: categories[0].subcategories[0],
+    category_slug: staticCategories[0].slug,
+    subcategory: staticCategories[0].subcategories[0],
     description: "",
     location: "",
     district: "",
@@ -110,7 +112,7 @@ function NewRequest() {
 
   const update = <K extends keyof typeof f>(k: K, v: (typeof f)[K]) => setF((s) => ({ ...s, [k]: v }));
 
-  const cat = categories.find((c) => c.slug === f.category_slug)!;
+  const cat = categories.find((c) => c.slug === f.category_slug) ?? staticCategories[0];
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -203,7 +205,7 @@ function NewRequest() {
                 value={f.category_slug}
                 onChange={(e) => {
                   update("category_slug", e.target.value);
-                  update("subcategory", categories.find((c) => c.slug === e.target.value)!.subcategories[0]);
+                  update("subcategory", categories.find((c) => c.slug === e.target.value)?.subcategories[0] ?? "");
                 }}
                 className={inp}
               >

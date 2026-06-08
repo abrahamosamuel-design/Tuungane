@@ -5,7 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { PostComposer } from "@/components/social/PostComposer";
 import { PostCard, type PostRow } from "@/components/social/PostCard";
-import { categories } from "@/data/categories";
+import { categories as staticCategories } from "@/data/categories";
+import { useCategories } from "@/hooks/use-categories";
 import { MyRequestsSummary } from "@/components/MyRequestsSummary";
 import { MatchingRequestsSection } from "@/components/MatchingRequestsSection";
 import { ContactedProvidersList } from "@/components/ContactedProvidersList";
@@ -190,9 +191,10 @@ function Stat({ label, value }: { label: string; value: number }) {
 
 function ServiceProfileForm({ onSaved }: { onSaved: () => void }) {
   const { user } = useAuth();
+  const { categories } = useCategories();
   const [businessName, setBusinessName] = useState("");
-  const [categorySlug, setCategorySlug] = useState(categories[0].slug);
-  const [subcategory, setSubcategory] = useState(categories[0].subcategories[0]);
+  const [categorySlug, setCategorySlug] = useState(staticCategories[0].slug);
+  const [subcategory, setSubcategory] = useState(staticCategories[0].subcategories[0]);
   const [bio, setBio] = useState("");
   const [district, setDistrict] = useState("");
   const [town, setTown] = useState("");
@@ -200,7 +202,7 @@ function ServiceProfileForm({ onSaved }: { onSaved: () => void }) {
   const [whatsapp, setWhatsapp] = useState("");
   const [busy, setBusy] = useState(false);
 
-  const cat = categories.find((c) => c.slug === categorySlug)!;
+  const cat = categories.find((c) => c.slug === categorySlug) ?? staticCategories[0];
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -221,7 +223,7 @@ function ServiceProfileForm({ onSaved }: { onSaved: () => void }) {
       <div className="grid grid-cols-2 gap-2">
         <div>
           <label className="text-xs font-medium text-navy">Category</label>
-          <select value={categorySlug} onChange={(e) => { setCategorySlug(e.target.value); setSubcategory(categories.find((c) => c.slug === e.target.value)!.subcategories[0]); }} className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm">
+          <select value={categorySlug} onChange={(e) => { setCategorySlug(e.target.value); setSubcategory(categories.find((c) => c.slug === e.target.value)?.subcategories[0] ?? ""); }} className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm">
             {categories.map((c) => <option key={c.slug} value={c.slug}>{c.name}</option>)}
           </select>
         </div>

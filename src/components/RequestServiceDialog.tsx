@@ -3,7 +3,7 @@ import { X, ShieldAlert, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { uploadMedia } from "@/lib/upload";
-import { categories } from "@/data/categories";
+import { useCategories } from "@/hooks/use-categories";
 import { urgencyOptions, contactMethods, budgetBuckets, visibilityOptions, type UrgencyValue, type ContactMethodValue, type VisibilityValue } from "@/data/serviceRequestTypes";
 import { toast } from "sonner";
 
@@ -19,6 +19,7 @@ interface Props {
 
 export function RequestServiceDialog({ open, onClose, providerId, providerName, defaultCategorySlug, defaultSubcategory, onSubmitted }: Props) {
   const { user } = useAuth();
+  const { categories } = useCategories();
   const [busy, setBusy] = useState(false);
   const [form, setForm] = useState({
     title: "",

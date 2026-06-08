@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { MapPin, Clock, Wallet, BadgeCheck, MessageSquare } from "lucide-react";
 import { timeAgo } from "@/lib/format";
-import { getCategory } from "@/data/categories";
+import { useCategory } from "@/hooks/use-categories";
 import { requestStatusMap, type ServiceRequestRow } from "@/data/serviceRequestTypes";
 import { NearYouBadge } from "@/components/NearYouBadge";
 import type { UserLocation } from "@/lib/location";
@@ -19,7 +19,7 @@ const urgencyLabel: Record<string, { label: string; tone: string }> = {
 };
 
 export function RequestCard({ r, userLoc }: { r: RequestRowLite; userLoc?: UserLocation | null }) {
-  const cat = r.category_slug ? getCategory(r.category_slug) : null;
+  const cat = useCategory(r.category_slug ?? undefined);
   const status = requestStatusMap[r.status];
   const urgency = urgencyLabel[r.urgency] ?? urgencyLabel.normal;
   const title = r.title?.trim() || r.service_needed || cat?.name || "Request";

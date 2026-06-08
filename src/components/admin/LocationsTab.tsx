@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Plus, Trash2, MapPin, Star, Save } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { categories } from "@/data/categories";
+import { useCategories } from "@/hooks/use-categories";
 import { invalidateFeaturedLocationsCache, type FeaturedLocation } from "@/hooks/use-featured-locations";
 
 type ExpansionSettings = {
@@ -38,6 +38,7 @@ const blankRow = (): Partial<FeaturedLocation> => ({
 });
 
 export function LocationsTab() {
+  const { categories } = useCategories();
   const [rows, setRows] = useState<FeaturedLocation[]>([]);
   const [loading, setLoading] = useState(true);
   const [draft, setDraft] = useState<Partial<FeaturedLocation>>(blankRow());

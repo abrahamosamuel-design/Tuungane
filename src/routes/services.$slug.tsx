@@ -1,9 +1,10 @@
-import { createFileRoute, Link, notFound } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, BadgeCheck, MapPin, Star, Sparkles, ShieldCheck } from "lucide-react";
 import { Layout } from "@/components/Layout";
 import { Avatar } from "@/components/social/Avatar";
 import { getCategory } from "@/data/categories";
+import { useCategory } from "@/hooks/use-categories";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserLocation } from "@/hooks/use-user-location";
 import { filterByRadius, sortByProximity, proximityLabel, type UserLocation } from "@/lib/location";
@@ -27,8 +28,8 @@ type Row = {
 
 export const Route = createFileRoute("/services/$slug")({
   loader: ({ params }) => {
-    const category = getCategory(params.slug);
-    if (!category) throw notFound();
+    // Static fallback for SEO/SSR; component layer will override with live DB data.
+    const category = getCategory(params.slug) ?? { slug: params.slug, name: params.slug, icon: "Wrench", blurb: "", subcategories: [] };
     return { category };
   },
   head: ({ loaderData }) => ({
@@ -61,7 +62,9 @@ export const Route = createFileRoute("/services/$slug")({
 });
 
 function CategoryPage() {
-  const { category } = Route.useLoaderData();
+  const { category: loaderCat } = Route.useLoaderData();
+  const dbCat = useCategory(loaderCat.slug);
+  const category = dbCat ?? loaderCat;
   const { location: userLoc } = useUserLocation();
   const [list, setList] = useState<Row[] | null>(null);
   const [others, setOthers] = useState<Row[]>([]);

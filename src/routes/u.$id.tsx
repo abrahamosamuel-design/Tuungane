@@ -20,7 +20,7 @@ import { VerifiedReviewBadge } from "@/components/VerifiedReviewBadge";
 import { uploadMedia } from "@/lib/upload";
 import { timeAgo } from "@/lib/format";
 
-import { getCategory } from "@/data/categories";
+import { useCategory } from "@/hooks/use-categories";
 import { toast } from "sonner";
 import { useActiveBoosts } from "@/hooks/use-boosts";
 import { BoostBadge } from "@/components/BoostBadge";
@@ -138,13 +138,13 @@ function UserProfile() {
   };
 
   const gate = useContactGate(id);
+  const cat = useCategory(sp?.category_slug);
 
   if (!profile) return <Layout><div className="mx-auto max-w-2xl px-4 py-16 text-center text-muted-foreground">Loading…</div></Layout>;
 
   const avgRating = reviews.length ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length : 0;
   const isOwn = user?.id === id;
   const isProvider = profile.is_provider;
-  const cat = sp ? getCategory(sp.category_slug) : null;
   const visibleTabs = TABS.filter((t) => !t.providerOnly || isProvider);
   const portfolioPosts = posts.filter((p) => p.media_urls.length > 0);
 

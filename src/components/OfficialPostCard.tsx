@@ -7,7 +7,7 @@ import { timeAgo } from "@/lib/format";
 import { toast } from "sonner";
 import { OfficialAttribution } from "./OfficialBadge";
 import { officialPostTypeMap, type OfficialPostRow, type OfficialAccountRow } from "@/data/officialPostTypes";
-import { getCategory } from "@/data/categories";
+import { useCategory } from "@/hooks/use-categories";
 import { PostShell } from "./social/PostShell";
 import { PostText } from "./social/PostText";
 import { PostMedia } from "./social/PostMedia";
@@ -18,7 +18,7 @@ export function OfficialPostCard({ post, account, onChanged }: { post: OfficialP
   const [liked, setLiked] = useState(false);
   const [comments, setComments] = useState(0);
   const meta = officialPostTypeMap[post.post_type];
-  const cat = post.category_slug ? getCategory(post.category_slug) : null;
+  const cat = useCategory(post.category_slug ?? undefined);
 
   useEffect(() => {
     (async () => {

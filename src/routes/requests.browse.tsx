@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Search, Plus, ShieldAlert } from "lucide-react";
 import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
-import { categories } from "@/data/categories";
+import { useCategories } from "@/hooks/use-categories";
 import { RequestCard, type RequestRowLite } from "@/components/RequestCard";
 import { EmptyState } from "@/components/EmptyState";
 import { ProviderTrackCTA } from "@/components/cta/ProviderTrackCTA";
@@ -35,6 +35,7 @@ export const Route = createFileRoute("/requests/browse")({
 function BrowseRequests() {
   const { user } = useAuth();
   const { location: userLoc } = useUserLocation();
+  const { categories } = useCategories();
   const [q, setQ] = useState("");
   const [loc, setLoc] = useState("");
   const [cat, setCat] = useState("");

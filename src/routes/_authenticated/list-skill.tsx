@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import { categories } from "@/data/categories";
+import { categories as staticCategories } from "@/data/categories";
+import { useCategories } from "@/hooks/use-categories";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/list-skill")({
@@ -13,6 +14,7 @@ export const Route = createFileRoute("/_authenticated/list-skill")({
 
 function ListSkillPage() {
   const { user } = useAuth();
+  const { categories } = useCategories();
   const nav = useNavigate();
   const [step, setStep] = useState(1);
   const [checking, setChecking] = useState(true);
@@ -20,8 +22,8 @@ function ListSkillPage() {
 
   // form
   const [businessName, setBusinessName] = useState("");
-  const [categorySlug, setCategorySlug] = useState(categories[0].slug);
-  const [subcategory, setSubcategory] = useState(categories[0].subcategories[0]);
+  const [categorySlug, setCategorySlug] = useState(staticCategories[0].slug);
+  const [subcategory, setSubcategory] = useState(staticCategories[0].subcategories[0]);
   const [bio, setBio] = useState("");
   const [district, setDistrict] = useState("");
   const [town, setTown] = useState("");
@@ -42,7 +44,7 @@ function ListSkillPage() {
     })();
   }, [user]);
 
-  const cat = categories.find((c) => c.slug === categorySlug)!;
+  const cat = categories.find((c) => c.slug === categorySlug) ?? staticCategories[0];
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -110,7 +112,7 @@ function ListSkillPage() {
               </Field>
               <div className="grid grid-cols-2 gap-2">
                 <Field label="Category">
-                  <select value={categorySlug} onChange={(e) => { setCategorySlug(e.target.value); setSubcategory(categories.find((c) => c.slug === e.target.value)!.subcategories[0]); }} className="input">
+                  <select value={categorySlug} onChange={(e) => { setCategorySlug(e.target.value); setSubcategory(categories.find((c) => c.slug === e.target.value)?.subcategories[0] ?? ""); }} className="input">
                     {categories.map((c) => <option key={c.slug} value={c.slug}>{c.name}</option>)}
                   </select>
                 </Field>

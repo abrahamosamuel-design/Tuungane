@@ -4,7 +4,7 @@ import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { Building2, Plus, Sparkles, BadgeCheck, MapPin } from "lucide-react";
 import { orgTypeLabel } from "@/data/businessTypes";
-import { categories } from "@/data/categories";
+import { useCategories } from "@/hooks/use-categories";
 import { useUserLocation } from "@/hooks/use-user-location";
 import { filterByRadius, proximityLabel, sortByProximity, type UserLocation } from "@/lib/location";
 import { RadiusFilter } from "@/components/RadiusFilter";
@@ -27,6 +27,7 @@ type BPage = {
 
 function BusinessesPage() {
   const { location: userLoc } = useUserLocation();
+  const { categories } = useCategories();
   const [pages, setPages] = useState<BPage[]>([]);
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<string>("");
