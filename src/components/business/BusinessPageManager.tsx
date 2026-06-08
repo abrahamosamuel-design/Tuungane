@@ -24,6 +24,7 @@ type BusinessPageRow = {
 
 export function BusinessPageCreateForm() {
   const { user, loading } = useAuth();
+  const { categories } = useCategories();
   const nav = useNavigate();
   const [busy, setBusy] = useState(false);
   const [form, setForm] = useState({
