@@ -21,6 +21,18 @@ let _cache: FeaturedLocation[] | null = null;
 let _cacheAt = 0;
 const TTL = 5 * 60 * 1000;
 
+// Subscribers are notified when the cache is invalidated so live
+// `useFeaturedLocations` consumers refetch instead of holding stale rows.
+type Listener = () => void;
+const _listeners = new Set<Listener>();
+function _notify() {
+  for (const l of _listeners) {
+    try {
+      l();
+    } catch {}
+  }
+}
+
 export async function fetchFeaturedLocations(force = false): Promise<FeaturedLocation[]> {
   if (!force && _cache && Date.now() - _cacheAt < TTL) return _cache;
   const { data } = await supabase
@@ -36,6 +48,18 @@ export async function fetchFeaturedLocations(force = false): Promise<FeaturedLoc
 export function invalidateFeaturedLocationsCache() {
   _cache = null;
   _cacheAt = 0;
+  _notify();
+}
+
+// Invalidate cache on sign-in / sign-out so a different user never sees the
+// previous session's featured rows (defense-in-depth; rows are public today
+// but may become role-scoped later).
+if (typeof window !== "undefined") {
+  supabase.auth.onAuthStateChange((event) => {
+    if (event === "SIGNED_IN" || event === "SIGNED_OUT" || event === "USER_UPDATED") {
+      invalidateFeaturedLocationsCache();
+    }
+  });
 }
 
 export function useFeaturedLocations() {
@@ -43,14 +67,23 @@ export function useFeaturedLocations() {
   const [loading, setLoading] = useState(!_cache);
   useEffect(() => {
     let cancelled = false;
-    fetchFeaturedLocations().then((rows) => {
-      if (!cancelled) {
-        setLocations(rows);
-        setLoading(false);
-      }
-    });
+    const refresh = () => {
+      fetchFeaturedLocations().then((rows) => {
+        if (!cancelled) {
+          setLocations(rows);
+          setLoading(false);
+        }
+      });
+    };
+    refresh();
+    // Re-fetch whenever the module cache is invalidated (admin edits, auth changes).
+    const listener: Listener = () => {
+      if (!cancelled) refresh();
+    };
+    _listeners.add(listener);
     return () => {
       cancelled = true;
+      _listeners.delete(listener);
     };
   }, []);
   return { locations, loading };
