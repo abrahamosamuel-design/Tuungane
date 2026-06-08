@@ -60,7 +60,7 @@ function BrowseRequests() {
     setLoading(true);
     let query = supabase
       .from("service_requests")
-      .select("id,customer_id,provider_id,category_slug,subcategory,service_needed,title,visibility,location,district,town,area,latitude,longitude,description,preferred_date,preferred_time,urgency,budget_range,preferred_contact_method,attachment_url,status,urgent_flag,created_at,updated_at,completed_at,cancelled_at,disputed_at,service_profile_id,selected_provider_id,completion_code,provider_confirmed_completion,customer_confirmed_completion")
+      .select("id,customer_id,provider_id,category_slug,subcategory,service_needed,title,visibility,location,district,town,area,latitude,longitude,description,preferred_date,preferred_time,urgency,budget_range,preferred_contact_method,attachment_url,status,urgent_flag,created_at,updated_at,completed_at,cancelled_at,disputed_at,service_profile_id,selected_provider_id,provider_confirmed_completion,customer_confirmed_completion")
       .eq("visibility", "public")
       .eq("status", "requested")
       .is("provider_id", null)

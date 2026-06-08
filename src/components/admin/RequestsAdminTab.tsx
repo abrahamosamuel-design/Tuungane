@@ -15,11 +15,11 @@ export function RequestsAdminTab() {
 
   const load = async () => {
     const [r, f, d] = await Promise.all([
-      supabase.from("service_requests").select("*").order("created_at", { ascending: false }).limit(200),
+      supabase.from("service_requests").select("id,customer_id,provider_id,category_slug,subcategory,service_needed,title,visibility,location,district,town,area,latitude,longitude,country,region,description,preferred_date,preferred_time,urgency,budget_range,preferred_contact_method,customer_phone,customer_whatsapp,attachment_url,status,urgent_flag,created_at,updated_at,completed_at,cancelled_at,disputed_at,service_profile_id,selected_provider_id,provider_confirmed_completion,customer_confirmed_completion").order("created_at", { ascending: false }).limit(200),
       supabase.from("service_feedback").select("*").order("created_at", { ascending: false }).limit(100),
       supabase.from("service_disputes").select("*").order("created_at", { ascending: false }).limit(100),
     ]);
-    setRequests((r.data ?? []) as ServiceRequestRow[]);
+    setRequests(((r.data ?? []).map((x) => ({ ...x, completion_code: null }))) as ServiceRequestRow[]);
     setFeedback((f.data ?? []) as ServiceFeedbackRow[]);
     setDisputes(d.data ?? []);
   };
