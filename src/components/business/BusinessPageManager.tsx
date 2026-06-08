@@ -112,6 +112,9 @@ export function BusinessPageCreateForm() {
           district: form.district.trim() || null,
           town: form.town.trim() || null,
           area: form.area.trim() || null,
+          latitude: coords?.lat ?? null,
+          longitude: coords?.lng ?? null,
+
           contact_phone: form.contact_phone.trim() || null,
           whatsapp: form.whatsapp.trim() || null,
           email: form.email.trim() || null,
