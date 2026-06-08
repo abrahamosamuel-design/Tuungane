@@ -2043,6 +2043,15 @@ export type Database = {
           town: string
         }[]
       }
+      get_profile_claim_contact: {
+        Args: { _id: string }
+        Returns: {
+          email: string
+          phone_number: string
+          supporting_file_url: string
+          whatsapp_number: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
