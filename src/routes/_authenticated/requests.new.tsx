@@ -35,6 +35,7 @@ function NewRequest() {
   const search = useSearch({ from: "/_authenticated/requests/new" });
   const { user, loading } = useAuth();
   const { location: profileLoc, requestingGeo, requestBrowserLocation } = useUserLocation();
+  const { categories } = useCategories();
   const nav = useNavigate();
   const [busy, setBusy] = useState(false);
   const [autofilled, setAutofilled] = useState(false);
