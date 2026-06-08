@@ -69,7 +69,7 @@ function Login() {
           await supabase.from("profiles").update({ is_provider: true, full_name: fullName }).eq("id", data.user.id);
         }
         toast.success("Account created!");
-        nav({ to: isProvider ? "/dashboard" : (search.redirect as never) ?? "/feed" });
+        nav({ to: (search.redirect as never) ?? (isProvider ? "/list-skill" : "/feed") });
       } else {
         if (rememberMe) {
           localStorage.setItem("tuungane_remember_me", "true");
