@@ -14,6 +14,7 @@ export const Route = createFileRoute("/_authenticated/list-skill")({
 
 function ListSkillPage() {
   const { user } = useAuth();
+  const { categories } = useCategories();
   const nav = useNavigate();
   const [step, setStep] = useState(1);
   const [checking, setChecking] = useState(true);
@@ -21,8 +22,8 @@ function ListSkillPage() {
 
   // form
   const [businessName, setBusinessName] = useState("");
-  const [categorySlug, setCategorySlug] = useState(categories[0].slug);
-  const [subcategory, setSubcategory] = useState(categories[0].subcategories[0]);
+  const [categorySlug, setCategorySlug] = useState(staticCategories[0].slug);
+  const [subcategory, setSubcategory] = useState(staticCategories[0].subcategories[0]);
   const [bio, setBio] = useState("");
   const [district, setDistrict] = useState("");
   const [town, setTown] = useState("");
