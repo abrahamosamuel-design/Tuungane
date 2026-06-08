@@ -20,7 +20,7 @@ import {
   User as UserIcon,
 } from "lucide-react";
 import { Layout } from "@/components/Layout";
-import { categories } from "@/data/categories";
+import { useCategories } from "@/hooks/use-categories";
 import { ListYourSkillButton } from "@/components/cta/ListYourSkillButton";
 import { useAuth } from "@/hooks/use-auth";
 import { listSkillHref } from "@/lib/cta";
