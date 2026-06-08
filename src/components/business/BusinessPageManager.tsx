@@ -187,6 +187,50 @@ export function BusinessPageCreateForm() {
           <input value={form.address} onChange={(e) => set("address", e.target.value)} className="input" placeholder="Street, plot, landmark, or trading centre" />
         </Field>
 
+        <Field label="Search for a precise place (optional)">
+          <AreaAutocomplete
+            placeholder="Search for a town, area, or neighbourhood…"
+            bounds={districtBounds}
+            onSelect={(p) => {
+              setForm((s) => ({
+                ...s,
+                district: p.district ?? s.district,
+                town: p.town ?? s.town,
+                area: p.area ?? s.area,
+              }));
+              setCoords({ lat: p.latitude, lng: p.longitude });
+              if (p.bounds) setDistrictBounds(p.bounds);
+              if (p.district) {
+                findDistrictBounds(p.district).then((b) => {
+                  if (b) setDistrictBounds(b);
+                });
+              }
+            }}
+          />
+        </Field>
+
+        <MapPicker
+          latitude={coords?.lat ?? null}
+          longitude={coords?.lng ?? null}
+          bounds={districtBounds}
+          onChange={(lat, lng, place) => {
+            setCoords({ lat, lng });
+            if (!place) return;
+            setForm((s) => ({
+              ...s,
+              district: place.district ?? s.district,
+              town: place.town ?? s.town,
+              area: place.area ?? s.area,
+            }));
+            if (place.district) {
+              findDistrictBounds(place.district).then((b) => {
+                if (b) setDistrictBounds(b);
+              });
+            }
+          }}
+        />
+
+
         <div className="grid gap-4 sm:grid-cols-3">
           <Field label="District"><input value={form.district} onChange={(e) => set("district", e.target.value)} className="input" /></Field>
           <Field label="Town"><input value={form.town} onChange={(e) => set("town", e.target.value)} className="input" /></Field>
