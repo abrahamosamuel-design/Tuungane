@@ -191,9 +191,10 @@ function Stat({ label, value }: { label: string; value: number }) {
 
 function ServiceProfileForm({ onSaved }: { onSaved: () => void }) {
   const { user } = useAuth();
+  const { categories } = useCategories();
   const [businessName, setBusinessName] = useState("");
-  const [categorySlug, setCategorySlug] = useState(categories[0].slug);
-  const [subcategory, setSubcategory] = useState(categories[0].subcategories[0]);
+  const [categorySlug, setCategorySlug] = useState(staticCategories[0].slug);
+  const [subcategory, setSubcategory] = useState(staticCategories[0].subcategories[0]);
   const [bio, setBio] = useState("");
   const [district, setDistrict] = useState("");
   const [town, setTown] = useState("");
@@ -201,7 +202,7 @@ function ServiceProfileForm({ onSaved }: { onSaved: () => void }) {
   const [whatsapp, setWhatsapp] = useState("");
   const [busy, setBusy] = useState(false);
 
-  const cat = categories.find((c) => c.slug === categorySlug)!;
+  const cat = categories.find((c) => c.slug === categorySlug) ?? staticCategories[0];
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
