@@ -88,6 +88,27 @@ function Services() {
   const [radiusKm, setRadiusKm] = useState<number | null>(null);
   const [real, setReal] = useState<RealProvider[]>([]);
   const [loadingReal, setLoadingReal] = useState(true);
+  const [dbCats, setDbCats] = useState<Array<{ slug: string; name: string; icon: string; blurb: string; subCount: number; examples: string }> | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      const [{ data: cs }, { data: ss }] = await Promise.all([
+        supabase.from("service_categories").select("slug,name,icon,blurb,sort_order,active").eq("active", true).order("sort_order").order("name"),
+        supabase.from("service_subcategories").select("category_slug,name,sort_order,active").eq("active", true).order("sort_order").order("name"),
+      ]);
+      if (!cs) return;
+      const subsBy = new Map<string, string[]>();
+      (ss ?? []).forEach((s: any) => {
+        const arr = subsBy.get(s.category_slug) ?? [];
+        arr.push(s.name);
+        subsBy.set(s.category_slug, arr);
+      });
+      setDbCats(cs.map((c: any) => {
+        const subs = subsBy.get(c.slug) ?? [];
+        return { slug: c.slug, name: c.name, icon: c.icon || "Wrench", blurb: c.blurb || "", subCount: subs.length, examples: subs.slice(0, 3).join(" · ") };
+      }));
+    })();
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -274,9 +295,8 @@ function Services() {
         <div className="mx-auto max-w-7xl">
           <h2 className="font-display text-lg font-bold text-navy sm:text-xl">Browse services by category</h2>
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {categories.map((c) => {
+            {(dbCats ?? categories.map((c) => ({ slug: c.slug, name: c.name, icon: c.icon, blurb: c.blurb, subCount: c.subcategories.length, examples: c.subcategories.slice(0, 3).join(" · ") }))).map((c) => {
               const Icon = iconMap[c.icon] ?? Wrench;
-              const examples = c.subcategories.slice(0, 3).join(" · ");
               return (
                 <Link
                   key={c.slug}
@@ -289,8 +309,8 @@ function Services() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="font-display text-sm font-semibold text-navy">{c.name}</p>
-                    <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">{examples}</p>
-                    <p className="mt-0.5 text-[11px] font-medium text-orange">{c.subcategories.length} services</p>
+                    <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">{c.examples || c.blurb}</p>
+                    <p className="mt-0.5 text-[11px] font-medium text-orange">{c.subCount} services</p>
                   </div>
                   <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground transition group-hover:text-orange" />
                 </Link>
