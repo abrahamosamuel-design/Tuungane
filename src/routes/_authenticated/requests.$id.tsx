@@ -129,13 +129,13 @@ function RequestDetailsPage() {
     if (!isAssignedProvider) return;
     const code = completionInput.trim().toUpperCase();
     if (!code) return toast.error("Enter the completion code");
-    if (code !== (req.completion_code ?? "").toUpperCase()) return toast.error("Code does not match. Ask the customer for the correct code.");
     setBusy(true);
-    await supabase.from("service_requests").update({ provider_confirmed_completion: true }).eq("id", req.id);
-    if (req.customer_confirmed_completion) {
-      await supabase.from("service_requests").update({ status: "completed" }).eq("id", req.id);
-    }
+    const { error } = await supabase.rpc("confirm_completion", { _request_id: req.id, _code: code });
     setBusy(false);
+    if (error) {
+      if (error.message.includes("invalid_code")) return toast.error("Code does not match. Ask the customer for the correct code.");
+      return toast.error(error.message);
+    }
     toast.success("Code accepted. Waiting for customer confirmation.");
     load();
   };
@@ -143,8 +143,9 @@ function RequestDetailsPage() {
   const customerConfirmCompletion = async () => {
     if (!isCustomer) return;
     setBusy(true);
-    await supabase.from("service_requests").update({ customer_confirmed_completion: true, status: "completed" }).eq("id", req.id);
+    const { error } = await supabase.rpc("confirm_completion_customer", { _request_id: req.id });
     setBusy(false);
+    if (error) return toast.error(error.message);
     toast.success("Completion confirmed. Please leave a verified review.");
     load();
     setFeedbackOpen(true);
