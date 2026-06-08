@@ -19,6 +19,7 @@ interface Props {
 
 export function RequestServiceDialog({ open, onClose, providerId, providerName, defaultCategorySlug, defaultSubcategory, onSubmitted }: Props) {
   const { user } = useAuth();
+  const { categories } = useCategories();
   const [busy, setBusy] = useState(false);
   const [form, setForm] = useState({
     title: "",
