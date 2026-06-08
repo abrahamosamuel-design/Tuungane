@@ -64,6 +64,7 @@ function CategoryPage() {
   const { category } = Route.useLoaderData();
   const { location: userLoc } = useUserLocation();
   const [list, setList] = useState<Row[] | null>(null);
+  const [others, setOthers] = useState<Row[]>([]);
   const [sub, setSub] = useState<string>("");
   const [loc, setLoc] = useState("");
   const [verifiedOnly, setVerifiedOnly] = useState(false);
@@ -73,14 +74,16 @@ function CategoryPage() {
     (async () => {
       const { data: sps } = await supabase
         .from("service_profiles")
-        .select("user_id,business_name,subcategory,bio,town,district,area,latitude,longitude,verified")
-        .eq("category_slug", category.slug)
+        .select("user_id,business_name,subcategory,bio,town,district,area,latitude,longitude,verified,category_slug")
         .eq("suspended", false)
-        .limit(120);
-      const rows = (sps ?? []) as Row[];
-      const ids = rows.map((r) => r.user_id);
+        .limit(200);
+      const all = (sps ?? []) as (Row & { category_slug: string })[];
+      const inCat = all.filter((r) => r.category_slug === category.slug);
+      const outCat = all.filter((r) => r.category_slug !== category.slug);
+      const ids = all.map((r) => r.user_id);
       if (ids.length === 0) {
         setList([]);
+        setOthers([]);
         return;
       }
       const [{ data: profs }, { data: stats }] = await Promise.all([
@@ -89,16 +92,27 @@ function CategoryPage() {
       ]);
       const pmap = new Map((profs ?? []).map((p) => [p.id, p]));
       const smap = new Map((stats ?? []).map((s) => [s.provider_id, s.average_rating ?? 0]));
-      setList(
-        rows.map((r) => ({
-          ...r,
-          full_name: pmap.get(r.user_id)?.full_name,
-          avatar_url: pmap.get(r.user_id)?.avatar_url ?? null,
-          rating: Number(smap.get(r.user_id) ?? 0),
-        })),
+      const enrich = (r: Row) => ({
+        ...r,
+        full_name: pmap.get(r.user_id)?.full_name,
+        avatar_url: pmap.get(r.user_id)?.avatar_url ?? null,
+        rating: Number(smap.get(r.user_id) ?? 0),
+      });
+      setList(inCat.map(enrich));
+      setOthers(
+        outCat
+          .map(enrich)
+          .sort((a, b) => {
+            const rA = a.verified === "featured" ? 2 : a.verified === "verified" ? 1 : 0;
+            const rB = b.verified === "featured" ? 2 : b.verified === "verified" ? 1 : 0;
+            if (rB !== rA) return rB - rA;
+            return (b.rating ?? 0) - (a.rating ?? 0);
+          })
+          .slice(0, 6),
       );
     })();
   }, [category.slug]);
+
 
   const filtered = useMemo(() => {
     if (!list) return null;
