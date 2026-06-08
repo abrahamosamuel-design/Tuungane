@@ -3,12 +3,16 @@ import { useEffect, useMemo, useState } from "react";
 import { Building2, Briefcase, Image as ImageIcon, Info, Trash2, Upload } from "lucide-react";
 
 import { BoostButton } from "@/components/BoostButton";
+import { AreaAutocomplete } from "@/components/AreaAutocomplete";
+import { MapPicker } from "@/components/MapPicker";
+import { findDistrictBounds, type Bounds } from "@/lib/geocoding";
 import { categories } from "@/data/categories";
 import { businessOrgTypes, slugify } from "@/data/businessTypes";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadMedia } from "@/lib/upload";
 import { toast } from "sonner";
+
 
 type BusinessPageRow = {
   id: string;
@@ -42,6 +46,9 @@ export function BusinessPageCreateForm() {
   });
   const [logo, setLogo] = useState<File | null>(null);
   const [cover, setCover] = useState<File | null>(null);
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [districtBounds, setDistrictBounds] = useState<Bounds | null>(null);
+
 
   useEffect(() => {
     if (loading || user) return;
@@ -105,6 +112,9 @@ export function BusinessPageCreateForm() {
           district: form.district.trim() || null,
           town: form.town.trim() || null,
           area: form.area.trim() || null,
+          latitude: coords?.lat ?? null,
+          longitude: coords?.lng ?? null,
+
           contact_phone: form.contact_phone.trim() || null,
           whatsapp: form.whatsapp.trim() || null,
           email: form.email.trim() || null,
@@ -176,6 +186,50 @@ export function BusinessPageCreateForm() {
         <Field label="Location">
           <input value={form.address} onChange={(e) => set("address", e.target.value)} className="input" placeholder="Street, plot, landmark, or trading centre" />
         </Field>
+
+        <Field label="Search for a precise place (optional)">
+          <AreaAutocomplete
+            placeholder="Search for a town, area, or neighbourhood…"
+            bounds={districtBounds}
+            onSelect={(p) => {
+              setForm((s) => ({
+                ...s,
+                district: p.district ?? s.district,
+                town: p.town ?? s.town,
+                area: p.area ?? s.area,
+              }));
+              setCoords({ lat: p.latitude, lng: p.longitude });
+              if (p.bounds) setDistrictBounds(p.bounds);
+              if (p.district) {
+                findDistrictBounds(p.district).then((b) => {
+                  if (b) setDistrictBounds(b);
+                });
+              }
+            }}
+          />
+        </Field>
+
+        <MapPicker
+          latitude={coords?.lat ?? null}
+          longitude={coords?.lng ?? null}
+          bounds={districtBounds}
+          onChange={(lat, lng, place) => {
+            setCoords({ lat, lng });
+            if (!place) return;
+            setForm((s) => ({
+              ...s,
+              district: place.district ?? s.district,
+              town: place.town ?? s.town,
+              area: place.area ?? s.area,
+            }));
+            if (place.district) {
+              findDistrictBounds(place.district).then((b) => {
+                if (b) setDistrictBounds(b);
+              });
+            }
+          }}
+        />
+
 
         <div className="grid gap-4 sm:grid-cols-3">
           <Field label="District"><input value={form.district} onChange={(e) => set("district", e.target.value)} className="input" /></Field>
