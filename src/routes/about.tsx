@@ -8,7 +8,12 @@ export const Route = createFileRoute("/about")({
     meta: [
       { title: "About Tuungane — Skilled Help, Trusted Connections" },
       { name: "description", content: "Tuungane connects customers with skilled service providers nearby. Learn about our mission to help Uganda — and Africa — prosper together." },
+      { property: "og:title", content: "About Tuungane — Skilled Help, Trusted Connections" },
+      { property: "og:description", content: "Tuungane connects customers with skilled service providers nearby. Learn how we help Uganda prosper together." },
+      { property: "og:url", content: "https://tuungane.com/about" },
+      { property: "og:type", content: "website" },
     ],
+    links: [{ rel: "canonical", href: "https://tuungane.com/about" }],
   }),
   component: About,
 });
