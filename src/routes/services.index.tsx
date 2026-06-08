@@ -106,6 +106,10 @@ function Services() {
       setDbCats(cs.map((c: any) => {
         const subs = subsBy.get(c.slug) ?? [];
         return { slug: c.slug, name: c.name, icon: c.icon || "Wrench", blurb: c.blurb || "", subCount: subs.length, examples: subs.slice(0, 3).join(" · ") };
+      }).sort((a: any, b: any) => {
+        if (a.slug === "other") return 1;
+        if (b.slug === "other") return -1;
+        return 0;
       }));
     })();
   }, []);

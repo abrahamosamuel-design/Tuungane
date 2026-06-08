@@ -24,7 +24,11 @@ async function fetchCategories(): Promise<ServiceCategory[]> {
     icon: c.icon || "Wrench",
     blurb: c.blurb || "",
     subcategories: subsBy.get(c.slug) ?? [],
-  }));
+  })).sort((a: any, b: any) => {
+    if (a.slug === "other") return 1;
+    if (b.slug === "other") return -1;
+    return 0;
+  });
 }
 
 export function useCategories() {
