@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import { categories } from "@/data/categories";
+import { categories as staticCategories } from "@/data/categories";
+import { useCategories } from "@/hooks/use-categories";
 import {
   budgetBuckets,
   contactMethods,
