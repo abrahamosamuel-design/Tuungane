@@ -9,7 +9,7 @@ import { useBoostedSet } from "@/hooks/use-boosted-set";
 import { PostCard, type PostRow } from "@/components/social/PostCard";
 
 import { OfficialPostCard } from "@/components/OfficialPostCard";
-import { categories } from "@/data/categories";
+import { useCategories } from "@/hooks/use-categories";
 import { postTypes, type PostTypeValue } from "@/data/postTypes";
 import type { OfficialAccountRow, OfficialPostRow } from "@/data/officialPostTypes";
 import { useUserLocation } from "@/hooks/use-user-location";
