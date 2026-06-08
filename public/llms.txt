@@ -1,0 +1,24 @@
+# Tuungane
+
+> Tuungane is a Uganda-based services marketplace that connects customers with trusted, skilled service providers across home repair, cleaning, beauty, automotive, tutoring, and more.
+
+Customers post a request describing what they need; nearby skilled providers respond. Providers list their skills and businesses to be discovered locally.
+
+## Pages
+
+- [Home](/): Find services or list your skill
+- [About](/about): Mission and how Tuungane works
+- [Services](/services): Browse all service categories
+- [Browse requests](/requests/browse): Open service requests from customers
+- [Businesses](/businesses): Directory of local businesses
+- [Opportunities](/opportunities): Jobs and gigs board
+- [Official posts](/official): Updates from verified accounts
+- [Contact](/contact): Get in touch with the Tuungane team
+
+## Guides
+
+- [Property maintenance in Kampala](/guides/property-maintenance-kampala): How to hire trusted maintenance pros
+
+## Optional
+
+- [Terms](/terms): Terms of service
