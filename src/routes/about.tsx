@@ -40,7 +40,7 @@ function About() {
           ].map(({ i: Icon, t, d }) => (
             <div key={t} className="rounded-2xl border border-border bg-card p-6">
               <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange/10 text-orange"><Icon className="h-5 w-5" /></div>
-              <h3 className="mt-3 font-display text-lg font-bold text-navy">{t}</h3>
+              <h2 className="mt-3 font-display text-lg font-bold text-navy">{t}</h2>
               <p className="mt-1 text-sm text-muted-foreground">{d}</p>
             </div>
           ))}
