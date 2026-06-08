@@ -1931,6 +1931,10 @@ export type Database = {
         Args: { _code: string; _request_id: string }
         Returns: undefined
       }
+      confirm_completion_customer: {
+        Args: { _request_id: string }
+        Returns: undefined
+      }
       create_boost: {
         Args: { _entity_id: string; _entity_type: string; _pricing_id: string }
         Returns: string
