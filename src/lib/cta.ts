@@ -20,12 +20,12 @@ export function listSkillLink(user: User | null | undefined): {
   to: string;
   search?: Record<string, string>;
 } {
-  if (user) return { to: "/dashboard", search: { becomeProvider: "1" } };
-  return { to: "/login", search: { tab: "signup", intent: "provider" } };
+  if (user) return { to: "/list-skill" };
+  return { to: "/login", search: { tab: "signup", intent: "provider", redirect: "/list-skill" } };
 }
 
 /** Plain-string href fallback (anchors, server links). */
 export function listSkillHref(user: User | null | undefined): string {
-  if (user) return "/dashboard?becomeProvider=1";
-  return "/login?tab=signup&intent=provider";
+  if (user) return "/list-skill";
+  return "/login?tab=signup&intent=provider&redirect=/list-skill";
 }
