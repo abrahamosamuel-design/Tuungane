@@ -211,8 +211,19 @@ function UserProfile() {
           </div>
 
           <div className="mt-4 flex flex-wrap items-center gap-2">
-            {!isOwn && user && isProvider && (
-              <button onClick={() => setRequestOpen(true)} className="rounded-full bg-navy px-4 py-2 text-xs font-semibold text-navy-foreground hover:brightness-110">Request service</button>
+            {!isOwn && isProvider && (
+              <button
+                onClick={() => {
+                  if (!user) {
+                    nav({ to: "/login", search: { tab: "login", redirect: `/u/${id}` } as never });
+                    return;
+                  }
+                  setRequestOpen(true);
+                }}
+                className="rounded-full bg-orange px-4 py-2 text-xs font-semibold text-orange-foreground hover:brightness-110"
+              >
+                Request service
+              </button>
             )}
             {!isOwn && isProvider && <FollowButton providerUserId={id} onChange={setFollowers} />}
             {!isOwn && isProvider && <SaveButton providerUserId={id} variant="full" />}
