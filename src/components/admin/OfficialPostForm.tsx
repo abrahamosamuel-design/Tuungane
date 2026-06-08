@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { uploadMedia } from "@/lib/upload";
 import { toast } from "sonner";
-import { categories } from "@/data/categories";
+import { useCategories } from "@/hooks/use-categories";
 import { officialPostTypes, type OfficialPostTypeValue, type OfficialPostRow } from "@/data/officialPostTypes";
 
 export function OfficialPostForm({ accountId, editing, onSaved }: { accountId: string; editing?: OfficialPostRow | null; onSaved: () => void }) {
