@@ -20,7 +20,7 @@ import { VerifiedReviewBadge } from "@/components/VerifiedReviewBadge";
 import { uploadMedia } from "@/lib/upload";
 import { timeAgo } from "@/lib/format";
 
-import { getCategory } from "@/data/categories";
+import { useCategory } from "@/hooks/use-categories";
 import { toast } from "sonner";
 import { useActiveBoosts } from "@/hooks/use-boosts";
 import { BoostBadge } from "@/components/BoostBadge";
