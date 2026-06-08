@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useBoostedSet } from "@/hooks/use-boosted-set";
 import { useAuth } from "@/hooks/use-auth";
 import { EmptyState } from "@/components/EmptyState";
-import { categories } from "@/data/categories";
+import { useCategories } from "@/hooks/use-categories";
 import { urgencyOptions, requestStatusMap, type ServiceRequestRow } from "@/data/serviceRequestTypes";
 import { timeAgo } from "@/lib/format";
 
