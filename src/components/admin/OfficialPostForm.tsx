@@ -9,6 +9,7 @@ import { officialPostTypes, type OfficialPostTypeValue, type OfficialPostRow } f
 
 export function OfficialPostForm({ accountId, editing, onSaved }: { accountId: string; editing?: OfficialPostRow | null; onSaved: () => void }) {
   const { user } = useAuth();
+  const { categories } = useCategories();
   const [form, setForm] = useState({
     post_type: (editing?.post_type ?? "announcement") as OfficialPostTypeValue,
     title: editing?.title ?? "",
