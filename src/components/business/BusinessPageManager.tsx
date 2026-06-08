@@ -46,6 +46,9 @@ export function BusinessPageCreateForm() {
   });
   const [logo, setLogo] = useState<File | null>(null);
   const [cover, setCover] = useState<File | null>(null);
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [districtBounds, setDistrictBounds] = useState<Bounds | null>(null);
+
 
   useEffect(() => {
     if (loading || user) return;
