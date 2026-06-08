@@ -1,4 +1,4 @@
-import { createFileRoute, useParams, Link } from "@tanstack/react-router";
+import { createFileRoute, useParams, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { MapPin, Phone, BadgeCheck, Flag, Star, Share2, Camera, Users, ThumbsUp, MessageCircle, ClipboardList } from "lucide-react";
 import { Layout } from "@/components/Layout";
@@ -55,6 +55,7 @@ const TABS: { id: Tab; label: string; providerOnly?: boolean }[] = [
 function UserProfile() {
   const { id } = useParams({ from: "/u/$id" });
   const { user } = useAuth();
+  const nav = useNavigate();
   const [profile, setProfile] = useState<{ full_name: string; avatar_url: string | null; bio: string | null; town: string | null; district: string | null; area: string | null; location_visibility: string | null; is_provider: boolean } | null>(null);
   const [sp, setSp] = useState<{ business_name: string | null; subcategory: string; bio: string; town: string; district: string; phone: string | null; whatsapp: string | null; email: string | null; verified: string; category_slug: string; years_experience: number; areas_served: string[]; availability: string; cover_url: string | null; seeded_by_official: boolean; seeded_status: string | null } | null>(null);
   const [posts, setPosts] = useState<PostRow[]>([]);
@@ -211,8 +212,19 @@ function UserProfile() {
           </div>
 
           <div className="mt-4 flex flex-wrap items-center gap-2">
-            {!isOwn && user && isProvider && (
-              <button onClick={() => setRequestOpen(true)} className="rounded-full bg-navy px-4 py-2 text-xs font-semibold text-navy-foreground hover:brightness-110">Request service</button>
+            {!isOwn && isProvider && (
+              <button
+                onClick={() => {
+                  if (!user) {
+                    nav({ to: "/login", search: { tab: "login", redirect: `/u/${id}` } as never });
+                    return;
+                  }
+                  setRequestOpen(true);
+                }}
+                className="rounded-full bg-orange px-4 py-2 text-xs font-semibold text-orange-foreground hover:brightness-110"
+              >
+                Request service
+              </button>
             )}
             {!isOwn && isProvider && <FollowButton providerUserId={id} onChange={setFollowers} />}
             {!isOwn && isProvider && <SaveButton providerUserId={id} variant="full" />}
@@ -426,9 +438,9 @@ function UserProfile() {
         <ContactProviderModal open={contactModalOpen} onClose={() => setContactModalOpen(false)} providerName={sp?.business_name || profile.full_name} onRequestService={() => setRequestOpen(true)} />
       </section>
 
-      {!isOwn && isProvider && user && (
+      {!isOwn && isProvider && (
         <MobileActionBar>
-          <button onClick={() => setRequestOpen(true)} className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-orange px-4 py-3 text-sm font-semibold text-orange-foreground"><ClipboardList className="h-4 w-4" /> Request service</button>
+          <button onClick={() => { if (!user) { nav({ to: "/login", search: { tab: "login", redirect: `/u/${id}` } as never }); return; } setRequestOpen(true); }} className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-orange px-4 py-3 text-sm font-semibold text-orange-foreground"><ClipboardList className="h-4 w-4" /> Request service</button>
           {sp?.whatsapp && <a href={`https://wa.me/${sp.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noreferrer" aria-label="WhatsApp" className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-green text-white"><MessageCircle className="h-5 w-5" /></a>}
           {sp?.phone && <a href={`tel:${sp.phone}`} aria-label="Call" className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-border text-navy"><Phone className="h-5 w-5" /></a>}
         </MobileActionBar>
