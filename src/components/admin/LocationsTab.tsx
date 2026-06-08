@@ -38,6 +38,7 @@ const blankRow = (): Partial<FeaturedLocation> => ({
 });
 
 export function LocationsTab() {
+  const { categories } = useCategories();
   const [rows, setRows] = useState<FeaturedLocation[]>([]);
   const [loading, setLoading] = useState(true);
   const [draft, setDraft] = useState<Partial<FeaturedLocation>>(blankRow());
