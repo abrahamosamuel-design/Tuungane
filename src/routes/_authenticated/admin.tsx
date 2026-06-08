@@ -116,6 +116,7 @@ function Admin() {
           {tab === "contact" && <ContactAnalyticsTab />}
           {tab === "activity" && isAdmin && <ActivityLogTab />}
           {tab === "locations" && isAdmin && <LocationsTab />}
+          {tab === "categories" && <CategoriesTab />}
         </div>
       </section>
     </Layout>
