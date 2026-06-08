@@ -112,7 +112,7 @@ function ListSkillPage() {
               </Field>
               <div className="grid grid-cols-2 gap-2">
                 <Field label="Category">
-                  <select value={categorySlug} onChange={(e) => { setCategorySlug(e.target.value); setSubcategory(categories.find((c) => c.slug === e.target.value)!.subcategories[0]); }} className="input">
+                  <select value={categorySlug} onChange={(e) => { setCategorySlug(e.target.value); setSubcategory(categories.find((c) => c.slug === e.target.value)?.subcategories[0] ?? ""); }} className="input">
                     {categories.map((c) => <option key={c.slug} value={c.slug}>{c.name}</option>)}
                   </select>
                 </Field>
