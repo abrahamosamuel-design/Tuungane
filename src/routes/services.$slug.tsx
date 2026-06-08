@@ -4,6 +4,7 @@ import { ArrowLeft, BadgeCheck, MapPin, Star, Sparkles, ShieldCheck } from "luci
 import { Layout } from "@/components/Layout";
 import { Avatar } from "@/components/social/Avatar";
 import { getCategory } from "@/data/categories";
+import { useCategory } from "@/hooks/use-categories";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserLocation } from "@/hooks/use-user-location";
 import { filterByRadius, sortByProximity, proximityLabel, type UserLocation } from "@/lib/location";
