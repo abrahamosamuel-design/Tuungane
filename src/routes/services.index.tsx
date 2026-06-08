@@ -88,6 +88,27 @@ function Services() {
   const [radiusKm, setRadiusKm] = useState<number | null>(null);
   const [real, setReal] = useState<RealProvider[]>([]);
   const [loadingReal, setLoadingReal] = useState(true);
+  const [dbCats, setDbCats] = useState<Array<{ slug: string; name: string; icon: string; blurb: string; subCount: number; examples: string }> | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      const [{ data: cs }, { data: ss }] = await Promise.all([
+        supabase.from("service_categories").select("slug,name,icon,blurb,sort_order,active").eq("active", true).order("sort_order").order("name"),
+        supabase.from("service_subcategories").select("category_slug,name,sort_order,active").eq("active", true).order("sort_order").order("name"),
+      ]);
+      if (!cs) return;
+      const subsBy = new Map<string, string[]>();
+      (ss ?? []).forEach((s: any) => {
+        const arr = subsBy.get(s.category_slug) ?? [];
+        arr.push(s.name);
+        subsBy.set(s.category_slug, arr);
+      });
+      setDbCats(cs.map((c: any) => {
+        const subs = subsBy.get(c.slug) ?? [];
+        return { slug: c.slug, name: c.name, icon: c.icon || "Wrench", blurb: c.blurb || "", subCount: subs.length, examples: subs.slice(0, 3).join(" · ") };
+      }));
+    })();
+  }, []);
 
   useEffect(() => {
     (async () => {
