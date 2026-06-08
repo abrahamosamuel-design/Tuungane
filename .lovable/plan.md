@@ -1,58 +1,92 @@
-## Homepage refinement plan
+## Goal
 
-Scope: edit `src/routes/index.tsx` only. Generate new hero artwork. No DB, routing, or component-API changes.
+Shift Tuungane from a bluish dashboard look to a white, black-text, Facebook/LinkedIn-style reading experience — without touching the homepage hero or the footer, and without changing functionality.
 
-### 1. Hero visuals (the main visible problem)
+## Approach: token-level retune (single source of truth)
 
-Current hero uses two small cutout PNGs (`hero-customer.png`, `hero-provider.png`) flanking the CTA stack in a 3-column grid — on mobile they render as ~176px tall floating stickers. Replace with a single, well-composed hero scene.
+Most pages already consume semantic tokens (`bg-background`, `text-foreground`, `text-muted-foreground`, `border-border`, `bg-card`, `text-navy`, etc.) defined in `src/styles.css`. Rather than touching dozens of components, we rewrite the tokens. This propagates the new look platform-wide automatically.
 
-Approach:
-- Generate ONE premium hero image with `imagegen` (standard quality, ~1280x900): a warm, mobile-friendly scene showing a Ugandan customer on a phone in the foreground and a skilled provider (e.g. plumber/electrician with tools, uniform) beside or behind her, framed naturally — not cutouts. Navy-friendly background so it blends into the hero. Save to `src/assets/` and upload via `lovable-assets`.
-- New mobile-first hero layout (single column):
-  - Headline + subtext (centered, top)
-  - Two CTA buttons stacked full-width on mobile, side-by-side on sm+
-  - Large hero image below CTAs, full-width, with soft radial navy gradient blending edges (no hard rectangle)
-  - Trust strip remains as the overlapping white card
-- Delete the 3-column grid + the two small `heroCustomer`/`heroProvider` `<img>` blocks. Delete the now-unused `.asset.json` imports. Keep the two asset files on disk (no delete) since cleanup isn't required for build.
+### 1. `src/styles.css` — token rewrite
 
-### 2. Localize to Uganda + UGX
+Replace the current oklch palette with the requested Facebook/LinkedIn-style values:
 
-Rewrite the `openRequests` array in `src/routes/index.tsx` to:
+```
+--background:        #FFFFFF
+--surface:           #FFFFFF
+--card:              #FFFFFF
+--foreground:        #050505   (near-black main text)
+--muted:             #F0F2F5   (soft grey input/section bg)
+--muted-foreground:  #65676B   (secondary text)
+--border:            #DADDE1
+--input:             #DADDE1
+--secondary:         #F0F2F5
+--secondary-foreground: #050505
+--popover / -fg:     #FFFFFF / #050505
 
-| Title | Location | Budget | Badge |
-|---|---|---|---|
-| Fix leaking tap | Kitoro, Entebbe | UGX 30,000 – 60,000 | New |
-| Power outage fix | Katabi, Entebbe | UGX 50,000 – 120,000 | Urgent |
-| House cleaning | Kigungu, Entebbe | UGX 40,000 – 80,000 | Soon |
+--navy:    #0B1F3A  (kept as brand accent only)
+--orange:  #FF6B1A  (primary CTA — unchanged role)
+--green:   #22A652  (trust/verified — unchanged role)
+--ring:    --orange
+```
 
-(Three cards keeps the existing 3-col grid balanced; the extra examples in the brief are kept in mind but not needed for the home preview.)
+Font stack (replace Plus Jakarta / Inter defaults):
 
-### 3. Categories
+```
+--font-sans:    system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif
+--font-display: same stack (kept as variable so existing `font-display` classes still resolve, just no longer a distinct serif/display face)
+```
 
-Update the "Popular categories" grid (`categories.slice(0,5)` + More). The shown set depends on `src/data/categories.ts`. I'll read it during build; if entries like "Home" appear in the first 5, swap to an explicit allow-list rendered in this order: Plumbing, Electrical, Cleaning, Mechanics, Beauty, then "More". Lookup each by slug from `categories`; fall back to skipping any missing one. No edits to `src/data/categories.ts`.
+Base typography (added to `@layer base`):
+- `html { font-size: 16px }`
+- body text default 15–16px (Tailwind `text-sm`/`text-base` already maps here)
+- headings: keep bold but recolor to `--foreground` (remove the implicit navy tint by not overriding color in base; `text-navy` classes that components opt into still work)
 
-### 4. Show your work
+Shadows softened to grey instead of navy-tinted:
+- `--shadow-card: 0 1px 2px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.06)`
+- `--shadow-elevated: 0 4px 12px rgba(0,0,0,0.08), 0 12px 32px rgba(0,0,0,0.10)`
 
-Keep existing 4 cards. Update the fourth to `Sarah N. — Home cleaning services` for naming consistency with the brief. Names/categories already match otherwise. No image changes (Unsplash URLs are generic, not Kenya-specific).
+Keep `--gradient-hero` exactly as-is (used by the homepage hero — must not change).
 
-### 5. Mobile polish
+Mobile gutter rules at the bottom of `styles.css` stay.
 
-- Reduce hero top padding; tighten section vertical rhythm (`pt-10` → `pt-8` on small screens via responsive classes).
-- Ensure CTA buttons are `w-full` on mobile, `sm:w-auto`.
-- Consistent card radius (`rounded-2xl`) and `p-4 sm:p-5` across request + showcase cards.
-- Confirm trust strip overlap (`-mt-20`) still works with the new hero height; adjust to `-mt-12 sm:-mt-16` if needed after preview.
+### 2. Protect the hero and footer
 
-### 6. Copy
+- `src/routes/index.tsx` hero: it uses `--gradient-hero` and explicit `text-navy-foreground` / orange / green classes. Since `--gradient-hero` and the brand tokens (`--navy`, `--orange`, `--green`) are preserved, the hero renders unchanged. No edits to `index.tsx` hero markup.
+- `src/components/Footer.tsx`: uses its own dark navy background classes (`bg-navy`, `text-navy-foreground`). With `--navy` preserved, the footer renders unchanged. No edits to `Footer.tsx`.
 
-Already aligned with brief ("Connect to trusted help nearby.", "Create a Request", "List Your Skill", "Open Requests near you", "Show your work"). No changes.
+### 3. Targeted component nudges (small, surgical)
 
-### Out of scope
+A few components hardcode `text-navy` for body-level text where it should now be near-black for readability. Limited list:
 
-- No changes to Header, Footer, MobileBottomNav, dashboard, login, or data files.
-- No new routes, no DB migrations.
-- Existing `hero-customer.png` / `hero-provider.png` assets remain in repo unused (safe; can be cleaned later).
+- `src/components/social/PostShell.tsx` — already uses `bg-card` + `text-foreground/90`, picks up new tokens automatically. No change.
+- `src/components/social/PostText.tsx` — uses `text-foreground/90`. No change.
+- Comment bubbles (wherever they currently render) — ensure background is `bg-muted` (now `#F0F2F5`) with `rounded-2xl`. Audit `PostCard`/comment renderers and adjust only if they use navy.
+- Headings across pages that use `text-navy` as the default body heading color (e.g. `font-display ... text-navy`): we keep these — `--navy` is now `#0B1F3A` which reads as near-black and matches the "navy as accent for headings is fine" reading. So no mass find/replace needed.
 
-### Files touched
+We will NOT do a sweeping find/replace of `text-navy` → `text-foreground`. The new `--navy` (#0B1F3A) is already a deep near-black that reads cleanly on white, matching the FB/LinkedIn feel while preserving brand identity.
 
-- `src/routes/index.tsx` — layout, data, imports
-- `src/assets/hero-uganda.jpg.asset.json` — new asset pointer (generated)
+### 4. QA pass
+
+After the token rewrite, visually verify on mobile viewport:
+- Home (hero unchanged, sections below now white with black text)
+- Footer unchanged
+- Services, Services/$slug, Providers/$id
+- Feed, Official, Business pages
+- Requests new / browse / detail
+- Dashboard, Admin, Settings, Notifications, Credits
+- List Your Skill flow
+
+Fix any spot that visually regresses (e.g. a card that explicitly used `bg-surface` and now reads too white-on-white needs a `border-border` added). Expect 2–4 small follow-up tweaks max.
+
+## What is explicitly out of scope
+
+- Homepage hero markup and colors
+- Footer markup and colors
+- Any functional/behavioral change
+- Route, schema, RLS, or business logic changes
+- Brand role of orange (primary CTA) and green (trust/verified)
+
+## Files touched
+
+- `src/styles.css` (main change)
+- Possibly 1–3 small component tweaks discovered during QA (comment bubbles, any stray hardcoded blue background). Each will be a minimal class swap.
