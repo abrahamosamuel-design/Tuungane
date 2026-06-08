@@ -223,7 +223,7 @@ function ServiceProfileForm({ onSaved }: { onSaved: () => void }) {
       <div className="grid grid-cols-2 gap-2">
         <div>
           <label className="text-xs font-medium text-navy">Category</label>
-          <select value={categorySlug} onChange={(e) => { setCategorySlug(e.target.value); setSubcategory(categories.find((c) => c.slug === e.target.value)!.subcategories[0]); }} className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm">
+          <select value={categorySlug} onChange={(e) => { setCategorySlug(e.target.value); setSubcategory(categories.find((c) => c.slug === e.target.value)?.subcategories[0] ?? ""); }} className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm">
             {categories.map((c) => <option key={c.slug} value={c.slug}>{c.name}</option>)}
           </select>
         </div>
