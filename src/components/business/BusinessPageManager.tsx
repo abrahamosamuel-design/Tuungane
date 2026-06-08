@@ -3,12 +3,16 @@ import { useEffect, useMemo, useState } from "react";
 import { Building2, Briefcase, Image as ImageIcon, Info, Trash2, Upload } from "lucide-react";
 
 import { BoostButton } from "@/components/BoostButton";
+import { AreaAutocomplete } from "@/components/AreaAutocomplete";
+import { MapPicker } from "@/components/MapPicker";
+import { findDistrictBounds, type Bounds } from "@/lib/geocoding";
 import { categories } from "@/data/categories";
 import { businessOrgTypes, slugify } from "@/data/businessTypes";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadMedia } from "@/lib/upload";
 import { toast } from "sonner";
+
 
 type BusinessPageRow = {
   id: string;
