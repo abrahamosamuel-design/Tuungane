@@ -19,7 +19,7 @@ export function RequestsAdminTab() {
       supabase.from("service_feedback").select("*").order("created_at", { ascending: false }).limit(100),
       supabase.from("service_disputes").select("*").order("created_at", { ascending: false }).limit(100),
     ]);
-    setRequests((r.data ?? []) as ServiceRequestRow[]);
+    setRequests(((r.data ?? []).map((x) => ({ ...x, completion_code: null }))) as ServiceRequestRow[]);
     setFeedback((f.data ?? []) as ServiceFeedbackRow[]);
     setDisputes(d.data ?? []);
   };
