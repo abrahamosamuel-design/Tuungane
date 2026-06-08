@@ -30,6 +30,7 @@ const avatar = (s: string) =>
 function Feed() {
   const { user } = useAuth();
   const { location: userLoc } = useUserLocation();
+  const { categories } = useCategories();
   const [tab, setTab] = useState<Tab>("posts");
   const [filter, setFilter] = useState<PostFilter>("all");
   const [category, setCategory] = useState<string>("");
