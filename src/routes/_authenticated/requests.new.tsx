@@ -112,7 +112,7 @@ function NewRequest() {
 
   const update = <K extends keyof typeof f>(k: K, v: (typeof f)[K]) => setF((s) => ({ ...s, [k]: v }));
 
-  const cat = categories.find((c) => c.slug === f.category_slug)!;
+  const cat = categories.find((c) => c.slug === f.category_slug) ?? staticCategories[0];
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
