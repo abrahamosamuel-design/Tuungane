@@ -208,8 +208,8 @@ function Services() {
 
           <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-dashed border-orange/40 bg-orange/5 px-3 py-2.5">
             <p className="text-xs font-medium text-navy sm:text-sm">Not sure who to choose?</p>
-            <Link to="/requests" className="rounded-lg bg-orange px-3 py-2 text-xs font-semibold text-orange-foreground transition hover:brightness-110 sm:text-sm">
-              Request a Service
+            <Link to="/requests/new" className="rounded-lg bg-orange px-3 py-2 text-xs font-semibold text-orange-foreground transition hover:brightness-110 sm:text-sm">
+              Post a Request
             </Link>
           </div>
         </div>
