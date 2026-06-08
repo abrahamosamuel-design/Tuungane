@@ -55,6 +55,7 @@ const TABS: { id: Tab; label: string; providerOnly?: boolean }[] = [
 function UserProfile() {
   const { id } = useParams({ from: "/u/$id" });
   const { user } = useAuth();
+  const nav = useNavigate();
   const [profile, setProfile] = useState<{ full_name: string; avatar_url: string | null; bio: string | null; town: string | null; district: string | null; area: string | null; location_visibility: string | null; is_provider: boolean } | null>(null);
   const [sp, setSp] = useState<{ business_name: string | null; subcategory: string; bio: string; town: string; district: string; phone: string | null; whatsapp: string | null; email: string | null; verified: string; category_slug: string; years_experience: number; areas_served: string[]; availability: string; cover_url: string | null; seeded_by_official: boolean; seeded_status: string | null } | null>(null);
   const [posts, setPosts] = useState<PostRow[]>([]);
