@@ -15,6 +15,7 @@ import { DisputesAdminTab } from "@/components/admin/DisputesAdminTab";
 import { ContactAnalyticsTab } from "@/components/admin/ContactAnalyticsTab";
 import { ActivityLogTab } from "@/components/admin/ActivityLogTab";
 import { LocationsTab } from "@/components/admin/LocationsTab";
+import { CategoriesTab } from "@/components/admin/CategoriesTab";
 import { officialPostTypeMap, type OfficialAccountRow, type OfficialPostRow } from "@/data/officialPostTypes";
 import { timeAgo } from "@/lib/format";
 import { toast } from "sonner";
@@ -29,7 +30,7 @@ type Tab =
   | "users" | "providers" | "businesses"
   | "requests" | "posts" | "recs"
   | "reports" | "disputes"
-  | "credits" | "official" | "contact" | "activity" | "locations";
+  | "credits" | "official" | "contact" | "activity" | "locations" | "categories";
 
 const TAB_GROUPS: { label: string; tabs: { id: Tab; label: string; adminOnly?: boolean }[] }[] = [
   { label: "Home", tabs: [{ id: "overview", label: "Overview" }] },
@@ -52,6 +53,7 @@ const TAB_GROUPS: { label: string; tabs: { id: Tab; label: string; adminOnly?: b
     { id: "credits", label: "Credits & Boosts" },
     { id: "official", label: "Official Account" },
     { id: "locations", label: "Locations", adminOnly: true },
+    { id: "categories", label: "Categories" },
     { id: "activity", label: "Activity Log", adminOnly: true },
   ]},
 ];
@@ -114,6 +116,7 @@ function Admin() {
           {tab === "contact" && <ContactAnalyticsTab />}
           {tab === "activity" && isAdmin && <ActivityLogTab />}
           {tab === "locations" && isAdmin && <LocationsTab />}
+          {tab === "categories" && <CategoriesTab />}
         </div>
       </section>
     </Layout>
