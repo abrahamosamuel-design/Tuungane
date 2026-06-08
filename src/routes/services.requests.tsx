@@ -25,6 +25,7 @@ type RequestWithCustomer = ServiceRequestRow & { customer?: { full_name: string;
 
 function ServiceRequestsFeed() {
   const { user } = useAuth();
+  const { categories } = useCategories();
   const [items, setItems] = useState<RequestWithCustomer[]>([]);
   const [loading, setLoading] = useState(true);
   const [cat, setCat] = useState("");
