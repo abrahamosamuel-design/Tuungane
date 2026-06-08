@@ -9,6 +9,7 @@ import { toast } from "sonner";
 
 export function PostComposer({ defaultCategory, defaultPostType, businessPageId, onPosted }: { defaultCategory?: string | null; defaultPostType?: PostTypeValue; businessPageId?: string | null; onPosted?: () => void }) {
   const { user } = useAuth();
+  const { categories } = useCategories();
   const [text, setText] = useState("");
   const [category, setCategory] = useState(defaultCategory ?? "");
   const [location, setLocation] = useState("");
