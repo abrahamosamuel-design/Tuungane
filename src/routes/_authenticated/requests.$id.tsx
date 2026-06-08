@@ -53,7 +53,7 @@ function RequestDetailsPage() {
       toast.error("Request not found or you don't have access");
       return;
     }
-    const sr = r as ServiceRequestRow;
+    const sr = { ...r, completion_code: null } as ServiceRequestRow;
     // Fetch completion code via secure RPC (only the customer / admin can retrieve plaintext)
     if (user.id === sr.customer_id) {
       const { data: code } = await supabase.rpc("get_completion_code", { _request_id: id });
