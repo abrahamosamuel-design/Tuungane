@@ -1,5 +1,12 @@
 import { Link } from "@tanstack/react-router";
 import { MapPin } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export const RADIUS_OPTIONS: { km: number | null; label: string }[] = [
   { km: null, label: "Any distance" },
@@ -9,6 +16,8 @@ export const RADIUS_OPTIONS: { km: number | null; label: string }[] = [
   { km: 20, label: "20 km" },
   { km: 50, label: "50 km" },
 ];
+
+const ANY = "__any__";
 
 export function RadiusFilter({
   value,
@@ -41,17 +50,25 @@ export function RadiusFilter({
       <span className="inline-flex items-center gap-1 text-xs font-semibold text-muted-foreground">
         <MapPin className="h-3.5 w-3.5" /> Within
       </span>
-      <select
-        value={value === null ? "" : String(value)}
-        onChange={(e) => onChange(e.target.value === "" ? null : Number(e.target.value))}
-        className="rounded-full border border-border bg-card px-3 py-1.5 text-xs font-semibold text-navy"
+      <Select
+        value={value === null ? ANY : String(value)}
+        onValueChange={(v) => onChange(v === ANY ? null : Number(v))}
       >
-        {RADIUS_OPTIONS.map((o) => (
-          <option key={o.label} value={o.km === null ? "" : String(o.km)}>
-            {o.label}
-          </option>
-        ))}
-      </select>
+        <SelectTrigger className="h-8 w-auto rounded-full border-border bg-card px-3 py-1.5 text-xs font-semibold text-navy">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {RADIUS_OPTIONS.map((o) => (
+            <SelectItem
+              key={o.label}
+              value={o.km === null ? ANY : String(o.km)}
+              className="text-xs font-semibold"
+            >
+              {o.label}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 }
