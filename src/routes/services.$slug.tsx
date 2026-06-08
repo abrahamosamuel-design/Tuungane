@@ -28,8 +28,8 @@ type Row = {
 
 export const Route = createFileRoute("/services/$slug")({
   loader: ({ params }) => {
-    const category = getCategory(params.slug);
-    if (!category) throw notFound();
+    // Static fallback for SEO/SSR; component layer will override with live DB data.
+    const category = getCategory(params.slug) ?? { slug: params.slug, name: params.slug, icon: "Wrench", blurb: "", subcategories: [] };
     return { category };
   },
   head: ({ loaderData }) => ({
