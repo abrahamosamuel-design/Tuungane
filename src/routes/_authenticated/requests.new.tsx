@@ -44,8 +44,8 @@ function NewRequest() {
   const [districtBounds, setDistrictBounds] = useState<Bounds | null>(null);
   const [f, setF] = useState({
     title: "",
-    category_slug: categories[0].slug,
-    subcategory: categories[0].subcategories[0],
+    category_slug: staticCategories[0].slug,
+    subcategory: staticCategories[0].subcategories[0],
     description: "",
     location: "",
     district: "",
