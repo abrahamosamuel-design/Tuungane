@@ -1927,6 +1927,10 @@ export type Database = {
         Args: { _customer: string; _provider: string }
         Returns: boolean
       }
+      confirm_completion: {
+        Args: { _code: string; _request_id: string }
+        Returns: undefined
+      }
       create_boost: {
         Args: { _entity_id: string; _entity_type: string; _pricing_id: string }
         Returns: string
