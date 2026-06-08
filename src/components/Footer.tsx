@@ -42,7 +42,7 @@ export function Footer() {
             </ul>
           </div>
         </div>
-        <div className="mt-12 flex flex-col items-start justify-between gap-3 border-t border-white/10 pt-6 text-xs text-white/50 sm:flex-row sm:items-center">
+        <div className="mt-12 flex flex-col items-start justify-between gap-3 border-t border-white/10 pt-6 text-xs text-white/70 sm:flex-row sm:items-center">
           <p>© {new Date().getFullYear()} Tuungane. All rights reserved.</p>
           <p>Made with care in Uganda. Expanding soon.</p>
         </div>
