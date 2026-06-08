@@ -846,6 +846,7 @@ export type Database = {
         Row: {
           applicant_id: string
           contact_phone: string | null
+          contact_revealed: boolean
           created_at: string
           id: string
           message: string
@@ -855,6 +856,7 @@ export type Database = {
         Insert: {
           applicant_id: string
           contact_phone?: string | null
+          contact_revealed?: boolean
           created_at?: string
           id?: string
           message?: string
@@ -864,6 +866,7 @@ export type Database = {
         Update: {
           applicant_id?: string
           contact_phone?: string | null
+          contact_revealed?: boolean
           created_at?: string
           id?: string
           message?: string
@@ -2024,6 +2027,8 @@ export type Database = {
         }
         Returns: undefined
       }
+      get_application_phone: { Args: { _app_id: string }; Returns: string }
+      get_completion_code: { Args: { _request_id: string }; Returns: string }
       get_profile_card: {
         Args: { _id: string }
         Returns: {
@@ -2154,6 +2159,7 @@ export type Database = {
         Args: { _admin_note?: string; _request_id: string }
         Returns: undefined
       }
+      reveal_application_contact: { Args: { _app_id: string }; Returns: string }
       spend_credits: {
         Args: {
           _amount: number
