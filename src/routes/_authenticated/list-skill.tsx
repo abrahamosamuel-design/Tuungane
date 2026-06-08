@@ -44,7 +44,7 @@ function ListSkillPage() {
     })();
   }, [user]);
 
-  const cat = categories.find((c) => c.slug === categorySlug)!;
+  const cat = categories.find((c) => c.slug === categorySlug) ?? staticCategories[0];
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
