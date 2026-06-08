@@ -53,6 +53,7 @@ const TAB_GROUPS: { label: string; tabs: { id: Tab; label: string; adminOnly?: b
     { id: "credits", label: "Credits & Boosts" },
     { id: "official", label: "Official Account" },
     { id: "locations", label: "Locations", adminOnly: true },
+    { id: "categories", label: "Categories" },
     { id: "activity", label: "Activity Log", adminOnly: true },
   ]},
 ];
