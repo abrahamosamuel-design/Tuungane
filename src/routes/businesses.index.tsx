@@ -27,6 +27,7 @@ type BPage = {
 
 function BusinessesPage() {
   const { location: userLoc } = useUserLocation();
+  const { categories } = useCategories();
   const [pages, setPages] = useState<BPage[]>([]);
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<string>("");
