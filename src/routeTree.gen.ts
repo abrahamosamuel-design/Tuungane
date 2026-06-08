@@ -120,14 +120,14 @@ const UIdRoute = UIdRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const ServicesRequestsRoute = ServicesRequestsRouteImport.update({
-  id: '/requests',
-  path: '/requests',
-  getParentRoute: () => ServicesRoute,
+  id: '/services/requests',
+  path: '/services/requests',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ServicesSlugRoute = ServicesSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => ServicesRoute,
+  id: '/services/$slug',
+  path: '/services/$slug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const RequestsBrowseRoute = RequestsBrowseRouteImport.update({
   id: '/requests/browse',
@@ -459,6 +459,8 @@ export interface RootRouteChildren {
   OfficialPostsIdRoute: typeof OfficialPostsIdRoute
   ProvidersIdRoute: typeof ProvidersIdRoute
   RequestsBrowseRoute: typeof RequestsBrowseRoute
+  ServicesSlugRoute: typeof ServicesSlugRoute
+  ServicesRequestsRoute: typeof ServicesRequestsRoute
   UIdRoute: typeof UIdRoute
   ServicesIndexRoute: typeof ServicesIndexRoute
 }
@@ -572,17 +574,17 @@ declare module '@tanstack/react-router' {
     }
     '/services/requests': {
       id: '/services/requests'
-      path: '/requests'
+      path: '/services/requests'
       fullPath: '/services/requests'
       preLoaderRoute: typeof ServicesRequestsRouteImport
-      parentRoute: typeof ServicesRoute
+      parentRoute: typeof rootRouteImport
     }
     '/services/$slug': {
       id: '/services/$slug'
-      path: '/$slug'
+      path: '/services/$slug'
       fullPath: '/services/$slug'
       preLoaderRoute: typeof ServicesSlugRouteImport
-      parentRoute: typeof ServicesRoute
+      parentRoute: typeof rootRouteImport
     }
     '/requests/browse': {
       id: '/requests/browse'
@@ -790,19 +792,11 @@ const rootRouteChildren: RootRouteChildren = {
   OfficialPostsIdRoute: OfficialPostsIdRoute,
   ProvidersIdRoute: ProvidersIdRoute,
   RequestsBrowseRoute: RequestsBrowseRoute,
+  ServicesSlugRoute: ServicesSlugRoute,
+  ServicesRequestsRoute: ServicesRequestsRoute,
   UIdRoute: UIdRoute,
   ServicesIndexRoute: ServicesIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

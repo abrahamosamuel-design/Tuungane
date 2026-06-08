@@ -64,6 +64,7 @@ function CategoryPage() {
   const { category } = Route.useLoaderData();
   const { location: userLoc } = useUserLocation();
   const [list, setList] = useState<Row[] | null>(null);
+  const [others, setOthers] = useState<Row[]>([]);
   const [sub, setSub] = useState<string>("");
   const [loc, setLoc] = useState("");
   const [verifiedOnly, setVerifiedOnly] = useState(false);
@@ -73,14 +74,16 @@ function CategoryPage() {
     (async () => {
       const { data: sps } = await supabase
         .from("service_profiles")
-        .select("user_id,business_name,subcategory,bio,town,district,area,latitude,longitude,verified")
-        .eq("category_slug", category.slug)
+        .select("user_id,business_name,subcategory,bio,town,district,area,latitude,longitude,verified,category_slug")
         .eq("suspended", false)
-        .limit(120);
-      const rows = (sps ?? []) as Row[];
-      const ids = rows.map((r) => r.user_id);
+        .limit(200);
+      const all = (sps ?? []) as (Row & { category_slug: string })[];
+      const inCat = all.filter((r) => r.category_slug === category.slug);
+      const outCat = all.filter((r) => r.category_slug !== category.slug);
+      const ids = all.map((r) => r.user_id);
       if (ids.length === 0) {
         setList([]);
+        setOthers([]);
         return;
       }
       const [{ data: profs }, { data: stats }] = await Promise.all([
@@ -89,16 +92,27 @@ function CategoryPage() {
       ]);
       const pmap = new Map((profs ?? []).map((p) => [p.id, p]));
       const smap = new Map((stats ?? []).map((s) => [s.provider_id, s.average_rating ?? 0]));
-      setList(
-        rows.map((r) => ({
-          ...r,
-          full_name: pmap.get(r.user_id)?.full_name,
-          avatar_url: pmap.get(r.user_id)?.avatar_url ?? null,
-          rating: Number(smap.get(r.user_id) ?? 0),
-        })),
+      const enrich = (r: Row) => ({
+        ...r,
+        full_name: pmap.get(r.user_id)?.full_name,
+        avatar_url: pmap.get(r.user_id)?.avatar_url ?? null,
+        rating: Number(smap.get(r.user_id) ?? 0),
+      });
+      setList(inCat.map(enrich));
+      setOthers(
+        outCat
+          .map(enrich)
+          .sort((a, b) => {
+            const rA = a.verified === "featured" ? 2 : a.verified === "verified" ? 1 : 0;
+            const rB = b.verified === "featured" ? 2 : b.verified === "verified" ? 1 : 0;
+            if (rB !== rA) return rB - rA;
+            return (b.rating ?? 0) - (a.rating ?? 0);
+          })
+          .slice(0, 6),
       );
     })();
   }, [category.slug]);
+
 
   const filtered = useMemo(() => {
     if (!list) return null;
@@ -197,13 +211,25 @@ function CategoryPage() {
                 </div>
               ) : (
                 !radiusExpanded && (
-                  <div className="mt-6 rounded-2xl border border-dashed border-border p-12 text-center">
-                    <p className="font-semibold text-navy">No providers match these filters.</p>
-                    <p className="mt-1 text-sm text-muted-foreground">Try clearing the location or verified filter, or browse another subcategory.</p>
-                    <Link to="/login" search={{ tab: "signup" } as never} className="mt-5 inline-flex rounded-full bg-orange px-5 py-2 text-sm font-semibold text-orange-foreground">Post your skill</Link>
+                  <div className="mt-6 space-y-6">
+                    <div className="rounded-2xl border border-dashed border-border bg-card p-8 text-center">
+                      <p className="font-semibold text-navy">No providers in {category.name} yet.</p>
+                      <p className="mt-1 text-sm text-muted-foreground">Be among the first — list your skill and reach customers in this category.</p>
+                      <Link to="/login" search={{ tab: "signup", intent: "provider", redirect: "/list-skill" } as never} className="mt-5 inline-flex rounded-full bg-orange px-5 py-2 text-sm font-semibold text-orange-foreground">List your skill</Link>
+                    </div>
+                    {others.length > 0 && (
+                      <div>
+                        <h3 className="font-display text-lg font-bold text-navy">Explore other trusted providers</h3>
+                        <p className="mt-1 text-sm text-muted-foreground">Discover providers across Tuungane while this category grows.</p>
+                        <div className="mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                          {others.map((p) => <RealProviderCard key={p.user_id} p={p} userLoc={userLoc} />)}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )
               )}
+
             </>
           )}
         </div>
