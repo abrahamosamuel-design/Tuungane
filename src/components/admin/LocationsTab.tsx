@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Plus, Trash2, MapPin, Star, Save } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { categories } from "@/data/categories";
+import { useCategories } from "@/hooks/use-categories";
 import { invalidateFeaturedLocationsCache, type FeaturedLocation } from "@/hooks/use-featured-locations";
 
 type ExpansionSettings = {
