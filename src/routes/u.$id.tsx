@@ -35,7 +35,54 @@ import { Lock } from "lucide-react";
 import { RouteErrorCard, RouteNotFoundCard } from "@/lib/route-boundaries";
 
 export const Route = createFileRoute("/u/$id")({
-  head: () => ({ meta: [{ title: "Profile — Tuungane" }] }),
+  loader: async ({ params }) => {
+    try {
+      const [{ data: profile }, { data: sp }] = await Promise.all([
+        supabase.from("profiles").select("id,full_name,bio,is_provider,district,town,avatar_url").eq("id", params.id).maybeSingle(),
+        supabase.from("service_profiles").select("business_name,subcategory,bio,category_slug,district,town,verified").eq("user_id", params.id).maybeSingle(),
+      ]);
+      return { profile, sp };
+    } catch {
+      return { profile: null, sp: null };
+    }
+  },
+  head: ({ params, loaderData }) => {
+    const name = loaderData?.sp?.business_name || loaderData?.profile?.full_name || "Profile";
+    const loc = [loaderData?.sp?.town || loaderData?.profile?.town, loaderData?.sp?.district || loaderData?.profile?.district].filter(Boolean).join(", ");
+    const subtitle = loaderData?.sp?.subcategory || loaderData?.sp?.category_slug;
+    const title = `${name}${subtitle ? ` — ${subtitle}` : ""} | Tuungane`;
+    const description = (loaderData?.sp?.bio || loaderData?.profile?.bio || `Connect with ${name}${loc ? ` in ${loc}` : ""} on Tuungane — Uganda's trusted services marketplace.`).slice(0, 158);
+    const url = `https://tuungane.com/u/${params.id}`;
+    const isProvider = !!loaderData?.sp || loaderData?.profile?.is_provider;
+    const meta: Array<Record<string, string>> = [
+      { title },
+      { name: "description", content: description },
+      { property: "og:title", content: title },
+      { property: "og:description", content: description },
+      { property: "og:url", content: url },
+      { property: "og:type", content: "profile" },
+    ];
+    if (loaderData?.profile?.avatar_url) {
+      meta.push({ property: "og:image", content: loaderData.profile.avatar_url });
+      meta.push({ name: "twitter:image", content: loaderData.profile.avatar_url });
+    }
+    const scripts: Array<{ type: string; children: string }> = [];
+    if (isProvider) {
+      scripts.push({
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "LocalBusiness",
+          name,
+          description,
+          url,
+          address: loc ? { "@type": "PostalAddress", addressLocality: loaderData?.sp?.town || loaderData?.profile?.town, addressRegion: loaderData?.sp?.district || loaderData?.profile?.district, addressCountry: "UG" } : undefined,
+          image: loaderData?.profile?.avatar_url || undefined,
+        }),
+      });
+    }
+    return { meta, links: [{ rel: "canonical", href: url }], scripts };
+  },
   component: UserProfile,
   errorComponent: ({ error, reset }) => <RouteErrorCard error={error} reset={reset} title="Couldn't load this profile" />,
   notFoundComponent: () => <RouteNotFoundCard title="Profile not found" message="This user profile may have been removed." />,

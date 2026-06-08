@@ -54,6 +54,55 @@ export const Route = createFileRoute("/")({
         content:
           "Create a request and get matched with skilled providers in Entebbe, Kampala and across Uganda — or list your skill and get discovered.",
       },
+      { property: "og:title", content: "Tuungane — Connect to trusted services nearby" },
+      {
+        property: "og:description",
+        content:
+          "Create a request and get matched with skilled providers in Entebbe, Kampala and across Uganda — or list your skill and get discovered.",
+      },
+      { property: "og:url", content: "https://tuungane.com/" },
+      { property: "og:type", content: "website" },
+      {
+        property: "og:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/083bdbcc-d9aa-413f-b763-0278a078db5b/id-preview-ac344380--054979ad-e63e-426c-9551-3d8b05b5d74a.lovable.app-1780369444470.png",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/083bdbcc-d9aa-413f-b763-0278a078db5b/id-preview-ac344380--054979ad-e63e-426c-9551-3d8b05b5d74a.lovable.app-1780369444470.png",
+      },
+    ],
+    links: [{ rel: "canonical", href: "https://tuungane.com/" }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "Tuungane",
+          url: "https://tuungane.com/",
+          description:
+            "Tuungane connects customers with trusted service providers across Uganda — from home repair and cleaning to tutoring, beauty, and more.",
+          potentialAction: {
+            "@type": "SearchAction",
+            target: "https://tuungane.com/services?q={search_term_string}",
+            "query-input": "required name=search_term_string",
+          },
+        }),
+      },
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          name: "Tuungane",
+          url: "https://tuungane.com/",
+          description:
+            "A services-first marketplace connecting customers with skilled, trusted providers in Uganda.",
+          areaServed: "UG",
+        }),
+      },
     ],
   }),
   component: Index,
@@ -301,11 +350,11 @@ function Index() {
               </Link>
             );
           })}
-          <Link to="/services" className="group flex flex-col items-center gap-2">
+          <Link to="/services" className="group flex flex-col items-center gap-2" aria-label="Browse all service categories">
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-navy/5 text-navy transition group-hover:bg-orange group-hover:text-orange-foreground">
               <MoreHorizontal className="h-7 w-7" />
             </div>
-            <span className="text-xs font-semibold text-navy">More</span>
+            <span className="text-xs font-semibold text-navy">Browse all categories</span>
           </Link>
         </div>
       </section>

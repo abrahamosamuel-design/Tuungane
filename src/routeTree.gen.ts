@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as OpportunitiesRouteImport } from './routes/opportunities'
 import { Route as OfficialRouteImport } from './routes/official'
@@ -31,6 +32,7 @@ import { Route as ProvidersIdRouteImport } from './routes/providers.$id'
 import { Route as OpportunitiesNewRouteImport } from './routes/opportunities.new'
 import { Route as OpportunitiesIdRouteImport } from './routes/opportunities.$id'
 import { Route as OfficialPostsIdRouteImport } from './routes/official-posts.$id'
+import { Route as GuidesPropertyMaintenanceKampalaRouteImport } from './routes/guides.property-maintenance-kampala'
 import { Route as BusinessesNewRouteImport } from './routes/businesses.new'
 import { Route as BusinessesCreateRouteImport } from './routes/businesses.create'
 import { Route as BusinessesSlugRouteImport } from './routes/businesses.$slug'
@@ -48,6 +50,11 @@ import { Route as AuthenticatedRequestsIdRouteImport } from './routes/_authentic
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -154,6 +161,12 @@ const OfficialPostsIdRoute = OfficialPostsIdRouteImport.update({
   path: '/official-posts/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GuidesPropertyMaintenanceKampalaRoute =
+  GuidesPropertyMaintenanceKampalaRouteImport.update({
+    id: '/guides/property-maintenance-kampala',
+    path: '/guides/property-maintenance-kampala',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const BusinessesNewRoute = BusinessesNewRouteImport.update({
   id: '/new',
   path: '/new',
@@ -234,6 +247,7 @@ export interface FileRoutesByFullPath {
   '/official': typeof OfficialRoute
   '/opportunities': typeof OpportunitiesRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/credits': typeof AuthenticatedCreditsRoute
@@ -245,6 +259,7 @@ export interface FileRoutesByFullPath {
   '/businesses/$slug': typeof BusinessesSlugRoute
   '/businesses/create': typeof BusinessesCreateRoute
   '/businesses/new': typeof BusinessesNewRoute
+  '/guides/property-maintenance-kampala': typeof GuidesPropertyMaintenanceKampalaRoute
   '/official-posts/$id': typeof OfficialPostsIdRoute
   '/opportunities/$id': typeof OpportunitiesIdRoute
   '/opportunities/new': typeof OpportunitiesNewRoute
@@ -269,6 +284,7 @@ export interface FileRoutesByTo {
   '/official': typeof OfficialRoute
   '/opportunities': typeof OpportunitiesRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/credits': typeof AuthenticatedCreditsRoute
@@ -280,6 +296,7 @@ export interface FileRoutesByTo {
   '/businesses/$slug': typeof BusinessesSlugRoute
   '/businesses/create': typeof BusinessesCreateRoute
   '/businesses/new': typeof BusinessesNewRoute
+  '/guides/property-maintenance-kampala': typeof GuidesPropertyMaintenanceKampalaRoute
   '/official-posts/$id': typeof OfficialPostsIdRoute
   '/opportunities/$id': typeof OpportunitiesIdRoute
   '/opportunities/new': typeof OpportunitiesNewRoute
@@ -307,6 +324,7 @@ export interface FileRoutesById {
   '/official': typeof OfficialRoute
   '/opportunities': typeof OpportunitiesRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/credits': typeof AuthenticatedCreditsRoute
@@ -318,6 +336,7 @@ export interface FileRoutesById {
   '/businesses/$slug': typeof BusinessesSlugRoute
   '/businesses/create': typeof BusinessesCreateRoute
   '/businesses/new': typeof BusinessesNewRoute
+  '/guides/property-maintenance-kampala': typeof GuidesPropertyMaintenanceKampalaRoute
   '/official-posts/$id': typeof OfficialPostsIdRoute
   '/opportunities/$id': typeof OpportunitiesIdRoute
   '/opportunities/new': typeof OpportunitiesNewRoute
@@ -345,6 +364,7 @@ export interface FileRouteTypes {
     | '/official'
     | '/opportunities'
     | '/reset-password'
+    | '/sitemap.xml'
     | '/terms'
     | '/admin'
     | '/credits'
@@ -356,6 +376,7 @@ export interface FileRouteTypes {
     | '/businesses/$slug'
     | '/businesses/create'
     | '/businesses/new'
+    | '/guides/property-maintenance-kampala'
     | '/official-posts/$id'
     | '/opportunities/$id'
     | '/opportunities/new'
@@ -380,6 +401,7 @@ export interface FileRouteTypes {
     | '/official'
     | '/opportunities'
     | '/reset-password'
+    | '/sitemap.xml'
     | '/terms'
     | '/admin'
     | '/credits'
@@ -391,6 +413,7 @@ export interface FileRouteTypes {
     | '/businesses/$slug'
     | '/businesses/create'
     | '/businesses/new'
+    | '/guides/property-maintenance-kampala'
     | '/official-posts/$id'
     | '/opportunities/$id'
     | '/opportunities/new'
@@ -417,6 +440,7 @@ export interface FileRouteTypes {
     | '/official'
     | '/opportunities'
     | '/reset-password'
+    | '/sitemap.xml'
     | '/terms'
     | '/_authenticated/admin'
     | '/_authenticated/credits'
@@ -428,6 +452,7 @@ export interface FileRouteTypes {
     | '/businesses/$slug'
     | '/businesses/create'
     | '/businesses/new'
+    | '/guides/property-maintenance-kampala'
     | '/official-posts/$id'
     | '/opportunities/$id'
     | '/opportunities/new'
@@ -455,7 +480,9 @@ export interface RootRouteChildren {
   OfficialRoute: typeof OfficialRoute
   OpportunitiesRoute: typeof OpportunitiesRouteWithChildren
   ResetPasswordRoute: typeof ResetPasswordRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
+  GuidesPropertyMaintenanceKampalaRoute: typeof GuidesPropertyMaintenanceKampalaRoute
   OfficialPostsIdRoute: typeof OfficialPostsIdRoute
   ProvidersIdRoute: typeof ProvidersIdRoute
   RequestsBrowseRoute: typeof RequestsBrowseRoute
@@ -472,6 +499,13 @@ declare module '@tanstack/react-router' {
       path: '/terms'
       fullPath: '/terms'
       preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/reset-password': {
@@ -619,6 +653,13 @@ declare module '@tanstack/react-router' {
       path: '/official-posts/$id'
       fullPath: '/official-posts/$id'
       preLoaderRoute: typeof OfficialPostsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/guides/property-maintenance-kampala': {
+      id: '/guides/property-maintenance-kampala'
+      path: '/guides/property-maintenance-kampala'
+      fullPath: '/guides/property-maintenance-kampala'
+      preLoaderRoute: typeof GuidesPropertyMaintenanceKampalaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/businesses/new': {
@@ -788,7 +829,9 @@ const rootRouteChildren: RootRouteChildren = {
   OfficialRoute: OfficialRoute,
   OpportunitiesRoute: OpportunitiesRouteWithChildren,
   ResetPasswordRoute: ResetPasswordRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
+  GuidesPropertyMaintenanceKampalaRoute: GuidesPropertyMaintenanceKampalaRoute,
   OfficialPostsIdRoute: OfficialPostsIdRoute,
   ProvidersIdRoute: ProvidersIdRoute,
   RequestsBrowseRoute: RequestsBrowseRoute,

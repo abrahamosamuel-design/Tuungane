@@ -11,7 +11,52 @@ import { SafetyNote, SAFETY_TIPS } from "@/components/SafetyNote";
 import { RouteErrorCard, RouteNotFoundCard } from "@/lib/route-boundaries";
 
 export const Route = createFileRoute("/businesses/$slug")({
-  head: () => ({ meta: [{ title: "Business page — Tuungane" }] }),
+  loader: async ({ params }) => {
+    try {
+      const { data } = await supabase
+        .from("business_pages")
+        .select("name,description,logo_url,cover_url,district,town,area,address,category_slug,subcategory,org_type")
+        .eq("slug", params.slug)
+        .maybeSingle();
+      return { page: data };
+    } catch {
+      return { page: null };
+    }
+  },
+  head: ({ params, loaderData }) => {
+    const p = loaderData?.page;
+    const name = p?.name || "Business page";
+    const loc = [p?.town, p?.district].filter(Boolean).join(", ");
+    const title = `${name}${p?.subcategory ? ` — ${p.subcategory}` : ""} | Tuungane`;
+    const description = (p?.description || `${name}${loc ? ` in ${loc}` : ""} on Tuungane — discover trusted businesses across Uganda.`).slice(0, 158);
+    const url = `https://tuungane.com/businesses/${params.slug}`;
+    const image = p?.cover_url || p?.logo_url || undefined;
+    const meta: Array<Record<string, string>> = [
+      { title },
+      { name: "description", content: description },
+      { property: "og:title", content: title },
+      { property: "og:description", content: description },
+      { property: "og:url", content: url },
+      { property: "og:type", content: "website" },
+    ];
+    if (image) {
+      meta.push({ property: "og:image", content: image });
+      meta.push({ name: "twitter:image", content: image });
+    }
+    const scripts = p ? [{
+      type: "application/ld+json",
+      children: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "LocalBusiness",
+        name,
+        description,
+        url,
+        image,
+        address: loc ? { "@type": "PostalAddress", streetAddress: p?.address || undefined, addressLocality: p?.town || undefined, addressRegion: p?.district || undefined, addressCountry: "UG" } : undefined,
+      }),
+    }] : [];
+    return { meta, links: [{ rel: "canonical", href: url }], scripts };
+  },
   component: BusinessDetail,
   errorComponent: ({ error, reset }) => <RouteErrorCard error={error} reset={reset} title="Couldn't load this business" />,
   notFoundComponent: () => <RouteNotFoundCard title="Business not found" message="This business page may have been removed." homeHref="/businesses" homeLabel="Browse businesses" />,
