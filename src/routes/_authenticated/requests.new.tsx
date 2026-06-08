@@ -205,7 +205,7 @@ function NewRequest() {
                 value={f.category_slug}
                 onChange={(e) => {
                   update("category_slug", e.target.value);
-                  update("subcategory", categories.find((c) => c.slug === e.target.value)!.subcategories[0]);
+                  update("subcategory", categories.find((c) => c.slug === e.target.value)?.subcategories[0] ?? "");
                 }}
                 className={inp}
               >
