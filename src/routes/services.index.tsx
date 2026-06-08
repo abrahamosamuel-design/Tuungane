@@ -295,9 +295,8 @@ function Services() {
         <div className="mx-auto max-w-7xl">
           <h2 className="font-display text-lg font-bold text-navy sm:text-xl">Browse services by category</h2>
           <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {categories.map((c) => {
+            {(dbCats ?? categories.map((c) => ({ slug: c.slug, name: c.name, icon: c.icon, blurb: c.blurb, subCount: c.subcategories.length, examples: c.subcategories.slice(0, 3).join(" · ") }))).map((c) => {
               const Icon = iconMap[c.icon] ?? Wrench;
-              const examples = c.subcategories.slice(0, 3).join(" · ");
               return (
                 <Link
                   key={c.slug}
@@ -310,8 +309,8 @@ function Services() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="font-display text-sm font-semibold text-navy">{c.name}</p>
-                    <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">{examples}</p>
-                    <p className="mt-0.5 text-[11px] font-medium text-orange">{c.subcategories.length} services</p>
+                    <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">{c.examples || c.blurb}</p>
+                    <p className="mt-0.5 text-[11px] font-medium text-orange">{c.subCount} services</p>
                   </div>
                   <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground transition group-hover:text-orange" />
                 </Link>
