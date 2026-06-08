@@ -1304,6 +1304,42 @@ export type Database = {
         }
         Relationships: []
       }
+      service_categories: {
+        Row: {
+          active: boolean
+          blurb: string
+          created_at: string
+          icon: string
+          id: string
+          name: string
+          slug: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          blurb?: string
+          created_at?: string
+          icon?: string
+          id?: string
+          name: string
+          slug: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          blurb?: string
+          created_at?: string
+          icon?: string
+          id?: string
+          name?: string
+          slug?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       service_disputes: {
         Row: {
           admin_notes: string | null
@@ -1699,6 +1735,44 @@ export type Database = {
           visibility?: string
         }
         Relationships: []
+      }
+      service_subcategories: {
+        Row: {
+          active: boolean
+          category_slug: string
+          created_at: string
+          id: string
+          name: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          category_slug: string
+          created_at?: string
+          id?: string
+          name: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          category_slug?: string
+          created_at?: string
+          id?: string
+          name?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_subcategories_category_slug_fkey"
+            columns: ["category_slug"]
+            isOneToOne: false
+            referencedRelation: "service_categories"
+            referencedColumns: ["slug"]
+          },
+        ]
       }
       timeline_posts: {
         Row: {
