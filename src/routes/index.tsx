@@ -350,11 +350,11 @@ function Index() {
               </Link>
             );
           })}
-          <Link to="/services" className="group flex flex-col items-center gap-2">
+          <Link to="/services" className="group flex flex-col items-center gap-2" aria-label="Browse all service categories">
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-navy/5 text-navy transition group-hover:bg-orange group-hover:text-orange-foreground">
               <MoreHorizontal className="h-7 w-7" />
             </div>
-            <span className="text-xs font-semibold text-navy">More</span>
+            <span className="text-xs font-semibold text-navy">Browse all categories</span>
           </Link>
         </div>
       </section>
