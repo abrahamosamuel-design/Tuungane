@@ -62,7 +62,9 @@ export const Route = createFileRoute("/services/$slug")({
 });
 
 function CategoryPage() {
-  const { category } = Route.useLoaderData();
+  const { category: loaderCat } = Route.useLoaderData();
+  const dbCat = useCategory(loaderCat.slug);
+  const category = dbCat ?? loaderCat;
   const { location: userLoc } = useUserLocation();
   const [list, setList] = useState<Row[] | null>(null);
   const [others, setOthers] = useState<Row[]>([]);
