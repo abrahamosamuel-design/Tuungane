@@ -211,13 +211,25 @@ function CategoryPage() {
                 </div>
               ) : (
                 !radiusExpanded && (
-                  <div className="mt-6 rounded-2xl border border-dashed border-border p-12 text-center">
-                    <p className="font-semibold text-navy">No providers match these filters.</p>
-                    <p className="mt-1 text-sm text-muted-foreground">Try clearing the location or verified filter, or browse another subcategory.</p>
-                    <Link to="/login" search={{ tab: "signup" } as never} className="mt-5 inline-flex rounded-full bg-orange px-5 py-2 text-sm font-semibold text-orange-foreground">Post your skill</Link>
+                  <div className="mt-6 space-y-6">
+                    <div className="rounded-2xl border border-dashed border-border bg-card p-8 text-center">
+                      <p className="font-semibold text-navy">No providers in {category.name} yet.</p>
+                      <p className="mt-1 text-sm text-muted-foreground">Be among the first — list your skill and reach customers in this category.</p>
+                      <Link to="/login" search={{ tab: "signup", intent: "provider", redirect: "/list-skill" } as never} className="mt-5 inline-flex rounded-full bg-orange px-5 py-2 text-sm font-semibold text-orange-foreground">List your skill</Link>
+                    </div>
+                    {others.length > 0 && (
+                      <div>
+                        <h3 className="font-display text-lg font-bold text-navy">Explore other trusted providers</h3>
+                        <p className="mt-1 text-sm text-muted-foreground">Discover providers across Tuungane while this category grows.</p>
+                        <div className="mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                          {others.map((p) => <RealProviderCard key={p.user_id} p={p} userLoc={userLoc} />)}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )
               )}
+
             </>
           )}
         </div>
