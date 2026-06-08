@@ -263,6 +263,8 @@ function Index() {
                 alt="A Ugandan customer connected to multiple trusted skilled providers on Tuungane"
                 width={1024}
                 height={1280}
+                fetchPriority="high"
+                decoding="async"
                 className="block w-full"
               />
               {/* Edge fade into navy */}
