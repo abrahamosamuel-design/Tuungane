@@ -37,6 +37,7 @@ import { Route as BusinessesSlugRouteImport } from './routes/businesses.$slug'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedMeRouteImport } from './routes/_authenticated/me'
+import { Route as AuthenticatedListSkillRouteImport } from './routes/_authenticated/list-skill'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedCreditsRouteImport } from './routes/_authenticated/credits'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
@@ -184,6 +185,11 @@ const AuthenticatedMeRoute = AuthenticatedMeRouteImport.update({
   path: '/me',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedListSkillRoute = AuthenticatedListSkillRouteImport.update({
+  id: '/list-skill',
+  path: '/list-skill',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -233,6 +239,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRoute
   '/credits': typeof AuthenticatedCreditsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/list-skill': typeof AuthenticatedListSkillRoute
   '/me': typeof AuthenticatedMeRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/settings': typeof AuthenticatedSettingsRoute
@@ -267,6 +274,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminRoute
   '/credits': typeof AuthenticatedCreditsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/list-skill': typeof AuthenticatedListSkillRoute
   '/me': typeof AuthenticatedMeRoute
   '/notifications': typeof AuthenticatedNotificationsRoute
   '/settings': typeof AuthenticatedSettingsRoute
@@ -304,6 +312,7 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/credits': typeof AuthenticatedCreditsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/list-skill': typeof AuthenticatedListSkillRoute
   '/_authenticated/me': typeof AuthenticatedMeRoute
   '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
@@ -341,6 +350,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/credits'
     | '/dashboard'
+    | '/list-skill'
     | '/me'
     | '/notifications'
     | '/settings'
@@ -375,6 +385,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/credits'
     | '/dashboard'
+    | '/list-skill'
     | '/me'
     | '/notifications'
     | '/settings'
@@ -411,6 +422,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/_authenticated/credits'
     | '/_authenticated/dashboard'
+    | '/_authenticated/list-skill'
     | '/_authenticated/me'
     | '/_authenticated/notifications'
     | '/_authenticated/settings'
@@ -649,6 +661,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMeRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/list-skill': {
+      id: '/_authenticated/list-skill'
+      path: '/list-skill'
+      fullPath: '/list-skill'
+      preLoaderRoute: typeof AuthenticatedListSkillRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
       path: '/dashboard'
@@ -698,6 +717,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedCreditsRoute: typeof AuthenticatedCreditsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedListSkillRoute: typeof AuthenticatedListSkillRoute
   AuthenticatedMeRoute: typeof AuthenticatedMeRoute
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
@@ -710,6 +730,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedCreditsRoute: AuthenticatedCreditsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedListSkillRoute: AuthenticatedListSkillRoute,
   AuthenticatedMeRoute: AuthenticatedMeRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
