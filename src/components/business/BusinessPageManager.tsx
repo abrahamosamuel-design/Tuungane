@@ -6,7 +6,7 @@ import { BoostButton } from "@/components/BoostButton";
 import { AreaAutocomplete } from "@/components/AreaAutocomplete";
 import { MapPicker } from "@/components/MapPicker";
 import { findDistrictBounds, type Bounds } from "@/lib/geocoding";
-import { categories } from "@/data/categories";
+import { useCategories } from "@/hooks/use-categories";
 import { businessOrgTypes, slugify } from "@/data/businessTypes";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
