@@ -75,7 +75,7 @@ export function RequestServiceDialog({ open, onClose, providerId, providerName, 
     if (!form.service_needed.trim()) return toast.error("Tell us what service you need");
     if (!form.description.trim()) return toast.error("Add a short description");
     if (!form.location.trim()) return toast.error("Add a location");
-    if (!form.customer_phone.trim() && !form.customer_whatsapp.trim()) return toast.error("Add a phone or WhatsApp number");
+    if (!form.customer_phone.trim()) return toast.error("Add a phone number");
 
     setBusy(true);
     const payload = {
@@ -96,7 +96,7 @@ export function RequestServiceDialog({ open, onClose, providerId, providerName, 
       visibility: form.visibility,
       preferred_contact_method: form.preferred_contact_method,
       customer_phone: form.customer_phone || null,
-      customer_whatsapp: form.customer_whatsapp || null,
+      customer_whatsapp: null,
       attachment_url: form.attachment_url || null,
     };
     const { error } = await supabase.from("service_requests").insert(payload);
@@ -192,9 +192,8 @@ export function RequestServiceDialog({ open, onClose, providerId, providerName, 
             </div>
           </Field>
 
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-2">
             <Field label="Phone *"><input value={form.customer_phone} onChange={(e) => setForm({ ...form, customer_phone: e.target.value })} className={input} placeholder="+256…" /></Field>
-            <Field label="WhatsApp"><input value={form.customer_whatsapp} onChange={(e) => setForm({ ...form, customer_whatsapp: e.target.value })} className={input} placeholder="+256…" /></Field>
             <Field label="Preferred contact">
               <select value={form.preferred_contact_method} onChange={(e) => setForm({ ...form, preferred_contact_method: e.target.value as ContactMethodValue })} className={input}>
                 {contactMethods.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}

@@ -1,6 +1,6 @@
 import { createFileRoute, useParams, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { MapPin, Phone, BadgeCheck, Flag, Star, Share2, Camera, Users, ThumbsUp, MessageCircle, ClipboardList } from "lucide-react";
+import { MapPin, Phone, BadgeCheck, Flag, Star, Share2, Camera, Users, ThumbsUp, ClipboardList } from "lucide-react";
 import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
@@ -281,7 +281,7 @@ function UserProfile() {
                 <button onClick={() => setRevOpen(true)} className="rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-navy hover:border-orange">Review</button>
               </>
             )}
-            {!isOwn && isProvider && !gate.unlocked && (sp?.whatsapp || sp?.phone) && (
+            {!isOwn && isProvider && !gate.unlocked && sp?.phone && (
               <button onClick={() => setContactModalOpen(true)} className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-navy hover:border-orange">
                 <Lock className="h-3 w-3" /> Contact provider
               </button>
@@ -306,7 +306,6 @@ function UserProfile() {
                 providerId={id}
                 serviceRequestId={gate.requestId}
                 phone={sp?.phone ?? null}
-                whatsapp={sp?.whatsapp ?? null}
                 email={sp?.email ?? null}
               />
             </div>
@@ -380,8 +379,7 @@ function UserProfile() {
                     <div><dt className="text-muted-foreground">Status</dt><dd className="mt-0.5 font-medium capitalize text-navy">{sp.verified}</dd></div>
                   </dl>
                   <div className="mt-4 flex flex-wrap gap-2">
-                    {sp.whatsapp && <a href={`https://wa.me/${sp.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noreferrer" className="rounded-full bg-green px-4 py-2 text-xs font-semibold text-green-foreground">WhatsApp</a>}
-                    {sp.phone && <a href={`tel:${sp.phone}`} className="rounded-full bg-orange px-4 py-2 text-xs font-semibold text-orange-foreground">Call</a>}
+                    {sp.phone && <a href={`tel:${sp.phone}`} className="rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-navy hover:border-orange">Call</a>}
                   </div>
                 </div>
               )}
@@ -469,7 +467,7 @@ function UserProfile() {
                 {sp && <Row label="Experience" value={`${sp.years_experience} years`} />}
                 {sp && <Row label="Availability" value={sp.availability.replace(/_/g, " ")} />}
                 {sp?.phone && <Row label="Phone" value={sp.phone} />}
-                {sp?.whatsapp && <Row label="WhatsApp" value={sp.whatsapp} />}
+                
                 {sp?.email && <Row label="Email" value={sp.email} />}
                 {sp && <Row label="Verification" value={sp.verified} />}
               </dl>
@@ -488,7 +486,6 @@ function UserProfile() {
       {!isOwn && isProvider && (
         <MobileActionBar>
           <button onClick={() => { if (!user) { nav({ to: "/login", search: { tab: "login", redirect: `/u/${id}` } as never }); return; } setRequestOpen(true); }} className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-orange px-4 py-3 text-sm font-semibold text-orange-foreground"><ClipboardList className="h-4 w-4" /> Request service</button>
-          {sp?.whatsapp && <a href={`https://wa.me/${sp.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noreferrer" aria-label="WhatsApp" className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-green text-white"><MessageCircle className="h-5 w-5" /></a>}
           {sp?.phone && <a href={`tel:${sp.phone}`} aria-label="Call" className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-border text-navy"><Phone className="h-5 w-5" /></a>}
         </MobileActionBar>
       )}

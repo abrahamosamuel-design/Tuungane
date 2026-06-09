@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
-import { ArrowLeft, MapPin, Phone, MessageCircle, Loader2, Star, CheckCircle2, Copy, Send } from "lucide-react";
+import { ArrowLeft, MapPin, Phone, Loader2, Star, CheckCircle2, Copy, Send } from "lucide-react";
 import { Layout } from "@/components/Layout";
 import { Avatar } from "@/components/social/Avatar";
 import { StatusTracker } from "@/components/StatusTracker";
@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { SafetyNote, SAFETY_TIPS } from "@/components/SafetyNote";
 import { MobileActionBar } from "@/components/MobileActionBar";
 import { ContactOptionsUnlocked } from "@/components/ContactOptionsUnlocked";
+import { MessageButton } from "@/components/MessageButton";
 
 
 import { RouteErrorCard, RouteNotFoundCard } from "@/lib/route-boundaries";
@@ -209,7 +210,7 @@ function RequestDetailsPage() {
         <div className="mt-3"><SafetyNote>{SAFETY_TIPS.request}</SafetyNote></div>
 
         {/* Unlocked contact options — only for the customer, only after a provider is associated */}
-        {isCustomer && providerContact && (providerContact.phone || providerContact.whatsapp || providerContact.email) && (
+        {isCustomer && providerContact && (providerContact.phone || providerContact.email) && (
           (req.selected_provider_id || (req.provider_id && req.status !== "requested")) && (
             <div className="mt-4">
               <p className="mb-2 text-xs font-semibold text-navy">
@@ -220,7 +221,6 @@ function RequestDetailsPage() {
                 providerId={(req.selected_provider_id ?? req.provider_id) as string}
                 serviceRequestId={req.id}
                 phone={providerContact.phone}
-                whatsapp={providerContact.whatsapp}
                 email={providerContact.email}
               />
               <p className="mt-2 text-[11px] text-muted-foreground">After the service is completed, you'll be able to give verified feedback.</p>
@@ -246,7 +246,7 @@ function RequestDetailsPage() {
             ) : (
               <div className="mt-3 space-y-3">
                 {visibleResponses.map((r) => (
-                  <ResponseCard key={r.id} r={r} busy={busy} onChoose={() => chooseProvider(r)} onDecline={() => declineResponse(r)} />
+                  <ResponseCard key={r.id} r={r} serviceRequestId={req.id} busy={busy} onChoose={() => chooseProvider(r)} onDecline={() => declineResponse(r)} />
                 ))}
               </div>
             )}
@@ -320,7 +320,7 @@ function RequestDetailsPage() {
             <h2 className="font-display text-lg font-bold text-navy">Responses</h2>
             <div className="mt-3 space-y-3">
               {visibleResponses.map((r) => (
-                <ResponseCard key={r.id} r={r} busy={busy} showActions={false} />
+                <ResponseCard key={r.id} r={r} serviceRequestId={req.id} busy={busy} showActions={false} />
               ))}
             </div>
           </div>
@@ -364,7 +364,7 @@ function RequestDetailsPage() {
   );
 }
 
-function ResponseCard({ r, busy, onChoose, onDecline, showActions = true }: { r: ResponseWithProvider; busy: boolean; onChoose?: () => void; onDecline?: () => void; showActions?: boolean }) {
+function ResponseCard({ r, serviceRequestId, busy, onChoose, onDecline, showActions = true }: { r: ResponseWithProvider; serviceRequestId: string; busy: boolean; onChoose?: () => void; onDecline?: () => void; showActions?: boolean }) {
   const label = r.stats ? trustScoreLabel(r.stats.trust_score) : null;
   return (
     <div className={`rounded-2xl border p-4 ${r.status === "chosen" ? "border-green/40 bg-green/5" : r.status === "declined" ? "border-border bg-muted/30 opacity-70" : "border-border bg-card"}`}>
@@ -393,13 +393,18 @@ function ResponseCard({ r, busy, onChoose, onDecline, showActions = true }: { r:
             {r.availability_note && <span>{r.availability_note}</span>}
           </div>
 
-          {showActions && r.status !== "chosen" && r.status !== "declined" && (
-            <div className="mt-3 flex flex-wrap gap-2 text-xs">
-              {onChoose && <Btn onClick={onChoose} variant="primary">Choose provider</Btn>}
-              <Link to="/u/$id" params={{ id: r.provider_id }} className="rounded-full border border-border px-3 py-1 text-xs font-semibold text-navy hover:border-orange">View profile</Link>
-              {onDecline && <Btn onClick={onDecline}>Decline</Btn>}
-            </div>
-          )}
+          <div className="mt-3 flex flex-wrap gap-2 text-xs">
+            <MessageButton
+              serviceRequestId={serviceRequestId}
+              providerId={r.provider_id}
+              providerResponseId={r.id}
+              size="sm"
+              variant="primary"
+            />
+            {showActions && r.status !== "chosen" && r.status !== "declined" && onChoose && <Btn onClick={onChoose} variant="primary">Choose provider</Btn>}
+            <Link to="/u/$id" params={{ id: r.provider_id }} className="rounded-full border border-border px-3 py-1 text-xs font-semibold text-navy hover:border-orange">View profile</Link>
+            {showActions && r.status !== "chosen" && r.status !== "declined" && onDecline && <Btn onClick={onDecline}>Decline</Btn>}
+          </div>
         </div>
       </div>
     </div>

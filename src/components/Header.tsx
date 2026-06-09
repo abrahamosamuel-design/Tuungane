@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Menu, X, User as UserIcon, LogOut, LayoutDashboard, Shield, Rss, Wrench, ClipboardList, Coins, Building2, ChevronDown, Megaphone, Plus, Sparkles } from "lucide-react";
+import { Menu, X, User as UserIcon, LogOut, LayoutDashboard, Shield, Rss, Wrench, ClipboardList, Coins, Building2, ChevronDown, Megaphone, Plus, Sparkles, MessageSquare } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Logo } from "./Logo";
 import { NotificationsBell } from "./NotificationsBell";
@@ -67,6 +67,7 @@ export function Header() {
           {loading ? null : user ? (
             <>
             <CreditBalanceChip />
+            <MessagesIconLink />
             <NotificationsBell />
             <Link to={listSkillHref(user) as never} className="hidden lg:inline-flex items-center gap-1.5 rounded-full border border-green/40 bg-green/5 px-3 py-2 text-sm font-semibold text-green transition hover:bg-green/10">
               <Sparkles className="h-4 w-4" /> List Your Skill
@@ -83,6 +84,7 @@ export function Header() {
                   <div className="fixed inset-0 z-40" onClick={() => setMenu(false)} />
                   <div className="absolute right-0 z-50 mt-2 w-56 overflow-hidden rounded-xl border border-border bg-card shadow-lg">
                     <MenuItem to="/dashboard" icon={<LayoutDashboard className="h-4 w-4" />} label="My dashboard" onClick={() => setMenu(false)} />
+                    <MenuItem to="/messages" icon={<MessageSquare className="h-4 w-4" />} label="Messages" onClick={() => setMenu(false)} />
                     <MenuItem to="/requests" icon={<ClipboardList className="h-4 w-4" />} label="My Requests" onClick={() => setMenu(false)} />
                     <MenuItem to="/requests/new" icon={<Plus className="h-4 w-4" />} label="Create a Request" onClick={() => setMenu(false)} />
                     <MenuItem to={listSkillHref(user) as never} icon={<Sparkles className="h-4 w-4 text-green" />} label="List Your Skill" onClick={() => setMenu(false)} />
@@ -133,6 +135,7 @@ export function Header() {
               <>
                 <div className="my-2 border-t border-border" />
                 <p className="px-3 pt-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">My Account</p>
+                <CountedLink to="/messages" label="Messages" count={<MsgCount />} onClick={() => setOpen(false)} />
                 <CountedLink to="/notifications" label="Notifications" count={<NotifCount />} onClick={() => setOpen(false)} />
                 <CountedLink to="/requests" label="My Requests" count={<ActiveRequestsCount />} onClick={() => setOpen(false)} />
                 <Link to="/dashboard" onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-navy hover:bg-muted">My Dashboard</Link>
@@ -236,6 +239,45 @@ function ActiveRequestsCount() {
   }, [user?.id]);
   return <>{n}</>;
 }
+
+function useUnreadMessages() {
+  const { user } = useAuth();
+  const [n, setN] = useState(0);
+  useEffect(() => {
+    if (!user) { setN(0); return; }
+    let active = true;
+    const load = async () => {
+      const { data } = await supabase.rpc("get_unread_message_count");
+      if (active) setN((data as number) ?? 0);
+    };
+    load();
+    const ch = supabase.channel(`hdr-msgs-${user.id}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "conversations" }, load)
+      .subscribe();
+    return () => { active = false; supabase.removeChannel(ch); };
+  }, [user?.id]);
+  return n;
+}
+
+function MessagesIconLink() {
+  const n = useUnreadMessages();
+  return (
+    <Link to="/messages" aria-label="Messages" className="relative inline-flex h-9 w-9 items-center justify-center rounded-full text-navy hover:bg-muted">
+      <MessageSquare className="h-5 w-5" />
+      {n > 0 && (
+        <span className="absolute -right-0.5 -top-0.5 inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-orange px-1 text-[10px] font-bold text-orange-foreground">
+          {n > 99 ? "99+" : n}
+        </span>
+      )}
+    </Link>
+  );
+}
+
+function MsgCount() {
+  const n = useUnreadMessages();
+  return <>{n}</>;
+}
+
 
 
 

@@ -398,14 +398,9 @@ function NewRequest() {
             </Field>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Phone (optional)">
-              <input value={f.customer_phone} onChange={(e) => update("customer_phone", e.target.value)} className={inp} />
-            </Field>
-            <Field label="WhatsApp (optional)">
-              <input value={f.customer_whatsapp} onChange={(e) => update("customer_whatsapp", e.target.value)} className={inp} />
-            </Field>
-          </div>
+          <Field label="Phone (optional)">
+            <input value={f.customer_phone} onChange={(e) => update("customer_phone", e.target.value)} className={inp} />
+          </Field>
 
           <button
             disabled={busy}

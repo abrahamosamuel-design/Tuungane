@@ -78,7 +78,7 @@ export function ClaimProfileDialog({ serviceProfileUserId, open, onClose, onSubm
         <div className="mt-4 space-y-2">
           <Input label="Full name *" value={form.full_name} onChange={(v) => setForm({ ...form, full_name: v })} />
           <Input label="Phone number *" value={form.phone_number} onChange={(v) => setForm({ ...form, phone_number: v })} />
-          <Input label="WhatsApp number" value={form.whatsapp_number} onChange={(v) => setForm({ ...form, whatsapp_number: v })} />
+          
           <Input label="Email (optional)" value={form.email} onChange={(v) => setForm({ ...form, email: v })} />
           <div>
             <label className="text-xs font-medium text-navy">Relationship to the service/business *</label>

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import { Building2, BadgeCheck, MapPin, Phone, Mail, MessageCircle, Sparkles, Edit3, Users } from "lucide-react";
+import { Building2, BadgeCheck, MapPin, Phone, Mail, Sparkles, Edit3, Users } from "lucide-react";
 import { toast } from "sonner";
 import { orgTypeLabel } from "@/data/businessTypes";
 import { SafetyNote, SAFETY_TIPS } from "@/components/SafetyNote";
@@ -196,10 +196,9 @@ function BusinessDetail() {
               <h3 className="text-base font-bold text-navy">Contact</h3>
               <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
                 {page.contact_phone && <li className="flex items-center gap-2"><Phone className="h-4 w-4 text-orange" /> <a href={`tel:${page.contact_phone}`}>{page.contact_phone}</a></li>}
-                {page.whatsapp && <li className="flex items-center gap-2"><MessageCircle className="h-4 w-4 text-green" /> <a href={`https://wa.me/${page.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noreferrer">{page.whatsapp}</a></li>}
                 {page.email && <li className="flex items-center gap-2"><Mail className="h-4 w-4 text-navy" /> <a href={`mailto:${page.email}`}>{page.email}</a></li>}
                 {page.address && <li className="flex items-start gap-2"><MapPin className="h-4 w-4 text-orange" /> <span>{page.address}</span></li>}
-                {!page.contact_phone && !page.whatsapp && !page.email && <li>No contact info provided.</li>}
+                {!page.contact_phone && !page.email && <li>No contact info provided.</li>}
               </ul>
             </div>
             <SafetyNote>{SAFETY_TIPS.business}</SafetyNote>
@@ -239,9 +238,8 @@ function EditForm({ page, onSaved }: { page: BPage; onSaved: () => void }) {
     <div className="mt-4 space-y-3 rounded-xl border border-border bg-muted/30 p-4">
       <input className={inputCls} value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} placeholder="Name" />
       <textarea rows={3} className={inputCls} value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} placeholder="Description" />
-      <div className="grid gap-2 sm:grid-cols-3">
+      <div className="grid gap-2 sm:grid-cols-2">
         <input className={inputCls} value={f.contact_phone} onChange={(e) => setF({ ...f, contact_phone: e.target.value })} placeholder="Phone" />
-        <input className={inputCls} value={f.whatsapp} onChange={(e) => setF({ ...f, whatsapp: e.target.value })} placeholder="WhatsApp" />
         <input className={inputCls} value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} placeholder="Email" />
       </div>
       <div className="grid gap-2 sm:grid-cols-3">

@@ -22,7 +22,7 @@ export function ContactProviderModal({ open, onClose, providerName, onRequestSer
         </div>
         <p className="mt-3 text-sm text-foreground/80">
           To help Tuungane track service quality and protect users, please request the service first.
-          After submitting your request{providerName ? ` to ${providerName}` : ""}, you can call, WhatsApp, or message the provider.
+          After submitting your request{providerName ? ` to ${providerName}` : ""}, you can <strong>Message on Tuungane</strong>, and the provider's phone number may be shown depending on their contact preference.
         </p>
         <div className="mt-4 flex items-start gap-2 rounded-xl border border-border bg-surface p-3 text-xs text-muted-foreground">
           <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-green" />
