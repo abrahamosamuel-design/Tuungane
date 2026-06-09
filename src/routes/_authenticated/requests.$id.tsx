@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
-import { ArrowLeft, MapPin, Phone, MessageCircle, Loader2, Star, CheckCircle2, Copy, Send } from "lucide-react";
+import { ArrowLeft, MapPin, Phone, Loader2, Star, CheckCircle2, Copy, Send } from "lucide-react";
 import { Layout } from "@/components/Layout";
 import { Avatar } from "@/components/social/Avatar";
 import { StatusTracker } from "@/components/StatusTracker";
