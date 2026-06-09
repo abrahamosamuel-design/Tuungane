@@ -121,7 +121,7 @@ export function OfficialPostForm({ accountId, editing, onSaved }: { accountId: s
         <F label="Linked provider user ID"><input placeholder="uuid (optional)" value={form.linked_provider_id} onChange={(e) => setForm({ ...form, linked_provider_id: e.target.value })} className={input} /></F>
         <F label="Linked request ID"><input placeholder="uuid (optional)" value={form.linked_opportunity_id} onChange={(e) => setForm({ ...form, linked_opportunity_id: e.target.value })} className={input} /></F>
       </div>
-      <F label="Contact info"><input placeholder="e.g. WhatsApp +256 700 000 000" value={form.contact_info} onChange={(e) => setForm({ ...form, contact_info: e.target.value })} className={input} /></F>
+      <F label="Contact info"><input placeholder="e.g. +256 700 000 000" value={form.contact_info} onChange={(e) => setForm({ ...form, contact_info: e.target.value })} className={input} /></F>
       <F label="Safety note (optional)"><textarea rows={2} value={form.safety_note} onChange={(e) => setForm({ ...form, safety_note: e.target.value })} className={input} /></F>
       <div className="flex flex-wrap gap-4 text-sm">
         <label className="flex items-center gap-2"><input type="checkbox" checked={form.is_featured} onChange={(e) => setForm({ ...form, is_featured: e.target.checked })} /> Featured</label>
