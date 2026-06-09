@@ -44,6 +44,7 @@ import { Route as AuthenticatedDashboardRouteImport } from './routes/_authentica
 import { Route as AuthenticatedCreditsRouteImport } from './routes/_authenticated/credits'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedRequestsIndexRouteImport } from './routes/_authenticated/requests.index'
+import { Route as AuthenticatedMessagesIndexRouteImport } from './routes/_authenticated/messages.index'
 import { Route as AuthenticatedRequestsNewRouteImport } from './routes/_authenticated/requests.new'
 import { Route as AuthenticatedRequestsIdRouteImport } from './routes/_authenticated/requests.$id'
 
@@ -224,6 +225,12 @@ const AuthenticatedRequestsIndexRoute =
     path: '/requests/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedMessagesIndexRoute =
+  AuthenticatedMessagesIndexRouteImport.update({
+    id: '/messages/',
+    path: '/messages/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedRequestsNewRoute =
   AuthenticatedRequestsNewRouteImport.update({
     id: '/requests/new',
@@ -272,6 +279,7 @@ export interface FileRoutesByFullPath {
   '/services/': typeof ServicesIndexRoute
   '/requests/$id': typeof AuthenticatedRequestsIdRoute
   '/requests/new': typeof AuthenticatedRequestsNewRoute
+  '/messages/': typeof AuthenticatedMessagesIndexRoute
   '/requests/': typeof AuthenticatedRequestsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -309,6 +317,7 @@ export interface FileRoutesByTo {
   '/services': typeof ServicesIndexRoute
   '/requests/$id': typeof AuthenticatedRequestsIdRoute
   '/requests/new': typeof AuthenticatedRequestsNewRoute
+  '/messages': typeof AuthenticatedMessagesIndexRoute
   '/requests': typeof AuthenticatedRequestsIndexRoute
 }
 export interface FileRoutesById {
@@ -349,6 +358,7 @@ export interface FileRoutesById {
   '/services/': typeof ServicesIndexRoute
   '/_authenticated/requests/$id': typeof AuthenticatedRequestsIdRoute
   '/_authenticated/requests/new': typeof AuthenticatedRequestsNewRoute
+  '/_authenticated/messages/': typeof AuthenticatedMessagesIndexRoute
   '/_authenticated/requests/': typeof AuthenticatedRequestsIndexRoute
 }
 export interface FileRouteTypes {
@@ -389,6 +399,7 @@ export interface FileRouteTypes {
     | '/services/'
     | '/requests/$id'
     | '/requests/new'
+    | '/messages/'
     | '/requests/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -426,6 +437,7 @@ export interface FileRouteTypes {
     | '/services'
     | '/requests/$id'
     | '/requests/new'
+    | '/messages'
     | '/requests'
   id:
     | '__root__'
@@ -465,6 +477,7 @@ export interface FileRouteTypes {
     | '/services/'
     | '/_authenticated/requests/$id'
     | '/_authenticated/requests/new'
+    | '/_authenticated/messages/'
     | '/_authenticated/requests/'
   fileRoutesById: FileRoutesById
 }
@@ -739,6 +752,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRequestsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/messages/': {
+      id: '/_authenticated/messages/'
+      path: '/messages'
+      fullPath: '/messages/'
+      preLoaderRoute: typeof AuthenticatedMessagesIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/requests/new': {
       id: '/_authenticated/requests/new'
       path: '/requests/new'
@@ -766,6 +786,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedRequestsIdRoute: typeof AuthenticatedRequestsIdRoute
   AuthenticatedRequestsNewRoute: typeof AuthenticatedRequestsNewRoute
+  AuthenticatedMessagesIndexRoute: typeof AuthenticatedMessagesIndexRoute
   AuthenticatedRequestsIndexRoute: typeof AuthenticatedRequestsIndexRoute
 }
 
@@ -779,6 +800,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedRequestsIdRoute: AuthenticatedRequestsIdRoute,
   AuthenticatedRequestsNewRoute: AuthenticatedRequestsNewRoute,
+  AuthenticatedMessagesIndexRoute: AuthenticatedMessagesIndexRoute,
   AuthenticatedRequestsIndexRoute: AuthenticatedRequestsIndexRoute,
 }
 
