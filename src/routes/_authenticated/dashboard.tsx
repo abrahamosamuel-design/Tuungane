@@ -242,9 +242,8 @@ function ServiceProfileForm({ onSaved }: { onSaved: () => void }) {
         <Input label="District" value={district} onChange={setDistrict} required />
         <Input label="Town" value={town} onChange={setTown} required />
       </div>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-1 gap-2">
         <Input label="Phone" value={phone} onChange={setPhone} />
-        <Input label="WhatsApp" value={whatsapp} onChange={setWhatsapp} />
       </div>
       <button disabled={busy} className="rounded-xl bg-orange px-4 py-2.5 text-sm font-semibold text-orange-foreground disabled:opacity-50">{busy ? "Saving…" : "Save profile"}</button>
     </form>
