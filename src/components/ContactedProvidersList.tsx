@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Phone, MessageCircle, Mail, Users } from "lucide-react";
+import { Phone, MessageSquare, Mail, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { timeAgo } from "@/lib/format";
@@ -14,7 +14,7 @@ type Row = {
 };
 
 const methodIcon = (m: string) => {
-  if (m === "whatsapp") return <MessageCircle className="h-3 w-3" />;
+  if (m === "in_app") return <MessageSquare className="h-3 w-3" />;
   if (m === "call" || m === "phone") return <Phone className="h-3 w-3" />;
   if (m === "email") return <Mail className="h-3 w-3" />;
   return null;
