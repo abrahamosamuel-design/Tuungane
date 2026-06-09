@@ -380,8 +380,7 @@ function UserProfile() {
                     <div><dt className="text-muted-foreground">Status</dt><dd className="mt-0.5 font-medium capitalize text-navy">{sp.verified}</dd></div>
                   </dl>
                   <div className="mt-4 flex flex-wrap gap-2">
-                    {sp.whatsapp && <a href={`https://wa.me/${sp.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noreferrer" className="rounded-full bg-green px-4 py-2 text-xs font-semibold text-green-foreground">WhatsApp</a>}
-                    {sp.phone && <a href={`tel:${sp.phone}`} className="rounded-full bg-orange px-4 py-2 text-xs font-semibold text-orange-foreground">Call</a>}
+                    {sp.phone && <a href={`tel:${sp.phone}`} className="rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-navy hover:border-orange">Call</a>}
                   </div>
                 </div>
               )}
