@@ -306,7 +306,6 @@ function UserProfile() {
                 providerId={id}
                 serviceRequestId={gate.requestId}
                 phone={sp?.phone ?? null}
-                whatsapp={sp?.whatsapp ?? null}
                 email={sp?.email ?? null}
               />
             </div>
