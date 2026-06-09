@@ -221,7 +221,6 @@ function RequestDetailsPage() {
                 providerId={(req.selected_provider_id ?? req.provider_id) as string}
                 serviceRequestId={req.id}
                 phone={providerContact.phone}
-                whatsapp={providerContact.whatsapp}
                 email={providerContact.email}
               />
               <p className="mt-2 text-[11px] text-muted-foreground">After the service is completed, you'll be able to give verified feedback.</p>
