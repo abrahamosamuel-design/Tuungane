@@ -349,3 +349,58 @@ function LocationSection() {
     </Section>
   );
 }
+
+function ProviderContactPolicySection() {
+  const { user } = useAuth();
+  const [policy, setPolicy] = useState<"after_request" | "after_accept" | "after_selected" | "never">("after_request");
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { data } = await supabase
+        .from("provider_privacy_settings")
+        .select("contact_reveal_policy")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      if (data?.contact_reveal_policy) setPolicy(data.contact_reveal_policy as typeof policy);
+      setLoaded(true);
+    })();
+  }, [user?.id]);
+
+  const save = async (next: typeof policy) => {
+    if (!user) return;
+    setPolicy(next);
+    const { error } = await supabase
+      .from("provider_privacy_settings")
+      .upsert({ user_id: user.id, contact_reveal_policy: next }, { onConflict: "user_id" });
+    if (error) toast.error(error.message);
+    else toast.success("Contact preference saved");
+  };
+
+  if (!loaded) return null;
+
+  const options: { value: typeof policy; label: string; hint: string }[] = [
+    { value: "after_request", label: "After I respond to a request", hint: "Default — phone shown to a customer once you've responded to their request." },
+    { value: "after_selected", label: "Only after the customer selects me", hint: "Phone shown only when the customer chooses you." },
+    { value: "never", label: "Use Tuungane messages only", hint: "Phone never shown. Customers can only reach you via Tuungane messages." },
+  ];
+
+  return (
+    <Section title="Provider contact preferences">
+      <p className="text-xs text-muted-foreground">Tuungane Messages help protect both customers and providers. Choose when (if ever) your phone number is shown.</p>
+      <div className="space-y-2">
+        {options.map((o) => (
+          <label key={o.value} className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3 ${policy === o.value ? "border-orange bg-orange/5" : "border-border bg-background"}`}>
+            <input type="radio" name="contact_reveal_policy" checked={policy === o.value} onChange={() => save(o.value)} className="mt-1 h-4 w-4 accent-orange" />
+            <div>
+              <p className="text-sm font-semibold text-navy">{o.label}</p>
+              <p className="text-xs text-muted-foreground">{o.hint}</p>
+            </div>
+          </label>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
