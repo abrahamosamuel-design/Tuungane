@@ -281,7 +281,7 @@ function UserProfile() {
                 <button onClick={() => setRevOpen(true)} className="rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-navy hover:border-orange">Review</button>
               </>
             )}
-            {!isOwn && isProvider && !gate.unlocked && (sp?.whatsapp || sp?.phone) && (
+            {!isOwn && isProvider && !gate.unlocked && sp?.phone && (
               <button onClick={() => setContactModalOpen(true)} className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-navy hover:border-orange">
                 <Lock className="h-3 w-3" /> Contact provider
               </button>
