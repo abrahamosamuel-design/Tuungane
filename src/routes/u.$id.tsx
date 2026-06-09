@@ -468,7 +468,7 @@ function UserProfile() {
                 {sp && <Row label="Experience" value={`${sp.years_experience} years`} />}
                 {sp && <Row label="Availability" value={sp.availability.replace(/_/g, " ")} />}
                 {sp?.phone && <Row label="Phone" value={sp.phone} />}
-                {sp?.whatsapp && <Row label="WhatsApp" value={sp.whatsapp} />}
+                
                 {sp?.email && <Row label="Email" value={sp.email} />}
                 {sp && <Row label="Verification" value={sp.verified} />}
               </dl>
