@@ -135,6 +135,7 @@ export function Header() {
               <>
                 <div className="my-2 border-t border-border" />
                 <p className="px-3 pt-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">My Account</p>
+                <CountedLink to="/messages" label="Messages" count={<MsgCount />} onClick={() => setOpen(false)} />
                 <CountedLink to="/notifications" label="Notifications" count={<NotifCount />} onClick={() => setOpen(false)} />
                 <CountedLink to="/requests" label="My Requests" count={<ActiveRequestsCount />} onClick={() => setOpen(false)} />
                 <Link to="/dashboard" onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-navy hover:bg-muted">My Dashboard</Link>
