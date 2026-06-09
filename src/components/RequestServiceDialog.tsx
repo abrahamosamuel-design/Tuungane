@@ -75,7 +75,7 @@ export function RequestServiceDialog({ open, onClose, providerId, providerName, 
     if (!form.service_needed.trim()) return toast.error("Tell us what service you need");
     if (!form.description.trim()) return toast.error("Add a short description");
     if (!form.location.trim()) return toast.error("Add a location");
-    if (!form.customer_phone.trim() && !form.customer_whatsapp.trim()) return toast.error("Add a phone or WhatsApp number");
+    if (!form.customer_phone.trim()) return toast.error("Add a phone number");
 
     setBusy(true);
     const payload = {
