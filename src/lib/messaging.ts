@@ -9,11 +9,12 @@ export async function startOrGetConversation(opts: {
   providerId: string;
   providerResponseId?: string | null;
 }): Promise<string> {
-  const { data, error } = await supabase.rpc("start_or_get_conversation", {
+  const args: { _service_request_id: string; _provider_id: string; _provider_response_id?: string } = {
     _service_request_id: opts.serviceRequestId,
     _provider_id: opts.providerId,
-    _provider_response_id: opts.providerResponseId ?? null,
-  });
+  };
+  if (opts.providerResponseId) args._provider_response_id = opts.providerResponseId;
+  const { data, error } = await supabase.rpc("start_or_get_conversation", args);
   if (error) throw error;
   return data as unknown as string;
 }
