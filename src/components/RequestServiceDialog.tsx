@@ -192,9 +192,8 @@ export function RequestServiceDialog({ open, onClose, providerId, providerName, 
             </div>
           </Field>
 
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid gap-3 sm:grid-cols-2">
             <Field label="Phone *"><input value={form.customer_phone} onChange={(e) => setForm({ ...form, customer_phone: e.target.value })} className={input} placeholder="+256…" /></Field>
-            <Field label="WhatsApp"><input value={form.customer_whatsapp} onChange={(e) => setForm({ ...form, customer_whatsapp: e.target.value })} className={input} placeholder="+256…" /></Field>
             <Field label="Preferred contact">
               <select value={form.preferred_contact_method} onChange={(e) => setForm({ ...form, preferred_contact_method: e.target.value as ContactMethodValue })} className={input}>
                 {contactMethods.map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}
