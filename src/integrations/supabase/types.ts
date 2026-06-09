@@ -338,6 +338,66 @@ export type Database = {
         }
         Relationships: []
       }
+      conversations: {
+        Row: {
+          created_at: string
+          customer_id: string
+          customer_unread_count: number
+          id: string
+          last_message_at: string
+          last_message_preview: string | null
+          provider_id: string
+          provider_response_id: string | null
+          provider_unread_count: number
+          service_request_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          customer_unread_count?: number
+          id?: string
+          last_message_at?: string
+          last_message_preview?: string | null
+          provider_id: string
+          provider_response_id?: string | null
+          provider_unread_count?: number
+          service_request_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          customer_unread_count?: number
+          id?: string
+          last_message_at?: string
+          last_message_preview?: string | null
+          provider_id?: string
+          provider_response_id?: string | null
+          provider_unread_count?: number
+          service_request_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_provider_response_id_fkey"
+            columns: ["provider_response_id"]
+            isOneToOne: false
+            referencedRelation: "provider_responses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_service_request_id_fkey"
+            columns: ["service_request_id"]
+            isOneToOne: false
+            referencedRelation: "service_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       credit_packages: {
         Row: {
           active: boolean
@@ -553,6 +613,47 @@ export type Database = {
           provider_user_id?: string
         }
         Relationships: []
+      }
+      messages: {
+        Row: {
+          attachment_url: string | null
+          body: string
+          conversation_id: string
+          created_at: string
+          id: string
+          is_read: boolean
+          receiver_id: string
+          sender_id: string
+        }
+        Insert: {
+          attachment_url?: string | null
+          body: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          receiver_id: string
+          sender_id: string
+        }
+        Update: {
+          attachment_url?: string | null
+          body?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          receiver_id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notifications: {
         Row: {
@@ -1837,6 +1938,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_blocks: {
+        Row: {
+          blocked_id: string
+          blocker_id: string
+          created_at: string
+          reason: string | null
+        }
+        Insert: {
+          blocked_id: string
+          blocker_id: string
+          created_at?: string
+          reason?: string | null
+        }
+        Update: {
+          blocked_id?: string
+          blocker_id?: string
+          created_at?: string
+          reason?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -2052,6 +2174,7 @@ export type Database = {
           whatsapp_number: string
         }[]
       }
+      get_unread_message_count: { Args: never; Returns: number }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -2067,6 +2190,10 @@ export type Database = {
           _target_type: string
           _target_user_id: string
         }
+        Returns: undefined
+      }
+      mark_conversation_read: {
+        Args: { _conversation_id: string }
         Returns: undefined
       }
       matching_requests_for_provider: {
@@ -2177,6 +2304,14 @@ export type Database = {
           _reason: string
           _tx_type: string
           _user_id: string
+        }
+        Returns: string
+      }
+      start_or_get_conversation: {
+        Args: {
+          _provider_id: string
+          _provider_response_id?: string
+          _service_request_id: string
         }
         Returns: string
       }
