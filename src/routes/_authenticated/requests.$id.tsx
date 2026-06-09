@@ -365,7 +365,7 @@ function RequestDetailsPage() {
   );
 }
 
-function ResponseCard({ r, busy, onChoose, onDecline, showActions = true }: { r: ResponseWithProvider; busy: boolean; onChoose?: () => void; onDecline?: () => void; showActions?: boolean }) {
+function ResponseCard({ r, serviceRequestId, busy, onChoose, onDecline, showActions = true }: { r: ResponseWithProvider; serviceRequestId: string; busy: boolean; onChoose?: () => void; onDecline?: () => void; showActions?: boolean }) {
   const label = r.stats ? trustScoreLabel(r.stats.trust_score) : null;
   return (
     <div className={`rounded-2xl border p-4 ${r.status === "chosen" ? "border-green/40 bg-green/5" : r.status === "declined" ? "border-border bg-muted/30 opacity-70" : "border-border bg-card"}`}>
