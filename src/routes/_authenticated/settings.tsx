@@ -108,10 +108,12 @@ function SettingsPage() {
 
         <Section title="Privacy & contact">
           <Toggle label="Show phone number" checked={privacy.showPhone} onChange={(v) => persist({ privacy: { ...privacy, showPhone: v } })} />
-          <Toggle label="Allow WhatsApp contact" checked={privacy.whatsapp} onChange={(v) => persist({ privacy: { ...privacy, whatsapp: v } })} />
           <Toggle label="Allow phone calls" checked={privacy.calls} onChange={(v) => persist({ privacy: { ...privacy, calls: v } })} />
-          <Toggle label="Use platform chat only" checked={privacy.chatOnly} onChange={(v) => persist({ privacy: { ...privacy, chatOnly: v } })} />
+          <Toggle label="Use Tuungane messages only" checked={privacy.chatOnly} onChange={(v) => persist({ privacy: { ...privacy, chatOnly: v } })} />
+          <p className="text-[11px] text-muted-foreground">For safety, tracking, and verified reviews, Tuungane recommends keeping communication on the platform.</p>
         </Section>
+
+        {isProvider && <ProviderContactPolicySection />}
 
         {isProvider && (
           <Section title="Provider settings">
