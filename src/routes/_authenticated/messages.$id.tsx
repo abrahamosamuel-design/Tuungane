@@ -208,5 +208,3 @@ function ConversationPage() {
   );
 }
 
-// Re-export Phone to silence unused-import linter while keeping the import for future use.
-export { Phone as _Phone };
