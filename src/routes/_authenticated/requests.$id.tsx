@@ -394,13 +394,18 @@ function ResponseCard({ r, serviceRequestId, busy, onChoose, onDecline, showActi
             {r.availability_note && <span>{r.availability_note}</span>}
           </div>
 
-          {showActions && r.status !== "chosen" && r.status !== "declined" && (
-            <div className="mt-3 flex flex-wrap gap-2 text-xs">
-              {onChoose && <Btn onClick={onChoose} variant="primary">Choose provider</Btn>}
-              <Link to="/u/$id" params={{ id: r.provider_id }} className="rounded-full border border-border px-3 py-1 text-xs font-semibold text-navy hover:border-orange">View profile</Link>
-              {onDecline && <Btn onClick={onDecline}>Decline</Btn>}
-            </div>
-          )}
+          <div className="mt-3 flex flex-wrap gap-2 text-xs">
+            <MessageButton
+              serviceRequestId={serviceRequestId}
+              providerId={r.provider_id}
+              providerResponseId={r.id}
+              size="sm"
+              variant="primary"
+            />
+            {showActions && r.status !== "chosen" && r.status !== "declined" && onChoose && <Btn onClick={onChoose} variant="primary">Choose provider</Btn>}
+            <Link to="/u/$id" params={{ id: r.provider_id }} className="rounded-full border border-border px-3 py-1 text-xs font-semibold text-navy hover:border-orange">View profile</Link>
+            {showActions && r.status !== "chosen" && r.status !== "declined" && onDecline && <Btn onClick={onDecline}>Decline</Btn>}
+          </div>
         </div>
       </div>
     </div>
