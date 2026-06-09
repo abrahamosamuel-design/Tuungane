@@ -238,9 +238,8 @@ function EditForm({ page, onSaved }: { page: BPage; onSaved: () => void }) {
     <div className="mt-4 space-y-3 rounded-xl border border-border bg-muted/30 p-4">
       <input className={inputCls} value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} placeholder="Name" />
       <textarea rows={3} className={inputCls} value={f.description} onChange={(e) => setF({ ...f, description: e.target.value })} placeholder="Description" />
-      <div className="grid gap-2 sm:grid-cols-3">
+      <div className="grid gap-2 sm:grid-cols-2">
         <input className={inputCls} value={f.contact_phone} onChange={(e) => setF({ ...f, contact_phone: e.target.value })} placeholder="Phone" />
-        <input className={inputCls} value={f.whatsapp} onChange={(e) => setF({ ...f, whatsapp: e.target.value })} placeholder="WhatsApp" />
         <input className={inputCls} value={f.email} onChange={(e) => setF({ ...f, email: e.target.value })} placeholder="Email" />
       </div>
       <div className="grid gap-2 sm:grid-cols-3">
