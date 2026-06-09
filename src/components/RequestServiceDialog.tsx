@@ -96,7 +96,7 @@ export function RequestServiceDialog({ open, onClose, providerId, providerName, 
       visibility: form.visibility,
       preferred_contact_method: form.preferred_contact_method,
       customer_phone: form.customer_phone || null,
-      customer_whatsapp: form.customer_whatsapp || null,
+      customer_whatsapp: null,
       attachment_url: form.attachment_url || null,
     };
     const { error } = await supabase.from("service_requests").insert(payload);
