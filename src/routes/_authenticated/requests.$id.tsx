@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { SafetyNote, SAFETY_TIPS } from "@/components/SafetyNote";
 import { MobileActionBar } from "@/components/MobileActionBar";
 import { ContactOptionsUnlocked } from "@/components/ContactOptionsUnlocked";
+import { MessageButton } from "@/components/MessageButton";
 
 
 import { RouteErrorCard, RouteNotFoundCard } from "@/lib/route-boundaries";
