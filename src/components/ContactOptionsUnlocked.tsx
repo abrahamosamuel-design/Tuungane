@@ -1,76 +1,99 @@
-import { Phone, MessageCircle, Mail, ShieldCheck } from "lucide-react";
+import { Phone, ShieldCheck } from "lucide-react";
 import { logContactClick, logContactReveal } from "@/hooks/use-contact-gate";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { MessageButton } from "./MessageButton";
 
 interface Props {
   customerId: string;
   providerId: string;
   serviceRequestId: string;
   phone?: string | null;
+  /** Kept in the type for compatibility; the WhatsApp surface has been removed. */
   whatsapp?: string | null;
   email?: string | null;
+  providerResponseId?: string | null;
 }
 
 /**
- * Unlocked contact actions shown only after a tracked service_request exists
+ * Contact options shown only after a tracked service_request exists
  * between the current customer and the provider.
+ *
+ * Primary action: "Message on Tuungane".
+ * Secondary action: "Call / View Number" — only revealed when the customer
+ * explicitly opts to view the phone number.
  */
-export function ContactOptionsUnlocked({ customerId, providerId, serviceRequestId, phone, whatsapp, email }: Props) {
+export function ContactOptionsUnlocked({
+  customerId,
+  providerId,
+  serviceRequestId,
+  phone,
+  email: _email,
+  providerResponseId,
+}: Props) {
   const loggedRef = useRef(false);
+  const [revealed, setRevealed] = useState(false);
+
   useEffect(() => {
     if (loggedRef.current) return;
     loggedRef.current = true;
     logContactReveal({
       customerId, providerId, serviceRequestId,
       revealedPhone: phone ?? null,
-      revealedWhatsapp: whatsapp ?? null,
+      revealedWhatsapp: null,
       reason: "request_unlocked",
     });
-  }, [customerId, providerId, serviceRequestId, phone, whatsapp]);
+  }, [customerId, providerId, serviceRequestId, phone]);
 
-  const onClick = (method: "whatsapp" | "call" | "in_app") => {
-    logContactClick({ customerId, providerId, serviceRequestId, method });
+  const revealPhone = () => {
+    if (!phone) return;
+    setRevealed(true);
+    logContactClick({ customerId, providerId, serviceRequestId, method: "call" });
   };
 
   return (
     <div className="rounded-2xl border border-green/30 bg-green/5 p-4">
       <div className="flex items-center gap-2 text-green">
         <ShieldCheck className="h-4 w-4" />
-        <p className="text-xs font-semibold uppercase tracking-wide">Contact options unlocked — tracked by Tuungane</p>
+        <p className="text-xs font-semibold uppercase tracking-wide">Tracked by Tuungane</p>
       </div>
       <p className="mt-1 text-xs text-foreground/70">
-        Please agree on details, pricing, timing, and safety before work begins. After completion you'll be invited to leave a verified service review.
+        For safety, tracking, and verified reviews, we recommend keeping communication on Tuungane.
+        Phone contact is available as a backup.
       </p>
-      <div className="mt-3 flex flex-wrap gap-2">
-        {whatsapp && (
-          <a
-            href={`https://wa.me/${whatsapp.replace(/\D/g, "")}`}
-            target="_blank" rel="noreferrer"
-            onClick={() => onClick("whatsapp")}
-            className="inline-flex items-center gap-1.5 rounded-full bg-green px-4 py-2 text-xs font-semibold text-green-foreground hover:brightness-110"
+
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <MessageButton
+          serviceRequestId={serviceRequestId}
+          providerId={providerId}
+          providerResponseId={providerResponseId}
+          variant="primary"
+        />
+
+        {phone && !revealed && (
+          <button
+            onClick={revealPhone}
+            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-semibold text-navy hover:border-orange"
           >
-            <MessageCircle className="h-3.5 w-3.5" /> WhatsApp Provider
-          </a>
+            <Phone className="h-3.5 w-3.5" /> Call / View number
+          </button>
         )}
-        {phone && (
+
+        {phone && revealed && (
           <a
             href={`tel:${phone}`}
-            onClick={() => onClick("call")}
-            className="inline-flex items-center gap-1.5 rounded-full bg-orange px-4 py-2 text-xs font-semibold text-orange-foreground hover:brightness-110"
+            onClick={() => logContactClick({ customerId, providerId, serviceRequestId, method: "call" })}
+            className="inline-flex items-center gap-1.5 rounded-full border border-orange/40 bg-orange/5 px-3 py-1.5 text-xs font-semibold text-orange hover:bg-orange/10"
           >
-            <Phone className="h-3.5 w-3.5" /> Call Provider
-          </a>
-        )}
-        {email && (
-          <a
-            href={`mailto:${email}`}
-            onClick={() => onClick("in_app")}
-            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-navy hover:border-orange"
-          >
-            <Mail className="h-3.5 w-3.5" /> Email
+            <Phone className="h-3.5 w-3.5" /> {phone}
           </a>
         )}
       </div>
+
+      {phone && revealed && (
+        <p className="mt-2 text-[11px] text-muted-foreground">
+          For safety, tracking, and verified reviews, we recommend keeping communication on Tuungane.
+        </p>
+      )}
     </div>
   );
 }
