@@ -140,8 +140,7 @@ function ListSkillPage() {
           {step === 3 && (
             <>
               <Field label="Phone (optional)"><input value={phone} onChange={(e) => setPhone(e.target.value)} className="input" /></Field>
-              <Field label="WhatsApp (optional)"><input value={whatsapp} onChange={(e) => setWhatsapp(e.target.value)} className="input" /></Field>
-              <p className="text-xs text-muted-foreground">Your contact details are only revealed to customers who actively contact you.</p>
+              <p className="text-xs text-muted-foreground">Customers reach you through Tuungane Messages. Your phone number is only revealed based on your contact preference in settings.</p>
               <div className="flex items-center justify-between pt-2">
                 <button type="button" onClick={() => setStep(2)} className="text-sm font-medium text-muted-foreground">Back</button>
                 <button disabled={busy} className="rounded-xl bg-green px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50">{busy ? "Publishing…" : "Publish my skill"}</button>
