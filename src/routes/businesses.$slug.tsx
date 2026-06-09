@@ -196,10 +196,9 @@ function BusinessDetail() {
               <h3 className="text-base font-bold text-navy">Contact</h3>
               <ul className="mt-3 space-y-2 text-sm text-muted-foreground">
                 {page.contact_phone && <li className="flex items-center gap-2"><Phone className="h-4 w-4 text-orange" /> <a href={`tel:${page.contact_phone}`}>{page.contact_phone}</a></li>}
-                {page.whatsapp && <li className="flex items-center gap-2"><MessageCircle className="h-4 w-4 text-green" /> <a href={`https://wa.me/${page.whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noreferrer">{page.whatsapp}</a></li>}
                 {page.email && <li className="flex items-center gap-2"><Mail className="h-4 w-4 text-navy" /> <a href={`mailto:${page.email}`}>{page.email}</a></li>}
                 {page.address && <li className="flex items-start gap-2"><MapPin className="h-4 w-4 text-orange" /> <span>{page.address}</span></li>}
-                {!page.contact_phone && !page.whatsapp && !page.email && <li>No contact info provided.</li>}
+                {!page.contact_phone && !page.email && <li>No contact info provided.</li>}
               </ul>
             </div>
             <SafetyNote>{SAFETY_TIPS.business}</SafetyNote>
