@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import { ArrowLeft, Send, ShieldCheck, Flag, Ban, Loader2, Phone } from "lucide-react";
+import { ArrowLeft, Send, ShieldCheck, Flag, Ban, Loader2 } from "lucide-react";
 import { Avatar } from "@/components/social/Avatar";
 import { toast } from "sonner";
 import { markConversationRead } from "@/lib/messaging";

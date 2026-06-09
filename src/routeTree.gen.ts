@@ -47,6 +47,7 @@ import { Route as AuthenticatedRequestsIndexRouteImport } from './routes/_authen
 import { Route as AuthenticatedMessagesIndexRouteImport } from './routes/_authenticated/messages.index'
 import { Route as AuthenticatedRequestsNewRouteImport } from './routes/_authenticated/requests.new'
 import { Route as AuthenticatedRequestsIdRouteImport } from './routes/_authenticated/requests.$id'
+import { Route as AuthenticatedMessagesIdRouteImport } from './routes/_authenticated/messages.$id'
 
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
@@ -242,6 +243,11 @@ const AuthenticatedRequestsIdRoute = AuthenticatedRequestsIdRouteImport.update({
   path: '/requests/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedMessagesIdRoute = AuthenticatedMessagesIdRouteImport.update({
+  id: '/messages/$id',
+  path: '/messages/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -277,6 +283,7 @@ export interface FileRoutesByFullPath {
   '/u/$id': typeof UIdRoute
   '/businesses/': typeof BusinessesIndexRoute
   '/services/': typeof ServicesIndexRoute
+  '/messages/$id': typeof AuthenticatedMessagesIdRoute
   '/requests/$id': typeof AuthenticatedRequestsIdRoute
   '/requests/new': typeof AuthenticatedRequestsNewRoute
   '/messages/': typeof AuthenticatedMessagesIndexRoute
@@ -315,6 +322,7 @@ export interface FileRoutesByTo {
   '/u/$id': typeof UIdRoute
   '/businesses': typeof BusinessesIndexRoute
   '/services': typeof ServicesIndexRoute
+  '/messages/$id': typeof AuthenticatedMessagesIdRoute
   '/requests/$id': typeof AuthenticatedRequestsIdRoute
   '/requests/new': typeof AuthenticatedRequestsNewRoute
   '/messages': typeof AuthenticatedMessagesIndexRoute
@@ -356,6 +364,7 @@ export interface FileRoutesById {
   '/u/$id': typeof UIdRoute
   '/businesses/': typeof BusinessesIndexRoute
   '/services/': typeof ServicesIndexRoute
+  '/_authenticated/messages/$id': typeof AuthenticatedMessagesIdRoute
   '/_authenticated/requests/$id': typeof AuthenticatedRequestsIdRoute
   '/_authenticated/requests/new': typeof AuthenticatedRequestsNewRoute
   '/_authenticated/messages/': typeof AuthenticatedMessagesIndexRoute
@@ -397,6 +406,7 @@ export interface FileRouteTypes {
     | '/u/$id'
     | '/businesses/'
     | '/services/'
+    | '/messages/$id'
     | '/requests/$id'
     | '/requests/new'
     | '/messages/'
@@ -435,6 +445,7 @@ export interface FileRouteTypes {
     | '/u/$id'
     | '/businesses'
     | '/services'
+    | '/messages/$id'
     | '/requests/$id'
     | '/requests/new'
     | '/messages'
@@ -475,6 +486,7 @@ export interface FileRouteTypes {
     | '/u/$id'
     | '/businesses/'
     | '/services/'
+    | '/_authenticated/messages/$id'
     | '/_authenticated/requests/$id'
     | '/_authenticated/requests/new'
     | '/_authenticated/messages/'
@@ -773,6 +785,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRequestsIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/messages/$id': {
+      id: '/_authenticated/messages/$id'
+      path: '/messages/$id'
+      fullPath: '/messages/$id'
+      preLoaderRoute: typeof AuthenticatedMessagesIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -784,6 +803,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedMeRoute: typeof AuthenticatedMeRoute
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedMessagesIdRoute: typeof AuthenticatedMessagesIdRoute
   AuthenticatedRequestsIdRoute: typeof AuthenticatedRequestsIdRoute
   AuthenticatedRequestsNewRoute: typeof AuthenticatedRequestsNewRoute
   AuthenticatedMessagesIndexRoute: typeof AuthenticatedMessagesIndexRoute
@@ -798,6 +818,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMeRoute: AuthenticatedMeRoute,
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedMessagesIdRoute: AuthenticatedMessagesIdRoute,
   AuthenticatedRequestsIdRoute: AuthenticatedRequestsIdRoute,
   AuthenticatedRequestsNewRoute: AuthenticatedRequestsNewRoute,
   AuthenticatedMessagesIndexRoute: AuthenticatedMessagesIndexRoute,
