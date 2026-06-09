@@ -84,6 +84,7 @@ export function Header() {
                   <div className="fixed inset-0 z-40" onClick={() => setMenu(false)} />
                   <div className="absolute right-0 z-50 mt-2 w-56 overflow-hidden rounded-xl border border-border bg-card shadow-lg">
                     <MenuItem to="/dashboard" icon={<LayoutDashboard className="h-4 w-4" />} label="My dashboard" onClick={() => setMenu(false)} />
+                    <MenuItem to="/messages" icon={<MessageSquare className="h-4 w-4" />} label="Messages" onClick={() => setMenu(false)} />
                     <MenuItem to="/requests" icon={<ClipboardList className="h-4 w-4" />} label="My Requests" onClick={() => setMenu(false)} />
                     <MenuItem to="/requests/new" icon={<Plus className="h-4 w-4" />} label="Create a Request" onClick={() => setMenu(false)} />
                     <MenuItem to={listSkillHref(user) as never} icon={<Sparkles className="h-4 w-4 text-green" />} label="List Your Skill" onClick={() => setMenu(false)} />
