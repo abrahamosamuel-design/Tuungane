@@ -210,7 +210,7 @@ function RequestDetailsPage() {
         <div className="mt-3"><SafetyNote>{SAFETY_TIPS.request}</SafetyNote></div>
 
         {/* Unlocked contact options — only for the customer, only after a provider is associated */}
-        {isCustomer && providerContact && (providerContact.phone || providerContact.whatsapp || providerContact.email) && (
+        {isCustomer && providerContact && (providerContact.phone || providerContact.email) && (
           (req.selected_provider_id || (req.provider_id && req.status !== "requested")) && (
             <div className="mt-4">
               <p className="mb-2 text-xs font-semibold text-navy">
