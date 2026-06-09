@@ -67,6 +67,7 @@ export function Header() {
           {loading ? null : user ? (
             <>
             <CreditBalanceChip />
+            <MessagesIconLink />
             <NotificationsBell />
             <Link to={listSkillHref(user) as never} className="hidden lg:inline-flex items-center gap-1.5 rounded-full border border-green/40 bg-green/5 px-3 py-2 text-sm font-semibold text-green transition hover:bg-green/10">
               <Sparkles className="h-4 w-4" /> List Your Skill
