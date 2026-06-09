@@ -240,5 +240,44 @@ function ActiveRequestsCount() {
   return <>{n}</>;
 }
 
+function useUnreadMessages() {
+  const { user } = useAuth();
+  const [n, setN] = useState(0);
+  useEffect(() => {
+    if (!user) { setN(0); return; }
+    let active = true;
+    const load = async () => {
+      const { data } = await supabase.rpc("get_unread_message_count");
+      if (active) setN((data as number) ?? 0);
+    };
+    load();
+    const ch = supabase.channel(`hdr-msgs-${user.id}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "conversations" }, load)
+      .subscribe();
+    return () => { active = false; supabase.removeChannel(ch); };
+  }, [user?.id]);
+  return n;
+}
+
+function MessagesIconLink() {
+  const n = useUnreadMessages();
+  return (
+    <Link to="/messages" aria-label="Messages" className="relative inline-flex h-9 w-9 items-center justify-center rounded-full text-navy hover:bg-muted">
+      <MessageSquare className="h-5 w-5" />
+      {n > 0 && (
+        <span className="absolute -right-0.5 -top-0.5 inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-orange px-1 text-[10px] font-bold text-orange-foreground">
+          {n > 99 ? "99+" : n}
+        </span>
+      )}
+    </Link>
+  );
+}
+
+function MsgCount() {
+  const n = useUnreadMessages();
+  return <>{n}</>;
+}
+
+
 
 
