@@ -238,9 +238,8 @@ export function BusinessPageCreateForm() {
           <Field label="Area"><input value={form.area} onChange={(e) => set("area", e.target.value)} className="input" /></Field>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Contact phone"><input value={form.contact_phone} onChange={(e) => set("contact_phone", e.target.value)} className="input" placeholder="07…" /></Field>
-          <Field label="WhatsApp number"><input value={form.whatsapp} onChange={(e) => set("whatsapp", e.target.value)} className="input" placeholder="07…" /></Field>
           <Field label="Email, optional"><input type="email" value={form.email} onChange={(e) => set("email", e.target.value)} className="input" /></Field>
         </div>
 
