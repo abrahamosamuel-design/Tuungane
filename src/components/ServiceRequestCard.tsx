@@ -72,9 +72,8 @@ export function ServiceRequestCard({ r, viewerRole, onStatus, onFeedback, onDisp
 
           {viewerRole === "provider" && (
             <div className="mt-2 flex flex-wrap gap-2 text-xs">
-              <span className="rounded-full bg-muted px-2 py-0.5">Prefers: {r.preferred_contact_method}</span>
+              <span className="rounded-full bg-muted px-2 py-0.5">Prefers: Tuungane messages</span>
               {r.customer_phone && <a href={`tel:${r.customer_phone}`} className="inline-flex items-center gap-1 rounded-full bg-orange/10 px-2 py-1 font-semibold text-orange"><Phone className="h-3 w-3" /> {r.customer_phone}</a>}
-              {r.customer_whatsapp && <a href={`https://wa.me/${r.customer_whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-full bg-green/10 px-2 py-1 font-semibold text-green"><Phone className="h-3 w-3" /> WhatsApp</a>}
             </div>
           )}
 
