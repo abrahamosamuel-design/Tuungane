@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import { Building2, BadgeCheck, MapPin, Phone, Mail, MessageCircle, Sparkles, Edit3, Users } from "lucide-react";
+import { Building2, BadgeCheck, MapPin, Phone, Mail, Sparkles, Edit3, Users } from "lucide-react";
 import { toast } from "sonner";
 import { orgTypeLabel } from "@/data/businessTypes";
 import { SafetyNote, SAFETY_TIPS } from "@/components/SafetyNote";
