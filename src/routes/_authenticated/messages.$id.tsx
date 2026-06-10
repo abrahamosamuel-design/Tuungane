@@ -60,7 +60,7 @@ function ConversationPage() {
       const otherId = c.customer_id === user.id ? c.provider_id : c.customer_id;
       const [{ data: prof }, { data: r }, { data: msgs }] = await Promise.all([
         supabase.from("profiles").select("id,full_name,avatar_url").eq("id", otherId).maybeSingle(),
-        supabase.from("service_requests").select("id,service_needed,title,status").eq("id", c.service_request_id).maybeSingle(),
+        supabase.from("service_requests").select("id,service_needed,title,status,location,budget_range,selected_provider_id,urgent_flag,urgency").eq("id", c.service_request_id).maybeSingle(),
         supabase.from("messages").select("id,conversation_id,sender_id,receiver_id,body,created_at,is_read").eq("conversation_id", id).order("created_at", { ascending: true }),
       ]);
       if (!active) return;
