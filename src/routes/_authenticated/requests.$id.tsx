@@ -34,6 +34,7 @@ type ResponseWithProvider = ProviderResponseRow & { provider?: Profile; stats?: 
 
 function RequestDetailsPage() {
   const { id } = Route.useParams();
+  const search = Route.useSearch();
   const { user, loading } = useAuth();
   const nav = useNavigate();
   const [req, setReq] = useState<ServiceRequestRow | null>(null);
