@@ -54,46 +54,44 @@ export function ContactOptionsUnlocked({
     <div className="rounded-2xl border border-green/30 bg-green/5 p-4">
       <div className="flex items-center gap-2 text-green">
         <ShieldCheck className="h-4 w-4" />
-        <p className="text-xs font-semibold uppercase tracking-wide">Tracked by Tuungane</p>
+        <p className="text-xs font-semibold uppercase tracking-wide">You have two ways to contact</p>
       </div>
       <p className="mt-1 text-xs text-foreground/70">
-        For safety, tracking, and verified reviews, we recommend keeping communication on Tuungane.
-        Phone contact is available as a backup.
+        For safety and verified reviews, keep key service details on Tuungane.
       </p>
 
-      <div className="mt-3 flex flex-wrap items-center gap-2">
+      <div className="mt-3 grid gap-2 sm:grid-cols-2">
         <MessageButton
           serviceRequestId={serviceRequestId}
           providerId={providerId}
           providerResponseId={providerResponseId}
           variant="primary"
+          className="w-full"
         />
 
-        {phone && !revealed && (
-          <button
-            onClick={revealPhone}
-            className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-semibold text-navy hover:border-orange"
-          >
-            <Phone className="h-3.5 w-3.5" /> Call / View number
-          </button>
-        )}
-
-        {phone && revealed && (
-          <a
-            href={`tel:${phone}`}
-            onClick={() => logContactClick({ customerId, providerId, serviceRequestId, method: "call" })}
-            className="inline-flex items-center gap-1.5 rounded-full border border-orange/40 bg-orange/5 px-3 py-1.5 text-xs font-semibold text-orange hover:bg-orange/10"
-          >
-            <Phone className="h-3.5 w-3.5" /> {phone}
-          </a>
+        {phone ? (
+          !revealed ? (
+            <button
+              onClick={revealPhone}
+              className="inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-orange/40 bg-card px-4 py-2 text-sm font-semibold text-orange hover:bg-orange/5"
+            >
+              <Phone className="h-4 w-4" /> Call / View Number
+            </button>
+          ) : (
+            <a
+              href={`tel:${phone}`}
+              onClick={() => logContactClick({ customerId, providerId, serviceRequestId, method: "call" })}
+              className="inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-orange/40 bg-orange/5 px-4 py-2 text-sm font-semibold text-orange hover:bg-orange/10"
+            >
+              <Phone className="h-4 w-4" /> {phone}
+            </a>
+          )
+        ) : (
+          <div className="inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-dashed border-border px-4 py-2 text-xs text-muted-foreground">
+            Phone not shared yet
+          </div>
         )}
       </div>
-
-      {phone && revealed && (
-        <p className="mt-2 text-[11px] text-muted-foreground">
-          For safety, tracking, and verified reviews, we recommend keeping communication on Tuungane.
-        </p>
-      )}
     </div>
   );
 }
