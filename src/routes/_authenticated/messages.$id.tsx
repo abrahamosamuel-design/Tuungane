@@ -157,10 +157,55 @@ function ConversationPage() {
           <button onClick={blockOther} aria-label="Block" className="rounded-full p-2 text-muted-foreground hover:text-destructive"><Ban className="h-4 w-4" /></button>
         </div>
 
+        {/* Request summary card — keeps messaging tied to the service request */}
+        {req && (
+          <div className="mx-4 mt-3 rounded-xl border border-border bg-card p-3">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-bold uppercase text-navy">{req.status.replace("_", " ")}</span>
+                  {(req.urgent_flag || req.urgency === "urgent" || req.urgency === "today") && (
+                    <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-bold uppercase text-destructive">Urgent</span>
+                  )}
+                </div>
+                <p className="mt-1 truncate text-sm font-semibold text-navy">{req.title || req.service_needed}</p>
+                <div className="mt-1 flex flex-wrap items-center gap-3 text-[11px] text-muted-foreground">
+                  {req.location && <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" /> {req.location}</span>}
+                  {req.budget_range && <span>Budget: {req.budget_range}</span>}
+                  <span>With: {other?.full_name ?? "User"}</span>
+                </div>
+              </div>
+              <Link to="/requests/$id" params={{ id: req.id }} className="inline-flex shrink-0 items-center gap-1 rounded-full border border-border bg-background px-3 py-1.5 text-xs font-semibold text-navy hover:border-orange">
+                <ExternalLink className="h-3 w-3" /> View
+              </Link>
+            </div>
+
+            {/* Next-step shortcuts (link into request page where actions execute) */}
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {conv.customer_id === user.id && req.status === "requested" && (
+                <Link to="/requests/$id" params={{ id: req.id }} className="rounded-full bg-orange px-3 py-1 text-[11px] font-semibold text-orange-foreground hover:brightness-110">Select provider</Link>
+              )}
+              {conv.provider_id === user.id && req.status === "accepted" && (
+                <Link to="/requests/$id" params={{ id: req.id }} className="rounded-full bg-orange px-3 py-1 text-[11px] font-semibold text-orange-foreground hover:brightness-110">
+                  <CheckCircle2 className="mr-1 inline h-3 w-3" /> Mark in progress
+                </Link>
+              )}
+              {req.status === "in_progress" && (
+                <Link to="/requests/$id" params={{ id: req.id }} className="rounded-full bg-orange px-3 py-1 text-[11px] font-semibold text-orange-foreground hover:brightness-110">Complete service</Link>
+              )}
+              {conv.customer_id === user.id && req.status === "completed" && (
+                <Link to="/requests/$id" params={{ id: req.id }} className="rounded-full bg-orange px-3 py-1 text-[11px] font-semibold text-orange-foreground hover:brightness-110">
+                  <Star className="mr-1 inline h-3 w-3" /> Leave review
+                </Link>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Trust note */}
-        <div className="mx-4 mt-3 flex items-start gap-2 rounded-xl border border-green/30 bg-green/5 p-3 text-[11px] text-foreground/80">
+        <div className="mx-4 mt-2 flex items-start gap-2 rounded-xl border border-green/30 bg-green/5 p-2.5 text-[11px] text-foreground/80">
           <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-green" />
-          <p>Phone contact is available, but Tuungane recommends keeping important service details inside the platform for safety and verified reviews.</p>
+          <p>For safety and verified reviews, keep key service details on Tuungane.</p>
         </div>
 
         {/* Thread */}
