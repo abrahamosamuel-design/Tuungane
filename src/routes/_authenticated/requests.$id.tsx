@@ -403,8 +403,10 @@ function RequestDetailsPage() {
   );
 }
 
-function ResponseCard({ r, serviceRequestId, busy, onChoose, onDecline, showActions = true }: { r: ResponseWithProvider; serviceRequestId: string; busy: boolean; onChoose?: () => void; onDecline?: () => void; showActions?: boolean }) {
+function ResponseCard({ r, serviceRequestId, busy: _busy, onChoose, onDecline, showActions = true, phone = null, urgent = false, customerId }: { r: ResponseWithProvider; serviceRequestId: string; busy: boolean; onChoose?: () => void; onDecline?: () => void; showActions?: boolean; phone?: string | null; urgent?: boolean; customerId?: string }) {
   const label = r.stats ? trustScoreLabel(r.stats.trust_score) : null;
+  const [revealPhone, setRevealPhone] = useState(false);
+  const canShowPhone = !!phone && r.status === "chosen";
   return (
     <div className={`rounded-2xl border p-4 ${r.status === "chosen" ? "border-green/40 bg-green/5" : r.status === "declined" ? "border-border bg-muted/30 opacity-70" : "border-border bg-card"}`}>
       <div className="flex items-start gap-3">
@@ -417,6 +419,7 @@ function ResponseCard({ r, serviceRequestId, busy, onChoose, onDecline, showActi
             {label && <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${label.color}`}>{label.label}</span>}
             {r.status === "chosen" && <span className="rounded-full bg-green/10 px-2 py-0.5 text-[10px] font-bold uppercase text-green">Chosen</span>}
             {r.status === "declined" && <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold uppercase text-slate-600">Declined</span>}
+            {urgent && r.status === "chosen" && <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-bold uppercase text-destructive">Urgent</span>}
           </div>
           {r.stats && (
             <div className="mt-1 flex flex-wrap gap-3 text-[11px] text-muted-foreground">
@@ -432,7 +435,7 @@ function ResponseCard({ r, serviceRequestId, busy, onChoose, onDecline, showActi
             {r.availability_note && <span>{r.availability_note}</span>}
           </div>
 
-          <div className="mt-3 flex flex-wrap gap-2 text-xs">
+          <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
             <MessageButton
               serviceRequestId={serviceRequestId}
               providerId={r.provider_id}
@@ -440,10 +443,23 @@ function ResponseCard({ r, serviceRequestId, busy, onChoose, onDecline, showActi
               size="sm"
               variant="primary"
             />
+            {canShowPhone && !revealPhone && (
+              <button onClick={() => { setRevealPhone(true); if (customerId) logContactClick({ customerId, providerId: r.provider_id, serviceRequestId, method: "call" }); }} className="inline-flex items-center gap-1 rounded-full border border-orange/40 bg-card px-3 py-1.5 text-xs font-semibold text-orange hover:bg-orange/5">
+                <Phone className="h-3 w-3" /> Call / View Number
+              </button>
+            )}
+            {canShowPhone && revealPhone && phone && (
+              <a href={`tel:${phone}`} className="inline-flex items-center gap-1 rounded-full border border-orange/40 bg-orange/5 px-3 py-1.5 text-xs font-semibold text-orange hover:bg-orange/10">
+                <Phone className="h-3 w-3" /> {phone}
+              </a>
+            )}
             {showActions && r.status !== "chosen" && r.status !== "declined" && onChoose && <Btn onClick={onChoose} variant="primary">Choose provider</Btn>}
             <Link to="/u/$id" params={{ id: r.provider_id }} className="rounded-full border border-border px-3 py-1 text-xs font-semibold text-navy hover:border-orange">View profile</Link>
             {showActions && r.status !== "chosen" && r.status !== "declined" && onDecline && <Btn onClick={onDecline}>Decline</Btn>}
           </div>
+          {canShowPhone && (
+            <p className="mt-2 text-[11px] text-muted-foreground">For safety and verified reviews, keep key service details on Tuungane.</p>
+          )}
         </div>
       </div>
     </div>
