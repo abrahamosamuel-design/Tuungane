@@ -213,6 +213,41 @@ function RequestDetailsPage() {
 
         <div className="mt-3"><SafetyNote>{SAFETY_TIPS.request}</SafetyNote></div>
 
+        {/* Post-create success banner */}
+        {isCustomer && search.posted === "1" && (
+          <div className="mt-3 rounded-2xl border border-green/40 bg-green/5 p-4">
+            <p className="font-display text-base font-bold text-green">Your request has been posted ✓</p>
+            <p className="mt-1 text-xs text-foreground/80">
+              Providers can now respond. You can message providers on Tuungane or call them when contact is available.
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <Link to="/requests" className="rounded-full bg-orange px-3 py-1.5 text-xs font-semibold text-orange-foreground">View my requests</Link>
+              <Link to="/requests/browse" className="rounded-full border border-border bg-card px-3 py-1.5 text-xs font-semibold text-navy hover:border-orange">Find providers near me</Link>
+            </div>
+          </div>
+        )}
+
+        {/* Customer step guide */}
+        {isCustomer && req.status !== "completed" && req.status !== "cancelled" && req.status !== "disputed" && (
+          <div className="mt-3 rounded-2xl border border-border bg-card p-4">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">How this works</p>
+            <ol className="mt-2 grid grid-cols-1 gap-2 text-xs text-foreground/85 sm:grid-cols-2">
+              {[
+                "Review provider responses",
+                "Message or call providers",
+                "Select the best provider",
+                "Complete and review the service",
+              ].map((step, i) => (
+                <li key={i} className="flex items-start gap-2 rounded-lg bg-muted/40 px-2.5 py-2">
+                  <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-orange text-[10px] font-bold text-orange-foreground">{i + 1}</span>
+                  <span>{step}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
+
+
         {/* Unlocked contact options — only for the customer, only after a provider is associated */}
         {isCustomer && providerContact && (providerContact.phone || providerContact.email) && (
           (req.selected_provider_id || (req.provider_id && req.status !== "requested")) && (
