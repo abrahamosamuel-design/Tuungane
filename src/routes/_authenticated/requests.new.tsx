@@ -134,7 +134,7 @@ function NewRequest() {
 
     const targetedProvider = search.providerId || null;
 
-    const { error } = await supabase.from("service_requests").insert({
+    const { data: inserted, error } = await supabase.from("service_requests").insert({
       customer_id: user.id,
       provider_id: targetedProvider,
       category_slug: f.category_slug,
@@ -157,14 +157,18 @@ function NewRequest() {
       customer_whatsapp: f.customer_whatsapp || null,
       attachment_url,
       status: "requested",
-    });
+    }).select("id").single();
     setBusy(false);
     if (error) {
       toast.error(error.message);
       return;
     }
     toast.success("Request posted");
-    nav({ to: "/requests" });
+    if (inserted?.id) {
+      nav({ to: "/requests/$id", params: { id: inserted.id }, search: { posted: "1" } as never });
+    } else {
+      nav({ to: "/requests" });
+    }
   };
 
   if (loading) {
