@@ -285,7 +285,7 @@ function RequestDetailsPage() {
             ) : (
               <div className="mt-3 space-y-3">
                 {visibleResponses.map((r) => (
-                  <ResponseCard key={r.id} r={r} serviceRequestId={req.id} busy={busy} onChoose={() => chooseProvider(r)} onDecline={() => declineResponse(r)} phone={null} urgent={req.urgent_flag || req.urgency === "urgent" || req.urgency === "today"} />
+                  <ResponseCard key={r.id} r={r} serviceRequestId={req.id} busy={busy} onChoose={() => chooseProvider(r)} onDecline={() => declineResponse(r)} phone={null} urgent={!!req.urgent_flag || req.urgency === "emergency"} />
                 ))}
               </div>
             )}
