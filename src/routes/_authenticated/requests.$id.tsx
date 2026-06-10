@@ -15,6 +15,7 @@ import { SafetyNote, SAFETY_TIPS } from "@/components/SafetyNote";
 import { MobileActionBar } from "@/components/MobileActionBar";
 import { ContactOptionsUnlocked } from "@/components/ContactOptionsUnlocked";
 import { MessageButton } from "@/components/MessageButton";
+import { logContactClick } from "@/hooks/use-contact-gate";
 
 
 import { RouteErrorCard, RouteNotFoundCard } from "@/lib/route-boundaries";
