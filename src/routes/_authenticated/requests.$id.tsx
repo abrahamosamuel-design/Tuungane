@@ -359,7 +359,7 @@ function RequestDetailsPage() {
             <h2 className="font-display text-lg font-bold text-navy">Responses</h2>
             <div className="mt-3 space-y-3">
               {visibleResponses.map((r) => (
-                <ResponseCard key={r.id} r={r} serviceRequestId={req.id} busy={busy} showActions={false} />
+                <ResponseCard key={r.id} r={r} serviceRequestId={req.id} busy={busy} showActions={false} phone={r.status === "chosen" ? (providerContact?.phone ?? null) : null} urgent={!!req.urgent_flag || req.urgency === "emergency"} customerId={user.id} />
               ))}
             </div>
           </div>
