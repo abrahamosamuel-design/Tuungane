@@ -20,6 +20,9 @@ import { MessageButton } from "@/components/MessageButton";
 import { RouteErrorCard, RouteNotFoundCard } from "@/lib/route-boundaries";
 
 export const Route = createFileRoute("/_authenticated/requests/$id")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    posted: search.posted === "1" || search.posted === 1 ? "1" : undefined,
+  }),
   head: () => ({ meta: [{ title: "Service request — Tuungane" }] }),
   component: RequestDetailsPage,
   errorComponent: ({ error, reset }) => <RouteErrorCard error={error} reset={reset} title="Couldn't load this request" />,
