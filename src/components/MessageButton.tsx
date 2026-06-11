@@ -4,6 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
 import { startOrGetConversation } from "@/lib/messaging";
+import { logContactClick } from "@/hooks/use-contact-gate";
 
 interface Props {
   serviceRequestId: string;
@@ -48,6 +49,12 @@ export function MessageButton({
         providerId,
         providerResponseId: providerResponseId ?? null,
       });
+      logContactClick({
+        customerId: user.id,
+        providerId,
+        serviceRequestId,
+        method: "message",
+      }).catch(() => {});
       navigate({ to: "/messages/$id", params: { id } });
     } catch (e: unknown) {
       const msg = (e as { message?: string })?.message ?? "Could not open conversation";

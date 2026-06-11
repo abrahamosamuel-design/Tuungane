@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Activity, Phone, MessageCircle, Mail, Eye, AlertTriangle, Settings as SettingsIcon, Download } from "lucide-react";
+import { Activity, Phone, MessageCircle, Mail, Eye, AlertTriangle, Settings as SettingsIcon, Download, MessageSquare } from "lucide-react";
 import { timeAgo } from "@/lib/format";
 
 const STATUSES = ["requested", "accepted", "in_progress", "completed", "cancelled", "disputed"] as const;
@@ -17,6 +17,7 @@ interface LogRow {
   contact_method: string;
   clicked_at: string;
   request_status: ServiceRequestStatus;
+  is_urgent: boolean;
 }
 
 type RevealRow = { id: string; customer_id: string; provider_id: string; service_request_id: string; reveal_reason: string | null; created_at: string };
@@ -70,6 +71,7 @@ export function ContactAnalyticsTab() {
       service_job_id: string | null;
       contact_method: string;
       clicked_at: string;
+      is_urgent: boolean;
       service_requests: { status: ServiceRequestStatus };
     }>;
     const ll: LogRow[] = raw.map((x) => ({
@@ -81,6 +83,7 @@ export function ContactAnalyticsTab() {
       contact_method: x.contact_method,
       clicked_at: x.clicked_at,
       request_status: x.service_requests.status,
+      is_urgent: x.is_urgent,
     }));
     const rr = (r.data ?? []) as RevealRow[];
     setLogs(ll);
@@ -117,6 +120,8 @@ export function ContactAnalyticsTab() {
     const uniqueCustomers = new Set(filteredLogs.map((l) => l.customer_id)).size;
     const jobLinked = filteredLogs.filter((l) => l.service_job_id !== null).length;
     const jobNull = filteredLogs.filter((l) => l.service_job_id === null).length;
+    const urgentClicks = filteredLogs.filter((l) => l.is_urgent).length;
+    const nonUrgentClicks = filteredLogs.length - urgentClicks;
     // suspicious: customers contacting many providers
     const perCust = new Map<string, Set<string>>();
     for (const l of filteredLogs) {
@@ -128,7 +133,7 @@ export function ContactAnalyticsTab() {
       .map(([cid, s]) => ({ customer_id: cid, providers: s.size }))
       .sort((a, b) => b.providers - a.providers)
       .slice(0, 10);
-    return { byMethod, byStatus, uniqueProviders, uniqueCustomers, suspicious, jobLinked, jobNull };
+    return { byMethod, byStatus, uniqueProviders, uniqueCustomers, suspicious, jobLinked, jobNull, urgentClicks, nonUrgentClicks };
   }, [filteredLogs]);
 
   const saveSettings = async () => {
@@ -144,7 +149,7 @@ export function ContactAnalyticsTab() {
     else { toast.success("Contact visibility settings saved"); load(); }
   };
 
-  const methodIcon = (m: string) => m === "whatsapp" ? <MessageCircle className="h-3 w-3" /> : m === "email" ? <Mail className="h-3 w-3" /> : <Phone className="h-3 w-3" />;
+  const methodIcon = (m: string) => m === "whatsapp" ? <MessageCircle className="h-3 w-3" /> : m === "email" ? <Mail className="h-3 w-3" /> : m === "message" ? <MessageSquare className="h-3 w-3" /> : <Phone className="h-3 w-3" />;
 
   const exportCSV = () => {
     if (filteredLogs.length === 0) { toast.info("No data to export"); return; }
@@ -237,13 +242,15 @@ export function ContactAnalyticsTab() {
             <Card label="Total contact clicks" value={filteredLogs.length} />
             <Card label="Unique customers" value={stats.uniqueCustomers} />
             <Card label="Unique providers" value={stats.uniqueProviders} />
-            <Card label="Contact reveals" value={reveals.length} />
-            <Card label="WhatsApp clicks" value={stats.byMethod.get("whatsapp") ?? 0} />
+            <Card label="Message clicks" value={stats.byMethod.get("message") ?? 0} />
+            <Card label="Call clicks" value={stats.byMethod.get("call") ?? 0} />
           </div>
 
           <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
             <Card label="Job linked" value={stats.jobLinked} />
             <Card label="Job unlinked" value={stats.jobNull} />
+            <Card label="Urgent clicks" value={stats.urgentClicks} />
+            <Card label="Non-urgent clicks" value={stats.nonUrgentClicks} />
           </div>
 
           <div>
@@ -263,6 +270,14 @@ export function ContactAnalyticsTab() {
                 <span key={s} className="inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1 text-xs font-semibold capitalize text-navy">{s.replace("_", " ")} · {n}</span>
               ))}
               {stats.byStatus.size === 0 && <span className="text-xs text-muted-foreground">No data in this view.</span>}
+            </div>
+          </div>
+
+          <div>
+            <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">Urgent vs non-urgent</h3>
+            <div className="flex flex-wrap gap-2">
+              <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-3 py-1 text-xs font-semibold text-destructive">Urgent · {stats.urgentClicks}</span>
+              <span className="inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1 text-xs font-semibold text-navy">Non-urgent · {stats.nonUrgentClicks}</span>
             </div>
           </div>
 
