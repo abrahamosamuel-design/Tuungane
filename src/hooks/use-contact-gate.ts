@@ -47,7 +47,7 @@ export async function logContactClick(args: {
   customerId: string;
   providerId: string;
   serviceRequestId: string;
-  method: "whatsapp" | "call" | "in_app";
+  method: "whatsapp" | "call" | "in_app" | "message";
 }) {
   try {
     // If the request has progressed beyond "requested" it counts as an active job.
