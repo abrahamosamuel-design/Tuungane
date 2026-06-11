@@ -71,6 +71,7 @@ export function ContactAnalyticsTab() {
       service_job_id: string | null;
       contact_method: string;
       clicked_at: string;
+      is_urgent: boolean;
       service_requests: { status: ServiceRequestStatus };
     }>;
     const ll: LogRow[] = raw.map((x) => ({
@@ -82,6 +83,7 @@ export function ContactAnalyticsTab() {
       contact_method: x.contact_method,
       clicked_at: x.clicked_at,
       request_status: x.service_requests.status,
+      is_urgent: x.is_urgent,
     }));
     const rr = (r.data ?? []) as RevealRow[];
     setLogs(ll);
