@@ -120,6 +120,8 @@ export function ContactAnalyticsTab() {
     const uniqueCustomers = new Set(filteredLogs.map((l) => l.customer_id)).size;
     const jobLinked = filteredLogs.filter((l) => l.service_job_id !== null).length;
     const jobNull = filteredLogs.filter((l) => l.service_job_id === null).length;
+    const urgentClicks = filteredLogs.filter((l) => l.is_urgent).length;
+    const nonUrgentClicks = filteredLogs.length - urgentClicks;
     // suspicious: customers contacting many providers
     const perCust = new Map<string, Set<string>>();
     for (const l of filteredLogs) {
@@ -131,7 +133,7 @@ export function ContactAnalyticsTab() {
       .map(([cid, s]) => ({ customer_id: cid, providers: s.size }))
       .sort((a, b) => b.providers - a.providers)
       .slice(0, 10);
-    return { byMethod, byStatus, uniqueProviders, uniqueCustomers, suspicious, jobLinked, jobNull };
+    return { byMethod, byStatus, uniqueProviders, uniqueCustomers, suspicious, jobLinked, jobNull, urgentClicks, nonUrgentClicks };
   }, [filteredLogs]);
 
   const saveSettings = async () => {
