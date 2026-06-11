@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Activity, Phone, MessageCircle, Mail, Eye, AlertTriangle, Settings as SettingsIcon, Download } from "lucide-react";
+import { Activity, Phone, MessageCircle, Mail, Eye, AlertTriangle, Settings as SettingsIcon, Download, MessageSquare } from "lucide-react";
 import { timeAgo } from "@/lib/format";
 
 const STATUSES = ["requested", "accepted", "in_progress", "completed", "cancelled", "disputed"] as const;
@@ -17,6 +17,7 @@ interface LogRow {
   contact_method: string;
   clicked_at: string;
   request_status: ServiceRequestStatus;
+  is_urgent: boolean;
 }
 
 type RevealRow = { id: string; customer_id: string; provider_id: string; service_request_id: string; reveal_reason: string | null; created_at: string };
