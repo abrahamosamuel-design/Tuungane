@@ -274,6 +274,14 @@ export function ContactAnalyticsTab() {
           </div>
 
           <div>
+            <h3 className="mb-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground">Urgent vs non-urgent</h3>
+            <div className="flex flex-wrap gap-2">
+              <span className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-3 py-1 text-xs font-semibold text-destructive">Urgent · {stats.urgentClicks}</span>
+              <span className="inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1 text-xs font-semibold text-navy">Non-urgent · {stats.nonUrgentClicks}</span>
+            </div>
+          </div>
+
+          <div>
             <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-muted-foreground"><AlertTriangle className="h-3 w-3" /> Suspicious patterns</h3>
             {stats.suspicious.length === 0 && <p className="text-xs text-muted-foreground">No customers contacting 5+ providers detected.</p>}
             <div className="space-y-1">
