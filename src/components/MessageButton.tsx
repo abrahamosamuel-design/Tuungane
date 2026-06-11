@@ -4,6 +4,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
 import { startOrGetConversation } from "@/lib/messaging";
+import { logContactClick } from "@/hooks/use-contact-gate";
 
 interface Props {
   serviceRequestId: string;
