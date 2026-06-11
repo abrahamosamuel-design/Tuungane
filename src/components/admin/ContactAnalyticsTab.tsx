@@ -149,7 +149,7 @@ export function ContactAnalyticsTab() {
     else { toast.success("Contact visibility settings saved"); load(); }
   };
 
-  const methodIcon = (m: string) => m === "whatsapp" ? <MessageCircle className="h-3 w-3" /> : m === "email" ? <Mail className="h-3 w-3" /> : <Phone className="h-3 w-3" />;
+  const methodIcon = (m: string) => m === "whatsapp" ? <MessageCircle className="h-3 w-3" /> : m === "email" ? <Mail className="h-3 w-3" /> : m === "message" ? <MessageSquare className="h-3 w-3" /> : <Phone className="h-3 w-3" />;
 
   const exportCSV = () => {
     if (filteredLogs.length === 0) { toast.info("No data to export"); return; }
@@ -242,13 +242,15 @@ export function ContactAnalyticsTab() {
             <Card label="Total contact clicks" value={filteredLogs.length} />
             <Card label="Unique customers" value={stats.uniqueCustomers} />
             <Card label="Unique providers" value={stats.uniqueProviders} />
-            <Card label="Contact reveals" value={reveals.length} />
-            <Card label="WhatsApp clicks" value={stats.byMethod.get("whatsapp") ?? 0} />
+            <Card label="Message clicks" value={stats.byMethod.get("message") ?? 0} />
+            <Card label="Call clicks" value={stats.byMethod.get("call") ?? 0} />
           </div>
 
           <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
             <Card label="Job linked" value={stats.jobLinked} />
             <Card label="Job unlinked" value={stats.jobNull} />
+            <Card label="Urgent clicks" value={stats.urgentClicks} />
+            <Card label="Non-urgent clicks" value={stats.nonUrgentClicks} />
           </div>
 
           <div>
