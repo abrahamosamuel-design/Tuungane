@@ -276,6 +276,7 @@ export type Database = {
           created_at: string
           customer_id: string
           id: string
+          is_urgent: boolean
           provider_id: string
           service_job_id: string | null
           service_request_id: string
@@ -287,6 +288,7 @@ export type Database = {
           created_at?: string
           customer_id: string
           id?: string
+          is_urgent?: boolean
           provider_id: string
           service_job_id?: string | null
           service_request_id: string
@@ -298,6 +300,7 @@ export type Database = {
           created_at?: string
           customer_id?: string
           id?: string
+          is_urgent?: boolean
           provider_id?: string
           service_job_id?: string | null
           service_request_id?: string

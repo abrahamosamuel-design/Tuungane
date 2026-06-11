@@ -1,0 +1,1 @@
+ALTER TABLE public.contact_logs ADD COLUMN is_urgent BOOLEAN NOT NULL DEFAULT false;
