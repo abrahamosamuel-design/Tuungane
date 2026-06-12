@@ -431,7 +431,7 @@ function UserProfile() {
                   ))}
                 </div>
               )}
-              {reviews.length === 0 && feedback.length === 0 && <p className="rounded-2xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground">No reviews yet.</p>}
+              {reviews.length === 0 && feedback.length === 0 && <p className="rounded-2xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground">No verified reviews yet. Reviews will appear after completed Tuungane services.</p>}
               {reviews.map((r) => (
                 <div key={r.id} className="rounded-2xl border border-border bg-card p-4">
                   <div className="flex items-center gap-3">
