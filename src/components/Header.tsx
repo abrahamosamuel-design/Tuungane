@@ -215,7 +215,7 @@ function NotifCount() {
       if (active) setN(count ?? 0);
     };
     load();
-    const ch = supabase.channel(`hdr-notif-${user.id}`).on("postgres_changes", { event: "*", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` }, load).subscribe();
+    const ch = supabase.channel(`hdr-notif-${user.id}-${Math.random().toString(36).slice(2)}`).on("postgres_changes", { event: "*", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` }, load).subscribe();
     return () => { active = false; supabase.removeChannel(ch); };
   }, [user?.id]);
   return <>{n}</>;
