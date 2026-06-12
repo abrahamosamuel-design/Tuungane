@@ -91,12 +91,12 @@ export const Route = createFileRoute("/u/$id")({
 type Tab = "timeline" | "portfolio" | "services" | "recommendations" | "reviews" | "about";
 
 const TABS: { id: Tab; label: string; providerOnly?: boolean }[] = [
-  { id: "timeline", label: "Timeline" },
-  { id: "portfolio", label: "Portfolio", providerOnly: true },
   { id: "services", label: "Services", providerOnly: true },
-  { id: "recommendations", label: "Recommendations", providerOnly: true },
+  { id: "portfolio", label: "Portfolio", providerOnly: true },
   { id: "reviews", label: "Reviews", providerOnly: true },
   { id: "about", label: "About" },
+  { id: "timeline", label: "Timeline" },
+  { id: "recommendations", label: "Recommendations", providerOnly: true },
 ];
 
 function UserProfile() {
@@ -110,7 +110,7 @@ function UserProfile() {
   const [followers, setFollowers] = useState(0);
   const [recs, setRecs] = useState<Array<{ id: string; service: string; message: string; rating: number | null; created_at: string; user_id: string; profile?: { full_name: string; avatar_url: string | null } }>>([]);
   const [reviews, setReviews] = useState<Array<{ id: string; rating: number; text: string; created_at: string; user_id: string; profile?: { full_name: string; avatar_url: string | null } }>>([]);
-  const [tab, setTab] = useState<Tab>("timeline");
+  const [tab, setTab] = useState<Tab>("services");
   const [recOpen, setRecOpen] = useState(false);
   const [revOpen, setRevOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
