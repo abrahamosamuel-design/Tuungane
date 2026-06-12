@@ -9,9 +9,9 @@ export function MobileActionBar({ children }: { children: ReactNode }) {
   return (
     <>
       {/* Spacer so page content isn't covered when scrolled to bottom */}
-      <div className="h-20 md:hidden" aria-hidden />
+      <div className="h-24 md:hidden" aria-hidden />
       <div className="fixed inset-x-0 bottom-16 z-30 border-t border-border bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden">
-        <div className="mx-auto flex max-w-md items-center gap-2 px-3 py-2">
+        <div className="mx-auto flex max-w-md items-center gap-2 px-3 py-1.5">
           {children}
         </div>
       </div>

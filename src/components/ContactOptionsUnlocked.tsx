@@ -54,7 +54,7 @@ export function ContactOptionsUnlocked({
     <div className="rounded-2xl border border-green/30 bg-green/5 p-4">
       <div className="flex items-center gap-2 text-green">
         <ShieldCheck className="h-4 w-4" />
-        <p className="text-xs font-semibold uppercase tracking-wide">You have two ways to contact</p>
+        <p className="text-sm font-semibold text-navy">Contact this provider on Tuungane</p>
       </div>
       <p className="mt-1 text-xs text-foreground/70">
         For safety and verified reviews, keep key service details on Tuungane.
