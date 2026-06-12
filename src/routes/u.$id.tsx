@@ -91,12 +91,12 @@ export const Route = createFileRoute("/u/$id")({
 type Tab = "timeline" | "portfolio" | "services" | "recommendations" | "reviews" | "about";
 
 const TABS: { id: Tab; label: string; providerOnly?: boolean }[] = [
-  { id: "timeline", label: "Timeline" },
-  { id: "portfolio", label: "Portfolio", providerOnly: true },
   { id: "services", label: "Services", providerOnly: true },
-  { id: "recommendations", label: "Recommendations", providerOnly: true },
+  { id: "portfolio", label: "Portfolio", providerOnly: true },
   { id: "reviews", label: "Reviews", providerOnly: true },
   { id: "about", label: "About" },
+  { id: "timeline", label: "Timeline" },
+  { id: "recommendations", label: "Recommendations", providerOnly: true },
 ];
 
 function UserProfile() {
@@ -110,7 +110,7 @@ function UserProfile() {
   const [followers, setFollowers] = useState(0);
   const [recs, setRecs] = useState<Array<{ id: string; service: string; message: string; rating: number | null; created_at: string; user_id: string; profile?: { full_name: string; avatar_url: string | null } }>>([]);
   const [reviews, setReviews] = useState<Array<{ id: string; rating: number; text: string; created_at: string; user_id: string; profile?: { full_name: string; avatar_url: string | null } }>>([]);
-  const [tab, setTab] = useState<Tab>("timeline");
+  const [tab, setTab] = useState<Tab>("services");
   const [recOpen, setRecOpen] = useState(false);
   const [revOpen, setRevOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
@@ -193,6 +193,10 @@ function UserProfile() {
   const isOwn = user?.id === id;
   const isProvider = profile.is_provider;
   const visibleTabs = TABS.filter((t) => !t.providerOnly || isProvider);
+  useEffect(() => {
+    if (!visibleTabs.some((t) => t.id === tab)) setTab(visibleTabs[0]?.id ?? "about");
+    // eslint-disable-next-line
+  }, [isProvider]);
   const portfolioPosts = posts.filter((p) => p.media_urls.length > 0);
 
   return (
@@ -268,25 +272,14 @@ function UserProfile() {
                   }
                   setRequestOpen(true);
                 }}
-                className="rounded-full bg-orange px-4 py-2 text-xs font-semibold text-orange-foreground hover:brightness-110"
+                className="rounded-full bg-orange px-5 py-2.5 text-sm font-semibold text-orange-foreground shadow-sm hover:brightness-110"
               >
                 Request service
               </button>
             )}
             {!isOwn && isProvider && <FollowButton providerUserId={id} onChange={setFollowers} />}
             {!isOwn && isProvider && <SaveButton providerUserId={id} variant="full" />}
-            {!isOwn && user && isProvider && (
-              <>
-                <button onClick={() => setRecOpen(true)} className="rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-navy hover:border-orange">Recommend</button>
-                <button onClick={() => setRevOpen(true)} className="rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-navy hover:border-orange">Review</button>
-              </>
-            )}
-            {!isOwn && isProvider && !gate.unlocked && sp?.phone && (
-              <button onClick={() => setContactModalOpen(true)} className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-navy hover:border-orange">
-                <Lock className="h-3 w-3" /> Contact provider
-              </button>
-            )}
-            <button onClick={share} className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-3 py-2 text-xs font-semibold text-navy hover:border-orange"><Share2 className="h-3 w-3" /> Share</button>
+            <button onClick={share} aria-label="Share" className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-3 py-2 text-xs font-semibold text-navy hover:border-orange"><Share2 className="h-3.5 w-3.5" /> Share</button>
             {isOwn && isProvider && (
               <>
                 <BoostButton boostType="boost_profile" entityType="provider_profile" entityId={id} label="Boost profile" dialogTitle="Boost your provider profile" dialogDescription="Increase your visibility across Tuungane for a set period." />
@@ -294,7 +287,7 @@ function UserProfile() {
               </>
             )}
             {isOwn && <Link to="/dashboard" className="ml-auto rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-navy hover:border-orange">Edit profile</Link>}
-            {!isOwn && user && <button onClick={() => setReportOpen(true)} className="ml-auto text-muted-foreground hover:text-destructive"><Flag className="h-4 w-4" /></button>}
+            {!isOwn && user && <button onClick={() => setReportOpen(true)} aria-label="Report" className="ml-auto text-muted-foreground hover:text-destructive"><Flag className="h-4 w-4" /></button>}
           </div>
         </div>
 
@@ -345,7 +338,7 @@ function UserProfile() {
           {tab === "portfolio" && (
             <>
               {portfolioPosts.length === 0 ? (
-                <p className="rounded-2xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground">No portfolio items yet. Post photos of your work on the timeline to build your portfolio.</p>
+                <div className="rounded-2xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground"><p>No portfolio added yet.</p><p className="mt-1 text-xs">Message this provider on Tuungane to ask about previous work, availability, and pricing.</p></div>
               ) : (
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                   {portfolioPosts.flatMap((p) =>
@@ -438,7 +431,7 @@ function UserProfile() {
                   ))}
                 </div>
               )}
-              {reviews.length === 0 && feedback.length === 0 && <p className="rounded-2xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground">No reviews yet.</p>}
+              {reviews.length === 0 && feedback.length === 0 && <p className="rounded-2xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground">No verified reviews yet. Reviews will appear after completed Tuungane services.</p>}
               {reviews.map((r) => (
                 <div key={r.id} className="rounded-2xl border border-border bg-card p-4">
                   <div className="flex items-center gap-3">
@@ -485,8 +478,8 @@ function UserProfile() {
 
       {!isOwn && isProvider && (
         <MobileActionBar>
-          <button onClick={() => { if (!user) { nav({ to: "/login", search: { tab: "login", redirect: `/u/${id}` } as never }); return; } setRequestOpen(true); }} className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-orange px-4 py-3 text-sm font-semibold text-orange-foreground"><ClipboardList className="h-4 w-4" /> Request service</button>
-          {sp?.phone && <a href={`tel:${sp.phone}`} aria-label="Call" className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-border text-navy"><Phone className="h-5 w-5" /></a>}
+          <button onClick={() => { if (!user) { nav({ to: "/login", search: { tab: "login", redirect: `/u/${id}` } as never }); return; } setRequestOpen(true); }} className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-orange px-4 py-2.5 text-sm font-semibold text-orange-foreground shadow-sm"><ClipboardList className="h-4 w-4" /> Request service</button>
+          {sp?.phone && <a href={`tel:${sp.phone}`} aria-label="Call provider" className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-card text-navy"><Phone className="h-4 w-4" /></a>}
         </MobileActionBar>
       )}
     </Layout>
