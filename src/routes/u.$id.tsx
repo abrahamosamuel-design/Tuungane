@@ -338,7 +338,7 @@ function UserProfile() {
           {tab === "portfolio" && (
             <>
               {portfolioPosts.length === 0 ? (
-                <p className="rounded-2xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground">No portfolio items yet. Post photos of your work on the timeline to build your portfolio.</p>
+                <div className="rounded-2xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground"><p>No portfolio added yet.</p><p className="mt-1 text-xs">Message this provider on Tuungane to ask about previous work, availability, and pricing.</p></div>
               ) : (
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                   {portfolioPosts.flatMap((p) =>
