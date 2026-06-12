@@ -64,7 +64,7 @@ function MessagesIndex() {
 
     load();
     const ch = supabase
-      .channel(`msgs-list-${user.id}`)
+      .channel(`msgs-list-${user.id}-${Math.random().toString(36).slice(2)}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "conversations" }, load)
       .subscribe();
     return () => { active = false; supabase.removeChannel(ch); };
