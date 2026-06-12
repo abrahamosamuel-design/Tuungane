@@ -251,7 +251,7 @@ function useUnreadMessages() {
       if (active) setN((data as number) ?? 0);
     };
     load();
-    const ch = supabase.channel(`hdr-msgs-${user.id}`)
+    const ch = supabase.channel(`hdr-msgs-${user.id}-${Math.random().toString(36).slice(2)}`)
       .on("postgres_changes", { event: "*", schema: "public", table: "conversations" }, load)
       .subscribe();
     return () => { active = false; supabase.removeChannel(ch); };
