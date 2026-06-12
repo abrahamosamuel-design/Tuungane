@@ -193,6 +193,10 @@ function UserProfile() {
   const isOwn = user?.id === id;
   const isProvider = profile.is_provider;
   const visibleTabs = TABS.filter((t) => !t.providerOnly || isProvider);
+  useEffect(() => {
+    if (!visibleTabs.some((t) => t.id === tab)) setTab(visibleTabs[0]?.id ?? "about");
+    // eslint-disable-next-line
+  }, [isProvider]);
   const portfolioPosts = posts.filter((p) => p.media_urls.length > 0);
 
   return (
@@ -268,25 +272,14 @@ function UserProfile() {
                   }
                   setRequestOpen(true);
                 }}
-                className="rounded-full bg-orange px-4 py-2 text-xs font-semibold text-orange-foreground hover:brightness-110"
+                className="rounded-full bg-orange px-5 py-2.5 text-sm font-semibold text-orange-foreground shadow-sm hover:brightness-110"
               >
                 Request service
               </button>
             )}
             {!isOwn && isProvider && <FollowButton providerUserId={id} onChange={setFollowers} />}
             {!isOwn && isProvider && <SaveButton providerUserId={id} variant="full" />}
-            {!isOwn && user && isProvider && (
-              <>
-                <button onClick={() => setRecOpen(true)} className="rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-navy hover:border-orange">Recommend</button>
-                <button onClick={() => setRevOpen(true)} className="rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-navy hover:border-orange">Review</button>
-              </>
-            )}
-            {!isOwn && isProvider && !gate.unlocked && sp?.phone && (
-              <button onClick={() => setContactModalOpen(true)} className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-navy hover:border-orange">
-                <Lock className="h-3 w-3" /> Contact provider
-              </button>
-            )}
-            <button onClick={share} className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-3 py-2 text-xs font-semibold text-navy hover:border-orange"><Share2 className="h-3 w-3" /> Share</button>
+            <button onClick={share} aria-label="Share" className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-3 py-2 text-xs font-semibold text-navy hover:border-orange"><Share2 className="h-3.5 w-3.5" /> Share</button>
             {isOwn && isProvider && (
               <>
                 <BoostButton boostType="boost_profile" entityType="provider_profile" entityId={id} label="Boost profile" dialogTitle="Boost your provider profile" dialogDescription="Increase your visibility across Tuungane for a set period." />
@@ -294,7 +287,7 @@ function UserProfile() {
               </>
             )}
             {isOwn && <Link to="/dashboard" className="ml-auto rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-navy hover:border-orange">Edit profile</Link>}
-            {!isOwn && user && <button onClick={() => setReportOpen(true)} className="ml-auto text-muted-foreground hover:text-destructive"><Flag className="h-4 w-4" /></button>}
+            {!isOwn && user && <button onClick={() => setReportOpen(true)} aria-label="Report" className="ml-auto text-muted-foreground hover:text-destructive"><Flag className="h-4 w-4" /></button>}
           </div>
         </div>
 
