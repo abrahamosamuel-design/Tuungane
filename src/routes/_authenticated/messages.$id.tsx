@@ -74,7 +74,7 @@ function ConversationPage() {
     load();
 
     const ch = supabase
-      .channel(`conv-${id}`)
+      .channel(`conv-${id}-${Math.random().toString(36).slice(2)}`)
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages", filter: `conversation_id=eq.${id}` }, (payload) => {
         setMessages((prev) => {
           const m = payload.new as Msg;
