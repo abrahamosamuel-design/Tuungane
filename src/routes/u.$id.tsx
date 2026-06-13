@@ -379,27 +379,6 @@ function UserProfile() {
             </>
           )}
 
-          {tab === "recommendations" && (
-            <>
-              {!isOwn && user && isProvider && (
-                <button onClick={() => setRecOpen(true)} className="w-full rounded-2xl border-2 border-dashed border-orange/40 bg-orange/5 p-4 text-sm font-semibold text-orange hover:bg-orange/10">+ Recommend this provider</button>
-              )}
-              {recs.length === 0 && <p className="rounded-2xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground">No recommendations yet.</p>}
-              {recs.map((r) => (
-                <div key={r.id} className="rounded-2xl border border-border bg-card p-4">
-                  <div className="flex items-center gap-3">
-                    <Avatar name={r.profile?.full_name ?? "User"} url={r.profile?.avatar_url ?? null} size={40} />
-                    <div>
-                      <p className="text-sm font-semibold text-navy">{r.profile?.full_name ?? "User"}</p>
-                      <p className="text-xs text-muted-foreground">recommends for {r.service} · {timeAgo(r.created_at)}</p>
-                    </div>
-                    {r.rating && <span className="ml-auto text-sm text-orange">{"★".repeat(r.rating)}</span>}
-                  </div>
-                  <p className="mt-3 text-sm text-foreground/90">{r.message}</p>
-                </div>
-              ))}
-            </>
-          )}
 
           {tab === "reviews" && (
             <>
