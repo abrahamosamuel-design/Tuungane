@@ -161,6 +161,18 @@ function UserProfile() {
       (ps3 ?? []).forEach((p) => pm.set(p.id, { full_name: p.full_name, avatar_url: p.avatar_url }));
     }
     setFeedback(fbList.map((f) => ({ ...f, profile: pm.get(f.customer_id) })));
+
+    if (user && user.id !== id) {
+      const { count: completedCount } = await supabase
+        .from("service_requests")
+        .select("id", { count: "exact", head: true })
+        .eq("customer_id", user.id)
+        .eq("provider_id", id)
+        .eq("status", "completed");
+      setCanReview((completedCount ?? 0) > 0);
+    } else {
+      setCanReview(false);
+    }
   };
 
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [id]);
