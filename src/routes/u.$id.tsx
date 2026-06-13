@@ -187,16 +187,17 @@ function UserProfile() {
   const gate = useContactGate(id);
   const cat = useCategory(sp?.category_slug);
 
-  if (!profile) return <Layout><div className="mx-auto max-w-2xl px-4 py-16 text-center text-muted-foreground">Loading…</div></Layout>;
-
-  const avgRating = reviews.length ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length : 0;
   const isOwn = user?.id === id;
-  const isProvider = profile.is_provider;
+  const isProvider = !!profile?.is_provider;
   const visibleTabs = TABS.filter((t) => !t.providerOnly || isProvider);
   useEffect(() => {
     if (!visibleTabs.some((t) => t.id === tab)) setTab(visibleTabs[0]?.id ?? "about");
     // eslint-disable-next-line
   }, [isProvider]);
+
+  if (!profile) return <Layout><div className="mx-auto max-w-2xl px-4 py-16 text-center text-muted-foreground">Loading…</div></Layout>;
+
+  const avgRating = reviews.length ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length : 0;
   const portfolioPosts = posts.filter((p) => p.media_urls.length > 0);
 
   return (
