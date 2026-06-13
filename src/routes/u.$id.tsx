@@ -209,7 +209,8 @@ function UserProfile() {
 
   if (!profile) return <Layout><div className="mx-auto max-w-2xl px-4 py-16 text-center text-muted-foreground">Loading…</div></Layout>;
 
-  const avgRating = reviews.length ? reviews.reduce((s, r) => s + r.rating, 0) / reviews.length : 0;
+  const verifiedRating = feedback.length ? feedback.reduce((s, r) => s + r.rating, 0) / feedback.length : 0;
+  const avgRating = verifiedRating;
   const portfolioPosts = posts.filter((p) => p.media_urls.length > 0);
 
   return (
