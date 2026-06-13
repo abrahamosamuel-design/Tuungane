@@ -400,48 +400,82 @@ function UserProfile() {
 
           {tab === "reviews" && (
             <>
-              {avgRating > 0 && (
-                <div className="rounded-2xl border border-border bg-card p-5 text-center">
-                  <p className="font-display text-4xl font-bold text-navy">{avgRating.toFixed(1)}</p>
-                  <p className="mt-1 text-sm text-orange">{"★".repeat(Math.round(avgRating))}{"☆".repeat(5 - Math.round(avgRating))}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">{reviews.length} review{reviews.length === 1 ? "" : "s"}</p>
-                </div>
-              )}
-              {!isOwn && user && isProvider && (
-                <button onClick={() => setRevOpen(true)} className="w-full rounded-2xl border-2 border-dashed border-orange/40 bg-orange/5 p-4 text-sm font-semibold text-orange hover:bg-orange/10">+ Write a review</button>
-              )}
-              {feedback.length > 0 && (
-                <div className="space-y-3">
-                  <h4 className="font-display text-sm font-bold text-navy">Verified service reviews</h4>
-                  {feedback.map((f) => (
-                    <div key={f.id} className="rounded-2xl border border-green/30 bg-green/5 p-4">
-                      <div className="flex items-center gap-3">
-                        <Avatar name={f.profile?.full_name ?? "Customer"} url={f.profile?.avatar_url ?? null} size={36} />
-                        <div>
-                          <p className="flex items-center gap-2 text-sm font-semibold text-navy">{f.profile?.full_name ?? "Customer"} <VerifiedReviewBadge /></p>
-                          <p className="text-xs text-muted-foreground">{f.service_provided} · {timeAgo(f.created_at)}</p>
-                        </div>
-                        <span className="ml-auto text-sm text-orange">{"★".repeat(f.rating)}{"☆".repeat(5 - f.rating)}</span>
-                      </div>
-                      {f.review_text && <p className="mt-3 text-sm text-foreground/90">{f.review_text}</p>}
-                    </div>
-                  ))}
-                </div>
-              )}
-              {reviews.length === 0 && feedback.length === 0 && <p className="rounded-2xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground">No verified reviews yet. Reviews will appear after completed Tuungane services.</p>}
-              {reviews.map((r) => (
-                <div key={r.id} className="rounded-2xl border border-border bg-card p-4">
-                  <div className="flex items-center gap-3">
-                    <Avatar name={r.profile?.full_name ?? "User"} url={r.profile?.avatar_url ?? null} size={36} />
-                    <div>
-                      <p className="text-sm font-semibold text-navy">{r.profile?.full_name ?? "User"}</p>
-                      <p className="text-xs text-muted-foreground">{timeAgo(r.created_at)}</p>
-                    </div>
-                    <span className="ml-auto text-sm text-orange">{"★".repeat(r.rating)}{"☆".repeat(5 - r.rating)}</span>
+              {/* Section 1: Verified Reviews */}
+              <section className="space-y-3">
+                <div className="flex items-center justify-between gap-2">
+                  <div>
+                    <h3 className="font-display text-base font-bold text-navy">Verified Reviews</h3>
+                    <p className="text-xs text-muted-foreground">From completed Tuungane services</p>
                   </div>
-                  {r.text && <p className="mt-3 text-sm text-foreground/90">{r.text}</p>}
+                  {avgRating > 0 && (
+                    <div className="text-right">
+                      <p className="font-display text-2xl font-bold text-navy leading-none">{avgRating.toFixed(1)}</p>
+                      <p className="text-[11px] text-muted-foreground">{feedback.length} verified</p>
+                    </div>
+                  )}
                 </div>
-              ))}
+
+                {!isOwn && user && canReview && (
+                  <button onClick={() => setRevOpen(true)} className="w-full rounded-2xl border-2 border-dashed border-green/40 bg-green/5 p-3 text-sm font-semibold text-green hover:bg-green/10">+ Write a verified review</button>
+                )}
+
+                {feedback.length === 0 ? (
+                  <div className="rounded-2xl border border-dashed border-border bg-card p-6 text-center text-sm">
+                    <p className="font-semibold text-navy">No verified reviews yet.</p>
+                    <p className="mt-1 text-xs text-muted-foreground">Verified reviews will appear after completed Tuungane services.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {feedback.map((f) => (
+                      <div key={f.id} className="rounded-2xl border border-green/30 bg-green/5 p-4">
+                        <div className="flex items-center gap-3">
+                          <Avatar name={f.profile?.full_name ?? "Customer"} url={f.profile?.avatar_url ?? null} size={36} />
+                          <div>
+                            <p className="flex flex-wrap items-center gap-2 text-sm font-semibold text-navy">{f.profile?.full_name ?? "Customer"} <VerifiedReviewBadge /></p>
+                            <p className="text-xs text-muted-foreground">{f.service_provided} · {timeAgo(f.created_at)}</p>
+                          </div>
+                          <span className="ml-auto text-sm text-orange">{"★".repeat(f.rating)}{"☆".repeat(5 - f.rating)}</span>
+                        </div>
+                        {f.review_text && <p className="mt-3 text-sm text-foreground/90">{f.review_text}</p>}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+
+              {/* Section 2: Endorsements */}
+              <section className="space-y-3 pt-2">
+                <div>
+                  <h3 className="font-display text-base font-bold text-navy">Endorsements</h3>
+                  <p className="text-xs text-muted-foreground">General support from people who know or trust this provider · not verified service reviews</p>
+                </div>
+
+                {!isOwn && user && isProvider && (
+                  <button onClick={() => setRecOpen(true)} className="w-full rounded-xl border border-dashed border-border bg-card p-3 text-sm font-medium text-navy hover:border-orange">+ Endorse this provider</button>
+                )}
+
+                {recs.length === 0 ? (
+                  <div className="rounded-2xl border border-dashed border-border bg-card p-6 text-center text-sm">
+                    <p className="font-semibold text-navy">No endorsements yet.</p>
+                    <p className="mt-1 text-xs text-muted-foreground">People who know this provider can endorse their work.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {recs.map((r) => (
+                      <div key={r.id} className="rounded-xl border border-border/70 bg-background p-3">
+                        <div className="flex items-center gap-3">
+                          <Avatar name={r.profile?.full_name ?? "User"} url={r.profile?.avatar_url ?? null} size={32} />
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-medium text-navy">{r.profile?.full_name ?? "User"}</p>
+                            <p className="text-[11px] text-muted-foreground">Endorses for {r.service} · {timeAgo(r.created_at)}</p>
+                          </div>
+                        </div>
+                        <p className="mt-2 text-sm text-foreground/85">{r.message}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
             </>
           )}
 
