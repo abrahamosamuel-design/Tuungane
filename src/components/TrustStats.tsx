@@ -60,7 +60,7 @@ export function TrustStats({ providerId }: { providerId: string }) {
         />
         <Stat
           icon={<ThumbsUp className="h-4 w-4 text-orange" />}
-          label="Recommendations"
+          label="Endorsements"
           value={s?.total_recommendations ?? 0}
         />
         <Stat
