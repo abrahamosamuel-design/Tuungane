@@ -203,7 +203,8 @@ function UserProfile() {
   const isProvider = !!profile?.is_provider;
   const visibleTabs = TABS.filter((t) => !t.providerOnly || isProvider);
   useEffect(() => {
-    if (!visibleTabs.some((t) => t.id === tab)) setTab(visibleTabs[0]?.id ?? "about");
+    if (isProvider) setTab("services");
+    else setTab("about");
     // eslint-disable-next-line
   }, [isProvider]);
 
