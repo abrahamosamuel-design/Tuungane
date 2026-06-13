@@ -88,15 +88,14 @@ export const Route = createFileRoute("/u/$id")({
   notFoundComponent: () => <RouteNotFoundCard title="Profile not found" message="This user profile may have been removed." />,
 });
 
-type Tab = "timeline" | "portfolio" | "services" | "recommendations" | "reviews" | "about";
+type Tab = "timeline" | "portfolio" | "services" | "reviews" | "about";
 
 const TABS: { id: Tab; label: string; providerOnly?: boolean }[] = [
   { id: "services", label: "Services", providerOnly: true },
   { id: "portfolio", label: "Portfolio", providerOnly: true },
   { id: "reviews", label: "Reviews", providerOnly: true },
-  { id: "about", label: "About" },
   { id: "timeline", label: "Timeline" },
-  { id: "recommendations", label: "Recommendations", providerOnly: true },
+  { id: "about", label: "About" },
 ];
 
 function UserProfile() {
