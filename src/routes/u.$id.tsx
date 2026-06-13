@@ -269,8 +269,12 @@ function UserProfile() {
                 )}
                 <div className="mt-2 flex flex-wrap gap-3 text-xs text-muted-foreground">
                   <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" /> <strong className="text-navy">{followers}</strong> followers</span>
-                  <span className="inline-flex items-center gap-1"><ThumbsUp className="h-3 w-3" /> <strong className="text-navy">{recs.length}</strong> recommendations</span>
-                  {avgRating > 0 && <span className="inline-flex items-center gap-1"><Star className="h-3 w-3 fill-orange text-orange" /> <strong className="text-navy">{avgRating.toFixed(1)}</strong> ({reviews.length})</span>}
+                  <span className="inline-flex items-center gap-1"><ThumbsUp className="h-3 w-3" /> <strong className="text-navy">{recs.length}</strong> endorsements</span>
+                  {avgRating > 0 ? (
+                    <span className="inline-flex items-center gap-1"><Star className="h-3 w-3 fill-orange text-orange" /> <strong className="text-navy">{avgRating.toFixed(1)}</strong> ({feedback.length} verified)</span>
+                  ) : isProvider ? (
+                    <span className="inline-flex items-center gap-1 text-muted-foreground">No rating yet</span>
+                  ) : null}
                 </div>
               </div>
             </div>
