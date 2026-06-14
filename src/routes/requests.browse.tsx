@@ -46,6 +46,7 @@ function BrowseRequests() {
   const [myDistrict, setMyDistrict] = useState<string | null>(null);
   const [items, setItems] = useState<RequestRowLite[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showMoreFilters, setShowMoreFilters] = useState(false);
 
   useEffect(() => {
     (async () => {
