@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Search, Plus, ShieldAlert } from "lucide-react";
+import { Search, Plus, ShieldAlert, SlidersHorizontal } from "lucide-react";
 import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { useCategories } from "@/hooks/use-categories";
@@ -8,7 +8,6 @@ import { RequestCard, type RequestRowLite } from "@/components/RequestCard";
 import { EmptyState } from "@/components/EmptyState";
 import { ProviderTrackCTA } from "@/components/cta/ProviderTrackCTA";
 import {
-  REQUESTS_COPY,
   REQUESTS_SAFETY_TEXT,
   requestFilterChips,
   type RequestFilterChip,
