@@ -258,17 +258,17 @@ function BrowseRequests() {
           )}
           <div className="grid gap-3 sm:grid-cols-2">
             {rankedItems.map((r, idx) => (
-              <>
-                <RequestCard key={r.id} r={r} userLoc={userLoc} currentUserId={user?.id ?? null} />
+              <Fragment key={r.id}>
+                <RequestCard r={r} userLoc={userLoc} currentUserId={user?.id ?? null} />
                 {idx === 1 && (
-                  <div key="provider-cta" className="sm:col-span-2">
+                  <div className="sm:col-span-2">
                     <ProviderTrackCTA
                       title="Want customers to find you too?"
                       text="List your skill so people can discover you."
                     />
                   </div>
                 )}
-              </>
+              </Fragment>
             ))}
           </div>
         </div>
