@@ -167,14 +167,7 @@ function BrowseRequests() {
 
 
 
-      <section className="mx-auto max-w-7xl px-4 pt-4 sm:px-6 lg:px-8">
-        <ProviderTrackCTA
-          title="Want customers to find you too?"
-          text="List your skill so people can discover you even before you respond to requests."
-        />
-      </section>
-
-      <section className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+      <section className="mx-auto max-w-7xl px-4 py-3 sm:px-6 sm:py-4 lg:px-8">
         {/* Filter chips */}
         <div className="flex flex-wrap items-center gap-1.5">
           {requestFilterChips
@@ -239,16 +232,13 @@ function BrowseRequests() {
         )}
 
         {/* Safety notice compact */}
-        <div className="mt-3 flex items-start gap-2 rounded-xl border border-orange/30 bg-orange/5 px-3 py-2 text-[11px] text-foreground/80">
+        <div className="mt-2.5 flex items-start gap-2 rounded-xl border border-orange/30 bg-orange/5 px-3 py-1.5 text-[11px] text-foreground/80">
           <ShieldAlert className="h-3.5 w-3.5 shrink-0 text-orange" />
           <p>{REQUESTS_SAFETY_TEXT}</p>
         </div>
 
         {/* List */}
-        <div className="mt-4">
-          <h2 className="mb-2.5 font-display text-base font-bold text-navy sm:text-lg">
-            Recent requests
-          </h2>
+        <div className="mt-3 pb-24 sm:pb-8">
           {loading && <p className="text-sm text-muted-foreground">Loading…</p>}
           {!loading && radiusExpanded && (
             <div className="mb-3 rounded-xl border border-orange/30 bg-orange/5 p-3 text-xs text-foreground/80">
@@ -267,8 +257,18 @@ function BrowseRequests() {
             />
           )}
           <div className="grid gap-3 sm:grid-cols-2">
-            {rankedItems.map((r) => (
-              <RequestCard key={r.id} r={r} userLoc={userLoc} />
+            {rankedItems.map((r, idx) => (
+              <>
+                <RequestCard key={r.id} r={r} userLoc={userLoc} currentUserId={user?.id ?? null} />
+                {idx === 1 && (
+                  <div key="provider-cta" className="sm:col-span-2">
+                    <ProviderTrackCTA
+                      title="Want customers to find you too?"
+                      text="List your skill so people can discover you."
+                    />
+                  </div>
+                )}
+              </>
             ))}
           </div>
         </div>
@@ -276,6 +276,7 @@ function BrowseRequests() {
     </Layout>
   );
 }
+
 
 function Pill({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
