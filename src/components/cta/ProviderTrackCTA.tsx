@@ -12,18 +12,21 @@ export function ProviderTrackCTA({
 }) {
   return (
     <div
-      className={`flex flex-col gap-3 rounded-2xl border border-green/30 bg-green/5 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5 ${className}`}
+      className={`flex items-center gap-2.5 rounded-xl border border-green/30 bg-green/5 p-2.5 sm:gap-3 sm:rounded-2xl sm:p-4 ${className}`}
     >
-      <div className="flex items-start gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-green text-white">
-          <Sparkles className="h-5 w-5" />
-        </div>
-        <div className="min-w-0">
-          <p className="font-display text-sm font-bold text-navy sm:text-base">{title}</p>
-          <p className="mt-0.5 text-xs text-foreground/75 sm:text-sm">{text}</p>
-        </div>
+      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-green text-white sm:h-9 sm:w-9">
+        <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
       </div>
-      <ListYourSkillButton variant="solid" className="shrink-0" />
+      <div className="min-w-0 flex-1">
+        <p className="font-display text-xs font-bold text-navy sm:text-sm">{title}</p>
+        <p className="mt-0.5 line-clamp-1 text-[11px] text-foreground/70 sm:text-xs">{text}</p>
+      </div>
+      <ListYourSkillButton
+        variant="solid"
+        withIcon={false}
+        label="List skill"
+        className="shrink-0 !px-3 !py-1.5 !text-xs"
+      />
     </div>
   );
 }
