@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Search, Plus, ShieldAlert } from "lucide-react";
+import { Search, Plus, ShieldAlert, SlidersHorizontal } from "lucide-react";
 import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { useCategories } from "@/hooks/use-categories";
@@ -8,7 +8,6 @@ import { RequestCard, type RequestRowLite } from "@/components/RequestCard";
 import { EmptyState } from "@/components/EmptyState";
 import { ProviderTrackCTA } from "@/components/cta/ProviderTrackCTA";
 import {
-  REQUESTS_COPY,
   REQUESTS_SAFETY_TEXT,
   requestFilterChips,
   type RequestFilterChip,
@@ -47,6 +46,7 @@ function BrowseRequests() {
   const [myDistrict, setMyDistrict] = useState<string | null>(null);
   const [items, setItems] = useState<RequestRowLite[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showMoreFilters, setShowMoreFilters] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -118,23 +118,25 @@ function BrowseRequests() {
 
   return (
     <Layout>
-      <section className="bg-navy py-12 text-white">
+      <section className="bg-navy py-5 text-white sm:py-8">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-orange">
-                {REQUESTS_COPY.eyebrow}
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-orange">
+                Open Requests
               </p>
-              <h1 className="mt-1 font-display text-3xl font-bold sm:text-4xl">
-                {REQUESTS_COPY.heading}
+              <h1 className="mt-0.5 font-display text-2xl font-bold sm:text-3xl">
+                Open Requests Near You
               </h1>
-              <p className="mt-2 max-w-2xl text-sm text-white/70">{REQUESTS_COPY.supporting}</p>
+              <p className="mt-1 max-w-2xl text-xs text-white/70 sm:text-sm">
+                Browse real customer requests near you and respond with your offer.
+              </p>
             </div>
             <Link
               to="/requests/new"
-              className="inline-flex w-fit items-center gap-2 rounded-full bg-orange px-5 py-2.5 text-sm font-semibold text-orange-foreground hover:brightness-110"
+              className="inline-flex shrink-0 items-center gap-1 rounded-full border border-white/30 px-3 py-1.5 text-xs font-semibold text-white hover:bg-white/10"
             >
-              <Plus className="h-4 w-4" /> {REQUESTS_COPY.primaryCTA}
+              <Plus className="h-3.5 w-3.5" /> Create
             </Link>
           </div>
           <form
@@ -142,53 +144,61 @@ function BrowseRequests() {
               e.preventDefault();
               load();
             }}
-            className="mt-6 flex flex-col gap-2 sm:flex-row"
+            className="mt-3 flex flex-col gap-2 sm:flex-row"
           >
-            <div className="flex flex-1 items-center gap-2 rounded-full bg-white px-4 py-2.5 text-foreground">
+            <div className="flex flex-1 items-center gap-2 rounded-full bg-white px-3.5 py-2 text-foreground">
               <Search className="h-4 w-4 text-muted-foreground" />
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                placeholder={REQUESTS_COPY.searchPlaceholder}
+                placeholder="Search requests…"
                 className="w-full bg-transparent text-sm outline-none"
               />
             </div>
             <input
               value={loc}
               onChange={(e) => setLoc(e.target.value)}
-              placeholder={REQUESTS_COPY.locationPlaceholder}
-              className="rounded-full bg-white/95 px-4 py-2.5 text-sm text-foreground outline-none sm:w-72"
+              placeholder="Location e.g. Entebbe, Kampala, Wakiso"
+              className="rounded-full bg-white/95 px-3.5 py-2 text-sm text-foreground outline-none sm:w-72"
             />
-            <button className="rounded-full bg-orange px-5 py-2.5 text-sm font-semibold text-orange-foreground">
+            <button className="rounded-full bg-orange px-5 py-2 text-sm font-semibold text-orange-foreground">
               Search
             </button>
           </form>
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
+      <section className="mx-auto max-w-7xl px-4 pt-4 sm:px-6 lg:px-8">
         <ProviderTrackCTA
           title="Want customers to find you too?"
-          text="List your skill and show your work so people can discover you even before you respond to requests."
+          text="List your skill so people can discover you even before you respond to requests."
         />
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="grid gap-6 lg:grid-cols-[260px_1fr]">
-          <aside className="space-y-5">
-            <div>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Filter</p>
-              <div className="flex flex-wrap gap-2">
-                {requestFilterChips.map((c) => (
-                  <Pill key={c.value} active={chip === c.value} onClick={() => setChip(c.value)}>
-                    {c.label}
-                  </Pill>
-                ))}
-              </div>
-            </div>
+      <section className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+        {/* Filter chips */}
+        <div className="flex flex-wrap items-center gap-1.5">
+          {requestFilterChips
+            .filter((c) => ["all", "urgent", "today", "week", "nearby"].includes(c.value))
+            .map((c) => (
+              <Pill key={c.value} active={chip === c.value} onClick={() => setChip(c.value)}>
+                {c.label}
+              </Pill>
+            ))}
+          <button
+            onClick={() => setShowMoreFilters((s) => !s)}
+            className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-xs font-semibold transition ${
+              showMoreFilters ? "border-navy bg-navy text-navy-foreground" : "border-border bg-background text-muted-foreground hover:border-navy"
+            }`}
+          >
+            <SlidersHorizontal className="h-3 w-3" /> More filters
+          </button>
+        </div>
 
+        {showMoreFilters && (
+          <div className="mt-3 grid gap-4 rounded-2xl border border-border bg-card p-4 sm:grid-cols-2">
             <div>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Category</p>
+              <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Category</p>
               <select
                 value={cat}
                 onChange={(e) => setCat(e.target.value)}
@@ -205,7 +215,6 @@ function BrowseRequests() {
                 <p className="mt-1 text-[11px] text-muted-foreground">{category.blurb}</p>
               )}
             </div>
-
             <div className="space-y-2 text-sm">
               <label className="flex items-center gap-2">
                 <input type="checkbox" checked={urgentOnly} onChange={(e) => setUrgentOnly(e.target.checked)} /> Urgent only
@@ -223,42 +232,45 @@ function BrowseRequests() {
                 Near me {myDistrict ? `(${myDistrict})` : "(set your district)"}
               </label>
             </div>
-
-            <div>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Distance</p>
+            <div className="sm:col-span-2">
+              <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">Distance</p>
               <RadiusFilter value={radiusKm} onChange={setRadiusKm} disabled={!userLoc} />
             </div>
+          </div>
+        )}
 
-            <div className="flex gap-3 rounded-xl border border-orange/30 bg-orange/5 p-3 text-xs text-foreground/80">
-              <ShieldAlert className="h-4 w-4 shrink-0 text-orange" />
-              <p>{REQUESTS_SAFETY_TEXT}</p>
-            </div>
-          </aside>
+        {/* Safety notice compact */}
+        <div className="mt-3 flex items-start gap-2 rounded-xl border border-orange/30 bg-orange/5 px-3 py-2 text-[11px] text-foreground/80">
+          <ShieldAlert className="h-3.5 w-3.5 shrink-0 text-orange" />
+          <p>{REQUESTS_SAFETY_TEXT}</p>
+        </div>
 
-          <div>
-            <h2 className="mb-3 font-display text-lg font-bold text-navy">
-              {REQUESTS_COPY.listTitle}
-            </h2>
-            {loading && <p className="text-sm text-muted-foreground">Loading…</p>}
-            {!loading && radiusExpanded && (
-              <div className="mb-3 rounded-xl border border-orange/30 bg-orange/5 p-3 text-xs text-foreground/80">
-                Not many results in your area within {radiusKm} km yet.{" "}
-                <button onClick={() => setRadiusKm(null)} className="font-semibold text-orange underline">Show all results</button>
-              </div>
-            )}
-            {!loading && rankedItems.length === 0 && !radiusExpanded && (
-              <EmptyState
-                icon={Plus}
-                title={REQUESTS_COPY.emptyTitle}
-                description={REQUESTS_COPY.emptyDescription}
-                action={{ label: REQUESTS_COPY.emptyCTA, to: "/requests/new" }}
-              />
-            )}
-            <div className="grid gap-3 sm:grid-cols-2">
-              {rankedItems.map((r) => (
-                <RequestCard key={r.id} r={r} userLoc={userLoc} />
-              ))}
+        {/* List */}
+        <div className="mt-4">
+          <h2 className="mb-2.5 font-display text-base font-bold text-navy sm:text-lg">
+            Recent requests
+          </h2>
+          {loading && <p className="text-sm text-muted-foreground">Loading…</p>}
+          {!loading && radiusExpanded && (
+            <div className="mb-3 rounded-xl border border-orange/30 bg-orange/5 p-3 text-xs text-foreground/80">
+              Not many results in your area within {radiusKm} km yet.{" "}
+              <button onClick={() => setRadiusKm(null)} className="font-semibold text-orange underline">
+                Show all results
+              </button>
             </div>
+          )}
+          {!loading && rankedItems.length === 0 && !radiusExpanded && (
+            <EmptyState
+              icon={Plus}
+              title="No requests yet"
+              description="Be the first to create a request, or check back soon for requests near you."
+              action={{ label: "Create a request", to: "/requests/new" }}
+            />
+          )}
+          <div className="grid gap-3 sm:grid-cols-2">
+            {rankedItems.map((r) => (
+              <RequestCard key={r.id} r={r} userLoc={userLoc} />
+            ))}
           </div>
         </div>
       </section>
