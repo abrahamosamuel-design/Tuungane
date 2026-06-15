@@ -41,17 +41,31 @@ function NotificationPreferencesPage() {
   const [pushSupported, setPushSupported] = useState(false);
   const [pushPermission, setPushPermission] = useState<NotificationPermission | "unsupported">("default");
   const [pushSubscribed, setPushSubscribed] = useState(false);
+  const [pushEndpoint, setPushEndpoint] = useState<string | null>(null);
   const [pushBusy, setPushBusy] = useState(false);
 
-  useEffect(() => {
-    setPrefs(loadNotifPrefs());
-    setLoaded(true);
+  const refreshPushStatus = async () => {
     const supported = isPushSupported();
     setPushSupported(supported);
     setPushPermission(getPushPermission());
     if (supported) {
-      getActiveSubscriptionEndpoint().then((ep) => setPushSubscribed(!!ep));
+      const ep = await getActiveSubscriptionEndpoint();
+      setPushSubscribed(!!ep);
+      setPushEndpoint(ep);
     }
+  };
+
+  useEffect(() => {
+    setPrefs(loadNotifPrefs());
+    setLoaded(true);
+    refreshPushStatus();
+  }, []);
+
+  // Re-check permission when user returns to tab (they may have changed it in settings)
+  useEffect(() => {
+    const onVis = () => { if (!document.hidden) refreshPushStatus(); };
+    document.addEventListener("visibilitychange", onVis);
+    return () => document.removeEventListener("visibilitychange", onVis);
   }, []);
 
   // Mirror push-channel preferences to the server whenever they change so the
