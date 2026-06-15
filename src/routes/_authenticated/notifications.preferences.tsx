@@ -151,9 +151,72 @@ function NotificationPreferencesPage() {
               <div className="rounded-xl bg-orange/10 p-2 text-orange">
                 <Smartphone className="h-5 w-5" />
               </div>
-              <div>
-                <p className="font-semibold text-navy">Push on this device</p>
-                <p className="mt-0.5 text-xs text-muted-foreground">
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="font-semibold text-navy">Push on this device</p>
+                  {/* Overall status badge */}
+                  {!pushSupported ? (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+                      <XCircle className="h-3 w-3" /> Unsupported
+                    </span>
+                  ) : pushPermission === "denied" ? (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-red-50 px-2 py-0.5 text-[11px] font-medium text-red-600">
+                      <XCircle className="h-3 w-3" /> Permission denied
+                    </span>
+                  ) : pushSubscribed ? (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-green-50 px-2 py-0.5 text-[11px] font-medium text-green-600">
+                      <CheckCircle2 className="h-3 w-3" /> Push enabled
+                    </span>
+                  ) : pushPermission === "granted" ? (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-600">
+                      <AlertCircle className="h-3 w-3" /> Permission granted, not subscribed
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
+                      <Info className="h-3 w-3" /> Permission default
+                    </span>
+                  )}
+                </div>
+
+                {/* Detailed status rows */}
+                <div className="mt-2 space-y-1">
+                  <div className="flex items-center gap-2 text-xs">
+                    <span className="text-muted-foreground">Browser support:</span>
+                    <span className={pushSupported ? "font-medium text-green-600" : "font-medium text-red-500"}>
+                      {pushSupported ? "Supported" : "Not supported"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs">
+                    <span className="text-muted-foreground">Permission:</span>
+                    <span
+                      className={`font-medium capitalize ${
+                        pushPermission === "granted"
+                          ? "text-green-600"
+                          : pushPermission === "denied"
+                            ? "text-red-500"
+                            : "text-muted-foreground"
+                      }`}
+                    >
+                      {pushPermission === "unsupported" ? "N/A" : pushPermission}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs">
+                    <span className="text-muted-foreground">Subscription:</span>
+                    <span className={pushSubscribed ? "font-medium text-green-600" : "font-medium text-muted-foreground"}>
+                      {pushSubscribed ? "Active" : "Not active"}
+                    </span>
+                  </div>
+                  {pushEndpoint && (
+                    <div className="flex items-center gap-2 text-xs">
+                      <span className="text-muted-foreground">Endpoint:</span>
+                      <span className="truncate font-mono text-[10px] text-muted-foreground max-w-[200px] sm:max-w-xs">
+                        {pushEndpoint}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                <p className="mt-2 text-xs text-muted-foreground">
                   {!pushSupported
                     ? "This browser does not support web push. Try a recent Chrome, Edge, or Firefox — on iOS, install Tuungane to your Home Screen first."
                     : pushPermission === "denied"
