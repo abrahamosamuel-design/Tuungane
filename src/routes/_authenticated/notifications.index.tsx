@@ -8,7 +8,7 @@ import { timeAgo } from "@/lib/format";
 import { Heart, MessageCircle, ThumbsUp, Star, UserPlus, ClipboardList, CheckCircle2, PlayCircle, Send, ShieldCheck, AlertTriangle, XCircle, Settings } from "lucide-react";
 import { isTypeEnabled, loadNotifPrefs, type NotifPrefs, DEFAULT_PREFS } from "@/lib/notification-prefs";
 
-export const Route = createFileRoute("/_authenticated/notifications")({
+export const Route = createFileRoute("/_authenticated/notifications/")({
   head: () => ({ meta: [{ title: "Notifications — Tuungane" }] }),
   component: NotificationsPage,
 });

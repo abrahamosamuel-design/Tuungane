@@ -39,13 +39,13 @@ import { Route as BusinessesNewRouteImport } from './routes/businesses.new'
 import { Route as BusinessesCreateRouteImport } from './routes/businesses.create'
 import { Route as BusinessesSlugRouteImport } from './routes/businesses.$slug'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
-import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedMeRouteImport } from './routes/_authenticated/me'
 import { Route as AuthenticatedListSkillRouteImport } from './routes/_authenticated/list-skill'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedCreditsRouteImport } from './routes/_authenticated/credits'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedRequestsIndexRouteImport } from './routes/_authenticated/requests.index'
+import { Route as AuthenticatedNotificationsIndexRouteImport } from './routes/_authenticated/notifications.index'
 import { Route as AuthenticatedMessagesIndexRouteImport } from './routes/_authenticated/messages.index'
 import { Route as AuthenticatedRequestsNewRouteImport } from './routes/_authenticated/requests.new'
 import { Route as AuthenticatedRequestsIdRouteImport } from './routes/_authenticated/requests.$id'
@@ -205,12 +205,6 @@ const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedNotificationsRoute =
-  AuthenticatedNotificationsRouteImport.update({
-    id: '/notifications',
-    path: '/notifications',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
 const AuthenticatedMeRoute = AuthenticatedMeRouteImport.update({
   id: '/me',
   path: '/me',
@@ -240,6 +234,12 @@ const AuthenticatedRequestsIndexRoute =
   AuthenticatedRequestsIndexRouteImport.update({
     id: '/requests/',
     path: '/requests/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedNotificationsIndexRoute =
+  AuthenticatedNotificationsIndexRouteImport.update({
+    id: '/notifications/',
+    path: '/notifications/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedMessagesIndexRoute =
@@ -272,15 +272,15 @@ const AuthenticatedProfilesIdRoute = AuthenticatedProfilesIdRouteImport.update({
 } as any)
 const AuthenticatedNotificationsPreferencesRoute =
   AuthenticatedNotificationsPreferencesRouteImport.update({
-    id: '/preferences',
-    path: '/preferences',
-    getParentRoute: () => AuthenticatedNotificationsRoute,
+    id: '/notifications/preferences',
+    path: '/notifications/preferences',
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedNotificationsIdRoute =
   AuthenticatedNotificationsIdRouteImport.update({
-    id: '/$id',
-    path: '/$id',
-    getParentRoute: () => AuthenticatedNotificationsRoute,
+    id: '/notifications/$id',
+    path: '/notifications/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedMessagesIdRoute = AuthenticatedMessagesIdRouteImport.update({
   id: '/messages/$id',
@@ -306,7 +306,6 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/list-skill': typeof AuthenticatedListSkillRoute
   '/me': typeof AuthenticatedMeRoute
-  '/notifications': typeof AuthenticatedNotificationsRouteWithChildren
   '/settings': typeof AuthenticatedSettingsRoute
   '/businesses/$slug': typeof BusinessesSlugRoute
   '/businesses/create': typeof BusinessesCreateRoute
@@ -332,6 +331,7 @@ export interface FileRoutesByFullPath {
   '/requests/$id': typeof AuthenticatedRequestsIdRoute
   '/requests/new': typeof AuthenticatedRequestsNewRoute
   '/messages/': typeof AuthenticatedMessagesIndexRoute
+  '/notifications/': typeof AuthenticatedNotificationsIndexRoute
   '/requests/': typeof AuthenticatedRequestsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -351,7 +351,6 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/list-skill': typeof AuthenticatedListSkillRoute
   '/me': typeof AuthenticatedMeRoute
-  '/notifications': typeof AuthenticatedNotificationsRouteWithChildren
   '/settings': typeof AuthenticatedSettingsRoute
   '/businesses/$slug': typeof BusinessesSlugRoute
   '/businesses/create': typeof BusinessesCreateRoute
@@ -377,6 +376,7 @@ export interface FileRoutesByTo {
   '/requests/$id': typeof AuthenticatedRequestsIdRoute
   '/requests/new': typeof AuthenticatedRequestsNewRoute
   '/messages': typeof AuthenticatedMessagesIndexRoute
+  '/notifications': typeof AuthenticatedNotificationsIndexRoute
   '/requests': typeof AuthenticatedRequestsIndexRoute
 }
 export interface FileRoutesById {
@@ -399,7 +399,6 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/list-skill': typeof AuthenticatedListSkillRoute
   '/_authenticated/me': typeof AuthenticatedMeRoute
-  '/_authenticated/notifications': typeof AuthenticatedNotificationsRouteWithChildren
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/businesses/$slug': typeof BusinessesSlugRoute
   '/businesses/create': typeof BusinessesCreateRoute
@@ -425,6 +424,7 @@ export interface FileRoutesById {
   '/_authenticated/requests/$id': typeof AuthenticatedRequestsIdRoute
   '/_authenticated/requests/new': typeof AuthenticatedRequestsNewRoute
   '/_authenticated/messages/': typeof AuthenticatedMessagesIndexRoute
+  '/_authenticated/notifications/': typeof AuthenticatedNotificationsIndexRoute
   '/_authenticated/requests/': typeof AuthenticatedRequestsIndexRoute
 }
 export interface FileRouteTypes {
@@ -447,7 +447,6 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/list-skill'
     | '/me'
-    | '/notifications'
     | '/settings'
     | '/businesses/$slug'
     | '/businesses/create'
@@ -473,6 +472,7 @@ export interface FileRouteTypes {
     | '/requests/$id'
     | '/requests/new'
     | '/messages/'
+    | '/notifications/'
     | '/requests/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -492,7 +492,6 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/list-skill'
     | '/me'
-    | '/notifications'
     | '/settings'
     | '/businesses/$slug'
     | '/businesses/create'
@@ -518,6 +517,7 @@ export interface FileRouteTypes {
     | '/requests/$id'
     | '/requests/new'
     | '/messages'
+    | '/notifications'
     | '/requests'
   id:
     | '__root__'
@@ -539,7 +539,6 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/list-skill'
     | '/_authenticated/me'
-    | '/_authenticated/notifications'
     | '/_authenticated/settings'
     | '/businesses/$slug'
     | '/businesses/create'
@@ -565,6 +564,7 @@ export interface FileRouteTypes {
     | '/_authenticated/requests/$id'
     | '/_authenticated/requests/new'
     | '/_authenticated/messages/'
+    | '/_authenticated/notifications/'
     | '/_authenticated/requests/'
   fileRoutesById: FileRoutesById
 }
@@ -806,13 +806,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/notifications': {
-      id: '/_authenticated/notifications'
-      path: '/notifications'
-      fullPath: '/notifications'
-      preLoaderRoute: typeof AuthenticatedNotificationsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/me': {
       id: '/_authenticated/me'
       path: '/me'
@@ -855,6 +848,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRequestsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/notifications/': {
+      id: '/_authenticated/notifications/'
+      path: '/notifications'
+      fullPath: '/notifications/'
+      preLoaderRoute: typeof AuthenticatedNotificationsIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/messages/': {
       id: '/_authenticated/messages/'
       path: '/messages'
@@ -892,17 +892,17 @@ declare module '@tanstack/react-router' {
     }
     '/_authenticated/notifications/preferences': {
       id: '/_authenticated/notifications/preferences'
-      path: '/preferences'
+      path: '/notifications/preferences'
       fullPath: '/notifications/preferences'
       preLoaderRoute: typeof AuthenticatedNotificationsPreferencesRouteImport
-      parentRoute: typeof AuthenticatedNotificationsRoute
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/notifications/$id': {
       id: '/_authenticated/notifications/$id'
-      path: '/$id'
+      path: '/notifications/$id'
       fullPath: '/notifications/$id'
       preLoaderRoute: typeof AuthenticatedNotificationsIdRouteImport
-      parentRoute: typeof AuthenticatedNotificationsRoute
+      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/messages/$id': {
       id: '/_authenticated/messages/$id'
@@ -914,37 +914,22 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface AuthenticatedNotificationsRouteChildren {
-  AuthenticatedNotificationsIdRoute: typeof AuthenticatedNotificationsIdRoute
-  AuthenticatedNotificationsPreferencesRoute: typeof AuthenticatedNotificationsPreferencesRoute
-}
-
-const AuthenticatedNotificationsRouteChildren: AuthenticatedNotificationsRouteChildren =
-  {
-    AuthenticatedNotificationsIdRoute: AuthenticatedNotificationsIdRoute,
-    AuthenticatedNotificationsPreferencesRoute:
-      AuthenticatedNotificationsPreferencesRoute,
-  }
-
-const AuthenticatedNotificationsRouteWithChildren =
-  AuthenticatedNotificationsRoute._addFileChildren(
-    AuthenticatedNotificationsRouteChildren,
-  )
-
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedCreditsRoute: typeof AuthenticatedCreditsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedListSkillRoute: typeof AuthenticatedListSkillRoute
   AuthenticatedMeRoute: typeof AuthenticatedMeRoute
-  AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRouteWithChildren
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedMessagesIdRoute: typeof AuthenticatedMessagesIdRoute
+  AuthenticatedNotificationsIdRoute: typeof AuthenticatedNotificationsIdRoute
+  AuthenticatedNotificationsPreferencesRoute: typeof AuthenticatedNotificationsPreferencesRoute
   AuthenticatedProfilesIdRoute: typeof AuthenticatedProfilesIdRoute
   AuthenticatedProfilesNewRoute: typeof AuthenticatedProfilesNewRoute
   AuthenticatedRequestsIdRoute: typeof AuthenticatedRequestsIdRoute
   AuthenticatedRequestsNewRoute: typeof AuthenticatedRequestsNewRoute
   AuthenticatedMessagesIndexRoute: typeof AuthenticatedMessagesIndexRoute
+  AuthenticatedNotificationsIndexRoute: typeof AuthenticatedNotificationsIndexRoute
   AuthenticatedRequestsIndexRoute: typeof AuthenticatedRequestsIndexRoute
 }
 
@@ -954,14 +939,17 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedListSkillRoute: AuthenticatedListSkillRoute,
   AuthenticatedMeRoute: AuthenticatedMeRoute,
-  AuthenticatedNotificationsRoute: AuthenticatedNotificationsRouteWithChildren,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedMessagesIdRoute: AuthenticatedMessagesIdRoute,
+  AuthenticatedNotificationsIdRoute: AuthenticatedNotificationsIdRoute,
+  AuthenticatedNotificationsPreferencesRoute:
+    AuthenticatedNotificationsPreferencesRoute,
   AuthenticatedProfilesIdRoute: AuthenticatedProfilesIdRoute,
   AuthenticatedProfilesNewRoute: AuthenticatedProfilesNewRoute,
   AuthenticatedRequestsIdRoute: AuthenticatedRequestsIdRoute,
   AuthenticatedRequestsNewRoute: AuthenticatedRequestsNewRoute,
   AuthenticatedMessagesIndexRoute: AuthenticatedMessagesIndexRoute,
+  AuthenticatedNotificationsIndexRoute: AuthenticatedNotificationsIndexRoute,
   AuthenticatedRequestsIndexRoute: AuthenticatedRequestsIndexRoute,
 }
 
