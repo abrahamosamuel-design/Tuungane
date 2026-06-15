@@ -243,7 +243,7 @@ function NotificationPreferencesPage() {
         </div>
 
         <p className="mt-6 text-xs text-muted-foreground">
-          Email and push delivery follow these preferences as we roll them out. In-app changes apply immediately to your bell and notifications list.
+          Push delivery is live for enabled categories on devices where you've turned push on. Email delivery follows these preferences as we roll it out. In-app changes apply immediately to your bell and notifications list.
         </p>
       </section>
     </Layout>
