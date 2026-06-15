@@ -21,6 +21,7 @@ import {
   disablePush,
   getActiveSubscriptionEndpoint,
   syncPushPrefsToServer,
+  setPushOptOut,
 } from "@/lib/push";
 import { toast } from "sonner";
 
@@ -108,6 +109,7 @@ function NotificationPreferencesPage() {
   const handleEnablePush = async () => {
     setPushBusy(true);
     const res = await enablePush();
+    if (res.ok) setPushOptOut(false);
     await refreshPushStatus();
     setPushBusy(false);
     if (res.ok) {
@@ -124,6 +126,7 @@ function NotificationPreferencesPage() {
   const handleDisablePush = async () => {
     setPushBusy(true);
     await disablePush();
+    setPushOptOut(true);
     await refreshPushStatus();
     setPushBusy(false);
     toast.success("Push disabled on this device");

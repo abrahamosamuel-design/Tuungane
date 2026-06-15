@@ -48,14 +48,14 @@ export type ChannelPrefs = Record<NotifChannel, boolean>;
 export type NotifPrefs = Record<NotifCategory, ChannelPrefs>;
 
 const DEFAULT_CHANNEL_PREFS: Record<NotifCategory, ChannelPrefs> = {
-  // Conservative defaults: in-app on everywhere; email on for the high-signal
-  // categories; push opt-in per category but on for the most actionable ones.
+  // Push is on by default for every category — users can opt out per-category
+  // in preferences or disable push entirely on the device.
   requests: { in_app: true, email: true, push: true },
   messages: { in_app: true, email: false, push: true },
-  social: { in_app: true, email: false, push: false },
-  reviews: { in_app: true, email: true, push: false },
-  credits: { in_app: true, email: true, push: false },
-  official: { in_app: true, email: true, push: false },
+  social: { in_app: true, email: false, push: true },
+  reviews: { in_app: true, email: true, push: true },
+  credits: { in_app: true, email: true, push: true },
+  official: { in_app: true, email: true, push: true },
 };
 
 export const DEFAULT_PREFS: NotifPrefs = DEFAULT_CHANNEL_PREFS;
