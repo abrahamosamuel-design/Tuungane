@@ -167,11 +167,17 @@ function NewRequest() {
       return;
     }
 
-    const targetedProvider = search.providerId || null;
+    // If the request targets a public profile, infer the provider for individual profiles.
+    const targetedProvider =
+      search.providerId ||
+      (targetProfile && targetProfile.profile_type === "individual" ? targetProfile.owner_id : null);
+    const isTargeted = !!(targetedProvider || targetProfile);
 
     const { data: inserted, error } = await supabase.from("service_requests").insert({
       customer_id: user.id,
       provider_id: targetedProvider,
+      public_profile_id: targetProfile?.id ?? null,
+      profile_service_id: targetService?.id ?? null,
       category_slug: f.category_slug,
       subcategory: f.subcategory,
       service_needed: f.subcategory || cat.name,
@@ -187,7 +193,7 @@ function NewRequest() {
       preferred_date: f.preferred_date || null,
       preferred_time: f.preferred_time || null,
       preferred_contact_method: f.preferred_contact_method,
-      visibility: targetedProvider ? "matching_only" : f.visibility,
+      visibility: isTargeted ? "matching_only" : f.visibility,
       customer_phone: f.customer_phone || null,
       customer_whatsapp: f.customer_whatsapp || null,
       attachment_url,
