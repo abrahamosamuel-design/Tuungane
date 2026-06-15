@@ -92,7 +92,7 @@ function ServiceRequestsFeed() {
           <div className="flex items-start justify-between gap-3 flex-wrap">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wider text-green">For providers</p>
-              <h1 className="mt-1 font-display text-3xl font-bold text-navy sm:text-4xl">Work Feed</h1>
+              <h1 className="mt-1 font-display text-3xl font-bold text-navy sm:text-4xl">Customer Requests</h1>
               <p className="mt-2 text-sm text-muted-foreground">Show your work so customers can trust you. Browse open requests, post your previous work, and respond to nearby jobs.</p>
             </div>
             <div className="flex flex-wrap gap-2">
