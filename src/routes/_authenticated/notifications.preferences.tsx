@@ -108,10 +108,9 @@ function NotificationPreferencesPage() {
   const handleEnablePush = async () => {
     setPushBusy(true);
     const res = await enablePush();
+    await refreshPushStatus();
     setPushBusy(false);
-    setPushPermission(getPushPermission());
     if (res.ok) {
-      setPushSubscribed(true);
       toast.success("Push notifications enabled on this device");
     } else if (res.reason === "denied") {
       toast.error("Push permission was denied. Enable it in your browser settings.");
@@ -125,8 +124,8 @@ function NotificationPreferencesPage() {
   const handleDisablePush = async () => {
     setPushBusy(true);
     await disablePush();
+    await refreshPushStatus();
     setPushBusy(false);
-    setPushSubscribed(false);
     toast.success("Push disabled on this device");
   };
 
