@@ -14,6 +14,14 @@ import {
   type NotifCategory,
   type NotifChannel,
 } from "@/lib/notification-prefs";
+import {
+  isPushSupported,
+  getPushPermission,
+  enablePush,
+  disablePush,
+  getActiveSubscriptionEndpoint,
+  syncPushPrefsToServer,
+} from "@/lib/push";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/notifications/preferences")({
