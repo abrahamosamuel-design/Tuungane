@@ -110,6 +110,67 @@ export async function getActiveSubscriptionEndpoint(): Promise<string | null> {
   return sub?.endpoint || null;
 }
 
+const AUTO_OPT_OUT_KEY = "tuungane_push_auto_opt_out";
+
+export function hasUserOptedOutOfPush(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    return localStorage.getItem(AUTO_OPT_OUT_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function setPushOptOut(v: boolean): void {
+  if (typeof window === "undefined") return;
+  try {
+    if (v) localStorage.setItem(AUTO_OPT_OUT_KEY, "1");
+    else localStorage.removeItem(AUTO_OPT_OUT_KEY);
+  } catch {}
+}
+
+// Auto-enable push on app load when the browser supports it, permission has
+// not been explicitly denied, and the user hasn't previously opted out on
+// this device. Safe to call repeatedly — it short-circuits when already
+// subscribed. Returns true only when a new subscription was created.
+export async function autoEnablePushIfNeeded(): Promise<boolean> {
+  if (!isPushSupported()) return false;
+  if (hasUserOptedOutOfPush()) return false;
+
+  const perm = Notification.permission;
+  if (perm === "denied") return false;
+
+  // If already subscribed, just make sure the row exists server-side.
+  const reg = await getRegistration();
+  const existing = await reg.pushManager.getSubscription();
+  if (existing) {
+    const { data: auth } = await supabase.auth.getUser();
+    const userId = auth.user?.id;
+    if (userId) {
+      await supabase
+        .from("notification_push_subscriptions")
+        .upsert(
+          {
+            user_id: userId,
+            endpoint: existing.endpoint,
+            p256dh: arrayBufferToBase64Url(existing.getKey("p256dh")),
+            auth: arrayBufferToBase64Url(existing.getKey("auth")),
+            user_agent: navigator.userAgent.slice(0, 500),
+            last_used_at: new Date().toISOString(),
+          },
+          { onConflict: "endpoint" },
+        );
+    }
+    return false;
+  }
+
+  // Permission is "default" — request it. Browsers require this to be in
+  // response to a user gesture on some platforms; when not granted we
+  // silently bail and the user can flip it on from the preferences page.
+  const result = await enablePush();
+  return result.ok;
+}
+
 const CATEGORIES = ["requests", "messages", "social", "reviews", "credits", "official"] as const;
 export type PushCategory = (typeof CATEGORIES)[number];
 
