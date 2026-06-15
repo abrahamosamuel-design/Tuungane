@@ -658,6 +658,60 @@ export type Database = {
           },
         ]
       }
+      notification_push_prefs: {
+        Row: {
+          category: string
+          enabled: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category: string
+          enabled?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          enabled?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      notification_push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          endpoint: string
+          id: string
+          last_used_at: string | null
+          p256dh: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          endpoint: string
+          id?: string
+          last_used_at?: string | null
+          p256dh: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          endpoint?: string
+          id?: string
+          last_used_at?: string | null
+          p256dh?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           actor_id: string | null
@@ -1462,6 +1516,24 @@ export type Database = {
           updated_at?: string
           verified?: string
           whatsapp?: string | null
+        }
+        Relationships: []
+      }
+      push_config: {
+        Row: {
+          function_url: string
+          id: number
+          trigger_secret: string
+        }
+        Insert: {
+          function_url: string
+          id: number
+          trigger_secret?: string
+        }
+        Update: {
+          function_url?: string
+          id?: number
+          trigger_secret?: string
         }
         Relationships: []
       }
