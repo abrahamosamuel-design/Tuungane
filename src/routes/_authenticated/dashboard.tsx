@@ -128,6 +128,8 @@ function Dashboard() {
           {profile?.is_provider ? <ProviderContactsList /> : <ContactedProvidersList />}
         </div>
 
+        <MyProfilesPanel />
+
         <MyBusinessPagesPanel />
 
         {search.composeBusiness && (
