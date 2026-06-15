@@ -115,9 +115,10 @@ function NotificationsPage() {
             </div>
           )}
           {filtered.map((n) => (
-            <a
+            <Link
               key={n.id}
-              href={hrefFor(n)}
+              to="/notifications/$id"
+              params={{ id: n.id }}
               className={`flex items-start gap-3 rounded-2xl border border-border p-3 transition hover:border-orange ${n.read ? "bg-card" : "bg-orange/5"}`}
             >
               <div className="relative">
@@ -132,7 +133,7 @@ function NotificationsPage() {
                 <p className="text-xs text-muted-foreground">{timeAgo(n.created_at)}</p>
               </div>
               {!n.read && <span className="mt-2 h-2 w-2 rounded-full bg-orange" />}
-            </a>
+            </Link>
           ))}
         </div>
       </section>
