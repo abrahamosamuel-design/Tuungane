@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Fragment, useEffect, useMemo, useState } from "react";
-import { Search, Plus, ShieldAlert, SlidersHorizontal } from "lucide-react";
+import { Search, Plus, ShieldAlert, SlidersHorizontal, ChevronDown, ChevronUp } from "lucide-react";
 import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { useCategories } from "@/hooks/use-categories";
@@ -8,7 +8,6 @@ import { RequestCard, type RequestRowLite } from "@/components/RequestCard";
 import { EmptyState } from "@/components/EmptyState";
 import { ProviderTrackCTA } from "@/components/cta/ProviderTrackCTA";
 import {
-  REQUESTS_SAFETY_TEXT,
   requestFilterChips,
   type RequestFilterChip,
 } from "@/data/requestTypes";
@@ -133,7 +132,7 @@ function BrowseRequests() {
               to="/requests/new"
               className="inline-flex shrink-0 items-center gap-1 rounded-full border border-white/30 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-white/10"
             >
-              <Plus className="h-3 w-3" /> Create
+              <Plus className="h-3 w-3" /> Post Request
             </Link>
           </div>
           <form
@@ -232,13 +231,10 @@ function BrowseRequests() {
         )}
 
         {/* Safety notice compact */}
-        <div className="mt-2.5 flex items-start gap-2 rounded-xl border border-orange/30 bg-orange/5 px-3 py-1.5 text-[11px] text-foreground/80">
-          <ShieldAlert className="h-3.5 w-3.5 shrink-0 text-orange" />
-          <p>{REQUESTS_SAFETY_TEXT}</p>
-        </div>
+        <SafetyNotice />
 
         {/* List */}
-        <div className="mt-3 pb-24 sm:pb-8">
+        <div className="mt-3 pb-32 sm:pb-8">
           {loading && <p className="text-sm text-muted-foreground">Loading…</p>}
           {!loading && radiusExpanded && (
             <div className="mb-3 rounded-xl border border-orange/30 bg-orange/5 p-3 text-xs text-foreground/80">
@@ -288,5 +284,40 @@ function Pill({ active, onClick, children }: { active: boolean; onClick: () => v
     >
       {children}
     </button>
+  );
+}
+
+function SafetyNotice() {
+  const [expanded, setExpanded] = useState(false);
+  return (
+    <div className="mt-2.5 rounded-xl border border-orange/20 bg-orange/5 px-3 py-2 text-[11px] text-foreground/80">
+      <div className="flex items-start gap-2">
+        <ShieldAlert className="h-3.5 w-3.5 shrink-0 text-orange" />
+        <div className="flex-1">
+          <p>Stay safe: verify the customer, location, and request details before starting work.</p>
+          {!expanded && (
+            <button
+              onClick={() => setExpanded(true)}
+              className="mt-1 inline-flex items-center gap-0.5 font-semibold text-orange hover:underline"
+            >
+              Safety tips <ChevronDown className="h-3 w-3" />
+            </button>
+          )}
+          {expanded && (
+            <div className="mt-1.5">
+              <p className="text-foreground/70">
+                Verify the customer, location, and request details before starting work. Do not share sensitive information or make unsafe payments. Report suspicious requests.
+              </p>
+              <button
+                onClick={() => setExpanded(false)}
+                className="mt-1 inline-flex items-center gap-0.5 font-semibold text-orange hover:underline"
+              >
+                Hide <ChevronUp className="h-3 w-3" />
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
