@@ -14,6 +14,14 @@ import {
   type NotifCategory,
   type NotifChannel,
 } from "@/lib/notification-prefs";
+import {
+  isPushSupported,
+  getPushPermission,
+  enablePush,
+  disablePush,
+  getActiveSubscriptionEndpoint,
+  syncPushPrefsToServer,
+} from "@/lib/push";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/notifications/preferences")({
@@ -30,11 +38,32 @@ const CHANNEL_ICON: Record<NotifChannel, React.ComponentType<{ className?: strin
 function NotificationPreferencesPage() {
   const [prefs, setPrefs] = useState<NotifPrefs>(DEFAULT_PREFS);
   const [loaded, setLoaded] = useState(false);
+  const [pushSupported, setPushSupported] = useState(false);
+  const [pushPermission, setPushPermission] = useState<NotificationPermission | "unsupported">("default");
+  const [pushSubscribed, setPushSubscribed] = useState(false);
+  const [pushBusy, setPushBusy] = useState(false);
 
   useEffect(() => {
     setPrefs(loadNotifPrefs());
     setLoaded(true);
+    const supported = isPushSupported();
+    setPushSupported(supported);
+    setPushPermission(getPushPermission());
+    if (supported) {
+      getActiveSubscriptionEndpoint().then((ep) => setPushSubscribed(!!ep));
+    }
   }, []);
+
+  // Mirror push-channel preferences to the server whenever they change so the
+  // edge function knows which categories to deliver to.
+  useEffect(() => {
+    if (!loaded) return;
+    const pushPrefs = CATEGORY_ORDER.reduce(
+      (acc, c) => ({ ...acc, [c]: !!prefs[c].push }),
+      {} as Record<NotifCategory, boolean>,
+    );
+    syncPushPrefsToServer(pushPrefs).catch(() => {});
+  }, [prefs, loaded]);
 
   const toggle = (cat: NotifCategory, ch: NotifChannel, value: boolean) => {
     const next: NotifPrefs = { ...prefs, [cat]: { ...prefs[cat], [ch]: value } };
@@ -62,6 +91,31 @@ function NotificationPreferencesPage() {
     toast.success(`${CATEGORY_LABELS[cat].title} ${value ? "enabled" : "muted"}`);
   };
 
+  const handleEnablePush = async () => {
+    setPushBusy(true);
+    const res = await enablePush();
+    setPushBusy(false);
+    setPushPermission(getPushPermission());
+    if (res.ok) {
+      setPushSubscribed(true);
+      toast.success("Push notifications enabled on this device");
+    } else if (res.reason === "denied") {
+      toast.error("Push permission was denied. Enable it in your browser settings.");
+    } else if (res.reason === "unsupported") {
+      toast.error("This browser does not support push notifications.");
+    } else {
+      toast.error("Couldn't enable push: " + (res.reason || "unknown error"));
+    }
+  };
+
+  const handleDisablePush = async () => {
+    setPushBusy(true);
+    await disablePush();
+    setPushBusy(false);
+    setPushSubscribed(false);
+    toast.success("Push disabled on this device");
+  };
+
   if (!loaded) return null;
 
   const columnAllOn = (ch: NotifChannel) => CATEGORY_ORDER.every((c) => prefs[c][ch]);
@@ -76,6 +130,42 @@ function NotificationPreferencesPage() {
         <p className="mt-1 text-sm text-muted-foreground">
           Pick how you want to be alerted for each category. Toggle channels independently — in-app, email, and push.
         </p>
+
+        {/* Push enable/disable for this device */}
+        <div className="mt-5 rounded-2xl border border-border bg-card p-4">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-start gap-3">
+              <div className="rounded-xl bg-orange/10 p-2 text-orange">
+                <Smartphone className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="font-semibold text-navy">Push on this device</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  {!pushSupported
+                    ? "This browser does not support web push. Try a recent Chrome, Edge, or Firefox — on iOS, install Tuungane to your Home Screen first."
+                    : pushPermission === "denied"
+                      ? "You blocked notifications for this site. Enable them in your browser site settings, then try again."
+                      : pushSubscribed
+                        ? "Push is active. You'll receive alerts for enabled categories below even when Tuungane is closed."
+                        : "Turn on push to get alerts on this device when something happens — even when Tuungane is closed."}
+                </p>
+              </div>
+            </div>
+            {pushSupported && pushPermission !== "denied" && (
+              <button
+                onClick={pushSubscribed ? handleDisablePush : handleEnablePush}
+                disabled={pushBusy}
+                className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold transition disabled:opacity-50 ${
+                  pushSubscribed
+                    ? "border border-border bg-background text-navy hover:border-orange"
+                    : "bg-orange text-white hover:bg-orange/90"
+                }`}
+              >
+                {pushBusy ? "…" : pushSubscribed ? "Disable" : "Enable push"}
+              </button>
+            )}
+          </div>
+        </div>
 
         {/* Channel legend / column toggles */}
         <div className="mt-5 grid grid-cols-3 gap-2 sm:gap-3">
@@ -153,7 +243,7 @@ function NotificationPreferencesPage() {
         </div>
 
         <p className="mt-6 text-xs text-muted-foreground">
-          Email and push delivery follow these preferences as we roll them out. In-app changes apply immediately to your bell and notifications list.
+          Push delivery is live for enabled categories on devices where you've turned push on. Email delivery follows these preferences as we roll it out. In-app changes apply immediately to your bell and notifications list.
         </p>
       </section>
     </Layout>
