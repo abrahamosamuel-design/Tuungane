@@ -51,6 +51,7 @@ import { Route as AuthenticatedRequestsNewRouteImport } from './routes/_authenti
 import { Route as AuthenticatedRequestsIdRouteImport } from './routes/_authenticated/requests.$id'
 import { Route as AuthenticatedProfilesNewRouteImport } from './routes/_authenticated/profiles.new'
 import { Route as AuthenticatedProfilesIdRouteImport } from './routes/_authenticated/profiles.$id'
+import { Route as AuthenticatedNotificationsIdRouteImport } from './routes/_authenticated/notifications.$id'
 import { Route as AuthenticatedMessagesIdRouteImport } from './routes/_authenticated/messages.$id'
 
 const TermsRoute = TermsRouteImport.update({
@@ -268,6 +269,12 @@ const AuthenticatedProfilesIdRoute = AuthenticatedProfilesIdRouteImport.update({
   path: '/profiles/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedNotificationsIdRoute =
+  AuthenticatedNotificationsIdRouteImport.update({
+    id: '/$id',
+    path: '/$id',
+    getParentRoute: () => AuthenticatedNotificationsRoute,
+  } as any)
 const AuthenticatedMessagesIdRoute = AuthenticatedMessagesIdRouteImport.update({
   id: '/messages/$id',
   path: '/messages/$id',
@@ -292,7 +299,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/list-skill': typeof AuthenticatedListSkillRoute
   '/me': typeof AuthenticatedMeRoute
-  '/notifications': typeof AuthenticatedNotificationsRoute
+  '/notifications': typeof AuthenticatedNotificationsRouteWithChildren
   '/settings': typeof AuthenticatedSettingsRoute
   '/businesses/$slug': typeof BusinessesSlugRoute
   '/businesses/create': typeof BusinessesCreateRoute
@@ -311,6 +318,7 @@ export interface FileRoutesByFullPath {
   '/profiles/': typeof ProfilesIndexRoute
   '/services/': typeof ServicesIndexRoute
   '/messages/$id': typeof AuthenticatedMessagesIdRoute
+  '/notifications/$id': typeof AuthenticatedNotificationsIdRoute
   '/profiles/$id': typeof AuthenticatedProfilesIdRoute
   '/profiles/new': typeof AuthenticatedProfilesNewRoute
   '/requests/$id': typeof AuthenticatedRequestsIdRoute
@@ -335,7 +343,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/list-skill': typeof AuthenticatedListSkillRoute
   '/me': typeof AuthenticatedMeRoute
-  '/notifications': typeof AuthenticatedNotificationsRoute
+  '/notifications': typeof AuthenticatedNotificationsRouteWithChildren
   '/settings': typeof AuthenticatedSettingsRoute
   '/businesses/$slug': typeof BusinessesSlugRoute
   '/businesses/create': typeof BusinessesCreateRoute
@@ -354,6 +362,7 @@ export interface FileRoutesByTo {
   '/profiles': typeof ProfilesIndexRoute
   '/services': typeof ServicesIndexRoute
   '/messages/$id': typeof AuthenticatedMessagesIdRoute
+  '/notifications/$id': typeof AuthenticatedNotificationsIdRoute
   '/profiles/$id': typeof AuthenticatedProfilesIdRoute
   '/profiles/new': typeof AuthenticatedProfilesNewRoute
   '/requests/$id': typeof AuthenticatedRequestsIdRoute
@@ -381,7 +390,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/list-skill': typeof AuthenticatedListSkillRoute
   '/_authenticated/me': typeof AuthenticatedMeRoute
-  '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
+  '/_authenticated/notifications': typeof AuthenticatedNotificationsRouteWithChildren
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/businesses/$slug': typeof BusinessesSlugRoute
   '/businesses/create': typeof BusinessesCreateRoute
@@ -400,6 +409,7 @@ export interface FileRoutesById {
   '/profiles/': typeof ProfilesIndexRoute
   '/services/': typeof ServicesIndexRoute
   '/_authenticated/messages/$id': typeof AuthenticatedMessagesIdRoute
+  '/_authenticated/notifications/$id': typeof AuthenticatedNotificationsIdRoute
   '/_authenticated/profiles/$id': typeof AuthenticatedProfilesIdRoute
   '/_authenticated/profiles/new': typeof AuthenticatedProfilesNewRoute
   '/_authenticated/requests/$id': typeof AuthenticatedRequestsIdRoute
@@ -446,6 +456,7 @@ export interface FileRouteTypes {
     | '/profiles/'
     | '/services/'
     | '/messages/$id'
+    | '/notifications/$id'
     | '/profiles/$id'
     | '/profiles/new'
     | '/requests/$id'
@@ -489,6 +500,7 @@ export interface FileRouteTypes {
     | '/profiles'
     | '/services'
     | '/messages/$id'
+    | '/notifications/$id'
     | '/profiles/$id'
     | '/profiles/new'
     | '/requests/$id'
@@ -534,6 +546,7 @@ export interface FileRouteTypes {
     | '/profiles/'
     | '/services/'
     | '/_authenticated/messages/$id'
+    | '/_authenticated/notifications/$id'
     | '/_authenticated/profiles/$id'
     | '/_authenticated/profiles/new'
     | '/_authenticated/requests/$id'
@@ -864,6 +877,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfilesIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/notifications/$id': {
+      id: '/_authenticated/notifications/$id'
+      path: '/$id'
+      fullPath: '/notifications/$id'
+      preLoaderRoute: typeof AuthenticatedNotificationsIdRouteImport
+      parentRoute: typeof AuthenticatedNotificationsRoute
+    }
     '/_authenticated/messages/$id': {
       id: '/_authenticated/messages/$id'
       path: '/messages/$id'
@@ -874,13 +894,27 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedNotificationsRouteChildren {
+  AuthenticatedNotificationsIdRoute: typeof AuthenticatedNotificationsIdRoute
+}
+
+const AuthenticatedNotificationsRouteChildren: AuthenticatedNotificationsRouteChildren =
+  {
+    AuthenticatedNotificationsIdRoute: AuthenticatedNotificationsIdRoute,
+  }
+
+const AuthenticatedNotificationsRouteWithChildren =
+  AuthenticatedNotificationsRoute._addFileChildren(
+    AuthenticatedNotificationsRouteChildren,
+  )
+
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedCreditsRoute: typeof AuthenticatedCreditsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedListSkillRoute: typeof AuthenticatedListSkillRoute
   AuthenticatedMeRoute: typeof AuthenticatedMeRoute
-  AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
+  AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRouteWithChildren
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedMessagesIdRoute: typeof AuthenticatedMessagesIdRoute
   AuthenticatedProfilesIdRoute: typeof AuthenticatedProfilesIdRoute
@@ -897,7 +931,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedListSkillRoute: AuthenticatedListSkillRoute,
   AuthenticatedMeRoute: AuthenticatedMeRoute,
-  AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
+  AuthenticatedNotificationsRoute: AuthenticatedNotificationsRouteWithChildren,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedMessagesIdRoute: AuthenticatedMessagesIdRoute,
   AuthenticatedProfilesIdRoute: AuthenticatedProfilesIdRoute,

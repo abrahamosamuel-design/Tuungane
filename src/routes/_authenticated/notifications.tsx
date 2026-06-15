@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
@@ -71,13 +71,6 @@ function NotificationsPage() {
 
   useEffect(() => { if (user) load(); /* eslint-disable-next-line */ }, [user?.id]);
 
-  const hrefFor = (n: Notif) => {
-    if (n.target_type === "service_request" && n.target_id) return `/requests/${n.target_id}`;
-    if (n.target_type === "service_feedback" && user) return `/u/${user.id}`;
-    if (n.target_type === "profile" && n.target_id) return `/u/${n.target_id}`;
-    if (n.target_type === "post" && user) return `/u/${user.id}`;
-    return "/feed";
-  };
 
   const filtered = filter === "all"
     ? items
@@ -115,9 +108,10 @@ function NotificationsPage() {
             </div>
           )}
           {filtered.map((n) => (
-            <a
+            <Link
               key={n.id}
-              href={hrefFor(n)}
+              to="/notifications/$id"
+              params={{ id: n.id }}
               className={`flex items-start gap-3 rounded-2xl border border-border p-3 transition hover:border-orange ${n.read ? "bg-card" : "bg-orange/5"}`}
             >
               <div className="relative">
@@ -132,7 +126,7 @@ function NotificationsPage() {
                 <p className="text-xs text-muted-foreground">{timeAgo(n.created_at)}</p>
               </div>
               {!n.read && <span className="mt-2 h-2 w-2 rounded-full bg-orange" />}
-            </a>
+            </Link>
           ))}
         </div>
       </section>
