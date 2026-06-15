@@ -15,7 +15,7 @@ const primaryNav = [
   { to: "/services", label: "Services" },
   { to: "/requests/browse", label: "Requests" },
   { to: "/services/requests", label: "Work Feed" },
-  { to: "/businesses", label: "Businesses" },
+  { to: "/profiles", label: "Businesses" },
 ];
 
 const moreNav = [
@@ -91,7 +91,6 @@ export function Header() {
                     <MenuItem to="/me" icon={<UserIcon className="h-4 w-4" />} label="My profile" onClick={() => setMenu(false)} />
                     <MenuItem to="/credits" icon={<Coins className="h-4 w-4" />} label="Tuungane Credits" onClick={() => setMenu(false)} />
                     <div className="border-t border-border" />
-                    <MenuItem to="/businesses/create" icon={<Building2 className="h-4 w-4" />} label="Create business page" onClick={() => setMenu(false)} />
                     <MenuItem to="/feed" icon={<Rss className="h-4 w-4" />} label="Activity feed" onClick={() => setMenu(false)} />
                     <MenuItem to="/official" icon={<Megaphone className="h-4 w-4" />} label="Official updates" onClick={() => setMenu(false)} />
                     {isModerator && <MenuItem to="/admin" icon={<Shield className="h-4 w-4" />} label="Admin & moderation" onClick={() => setMenu(false)} />}
@@ -142,7 +141,7 @@ export function Header() {
                 <Link to="/me" onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-navy hover:bg-muted">My Profile</Link>
                 <MyCreditsLink onClick={() => setOpen(false)} />
                 <Link to="/settings" onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-navy hover:bg-muted">Settings</Link>
-                <Link to="/businesses/create" onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-navy hover:bg-muted">Create Business Page</Link>
+                
                 {isModerator && (
                   <>
                     <div className="my-2 border-t border-border" />

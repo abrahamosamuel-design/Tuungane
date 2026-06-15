@@ -23,6 +23,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ServicesIndexRouteImport } from './routes/services.index'
+import { Route as ProfilesIndexRouteImport } from './routes/profiles.index'
 import { Route as BusinessesIndexRouteImport } from './routes/businesses.index'
 import { Route as UIdRouteImport } from './routes/u.$id'
 import { Route as ServicesRequestsRouteImport } from './routes/services.requests'
@@ -119,6 +120,11 @@ const IndexRoute = IndexRouteImport.update({
 const ServicesIndexRoute = ServicesIndexRouteImport.update({
   id: '/services/',
   path: '/services/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfilesIndexRoute = ProfilesIndexRouteImport.update({
+  id: '/profiles/',
+  path: '/profiles/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BusinessesIndexRoute = BusinessesIndexRouteImport.update({
@@ -302,6 +308,7 @@ export interface FileRoutesByFullPath {
   '/services/requests': typeof ServicesRequestsRoute
   '/u/$id': typeof UIdRoute
   '/businesses/': typeof BusinessesIndexRoute
+  '/profiles/': typeof ProfilesIndexRoute
   '/services/': typeof ServicesIndexRoute
   '/messages/$id': typeof AuthenticatedMessagesIdRoute
   '/profiles/$id': typeof AuthenticatedProfilesIdRoute
@@ -344,6 +351,7 @@ export interface FileRoutesByTo {
   '/services/requests': typeof ServicesRequestsRoute
   '/u/$id': typeof UIdRoute
   '/businesses': typeof BusinessesIndexRoute
+  '/profiles': typeof ProfilesIndexRoute
   '/services': typeof ServicesIndexRoute
   '/messages/$id': typeof AuthenticatedMessagesIdRoute
   '/profiles/$id': typeof AuthenticatedProfilesIdRoute
@@ -389,6 +397,7 @@ export interface FileRoutesById {
   '/services/requests': typeof ServicesRequestsRoute
   '/u/$id': typeof UIdRoute
   '/businesses/': typeof BusinessesIndexRoute
+  '/profiles/': typeof ProfilesIndexRoute
   '/services/': typeof ServicesIndexRoute
   '/_authenticated/messages/$id': typeof AuthenticatedMessagesIdRoute
   '/_authenticated/profiles/$id': typeof AuthenticatedProfilesIdRoute
@@ -434,6 +443,7 @@ export interface FileRouteTypes {
     | '/services/requests'
     | '/u/$id'
     | '/businesses/'
+    | '/profiles/'
     | '/services/'
     | '/messages/$id'
     | '/profiles/$id'
@@ -476,6 +486,7 @@ export interface FileRouteTypes {
     | '/services/requests'
     | '/u/$id'
     | '/businesses'
+    | '/profiles'
     | '/services'
     | '/messages/$id'
     | '/profiles/$id'
@@ -520,6 +531,7 @@ export interface FileRouteTypes {
     | '/services/requests'
     | '/u/$id'
     | '/businesses/'
+    | '/profiles/'
     | '/services/'
     | '/_authenticated/messages/$id'
     | '/_authenticated/profiles/$id'
@@ -552,6 +564,7 @@ export interface RootRouteChildren {
   ServicesSlugRoute: typeof ServicesSlugRoute
   ServicesRequestsRoute: typeof ServicesRequestsRoute
   UIdRoute: typeof UIdRoute
+  ProfilesIndexRoute: typeof ProfilesIndexRoute
   ServicesIndexRoute: typeof ServicesIndexRoute
 }
 
@@ -653,6 +666,13 @@ declare module '@tanstack/react-router' {
       path: '/services'
       fullPath: '/services/'
       preLoaderRoute: typeof ServicesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profiles/': {
+      id: '/profiles/'
+      path: '/profiles'
+      fullPath: '/profiles/'
+      preLoaderRoute: typeof ProfilesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/businesses/': {
@@ -945,6 +965,7 @@ const rootRouteChildren: RootRouteChildren = {
   ServicesSlugRoute: ServicesSlugRoute,
   ServicesRequestsRoute: ServicesRequestsRoute,
   UIdRoute: UIdRoute,
+  ProfilesIndexRoute: ProfilesIndexRoute,
   ServicesIndexRoute: ServicesIndexRoute,
 }
 export const routeTree = rootRouteImport
