@@ -1137,6 +1137,59 @@ export type Database = {
         }
         Relationships: []
       }
+      profile_services: {
+        Row: {
+          active: boolean
+          category_slug: string | null
+          created_at: string
+          description: string
+          id: string
+          location_served: string | null
+          photos: string[]
+          price_guidance_ugx: number | null
+          profile_id: string
+          sort_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          category_slug?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          location_served?: string | null
+          photos?: string[]
+          price_guidance_ugx?: number | null
+          profile_id: string
+          sort_order?: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          category_slug?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          location_served?: string | null
+          photos?: string[]
+          price_guidance_ugx?: number | null
+          profile_id?: string
+          sort_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_services_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           address_description: string | null
@@ -1301,6 +1354,117 @@ export type Database = {
           },
         ]
       }
+      public_profiles: {
+        Row: {
+          address: string | null
+          area: string | null
+          areas_served: string[]
+          availability: string
+          avatar_url: string | null
+          bio: string
+          category_slug: string | null
+          claim_status: string
+          country: string | null
+          cover_url: string | null
+          created_at: string
+          district: string | null
+          email: string | null
+          id: string
+          is_featured: boolean
+          latitude: number | null
+          legacy_ref: string | null
+          legacy_source: string | null
+          longitude: number | null
+          name: string
+          opening_hours: Json
+          owner_id: string
+          phone: string | null
+          profile_type: Database["public"]["Enums"]["public_profile_type"]
+          region: string | null
+          seeded_by_official: boolean
+          service_radius_km: number | null
+          slug: string
+          subcategory: string | null
+          suspended: boolean
+          town: string | null
+          updated_at: string
+          verified: string
+          whatsapp: string | null
+        }
+        Insert: {
+          address?: string | null
+          area?: string | null
+          areas_served?: string[]
+          availability?: string
+          avatar_url?: string | null
+          bio?: string
+          category_slug?: string | null
+          claim_status?: string
+          country?: string | null
+          cover_url?: string | null
+          created_at?: string
+          district?: string | null
+          email?: string | null
+          id?: string
+          is_featured?: boolean
+          latitude?: number | null
+          legacy_ref?: string | null
+          legacy_source?: string | null
+          longitude?: number | null
+          name: string
+          opening_hours?: Json
+          owner_id: string
+          phone?: string | null
+          profile_type?: Database["public"]["Enums"]["public_profile_type"]
+          region?: string | null
+          seeded_by_official?: boolean
+          service_radius_km?: number | null
+          slug: string
+          subcategory?: string | null
+          suspended?: boolean
+          town?: string | null
+          updated_at?: string
+          verified?: string
+          whatsapp?: string | null
+        }
+        Update: {
+          address?: string | null
+          area?: string | null
+          areas_served?: string[]
+          availability?: string
+          avatar_url?: string | null
+          bio?: string
+          category_slug?: string | null
+          claim_status?: string
+          country?: string | null
+          cover_url?: string | null
+          created_at?: string
+          district?: string | null
+          email?: string | null
+          id?: string
+          is_featured?: boolean
+          latitude?: number | null
+          legacy_ref?: string | null
+          legacy_source?: string | null
+          longitude?: number | null
+          name?: string
+          opening_hours?: Json
+          owner_id?: string
+          phone?: string | null
+          profile_type?: Database["public"]["Enums"]["public_profile_type"]
+          region?: string | null
+          seeded_by_official?: boolean
+          service_radius_km?: number | null
+          slug?: string
+          subcategory?: string | null
+          suspended?: boolean
+          town?: string | null
+          updated_at?: string
+          verified?: string
+          whatsapp?: string | null
+        }
+        Relationships: []
+      }
       reports: {
         Row: {
           created_at: string
@@ -1340,6 +1504,7 @@ export type Database = {
           hidden: boolean
           id: string
           provider_user_id: string
+          public_profile_id: string | null
           rating: number
           text: string
           user_id: string
@@ -1349,6 +1514,7 @@ export type Database = {
           hidden?: boolean
           id?: string
           provider_user_id: string
+          public_profile_id?: string | null
           rating: number
           text?: string
           user_id: string
@@ -1358,11 +1524,20 @@ export type Database = {
           hidden?: boolean
           id?: string
           provider_user_id?: string
+          public_profile_id?: string | null
           rating?: number
           text?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "reviews_public_profile_id_fkey"
+            columns: ["public_profile_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       saved_opportunities: {
         Row: {
@@ -1748,8 +1923,10 @@ export type Database = {
           preferred_contact_method: Database["public"]["Enums"]["contact_method"]
           preferred_date: string | null
           preferred_time: string | null
+          profile_service_id: string | null
           provider_confirmed_completion: boolean
           provider_id: string | null
+          public_profile_id: string | null
           region: string | null
           selected_provider_id: string | null
           service_needed: string
@@ -1787,8 +1964,10 @@ export type Database = {
           preferred_contact_method?: Database["public"]["Enums"]["contact_method"]
           preferred_date?: string | null
           preferred_time?: string | null
+          profile_service_id?: string | null
           provider_confirmed_completion?: boolean
           provider_id?: string | null
+          public_profile_id?: string | null
           region?: string | null
           selected_provider_id?: string | null
           service_needed: string
@@ -1826,8 +2005,10 @@ export type Database = {
           preferred_contact_method?: Database["public"]["Enums"]["contact_method"]
           preferred_date?: string | null
           preferred_time?: string | null
+          profile_service_id?: string | null
           provider_confirmed_completion?: boolean
           provider_id?: string | null
+          public_profile_id?: string | null
           region?: string | null
           selected_provider_id?: string | null
           service_needed?: string
@@ -1841,7 +2022,22 @@ export type Database = {
           urgent_flag?: boolean
           visibility?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "service_requests_profile_service_id_fkey"
+            columns: ["profile_service_id"]
+            isOneToOne: false
+            referencedRelation: "profile_services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_requests_public_profile_id_fkey"
+            columns: ["public_profile_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       service_subcategories: {
         Row: {
@@ -2038,6 +2234,7 @@ export type Database = {
         Args: { lat1: number; lat2: number; lon1: number; lon2: number }
         Returns: number
       }
+      _slugify: { Args: { _text: string }; Returns: string }
       admin_add_credits: {
         Args: { _amount: number; _reason?: string; _user_id: string }
         Returns: undefined
@@ -2225,8 +2422,10 @@ export type Database = {
           preferred_contact_method: Database["public"]["Enums"]["contact_method"]
           preferred_date: string | null
           preferred_time: string | null
+          profile_service_id: string | null
           provider_confirmed_completion: boolean
           provider_id: string | null
+          public_profile_id: string | null
           region: string | null
           selected_provider_id: string | null
           service_needed: string
@@ -2365,6 +2564,7 @@ export type Database = {
         | "church"
         | "ngo"
         | "admin"
+      public_profile_type: "individual" | "business" | "organization"
       report_status: "open" | "reviewing" | "resolved" | "dismissed"
       seeded_profile_status: "unclaimed" | "claim_pending" | "claimed"
       service_request_status:
@@ -2553,6 +2753,7 @@ export const Constants = {
         "ngo",
         "admin",
       ],
+      public_profile_type: ["individual", "business", "organization"],
       report_status: ["open", "reviewing", "resolved", "dismissed"],
       seeded_profile_status: ["unclaimed", "claim_pending", "claimed"],
       service_request_status: [
