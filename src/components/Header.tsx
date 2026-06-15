@@ -141,7 +141,7 @@ export function Header() {
                 <Link to="/me" onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-navy hover:bg-muted">My Profile</Link>
                 <MyCreditsLink onClick={() => setOpen(false)} />
                 <Link to="/settings" onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-navy hover:bg-muted">Settings</Link>
-                <Link to="/businesses/create" onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-navy hover:bg-muted">Create Business Page</Link>
+                
                 {isModerator && (
                   <>
                     <div className="my-2 border-t border-border" />
