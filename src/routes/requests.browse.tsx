@@ -231,13 +231,10 @@ function BrowseRequests() {
         )}
 
         {/* Safety notice compact */}
-        <div className="mt-2.5 flex items-start gap-2 rounded-xl border border-orange/30 bg-orange/5 px-3 py-1.5 text-[11px] text-foreground/80">
-          <ShieldAlert className="h-3.5 w-3.5 shrink-0 text-orange" />
-          <p>{REQUESTS_SAFETY_TEXT}</p>
-        </div>
+        <SafetyNotice />
 
         {/* List */}
-        <div className="mt-3 pb-24 sm:pb-8">
+        <div className="mt-3 pb-32 sm:pb-8">
           {loading && <p className="text-sm text-muted-foreground">Loading…</p>}
           {!loading && radiusExpanded && (
             <div className="mb-3 rounded-xl border border-orange/30 bg-orange/5 p-3 text-xs text-foreground/80">
