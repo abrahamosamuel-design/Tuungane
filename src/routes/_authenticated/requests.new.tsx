@@ -227,6 +227,15 @@ function NewRequest() {
         <h1 className="font-display text-3xl font-bold text-navy">Create a Request</h1>
         <p className="mt-1 text-sm text-muted-foreground">Tell providers what you need.</p>
 
+        {targetProfile && (
+          <div className="mt-3 rounded-xl border border-orange/40 bg-orange/5 p-3 text-xs">
+            <p className="text-navy">
+              Requesting from <span className="font-semibold">{targetProfile.name}</span>
+              {targetService ? <> · <span className="font-semibold">{targetService.title}</span></> : null}
+            </p>
+          </div>
+        )}
+
         <div className="mt-4 flex gap-3 rounded-xl border border-orange/30 bg-orange/5 p-3 text-xs text-foreground/80">
           <ShieldAlert className="h-4 w-4 shrink-0 text-orange" />
           <p>{REQUESTS_SAFETY_TEXT}</p>
