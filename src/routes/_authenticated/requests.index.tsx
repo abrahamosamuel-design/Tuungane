@@ -101,7 +101,7 @@ function RequestsPage() {
               icon={Inbox}
               title={`No requests ${role === "customer" ? "sent" : "received"} yet`}
               description={role === "customer" ? "Find a verified provider and send your first service request." : "When customers send requests in your category, they'll show up here."}
-              action={role === "customer" ? { label: "Browse services", to: "/services" } : { label: "See open requests", to: "/services/requests" }}
+              action={role === "customer" ? { label: "Browse services", to: "/services" } : { label: "See open requests", to: "/requests/browse" }}
             />
           )}
           {filtered.map((r) => (

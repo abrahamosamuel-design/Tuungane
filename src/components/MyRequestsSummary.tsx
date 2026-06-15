@@ -65,7 +65,7 @@ export function MyRequestsSummary({ limit = 5, title = "My service requests" }: 
             <p>No service requests yet.</p>
             <p className="mt-2 flex flex-wrap items-center justify-center gap-2 text-xs">
               <Link to="/services" className="rounded-full bg-orange px-3 py-1 font-semibold text-orange-foreground">Browse services</Link>
-              <Link to="/services/requests" className="rounded-full border border-border px-3 py-1 font-semibold text-navy hover:border-orange">See open requests</Link>
+              <Link to="/requests/browse" className="rounded-full border border-border px-3 py-1 font-semibold text-navy hover:border-orange">See open requests</Link>
             </p>
           </div>
         )}
