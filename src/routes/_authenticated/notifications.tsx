@@ -5,7 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { Avatar } from "@/components/social/Avatar";
 import { timeAgo } from "@/lib/format";
-import { Heart, MessageCircle, ThumbsUp, Star, UserPlus, ClipboardList, CheckCircle2, PlayCircle, Send, ShieldCheck, AlertTriangle, XCircle } from "lucide-react";
+import { Heart, MessageCircle, ThumbsUp, Star, UserPlus, ClipboardList, CheckCircle2, PlayCircle, Send, ShieldCheck, AlertTriangle, XCircle, Settings } from "lucide-react";
+import { isTypeEnabled, loadNotifPrefs, type NotifPrefs, DEFAULT_PREFS } from "@/lib/notification-prefs";
 
 export const Route = createFileRoute("/_authenticated/notifications")({
   head: () => ({ meta: [{ title: "Notifications — Tuungane" }] }),

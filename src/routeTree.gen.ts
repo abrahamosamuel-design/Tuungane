@@ -51,6 +51,7 @@ import { Route as AuthenticatedRequestsNewRouteImport } from './routes/_authenti
 import { Route as AuthenticatedRequestsIdRouteImport } from './routes/_authenticated/requests.$id'
 import { Route as AuthenticatedProfilesNewRouteImport } from './routes/_authenticated/profiles.new'
 import { Route as AuthenticatedProfilesIdRouteImport } from './routes/_authenticated/profiles.$id'
+import { Route as AuthenticatedNotificationsPreferencesRouteImport } from './routes/_authenticated/notifications.preferences'
 import { Route as AuthenticatedNotificationsIdRouteImport } from './routes/_authenticated/notifications.$id'
 import { Route as AuthenticatedMessagesIdRouteImport } from './routes/_authenticated/messages.$id'
 
@@ -269,6 +270,12 @@ const AuthenticatedProfilesIdRoute = AuthenticatedProfilesIdRouteImport.update({
   path: '/profiles/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedNotificationsPreferencesRoute =
+  AuthenticatedNotificationsPreferencesRouteImport.update({
+    id: '/preferences',
+    path: '/preferences',
+    getParentRoute: () => AuthenticatedNotificationsRoute,
+  } as any)
 const AuthenticatedNotificationsIdRoute =
   AuthenticatedNotificationsIdRouteImport.update({
     id: '/$id',
@@ -319,6 +326,7 @@ export interface FileRoutesByFullPath {
   '/services/': typeof ServicesIndexRoute
   '/messages/$id': typeof AuthenticatedMessagesIdRoute
   '/notifications/$id': typeof AuthenticatedNotificationsIdRoute
+  '/notifications/preferences': typeof AuthenticatedNotificationsPreferencesRoute
   '/profiles/$id': typeof AuthenticatedProfilesIdRoute
   '/profiles/new': typeof AuthenticatedProfilesNewRoute
   '/requests/$id': typeof AuthenticatedRequestsIdRoute
@@ -363,6 +371,7 @@ export interface FileRoutesByTo {
   '/services': typeof ServicesIndexRoute
   '/messages/$id': typeof AuthenticatedMessagesIdRoute
   '/notifications/$id': typeof AuthenticatedNotificationsIdRoute
+  '/notifications/preferences': typeof AuthenticatedNotificationsPreferencesRoute
   '/profiles/$id': typeof AuthenticatedProfilesIdRoute
   '/profiles/new': typeof AuthenticatedProfilesNewRoute
   '/requests/$id': typeof AuthenticatedRequestsIdRoute
@@ -410,6 +419,7 @@ export interface FileRoutesById {
   '/services/': typeof ServicesIndexRoute
   '/_authenticated/messages/$id': typeof AuthenticatedMessagesIdRoute
   '/_authenticated/notifications/$id': typeof AuthenticatedNotificationsIdRoute
+  '/_authenticated/notifications/preferences': typeof AuthenticatedNotificationsPreferencesRoute
   '/_authenticated/profiles/$id': typeof AuthenticatedProfilesIdRoute
   '/_authenticated/profiles/new': typeof AuthenticatedProfilesNewRoute
   '/_authenticated/requests/$id': typeof AuthenticatedRequestsIdRoute
@@ -457,6 +467,7 @@ export interface FileRouteTypes {
     | '/services/'
     | '/messages/$id'
     | '/notifications/$id'
+    | '/notifications/preferences'
     | '/profiles/$id'
     | '/profiles/new'
     | '/requests/$id'
@@ -501,6 +512,7 @@ export interface FileRouteTypes {
     | '/services'
     | '/messages/$id'
     | '/notifications/$id'
+    | '/notifications/preferences'
     | '/profiles/$id'
     | '/profiles/new'
     | '/requests/$id'
@@ -547,6 +559,7 @@ export interface FileRouteTypes {
     | '/services/'
     | '/_authenticated/messages/$id'
     | '/_authenticated/notifications/$id'
+    | '/_authenticated/notifications/preferences'
     | '/_authenticated/profiles/$id'
     | '/_authenticated/profiles/new'
     | '/_authenticated/requests/$id'
@@ -877,6 +890,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfilesIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/notifications/preferences': {
+      id: '/_authenticated/notifications/preferences'
+      path: '/preferences'
+      fullPath: '/notifications/preferences'
+      preLoaderRoute: typeof AuthenticatedNotificationsPreferencesRouteImport
+      parentRoute: typeof AuthenticatedNotificationsRoute
+    }
     '/_authenticated/notifications/$id': {
       id: '/_authenticated/notifications/$id'
       path: '/$id'
@@ -896,11 +916,14 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedNotificationsRouteChildren {
   AuthenticatedNotificationsIdRoute: typeof AuthenticatedNotificationsIdRoute
+  AuthenticatedNotificationsPreferencesRoute: typeof AuthenticatedNotificationsPreferencesRoute
 }
 
 const AuthenticatedNotificationsRouteChildren: AuthenticatedNotificationsRouteChildren =
   {
     AuthenticatedNotificationsIdRoute: AuthenticatedNotificationsIdRoute,
+    AuthenticatedNotificationsPreferencesRoute:
+      AuthenticatedNotificationsPreferencesRoute,
   }
 
 const AuthenticatedNotificationsRouteWithChildren =
