@@ -38,11 +38,32 @@ const CHANNEL_ICON: Record<NotifChannel, React.ComponentType<{ className?: strin
 function NotificationPreferencesPage() {
   const [prefs, setPrefs] = useState<NotifPrefs>(DEFAULT_PREFS);
   const [loaded, setLoaded] = useState(false);
+  const [pushSupported, setPushSupported] = useState(false);
+  const [pushPermission, setPushPermission] = useState<NotificationPermission | "unsupported">("default");
+  const [pushSubscribed, setPushSubscribed] = useState(false);
+  const [pushBusy, setPushBusy] = useState(false);
 
   useEffect(() => {
     setPrefs(loadNotifPrefs());
     setLoaded(true);
+    const supported = isPushSupported();
+    setPushSupported(supported);
+    setPushPermission(getPushPermission());
+    if (supported) {
+      getActiveSubscriptionEndpoint().then((ep) => setPushSubscribed(!!ep));
+    }
   }, []);
+
+  // Mirror push-channel preferences to the server whenever they change so the
+  // edge function knows which categories to deliver to.
+  useEffect(() => {
+    if (!loaded) return;
+    const pushPrefs = CATEGORY_ORDER.reduce(
+      (acc, c) => ({ ...acc, [c]: !!prefs[c].push }),
+      {} as Record<NotifCategory, boolean>,
+    );
+    syncPushPrefsToServer(pushPrefs).catch(() => {});
+  }, [prefs, loaded]);
 
   const toggle = (cat: NotifCategory, ch: NotifChannel, value: boolean) => {
     const next: NotifPrefs = { ...prefs, [cat]: { ...prefs[cat], [ch]: value } };
@@ -68,6 +89,31 @@ function NotificationPreferencesPage() {
     setPrefs(next);
     saveNotifPrefs(next);
     toast.success(`${CATEGORY_LABELS[cat].title} ${value ? "enabled" : "muted"}`);
+  };
+
+  const handleEnablePush = async () => {
+    setPushBusy(true);
+    const res = await enablePush();
+    setPushBusy(false);
+    setPushPermission(getPushPermission());
+    if (res.ok) {
+      setPushSubscribed(true);
+      toast.success("Push notifications enabled on this device");
+    } else if (res.reason === "denied") {
+      toast.error("Push permission was denied. Enable it in your browser settings.");
+    } else if (res.reason === "unsupported") {
+      toast.error("This browser does not support push notifications.");
+    } else {
+      toast.error("Couldn't enable push: " + (res.reason || "unknown error"));
+    }
+  };
+
+  const handleDisablePush = async () => {
+    setPushBusy(true);
+    await disablePush();
+    setPushBusy(false);
+    setPushSubscribed(false);
+    toast.success("Push disabled on this device");
   };
 
   if (!loaded) return null;
