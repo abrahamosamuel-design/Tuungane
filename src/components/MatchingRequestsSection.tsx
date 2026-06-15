@@ -286,7 +286,7 @@ export function MatchingRequestsSection() {
             <RefreshCw className={`h-3 w-3 ${refreshing ? "animate-spin" : ""}`} />
             Refresh
           </button>
-          <Link to="/services/requests" className="inline-flex items-center gap-1 text-xs font-semibold text-orange hover:underline">Open feed <ArrowRight className="h-3 w-3" /></Link>
+          <Link to="/requests/browse" className="inline-flex items-center gap-1 text-xs font-semibold text-orange hover:underline">Open feed <ArrowRight className="h-3 w-3" /></Link>
         </div>
       </div>
 
