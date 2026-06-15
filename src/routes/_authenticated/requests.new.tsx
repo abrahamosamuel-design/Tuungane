@@ -64,6 +64,39 @@ function NewRequest() {
     customer_whatsapp: "",
   });
 
+  // Targeted profile context (from /p/$slug "Request" button)
+  const [targetProfile, setTargetProfile] = useState<{ id: string; owner_id: string; name: string; profile_type: string; category_slug: string | null; subcategory: string | null } | null>(null);
+  const [targetService, setTargetService] = useState<{ id: string; title: string } | null>(null);
+
+  useEffect(() => {
+    if (!search.profileId) return;
+    (async () => {
+      const { data: p } = await supabase
+        .from("public_profiles")
+        .select("id,owner_id,name,profile_type,category_slug,subcategory")
+        .eq("id", search.profileId)
+        .maybeSingle();
+      if (!p) return;
+      setTargetProfile(p as typeof targetProfile);
+      setF((s) => ({
+        ...s,
+        category_slug: p.category_slug || s.category_slug,
+        subcategory: p.subcategory || s.subcategory,
+      }));
+      if (search.serviceId) {
+        const { data: svc } = await supabase
+          .from("profile_services")
+          .select("id,title")
+          .eq("id", search.serviceId)
+          .maybeSingle();
+        if (svc) {
+          setTargetService(svc as { id: string; title: string });
+          setF((s) => ({ ...s, title: s.title || `${svc.title} — ${p.name}` }));
+        }
+      }
+    })();
+  }, [search.profileId, search.serviceId]);
+
   useEffect(() => {
     if (!loading && !user) {
       nav({ to: "/login", search: { tab: "signup", redirect: "/requests/new" } as never });
