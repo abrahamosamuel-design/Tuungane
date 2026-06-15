@@ -286,3 +286,38 @@ function Pill({ active, onClick, children }: { active: boolean; onClick: () => v
     </button>
   );
 }
+
+function SafetyNotice() {
+  const [expanded, setExpanded] = useState(false);
+  return (
+    <div className="mt-2.5 rounded-xl border border-orange/20 bg-orange/5 px-3 py-2 text-[11px] text-foreground/80">
+      <div className="flex items-start gap-2">
+        <ShieldAlert className="h-3.5 w-3.5 shrink-0 text-orange" />
+        <div className="flex-1">
+          <p>Stay safe: verify the customer, location, and request details before starting work.</p>
+          {!expanded && (
+            <button
+              onClick={() => setExpanded(true)}
+              className="mt-1 inline-flex items-center gap-0.5 font-semibold text-orange hover:underline"
+            >
+              Safety tips <ChevronDown className="h-3 w-3" />
+            </button>
+          )}
+          {expanded && (
+            <div className="mt-1.5">
+              <p className="text-foreground/70">
+                Verify the customer, location, and request details before starting work. Do not share sensitive information or make unsafe payments. Report suspicious requests.
+              </p>
+              <button
+                onClick={() => setExpanded(false)}
+                className="mt-1 inline-flex items-center gap-0.5 font-semibold text-orange hover:underline"
+              >
+                Hide <ChevronUp className="h-3 w-3" />
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
