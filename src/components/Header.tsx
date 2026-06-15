@@ -113,9 +113,12 @@ export function Header() {
             </>
           )}
         </div>
-        <button aria-label="Toggle menu" className="rounded-md p-2 text-navy md:hidden" onClick={() => setOpen((o) => !o)}>
-          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
+        <div className="flex items-center gap-1 md:hidden">
+          {user && <NotificationsBell />}
+          <button aria-label="Toggle menu" className="rounded-md p-2 text-navy" onClick={() => setOpen((o) => !o)}>
+            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+        </div>
       </div>
       {open && (
         <div className="border-t border-border bg-background md:hidden max-h-[calc(100vh-4rem)] overflow-y-auto overscroll-contain">
