@@ -131,6 +131,42 @@ function NotificationPreferencesPage() {
           Pick how you want to be alerted for each category. Toggle channels independently — in-app, email, and push.
         </p>
 
+        {/* Push enable/disable for this device */}
+        <div className="mt-5 rounded-2xl border border-border bg-card p-4">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-start gap-3">
+              <div className="rounded-xl bg-orange/10 p-2 text-orange">
+                <Smartphone className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="font-semibold text-navy">Push on this device</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  {!pushSupported
+                    ? "This browser does not support web push. Try a recent Chrome, Edge, or Firefox — on iOS, install Tuungane to your Home Screen first."
+                    : pushPermission === "denied"
+                      ? "You blocked notifications for this site. Enable them in your browser site settings, then try again."
+                      : pushSubscribed
+                        ? "Push is active. You'll receive alerts for enabled categories below even when Tuungane is closed."
+                        : "Turn on push to get alerts on this device when something happens — even when Tuungane is closed."}
+                </p>
+              </div>
+            </div>
+            {pushSupported && pushPermission !== "denied" && (
+              <button
+                onClick={pushSubscribed ? handleDisablePush : handleEnablePush}
+                disabled={pushBusy}
+                className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold transition disabled:opacity-50 ${
+                  pushSubscribed
+                    ? "border border-border bg-background text-navy hover:border-orange"
+                    : "bg-orange text-white hover:bg-orange/90"
+                }`}
+              >
+                {pushBusy ? "…" : pushSubscribed ? "Disable" : "Enable push"}
+              </button>
+            )}
+          </div>
+        </div>
+
         {/* Channel legend / column toggles */}
         <div className="mt-5 grid grid-cols-3 gap-2 sm:gap-3">
           {CHANNEL_ORDER.map((ch) => {
