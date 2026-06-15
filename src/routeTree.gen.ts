@@ -29,6 +29,7 @@ import { Route as ServicesRequestsRouteImport } from './routes/services.requests
 import { Route as ServicesSlugRouteImport } from './routes/services.$slug'
 import { Route as RequestsBrowseRouteImport } from './routes/requests.browse'
 import { Route as ProvidersIdRouteImport } from './routes/providers.$id'
+import { Route as PSlugRouteImport } from './routes/p.$slug'
 import { Route as OpportunitiesNewRouteImport } from './routes/opportunities.new'
 import { Route as OpportunitiesIdRouteImport } from './routes/opportunities.$id'
 import { Route as OfficialPostsIdRouteImport } from './routes/official-posts.$id'
@@ -148,6 +149,11 @@ const RequestsBrowseRoute = RequestsBrowseRouteImport.update({
 const ProvidersIdRoute = ProvidersIdRouteImport.update({
   id: '/providers/$id',
   path: '/providers/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PSlugRoute = PSlugRouteImport.update({
+  id: '/p/$slug',
+  path: '/p/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OpportunitiesNewRoute = OpportunitiesNewRouteImport.update({
@@ -289,6 +295,7 @@ export interface FileRoutesByFullPath {
   '/official-posts/$id': typeof OfficialPostsIdRoute
   '/opportunities/$id': typeof OpportunitiesIdRoute
   '/opportunities/new': typeof OpportunitiesNewRoute
+  '/p/$slug': typeof PSlugRoute
   '/providers/$id': typeof ProvidersIdRoute
   '/requests/browse': typeof RequestsBrowseRoute
   '/services/$slug': typeof ServicesSlugRoute
@@ -330,6 +337,7 @@ export interface FileRoutesByTo {
   '/official-posts/$id': typeof OfficialPostsIdRoute
   '/opportunities/$id': typeof OpportunitiesIdRoute
   '/opportunities/new': typeof OpportunitiesNewRoute
+  '/p/$slug': typeof PSlugRoute
   '/providers/$id': typeof ProvidersIdRoute
   '/requests/browse': typeof RequestsBrowseRoute
   '/services/$slug': typeof ServicesSlugRoute
@@ -374,6 +382,7 @@ export interface FileRoutesById {
   '/official-posts/$id': typeof OfficialPostsIdRoute
   '/opportunities/$id': typeof OpportunitiesIdRoute
   '/opportunities/new': typeof OpportunitiesNewRoute
+  '/p/$slug': typeof PSlugRoute
   '/providers/$id': typeof ProvidersIdRoute
   '/requests/browse': typeof RequestsBrowseRoute
   '/services/$slug': typeof ServicesSlugRoute
@@ -418,6 +427,7 @@ export interface FileRouteTypes {
     | '/official-posts/$id'
     | '/opportunities/$id'
     | '/opportunities/new'
+    | '/p/$slug'
     | '/providers/$id'
     | '/requests/browse'
     | '/services/$slug'
@@ -459,6 +469,7 @@ export interface FileRouteTypes {
     | '/official-posts/$id'
     | '/opportunities/$id'
     | '/opportunities/new'
+    | '/p/$slug'
     | '/providers/$id'
     | '/requests/browse'
     | '/services/$slug'
@@ -502,6 +513,7 @@ export interface FileRouteTypes {
     | '/official-posts/$id'
     | '/opportunities/$id'
     | '/opportunities/new'
+    | '/p/$slug'
     | '/providers/$id'
     | '/requests/browse'
     | '/services/$slug'
@@ -534,6 +546,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   GuidesPropertyMaintenanceKampalaRoute: typeof GuidesPropertyMaintenanceKampalaRoute
   OfficialPostsIdRoute: typeof OfficialPostsIdRoute
+  PSlugRoute: typeof PSlugRoute
   ProvidersIdRoute: typeof ProvidersIdRoute
   RequestsBrowseRoute: typeof RequestsBrowseRoute
   ServicesSlugRoute: typeof ServicesSlugRoute
@@ -682,6 +695,13 @@ declare module '@tanstack/react-router' {
       path: '/providers/$id'
       fullPath: '/providers/$id'
       preLoaderRoute: typeof ProvidersIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/p/$slug': {
+      id: '/p/$slug'
+      path: '/p/$slug'
+      fullPath: '/p/$slug'
+      preLoaderRoute: typeof PSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/opportunities/new': {
@@ -919,6 +939,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   GuidesPropertyMaintenanceKampalaRoute: GuidesPropertyMaintenanceKampalaRoute,
   OfficialPostsIdRoute: OfficialPostsIdRoute,
+  PSlugRoute: PSlugRoute,
   ProvidersIdRoute: ProvidersIdRoute,
   RequestsBrowseRoute: RequestsBrowseRoute,
   ServicesSlugRoute: ServicesSlugRoute,

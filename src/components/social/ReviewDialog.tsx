@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 
-export function ReviewDialog({ open, onClose, providerUserId, onPosted }: { open: boolean; onClose: () => void; providerUserId: string; onPosted?: () => void }) {
+export function ReviewDialog({ open, onClose, providerUserId, publicProfileId, onPosted }: { open: boolean; onClose: () => void; providerUserId: string; publicProfileId?: string; onPosted?: () => void }) {
   const { user } = useAuth();
   const [rating, setRating] = useState(5);
   const [text, setText] = useState("");
@@ -17,6 +17,7 @@ export function ReviewDialog({ open, onClose, providerUserId, onPosted }: { open
     setBusy(true);
     const { error } = await supabase.from("reviews").upsert({
       provider_user_id: providerUserId, user_id: user.id, rating, text: text.trim(),
+      public_profile_id: publicProfileId ?? null,
     }, { onConflict: "provider_user_id,user_id" });
     setBusy(false);
     if (error) toast.error(error.message);
