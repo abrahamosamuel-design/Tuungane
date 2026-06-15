@@ -26,6 +26,8 @@ import { findDistrictBounds, type Bounds } from "@/lib/geocoding";
 export const Route = createFileRoute("/_authenticated/requests/new")({
   validateSearch: (search: Record<string, unknown>) => ({
     providerId: typeof search.providerId === "string" ? search.providerId : "",
+    profileId: typeof search.profileId === "string" ? search.profileId : "",
+    serviceId: typeof search.serviceId === "string" ? search.serviceId : "",
   }),
   head: () => ({ meta: [{ title: "Create a Request — Tuungane" }] }),
   component: NewRequest,
@@ -61,6 +63,39 @@ function NewRequest() {
     customer_phone: "",
     customer_whatsapp: "",
   });
+
+  // Targeted profile context (from /p/$slug "Request" button)
+  const [targetProfile, setTargetProfile] = useState<{ id: string; owner_id: string; name: string; profile_type: string; category_slug: string | null; subcategory: string | null } | null>(null);
+  const [targetService, setTargetService] = useState<{ id: string; title: string } | null>(null);
+
+  useEffect(() => {
+    if (!search.profileId) return;
+    (async () => {
+      const { data: p } = await supabase
+        .from("public_profiles")
+        .select("id,owner_id,name,profile_type,category_slug,subcategory")
+        .eq("id", search.profileId)
+        .maybeSingle();
+      if (!p) return;
+      setTargetProfile(p as typeof targetProfile);
+      setF((s) => ({
+        ...s,
+        category_slug: p.category_slug || s.category_slug,
+        subcategory: p.subcategory || s.subcategory,
+      }));
+      if (search.serviceId) {
+        const { data: svc } = await supabase
+          .from("profile_services")
+          .select("id,title")
+          .eq("id", search.serviceId)
+          .maybeSingle();
+        if (svc) {
+          setTargetService(svc as { id: string; title: string });
+          setF((s) => ({ ...s, title: s.title || `${svc.title} — ${p.name}` }));
+        }
+      }
+    })();
+  }, [search.profileId, search.serviceId]);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -132,11 +167,17 @@ function NewRequest() {
       return;
     }
 
-    const targetedProvider = search.providerId || null;
+    // If the request targets a public profile, infer the provider for individual profiles.
+    const targetedProvider =
+      search.providerId ||
+      (targetProfile && targetProfile.profile_type === "individual" ? targetProfile.owner_id : null);
+    const isTargeted = !!(targetedProvider || targetProfile);
 
     const { data: inserted, error } = await supabase.from("service_requests").insert({
       customer_id: user.id,
       provider_id: targetedProvider,
+      public_profile_id: targetProfile?.id ?? null,
+      profile_service_id: targetService?.id ?? null,
       category_slug: f.category_slug,
       subcategory: f.subcategory,
       service_needed: f.subcategory || cat.name,
@@ -152,7 +193,7 @@ function NewRequest() {
       preferred_date: f.preferred_date || null,
       preferred_time: f.preferred_time || null,
       preferred_contact_method: f.preferred_contact_method,
-      visibility: targetedProvider ? "matching_only" : f.visibility,
+      visibility: isTargeted ? "matching_only" : f.visibility,
       customer_phone: f.customer_phone || null,
       customer_whatsapp: f.customer_whatsapp || null,
       attachment_url,
@@ -185,6 +226,15 @@ function NewRequest() {
       <section className="mx-auto max-w-2xl px-4 py-8">
         <h1 className="font-display text-3xl font-bold text-navy">Create a Request</h1>
         <p className="mt-1 text-sm text-muted-foreground">Tell providers what you need.</p>
+
+        {targetProfile && (
+          <div className="mt-3 rounded-xl border border-orange/40 bg-orange/5 p-3 text-xs">
+            <p className="text-navy">
+              Requesting from <span className="font-semibold">{targetProfile.name}</span>
+              {targetService ? <> · <span className="font-semibold">{targetService.title}</span></> : null}
+            </p>
+          </div>
+        )}
 
         <div className="mt-4 flex gap-3 rounded-xl border border-orange/30 bg-orange/5 p-3 text-xs text-foreground/80">
           <ShieldAlert className="h-4 w-4 shrink-0 text-orange" />
