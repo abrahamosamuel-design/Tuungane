@@ -26,6 +26,8 @@ import { findDistrictBounds, type Bounds } from "@/lib/geocoding";
 export const Route = createFileRoute("/_authenticated/requests/new")({
   validateSearch: (search: Record<string, unknown>) => ({
     providerId: typeof search.providerId === "string" ? search.providerId : "",
+    profileId: typeof search.profileId === "string" ? search.profileId : "",
+    serviceId: typeof search.serviceId === "string" ? search.serviceId : "",
   }),
   head: () => ({ meta: [{ title: "Create a Request — Tuungane" }] }),
   component: NewRequest,
