@@ -130,8 +130,6 @@ function Dashboard() {
 
         <MyProfilesPanel />
 
-        <MyBusinessPagesPanel />
-
         {search.composeBusiness && (
           <div className="mt-6">
             <h2 className="mb-3 font-display text-lg font-bold text-navy">Post update</h2>
