@@ -5,7 +5,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { Avatar } from "@/components/social/Avatar";
 import { timeAgo } from "@/lib/format";
-import { Heart, MessageCircle, ThumbsUp, Star, UserPlus, ClipboardList, CheckCircle2, PlayCircle, Send, ShieldCheck, AlertTriangle, XCircle } from "lucide-react";
+import { Heart, MessageCircle, ThumbsUp, Star, UserPlus, ClipboardList, CheckCircle2, PlayCircle, Send, ShieldCheck, AlertTriangle, XCircle, Settings } from "lucide-react";
+import { isTypeEnabled, loadNotifPrefs, type NotifPrefs, DEFAULT_PREFS } from "@/lib/notification-prefs";
 
 export const Route = createFileRoute("/_authenticated/notifications")({
   head: () => ({ meta: [{ title: "Notifications — Tuungane" }] }),
@@ -49,6 +50,14 @@ function NotificationsPage() {
   const [items, setItems] = useState<Notif[]>([]);
   const [busy, setBusy] = useState(true);
   const [filter, setFilter] = useState<"all" | "jobs" | "social">("all");
+  const [prefs, setPrefs] = useState<NotifPrefs>(DEFAULT_PREFS);
+
+  useEffect(() => {
+    setPrefs(loadNotifPrefs());
+    const onChange = () => setPrefs(loadNotifPrefs());
+    window.addEventListener("tuungane:notif-prefs-changed", onChange);
+    return () => window.removeEventListener("tuungane:notif-prefs-changed", onChange);
+  }, []);
 
   useEffect(() => {
     if (!loading && !user) nav({ to: "/login", search: { tab: "login", redirect: "/notifications" } as never });
@@ -72,18 +81,30 @@ function NotificationsPage() {
   useEffect(() => { if (user) load(); /* eslint-disable-next-line */ }, [user?.id]);
 
 
+  const visible = items.filter((n) => isTypeEnabled(prefs, n.type));
   const filtered = filter === "all"
-    ? items
+    ? visible
     : filter === "jobs"
-      ? items.filter((n) => JOB_TYPES.has(n.type))
-      : items.filter((n) => !JOB_TYPES.has(n.type));
+      ? visible.filter((n) => JOB_TYPES.has(n.type))
+      : visible.filter((n) => !JOB_TYPES.has(n.type));
 
   if (!user) return null;
   return (
     <Layout>
       <section className="mx-auto max-w-2xl px-4 py-8">
-        <h1 className="font-display text-3xl font-bold text-navy">Notifications</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Activity on your posts, profile, follows, and service jobs.</p>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h1 className="font-display text-3xl font-bold text-navy">Notifications</h1>
+            <p className="mt-1 text-sm text-muted-foreground">Activity on your posts, profile, follows, and service jobs.</p>
+          </div>
+          <Link
+            to="/notifications/preferences"
+            className="inline-flex shrink-0 items-center gap-1 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-semibold text-navy hover:border-orange"
+            aria-label="Notification preferences"
+          >
+            <Settings className="h-3.5 w-3.5" /> Preferences
+          </Link>
+        </div>
 
         <div className="mt-4 inline-flex rounded-full border border-border bg-card p-1">
           {([

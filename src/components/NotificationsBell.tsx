@@ -3,15 +3,30 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { isTypeEnabled, loadNotifPrefs, type NotifPrefs, DEFAULT_PREFS } from "@/lib/notification-prefs";
 
 export function NotificationsBell() {
   const { user } = useAuth();
   const [count, setCount] = useState(0);
+  const [prefs, setPrefs] = useState<NotifPrefs>(DEFAULT_PREFS);
+
+  useEffect(() => {
+    setPrefs(loadNotifPrefs());
+    const onChange = () => setPrefs(loadNotifPrefs());
+    window.addEventListener("tuungane:notif-prefs-changed", onChange);
+    return () => window.removeEventListener("tuungane:notif-prefs-changed", onChange);
+  }, []);
 
   const load = async () => {
     if (!user) return;
-    const { count: c } = await supabase.from("notifications").select("*", { count: "exact", head: true }).eq("user_id", user.id).eq("read", false);
-    setCount(c ?? 0);
+    const { data } = await supabase
+      .from("notifications")
+      .select("type")
+      .eq("user_id", user.id)
+      .eq("read", false)
+      .limit(200);
+    const c = (data ?? []).filter((n) => isTypeEnabled(prefs, n.type)).length;
+    setCount(c);
   };
 
   useEffect(() => {
@@ -20,7 +35,7 @@ export function NotificationsBell() {
     const ch = supabase.channel(`notif-${user.id}-${Math.random().toString(36).slice(2)}`).on("postgres_changes", { event: "*", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` }, load).subscribe();
     return () => { supabase.removeChannel(ch); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user?.id]);
+  }, [user?.id, prefs]);
 
   if (!user) return null;
   return (
