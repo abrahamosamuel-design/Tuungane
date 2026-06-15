@@ -71,13 +71,6 @@ function NotificationsPage() {
 
   useEffect(() => { if (user) load(); /* eslint-disable-next-line */ }, [user?.id]);
 
-  const hrefFor = (n: Notif) => {
-    if (n.target_type === "service_request" && n.target_id) return `/requests/${n.target_id}`;
-    if (n.target_type === "service_feedback" && user) return `/u/${user.id}`;
-    if (n.target_type === "profile" && n.target_id) return `/u/${n.target_id}`;
-    if (n.target_type === "post" && user) return `/u/${user.id}`;
-    return "/feed";
-  };
 
   const filtered = filter === "all"
     ? items
