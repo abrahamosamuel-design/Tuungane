@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Layout } from "@/components/Layout";
-import { ChevronLeft, Bell, Mail, Smartphone } from "lucide-react";
+import { ChevronLeft, Bell, Mail, Smartphone, CheckCircle2, XCircle, AlertCircle, Info } from "lucide-react";
 import {
   CATEGORY_LABELS,
   CATEGORY_ORDER,
