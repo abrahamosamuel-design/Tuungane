@@ -50,6 +50,14 @@ function NotificationsPage() {
   const [items, setItems] = useState<Notif[]>([]);
   const [busy, setBusy] = useState(true);
   const [filter, setFilter] = useState<"all" | "jobs" | "social">("all");
+  const [prefs, setPrefs] = useState<NotifPrefs>(DEFAULT_PREFS);
+
+  useEffect(() => {
+    setPrefs(loadNotifPrefs());
+    const onChange = () => setPrefs(loadNotifPrefs());
+    window.addEventListener("tuungane:notif-prefs-changed", onChange);
+    return () => window.removeEventListener("tuungane:notif-prefs-changed", onChange);
+  }, []);
 
   useEffect(() => {
     if (!loading && !user) nav({ to: "/login", search: { tab: "login", redirect: "/notifications" } as never });
