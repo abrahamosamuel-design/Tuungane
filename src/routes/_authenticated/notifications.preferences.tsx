@@ -21,6 +21,7 @@ import {
   disablePush,
   getActiveSubscriptionEndpoint,
   syncPushPrefsToServer,
+  setPushOptOut,
 } from "@/lib/push";
 import { toast } from "sonner";
 
