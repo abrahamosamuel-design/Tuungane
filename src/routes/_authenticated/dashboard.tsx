@@ -12,6 +12,7 @@ import { MatchingRequestsSection } from "@/components/MatchingRequestsSection";
 import { ContactedProvidersList } from "@/components/ContactedProvidersList";
 import { ProviderContactsList } from "@/components/ProviderContactsList";
 import { MyBusinessPagesPanel } from "@/components/business/BusinessPageManager";
+import { MyProfilesPanel } from "@/components/profiles/MyProfilesPanel";
 import { toast } from "sonner";
 
 
@@ -126,6 +127,8 @@ function Dashboard() {
           {profile?.is_provider && <MatchingRequestsSection />}
           {profile?.is_provider ? <ProviderContactsList /> : <ContactedProvidersList />}
         </div>
+
+        <MyProfilesPanel />
 
         <MyBusinessPagesPanel />
 

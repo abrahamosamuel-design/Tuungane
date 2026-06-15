@@ -1,0 +1,156 @@
+import { useEffect, useState } from "react";
+import { Link } from "@tanstack/react-router";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/use-auth";
+import { Plus, Building2, User as UserIcon, Landmark, Star, ChevronRight } from "lucide-react";
+
+type Profile = {
+  id: string;
+  name: string;
+  profile_type: "individual" | "business" | "organization";
+  category_slug: string | null;
+  subcategory: string | null;
+  district: string | null;
+  town: string | null;
+  verified: string;
+  avatar_url: string | null;
+};
+
+type ProfileCardData = Profile & {
+  serviceCount: number;
+  pendingRequests: number;
+  rating: number | null;
+  reviewCount: number;
+};
+
+const TYPE_META: Record<Profile["profile_type"], { label: string; icon: React.ComponentType<{ className?: string }> }> = {
+  individual: { label: "Individual", icon: UserIcon },
+  business: { label: "Business", icon: Building2 },
+  organization: { label: "Organization", icon: Landmark },
+};
+
+export function MyProfilesPanel() {
+  const { user } = useAuth();
+  const [items, setItems] = useState<ProfileCardData[] | null>(null);
+
+  const load = async () => {
+    if (!user) return;
+    const { data: profiles } = await supabase
+      .from("public_profiles")
+      .select("id,name,profile_type,category_slug,subcategory,district,town,verified,avatar_url")
+      .eq("owner_id", user.id)
+      .order("created_at", { ascending: true });
+
+    const list = (profiles ?? []) as Profile[];
+    const enriched = await Promise.all(
+      list.map(async (p) => {
+        const [{ count: sc }, { count: pr }, reviewsRes] = await Promise.all([
+          supabase.from("profile_services").select("*", { count: "exact", head: true }).eq("profile_id", p.id),
+          supabase.from("service_requests").select("*", { count: "exact", head: true }).eq("public_profile_id", p.id).eq("status", "requested"),
+          supabase.from("reviews").select("rating").eq("public_profile_id", p.id),
+        ]);
+        const ratings = (reviewsRes.data ?? []).map((r: { rating: number }) => r.rating).filter((n) => typeof n === "number");
+        const avg = ratings.length ? ratings.reduce((a, b) => a + b, 0) / ratings.length : null;
+        return {
+          ...p,
+          serviceCount: sc ?? 0,
+          pendingRequests: pr ?? 0,
+          rating: avg,
+          reviewCount: ratings.length,
+        } satisfies ProfileCardData;
+      })
+    );
+    setItems(enriched);
+  };
+
+  useEffect(() => {
+    if (user) load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
+
+  return (
+    <section className="mt-6">
+      <div className="mb-3 flex items-center justify-between">
+        <div>
+          <h2 className="font-display text-lg font-bold text-navy">My Profiles</h2>
+          <p className="text-xs text-muted-foreground">One account · many public profiles</p>
+        </div>
+        <Link
+          to="/profiles/new"
+          className="inline-flex items-center gap-1 rounded-xl bg-orange px-3 py-2 text-xs font-semibold text-orange-foreground"
+        >
+          <Plus className="h-4 w-4" /> Create Profile
+        </Link>
+      </div>
+
+      {items === null ? (
+        <div className="rounded-2xl border border-border bg-card p-4 text-sm text-muted-foreground">Loading…</div>
+      ) : items.length === 0 ? (
+        <div className="rounded-2xl border border-dashed border-border bg-card p-5 text-center">
+          <p className="font-semibold text-navy">No public profiles yet</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Create a profile for each business, skill or organization you offer.
+          </p>
+          <Link
+            to="/profiles/new"
+            className="mt-3 inline-flex items-center gap-1 rounded-xl bg-orange px-4 py-2 text-sm font-semibold text-orange-foreground"
+          >
+            <Plus className="h-4 w-4" /> Create your first profile
+          </Link>
+        </div>
+      ) : (
+        <ul className="space-y-3">
+          {items.map((p) => {
+            const Icon = TYPE_META[p.profile_type].icon;
+            return (
+              <li key={p.id}>
+                <Link
+                  to="/profiles/$id"
+                  params={{ id: p.id }}
+                  className="flex items-start gap-3 rounded-2xl border border-border bg-card p-4 transition hover:border-orange/60"
+                >
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-muted">
+                    {p.avatar_url ? (
+                      <img src={p.avatar_url} alt="" className="h-full w-full object-cover" />
+                    ) : (
+                      <Icon className="h-6 w-6 text-navy/60" />
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="truncate font-semibold text-navy">{p.name}</p>
+                      <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-navy/70">
+                        {TYPE_META[p.profile_type].label}
+                      </span>
+                      {p.verified === "verified" && (
+                        <span className="rounded-full bg-green/10 px-2 py-0.5 text-[10px] font-semibold text-green">Verified</span>
+                      )}
+                    </div>
+                    <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                      {p.subcategory || p.category_slug || "—"} · {p.town || p.district || "Location not set"}
+                    </p>
+                    <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-navy/80">
+                      <span>{p.serviceCount} service{p.serviceCount === 1 ? "" : "s"}</span>
+                      <span className="text-muted-foreground">·</span>
+                      <span className="inline-flex items-center gap-0.5">
+                        <Star className="h-3 w-3 fill-orange text-orange" />
+                        {p.rating ? p.rating.toFixed(1) : "—"} ({p.reviewCount})
+                      </span>
+                      {p.pendingRequests > 0 && (
+                        <>
+                          <span className="text-muted-foreground">·</span>
+                          <span className="font-semibold text-orange">{p.pendingRequests} pending</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground" />
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </section>
+  );
+}

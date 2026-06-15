@@ -47,6 +47,8 @@ import { Route as AuthenticatedRequestsIndexRouteImport } from './routes/_authen
 import { Route as AuthenticatedMessagesIndexRouteImport } from './routes/_authenticated/messages.index'
 import { Route as AuthenticatedRequestsNewRouteImport } from './routes/_authenticated/requests.new'
 import { Route as AuthenticatedRequestsIdRouteImport } from './routes/_authenticated/requests.$id'
+import { Route as AuthenticatedProfilesNewRouteImport } from './routes/_authenticated/profiles.new'
+import { Route as AuthenticatedProfilesIdRouteImport } from './routes/_authenticated/profiles.$id'
 import { Route as AuthenticatedMessagesIdRouteImport } from './routes/_authenticated/messages.$id'
 
 const TermsRoute = TermsRouteImport.update({
@@ -243,6 +245,17 @@ const AuthenticatedRequestsIdRoute = AuthenticatedRequestsIdRouteImport.update({
   path: '/requests/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedProfilesNewRoute =
+  AuthenticatedProfilesNewRouteImport.update({
+    id: '/profiles/new',
+    path: '/profiles/new',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedProfilesIdRoute = AuthenticatedProfilesIdRouteImport.update({
+  id: '/profiles/$id',
+  path: '/profiles/$id',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedMessagesIdRoute = AuthenticatedMessagesIdRouteImport.update({
   id: '/messages/$id',
   path: '/messages/$id',
@@ -284,6 +297,8 @@ export interface FileRoutesByFullPath {
   '/businesses/': typeof BusinessesIndexRoute
   '/services/': typeof ServicesIndexRoute
   '/messages/$id': typeof AuthenticatedMessagesIdRoute
+  '/profiles/$id': typeof AuthenticatedProfilesIdRoute
+  '/profiles/new': typeof AuthenticatedProfilesNewRoute
   '/requests/$id': typeof AuthenticatedRequestsIdRoute
   '/requests/new': typeof AuthenticatedRequestsNewRoute
   '/messages/': typeof AuthenticatedMessagesIndexRoute
@@ -323,6 +338,8 @@ export interface FileRoutesByTo {
   '/businesses': typeof BusinessesIndexRoute
   '/services': typeof ServicesIndexRoute
   '/messages/$id': typeof AuthenticatedMessagesIdRoute
+  '/profiles/$id': typeof AuthenticatedProfilesIdRoute
+  '/profiles/new': typeof AuthenticatedProfilesNewRoute
   '/requests/$id': typeof AuthenticatedRequestsIdRoute
   '/requests/new': typeof AuthenticatedRequestsNewRoute
   '/messages': typeof AuthenticatedMessagesIndexRoute
@@ -365,6 +382,8 @@ export interface FileRoutesById {
   '/businesses/': typeof BusinessesIndexRoute
   '/services/': typeof ServicesIndexRoute
   '/_authenticated/messages/$id': typeof AuthenticatedMessagesIdRoute
+  '/_authenticated/profiles/$id': typeof AuthenticatedProfilesIdRoute
+  '/_authenticated/profiles/new': typeof AuthenticatedProfilesNewRoute
   '/_authenticated/requests/$id': typeof AuthenticatedRequestsIdRoute
   '/_authenticated/requests/new': typeof AuthenticatedRequestsNewRoute
   '/_authenticated/messages/': typeof AuthenticatedMessagesIndexRoute
@@ -407,6 +426,8 @@ export interface FileRouteTypes {
     | '/businesses/'
     | '/services/'
     | '/messages/$id'
+    | '/profiles/$id'
+    | '/profiles/new'
     | '/requests/$id'
     | '/requests/new'
     | '/messages/'
@@ -446,6 +467,8 @@ export interface FileRouteTypes {
     | '/businesses'
     | '/services'
     | '/messages/$id'
+    | '/profiles/$id'
+    | '/profiles/new'
     | '/requests/$id'
     | '/requests/new'
     | '/messages'
@@ -487,6 +510,8 @@ export interface FileRouteTypes {
     | '/businesses/'
     | '/services/'
     | '/_authenticated/messages/$id'
+    | '/_authenticated/profiles/$id'
+    | '/_authenticated/profiles/new'
     | '/_authenticated/requests/$id'
     | '/_authenticated/requests/new'
     | '/_authenticated/messages/'
@@ -785,6 +810,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRequestsIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/profiles/new': {
+      id: '/_authenticated/profiles/new'
+      path: '/profiles/new'
+      fullPath: '/profiles/new'
+      preLoaderRoute: typeof AuthenticatedProfilesNewRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/profiles/$id': {
+      id: '/_authenticated/profiles/$id'
+      path: '/profiles/$id'
+      fullPath: '/profiles/$id'
+      preLoaderRoute: typeof AuthenticatedProfilesIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/messages/$id': {
       id: '/_authenticated/messages/$id'
       path: '/messages/$id'
@@ -804,6 +843,8 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedMessagesIdRoute: typeof AuthenticatedMessagesIdRoute
+  AuthenticatedProfilesIdRoute: typeof AuthenticatedProfilesIdRoute
+  AuthenticatedProfilesNewRoute: typeof AuthenticatedProfilesNewRoute
   AuthenticatedRequestsIdRoute: typeof AuthenticatedRequestsIdRoute
   AuthenticatedRequestsNewRoute: typeof AuthenticatedRequestsNewRoute
   AuthenticatedMessagesIndexRoute: typeof AuthenticatedMessagesIndexRoute
@@ -819,6 +860,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedMessagesIdRoute: AuthenticatedMessagesIdRoute,
+  AuthenticatedProfilesIdRoute: AuthenticatedProfilesIdRoute,
+  AuthenticatedProfilesNewRoute: AuthenticatedProfilesNewRoute,
   AuthenticatedRequestsIdRoute: AuthenticatedRequestsIdRoute,
   AuthenticatedRequestsNewRoute: AuthenticatedRequestsNewRoute,
   AuthenticatedMessagesIndexRoute: AuthenticatedMessagesIndexRoute,
