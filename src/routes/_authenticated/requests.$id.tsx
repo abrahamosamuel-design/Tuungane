@@ -82,6 +82,29 @@ function RequestDetailsPage() {
     const { count } = await supabase.from("service_feedback").select("id", { count: "exact", head: true }).eq("service_request_id", id);
     setHasFeedback((count ?? 0) > 0);
 
+    // For the customer on an open/in-progress request, fetch revealable phones
+    // for every responding provider (respecting their phone_visibility setting)
+    // so Call/View Phone can appear directly on the response card.
+    if (user.id === sr.customer_id && provIds.length) {
+      const [{ data: sps }, { data: pps }] = await Promise.all([
+        supabase.from("service_profiles").select("user_id,phone").in("user_id", provIds),
+        supabase.from("provider_privacy_settings").select("user_id,phone_visibility" as never).in("user_id", provIds),
+      ]);
+      const visMap = new Map<string, string>();
+      ((pps ?? []) as Array<{ user_id: string; phone_visibility?: string }>).forEach((p) => {
+        visMap.set(p.user_id, p.phone_visibility ?? "logged_in_only");
+      });
+      const phoneMap: Record<string, string | null> = {};
+      ((sps ?? []) as Array<{ user_id: string; phone: string | null }>).forEach((s) => {
+        const vis = visMap.get(s.user_id) ?? "logged_in_only";
+        const allowed = vis !== "hidden" && vis !== "messages_first";
+        phoneMap[s.user_id] = allowed ? (s.phone ?? null) : null;
+      });
+      setResponsePhones(phoneMap);
+    } else {
+      setResponsePhones({});
+    }
+
     // Fetch contact info of the assigned provider (or original provider for direct requests)
     const assigned = sr.selected_provider_id ?? sr.provider_id;
     if (assigned) {
