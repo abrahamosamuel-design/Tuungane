@@ -19,6 +19,25 @@ export async function startOrGetConversation(opts: {
   return data as unknown as string;
 }
 
+/**
+ * Open or create a direct conversation (no service request) between the
+ * signed-in customer and a provider. Returns the conversation id.
+ */
+export async function startDirectConversation(providerId: string): Promise<string> {
+  // RPC types may not yet be regenerated; cast to keep TS happy.
+  const { data, error } = await (supabase.rpc as unknown as (
+    fn: string,
+    args: Record<string, unknown>,
+  ) => Promise<{ data: string | null; error: { message: string } | null }>)(
+    "start_direct_conversation",
+    { _provider_id: providerId },
+  );
+  if (error) throw error;
+  return data as string;
+}
+
+
+
 export async function markConversationRead(conversationId: string) {
   await supabase.rpc("mark_conversation_read", { _conversation_id: conversationId });
 }
