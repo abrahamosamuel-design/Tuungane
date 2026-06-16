@@ -8,7 +8,7 @@ import { ProviderResponseDialog } from "@/components/ProviderResponseDialog";
 import { FeedbackDialog } from "@/components/FeedbackDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import { requestStatusMap, trustScoreLabel, type ProviderResponseRow, type ServiceRequestRow, type TrustStatsRow } from "@/data/serviceRequestTypes";
+import { requestStatusMap, toVisibleStatus, visibleStatusMeta, trustScoreLabel, type ProviderResponseRow, type ServiceRequestRow, type TrustStatsRow } from "@/data/serviceRequestTypes";
 import { timeAgo } from "@/lib/format";
 import { toast } from "sonner";
 import { SafetyNote, SAFETY_TIPS } from "@/components/SafetyNote";
