@@ -30,7 +30,7 @@ type Tab =
   | "overview"
   | "users" | "providers" | "businesses"
   | "requests" | "posts" | "recs"
-  | "reports" | "disputes"
+  | "reports" | "disputes" | "trust"
   | "credits" | "official" | "contact" | "activity" | "locations" | "categories";
 
 const TAB_GROUPS: { label: string; tabs: { id: Tab; label: string; adminOnly?: boolean }[] }[] = [
@@ -44,6 +44,9 @@ const TAB_GROUPS: { label: string; tabs: { id: Tab; label: string; adminOnly?: b
     { id: "requests", label: "Manage Requests" },
     { id: "posts", label: "Posts" },
     { id: "recs", label: "Recommendations" },
+  ]},
+  { label: "Trust & Verification", tabs: [
+    { id: "trust", label: "Trust Center" },
   ]},
   { label: "Trust & Safety", tabs: [
     { id: "reports", label: "Reports" },
