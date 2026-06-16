@@ -273,8 +273,12 @@ function RealProviderCard({ p, userLoc }: { p: Row; userLoc: UserLocation | null
       {p.bio && <p className="line-clamp-2 px-5 pb-4 text-sm text-foreground/70">{p.bio}</p>}
       <div className="mt-auto flex items-center justify-between border-t border-border bg-surface px-5 py-3">
         <span className="text-xs text-muted-foreground">{p.district ?? ""}</span>
-        <span className="text-xs font-semibold text-orange transition group-hover:underline">View profile →</span>
+        <div className="flex items-center gap-2" onClick={(e) => e.preventDefault()}>
+          <ProviderQuickContact providerId={p.user_id} source="service_listing" variant="compact" />
+          <span className="text-xs font-semibold text-orange transition group-hover:underline">View →</span>
+        </div>
       </div>
+
     </Link>
   );
 }
