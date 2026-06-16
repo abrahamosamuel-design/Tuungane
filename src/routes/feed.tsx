@@ -15,6 +15,7 @@ import type { OfficialAccountRow, OfficialPostRow } from "@/data/officialPostTyp
 import { useUserLocation } from "@/hooks/use-user-location";
 import { sortByProximity, type TargetLocation } from "@/lib/location";
 import { NearYouBadge } from "@/components/NearYouBadge";
+import { ProfileTrustBadge } from "@/components/trust/ProfileTrustBadge";
 
 export const Route = createFileRoute("/feed")({
   head: () => ({ meta: [{ title: "Activity Feed — Tuungane" }] }),
