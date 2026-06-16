@@ -23,6 +23,7 @@ import {
   syncPushPrefsToServer,
   setPushOptOut,
 } from "@/lib/push";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/notifications/preferences")({
@@ -132,6 +133,15 @@ function NotificationPreferencesPage() {
     toast.success("Push disabled on this device");
   };
 
+  const handleSendTest = async () => {
+    setPushBusy(true);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase as any).rpc("send_test_push_notification");
+    setPushBusy(false);
+    if (error) { toast.error("Couldn't send test: " + error.message); return; }
+    toast.success("Test sent — check for the push notification on this device.");
+  };
+
   if (!loaded) return null;
 
   const columnAllOn = (ch: NotifChannel) => CATEGORY_ORDER.every((c) => prefs[c][ch]);
@@ -231,17 +241,28 @@ function NotificationPreferencesPage() {
               </div>
             </div>
             {pushSupported && pushPermission !== "denied" && (
-              <button
-                onClick={pushSubscribed ? handleDisablePush : handleEnablePush}
-                disabled={pushBusy}
-                className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold transition disabled:opacity-50 ${
-                  pushSubscribed
-                    ? "border border-border bg-background text-navy hover:border-orange"
-                    : "bg-orange text-white hover:bg-orange/90"
-                }`}
-              >
-                {pushBusy ? "…" : pushSubscribed ? "Disable" : "Enable push"}
-              </button>
+              <div className="flex shrink-0 flex-col items-end gap-1.5">
+                <button
+                  onClick={pushSubscribed ? handleDisablePush : handleEnablePush}
+                  disabled={pushBusy}
+                  className={`rounded-full px-3 py-1.5 text-xs font-semibold transition disabled:opacity-50 ${
+                    pushSubscribed
+                      ? "border border-border bg-background text-navy hover:border-orange"
+                      : "bg-orange text-white hover:bg-orange/90"
+                  }`}
+                >
+                  {pushBusy ? "…" : pushSubscribed ? "Disable" : "Enable push"}
+                </button>
+                {pushSubscribed && (
+                  <button
+                    onClick={handleSendTest}
+                    disabled={pushBusy}
+                    className="rounded-full border border-border bg-background px-3 py-1.5 text-xs font-semibold text-navy hover:border-orange disabled:opacity-50"
+                  >
+                    Send test notification
+                  </button>
+                )}
+              </div>
             )}
           </div>
         </div>
