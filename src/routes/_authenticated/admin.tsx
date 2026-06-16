@@ -16,6 +16,7 @@ import { ContactAnalyticsTab } from "@/components/admin/ContactAnalyticsTab";
 import { ActivityLogTab } from "@/components/admin/ActivityLogTab";
 import { LocationsTab } from "@/components/admin/LocationsTab";
 import { CategoriesTab } from "@/components/admin/CategoriesTab";
+import { TrustVerificationCenter } from "@/components/admin/trust/TrustVerificationCenter";
 import { officialPostTypeMap, type OfficialAccountRow, type OfficialPostRow } from "@/data/officialPostTypes";
 import { timeAgo } from "@/lib/format";
 import { toast } from "sonner";
@@ -29,7 +30,7 @@ type Tab =
   | "overview"
   | "users" | "providers" | "businesses"
   | "requests" | "posts" | "recs"
-  | "reports" | "disputes"
+  | "reports" | "disputes" | "trust"
   | "credits" | "official" | "contact" | "activity" | "locations" | "categories";
 
 const TAB_GROUPS: { label: string; tabs: { id: Tab; label: string; adminOnly?: boolean }[] }[] = [
@@ -43,6 +44,9 @@ const TAB_GROUPS: { label: string; tabs: { id: Tab; label: string; adminOnly?: b
     { id: "requests", label: "Manage Requests" },
     { id: "posts", label: "Posts" },
     { id: "recs", label: "Recommendations" },
+  ]},
+  { label: "Trust & Verification", tabs: [
+    { id: "trust", label: "Trust Center" },
   ]},
   { label: "Trust & Safety", tabs: [
     { id: "reports", label: "Reports" },
@@ -111,6 +115,7 @@ function Admin() {
           {tab === "recs" && <RecsTab />}
           {tab === "reports" && <ReportsTab />}
           {tab === "disputes" && <DisputesAdminTab />}
+          {tab === "trust" && <TrustVerificationCenter />}
           {tab === "credits" && <CreditsAdminTab />}
           {tab === "official" && <OfficialTabContent initialSub={officialSub} />}
           {tab === "contact" && <ContactAnalyticsTab />}
