@@ -88,7 +88,7 @@ function RequestDetailsPage() {
     if (user.id === sr.customer_id && provIds.length) {
       const [{ data: sps }, { data: pps }] = await Promise.all([
         supabase.from("service_profiles").select("user_id,phone").in("user_id", provIds),
-        supabase.from("provider_privacy_settings").select("user_id,phone_visibility" as never).in("user_id", provIds),
+        (supabase.from("provider_privacy_settings") as never as { select: (s: string) => { in: (c: string, v: string[]) => Promise<{ data: Array<{ user_id: string; phone_visibility?: string }> | null }> } }).select("user_id,phone_visibility").in("user_id", provIds),
       ]);
       const visMap = new Map<string, string>();
       ((pps ?? []) as Array<{ user_id: string; phone_visibility?: string }>).forEach((p) => {
