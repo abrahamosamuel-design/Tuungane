@@ -7,6 +7,8 @@ import { Building2, BadgeCheck, MapPin, Phone, Mail, Sparkles, Edit3, Users } fr
 import { toast } from "sonner";
 import { orgTypeLabel } from "@/data/businessTypes";
 import { SafetyNote, SAFETY_TIPS } from "@/components/SafetyNote";
+import { TrustBadge } from "@/components/trust/TrustBadge";
+import { useTrustBadge } from "@/hooks/use-trust-badges";
 
 import { RouteErrorCard, RouteNotFoundCard } from "@/lib/route-boundaries";
 
