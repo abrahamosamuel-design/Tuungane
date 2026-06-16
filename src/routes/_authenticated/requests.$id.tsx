@@ -330,7 +330,7 @@ function RequestDetailsPage() {
 
         {/* Customer view: comparison list */}
         {isCustomer && req.status === "requested" && (
-          <div className="mt-6">
+          <div id="responses-section" className="mt-6 scroll-mt-20">
             <h2 className="font-display text-lg font-bold text-navy">Compare provider responses</h2>
             {visibleResponses.length === 0 ? (
               <p className="mt-3 rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
