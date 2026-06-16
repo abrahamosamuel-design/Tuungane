@@ -133,6 +133,15 @@ function NotificationPreferencesPage() {
     toast.success("Push disabled on this device");
   };
 
+  const handleSendTest = async () => {
+    setPushBusy(true);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase as any).rpc("send_test_push_notification");
+    setPushBusy(false);
+    if (error) { toast.error("Couldn't send test: " + error.message); return; }
+    toast.success("Test sent — check for the push notification on this device.");
+  };
+
   if (!loaded) return null;
 
   const columnAllOn = (ch: NotifChannel) => CATEGORY_ORDER.every((c) => prefs[c][ch]);
