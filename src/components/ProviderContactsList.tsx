@@ -58,9 +58,9 @@ export function ProviderContactsList({ limit = 5 }: { limit?: number }) {
     <div className="rounded-2xl border border-border bg-card p-5">
       <div className="flex items-center gap-2">
         <div className="rounded-lg bg-orange/10 p-2 text-orange"><Inbox className="h-4 w-4" /></div>
-        <h2 className="font-display text-lg font-bold text-navy">Customers who contacted you</h2>
+        <h2 className="font-display text-lg font-bold text-navy">Recent customer contacts</h2>
       </div>
-      <p className="mt-1 text-xs text-muted-foreground">Each customer first sent you a tracked service request before contacting you.</p>
+      <p className="mt-1 text-xs text-muted-foreground">Customers who contacted you through a tracked Tuungane request.</p>
 
       <div className="mt-4 space-y-2">
         {!loaded && <p className="text-xs text-muted-foreground">Loading…</p>}
