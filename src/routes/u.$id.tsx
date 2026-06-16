@@ -28,8 +28,9 @@ import { BoostButton } from "@/components/BoostButton";
 import { MobileActionBar } from "@/components/MobileActionBar";
 import { ContactProviderModal } from "@/components/ContactProviderModal";
 import { ContactOptionsUnlocked } from "@/components/ContactOptionsUnlocked";
+import { ProviderQuickContact } from "@/components/ProviderQuickContact";
 import { useContactGate } from "@/hooks/use-contact-gate";
-import { Lock } from "lucide-react";
+
 
 
 import { RouteErrorCard, RouteNotFoundCard } from "@/lib/route-boundaries";
@@ -322,14 +323,13 @@ function UserProfile() {
               />
             </div>
           ) : (
-            <div className="mt-4 flex items-start gap-2 rounded-2xl border border-orange/30 bg-orange/5 p-4 text-sm">
-              <Lock className="mt-0.5 h-4 w-4 shrink-0 text-orange" />
-              <p className="text-foreground/80">
-                Request this service through Tuungane to unlock contact options and help us track service quality.
-              </p>
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              <ProviderQuickContact providerId={id} source="provider_profile" />
+              <span className="text-xs text-muted-foreground">Tip: request the service through Tuungane to keep your job tracked and reviewable.</span>
             </div>
           )
         )}
+
 
         {isProvider && <div className="mt-4"><TrustStats providerId={id} /></div>}
 
