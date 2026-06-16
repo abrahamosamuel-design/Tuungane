@@ -12,6 +12,39 @@ export const requestStatusMap = Object.fromEntries(
   requestStatuses.map((s) => [s.value, s]),
 ) as Record<RequestStatusValue, (typeof requestStatuses)[number]>;
 
+/**
+ * Customer / provider-facing simplified status.
+ * Internal statuses still exist (accepted, feedback_given, etc.) for admin/analytics,
+ * but the visible UI collapses them into three stages.
+ */
+export type VisibleStatus = "open" | "in_progress" | "completed" | "cancelled" | "disputed";
+
+export function toVisibleStatus(status: RequestStatusValue): VisibleStatus {
+  switch (status) {
+    case "requested":
+      return "open";
+    case "accepted":
+    case "in_progress":
+      return "in_progress";
+    case "completed":
+      return "completed";
+    case "cancelled":
+      return "cancelled";
+    case "disputed":
+      return "disputed";
+    default:
+      return "open";
+  }
+}
+
+export const visibleStatusMeta: Record<VisibleStatus, { label: string; color: string }> = {
+  open: { label: "Open", color: "bg-blue-100 text-blue-700" },
+  in_progress: { label: "In Progress", color: "bg-orange/15 text-orange" },
+  completed: { label: "Completed", color: "bg-green/10 text-green" },
+  cancelled: { label: "Cancelled", color: "bg-slate-100 text-slate-700" },
+  disputed: { label: "Disputed", color: "bg-destructive/10 text-destructive" },
+};
+
 // User-facing urgency labels mapped to the existing DB enum
 export const urgencyOptions = [
   { value: "emergency", label: "Today" },
