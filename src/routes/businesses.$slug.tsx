@@ -9,6 +9,7 @@ import { orgTypeLabel } from "@/data/businessTypes";
 import { SafetyNote, SAFETY_TIPS } from "@/components/SafetyNote";
 import { TrustBadge } from "@/components/trust/TrustBadge";
 import { useTrustBadge } from "@/hooks/use-trust-badges";
+import { ReportProfileButton } from "@/components/trust/ReportProfileButton";
 
 import { RouteErrorCard, RouteNotFoundCard } from "@/lib/route-boundaries";
 
@@ -155,6 +156,9 @@ function BusinessDetail() {
                   <button onClick={() => setEditing((v) => !v)} className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold text-navy hover:border-orange/60">
                     <Edit3 className="h-4 w-4" /> {editing ? "Cancel" : "Edit"}
                   </button>
+                )}
+                {user && user.id !== page.owner_id && (
+                  <ReportProfileButton kind="business_page" id={page.id} />
                 )}
               </div>
             </div>

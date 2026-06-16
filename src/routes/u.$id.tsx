@@ -1,6 +1,6 @@
 import { createFileRoute, useParams, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { MapPin, Phone, BadgeCheck, Flag, Star, Share2, Camera, Users, ThumbsUp, ClipboardList } from "lucide-react";
+import { MapPin, Phone, BadgeCheck, Star, Share2, Camera, Users, ThumbsUp, ClipboardList } from "lucide-react";
 import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
@@ -10,13 +10,14 @@ import { PostComposer } from "@/components/social/PostComposer";
 import { PostCard, type PostRow } from "@/components/social/PostCard";
 import { RecommendDialog } from "@/components/social/RecommendDialog";
 import { ReviewDialog } from "@/components/social/ReviewDialog";
-import { ReportDialog } from "@/components/social/ReportDialog";
+
 import { SaveButton } from "@/components/social/SaveButton";
 
 import { ClaimProfileDialog } from "@/components/ClaimProfileDialog";
 import { TrustStats } from "@/components/TrustStats";
 import { TrustBadge } from "@/components/trust/TrustBadge";
 import { useTrustBadge } from "@/hooks/use-trust-badges";
+import { ReportProfileButton } from "@/components/trust/ReportProfileButton";
 import { RequestServiceDialog } from "@/components/RequestServiceDialog";
 import { VerifiedReviewBadge } from "@/components/VerifiedReviewBadge";
 import { uploadMedia } from "@/lib/upload";
@@ -115,7 +116,7 @@ function UserProfile() {
   const [tab, setTab] = useState<Tab>("services");
   const [recOpen, setRecOpen] = useState(false);
   const [revOpen, setRevOpen] = useState(false);
-  const [reportOpen, setReportOpen] = useState(false);
+  
   const [uploadingCover, setUploadingCover] = useState(false);
   const [claimOpen, setClaimOpen] = useState(false);
   const [requestOpen, setRequestOpen] = useState(false);
@@ -307,7 +308,7 @@ function UserProfile() {
               </>
             )}
             {isOwn && <Link to="/dashboard" className="ml-auto rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-navy hover:border-orange">My Dashboard</Link>}
-            {!isOwn && user && <button onClick={() => setReportOpen(true)} aria-label="Report" className="ml-auto text-muted-foreground hover:text-destructive"><Flag className="h-4 w-4" /></button>}
+            {!isOwn && user && <ReportProfileButton kind="service_profile" id={id} className="ml-auto" />}
           </div>
         </div>
 
@@ -502,7 +503,7 @@ function UserProfile() {
 
         <RecommendDialog open={recOpen} onClose={() => setRecOpen(false)} providerUserId={id} />
         <ReviewDialog open={revOpen} onClose={() => setRevOpen(false)} providerUserId={id} onPosted={load} />
-        <ReportDialog open={reportOpen} onClose={() => setReportOpen(false)} targetType="provider" targetId={id} />
+        
         <ClaimProfileDialog serviceProfileUserId={id} open={claimOpen} onClose={() => setClaimOpen(false)} onSubmitted={load} />
         <RequestServiceDialog open={requestOpen} onClose={() => setRequestOpen(false)} providerId={id} providerName={sp?.business_name || profile.full_name} defaultCategorySlug={sp?.category_slug} defaultSubcategory={sp?.subcategory} onSubmitted={() => { load(); gate.refresh(); }} />
         <ContactProviderModal open={contactModalOpen} onClose={() => setContactModalOpen(false)} providerName={sp?.business_name || profile.full_name} onRequestService={() => setRequestOpen(true)} />
