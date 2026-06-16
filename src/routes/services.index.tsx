@@ -13,6 +13,8 @@ import { filterByRadius, proximityScore, type UserLocation } from "@/lib/locatio
 import { NearYouBadge } from "@/components/NearYouBadge";
 import { RadiusFilter } from "@/components/RadiusFilter";
 import { useFeaturedLocations, isFeaturedTarget } from "@/hooks/use-featured-locations";
+import { ProviderQuickContact } from "@/components/ProviderQuickContact";
+
 
 const iconMap: Record<string, any> = { Wrench, Sparkles, Building2, Scissors, Truck, Car, GraduationCap, Camera, ChefHat, Laptop, HeartPulse, Sprout, MoreHorizontal };
 
