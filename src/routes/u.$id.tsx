@@ -116,7 +116,7 @@ function UserProfile() {
   const [tab, setTab] = useState<Tab>("services");
   const [recOpen, setRecOpen] = useState(false);
   const [revOpen, setRevOpen] = useState(false);
-  const [reportOpen, setReportOpen] = useState(false);
+  
   const [uploadingCover, setUploadingCover] = useState(false);
   const [claimOpen, setClaimOpen] = useState(false);
   const [requestOpen, setRequestOpen] = useState(false);
