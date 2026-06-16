@@ -259,9 +259,7 @@ function UserProfile() {
               <div className="flex-1 min-w-0">
                 <h1 className="flex flex-wrap items-center gap-2 font-display text-2xl font-bold text-navy">
                   {sp?.business_name || profile.full_name}
-                  {(sp?.verified === "verified" || sp?.verified === "featured") && (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-green/10 px-2 py-0.5 text-xs font-semibold text-green"><BadgeCheck className="h-3 w-3" /> Verified</span>
-                  )}
+                  <TrustBadgeInline userId={id} />
                   <ProfileBoostBadges providerId={id} />
                 </h1>
                 {sp && <p className="text-sm font-medium text-orange">{sp.subcategory} {cat && <span className="text-muted-foreground">· {cat.name}</span>}</p>}
