@@ -278,8 +278,10 @@ export type Database = {
           id: string
           is_urgent: boolean
           provider_id: string
+          service_id: string | null
           service_job_id: string | null
-          service_request_id: string
+          service_request_id: string | null
+          source: string | null
           user_agent: string | null
         }
         Insert: {
@@ -290,8 +292,10 @@ export type Database = {
           id?: string
           is_urgent?: boolean
           provider_id: string
+          service_id?: string | null
           service_job_id?: string | null
-          service_request_id: string
+          service_request_id?: string | null
+          source?: string | null
           user_agent?: string | null
         }
         Update: {
@@ -302,8 +306,10 @@ export type Database = {
           id?: string
           is_urgent?: boolean
           provider_id?: string
+          service_id?: string | null
           service_job_id?: string | null
-          service_request_id?: string
+          service_request_id?: string | null
+          source?: string | null
           user_agent?: string | null
         }
         Relationships: []
@@ -1310,16 +1316,19 @@ export type Database = {
       provider_privacy_settings: {
         Row: {
           contact_reveal_policy: string
+          phone_visibility: string
           updated_at: string
           user_id: string
         }
         Insert: {
           contact_reveal_policy?: string
+          phone_visibility?: string
           updated_at?: string
           user_id: string
         }
         Update: {
           contact_reveal_policy?: string
+          phone_visibility?: string
           updated_at?: string
           user_id?: string
         }
