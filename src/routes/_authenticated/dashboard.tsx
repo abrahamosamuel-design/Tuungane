@@ -92,7 +92,7 @@ function Dashboard() {
 
   return (
     <Layout>
-      <section className="mx-auto max-w-3xl px-4 py-8 pb-32">
+      <section className="mx-auto max-w-3xl px-4 py-8 pb-40 [padding-bottom:calc(10rem+env(safe-area-inset-bottom))]">
         {/* 1. Greeting / header */}
         <div>
           <h1 className="font-display text-3xl font-bold text-navy">Hi, {profile?.full_name?.split(" ")[0] || "there"}</h1>
@@ -113,7 +113,7 @@ function Dashboard() {
         {/* 2. Quick actions */}
         <div className="mt-6">
           <h2 className="mb-3 font-display text-sm font-bold uppercase tracking-wide text-muted-foreground">Quick actions</h2>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <QuickAction to="/requests/new" icon={<ClipboardList className="h-5 w-5" />} label="Create request" hint="Find someone to help you" />
             {profile?.is_provider ? (
               <QuickAction to="/dashboard" icon={<Megaphone className="h-5 w-5" />} label="Post work update" hint="Share your work or offer" />
@@ -171,16 +171,7 @@ function Dashboard() {
 
         {profile?.is_provider && sp && (
           <>
-            <div className="mt-6 rounded-2xl border border-border bg-card p-4">
-              <div className="flex items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="text-xs uppercase tracking-wide text-muted-foreground">Service profile</p>
-                  <p className="truncate font-semibold text-navy">{sp.business_name || profile.full_name} · <span className="text-muted-foreground">{sp.subcategory}</span></p>
-                  <p className="truncate text-xs text-muted-foreground">{sp.town}, {sp.district}</p>
-                </div>
-                <button onClick={() => setSp(null)} className="shrink-0 text-xs font-medium text-orange">Edit</button>
-              </div>
-            </div>
+
 
             {/* 8. Post to your timeline */}
             <div className="mt-6">
@@ -234,12 +225,12 @@ function QuickAction({ to, params, icon, label, hint }: { to: string; params?: R
     <Link
       to={to as never}
       params={params as never}
-      className="flex items-start gap-3 rounded-2xl border border-border bg-card p-3 text-left hover:border-orange"
+      className="flex items-start gap-3 rounded-2xl border border-border bg-card p-4 text-left hover:border-orange"
     >
       <div className="shrink-0 rounded-xl bg-orange/10 p-2 text-orange">{icon}</div>
-      <div className="min-w-0">
-        <p className="truncate text-sm font-semibold text-navy">{label}</p>
-        <p className="truncate text-xs text-muted-foreground">{hint}</p>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-semibold leading-tight text-navy">{label}</p>
+        <p className="mt-0.5 text-xs leading-snug text-muted-foreground">{hint}</p>
       </div>
     </Link>
   );

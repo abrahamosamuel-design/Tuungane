@@ -67,21 +67,46 @@ export function ProviderContactsList({ limit = 5 }: { limit?: number }) {
         {loaded && rows.length === 0 && (
           <p className="rounded-xl border border-dashed border-border p-4 text-center text-sm text-muted-foreground">No customer contact activity yet.</p>
         )}
-        {rows.map((r) => (
-          <Link key={r.customer_id} to="/requests/$id" params={{ id: r.service_request_id }} className="flex items-center justify-between gap-3 rounded-xl border border-border p-3 hover:border-orange">
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold text-navy">{r.profile?.full_name ?? "Customer"}</p>
-              <p className="truncate text-xs text-muted-foreground">Contacted {timeAgo(r.last_at)} · view request</p>
+        {rows.map((r) => {
+          const allowCall = r.methods.has("call") || r.methods.has("phone");
+          return (
+            <div key={r.customer_id} className="rounded-xl border border-border p-3">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold text-navy">{r.profile?.full_name ?? "Customer"}</p>
+                  <p className="truncate text-xs text-muted-foreground">Contacted {timeAgo(r.last_at)}</p>
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {Array.from(r.methods).map((m) => (
+                    <span key={m} className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold capitalize text-navy">
+                      {methodIcon(m)} {m}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <div className="mt-2 flex flex-wrap gap-2">
+                <Link
+                  to="/requests/$id"
+                  params={{ id: r.service_request_id }}
+                  className="inline-flex items-center gap-1 rounded-full bg-orange px-3 py-1 text-[11px] font-semibold text-orange-foreground"
+                >
+                  View request
+                </Link>
+                <Link
+                  to="/messages"
+                  className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1 text-[11px] font-semibold text-navy hover:border-orange"
+                >
+                  <MessageSquare className="h-3 w-3" /> Message
+                </Link>
+                {allowCall && (
+                  <span className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1 text-[11px] font-semibold text-navy">
+                    <Phone className="h-3 w-3" /> Call logged
+                  </span>
+                )}
+              </div>
             </div>
-            <div className="flex flex-wrap gap-1">
-              {Array.from(r.methods).map((m) => (
-                <span key={m} className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold capitalize text-navy">
-                  {methodIcon(m)} {m}
-                </span>
-              ))}
-            </div>
-          </Link>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
