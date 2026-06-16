@@ -1,92 +1,84 @@
-## Goal
 
-Shift Tuungane from a bluish dashboard look to a white, black-text, Facebook/LinkedIn-style reading experience — without touching the homepage hero or the footer, and without changing functionality.
+# Trust & Verification Center — MVP plan
 
-## Approach: token-level retune (single source of truth)
+## Guiding principle
+"Anyone can create a profile. Trust grows in stages. Manual verification is reserved for stronger badges or flagged profiles." Trust is **profile-scoped**, never account-scoped.
 
-Most pages already consume semantic tokens (`bg-background`, `text-foreground`, `text-muted-foreground`, `border-border`, `bg-card`, `text-navy`, etc.) defined in `src/styles.css`. Rather than touching dozens of components, we rewrite the tokens. This propagates the new look platform-wide automatically.
+A "profile" in this system = one row in either `service_profiles` (Individual or Business provider) or `business_pages` (Business / Organization). Each is keyed by `(profile_kind, profile_id)`.
 
-### 1. `src/styles.css` — token rewrite
+---
 
-Replace the current oklch palette with the requested Facebook/LinkedIn-style values:
+## 1. Database (one migration)
 
-```
---background:        #FFFFFF
---surface:           #FFFFFF
---card:              #FFFFFF
---foreground:        #050505   (near-black main text)
---muted:             #F0F2F5   (soft grey input/section bg)
---muted-foreground:  #65676B   (secondary text)
---border:            #DADDE1
---input:             #DADDE1
---secondary:         #F0F2F5
---secondary-foreground: #050505
---popover / -fg:     #FFFFFF / #050505
+New tables, all linked by `(profile_kind, profile_id)` where `profile_kind ∈ ('service_profile','business_page')`.
 
---navy:    #0B1F3A  (kept as brand accent only)
---orange:  #FF6B1A  (primary CTA — unchanged role)
---green:   #22A652  (trust/verified — unchanged role)
---ring:    --orange
-```
+- `profile_trust_status` — current trust level per profile.
+  - level enum: `new`, `phone_verified`, `profile_complete`, `reviewed_provider`, `verified_provider`, `verified_business`, `verified_organization`, `under_review`, `suspended`
+  - `auto_level` (computed) vs `manual_level` (admin-set); displayed level = manual if set else auto.
+- `profile_verification_requests` — voluntary requests for a Verified badge. status: `pending`, `more_info`, `approved`, `rejected`, `revoked`. Stores requested_type, submitted text fields.
+- `verification_evidence` — file/link rows attached to a request (doc type + storage path; private bucket).
+- `profile_reports` — replaces ad-hoc use of `reports` for profile-targeted complaints. Keeps existing `reports` table intact; new table just for profile reports with reason enum + status.
+- `profile_admin_notes` — private notes (admins/mods only).
+- `trust_audit_log` — every admin action (action, prev_level, new_level, reason, actor).
+- `trust_settings` — single-row config table (manual verification open?, doc required?, completed-jobs threshold, review threshold, report auto-flag threshold, boosting allowed for unverified, etc.).
 
-Font stack (replace Plus Jakarta / Inter defaults):
+RLS:
+- Owner can read their own profile's trust status, own verification requests, own evidence.
+- Admins/moderators full read on all trust tables; only admin/mod can write admin notes, audit log, change manual_level, decide requests.
+- Public can read **only** the displayed badge via a SECURITY DEFINER `get_profile_trust_badge(kind, id)` returning level + counts (no notes/evidence).
+- Storage: new private bucket `verification-evidence` with RLS — owner upload, admin/mod read.
 
-```
---font-sans:    system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif
---font-display: same stack (kept as variable so existing `font-display` classes still resolve, just no longer a distinct serif/display face)
-```
+GRANTs included for all new public tables.
 
-Base typography (added to `@layer base`):
-- `html { font-size: 16px }`
-- body text default 15–16px (Tailwind `text-sm`/`text-base` already maps here)
-- headings: keep bold but recolor to `--foreground` (remove the implicit navy tint by not overriding color in base; `text-navy` classes that components opt into still work)
+## 2. Auto trust progression
+`recompute_profile_trust(kind, id)` SECURITY DEFINER function recalculates `auto_level` from:
+- phone verified on owner (`auth.users.phone_confirmed_at` or owner profile)
+- completeness: photo/logo, category, location, description, ≥1 service, contact set
+- ≥1 completed `service_requests` + ≥1 verified review (uses existing `provider_trust_stats`)
+Triggers call it on: profile update, service_request → completed, review insert, owner phone confirm. Manual levels (`verified_*`, `under_review`, `suspended`) override.
 
-Shadows softened to grey instead of navy-tinted:
-- `--shadow-card: 0 1px 2px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.06)`
-- `--shadow-elevated: 0 4px 12px rgba(0,0,0,0.08), 0 12px 32px rgba(0,0,0,0.10)`
+## 3. Admin UI — new "Trust & Verification" tab group in `src/routes/_authenticated/admin.tsx`
 
-Keep `--gradient-hero` exactly as-is (used by the homepage hero — must not change).
+New components in `src/components/admin/trust/`:
+- `TrustOverviewTab.tsx` — summary cards + "Needs Attention" list
+- `VerificationRequestsTab.tsx` — queue + review drawer with Approve / Reject / Request Info / Revoke / Add Note
+- `ReportedProfilesTab.tsx` — list with actions Dismiss / Warn / Under Review / Suspend / Revoke Verification
+- `TrustStatusTab.tsx` — searchable table of all profiles with filters; row actions Change Level / Add Badge / Suspend / Restore / Note
+- `AdminNotesTab.tsx` — searchable notes feed
+- `TrustAuditLogTab.tsx` — filterable audit log
+- `TrustSettingsTab.tsx` — form bound to `trust_settings`
 
-Mobile gutter rules at the bottom of `styles.css` stay.
+Adds a new "Trust & Verification" group in `TAB_GROUPS` with the 7 tabs.
 
-### 2. Protect the hero and footer
+## 4. User-facing pieces (minimal)
+- Profile edit page: "Request Verification" button → opens `RequestVerificationDialog` with the three forms (Individual / Business / Organization) and evidence uploader. Status banner shows current request state.
+- Public profile card / page: small badge component `TrustBadge` rendering one of the 9 labels with color rules (green verified, navy neutral, amber under_review, red suspended). Replaces ad-hoc verified pills.
+- Business/Org creation: notice text "Business and organization profiles may require verification before receiving verified trust badges…"
+- Notifications via existing `create_notification` for: request received/approved/rejected/more_info/revoked, under_review, suspended, restored.
 
-- `src/routes/index.tsx` hero: it uses `--gradient-hero` and explicit `text-navy-foreground` / orange / green classes. Since `--gradient-hero` and the brand tokens (`--navy`, `--orange`, `--green`) are preserved, the hero renders unchanged. No edits to `index.tsx` hero markup.
-- `src/components/Footer.tsx`: uses its own dark navy background classes (`bg-navy`, `text-navy-foreground`). With `--navy` preserved, the footer renders unchanged. No edits to `Footer.tsx`.
+## 5. Ranking
+Light touch: extend the existing search/list ordering to factor `trust_level_rank` (verified > reviewed > complete > phone > new; suspended/under_review demoted) instead of profile-kind. Concrete change: add an order term in `nearby_service_profiles`-style queries via a new SQL helper `trust_rank(kind, id)`. Detailed ranking overhaul is out of scope.
 
-### 3. Targeted component nudges (small, surgical)
+## 6. Migration of existing data
+Backfill `profile_trust_status` for every existing `service_profiles` and `business_pages` row by running `recompute_profile_trust` once. Existing `verified` columns on those tables: map `verified` enum/text → `manual_level` (`'verified' → verified_provider/business/organization` based on row type); existing `suspended=true` → `manual_level='suspended'`. Existing `reports` rows targeting profiles are left intact; new reports go into `profile_reports`.
 
-A few components hardcode `text-navy` for body-level text where it should now be near-black for readability. Limited list:
+## 7. Out of scope for this MVP
+- No phone OTP rewrite — relies on Supabase Auth's existing `phone_confirmed_at`.
+- No automated document OCR.
+- No ranking-engine rewrite beyond the single trust-rank term above.
+- No public-facing changes to home/search layout other than the badge component swap.
 
-- `src/components/social/PostShell.tsx` — already uses `bg-card` + `text-foreground/90`, picks up new tokens automatically. No change.
-- `src/components/social/PostText.tsx` — uses `text-foreground/90`. No change.
-- Comment bubbles (wherever they currently render) — ensure background is `bg-muted` (now `#F0F2F5`) with `rounded-2xl`. Audit `PostCard`/comment renderers and adjust only if they use navy.
-- Headings across pages that use `text-navy` as the default body heading color (e.g. `font-display ... text-navy`): we keep these — `--navy` is now `#0B1F3A` which reads as near-black and matches the "navy as accent for headings is fine" reading. So no mass find/replace needed.
+---
 
-We will NOT do a sweeping find/replace of `text-navy` → `text-foreground`. The new `--navy` (#0B1F3A) is already a deep near-black that reads cleanly on white, matching the FB/LinkedIn feel while preserving brand identity.
+## Technical notes
 
-### 4. QA pass
+- All new tables get GRANT + RLS in the same migration.
+- Storage bucket `verification-evidence` is private; signed URLs surface only to owner + admin/mod via a server function.
+- `recompute_profile_trust` runs in triggers (`AFTER INSERT/UPDATE` on `service_profiles`, `business_pages`, `reviews`, `service_requests`).
+- Admin write actions go through SECURITY DEFINER RPCs: `admin_set_trust_level`, `admin_decide_verification_request`, `admin_add_profile_note`, `admin_set_profile_status`. Each guards with `has_role(auth.uid(),'admin' or 'moderator')` and writes to `trust_audit_log`.
+- UI uses existing semantic tokens (navy structure, orange CTAs, green verified, red warnings) — no new colors.
 
-After the token rewrite, visually verify on mobile viewport:
-- Home (hero unchanged, sections below now white with black text)
-- Footer unchanged
-- Services, Services/$slug, Providers/$id
-- Feed, Official, Business pages
-- Requests new / browse / detail
-- Dashboard, Admin, Settings, Notifications, Credits
-- List Your Skill flow
-
-Fix any spot that visually regresses (e.g. a card that explicitly used `bg-surface` and now reads too white-on-white needs a `border-border` added). Expect 2–4 small follow-up tweaks max.
-
-## What is explicitly out of scope
-
-- Homepage hero markup and colors
-- Footer markup and colors
-- Any functional/behavioral change
-- Route, schema, RLS, or business logic changes
-- Brand role of orange (primary CTA) and green (trust/verified)
-
-## Files touched
-
-- `src/styles.css` (main change)
-- Possibly 1–3 small component tweaks discovered during QA (comment bubbles, any stray hardcoded blue background). Each will be a minimal class swap.
+## Open questions before I start
+1. Should the existing `verified` columns on `service_profiles` / `business_pages` be **kept in sync** with `profile_trust_status.manual_level`, or **deprecated** in favor of the new table only? (Sync is safer for current code; deprecate is cleaner.)
+2. For Organization profiles — today every `business_pages.org_type` other than `'business'` qualifies as organization, correct? (Used to decide which "verified_*" badge a manual approval grants.)
+3. Should boosting/feature placement be blocked for unverified profiles when the setting is off, or just hidden in UI? (Affects `create_boost` RPC.)
