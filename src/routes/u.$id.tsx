@@ -15,6 +15,8 @@ import { SaveButton } from "@/components/social/SaveButton";
 
 import { ClaimProfileDialog } from "@/components/ClaimProfileDialog";
 import { TrustStats } from "@/components/TrustStats";
+import { TrustBadge } from "@/components/trust/TrustBadge";
+import { useTrustBadge } from "@/hooks/use-trust-badges";
 import { RequestServiceDialog } from "@/components/RequestServiceDialog";
 import { VerifiedReviewBadge } from "@/components/VerifiedReviewBadge";
 import { uploadMedia } from "@/lib/upload";
