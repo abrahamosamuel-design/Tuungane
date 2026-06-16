@@ -236,7 +236,6 @@ export function NearYouHomeSection() {
             {topProviders.map((p) => {
               const near = proximityLabel(userLoc, p);
               const name = p.business_name || p.profile?.full_name || "Provider";
-              const verified = p.verified === "verified" || p.verified === "featured";
               const feat = isFeaturedTarget(p, featured);
               return (
                 <Link
@@ -247,7 +246,7 @@ export function NearYouHomeSection() {
                 >
                   <div className="flex items-center gap-1.5">
                     <h4 className="truncate text-sm font-bold text-navy">{name}</h4>
-                    {verified && <BadgeCheck className="h-4 w-4 shrink-0 text-green" />}
+                    <ProfileTrustBadge kind="service_profile" id={p.user_id} />
                   </div>
                   <p className="mt-0.5 text-xs text-muted-foreground">{p.subcategory}</p>
                   <p className="mt-1 inline-flex items-center gap-1 text-[11px] text-muted-foreground">
