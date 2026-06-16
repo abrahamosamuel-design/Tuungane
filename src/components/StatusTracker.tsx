@@ -1,32 +1,38 @@
 import { Check } from "lucide-react";
 import type { RequestStatusValue } from "@/data/serviceRequestTypes";
+import { toVisibleStatus } from "@/data/serviceRequestTypes";
 
-const steps: { id: RequestStatusValue | "feedback"; label: string }[] = [
-  { id: "requested", label: "Open" },
-  { id: "accepted", label: "Provider Selected" },
+const steps: { id: "open" | "in_progress" | "completed"; label: string }[] = [
+  { id: "open", label: "Open" },
   { id: "in_progress", label: "In Progress" },
   { id: "completed", label: "Completed" },
-  { id: "feedback", label: "Feedback Given" },
 ];
 
 interface Props {
   status: RequestStatusValue;
+  /** Kept for backwards compatibility; no longer rendered as a separate stage. */
   hasFeedback?: boolean;
 }
 
-export function StatusTracker({ status, hasFeedback }: Props) {
-  if (status === "cancelled" || status === "disputed") {
+export function StatusTracker({ status }: Props) {
+  if (status === "cancelled") {
     return (
-      <div className={`rounded-xl border p-3 text-sm font-semibold ${status === "disputed" ? "border-destructive/40 bg-destructive/10 text-destructive" : "border-border bg-muted text-muted-foreground"}`}>
-        {status === "disputed" ? "This request is in dispute. Tuungane will review." : "This request was cancelled."}
+      <div className="rounded-xl border border-border bg-muted p-3 text-sm font-semibold text-muted-foreground">
+        This request was cancelled.
       </div>
     );
   }
-  const order: Record<RequestStatusValue, number> = {
-    requested: 0, accepted: 1, in_progress: 2, completed: 3, cancelled: -1, disputed: -1,
-  };
-  let activeIdx = order[status];
-  if (status === "completed" && hasFeedback) activeIdx = 4;
+  if (status === "disputed") {
+    return (
+      <div className="rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-sm font-semibold text-destructive">
+        This request is in dispute. Tuungane will review.
+      </div>
+    );
+  }
+
+  const visible = toVisibleStatus(status) as "open" | "in_progress" | "completed";
+  const order: Record<"open" | "in_progress" | "completed", number> = { open: 0, in_progress: 1, completed: 2 };
+  const activeIdx = order[visible];
 
   return (
     <ol className="flex items-center gap-1">
@@ -35,13 +41,29 @@ export function StatusTracker({ status, hasFeedback }: Props) {
         const current = i === activeIdx;
         return (
           <li key={s.id} className="flex flex-1 items-center">
-            <div className="flex flex-col items-center gap-1 flex-1 min-w-0">
-              <div className={`flex h-7 w-7 items-center justify-center rounded-full text-[10px] font-bold ${done ? "bg-green text-green-foreground" : current ? "bg-orange text-orange-foreground" : "bg-muted text-muted-foreground"}`}>
+            <div className="flex min-w-0 flex-1 flex-col items-center gap-1">
+              <div
+                className={`flex h-7 w-7 items-center justify-center rounded-full text-[11px] font-bold ${
+                  done
+                    ? "bg-green text-green-foreground"
+                    : current
+                    ? "bg-orange text-orange-foreground"
+                    : "bg-muted text-muted-foreground"
+                }`}
+              >
                 {done ? <Check className="h-3.5 w-3.5" /> : i + 1}
               </div>
-              <span className={`text-[10px] text-center leading-tight ${current ? "font-bold text-navy" : "text-muted-foreground"}`}>{s.label}</span>
+              <span
+                className={`text-center text-[11px] leading-tight ${
+                  current ? "font-bold text-navy" : "text-muted-foreground"
+                }`}
+              >
+                {s.label}
+              </span>
             </div>
-            {i < steps.length - 1 && <div className={`h-0.5 flex-1 ${done ? "bg-green" : "bg-border"}`} />}
+            {i < steps.length - 1 && (
+              <div className={`h-0.5 flex-1 ${done ? "bg-green" : "bg-border"}`} />
+            )}
           </li>
         );
       })}

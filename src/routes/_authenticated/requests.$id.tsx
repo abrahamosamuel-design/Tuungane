@@ -8,7 +8,7 @@ import { ProviderResponseDialog } from "@/components/ProviderResponseDialog";
 import { FeedbackDialog } from "@/components/FeedbackDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import { requestStatusMap, trustScoreLabel, type ProviderResponseRow, type ServiceRequestRow, type TrustStatsRow } from "@/data/serviceRequestTypes";
+import { toVisibleStatus, visibleStatusMeta, trustScoreLabel, type ProviderResponseRow, type ServiceRequestRow, type TrustStatsRow } from "@/data/serviceRequestTypes";
 import { timeAgo } from "@/lib/format";
 import { toast } from "sonner";
 import { SafetyNote, SAFETY_TIPS } from "@/components/SafetyNote";
@@ -182,8 +182,31 @@ function RequestDetailsPage() {
     toast.success("Code copied");
   };
 
-  const meta = requestStatusMap[req.status];
+  const visible = toVisibleStatus(req.status);
+  const meta = visibleStatusMeta[visible];
   const visibleResponses = responses.filter((r) => r.status !== "withdrawn");
+  const responseCount = visibleResponses.length;
+  const urgencyLabel = req.urgency === "emergency" ? "Today" : req.urgency === "urgent" ? "This week" : "Flexible";
+
+  // Primary action depends on visible status + role
+  const primaryAction: { label: string; onClick: () => void; icon?: React.ReactNode } | null = (() => {
+    if (visible === "open" && isCustomer && responseCount > 0) {
+      return { label: `View ${responseCount} response${responseCount === 1 ? "" : "s"}`, onClick: () => { document.getElementById("responses-section")?.scrollIntoView({ behavior: "smooth" }); } };
+    }
+    if (visible === "in_progress" && isCustomer && !req.customer_confirmed_completion) {
+      return { label: "Mark as completed", onClick: customerConfirmCompletion, icon: <CheckCircle2 className="h-4 w-4" /> };
+    }
+    if (visible === "completed" && isCustomer && !hasFeedback) {
+      return { label: "Leave review", onClick: () => setFeedbackOpen(true), icon: <Star className="h-4 w-4" /> };
+    }
+    if (visible === "open" && !isCustomer && canRespond) {
+      return { label: "Respond to this request", onClick: () => setResponseDialogOpen(true), icon: <Send className="h-4 w-4" /> };
+    }
+    if (visible === "in_progress" && isAssignedProvider && req.status === "accepted") {
+      return { label: "Mark in progress", onClick: () => updateStatus("in_progress") };
+    }
+    return null;
+  })();
 
   return (
     <Layout>
@@ -192,24 +215,54 @@ function RequestDetailsPage() {
 
         <div className="mt-3 rounded-2xl border border-border bg-card p-5">
           <div className="flex flex-wrap items-center gap-2">
-            <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${meta.color}`}>{meta.label}</span>
+            <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase ${meta.color}`}>{meta.label}</span>
+            {req.urgent_flag && <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-bold uppercase text-destructive">Urgent</span>}
             <span className="text-[10px] text-muted-foreground">{timeAgo(req.created_at)}</span>
-            <span className="ml-auto text-[10px] text-muted-foreground">{visibleResponses.length} {visibleResponses.length === 1 ? "response" : "responses"}</span>
+            <span className="ml-auto text-[10px] text-muted-foreground">{responseCount} {responseCount === 1 ? "response" : "responses"}</span>
           </div>
           <h1 className="mt-2 font-display text-2xl font-bold text-navy">{req.title || req.service_needed}</h1>
           {req.subcategory && <p className="text-sm text-muted-foreground">{req.subcategory}</p>}
           <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
             <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" /> {req.location}{req.town && `, ${req.town}`}</span>
-            {req.budget_range && <span>Budget: {req.budget_range}</span>}
+            {req.budget_range && <span className="font-semibold text-orange">Budget: {req.budget_range}</span>}
             {req.preferred_date && <span>Preferred: {req.preferred_date}{req.preferred_time && ` ${req.preferred_time}`}</span>}
-            <span>Urgency: {req.urgency}</span>
+            <span>When: {urgencyLabel}</span>
           </div>
           {req.description && <p className="mt-3 whitespace-pre-wrap text-sm text-foreground/85">{req.description}</p>}
           {req.attachment_url && <img src={req.attachment_url} alt="" className="mt-3 max-h-56 rounded-lg border border-border" />}
 
           <div className="mt-4 border-t border-border pt-3">
-            <StatusTracker status={req.status} hasFeedback={hasFeedback} />
+            <StatusTracker status={req.status} />
           </div>
+
+          {primaryAction && (
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              <button
+                onClick={primaryAction.onClick}
+                disabled={busy}
+                className="inline-flex items-center gap-2 rounded-full bg-orange px-5 py-2.5 text-sm font-semibold text-orange-foreground hover:brightness-110 disabled:opacity-60"
+              >
+                {primaryAction.icon}
+                {primaryAction.label}
+              </button>
+              {visible === "in_progress" && isCustomer && (req.selected_provider_id || req.provider_id) && (
+                <MessageButton
+                  serviceRequestId={req.id}
+                  providerId={(req.selected_provider_id ?? req.provider_id) as string}
+                  size="sm"
+                />
+              )}
+              {visible === "completed" && (req.selected_provider_id || req.provider_id) && (
+                <Link
+                  to="/u/$id"
+                  params={{ id: (req.selected_provider_id ?? req.provider_id) as string }}
+                  className="rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-navy hover:border-orange"
+                >
+                  View provider
+                </Link>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="mt-3"><SafetyNote>{SAFETY_TIPS.request}</SafetyNote></div>
@@ -277,7 +330,7 @@ function RequestDetailsPage() {
 
         {/* Customer view: comparison list */}
         {isCustomer && req.status === "requested" && (
-          <div className="mt-6">
+          <div id="responses-section" className="mt-6 scroll-mt-20">
             <h2 className="font-display text-lg font-bold text-navy">Compare provider responses</h2>
             {visibleResponses.length === 0 ? (
               <p className="mt-3 rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
