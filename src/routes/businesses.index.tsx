@@ -150,7 +150,7 @@ function BPageCard({ p, featured, userLoc }: { p: BPage; featured?: boolean; use
       <div className="p-4 pt-3">
         <div className="flex items-center gap-1.5">
           <h3 className="font-display text-base font-bold text-navy group-hover:text-orange">{p.name}</h3>
-          {p.verified === "verified" && <BadgeCheck className="h-4 w-4 text-orange" />}
+          <ProfileTrustBadge kind="business_page" id={p.id} />
         </div>
         <div className="text-xs text-muted-foreground">{orgTypeLabel(p.org_type)}{p.town ? ` · ${p.town}` : ""}{p.district ? `, ${p.district}` : ""}</div>
         <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">{p.description || "No description yet."}</p>
