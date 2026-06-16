@@ -29,6 +29,21 @@ const TYPE_META: Record<Profile["profile_type"], { label: string; icon: React.Co
   organization: { label: "Organization", icon: Landmark },
 };
 
+function isDraft(p: { category_slug: string | null; town: string | null; district: string | null }) {
+  return !p.category_slug || (!p.town && !p.district);
+}
+
+function sortProfiles(a: ProfileCardData, b: ProfileCardData) {
+  const score = (p: ProfileCardData) => (p.verified === "verified" ? 0 : isDraft(p) ? 2 : 1);
+  return score(a) - score(b);
+}
+
+const GROUP_LABELS: Record<Profile["profile_type"], string> = {
+  individual: "Personal service profiles",
+  business: "Business profiles",
+  organization: "Organization profiles",
+};
+
 export function MyProfilesPanel() {
   const { user } = useAuth();
   const [items, setItems] = useState<ProfileCardData[] | null>(null);
