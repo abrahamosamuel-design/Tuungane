@@ -32,7 +32,7 @@ if (action === 'create') {
     visibility: 'direct',
     status: 'requested',
     urgent_flag: false,
-    contact_phone: '+256700000001',
+    customer_phone: '+256700000001',
   }).select().single();
   if (re) throw re;
   console.log('Request created:', req.id);
