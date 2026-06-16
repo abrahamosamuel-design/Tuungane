@@ -358,7 +358,7 @@ export type Database = {
           provider_id: string
           provider_response_id: string | null
           provider_unread_count: number
-          service_request_id: string
+          service_request_id: string | null
           status: string
           updated_at: string
         }
@@ -372,7 +372,7 @@ export type Database = {
           provider_id: string
           provider_response_id?: string | null
           provider_unread_count?: number
-          service_request_id: string
+          service_request_id?: string | null
           status?: string
           updated_at?: string
         }
@@ -386,7 +386,7 @@ export type Database = {
           provider_id?: string
           provider_response_id?: string | null
           provider_unread_count?: number
-          service_request_id?: string
+          service_request_id?: string | null
           status?: string
           updated_at?: string
         }
@@ -2588,6 +2588,10 @@ export type Database = {
           _tx_type: string
           _user_id: string
         }
+        Returns: string
+      }
+      start_direct_conversation: {
+        Args: { _provider_id: string }
         Returns: string
       }
       start_or_get_conversation: {
