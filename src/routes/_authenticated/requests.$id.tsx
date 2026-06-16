@@ -86,10 +86,13 @@ function RequestDetailsPage() {
     // for every responding provider (respecting their phone_visibility setting)
     // so Call/View Phone can appear directly on the response card.
     if (user.id === sr.customer_id && provIds.length) {
-      const [{ data: sps }, { data: pps }] = await Promise.all([
+      const [{ data: sps }, ppsRes] = await Promise.all([
         supabase.from("service_profiles").select("user_id,phone").in("user_id", provIds),
-        (supabase.from("provider_privacy_settings") as never as { select: (s: string) => { in: (c: string, v: string[]) => Promise<{ data: Array<{ user_id: string; phone_visibility?: string }> | null }> } }).select("user_id,phone_visibility").in("user_id", provIds),
+        // phone_visibility column added in recent migration; types may not be regenerated yet
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (supabase.from("provider_privacy_settings") as any).select("user_id,phone_visibility").in("user_id", provIds) as Promise<{ data: Array<{ user_id: string; phone_visibility?: string }> | null }>,
       ]);
+      const pps = ppsRes.data;
       const visMap = new Map<string, string>();
       ((pps ?? []) as Array<{ user_id: string; phone_visibility?: string }>).forEach((p) => {
         visMap.set(p.user_id, p.phone_visibility ?? "logged_in_only");
