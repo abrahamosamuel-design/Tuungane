@@ -258,7 +258,7 @@ function RealProviderCard({ p, userLoc }: { p: Row; userLoc: UserLocation | null
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
             <h3 className="truncate font-display text-base font-semibold text-navy">{name}</h3>
-            {p.verified === "verified" && <BadgeCheck className="h-4 w-4 shrink-0 text-green" />}
+            <ProfileTrustBadge kind="service_profile" id={p.user_id} />
             {p.verified === "featured" && <Sparkles className="h-4 w-4 shrink-0 text-orange" />}
           </div>
           <p className="text-sm text-muted-foreground">{p.subcategory}</p>
