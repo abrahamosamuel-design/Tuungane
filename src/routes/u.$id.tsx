@@ -28,8 +28,9 @@ import { BoostButton } from "@/components/BoostButton";
 import { MobileActionBar } from "@/components/MobileActionBar";
 import { ContactProviderModal } from "@/components/ContactProviderModal";
 import { ContactOptionsUnlocked } from "@/components/ContactOptionsUnlocked";
+import { ProviderQuickContact } from "@/components/ProviderQuickContact";
 import { useContactGate } from "@/hooks/use-contact-gate";
-import { Lock } from "lucide-react";
+
 
 
 import { RouteErrorCard, RouteNotFoundCard } from "@/lib/route-boundaries";
