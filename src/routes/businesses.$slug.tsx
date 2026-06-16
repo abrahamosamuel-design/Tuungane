@@ -3,10 +3,12 @@ import { useEffect, useState } from "react";
 import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import { Building2, BadgeCheck, MapPin, Phone, Mail, Sparkles, Edit3, Users } from "lucide-react";
+import { Building2, MapPin, Phone, Mail, Sparkles, Edit3, Users } from "lucide-react";
 import { toast } from "sonner";
 import { orgTypeLabel } from "@/data/businessTypes";
 import { SafetyNote, SAFETY_TIPS } from "@/components/SafetyNote";
+import { TrustBadge } from "@/components/trust/TrustBadge";
+import { useTrustBadge } from "@/hooks/use-trust-badges";
 
 import { RouteErrorCard, RouteNotFoundCard } from "@/lib/route-boundaries";
 
@@ -137,7 +139,7 @@ function BusinessDetail() {
               <div>
                 <div className="flex items-center gap-2">
                   <h1 className="font-display text-2xl font-bold text-navy sm:text-3xl">{page.name}</h1>
-                  {page.verified === "verified" && <BadgeCheck className="h-6 w-6 text-orange" />}
+                  <BusinessTrustBadge pageId={page.id} />
                 </div>
                 <div className="mt-1 text-sm text-muted-foreground">{orgTypeLabel(page.org_type)}{page.subcategory ? ` · ${page.subcategory}` : ""}</div>
                 {(page.town || page.district) && (
@@ -254,4 +256,10 @@ function EditForm({ page, onSaved }: { page: BPage; onSaved: () => void }) {
       </button>
     </div>
   );
+}
+
+function BusinessTrustBadge({ pageId }: { pageId: string }) {
+  const { level } = useTrustBadge("business_page", pageId);
+  if (!level) return null;
+  return <TrustBadge level={level} />;
 }

@@ -14,6 +14,7 @@ import { NearYouBadge } from "@/components/NearYouBadge";
 import { RadiusFilter } from "@/components/RadiusFilter";
 import { useFeaturedLocations, isFeaturedTarget } from "@/hooks/use-featured-locations";
 import { ProviderQuickContact } from "@/components/ProviderQuickContact";
+import { ProfileTrustBadge } from "@/components/trust/ProfileTrustBadge";
 
 
 const iconMap: Record<string, any> = { Wrench, Sparkles, Building2, Scissors, Truck, Car, GraduationCap, Camera, ChefHat, Laptop, HeartPulse, Sprout, MoreHorizontal };
@@ -378,7 +379,6 @@ function Services() {
 
 function ProviderRow({ p, isBoosted, userLoc, onRequest }: { p: RealProvider; isBoosted: boolean; userLoc?: UserLocation | null; onRequest: () => void }) {
   const name = p.business_name || p.profile?.full_name || "Provider";
-  const verified = p.verified === "verified" || p.verified === "featured";
   const available = (p.availability ?? "").toLowerCase() === "available";
 
   return (
@@ -388,7 +388,7 @@ function ProviderRow({ p, isBoosted, userLoc, onRequest }: { p: RealProvider; is
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
             <h3 className="truncate font-display text-base font-semibold text-navy">{name}</h3>
-            {verified && <BadgeCheck className="h-4 w-4 shrink-0 text-green" />}
+            <ProfileTrustBadge kind="service_profile" id={p.user_id} />
             {isBoosted && <Sparkles className="h-4 w-4 shrink-0 text-orange" />}
           </div>
           <p className="text-sm text-muted-foreground">{p.subcategory}</p>

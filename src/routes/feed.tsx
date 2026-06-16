@@ -15,6 +15,7 @@ import type { OfficialAccountRow, OfficialPostRow } from "@/data/officialPostTyp
 import { useUserLocation } from "@/hooks/use-user-location";
 import { sortByProximity, type TargetLocation } from "@/lib/location";
 import { NearYouBadge } from "@/components/NearYouBadge";
+import { ProfileTrustBadge } from "@/components/trust/ProfileTrustBadge";
 
 export const Route = createFileRoute("/feed")({
   head: () => ({ meta: [{ title: "Activity Feed — Tuungane" }] }),
@@ -207,7 +208,7 @@ function Feed() {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5">
                     <p className="truncate font-semibold text-navy">{p.business_name || p.profile?.full_name}</p>
-                    {p.verified === "verified" && <BadgeCheck className="h-4 w-4 text-green" />}
+                    <ProfileTrustBadge kind="service_profile" id={p.user_id} />
                     {p.verified === "featured" && <Sparkles className="h-4 w-4 text-orange" />}
                     {isBoostedProvider(p.user_id) && <span className="ml-1 inline-flex items-center gap-0.5 rounded-full bg-orange/15 px-1.5 py-0 text-[10px] font-semibold text-orange"><Sparkles className="h-2.5 w-2.5" /> Featured</span>}
                     <NearYouBadge user={userLoc} target={p as TargetLocation} className="ml-1" />

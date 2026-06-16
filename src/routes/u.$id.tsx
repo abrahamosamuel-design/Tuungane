@@ -15,6 +15,8 @@ import { SaveButton } from "@/components/social/SaveButton";
 
 import { ClaimProfileDialog } from "@/components/ClaimProfileDialog";
 import { TrustStats } from "@/components/TrustStats";
+import { TrustBadge } from "@/components/trust/TrustBadge";
+import { useTrustBadge } from "@/hooks/use-trust-badges";
 import { RequestServiceDialog } from "@/components/RequestServiceDialog";
 import { VerifiedReviewBadge } from "@/components/VerifiedReviewBadge";
 import { uploadMedia } from "@/lib/upload";
@@ -257,9 +259,7 @@ function UserProfile() {
               <div className="flex-1 min-w-0">
                 <h1 className="flex flex-wrap items-center gap-2 font-display text-2xl font-bold text-navy">
                   {sp?.business_name || profile.full_name}
-                  {(sp?.verified === "verified" || sp?.verified === "featured") && (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-green/10 px-2 py-0.5 text-xs font-semibold text-green"><BadgeCheck className="h-3 w-3" /> Verified</span>
-                  )}
+                  <TrustBadgeInline userId={id} />
                   <ProfileBoostBadges providerId={id} />
                 </h1>
                 {sp && <p className="text-sm font-medium text-orange">{sp.subcategory} {cat && <span className="text-muted-foreground">· {cat.name}</span>}</p>}
@@ -522,6 +522,12 @@ function UserProfile() {
 function ProfileBoostBadges({ providerId }: { providerId: string }) {
   const { boosts } = useActiveBoosts("provider_profile", providerId);
   return <>{boosts.map((b) => <BoostBadge key={b.id} type={b.boost_type} />)}</>;
+}
+
+function TrustBadgeInline({ userId }: { userId: string }) {
+  const { level } = useTrustBadge("service_profile", userId);
+  if (!level) return null;
+  return <TrustBadge level={level} />;
 }
 
 function Row({ label, value }: { label: string; value: string }) {

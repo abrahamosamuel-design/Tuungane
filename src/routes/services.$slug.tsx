@@ -10,6 +10,7 @@ import { useUserLocation } from "@/hooks/use-user-location";
 import { filterByRadius, sortByProximity, proximityLabel, type UserLocation } from "@/lib/location";
 import { RadiusFilter } from "@/components/RadiusFilter";
 import { ProviderQuickContact } from "@/components/ProviderQuickContact";
+import { ProfileTrustBadge } from "@/components/trust/ProfileTrustBadge";
 
 
 type Row = {
@@ -257,7 +258,7 @@ function RealProviderCard({ p, userLoc }: { p: Row; userLoc: UserLocation | null
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
             <h3 className="truncate font-display text-base font-semibold text-navy">{name}</h3>
-            {p.verified === "verified" && <BadgeCheck className="h-4 w-4 shrink-0 text-green" />}
+            <ProfileTrustBadge kind="service_profile" id={p.user_id} />
             {p.verified === "featured" && <Sparkles className="h-4 w-4 shrink-0 text-orange" />}
           </div>
           <p className="text-sm text-muted-foreground">{p.subcategory}</p>

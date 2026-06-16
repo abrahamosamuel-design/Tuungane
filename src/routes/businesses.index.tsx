@@ -2,12 +2,13 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
-import { Building2, Plus, Sparkles, BadgeCheck, MapPin } from "lucide-react";
+import { Building2, Plus, Sparkles, MapPin } from "lucide-react";
 import { orgTypeLabel } from "@/data/businessTypes";
 import { useCategories } from "@/hooks/use-categories";
 import { useUserLocation } from "@/hooks/use-user-location";
 import { filterByRadius, proximityLabel, sortByProximity, type UserLocation } from "@/lib/location";
 import { RadiusFilter } from "@/components/RadiusFilter";
+import { ProfileTrustBadge } from "@/components/trust/ProfileTrustBadge";
 
 export const Route = createFileRoute("/businesses/")({
   head: () => ({ meta: [
@@ -149,7 +150,7 @@ function BPageCard({ p, featured, userLoc }: { p: BPage; featured?: boolean; use
       <div className="p-4 pt-3">
         <div className="flex items-center gap-1.5">
           <h3 className="font-display text-base font-bold text-navy group-hover:text-orange">{p.name}</h3>
-          {p.verified === "verified" && <BadgeCheck className="h-4 w-4 text-orange" />}
+          <ProfileTrustBadge kind="business_page" id={p.id} />
         </div>
         <div className="text-xs text-muted-foreground">{orgTypeLabel(p.org_type)}{p.town ? ` · ${p.town}` : ""}{p.district ? `, ${p.district}` : ""}</div>
         <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">{p.description || "No description yet."}</p>
