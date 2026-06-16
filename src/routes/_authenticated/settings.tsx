@@ -353,17 +353,19 @@ function LocationSection() {
 function ProviderContactPolicySection() {
   const { user } = useAuth();
   const [policy, setPolicy] = useState<"after_request" | "after_accept" | "after_selected" | "never">("after_request");
+  const [phoneVis, setPhoneVis] = useState<"allow_calls" | "messages_first" | "logged_in_only" | "hidden">("logged_in_only");
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const { data } = await supabase
-        .from("provider_privacy_settings")
-        .select("contact_reveal_policy")
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data } = await (supabase.from("provider_privacy_settings") as any)
+        .select("contact_reveal_policy,phone_visibility")
         .eq("user_id", user.id)
         .maybeSingle();
       if (data?.contact_reveal_policy) setPolicy(data.contact_reveal_policy as typeof policy);
+      if (data?.phone_visibility) setPhoneVis(data.phone_visibility as typeof phoneVis);
       setLoaded(true);
     })();
   }, [user?.id]);
@@ -378,6 +380,16 @@ function ProviderContactPolicySection() {
     else toast.success("Contact preference saved");
   };
 
+  const savePhoneVis = async (next: typeof phoneVis) => {
+    if (!user) return;
+    setPhoneVis(next);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase.from("provider_privacy_settings") as any)
+      .upsert({ user_id: user.id, phone_visibility: next }, { onConflict: "user_id" });
+    if (error) toast.error(error.message);
+    else toast.success("Phone visibility saved");
+  };
+
   if (!loaded) return null;
 
   const options: { value: typeof policy; label: string; hint: string }[] = [
@@ -386,21 +398,45 @@ function ProviderContactPolicySection() {
     { value: "never", label: "Use Tuungane messages only", hint: "Phone never shown. Customers can only reach you via Tuungane messages." },
   ];
 
+  const phoneOptions: { value: typeof phoneVis; label: string; hint: string }[] = [
+    { value: "allow_calls", label: "Allow customers to call me", hint: "Phone is shown to any signed-in customer who finds you on Tuungane." },
+    { value: "logged_in_only", label: "Show phone only to logged-in customers", hint: "Default. Phone is shown to signed-in customers, never to anonymous visitors." },
+    { value: "messages_first", label: "Tuungane messages first", hint: "Phone is hidden by default — customers must start a Tuungane conversation first." },
+    { value: "hidden", label: "Hide phone number completely", hint: "Phone is never shown. Only Tuungane messages." },
+  ];
+
   return (
-    <Section title="Provider contact preferences">
-      <p className="text-xs text-muted-foreground">Tuungane Messages help protect both customers and providers. Choose when (if ever) your phone number is shown.</p>
-      <div className="space-y-2">
-        {options.map((o) => (
-          <label key={o.value} className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3 ${policy === o.value ? "border-orange bg-orange/5" : "border-border bg-background"}`}>
-            <input type="radio" name="contact_reveal_policy" checked={policy === o.value} onChange={() => save(o.value)} className="mt-1 h-4 w-4 accent-orange" />
-            <div>
-              <p className="text-sm font-semibold text-navy">{o.label}</p>
-              <p className="text-xs text-muted-foreground">{o.hint}</p>
-            </div>
-          </label>
-        ))}
-      </div>
-    </Section>
+    <>
+      <Section title="Phone visibility">
+        <p className="text-xs text-muted-foreground">Controls whether customers can see your phone number on Tuungane. Tuungane messages remain the recommended way to talk.</p>
+        <div className="space-y-2">
+          {phoneOptions.map((o) => (
+            <label key={o.value} className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3 ${phoneVis === o.value ? "border-orange bg-orange/5" : "border-border bg-background"}`}>
+              <input type="radio" name="phone_visibility" checked={phoneVis === o.value} onChange={() => savePhoneVis(o.value)} className="mt-1 h-4 w-4 accent-orange" />
+              <div>
+                <p className="text-sm font-semibold text-navy">{o.label}</p>
+                <p className="text-xs text-muted-foreground">{o.hint}</p>
+              </div>
+            </label>
+          ))}
+        </div>
+      </Section>
+
+      <Section title="Contact reveal timing">
+        <p className="text-xs text-muted-foreground">When your phone is allowed to be shown, choose how early in the request flow customers can see it.</p>
+        <div className="space-y-2">
+          {options.map((o) => (
+            <label key={o.value} className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3 ${policy === o.value ? "border-orange bg-orange/5" : "border-border bg-background"}`}>
+              <input type="radio" name="contact_reveal_policy" checked={policy === o.value} onChange={() => save(o.value)} className="mt-1 h-4 w-4 accent-orange" />
+              <div>
+                <p className="text-sm font-semibold text-navy">{o.label}</p>
+                <p className="text-xs text-muted-foreground">{o.hint}</p>
+              </div>
+            </label>
+          ))}
+        </div>
+      </Section>
+    </>
   );
 }
 
