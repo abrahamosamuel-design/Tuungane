@@ -68,6 +68,15 @@ export async function activateBoost(pricingId: string, entityType: string, entit
     _entity_type: entityType,
     _entity_id: entityId,
   });
-  if (error) throw error;
+  if (error) {
+    const msg = (error.message || "").toLowerCase();
+    if (msg.includes("boost_requires_verification")) {
+      throw new Error("Boosts are currently limited to verified profiles. Request verification from your profile to unlock boosting.");
+    }
+    if (msg.includes("profile_suspended")) {
+      throw new Error("This profile is suspended and cannot be boosted. Contact support for help.");
+    }
+    throw error;
+  }
   return data as string;
 }
