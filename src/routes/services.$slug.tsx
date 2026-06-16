@@ -9,6 +9,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useUserLocation } from "@/hooks/use-user-location";
 import { filterByRadius, sortByProximity, proximityLabel, type UserLocation } from "@/lib/location";
 import { RadiusFilter } from "@/components/RadiusFilter";
+import { ProviderQuickContact } from "@/components/ProviderQuickContact";
+
 
 type Row = {
   user_id: string;
