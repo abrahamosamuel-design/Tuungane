@@ -412,19 +412,31 @@ function OfficialTabContent({ initialSub }: { initialSub?: SubTab }) {
   const [posts, setPosts] = useState<OfficialPostRow[]>([]);
   const [editing, setEditing] = useState<OfficialPostRow | null>(null);
   const [seeded, setSeeded] = useState<Array<{ user_id: string; business_name: string | null; subcategory: string; seeded_status: string | null; verified: string }>>([]);
-  const [claims, setClaims] = useState<Array<{ id: string; service_profile_user_id: string; requester_user_id: string; full_name: string; phone_number: string; relationship_to_profile: string; explanation: string; supporting_file_url: string | null; status: string; created_at: string }>>([]);
+  const [claims, setClaims] = useState<Array<{ id: string; service_profile_user_id: string; requester_user_id: string; full_name: string; relationship_to_profile: string; explanation: string; status: string; created_at: string }>>([]);
+  const [revealed, setRevealed] = useState<Record<string, { phone_number: string | null; email: string | null; whatsapp_number: string | null; supporting_file_url: string | null }>>({});
 
   const load = async () => {
     const [a, p, sp, c] = await Promise.all([
       supabase.from("official_accounts").select("*").order("created_at").limit(1).maybeSingle(),
       supabase.from("official_posts").select("*").order("created_at", { ascending: false }).limit(100),
       supabase.from("service_profiles").select("user_id,business_name,subcategory,seeded_status,verified").eq("seeded_by_official", true),
-      supabase.from("profile_claim_requests").select("*").order("created_at", { ascending: false }),
+      // PII (phone_number, email, whatsapp_number, supporting_file_url) is fetched on demand via the get_profile_claim_contact RPC.
+      supabase.from("profile_claim_requests")
+        .select("id,service_profile_user_id,requester_user_id,full_name,relationship_to_profile,explanation,status,created_at")
+        .order("created_at", { ascending: false }),
     ]);
     setAccount(a.data as OfficialAccountRow | null);
     setPosts((p.data ?? []) as OfficialPostRow[]);
     setSeeded(sp.data ?? []);
     setClaims(c.data ?? []);
+  };
+
+  const revealClaimContact = async (id: string) => {
+    if (revealed[id]) return;
+    const { data, error } = await supabase.rpc("get_profile_claim_contact", { _id: id });
+    if (error) { toast.error("Could not reveal contact"); return; }
+    const row = Array.isArray(data) ? data[0] : data;
+    if (row) setRevealed((prev) => ({ ...prev, [id]: row as typeof revealed[string] }));
   };
   useEffect(() => { load(); }, []);
 
