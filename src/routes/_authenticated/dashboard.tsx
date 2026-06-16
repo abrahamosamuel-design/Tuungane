@@ -234,12 +234,12 @@ function QuickAction({ to, params, icon, label, hint }: { to: string; params?: R
     <Link
       to={to as never}
       params={params as never}
-      className="flex items-start gap-3 rounded-2xl border border-border bg-card p-3 text-left hover:border-orange"
+      className="flex items-start gap-3 rounded-2xl border border-border bg-card p-4 text-left hover:border-orange"
     >
       <div className="shrink-0 rounded-xl bg-orange/10 p-2 text-orange">{icon}</div>
-      <div className="min-w-0">
-        <p className="truncate text-sm font-semibold text-navy">{label}</p>
-        <p className="truncate text-xs text-muted-foreground">{hint}</p>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-semibold leading-tight text-navy">{label}</p>
+        <p className="mt-0.5 text-xs leading-snug text-muted-foreground">{hint}</p>
       </div>
     </Link>
   );
