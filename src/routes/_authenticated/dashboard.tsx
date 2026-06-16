@@ -171,16 +171,7 @@ function Dashboard() {
 
         {profile?.is_provider && sp && (
           <>
-            <div className="mt-6 rounded-2xl border border-border bg-card p-4">
-              <div className="flex items-center justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="text-xs uppercase tracking-wide text-muted-foreground">Service profile</p>
-                  <p className="truncate font-semibold text-navy">{sp.business_name || profile.full_name} · <span className="text-muted-foreground">{sp.subcategory}</span></p>
-                  <p className="truncate text-xs text-muted-foreground">{sp.town}, {sp.district}</p>
-                </div>
-                <button onClick={() => setSp(null)} className="shrink-0 text-xs font-medium text-orange">Edit</button>
-              </div>
-            </div>
+
 
             {/* 8. Post to your timeline */}
             <div className="mt-6">
