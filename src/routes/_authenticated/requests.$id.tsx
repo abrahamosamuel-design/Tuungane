@@ -43,6 +43,7 @@ function RequestDetailsPage() {
   const [responses, setResponses] = useState<ResponseWithProvider[]>([]);
   const [hasFeedback, setHasFeedback] = useState(false);
   const [providerContact, setProviderContact] = useState<{ phone: string | null; whatsapp: string | null; email: string | null; name: string | null } | null>(null);
+  const [responsePhones, setResponsePhones] = useState<Record<string, string | null>>({});
   const [responseDialogOpen, setResponseDialogOpen] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [busy, setBusy] = useState(false);
