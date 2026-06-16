@@ -8,6 +8,7 @@ import { useCategories } from "@/hooks/use-categories";
 import { useUserLocation } from "@/hooks/use-user-location";
 import { filterByRadius, proximityLabel, sortByProximity, type UserLocation } from "@/lib/location";
 import { RadiusFilter } from "@/components/RadiusFilter";
+import { ProfileTrustBadge } from "@/components/trust/ProfileTrustBadge";
 
 export const Route = createFileRoute("/businesses/")({
   head: () => ({ meta: [
