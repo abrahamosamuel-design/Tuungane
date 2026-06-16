@@ -524,6 +524,12 @@ function ProfileBoostBadges({ providerId }: { providerId: string }) {
   return <>{boosts.map((b) => <BoostBadge key={b.id} type={b.boost_type} />)}</>;
 }
 
+function TrustBadgeInline({ userId }: { userId: string }) {
+  const { level } = useTrustBadge("service_profile", userId);
+  if (!level) return null;
+  return <TrustBadge level={level} />;
+}
+
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex justify-between gap-3 border-b border-border/50 py-2 last:border-0">
