@@ -51,7 +51,7 @@ function MessagesIndex() {
       setRows(list);
 
       const userIds = Array.from(new Set(list.flatMap((r) => [r.customer_id, r.provider_id]).filter((id) => id !== user.id)));
-      const reqIds = Array.from(new Set(list.map((r) => r.service_request_id)));
+      const reqIds = Array.from(new Set(list.map((r) => r.service_request_id).filter((x): x is string => !!x)));
 
       const [{ data: profs }, { data: reqs }] = await Promise.all([
         userIds.length ? supabase.from("profiles").select("id,full_name,avatar_url").in("id", userIds) : Promise.resolve({ data: [] }),
