@@ -413,8 +413,9 @@ function ProviderRow({ p, isBoosted, userLoc, onRequest }: { p: RealProvider; is
           {available ? "Available now" : "Check availability"}
         </span>
         <div className="flex items-center gap-2">
+          <ProviderQuickContact providerId={p.user_id} source="search_result" variant="compact" />
           <Link to="/u/$id" params={{ id: p.user_id }} className="rounded-lg border border-border bg-background px-3 py-1.5 text-xs font-semibold text-navy transition hover:border-navy">
-            View Profile
+            View
           </Link>
           <button
             onClick={onRequest}
@@ -423,6 +424,7 @@ function ProviderRow({ p, isBoosted, userLoc, onRequest }: { p: RealProvider; is
             <ClipboardList className="h-3.5 w-3.5" /> Request
           </button>
         </div>
+
       </div>
     </div>
   );
