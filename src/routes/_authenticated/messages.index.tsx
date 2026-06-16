@@ -14,7 +14,7 @@ export const Route = createFileRoute("/_authenticated/messages/")({
 
 type Row = {
   id: string;
-  service_request_id: string;
+  service_request_id: string | null;
   customer_id: string;
   provider_id: string;
   status: string;
@@ -23,6 +23,7 @@ type Row = {
   customer_unread_count: number;
   provider_unread_count: number;
 };
+
 
 type Profile = { id: string; full_name: string; avatar_url: string | null };
 type Req = { id: string; service_needed: string; title: string | null };
