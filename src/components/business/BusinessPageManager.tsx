@@ -152,7 +152,12 @@ export function BusinessPageCreateForm() {
       <h1 className="text-3xl font-bold text-navy">Create a Business Page</h1>
       <p className="mt-2 text-sm text-muted-foreground">Set up your page now, then use it for updates, requests, and business discovery across Tuungane.</p>
 
+      <div className="mt-4 rounded-lg border border-navy/15 bg-navy/5 p-3 text-xs text-navy/80">
+        New pages start as <strong>Unverified</strong>. You can earn higher trust by completing your page, getting reviews, and—when you're ready—requesting manual verification from Tuungane. Business and organization profiles may require verification before receiving a verified badge.
+      </div>
+
       <form onSubmit={submit} className="mt-8 space-y-5">
+
         <Field label="Business name">
           <input required value={form.name} onChange={(e) => set("name", e.target.value)} className="input" placeholder="e.g. Kabira Salon & Spa" />
         </Field>
