@@ -307,7 +307,7 @@ function UserProfile() {
               </>
             )}
             {isOwn && <Link to="/dashboard" className="ml-auto rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-navy hover:border-orange">My Dashboard</Link>}
-            {!isOwn && user && <button onClick={() => setReportOpen(true)} aria-label="Report" className="ml-auto text-muted-foreground hover:text-destructive"><Flag className="h-4 w-4" /></button>}
+            {!isOwn && user && <ReportProfileButton kind="service_profile" id={id} className="ml-auto" />}
           </div>
         </div>
 
