@@ -92,7 +92,7 @@ function Dashboard() {
 
   return (
     <Layout>
-      <section className="mx-auto max-w-3xl px-4 py-8 pb-32">
+      <section className="mx-auto max-w-3xl px-4 py-8 pb-40 [padding-bottom:calc(10rem+env(safe-area-inset-bottom))]">
         {/* 1. Greeting / header */}
         <div>
           <h1 className="font-display text-3xl font-bold text-navy">Hi, {profile?.full_name?.split(" ")[0] || "there"}</h1>
@@ -113,7 +113,7 @@ function Dashboard() {
         {/* 2. Quick actions */}
         <div className="mt-6">
           <h2 className="mb-3 font-display text-sm font-bold uppercase tracking-wide text-muted-foreground">Quick actions</h2>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <QuickAction to="/requests/new" icon={<ClipboardList className="h-5 w-5" />} label="Create request" hint="Find someone to help you" />
             {profile?.is_provider ? (
               <QuickAction to="/dashboard" icon={<Megaphone className="h-5 w-5" />} label="Post work update" hint="Share your work or offer" />
