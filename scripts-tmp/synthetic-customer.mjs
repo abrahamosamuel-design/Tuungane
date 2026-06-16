@@ -29,7 +29,7 @@ if (action === 'create') {
     category_slug: 'automotive',
     town: 'Kampala', district: 'Kampala', area: 'Nakawa',
     location: 'Nakawa, Kampala',
-    visibility: 'direct',
+    visibility: 'matching_only',
     status: 'requested',
     urgent_flag: false,
     customer_phone: '+256700000001',
