@@ -2982,6 +2982,13 @@ export type Database = {
         }
         Returns: string
       }
+      trust_rank: {
+        Args: {
+          _id: string
+          _kind: Database["public"]["Enums"]["profile_kind"]
+        }
+        Returns: number
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user" | "finance_admin"
