@@ -10,7 +10,7 @@ import { PostComposer } from "@/components/social/PostComposer";
 import { PostCard, type PostRow } from "@/components/social/PostCard";
 import { RecommendDialog } from "@/components/social/RecommendDialog";
 import { ReviewDialog } from "@/components/social/ReviewDialog";
-import { ReportDialog } from "@/components/social/ReportDialog";
+
 import { SaveButton } from "@/components/social/SaveButton";
 
 import { ClaimProfileDialog } from "@/components/ClaimProfileDialog";
