@@ -535,7 +535,7 @@ function OfficialTabContent({ initialSub }: { initialSub?: SubTab }) {
             <div key={c.id} className={`rounded-xl border bg-card p-3 ${c.status === "pending" ? "border-orange/50" : "border-border opacity-80"}`}>
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <p className="font-semibold text-navy">{c.full_name} <span className="ml-2 text-xs text-muted-foreground">{c.phone_number}</span></p>
+                  <p className="font-semibold text-navy">{c.full_name}{revealed[c.id]?.phone_number && <span className="ml-2 text-xs text-muted-foreground">{revealed[c.id]?.phone_number}</span>}</p>
                   <p className="text-xs text-muted-foreground">{c.relationship_to_profile} · {timeAgo(c.created_at)} · <span className={`font-medium ${c.status === "pending" ? "text-orange" : c.status === "approved" ? "text-green" : "text-destructive"}`}>{c.status}</span></p>
                   <Link to="/u/$id" params={{ id: c.service_profile_user_id }} className="mt-1 inline-block text-[11px] text-orange underline">View claimed profile →</Link>
                 </div>
@@ -547,7 +547,15 @@ function OfficialTabContent({ initialSub }: { initialSub?: SubTab }) {
                 )}
               </div>
               {c.explanation && <p className="mt-2 text-xs text-foreground/80">{c.explanation}</p>}
-              {c.supporting_file_url && <a href={c.supporting_file_url} target="_blank" rel="noreferrer" className="mt-1 inline-block text-[10px] text-orange underline">View supporting file</a>}
+              {!revealed[c.id] ? (
+                <button onClick={() => revealClaimContact(c.id)} className="mt-2 inline-block text-[11px] text-orange underline">Reveal contact &amp; supporting file</button>
+              ) : (
+                <div className="mt-2 space-y-0.5 text-[11px] text-muted-foreground">
+                  {revealed[c.id]?.email && <p>Email: {revealed[c.id]?.email}</p>}
+                  {revealed[c.id]?.whatsapp_number && <p>WhatsApp: {revealed[c.id]?.whatsapp_number}</p>}
+                  {revealed[c.id]?.supporting_file_url && <a href={revealed[c.id]!.supporting_file_url!} target="_blank" rel="noreferrer" className="inline-block text-orange underline">View supporting file</a>}
+                </div>
+              )}
             </div>
           ))}
         </div>
