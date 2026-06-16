@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { uploadMedia } from "@/lib/upload";
 import { Avatar } from "@/components/social/Avatar";
 import { MyRequestsSummary } from "@/components/MyRequestsSummary";
+import { MyTrustStatusCard } from "@/components/trust/MyTrustStatusCard";
 import { toast } from "sonner";
 
 
@@ -100,6 +101,9 @@ function Me() {
         <div className="mt-6">
           <MyRequestsSummary limit={3} />
         </div>
+
+        <MyTrustStatusCard />
+
 
         <SubSection title="Providers you follow" items={following} empty="You don't follow anyone yet." />
         <SubSection title="Saved providers" items={saved} empty="No saved providers." />
