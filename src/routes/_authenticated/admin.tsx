@@ -115,6 +115,7 @@ function Admin() {
           {tab === "recs" && <RecsTab />}
           {tab === "reports" && <ReportsTab />}
           {tab === "disputes" && <DisputesAdminTab />}
+          {tab === "trust" && <TrustVerificationCenter />}
           {tab === "credits" && <CreditsAdminTab />}
           {tab === "official" && <OfficialTabContent initialSub={officialSub} />}
           {tab === "contact" && <ContactAnalyticsTab />}
