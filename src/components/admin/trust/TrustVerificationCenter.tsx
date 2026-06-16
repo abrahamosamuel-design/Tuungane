@@ -157,7 +157,7 @@ function RequestsSub() {
 
   const load = async () => {
     let q = supabase.from("profile_verification_requests").select("*").order("created_at", { ascending: false }).limit(100);
-    if (filter !== "all") q = q.eq("status", filter);
+    if (filter !== "all") q = q.eq("status", filter as never);
     const { data } = await q;
     setRows((data ?? []) as ReqRow[]);
   };
@@ -252,7 +252,7 @@ function ReportsSub() {
 
   const load = async () => {
     let q = supabase.from("profile_reports").select("*").order("created_at", { ascending: false }).limit(100);
-    if (filter !== "all") q = q.eq("status", filter);
+    if (filter !== "all") q = q.eq("status", filter as never);
     const { data } = await q;
     setRows((data ?? []) as Report[]);
   };
