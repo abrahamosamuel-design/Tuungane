@@ -484,10 +484,12 @@ function RequestDetailsPage() {
   );
 }
 
-function ResponseCard({ r, serviceRequestId, busy: _busy, onChoose, onDecline, showActions = true, phone = null, urgent = false, customerId }: { r: ResponseWithProvider; serviceRequestId: string; busy: boolean; onChoose?: () => void; onDecline?: () => void; showActions?: boolean; phone?: string | null; urgent?: boolean; customerId?: string }) {
+function ResponseCard({ r, serviceRequestId, busy: _busy, onChoose, onDecline, showActions = true, phone = null, urgent = false, customerId, source = "request_detail" }: { r: ResponseWithProvider; serviceRequestId: string; busy: boolean; onChoose?: () => void; onDecline?: () => void; showActions?: boolean; phone?: string | null; urgent?: boolean; customerId?: string; source?: "request_response" | "request_detail" }) {
   const label = r.stats ? trustScoreLabel(r.stats.trust_score) : null;
   const [revealPhone, setRevealPhone] = useState(false);
-  const canShowPhone = !!phone && r.status === "chosen";
+  // Phone is shown whenever the provider's visibility allows it (phone prop is non-null).
+  // Customers no longer need to "choose" a provider before being allowed to call.
+  const canShowPhone = !!phone && r.status !== "declined";
   return (
     <div className={`rounded-2xl border p-4 ${r.status === "chosen" ? "border-green/40 bg-green/5" : r.status === "declined" ? "border-border bg-muted/30 opacity-70" : "border-border bg-card"}`}>
       <div className="flex items-start gap-3">
