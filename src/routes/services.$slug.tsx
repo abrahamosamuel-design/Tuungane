@@ -10,6 +10,7 @@ import { useUserLocation } from "@/hooks/use-user-location";
 import { filterByRadius, sortByProximity, proximityLabel, type UserLocation } from "@/lib/location";
 import { RadiusFilter } from "@/components/RadiusFilter";
 import { ProviderQuickContact } from "@/components/ProviderQuickContact";
+import { ProfileTrustBadge } from "@/components/trust/ProfileTrustBadge";
 
 
 type Row = {
