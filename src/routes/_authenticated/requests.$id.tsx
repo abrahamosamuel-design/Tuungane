@@ -43,6 +43,7 @@ function RequestDetailsPage() {
   const [responses, setResponses] = useState<ResponseWithProvider[]>([]);
   const [hasFeedback, setHasFeedback] = useState(false);
   const [providerContact, setProviderContact] = useState<{ phone: string | null; whatsapp: string | null; email: string | null; name: string | null } | null>(null);
+  const [responsePhones, setResponsePhones] = useState<Record<string, string | null>>({});
   const [responseDialogOpen, setResponseDialogOpen] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -80,6 +81,32 @@ function RequestDetailsPage() {
     setResponses(list.map((x): ResponseWithProvider => ({ ...x, provider: pmap.get(x.provider_id), stats: smap.get(x.provider_id) })));
     const { count } = await supabase.from("service_feedback").select("id", { count: "exact", head: true }).eq("service_request_id", id);
     setHasFeedback((count ?? 0) > 0);
+
+    // For the customer on an open/in-progress request, fetch revealable phones
+    // for every responding provider (respecting their phone_visibility setting)
+    // so Call/View Phone can appear directly on the response card.
+    if (user.id === sr.customer_id && provIds.length) {
+      const [{ data: sps }, ppsRes] = await Promise.all([
+        supabase.from("service_profiles").select("user_id,phone").in("user_id", provIds),
+        // phone_visibility column added in recent migration; types may not be regenerated yet
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (supabase.from("provider_privacy_settings") as any).select("user_id,phone_visibility").in("user_id", provIds) as Promise<{ data: Array<{ user_id: string; phone_visibility?: string }> | null }>,
+      ]);
+      const pps = ppsRes.data;
+      const visMap = new Map<string, string>();
+      ((pps ?? []) as Array<{ user_id: string; phone_visibility?: string }>).forEach((p) => {
+        visMap.set(p.user_id, p.phone_visibility ?? "logged_in_only");
+      });
+      const phoneMap: Record<string, string | null> = {};
+      ((sps ?? []) as Array<{ user_id: string; phone: string | null }>).forEach((s) => {
+        const vis = visMap.get(s.user_id) ?? "logged_in_only";
+        const allowed = vis !== "hidden" && vis !== "messages_first";
+        phoneMap[s.user_id] = allowed ? (s.phone ?? null) : null;
+      });
+      setResponsePhones(phoneMap);
+    } else {
+      setResponsePhones({});
+    }
 
     // Fetch contact info of the assigned provider (or original provider for direct requests)
     const assigned = sr.selected_provider_id ?? sr.provider_id;
@@ -339,7 +366,7 @@ function RequestDetailsPage() {
             ) : (
               <div className="mt-3 space-y-3">
                 {visibleResponses.map((r) => (
-                  <ResponseCard key={r.id} r={r} serviceRequestId={req.id} busy={busy} onChoose={() => chooseProvider(r)} onDecline={() => declineResponse(r)} phone={null} urgent={!!req.urgent_flag || req.urgency === "emergency"} />
+                  <ResponseCard key={r.id} r={r} serviceRequestId={req.id} busy={busy} onChoose={() => chooseProvider(r)} onDecline={() => declineResponse(r)} phone={responsePhones[r.provider_id] ?? null} urgent={!!req.urgent_flag || req.urgency === "emergency"} customerId={user.id} source="request_response" />
                 ))}
               </div>
             )}
@@ -457,10 +484,12 @@ function RequestDetailsPage() {
   );
 }
 
-function ResponseCard({ r, serviceRequestId, busy: _busy, onChoose, onDecline, showActions = true, phone = null, urgent = false, customerId }: { r: ResponseWithProvider; serviceRequestId: string; busy: boolean; onChoose?: () => void; onDecline?: () => void; showActions?: boolean; phone?: string | null; urgent?: boolean; customerId?: string }) {
+function ResponseCard({ r, serviceRequestId, busy: _busy, onChoose, onDecline, showActions = true, phone = null, urgent = false, customerId, source = "request_detail" }: { r: ResponseWithProvider; serviceRequestId: string; busy: boolean; onChoose?: () => void; onDecline?: () => void; showActions?: boolean; phone?: string | null; urgent?: boolean; customerId?: string; source?: "request_response" | "request_detail" }) {
   const label = r.stats ? trustScoreLabel(r.stats.trust_score) : null;
   const [revealPhone, setRevealPhone] = useState(false);
-  const canShowPhone = !!phone && r.status === "chosen";
+  // Phone is shown whenever the provider's visibility allows it (phone prop is non-null).
+  // Customers no longer need to "choose" a provider before being allowed to call.
+  const canShowPhone = !!phone && r.status !== "declined";
   return (
     <div className={`rounded-2xl border p-4 ${r.status === "chosen" ? "border-green/40 bg-green/5" : r.status === "declined" ? "border-border bg-muted/30 opacity-70" : "border-border bg-card"}`}>
       <div className="flex items-start gap-3">
@@ -498,8 +527,8 @@ function ResponseCard({ r, serviceRequestId, busy: _busy, onChoose, onDecline, s
               variant="primary"
             />
             {canShowPhone && !revealPhone && (
-              <button onClick={() => { setRevealPhone(true); if (customerId) logContactClick({ customerId, providerId: r.provider_id, serviceRequestId, method: "call" }); }} className="inline-flex items-center gap-1 rounded-full border border-orange/40 bg-card px-3 py-1.5 text-xs font-semibold text-orange hover:bg-orange/5">
-                <Phone className="h-3 w-3" /> Call / View Number
+              <button onClick={() => { setRevealPhone(true); if (customerId) logContactClick({ customerId, providerId: r.provider_id, serviceRequestId, source, method: "call" }); }} className="inline-flex items-center gap-1 rounded-full border border-orange/40 bg-card px-3 py-1.5 text-xs font-semibold text-orange hover:bg-orange/5">
+                <Phone className="h-3 w-3" /> Call / View Phone
               </button>
             )}
             {canShowPhone && revealPhone && phone && (

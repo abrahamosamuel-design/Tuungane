@@ -46,34 +46,57 @@ export function useContactGate(providerId: string | null | undefined) {
 export async function logContactClick(args: {
   customerId: string;
   providerId: string;
-  serviceRequestId: string;
+  serviceRequestId?: string | null;
+  serviceId?: string | null;
+  source?: "request_response" | "provider_profile" | "service_listing" | "search_result" | "request_detail" | "message_thread";
   method: "whatsapp" | "call" | "in_app" | "message";
 }) {
   try {
-    // If the request has progressed beyond "requested" it counts as an active job.
-    // Populate service_job_id so contact analytics can split request-phase vs
-    // job-phase contacts. (No separate service_jobs table — the request id
-    // doubles as the job id once status is accepted/in_progress/completed.)
     let serviceJobId: string | null = null;
-    const { data: r } = await supabase
-      .from("service_requests")
-      .select("status")
-      .eq("id", args.serviceRequestId)
-      .maybeSingle();
-    if (r && ["accepted", "in_progress", "completed"].includes(r.status as string)) {
-      serviceJobId = args.serviceRequestId;
+    if (args.serviceRequestId) {
+      const { data: r } = await supabase
+        .from("service_requests")
+        .select("status")
+        .eq("id", args.serviceRequestId)
+        .maybeSingle();
+      if (r && ["accepted", "in_progress", "completed"].includes(r.status as string)) {
+        serviceJobId = args.serviceRequestId;
+      }
     }
 
     await supabase.from("contact_logs").insert({
       customer_id: args.customerId,
       provider_id: args.providerId,
-      service_request_id: args.serviceRequestId,
+      service_request_id: args.serviceRequestId ?? null,
       service_job_id: serviceJobId,
+      service_id: args.serviceId ?? null,
+      source: args.source ?? null,
       contact_method: args.method,
       user_agent: typeof navigator !== "undefined" ? navigator.userAgent.slice(0, 500) : null,
-    });
+    } as never);
   } catch {
     // best-effort; don't block the user from contacting
+  }
+}
+
+/**
+ * Fetch a provider's phone if their phone_visibility allows the current
+ * (signed-in) customer to see it. Returns null when hidden / messages-first / no phone.
+ */
+export async function getRevealablePhone(providerId: string): Promise<string | null> {
+  try {
+    const [{ data: sp }, { data: pp }] = await Promise.all([
+      supabase.from("service_profiles").select("phone").eq("user_id", providerId).maybeSingle(),
+      supabase.from("provider_privacy_settings").select("phone_visibility").eq("user_id", providerId).maybeSingle(),
+    ]);
+    const phone = sp?.phone ?? null;
+    if (!phone) return null;
+    const vis = (pp as { phone_visibility?: string } | null)?.phone_visibility ?? "logged_in_only";
+    if (vis === "hidden" || vis === "messages_first") return null;
+    // allow_calls and logged_in_only both reveal to the signed-in customer
+    return phone;
+  } catch {
+    return null;
   }
 }
 
