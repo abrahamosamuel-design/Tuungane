@@ -30,8 +30,8 @@ export function StatusTracker({ status }: Props) {
     );
   }
 
-  const visible = toVisibleStatus(status); // "open" | "in_progress" | "completed"
-  const order = { open: 0, in_progress: 1, completed: 2 } as const;
+  const visible = toVisibleStatus(status) as "open" | "in_progress" | "completed";
+  const order: Record<"open" | "in_progress" | "completed", number> = { open: 0, in_progress: 1, completed: 2 };
   const activeIdx = order[visible];
 
   return (
