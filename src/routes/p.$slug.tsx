@@ -150,11 +150,13 @@ function PublicProfilePage() {
         <div className="mt-3">
           <div className="flex flex-wrap items-center gap-2">
             <h1 className="font-display text-2xl font-bold text-navy">{profile.name}</h1>
-            {profile.verified === "verified" && (
+            {profile.profile_type === "individual" ? (
+              <ProfileTrustBadge kind="service_profile" id={profile.owner_id} />
+            ) : profile.verified === "verified" ? (
               <span className="inline-flex items-center gap-1 rounded-full bg-green/10 px-2 py-0.5 text-[11px] font-semibold text-green">
                 <ShieldCheck className="h-3 w-3" /> Verified
               </span>
-            )}
+            ) : null}
           </div>
           <p className="mt-0.5 text-xs uppercase tracking-wide text-navy/60">
             {TYPE_META[profile.profile_type].label}
