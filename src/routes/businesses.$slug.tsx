@@ -157,6 +157,9 @@ function BusinessDetail() {
                     <Edit3 className="h-4 w-4" /> {editing ? "Cancel" : "Edit"}
                   </button>
                 )}
+                {user && user.id !== page.owner_id && (
+                  <ReportProfileButton kind="business_page" id={page.id} />
+                )}
               </div>
             </div>
 
