@@ -139,7 +139,7 @@ function BusinessDetail() {
               <div>
                 <div className="flex items-center gap-2">
                   <h1 className="font-display text-2xl font-bold text-navy sm:text-3xl">{page.name}</h1>
-                  {page.verified === "verified" && <BadgeCheck className="h-6 w-6 text-orange" />}
+                  <BusinessTrustBadge pageId={page.id} />
                 </div>
                 <div className="mt-1 text-sm text-muted-foreground">{orgTypeLabel(page.org_type)}{page.subcategory ? ` · ${page.subcategory}` : ""}</div>
                 {(page.town || page.district) && (
