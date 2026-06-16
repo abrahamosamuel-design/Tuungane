@@ -97,7 +97,7 @@ function MessagesIndex() {
           {rows.map((r) => {
             const otherId = r.customer_id === user.id ? r.provider_id : r.customer_id;
             const other = profiles.get(otherId);
-            const req = requests.get(r.service_request_id);
+            const req = r.service_request_id ? requests.get(r.service_request_id) : null;
             const unread = r.customer_id === user.id ? r.customer_unread_count : r.provider_unread_count;
             return (
               <Link key={r.id} to="/messages/$id" params={{ id: r.id }} className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3 hover:border-orange">
