@@ -257,3 +257,10 @@ function EditForm({ page, onSaved }: { page: BPage; onSaved: () => void }) {
     </div>
   );
 }
+
+function BusinessTrustBadge({ pageId }: { pageId: string }) {
+  const { level } = useTrustBadge("business_page", pageId);
+  if (!level) return null;
+  return <TrustBadge level={level} />;
+}
+}
