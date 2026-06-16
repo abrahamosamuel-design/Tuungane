@@ -1146,6 +1146,54 @@ export type Database = {
           },
         ]
       }
+      profile_admin_notes: {
+        Row: {
+          author_id: string
+          created_at: string
+          id: string
+          note: string
+          profile_id: string
+          profile_kind: Database["public"]["Enums"]["profile_kind"]
+          related_report_id: string | null
+          related_request_id: string | null
+        }
+        Insert: {
+          author_id: string
+          created_at?: string
+          id?: string
+          note: string
+          profile_id: string
+          profile_kind: Database["public"]["Enums"]["profile_kind"]
+          related_report_id?: string | null
+          related_request_id?: string | null
+        }
+        Update: {
+          author_id?: string
+          created_at?: string
+          id?: string
+          note?: string
+          profile_id?: string
+          profile_kind?: Database["public"]["Enums"]["profile_kind"]
+          related_report_id?: string | null
+          related_request_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_admin_notes_related_report_id_fkey"
+            columns: ["related_report_id"]
+            isOneToOne: false
+            referencedRelation: "profile_reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_admin_notes_related_request_id_fkey"
+            columns: ["related_request_id"]
+            isOneToOne: false
+            referencedRelation: "profile_verification_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profile_claim_requests: {
         Row: {
           created_at: string
@@ -1194,6 +1242,48 @@ export type Database = {
           status?: Database["public"]["Enums"]["claim_status"]
           supporting_file_url?: string | null
           whatsapp_number?: string | null
+        }
+        Relationships: []
+      }
+      profile_reports: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          profile_id: string
+          profile_kind: Database["public"]["Enums"]["profile_kind"]
+          reason: string
+          reporter_id: string
+          resolution_note: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          status: Database["public"]["Enums"]["profile_report_status"]
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          profile_id: string
+          profile_kind: Database["public"]["Enums"]["profile_kind"]
+          reason: string
+          reporter_id: string
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: Database["public"]["Enums"]["profile_report_status"]
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          profile_id?: string
+          profile_kind?: Database["public"]["Enums"]["profile_kind"]
+          reason?: string
+          reporter_id?: string
+          resolution_note?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: Database["public"]["Enums"]["profile_report_status"]
         }
         Relationships: []
       }
@@ -1249,6 +1339,114 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      profile_trust_status: {
+        Row: {
+          auto_level: Database["public"]["Enums"]["trust_level"]
+          created_at: string
+          id: string
+          last_recomputed_at: string
+          manual_level: Database["public"]["Enums"]["trust_level"] | null
+          manual_reason: string | null
+          manual_set_at: string | null
+          manual_set_by: string | null
+          owner_user_id: string
+          profile_id: string
+          profile_kind: Database["public"]["Enums"]["profile_kind"]
+          reports_count: number
+          updated_at: string
+        }
+        Insert: {
+          auto_level?: Database["public"]["Enums"]["trust_level"]
+          created_at?: string
+          id?: string
+          last_recomputed_at?: string
+          manual_level?: Database["public"]["Enums"]["trust_level"] | null
+          manual_reason?: string | null
+          manual_set_at?: string | null
+          manual_set_by?: string | null
+          owner_user_id: string
+          profile_id: string
+          profile_kind: Database["public"]["Enums"]["profile_kind"]
+          reports_count?: number
+          updated_at?: string
+        }
+        Update: {
+          auto_level?: Database["public"]["Enums"]["trust_level"]
+          created_at?: string
+          id?: string
+          last_recomputed_at?: string
+          manual_level?: Database["public"]["Enums"]["trust_level"] | null
+          manual_reason?: string | null
+          manual_set_at?: string | null
+          manual_set_by?: string | null
+          owner_user_id?: string
+          profile_id?: string
+          profile_kind?: Database["public"]["Enums"]["profile_kind"]
+          reports_count?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profile_verification_requests: {
+        Row: {
+          admin_note: string | null
+          business_name: string | null
+          contact_person: string | null
+          created_at: string
+          experience_summary: string | null
+          full_name: string | null
+          id: string
+          location: string | null
+          owner_user_id: string
+          phone: string | null
+          profile_id: string
+          profile_kind: Database["public"]["Enums"]["profile_kind"]
+          requested_type: Database["public"]["Enums"]["verification_request_type"]
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["verification_request_status"]
+          updated_at: string
+        }
+        Insert: {
+          admin_note?: string | null
+          business_name?: string | null
+          contact_person?: string | null
+          created_at?: string
+          experience_summary?: string | null
+          full_name?: string | null
+          id?: string
+          location?: string | null
+          owner_user_id: string
+          phone?: string | null
+          profile_id: string
+          profile_kind: Database["public"]["Enums"]["profile_kind"]
+          requested_type: Database["public"]["Enums"]["verification_request_type"]
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["verification_request_status"]
+          updated_at?: string
+        }
+        Update: {
+          admin_note?: string | null
+          business_name?: string | null
+          contact_person?: string | null
+          created_at?: string
+          experience_summary?: string | null
+          full_name?: string | null
+          id?: string
+          location?: string | null
+          owner_user_id?: string
+          phone?: string | null
+          profile_id?: string
+          profile_kind?: Database["public"]["Enums"]["profile_kind"]
+          requested_type?: Database["public"]["Enums"]["verification_request_type"]
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["verification_request_status"]
+          updated_at?: string
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -2218,6 +2416,93 @@ export type Database = {
         }
         Relationships: []
       }
+      trust_audit_log: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          details: Json
+          id: string
+          new_level: Database["public"]["Enums"]["trust_level"] | null
+          owner_user_id: string | null
+          prev_level: Database["public"]["Enums"]["trust_level"] | null
+          profile_id: string | null
+          profile_kind: Database["public"]["Enums"]["profile_kind"] | null
+          reason: string | null
+          related_report_id: string | null
+          related_request_id: string | null
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          new_level?: Database["public"]["Enums"]["trust_level"] | null
+          owner_user_id?: string | null
+          prev_level?: Database["public"]["Enums"]["trust_level"] | null
+          profile_id?: string | null
+          profile_kind?: Database["public"]["Enums"]["profile_kind"] | null
+          reason?: string | null
+          related_report_id?: string | null
+          related_request_id?: string | null
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          new_level?: Database["public"]["Enums"]["trust_level"] | null
+          owner_user_id?: string | null
+          prev_level?: Database["public"]["Enums"]["trust_level"] | null
+          profile_id?: string | null
+          profile_kind?: Database["public"]["Enums"]["profile_kind"] | null
+          reason?: string | null
+          related_report_id?: string | null
+          related_request_id?: string | null
+        }
+        Relationships: []
+      }
+      trust_settings: {
+        Row: {
+          allow_boost_unverified: boolean
+          documents_required: boolean
+          id: number
+          manual_verification_open: boolean
+          min_completed_jobs_for_reviewed: number
+          min_verified_reviews_for_reviewed: number
+          report_auto_flag_threshold: number
+          show_badges_publicly: boolean
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          allow_boost_unverified?: boolean
+          documents_required?: boolean
+          id?: number
+          manual_verification_open?: boolean
+          min_completed_jobs_for_reviewed?: number
+          min_verified_reviews_for_reviewed?: number
+          report_auto_flag_threshold?: number
+          show_badges_publicly?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          allow_boost_unverified?: boolean
+          documents_required?: boolean
+          id?: number
+          manual_verification_open?: boolean
+          min_completed_jobs_for_reviewed?: number
+          min_verified_reviews_for_reviewed?: number
+          report_auto_flag_threshold?: number
+          show_badges_publicly?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       user_blocks: {
         Row: {
           blocked_id: string
@@ -2259,6 +2544,44 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      verification_evidence: {
+        Row: {
+          created_at: string
+          doc_type: string
+          id: string
+          note: string | null
+          owner_user_id: string
+          request_id: string
+          storage_path: string | null
+        }
+        Insert: {
+          created_at?: string
+          doc_type: string
+          id?: string
+          note?: string | null
+          owner_user_id: string
+          request_id: string
+          storage_path?: string | null
+        }
+        Update: {
+          created_at?: string
+          doc_type?: string
+          id?: string
+          note?: string | null
+          owner_user_id?: string
+          request_id?: string
+          storage_path?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "verification_evidence_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "profile_verification_requests"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -2316,8 +2639,37 @@ export type Database = {
         Returns: number
       }
       _slugify: { Args: { _text: string }; Returns: string }
+      _trust_profile_owner: {
+        Args: {
+          _id: string
+          _kind: Database["public"]["Enums"]["profile_kind"]
+        }
+        Returns: string
+      }
       admin_add_credits: {
         Args: { _amount: number; _reason?: string; _user_id: string }
+        Returns: undefined
+      }
+      admin_add_profile_note: {
+        Args: {
+          _id: string
+          _kind: Database["public"]["Enums"]["profile_kind"]
+          _note: string
+          _related_report_id?: string
+          _related_request_id?: string
+        }
+        Returns: string
+      }
+      admin_clear_manual_trust_level: {
+        Args: {
+          _id: string
+          _kind: Database["public"]["Enums"]["profile_kind"]
+          _reason?: string
+        }
+        Returns: undefined
+      }
+      admin_decide_verification_request: {
+        Args: { _admin_note?: string; _decision: string; _request_id: string }
         Returns: undefined
       }
       admin_deduct_credits: {
@@ -2346,6 +2698,10 @@ export type Database = {
           role: Database["public"]["Enums"]["app_role"]
           user_id: string
         }[]
+      }
+      admin_resolve_profile_report: {
+        Args: { _note?: string; _report_id: string; _resolution: string }
+        Returns: undefined
       }
       admin_revoke_role: {
         Args: {
@@ -2395,6 +2751,15 @@ export type Database = {
               target_user_id: string
             }[]
           }
+      admin_set_trust_level: {
+        Args: {
+          _id: string
+          _kind: Database["public"]["Enums"]["profile_kind"]
+          _level: Database["public"]["Enums"]["trust_level"]
+          _reason?: string
+        }
+        Returns: undefined
+      }
       approve_purchase_request: {
         Args: {
           _admin_note?: string
@@ -2454,6 +2819,13 @@ export type Database = {
           supporting_file_url: string
           whatsapp_number: string
         }[]
+      }
+      get_profile_trust_badge: {
+        Args: {
+          _id: string
+          _kind: Database["public"]["Enums"]["profile_kind"]
+        }
+        Returns: Database["public"]["Enums"]["trust_level"]
       }
       get_unread_message_count: { Args: never; Returns: number }
       has_role: {
@@ -2574,6 +2946,13 @@ export type Database = {
           urgent_flag: boolean
         }[]
       }
+      recompute_profile_trust: {
+        Args: {
+          _id: string
+          _kind: Database["public"]["Enums"]["profile_kind"]
+        }
+        Returns: Database["public"]["Enums"]["trust_level"]
+      }
       reject_purchase_request: {
         Args: { _admin_note?: string; _request_id: string }
         Returns: undefined
@@ -2650,6 +3029,8 @@ export type Database = {
         | "church"
         | "ngo"
         | "admin"
+      profile_kind: "service_profile" | "business_page"
+      profile_report_status: "open" | "reviewed" | "dismissed" | "action_taken"
       public_profile_type: "individual" | "business" | "organization"
       report_status: "open" | "reviewing" | "resolved" | "dismissed"
       seeded_profile_status: "unclaimed" | "claim_pending" | "claimed"
@@ -2661,6 +3042,26 @@ export type Database = {
         | "cancelled"
         | "disputed"
       service_urgency: "normal" | "urgent" | "emergency"
+      trust_level:
+        | "new"
+        | "phone_verified"
+        | "profile_complete"
+        | "reviewed_provider"
+        | "verified_provider"
+        | "verified_business"
+        | "verified_organization"
+        | "under_review"
+        | "suspended"
+      verification_request_status:
+        | "pending"
+        | "more_info"
+        | "approved"
+        | "rejected"
+        | "revoked"
+      verification_request_type:
+        | "verified_provider"
+        | "verified_business"
+        | "verified_organization"
       verification_status: "none" | "pending" | "verified" | "featured"
     }
     CompositeTypes: {
@@ -2839,6 +3240,8 @@ export const Constants = {
         "ngo",
         "admin",
       ],
+      profile_kind: ["service_profile", "business_page"],
+      profile_report_status: ["open", "reviewed", "dismissed", "action_taken"],
       public_profile_type: ["individual", "business", "organization"],
       report_status: ["open", "reviewing", "resolved", "dismissed"],
       seeded_profile_status: ["unclaimed", "claim_pending", "claimed"],
@@ -2851,6 +3254,29 @@ export const Constants = {
         "disputed",
       ],
       service_urgency: ["normal", "urgent", "emergency"],
+      trust_level: [
+        "new",
+        "phone_verified",
+        "profile_complete",
+        "reviewed_provider",
+        "verified_provider",
+        "verified_business",
+        "verified_organization",
+        "under_review",
+        "suspended",
+      ],
+      verification_request_status: [
+        "pending",
+        "more_info",
+        "approved",
+        "rejected",
+        "revoked",
+      ],
+      verification_request_type: [
+        "verified_provider",
+        "verified_business",
+        "verified_organization",
+      ],
       verification_status: ["none", "pending", "verified", "featured"],
     },
   },
