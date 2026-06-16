@@ -86,6 +86,13 @@ function ConversationPage() {
         });
         if ((payload.new as Msg).receiver_id === user.id) void markConversationRead(id);
       })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "messages", filter: `conversation_id=eq.${id}` }, (payload) => {
+        const m = payload.new as Msg;
+        setMessages((prev) => prev.map((x) => (x.id === m.id ? { ...x, ...m } : x)));
+      })
+      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "conversations", filter: `id=eq.${id}` }, (payload) => {
+        setConv((prev) => (prev ? { ...prev, ...(payload.new as Conv) } : prev));
+      })
       .subscribe();
 
     return () => { active = false; supabase.removeChannel(ch); };
