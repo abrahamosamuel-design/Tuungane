@@ -2579,6 +2579,7 @@ export type Database = {
         Returns: undefined
       }
       reveal_application_contact: { Args: { _app_id: string }; Returns: string }
+      send_test_push_notification: { Args: never; Returns: string }
       spend_credits: {
         Args: {
           _amount: number
