@@ -6,6 +6,7 @@ import { useUserLocation } from "@/hooks/use-user-location";
 import { filterByRadius, proximityLabel, sortByProximity } from "@/lib/location";
 import { useFeaturedLocations, isFeaturedTarget } from "@/hooks/use-featured-locations";
 import { timeAgo } from "@/lib/format";
+import { ProfileTrustBadge } from "@/components/trust/ProfileTrustBadge";
 
 type NearbyRequest = {
   id: string;
