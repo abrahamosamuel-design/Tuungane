@@ -7,8 +7,10 @@ function getOnline() {
 }
 
 export function useOnlineStatus() {
-  const [online, setOnline] = useState<boolean>(() => getOnline());
+  // Always start as `true` to match SSR output; correct on mount.
+  const [online, setOnline] = useState<boolean>(true);
   useEffect(() => {
+    setOnline(getOnline());
     const on = () => setOnline(true);
     const off = () => setOnline(false);
     window.addEventListener("online", on);
