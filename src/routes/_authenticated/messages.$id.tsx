@@ -148,8 +148,10 @@ function ConversationPage() {
   if (!conv) return <Layout><div className="mx-auto max-w-3xl px-4 py-10 text-sm text-muted-foreground">Conversation not found.</div></Layout>;
 
   return (
-    <Layout>
-      <section className="mx-auto flex h-[calc(100dvh-4rem)] max-w-3xl flex-col">
+    <Layout hideFooter>
+      <section className="mx-auto flex h-[calc(100dvh-8rem)] max-w-3xl flex-col md:h-[calc(100dvh-4rem)]">
+
+
         {/* Sticky header */}
         <div className="sticky top-0 z-10 flex items-center gap-3 border-b border-border bg-background/95 px-4 py-3 backdrop-blur">
           <button onClick={() => navigate({ to: "/messages" })} className="rounded-full p-1.5 text-navy hover:bg-muted">
