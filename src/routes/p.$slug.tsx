@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { Building2, User as UserIcon, Landmark, Star, MapPin, MessageSquare, Phone, ShieldCheck } from "lucide-react";
 import { ReviewDialog } from "@/components/social/ReviewDialog";
+import { ProfileTrustBadge } from "@/components/trust/ProfileTrustBadge";
 
 type ProfileType = "individual" | "business" | "organization";
 
