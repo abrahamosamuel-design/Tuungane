@@ -263,4 +263,3 @@ function BusinessTrustBadge({ pageId }: { pageId: string }) {
   if (!level) return null;
   return <TrustBadge level={level} />;
 }
-}
