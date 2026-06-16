@@ -14,7 +14,7 @@ export const Route = createFileRoute("/_authenticated/messages/")({
 
 type Row = {
   id: string;
-  service_request_id: string;
+  service_request_id: string | null;
   customer_id: string;
   provider_id: string;
   status: string;
@@ -23,6 +23,7 @@ type Row = {
   customer_unread_count: number;
   provider_unread_count: number;
 };
+
 
 type Profile = { id: string; full_name: string; avatar_url: string | null };
 type Req = { id: string; service_needed: string; title: string | null };
@@ -50,7 +51,7 @@ function MessagesIndex() {
       setRows(list);
 
       const userIds = Array.from(new Set(list.flatMap((r) => [r.customer_id, r.provider_id]).filter((id) => id !== user.id)));
-      const reqIds = Array.from(new Set(list.map((r) => r.service_request_id)));
+      const reqIds = Array.from(new Set(list.map((r) => r.service_request_id).filter((x): x is string => !!x)));
 
       const [{ data: profs }, { data: reqs }] = await Promise.all([
         userIds.length ? supabase.from("profiles").select("id,full_name,avatar_url").in("id", userIds) : Promise.resolve({ data: [] }),
@@ -90,13 +91,13 @@ function MessagesIndex() {
             <div className="rounded-2xl border border-dashed border-border p-8 text-center">
               <MessageSquare className="mx-auto h-8 w-8 text-muted-foreground" />
               <p className="mt-2 text-sm font-semibold text-navy">No conversations yet</p>
-              <p className="mt-1 text-xs text-muted-foreground">Submit a request, then message providers directly from their response.</p>
+              <p className="mt-1 text-xs text-muted-foreground">Message a provider from their profile or a service listing to start a conversation.</p>
             </div>
           )}
           {rows.map((r) => {
             const otherId = r.customer_id === user.id ? r.provider_id : r.customer_id;
             const other = profiles.get(otherId);
-            const req = requests.get(r.service_request_id);
+            const req = r.service_request_id ? requests.get(r.service_request_id) : null;
             const unread = r.customer_id === user.id ? r.customer_unread_count : r.provider_unread_count;
             return (
               <Link key={r.id} to="/messages/$id" params={{ id: r.id }} className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3 hover:border-orange">
