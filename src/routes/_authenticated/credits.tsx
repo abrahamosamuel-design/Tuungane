@@ -24,7 +24,7 @@ const fmtUgx = (n: number) => `${n.toLocaleString()} UGX`;
 const loginSearch = { tab: "login", redirect: "/credits" } as never;
 
 function CreditsPage() {
-  const { user, isAdmin } = useAuth();
+  const { user } = useAuth();
   const { balance } = useCreditWallet();
   const [pkgs, setPkgs] = useState<Pkg[]>([]);
   const [txs, setTxs] = useState<Tx[]>([]);
@@ -33,13 +33,21 @@ function CreditsPage() {
   const packagesLoadedRef = useRef(false);
   const personalLoadedForUserRef = useRef<string | null>(null);
 
-  // Debug panel is admin/dev only. Enabled via ?debug=1 or localStorage.
-  const debugEligible = isAdmin || (typeof window !== "undefined" && window.localStorage.getItem("credits:debug:enable") === "1");
+  // Debug panel is hidden from all normal users. Only shown when an explicit
+  // dev flag is set: VITE_ENABLE_CREDITS_DEBUG=true, ?debug=1 in the URL, or
+  // localStorage `credits:debug:enable=1` (set manually by developers).
+  const debugEligible = useMemo(() => {
+    if (typeof window === "undefined") return false;
+    if (import.meta.env.VITE_ENABLE_CREDITS_DEBUG === "true") return true;
+    if (new URLSearchParams(window.location.search).get("debug") === "1") return true;
+    try { if (window.localStorage.getItem("credits:debug:enable") === "1") return true; } catch {}
+    return false;
+  }, []);
   const [debug, setDebug] = useState(() => {
     if (typeof window === "undefined") return false;
-    return new URLSearchParams(window.location.search).get("debug") === "1"
-      || window.localStorage.getItem("credits:debug") === "1";
+    return new URLSearchParams(window.location.search).get("debug") === "1";
   });
+
   const [realtimeStatus, setRealtimeStatus] = useState<string>("idle");
   const [lastEventAt, setLastEventAt] = useState<string | null>(null);
   const [lastEventKind, setLastEventKind] = useState<string | null>(null);
