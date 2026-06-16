@@ -72,8 +72,8 @@ export function MyProfilesPanel() {
     <section className="mt-6">
       <div className="mb-3 flex items-center justify-between">
         <div>
-          <h2 className="font-display text-lg font-bold text-navy">My Profiles</h2>
-          <p className="text-xs text-muted-foreground">One account · many public profiles</p>
+          <h2 className="font-display text-lg font-bold text-navy">Profiles & services</h2>
+          <p className="text-xs text-muted-foreground">One account. Manage your public profiles and services.</p>
         </div>
         <Link
           to="/profiles/new"

@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { ClipboardList, Megaphone, Wrench, UserCircle2, ArrowRight } from "lucide-react";
 import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
@@ -91,25 +92,46 @@ function Dashboard() {
 
   return (
     <Layout>
-      <section className="mx-auto max-w-3xl px-4 py-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="font-display text-3xl font-bold text-navy">Hi, {profile?.full_name?.split(" ")[0] || "there"}</h1>
-            <p className="mt-1 text-sm text-muted-foreground">{profile?.is_provider ? "Manage your skills, post your work, and respond to nearby requests." : "Manage your requests and connect with skilled people near you."}</p>
-          </div>
-          <Link to="/u/$id" params={{ id: user.id }} className="rounded-full border border-border px-4 py-2 text-sm font-semibold text-navy hover:border-orange">View public profile</Link>
+      <section className="mx-auto max-w-3xl px-4 py-8 pb-32">
+        {/* 1. Greeting / header */}
+        <div>
+          <h1 className="font-display text-3xl font-bold text-navy">Hi, {profile?.full_name?.split(" ")[0] || "there"}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {profile?.is_provider
+              ? "Manage your services, respond to requests, and grow your reputation."
+              : "Manage your requests and connect with skilled people near you."}
+          </p>
+          <Link
+            to="/u/$id"
+            params={{ id: user.id }}
+            className="mt-3 inline-flex items-center gap-1 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold text-navy hover:border-orange"
+          >
+            View public profile <ArrowRight className="h-4 w-4" />
+          </Link>
         </div>
 
+        {/* 2. Quick actions */}
+        <div className="mt-6">
+          <h2 className="mb-3 font-display text-sm font-bold uppercase tracking-wide text-muted-foreground">Quick actions</h2>
+          <div className="grid grid-cols-2 gap-3">
+            <QuickAction to="/requests/new" icon={<ClipboardList className="h-5 w-5" />} label="Create request" hint="Find someone to help you" />
+            {profile?.is_provider ? (
+              <QuickAction to="/dashboard" icon={<Megaphone className="h-5 w-5" />} label="Post work update" hint="Share your work or offer" />
+            ) : (
+              <QuickAction to="/services" icon={<Wrench className="h-5 w-5" />} label="Browse services" hint="Find skilled providers" />
+            )}
+            <QuickAction to="/list-skill" icon={<Wrench className="h-5 w-5" />} label="Add service" hint="List a service you provide" />
+            <QuickAction to="/u/$id" params={{ id: user.id }} icon={<UserCircle2 className="h-5 w-5" />} label="View public profile" hint="See how customers see you" />
+          </div>
+        </div>
+
+        {/* 3. Main stats — simplified */}
         {profile?.is_provider && (
           <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <Stat label="My Skills" value={sp ? 1 : 0} />
-            <Stat label="My Work" value={stats.posts} />
-            <Stat label="Followers" value={stats.followers} />
-            <Stat label="Profile likes" value={stats.likes} />
+            <Stat label="Services" value={sp ? 1 : 0} />
+            <Stat label="Work posts" value={stats.posts} />
             <Stat label="Reviews" value={stats.reviews} />
-            <Stat label="Recommendations" value={stats.recs} />
-            <Stat label="Saves" value={stats.saves} />
-            <Stat label="My Responses" value={stats.opps} />
+            <Stat label="Responses" value={stats.opps} />
           </div>
         )}
 
@@ -122,12 +144,18 @@ function Dashboard() {
           </div>
         )}
 
+        {/* 4. Requests I created */}
         <div className="mt-6 space-y-4">
-          <MyRequestsSummary />
+          <MyRequestsSummary title="Requests I created" />
+
+          {/* 5. Requests matching my services */}
           {profile?.is_provider && <MatchingRequestsSection />}
+
+          {/* 6. Recent customer contacts */}
           {profile?.is_provider ? <ProviderContactsList /> : <ContactedProvidersList />}
         </div>
 
+        {/* 7. Profiles & services */}
         <MyProfilesPanel />
 
         {search.composeBusiness && (
@@ -137,7 +165,6 @@ function Dashboard() {
           </div>
         )}
 
-
         {profile?.is_provider && !sp && (
           <ServiceProfileForm onSaved={load} />
         )}
@@ -145,23 +172,44 @@ function Dashboard() {
         {profile?.is_provider && sp && (
           <>
             <div className="mt-6 rounded-2xl border border-border bg-card p-4">
-              <div className="flex items-center justify-between">
-                <div>
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0">
                   <p className="text-xs uppercase tracking-wide text-muted-foreground">Service profile</p>
-                  <p className="font-semibold text-navy">{sp.business_name || profile.full_name} · <span className="text-muted-foreground">{sp.subcategory}</span></p>
-                  <p className="text-xs text-muted-foreground">{sp.town}, {sp.district}</p>
+                  <p className="truncate font-semibold text-navy">{sp.business_name || profile.full_name} · <span className="text-muted-foreground">{sp.subcategory}</span></p>
+                  <p className="truncate text-xs text-muted-foreground">{sp.town}, {sp.district}</p>
                 </div>
-                <button onClick={() => setSp(null)} className="text-xs font-medium text-orange">Edit</button>
+                <button onClick={() => setSp(null)} className="shrink-0 text-xs font-medium text-orange">Edit</button>
               </div>
             </div>
+
+            {/* 8. Post to your timeline */}
             <div className="mt-6">
-              <h2 className="mb-3 font-display text-lg font-bold text-navy">Post to your timeline</h2>
+              <h2 className="mb-1 font-display text-lg font-bold text-navy">Post to your timeline</h2>
+              <p className="mb-3 text-xs text-muted-foreground">Posting as: <span className="font-semibold text-navy">{sp.business_name || profile.full_name}</span></p>
               <PostComposer defaultCategory={sp.category_slug} onPosted={load} />
             </div>
+
+            {/* 9. Your posts */}
             <div className="mt-6 space-y-4">
               <h2 className="font-display text-lg font-bold text-navy">Your posts</h2>
-              {posts.length === 0 && <p className="text-sm text-muted-foreground">No posts yet — share your first piece of work above.</p>}
+              {posts.length === 0 && (
+                <div className="rounded-2xl border border-dashed border-border bg-card p-5 text-center">
+                  <p className="text-sm text-muted-foreground">You have not posted any work updates yet.</p>
+                </div>
+              )}
               {posts.map((p) => <PostCard key={p.id} post={p} onChanged={load} />)}
+            </div>
+
+            {/* 10. Profile insights */}
+            <div className="mt-8">
+              <h2 className="mb-1 font-display text-lg font-bold text-navy">Profile insights</h2>
+              <p className="mb-3 text-xs text-muted-foreground">Lighter trust and engagement signals from your audience.</p>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <Stat label="Followers" value={stats.followers} />
+                <Stat label="Profile likes" value={stats.likes} />
+                <Stat label="Saves" value={stats.saves} />
+                <Stat label="Endorsements" value={stats.recs} />
+              </div>
             </div>
           </>
         )}
@@ -178,6 +226,22 @@ function Dashboard() {
         )}
       </section>
     </Layout>
+  );
+}
+
+function QuickAction({ to, params, icon, label, hint }: { to: string; params?: Record<string, string>; icon: React.ReactNode; label: string; hint: string }) {
+  return (
+    <Link
+      to={to as never}
+      params={params as never}
+      className="flex items-start gap-3 rounded-2xl border border-border bg-card p-3 text-left hover:border-orange"
+    >
+      <div className="shrink-0 rounded-xl bg-orange/10 p-2 text-orange">{icon}</div>
+      <div className="min-w-0">
+        <p className="truncate text-sm font-semibold text-navy">{label}</p>
+        <p className="truncate text-xs text-muted-foreground">{hint}</p>
+      </div>
+    </Link>
   );
 }
 
