@@ -24,7 +24,7 @@ const fmtUgx = (n: number) => `${n.toLocaleString()} UGX`;
 const loginSearch = { tab: "login", redirect: "/credits" } as never;
 
 function CreditsPage() {
-  const { user, isAdmin } = useAuth();
+  const { user } = useAuth();
   const { balance } = useCreditWallet();
   const [pkgs, setPkgs] = useState<Pkg[]>([]);
   const [txs, setTxs] = useState<Tx[]>([]);
