@@ -114,7 +114,12 @@ export function Header() {
           )}
         </div>
         <div className="flex items-center gap-1 md:hidden">
-          {user && <NotificationsBell />}
+          {user && (
+            <>
+              <MessagesIconLink />
+              <NotificationsBell />
+            </>
+          )}
           <button aria-label="Toggle menu" className="rounded-md p-2 text-navy" onClick={() => setOpen((o) => !o)}>
             {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </button>
