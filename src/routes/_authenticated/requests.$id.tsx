@@ -527,8 +527,8 @@ function ResponseCard({ r, serviceRequestId, busy: _busy, onChoose, onDecline, s
               variant="primary"
             />
             {canShowPhone && !revealPhone && (
-              <button onClick={() => { setRevealPhone(true); if (customerId) logContactClick({ customerId, providerId: r.provider_id, serviceRequestId, method: "call" }); }} className="inline-flex items-center gap-1 rounded-full border border-orange/40 bg-card px-3 py-1.5 text-xs font-semibold text-orange hover:bg-orange/5">
-                <Phone className="h-3 w-3" /> Call / View Number
+              <button onClick={() => { setRevealPhone(true); if (customerId) logContactClick({ customerId, providerId: r.provider_id, serviceRequestId, source, method: "call" }); }} className="inline-flex items-center gap-1 rounded-full border border-orange/40 bg-card px-3 py-1.5 text-xs font-semibold text-orange hover:bg-orange/5">
+                <Phone className="h-3 w-3" /> Call / View Phone
               </button>
             )}
             {canShowPhone && revealPhone && phone && (
