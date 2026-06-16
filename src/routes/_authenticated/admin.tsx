@@ -16,6 +16,7 @@ import { ContactAnalyticsTab } from "@/components/admin/ContactAnalyticsTab";
 import { ActivityLogTab } from "@/components/admin/ActivityLogTab";
 import { LocationsTab } from "@/components/admin/LocationsTab";
 import { CategoriesTab } from "@/components/admin/CategoriesTab";
+import { TrustVerificationCenter } from "@/components/admin/trust/TrustVerificationCenter";
 import { officialPostTypeMap, type OfficialAccountRow, type OfficialPostRow } from "@/data/officialPostTypes";
 import { timeAgo } from "@/lib/format";
 import { toast } from "sonner";
