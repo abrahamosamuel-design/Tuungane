@@ -241,17 +241,28 @@ function NotificationPreferencesPage() {
               </div>
             </div>
             {pushSupported && pushPermission !== "denied" && (
-              <button
-                onClick={pushSubscribed ? handleDisablePush : handleEnablePush}
-                disabled={pushBusy}
-                className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold transition disabled:opacity-50 ${
-                  pushSubscribed
-                    ? "border border-border bg-background text-navy hover:border-orange"
-                    : "bg-orange text-white hover:bg-orange/90"
-                }`}
-              >
-                {pushBusy ? "…" : pushSubscribed ? "Disable" : "Enable push"}
-              </button>
+              <div className="flex shrink-0 flex-col items-end gap-1.5">
+                <button
+                  onClick={pushSubscribed ? handleDisablePush : handleEnablePush}
+                  disabled={pushBusy}
+                  className={`rounded-full px-3 py-1.5 text-xs font-semibold transition disabled:opacity-50 ${
+                    pushSubscribed
+                      ? "border border-border bg-background text-navy hover:border-orange"
+                      : "bg-orange text-white hover:bg-orange/90"
+                  }`}
+                >
+                  {pushBusy ? "…" : pushSubscribed ? "Disable" : "Enable push"}
+                </button>
+                {pushSubscribed && (
+                  <button
+                    onClick={handleSendTest}
+                    disabled={pushBusy}
+                    className="rounded-full border border-border bg-background px-3 py-1.5 text-xs font-semibold text-navy hover:border-orange disabled:opacity-50"
+                  >
+                    Send test notification
+                  </button>
+                )}
+              </div>
             )}
           </div>
         </div>
