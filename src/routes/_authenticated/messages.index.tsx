@@ -91,7 +91,7 @@ function MessagesIndex() {
             <div className="rounded-2xl border border-dashed border-border p-8 text-center">
               <MessageSquare className="mx-auto h-8 w-8 text-muted-foreground" />
               <p className="mt-2 text-sm font-semibold text-navy">No conversations yet</p>
-              <p className="mt-1 text-xs text-muted-foreground">Submit a request, then message providers directly from their response.</p>
+              <p className="mt-1 text-xs text-muted-foreground">Message a provider from their profile or a service listing to start a conversation.</p>
             </div>
           )}
           {rows.map((r) => {
