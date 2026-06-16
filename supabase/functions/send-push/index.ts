@@ -32,6 +32,13 @@ const CATEGORY_TITLE: Record<string, string> = {
   official: "Tuungane update",
 };
 
+function timingSafeEqualStr(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}
+
 Deno.serve(async (req) => {
   if (req.method !== "POST") return new Response("method not allowed", { status: 405 });
 
@@ -41,7 +48,7 @@ Deno.serve(async (req) => {
     .select("trigger_secret")
     .eq("id", 1)
     .maybeSingle();
-  if (!cfg?.trigger_secret || headerSecret !== cfg.trigger_secret) {
+  if (!cfg?.trigger_secret || !timingSafeEqualStr(headerSecret, cfg.trigger_secret)) {
     return new Response("forbidden", { status: 403 });
   }
 
