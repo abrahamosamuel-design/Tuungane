@@ -55,14 +55,14 @@ function NewRequest() {
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [districtBounds, setDistrictBounds] = useState<Bounds | null>(null);
   const [f, setF] = useState({
-    title: "",
-    category_slug: staticCategories[0].slug,
-    subcategory: staticCategories[0].subcategories[0],
+    title: search.title || "",
+    category_slug: search.category || staticCategories[0].slug,
+    subcategory: search.subcategory || staticCategories[0].subcategories[0],
     description: "",
-    location: "",
-    district: "",
-    town: "",
-    area: "",
+    location: search.location || "",
+    district: search.district || "",
+    town: search.town || "",
+    area: search.area || "",
     urgency: "normal" as UrgencyValue,
     urgent_flag: false,
     budget_range: "",
