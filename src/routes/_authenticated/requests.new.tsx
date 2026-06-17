@@ -301,7 +301,67 @@ function NewRequest() {
           <p>{REQUESTS_SAFETY_TEXT}</p>
         </div>
 
+        {step === "describe" ? (
+          <div className="mt-6 space-y-4 rounded-2xl border border-border bg-card p-5">
+            <div className="flex items-start gap-2">
+              <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-orange" />
+              <div>
+                <h2 className="font-display text-lg font-bold text-navy">Describe what you need</h2>
+                <p className="text-xs text-muted-foreground">Just write it in your own words — we'll suggest the right category for you.</p>
+              </div>
+            </div>
+            <textarea
+              autoFocus
+              rows={5}
+              maxLength={2000}
+              value={describeText}
+              onChange={(e) => setDescribeText(e.target.value)}
+              placeholder="e.g. My kitchen sink is leaking under the cabinet and water is pooling on the floor."
+              className={`${inp} resize-none`}
+            />
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={runSuggest}
+                disabled={suggesting || describeText.trim().length < 6}
+                className="inline-flex items-center gap-2 rounded-full bg-orange px-5 py-2.5 text-sm font-semibold text-orange-foreground disabled:opacity-50"
+              >
+                {suggesting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                {suggesting ? "Thinking…" : "Continue"}
+                {!suggesting && <ArrowRight className="h-4 w-4" />}
+              </button>
+              <button
+                type="button"
+                onClick={skipToForm}
+                className="rounded-full border border-border px-4 py-2 text-xs font-semibold text-navy hover:border-orange"
+              >
+                Skip — pick a category manually
+              </button>
+            </div>
+          </div>
+        ) : (
         <form onSubmit={submit} className="mt-6 space-y-4 rounded-2xl border border-border bg-card p-5">
+          {suggestion && (
+            <div className="flex items-start gap-2 rounded-xl border border-orange/30 bg-orange/5 p-3 text-xs">
+              <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-orange" />
+              <div className="flex-1">
+                <p className="font-semibold text-navy">
+                  Suggested: {staticCategories.find((c) => c.slug === suggestion.category_slug)?.name ?? suggestion.category_slug} · {suggestion.subcategory}
+                </p>
+                <p className="mt-0.5 text-muted-foreground">
+                  {suggestion.confidence === "low" ? "Not sure — please double-check below." : "Change it below if it's not right."}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => { setStep("describe"); setSuggestion(null); }}
+                className="inline-flex items-center gap-1 rounded-full border border-orange/40 px-2 py-1 text-[11px] font-semibold text-orange hover:bg-orange/10"
+              >
+                <Pencil className="h-3 w-3" /> Redo
+              </button>
+            </div>
+          )}
+
           <Field label="What do you need help with? *">
             <input
               required
