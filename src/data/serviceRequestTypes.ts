@@ -45,6 +45,46 @@ export const visibleStatusMeta: Record<VisibleStatus, { label: string; color: st
   disputed: { label: "Disputed", color: "bg-destructive/10 text-destructive" },
 };
 
+/**
+ * Plain-language "what's happening right now" hint for the request, tailored
+ * to who is viewing it. Returns null when no extra context is useful.
+ */
+export function statusHint(
+  status: RequestStatusValue,
+  viewerRole: "customer" | "provider",
+  opts: { customerConfirmed?: boolean | null; providerConfirmed?: boolean | null; hasProvider?: boolean } = {},
+): { tone: "info" | "action" | "success" | "muted" | "warn"; text: string } | null {
+  const { customerConfirmed, providerConfirmed, hasProvider } = opts;
+  if (status === "requested") {
+    return viewerRole === "customer"
+      ? { tone: "info", text: hasProvider ? "Waiting for the provider to accept." : "Live — providers can respond now." }
+      : { tone: "action", text: "Open request — respond to be considered." };
+  }
+  if (status === "accepted") {
+    return viewerRole === "customer"
+      ? { tone: "info", text: "Provider confirmed. They'll mark the job in progress when they start." }
+      : { tone: "action", text: "You've accepted. Tap Mark in progress when you start the work." };
+  }
+  if (status === "in_progress") {
+    if (viewerRole === "customer") {
+      return customerConfirmed
+        ? { tone: "info", text: "Waiting for the provider to confirm completion." }
+        : { tone: "action", text: "Work in progress — tap Confirm completion when it's done." };
+    }
+    return providerConfirmed
+      ? { tone: "info", text: "Waiting for the customer to confirm completion." }
+      : { tone: "action", text: "In progress — tap Mark completed when the work is finished." };
+  }
+  if (status === "completed") {
+    return viewerRole === "customer"
+      ? { tone: "success", text: "Job completed. Leave a verified review to help others." }
+      : { tone: "success", text: "Job completed. Thanks for delivering!" };
+  }
+  if (status === "cancelled") return { tone: "muted", text: "This request was cancelled." };
+  if (status === "disputed") return { tone: "warn", text: "Dispute opened — Tuungane is reviewing." };
+  return null;
+}
+
 // User-facing urgency labels mapped to the existing DB enum
 export const urgencyOptions = [
   { value: "emergency", label: "Today" },
