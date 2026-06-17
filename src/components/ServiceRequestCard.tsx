@@ -42,7 +42,7 @@ export function ServiceRequestCard({ r, viewerRole, onStatus, onFeedback, onDisp
     subcategory: r.subcategory ?? "",
     title: r.service_needed ?? "",
     location: r.location ?? "",
-    district: r.town ? "" : "",
+    district: r.district ?? "",
     town: r.town ?? "",
     area: r.area ?? "",
     providerId: r.status === "completed" && r.provider_id ? r.provider_id : "",
