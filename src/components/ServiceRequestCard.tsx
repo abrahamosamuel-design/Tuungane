@@ -77,7 +77,28 @@ export function ServiceRequestCard({ r, viewerRole, onStatus, onFeedback, onDisp
             </div>
           )}
 
+          {(() => {
+            const hint = statusHint(r.status, viewerRole, {
+              customerConfirmed: r.customer_confirmed_completion,
+              providerConfirmed: r.provider_confirmed_completion,
+              hasProvider: !!r.provider_id,
+            });
+            if (!hint) return null;
+            const toneCls =
+              hint.tone === "action" ? "border-orange/30 bg-orange/5 text-navy"
+              : hint.tone === "success" ? "border-green/30 bg-green/5 text-green"
+              : hint.tone === "warn" ? "border-destructive/30 bg-destructive/5 text-destructive"
+              : hint.tone === "muted" ? "border-border bg-muted/40 text-muted-foreground"
+              : "border-blue-200 bg-blue-50 text-blue-800";
+            return (
+              <div className={`mt-2 rounded-lg border px-2.5 py-1.5 text-xs font-medium ${toneCls}`}>
+                {hint.text}
+              </div>
+            );
+          })()}
+
           <div className="mt-3 flex flex-wrap gap-1.5 text-xs">
+
             {canAccept && <Btn onClick={() => onStatus?.("accepted")} variant="primary">Accept</Btn>}
             {canProgress && <Btn onClick={() => onStatus?.("in_progress")}>Mark in progress</Btn>}
             {canComplete && <Btn onClick={() => onStatus?.("completed")} variant="primary">Mark completed</Btn>}
