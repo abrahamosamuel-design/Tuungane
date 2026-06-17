@@ -212,7 +212,32 @@ function RequestDetailsPage() {
 
   const visible = toVisibleStatus(req.status);
   const meta = visibleStatusMeta[visible];
-  const visibleResponses = responses.filter((r) => r.status !== "withdrawn");
+  const filteredResponses = responses.filter((r) => r.status !== "withdrawn");
+  const requestCreatedAt = req?.created_at ? new Date(req.created_at).getTime() : 0;
+  const scoreResponse = (r: ResponseWithProvider) => {
+    const s = r.stats;
+    const rating = s?.average_rating ?? 0;
+    const trust = s?.trust_score ?? 0;
+    const completion = s?.completion_rate ?? 0;
+    const reviews = s?.total_verified_reviews ?? 0;
+    // Speed in hours since request was posted (lower = faster)
+    const respondedAt = new Date(r.created_at).getTime();
+    const hoursToRespond = requestCreatedAt ? Math.max(0, (respondedAt - requestCreatedAt) / 36e5) : 0;
+    const speedBonus = Math.max(0, 20 - Math.min(hoursToRespond, 20)); // up to +20 for instant
+    const reviewWeight = Math.min(reviews, 10); // cap influence
+    // Composite: trust dominates, rating tunes it, speed breaks ties, reviews lend credibility
+    return trust * 1.0 + rating * 6 + completion * 0.2 + speedBonus + reviewWeight;
+  };
+  const visibleResponses = [...filteredResponses].sort((a, b) => {
+    if (sortBy === "rating") return (b.stats?.average_rating ?? 0) - (a.stats?.average_rating ?? 0);
+    if (sortBy === "quote_low") {
+      const av = a.quote_amount ?? Number.POSITIVE_INFINITY;
+      const bv = b.quote_amount ?? Number.POSITIVE_INFINITY;
+      return Number(av) - Number(bv);
+    }
+    if (sortBy === "fastest") return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+    return scoreResponse(b) - scoreResponse(a);
+  });
   const responseCount = visibleResponses.length;
   const urgencyLabel = req.urgency === "emergency" ? "Today" : req.urgency === "urgent" ? "This week" : "Flexible";
 
