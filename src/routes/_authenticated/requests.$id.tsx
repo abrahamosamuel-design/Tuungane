@@ -48,6 +48,7 @@ function RequestDetailsPage() {
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [completionInput, setCompletionInput] = useState("");
+  const [sortBy, setSortBy] = useState<"recommended" | "rating" | "quote_low" | "fastest">("recommended");
 
   useEffect(() => {
     if (!loading && !user) nav({ to: "/login", search: { tab: "login", redirect: `/requests/${id}` } as never });
@@ -211,7 +212,32 @@ function RequestDetailsPage() {
 
   const visible = toVisibleStatus(req.status);
   const meta = visibleStatusMeta[visible];
-  const visibleResponses = responses.filter((r) => r.status !== "withdrawn");
+  const filteredResponses = responses.filter((r) => r.status !== "withdrawn");
+  const requestCreatedAt = req?.created_at ? new Date(req.created_at).getTime() : 0;
+  const scoreResponse = (r: ResponseWithProvider) => {
+    const s = r.stats;
+    const rating = s?.average_rating ?? 0;
+    const trust = s?.trust_score ?? 0;
+    const completion = s?.completion_rate ?? 0;
+    const reviews = s?.total_verified_reviews ?? 0;
+    // Speed in hours since request was posted (lower = faster)
+    const respondedAt = new Date(r.created_at).getTime();
+    const hoursToRespond = requestCreatedAt ? Math.max(0, (respondedAt - requestCreatedAt) / 36e5) : 0;
+    const speedBonus = Math.max(0, 20 - Math.min(hoursToRespond, 20)); // up to +20 for instant
+    const reviewWeight = Math.min(reviews, 10); // cap influence
+    // Composite: trust dominates, rating tunes it, speed breaks ties, reviews lend credibility
+    return trust * 1.0 + rating * 6 + completion * 0.2 + speedBonus + reviewWeight;
+  };
+  const visibleResponses = [...filteredResponses].sort((a, b) => {
+    if (sortBy === "rating") return (b.stats?.average_rating ?? 0) - (a.stats?.average_rating ?? 0);
+    if (sortBy === "quote_low") {
+      const av = a.quote_amount ?? Number.POSITIVE_INFINITY;
+      const bv = b.quote_amount ?? Number.POSITIVE_INFINITY;
+      return Number(av) - Number(bv);
+    }
+    if (sortBy === "fastest") return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+    return scoreResponse(b) - scoreResponse(a);
+  });
   const responseCount = visibleResponses.length;
   const urgencyLabel = req.urgency === "emergency" ? "Today" : req.urgency === "urgent" ? "This week" : "Flexible";
 
@@ -358,15 +384,40 @@ function RequestDetailsPage() {
         {/* Customer view: comparison list */}
         {isCustomer && req.status === "requested" && (
           <div id="responses-section" className="mt-6 scroll-mt-20">
-            <h2 className="font-display text-lg font-bold text-navy">Compare provider responses</h2>
+            <div className="flex items-center justify-between gap-2">
+              <h2 className="font-display text-lg font-bold text-navy">Compare provider responses</h2>
+              {visibleResponses.length > 1 && (
+                <label className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <span className="hidden sm:inline">Sort:</span>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+                    className="rounded-full border border-border bg-card px-2.5 py-1 text-xs font-semibold text-navy focus:border-orange focus:outline-none"
+                  >
+                    <option value="recommended">Recommended</option>
+                    <option value="rating">Highest rated</option>
+                    <option value="quote_low">Lowest quote</option>
+                    <option value="fastest">Fastest to respond</option>
+                  </select>
+                </label>
+              )}
+            </div>
+            {sortBy === "recommended" && visibleResponses.length > 1 && (
+              <p className="mt-1 text-xs text-muted-foreground">Ranked by trust, rating, and how quickly they responded.</p>
+            )}
             {visibleResponses.length === 0 ? (
               <p className="mt-3 rounded-xl border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
                 Your request is live. Matching providers will be able to respond soon.
               </p>
             ) : (
               <div className="mt-3 space-y-3">
-                {visibleResponses.map((r) => (
-                  <ResponseCard key={r.id} r={r} serviceRequestId={req.id} busy={busy} onChoose={() => chooseProvider(r)} onDecline={() => declineResponse(r)} phone={responsePhones[r.provider_id] ?? null} urgent={!!req.urgent_flag || req.urgency === "emergency"} customerId={user.id} source="request_response" />
+                {visibleResponses.map((r, idx) => (
+                  <div key={r.id} className="relative">
+                    {sortBy === "recommended" && idx === 0 && visibleResponses.length > 1 && (
+                      <span className="absolute -top-2 left-3 z-10 rounded-full bg-orange px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-orange-foreground shadow-sm">Top match</span>
+                    )}
+                    <ResponseCard r={r} serviceRequestId={req.id} busy={busy} onChoose={() => chooseProvider(r)} onDecline={() => declineResponse(r)} phone={responsePhones[r.provider_id] ?? null} urgent={!!req.urgent_flag || req.urgency === "emergency"} customerId={user.id} source="request_response" />
+                  </div>
                 ))}
               </div>
             )}
