@@ -36,6 +36,17 @@ export function ServiceRequestCard({ r, viewerRole, onStatus, onFeedback, onDisp
   const canCancel = r.status === "requested" || r.status === "accepted";
   const canDispute = (r.status !== "cancelled" && r.status !== "disputed");
   const canFeedback = viewerRole === "customer" && r.status === "completed" && !r.has_feedback;
+  const canRebook = viewerRole === "customer" && (r.status === "completed" || r.status === "cancelled");
+  const rebookSearch = {
+    category: r.category_slug ?? "",
+    subcategory: r.subcategory ?? "",
+    title: r.service_needed ?? "",
+    location: r.location ?? "",
+    district: r.district ?? "",
+    town: r.town ?? "",
+    area: r.area ?? "",
+    providerId: r.status === "completed" && r.provider_id ? r.provider_id : "",
+  } as never;
 
   return (
     <div className="rounded-2xl border border-border bg-card p-4">
@@ -106,6 +117,11 @@ export function ServiceRequestCard({ r, viewerRole, onStatus, onFeedback, onDisp
             {canFeedback && <Btn onClick={onFeedback} variant="primary">Leave verified review</Btn>}
             {canDispute && onDispute && <Btn onClick={onDispute} variant="danger">Open dispute</Btn>}
             <Link to="/requests/$id" params={{ id: r.id }} className="inline-flex items-center gap-1 rounded-full border border-border px-2 py-1 text-xs font-semibold text-navy hover:border-orange"><ExternalLink className="h-3 w-3" /> Open</Link>
+            {canRebook && (
+              <Link to="/requests/new" search={rebookSearch} className="inline-flex items-center gap-1 rounded-full bg-orange/10 px-3 py-1 text-xs font-semibold text-orange hover:bg-orange/20">
+                Request again
+              </Link>
+            )}
             {viewerRole === "customer" && (r.status === "requested" || r.status === "accepted") && (
               <BoostButton boostType="urgent_request" entityType="service_request" entityId={r.id} label="Mark urgent" isActive={hasReqBoost("urgent_request")} dialogTitle="Mark this request as urgent" dialogDescription="Push this request to the top of providers' inboxes." onActivated={refreshReqBoosts} />
             )}

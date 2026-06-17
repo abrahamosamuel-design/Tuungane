@@ -314,6 +314,24 @@ function RequestDetailsPage() {
                   View provider
                 </Link>
               )}
+              {isCustomer && (visible === "completed" || visible === "cancelled") && (
+                <Link
+                  to="/requests/new"
+                  search={{
+                    category: req.category_slug ?? "",
+                    subcategory: req.subcategory ?? "",
+                    title: req.service_needed ?? "",
+                    location: req.location ?? "",
+                    district: req.district ?? "",
+                    town: req.town ?? "",
+                    area: req.area ?? "",
+                    providerId: visible === "completed" ? ((req.selected_provider_id ?? req.provider_id) ?? "") : "",
+                  } as never}
+                  className="rounded-full bg-orange px-4 py-2 text-xs font-semibold text-orange-foreground hover:brightness-110"
+                >
+                  Request again
+                </Link>
+              )}
             </div>
           )}
         </div>

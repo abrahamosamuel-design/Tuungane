@@ -23,11 +23,21 @@ import { AreaAutocomplete } from "@/components/AreaAutocomplete";
 import { MapPicker } from "@/components/MapPicker";
 import { findDistrictBounds, type Bounds } from "@/lib/geocoding";
 
+const s = (v: unknown) => (typeof v === "string" ? v : "");
+
 export const Route = createFileRoute("/_authenticated/requests/new")({
   validateSearch: (search: Record<string, unknown>) => ({
-    providerId: typeof search.providerId === "string" ? search.providerId : "",
-    profileId: typeof search.profileId === "string" ? search.profileId : "",
-    serviceId: typeof search.serviceId === "string" ? search.serviceId : "",
+    providerId: s(search.providerId),
+    profileId: s(search.profileId),
+    serviceId: s(search.serviceId),
+    // Prefill (used by "Request again")
+    category: s(search.category),
+    subcategory: s(search.subcategory),
+    title: s(search.title),
+    location: s(search.location),
+    district: s(search.district),
+    town: s(search.town),
+    area: s(search.area),
   }),
   head: () => ({ meta: [{ title: "Create a Request — Tuungane" }] }),
   component: NewRequest,
@@ -45,14 +55,14 @@ function NewRequest() {
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [districtBounds, setDistrictBounds] = useState<Bounds | null>(null);
   const [f, setF] = useState({
-    title: "",
-    category_slug: staticCategories[0].slug,
-    subcategory: staticCategories[0].subcategories[0],
+    title: search.title || "",
+    category_slug: search.category || staticCategories[0].slug,
+    subcategory: search.subcategory || staticCategories[0].subcategories[0],
     description: "",
-    location: "",
-    district: "",
-    town: "",
-    area: "",
+    location: search.location || "",
+    district: search.district || "",
+    town: search.town || "",
+    area: search.area || "",
     urgency: "normal" as UrgencyValue,
     urgent_flag: false,
     budget_range: "",
