@@ -398,32 +398,13 @@ function RequestDetailsPage() {
         {(req.status === "accepted" || req.status === "in_progress" || req.status === "completed") && (isCustomer || isAssignedProvider) && (
           <div className="mt-6 rounded-2xl border border-border bg-card p-5">
             <h2 className="font-display text-lg font-bold text-navy">Job tracking</h2>
-            <p className="mt-1 text-xs text-muted-foreground">Use the completion code to mark this job as completed. Share it with the provider <strong>only after the service is done</strong>.</p>
+            <p className="mt-1 text-xs text-muted-foreground">{isCustomer ? <>Once the service is done, tap <strong>Confirm completion</strong> to close the job and leave a review.</> : <>The customer will tap <strong>Confirm completion</strong> once the service is done.</>}</p>
 
-            {(req.completion_code || isAssignedProvider) && (
+            {(req.provider_confirmed_completion || req.customer_confirmed_completion) && (
               <div className="mt-3 rounded-xl border border-orange/40 bg-orange/5 p-3">
-                {isCustomer && req.completion_code ? (
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Completion code</p>
-                      <p className="font-display text-2xl font-bold tracking-widest text-navy">{req.completion_code}</p>
-                    </div>
-                    <button onClick={copyCode} className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-semibold text-navy hover:border-orange"><Copy className="h-3 w-3" /> Copy</button>
-                  </div>
-                ) : isAssignedProvider ? (
-                  <>
-                    <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Completion code from customer</p>
-                    <div className="mt-1 flex flex-wrap items-center gap-2">
-                      <input value={completionInput} onChange={(e) => setCompletionInput(e.target.value)} placeholder="Enter 6-char code" className="flex-1 rounded-lg border border-border bg-background px-3 py-2 text-sm font-mono uppercase" />
-                      <button onClick={useCompletionCode} disabled={busy} className="inline-flex items-center gap-1 rounded-full bg-orange px-4 py-2 text-xs font-semibold text-orange-foreground"><CheckCircle2 className="h-3 w-3" /> Confirm</button>
-                    </div>
-                  </>
-                ) : null}
-                {(req.provider_confirmed_completion || req.customer_confirmed_completion) && (
-                  <p className="mt-2 text-xs text-muted-foreground">
-                    {req.provider_confirmed_completion ? "✓ Provider confirmed" : "○ Provider pending"} · {req.customer_confirmed_completion ? "✓ Customer confirmed" : "○ Customer pending"}
-                  </p>
-                )}
+                <p className="text-xs text-muted-foreground">
+                  {req.provider_confirmed_completion ? "✓ Provider confirmed" : "○ Provider pending"} · {req.customer_confirmed_completion ? "✓ Customer confirmed" : "○ Customer pending"}
+                </p>
               </div>
             )}
 
