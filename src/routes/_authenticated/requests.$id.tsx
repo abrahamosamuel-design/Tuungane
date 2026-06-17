@@ -48,6 +48,7 @@ function RequestDetailsPage() {
   const [feedbackOpen, setFeedbackOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [completionInput, setCompletionInput] = useState("");
+  const [sortBy, setSortBy] = useState<"recommended" | "rating" | "quote_low" | "fastest">("recommended");
 
   useEffect(() => {
     if (!loading && !user) nav({ to: "/login", search: { tab: "login", redirect: `/requests/${id}` } as never });
