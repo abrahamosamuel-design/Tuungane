@@ -583,6 +583,7 @@ function NewRequest() {
             {busy ? "Posting…" : "Post request"}
           </button>
         </form>
+        )}
       </section>
     </Layout>
   );
