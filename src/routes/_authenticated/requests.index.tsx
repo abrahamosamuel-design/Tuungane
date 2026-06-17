@@ -102,7 +102,14 @@ function RequestsPage() {
         </div>
 
         <div className="mt-5 space-y-3 pb-12">
-          {filtered.length === 0 && (
+          {loadingItems && items.length === 0 && (
+            <>
+              {[0, 1, 2].map((i) => (
+                <div key={i} className="h-28 animate-pulse rounded-2xl border border-border bg-card" />
+              ))}
+            </>
+          )}
+          {!loadingItems && filtered.length === 0 && (
             <EmptyState
               icon={Inbox}
               title={`No requests ${role === "customer" ? "sent" : "received"} yet`}
