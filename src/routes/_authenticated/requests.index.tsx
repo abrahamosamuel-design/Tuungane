@@ -29,8 +29,11 @@ function RequestsPage() {
     if (!loading && !user) nav({ to: "/login", search: { tab: "login", redirect: "/requests" } as never });
   }, [loading, user, nav]);
 
+  const [loadingItems, setLoadingItems] = useState(true);
+
   const load = async () => {
     if (!user) return;
+    setLoadingItems(true);
     const col = role === "customer" ? "customer_id" : "provider_id";
     const { data: rs } = await supabase
       .from("service_requests")
@@ -39,16 +42,19 @@ function RequestsPage() {
       .order("created_at", { ascending: false });
     const list = (rs ?? []) as ServiceRequestRow[];
     const ids = Array.from(new Set(list.flatMap((r) => [r.customer_id, r.provider_id]).filter((id): id is string => !!id)));
-    const { data: profs } = ids.length
-      ? await supabase.from("profiles").select("id,full_name,avatar_url").in("id", ids)
-      : { data: [] as Array<{ id: string; full_name: string; avatar_url: string | null }> };
-    const pmap = new Map((profs ?? []).map((p) => [p.id, { full_name: p.full_name, avatar_url: p.avatar_url }]));
     const reqIds = list.map((r) => r.id);
-    const { data: fb } = reqIds.length
-      ? await supabase.from("service_feedback").select("service_request_id").in("service_request_id", reqIds)
-      : { data: [] as Array<{ service_request_id: string }> };
+    const [{ data: profs }, { data: fb }] = await Promise.all([
+      ids.length
+        ? supabase.from("profiles").select("id,full_name,avatar_url").in("id", ids)
+        : Promise.resolve({ data: [] as Array<{ id: string; full_name: string; avatar_url: string | null }> }),
+      reqIds.length
+        ? supabase.from("service_feedback").select("service_request_id").in("service_request_id", reqIds)
+        : Promise.resolve({ data: [] as Array<{ service_request_id: string }> }),
+    ]);
+    const pmap = new Map((profs ?? []).map((p) => [p.id, { full_name: p.full_name, avatar_url: p.avatar_url }]));
     const fbSet = new Set((fb ?? []).map((x: { service_request_id: string }) => x.service_request_id));
     setItems(list.map((r) => ({ ...r, customer: pmap.get(r.customer_id), provider: r.provider_id ? pmap.get(r.provider_id) : undefined, has_feedback: fbSet.has(r.id) })));
+    setLoadingItems(false);
   };
 
   useEffect(() => { if (user) load(); /* eslint-disable-next-line */ }, [user, role]);
