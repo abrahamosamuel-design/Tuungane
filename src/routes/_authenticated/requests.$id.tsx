@@ -562,12 +562,12 @@ function ResponseCard({ r, serviceRequestId, busy: _busy, onChoose, onDecline, s
               variant="primary"
             />
             {canShowPhone && !revealPhone && (
-              <button onClick={() => { setRevealPhone(true); if (customerId) logContactClick({ customerId, providerId: r.provider_id, serviceRequestId, source, method: "call" }); }} className="inline-flex items-center gap-1 rounded-full border border-orange/40 bg-card px-3 py-1.5 text-xs font-semibold text-orange hover:bg-orange/5">
-                <Phone className="h-3 w-3" /> Call / View Phone
+              <button onClick={() => { setRevealPhone(true); if (customerId) logContactClick({ customerId, providerId: r.provider_id, serviceRequestId, source, method: "call" }); }} className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-semibold text-muted-foreground hover:border-orange/60 hover:text-navy">
+                <Phone className="h-3 w-3" /> Call instead
               </button>
             )}
             {canShowPhone && revealPhone && phone && (
-              <a href={`tel:${phone}`} className="inline-flex items-center gap-1 rounded-full border border-orange/40 bg-orange/5 px-3 py-1.5 text-xs font-semibold text-orange hover:bg-orange/10">
+              <a href={`tel:${phone}`} className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-semibold text-navy hover:border-orange/60">
                 <Phone className="h-3 w-3" /> {phone}
               </a>
             )}
