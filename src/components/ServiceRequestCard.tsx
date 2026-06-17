@@ -36,6 +36,17 @@ export function ServiceRequestCard({ r, viewerRole, onStatus, onFeedback, onDisp
   const canCancel = r.status === "requested" || r.status === "accepted";
   const canDispute = (r.status !== "cancelled" && r.status !== "disputed");
   const canFeedback = viewerRole === "customer" && r.status === "completed" && !r.has_feedback;
+  const canRebook = viewerRole === "customer" && (r.status === "completed" || r.status === "cancelled");
+  const rebookSearch = {
+    category: r.category_slug ?? "",
+    subcategory: r.subcategory ?? "",
+    title: r.service_needed ?? "",
+    location: r.location ?? "",
+    district: r.town ? "" : "",
+    town: r.town ?? "",
+    area: r.area ?? "",
+    providerId: r.status === "completed" && r.provider_id ? r.provider_id : "",
+  } as never;
 
   return (
     <div className="rounded-2xl border border-border bg-card p-4">
