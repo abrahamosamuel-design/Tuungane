@@ -3,7 +3,7 @@ import { ExternalLink } from "lucide-react";
 import { Phone, MapPin, Flag, AlertTriangle } from "lucide-react";
 import { Avatar } from "@/components/social/Avatar";
 import { timeAgo } from "@/lib/format";
-import { requestStatusMap, type ServiceRequestRow } from "@/data/serviceRequestTypes";
+import { requestStatusMap, statusHint, type ServiceRequestRow } from "@/data/serviceRequestTypes";
 import { VerifiedReviewBadge } from "./VerifiedReviewBadge";
 import { useActiveBoosts } from "@/hooks/use-boosts";
 import { BoostBadge } from "./BoostBadge";
