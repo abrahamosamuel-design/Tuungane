@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
@@ -16,12 +16,13 @@ import {
 } from "@/data/serviceRequestTypes";
 import { uploadMedia } from "@/lib/upload";
 import { toast } from "sonner";
-import { Loader2, MapPin, ShieldAlert } from "lucide-react";
+import { Loader2, MapPin, ShieldAlert, Sparkles, ArrowRight, Pencil } from "lucide-react";
 import { REQUESTS_SAFETY_TEXT } from "@/data/requestTypes";
 import { useUserLocation } from "@/hooks/use-user-location";
 import { AreaAutocomplete } from "@/components/AreaAutocomplete";
 import { MapPicker } from "@/components/MapPicker";
 import { findDistrictBounds, type Bounds } from "@/lib/geocoding";
+import { suggestCategory } from "@/lib/api/suggest-category.functions";
 
 const s = (v: unknown) => (typeof v === "string" ? v : "");
 
