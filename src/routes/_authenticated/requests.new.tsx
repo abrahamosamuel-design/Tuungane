@@ -79,6 +79,55 @@ function NewRequest() {
   const [targetProfile, setTargetProfile] = useState<{ id: string; owner_id: string; name: string; profile_type: string; category_slug: string | null; subcategory: string | null } | null>(null);
   const [targetService, setTargetService] = useState<{ id: string; title: string } | null>(null);
 
+  // "Describe first" smart intake — skipped when the form is prefilled
+  // (Request again / coming from a provider profile).
+  const skipDescribeStep = useMemo(
+    () => Boolean(search.profileId || search.providerId || search.category || search.title),
+    [search.profileId, search.providerId, search.category, search.title],
+  );
+  const [step, setStep] = useState<"describe" | "form">(skipDescribeStep ? "form" : "describe");
+  const [describeText, setDescribeText] = useState("");
+  const [suggesting, setSuggesting] = useState(false);
+  const [suggestion, setSuggestion] = useState<{ category_slug: string; subcategory: string; confidence: "low" | "medium" | "high"; title: string } | null>(null);
+
+  const runSuggest = async () => {
+    const text = describeText.trim();
+    if (text.length < 6) {
+      toast.error("Add a few more details so we can help");
+      return;
+    }
+    setSuggesting(true);
+    try {
+      const result = await suggestCategory({ data: { description: text } });
+      if (result) {
+        setSuggestion(result);
+        setF((s) => ({
+          ...s,
+          description: s.description || text,
+          title: s.title || result.title,
+          category_slug: result.category_slug,
+          subcategory: result.subcategory,
+        }));
+      } else {
+        toast.error("Couldn't auto-categorise — pick a category yourself");
+        setF((s) => ({ ...s, description: s.description || text }));
+      }
+      setStep("form");
+    } catch (err) {
+      console.error(err);
+      toast.error("Suggestion failed — continuing to the full form");
+      setF((s) => ({ ...s, description: s.description || text }));
+      setStep("form");
+    } finally {
+      setSuggesting(false);
+    }
+  };
+
+  const skipToForm = () => {
+    if (describeText.trim()) setF((s) => ({ ...s, description: s.description || describeText.trim() }));
+    setStep("form");
+  };
+
   useEffect(() => {
     if (!search.profileId) return;
     (async () => {
