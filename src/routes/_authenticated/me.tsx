@@ -105,8 +105,8 @@ function Me() {
         <MyTrustStatusCard />
 
 
-        <SubSection title="Providers you follow" items={following} empty="You don't follow anyone yet." />
-        <SubSection title="Saved providers" items={saved} empty="No saved providers." />
+        <SubSection title="Providers you follow" items={following} empty="You don't follow anyone yet. Follow providers to keep tabs on their updates." emptyAction={{ label: "Browse services", to: "/services" }} />
+        <SubSection title="Saved providers" items={saved} empty="No saved providers yet. Save providers to come back to them later." emptyAction={{ label: "Browse services", to: "/services" }} />
 
       </section>
     </Layout>
