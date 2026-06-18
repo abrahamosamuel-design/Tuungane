@@ -126,12 +126,19 @@ function Stat({ label, value }: { label: string; value: number }) {
   return <div className="rounded-xl border border-border bg-card p-4 text-center"><p className="font-display text-2xl font-bold text-navy">{value}</p><p className="text-xs text-muted-foreground">{label}</p></div>;
 }
 
-function SubSection({ title, items, empty }: { title: string; items: Array<{ id: string; full_name: string; avatar_url: string | null }>; empty: string }) {
+function SubSection({ title, items, empty, emptyAction }: { title: string; items: Array<{ id: string; full_name: string; avatar_url: string | null }>; empty: string; emptyAction?: { label: string; to: string } }) {
   return (
     <div className="mt-6">
       <h3 className="font-display text-base font-bold text-navy">{title}</h3>
       {items.length === 0 ? (
-        <p className="mt-2 text-sm text-muted-foreground">{empty}</p>
+        <div className="mt-2 rounded-2xl border border-dashed border-border bg-card/50 px-4 py-6 text-center">
+          <p className="text-sm text-muted-foreground">{empty}</p>
+          {emptyAction && (
+            <Link to={emptyAction.to} className="mt-3 inline-flex items-center rounded-full bg-orange px-4 py-1.5 text-xs font-semibold text-white shadow hover:bg-orange/90">
+              {emptyAction.label}
+            </Link>
+          )}
+        </div>
       ) : (
         <div className="mt-2 flex flex-wrap gap-3">
           {items.map((i) => (
