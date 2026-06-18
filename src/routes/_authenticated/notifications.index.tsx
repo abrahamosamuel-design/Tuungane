@@ -124,8 +124,16 @@ function NotificationsPage() {
               <p className="mt-1 text-sm text-muted-foreground">
                 {filter === "jobs"
                   ? "Activity on your service requests and jobs will show up here."
-                  : "When people follow you, like your posts, or recommend you, it'll show up here."}
+                  : filter === "social"
+                  ? "When people follow you, like your posts, or recommend you, it'll show up here."
+                  : "Send a request or browse services to get things moving."}
               </p>
+              <Link
+                to={filter === "jobs" ? "/requests/browse" : filter === "social" ? "/services" : "/services"}
+                className="mt-4 inline-flex items-center rounded-full bg-orange px-4 py-1.5 text-xs font-semibold text-white shadow hover:bg-orange/90"
+              >
+                {filter === "jobs" ? "See open requests" : "Browse services"}
+              </Link>
             </div>
           )}
           {filtered.map((n) => (
