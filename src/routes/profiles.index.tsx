@@ -2,7 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
-import { Building2, MapPin, BadgeCheck, Sparkles, User } from "lucide-react";
+import { Building2, MapPin, BadgeCheck, Sparkles, User, SearchX } from "lucide-react";
+import { EmptyState } from "@/components/EmptyState";
 
 export const Route = createFileRoute("/profiles/")({
   head: () => ({ meta: [
@@ -90,7 +91,16 @@ function ProfilesBrowsePage() {
         {loading ? (
           <p className="text-sm text-muted-foreground">Loading…</p>
         ) : filtered.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No profiles found.</p>
+          <EmptyState
+            icon={profiles.length === 0 ? Sparkles : SearchX}
+            title={profiles.length === 0 ? "Be the first profile here" : "No profiles match your search"}
+            description={profiles.length === 0
+              ? "Create your individual, business, or organization profile so customers can find and contact you."
+              : "Try a different search term or clear the type filter."}
+            action={profiles.length === 0
+              ? { label: "Create a profile", to: "/profiles/new" }
+              : { label: "Clear filters", onClick: () => { setQ(""); setType(""); } }}
+          />
         ) : (
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {filtered.map((p) => (
