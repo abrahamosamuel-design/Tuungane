@@ -91,7 +91,16 @@ function ProfilesBrowsePage() {
         {loading ? (
           <p className="text-sm text-muted-foreground">Loading…</p>
         ) : filtered.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No profiles found.</p>
+          <EmptyState
+            icon={profiles.length === 0 ? Sparkles : SearchX}
+            title={profiles.length === 0 ? "Be the first profile here" : "No profiles match your search"}
+            description={profiles.length === 0
+              ? "Create your individual, business, or organization profile so customers can find and contact you."
+              : "Try a different search term or clear the type filter."}
+            action={profiles.length === 0
+              ? { label: "Create a profile", to: "/profiles/new" }
+              : { label: "Clear filters", onClick: () => { setQ(""); setType(""); } }}
+          />
         ) : (
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {filtered.map((p) => (
