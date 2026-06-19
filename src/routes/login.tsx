@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Eye, EyeOff, Check, AlertCircle } from "lucide-react";
+import { Eye, EyeOff, Check, AlertCircle, Loader2 } from "lucide-react";
 import { Layout } from "@/components/Layout";
 import { Logo } from "@/components/Logo";
 import { supabase } from "@/integrations/supabase/client";
@@ -139,7 +139,7 @@ function Login() {
             disabled={googleBusy || busy}
             className="mt-5 flex w-full items-center justify-center gap-3 rounded-xl border border-border bg-background py-3 text-sm font-semibold text-navy transition hover:bg-surface disabled:opacity-50"
           >
-            <GoogleIcon />
+            {googleBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <GoogleIcon />}
             {googleBusy ? "Opening Google…" : tab === "login" ? "Continue with Google" : "Sign up with Google"}
           </button>
 
@@ -229,8 +229,9 @@ function Login() {
               />
             )}
 
-            <button type="submit" disabled={!canSubmitEmail} className="mt-2 w-full rounded-xl bg-orange py-3 text-sm font-semibold text-orange-foreground transition hover:brightness-110 disabled:opacity-50">
-              {busy ? "Please wait..." : tab === "login" ? "Log in" : "Create account"}
+            <button type="submit" disabled={!canSubmitEmail} className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-orange py-3 text-sm font-semibold text-orange-foreground transition hover:brightness-110 disabled:opacity-50">
+              {busy && <Loader2 className="h-4 w-4 animate-spin" />}
+              {busy ? "Please wait…" : tab === "login" ? "Log in" : "Create account"}
             </button>
           </form>
 
