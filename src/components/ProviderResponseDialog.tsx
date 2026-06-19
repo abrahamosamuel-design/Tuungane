@@ -3,6 +3,7 @@ import { X, Loader2, ShieldAlert } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
+import { toastError } from "@/lib/user-errors";
 import type { ProviderResponseRow } from "@/data/serviceRequestTypes";
 
 interface Props {
