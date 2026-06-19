@@ -408,7 +408,7 @@ function StatusSub() {
                 <p className="text-sm font-semibold text-navy">{r.profile_kind} · {r.profile_id.slice(0, 8)}</p>
                 <p className="text-xs text-muted-foreground">owner {r.owner_user_id.slice(0, 8)} · {r.reports_count} report(s) · updated {timeAgo(r.updated_at)}</p>
               </div>
-              <TrustBadge level={displayed} />
+              <TrustBadge level={displayed} variant="internal" />
             </div>
             <div className="mt-2 flex flex-wrap items-center gap-1 text-[11px]">
               <span className="text-muted-foreground mr-1">Auto: {TRUST_LABEL[r.auto_level]}</span>

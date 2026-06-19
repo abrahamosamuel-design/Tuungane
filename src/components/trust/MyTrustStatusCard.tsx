@@ -76,7 +76,7 @@ export function MyTrustStatusCard() {
             <div className="min-w-0 flex-1">
               <p className="text-sm font-semibold text-navy truncate">{r.name}</p>
               <div className="mt-1 flex items-center gap-2">
-                <TrustBadge level={r.level} />
+                <TrustBadge level={r.level} variant="internal" />
                 {r.has_pending && <span className="text-[10px] font-bold uppercase text-orange">Verification pending</span>}
               </div>
             </div>
