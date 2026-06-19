@@ -2827,6 +2827,18 @@ export type Database = {
         }
         Returns: Database["public"]["Enums"]["trust_level"]
       }
+      get_profile_trust_checklist: {
+        Args: {
+          _id: string
+          _kind: Database["public"]["Enums"]["profile_kind"]
+        }
+        Returns: {
+          done: boolean
+          key: string
+          label: string
+          unlocks: string
+        }[]
+      }
       get_unread_message_count: { Args: never; Returns: number }
       has_role: {
         Args: {

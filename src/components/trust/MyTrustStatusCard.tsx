@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { TrustBadge, type TrustLevel } from "./TrustBadge";
+import { NextStepsCard } from "./NextStepsCard";
 import { RequestVerificationDialog } from "./RequestVerificationDialog";
 
 type Row = {
@@ -72,19 +73,22 @@ export function MyTrustStatusCard() {
       <p className="text-xs text-muted-foreground">Your public profiles and their current trust level.</p>
       <div className="mt-2 space-y-2">
         {rows.map((r) => (
-          <div key={`${r.kind}:${r.id}`} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-card p-3">
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-navy truncate">{r.name}</p>
-              <div className="mt-1 flex items-center gap-2">
-                <TrustBadge level={r.level} variant="internal" />
-                {r.has_pending && <span className="text-[10px] font-bold uppercase text-orange">Verification pending</span>}
+          <div key={`${r.kind}:${r.id}`} className="rounded-xl border border-border bg-card p-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold text-navy truncate">{r.name}</p>
+                <div className="mt-1 flex items-center gap-2">
+                  <TrustBadge level={r.level} variant="internal" />
+                  {r.has_pending && <span className="text-[10px] font-bold uppercase text-orange">Verification pending</span>}
+                </div>
               </div>
+              {!r.has_pending && !["verified_provider", "verified_business", "verified_organization"].includes(r.level) && (
+                <button onClick={() => setOpen(r)} className="rounded-md bg-orange px-3 py-1.5 text-xs font-semibold text-orange-foreground">
+                  Request verification
+                </button>
+              )}
             </div>
-            {!r.has_pending && !["verified_provider", "verified_business", "verified_organization"].includes(r.level) && (
-              <button onClick={() => setOpen(r)} className="rounded-md bg-orange px-3 py-1.5 text-xs font-semibold text-orange-foreground">
-                Request verification
-              </button>
-            )}
+            <NextStepsCard kind={r.kind} id={r.id} />
           </div>
         ))}
       </div>
