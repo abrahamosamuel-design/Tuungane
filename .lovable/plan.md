@@ -78,7 +78,7 @@ Backfill `profile_trust_status` for every existing `service_profiles` and `busin
 - Admin write actions go through SECURITY DEFINER RPCs: `admin_set_trust_level`, `admin_decide_verification_request`, `admin_add_profile_note`, `admin_set_profile_status`. Each guards with `has_role(auth.uid(),'admin' or 'moderator')` and writes to `trust_audit_log`.
 - UI uses existing semantic tokens (navy structure, orange CTAs, green verified, red warnings) — no new colors.
 
-## Open questions before I start
-1. Should the existing `verified` columns on `service_profiles` / `business_pages` be **kept in sync** with `profile_trust_status.manual_level`, or **deprecated** in favor of the new table only? (Sync is safer for current code; deprecate is cleaner.)
-2. For Organization profiles — today every `business_pages.org_type` other than `'business'` qualifies as organization, correct? (Used to decide which "verified_*" badge a manual approval grants.)
-3. Should boosting/feature placement be blocked for unverified profiles when the setting is off, or just hidden in UI? (Affects `create_boost` RPC.)
+## Resolved decisions
+1. **`verified` columns** → **Sync** with `profile_trust_status.manual_level` via `admin_set_trust_level` (already implemented). Old columns marked deprecated; removal is a follow-up after all reads migrate.
+2. **Organization detection** → `business_pages.org_type <> 'business'` ⇒ `verified_organization`; else `verified_business`. Used by `RequestVerificationDialog` defaults and admin approve flow.
+3. **Boosting for unverified** → **Allowed but visually demoted**. `allow_boost_unverified` stays `true`; `BoostDialog` shows a "Verified profiles rank higher" hint. No RPC change.
