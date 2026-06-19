@@ -41,8 +41,8 @@ export function ReportDialog({ open, onClose, targetType, targetId }: { open: bo
           </div>
         </div>
         <div className="mt-5 flex justify-end gap-2">
-          <button onClick={onClose} className="rounded-xl px-4 py-2 text-sm font-medium text-muted-foreground">Cancel</button>
-          <button onClick={submit} disabled={busy} className="rounded-xl bg-destructive px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">Submit report</button>
+          <button onClick={onClose} className="rounded-xl px-4 py-2.5 min-h-11 text-sm font-medium text-muted-foreground">Cancel</button>
+          <button onClick={submit} disabled={busy} className="rounded-xl bg-destructive px-4 py-2.5 min-h-11 text-sm font-semibold text-white disabled:opacity-50">Submit report</button>
         </div>
       </div>
     </div>

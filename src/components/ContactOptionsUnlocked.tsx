@@ -73,7 +73,7 @@ export function ContactOptionsUnlocked({
           !revealed ? (
             <button
               onClick={revealPhone}
-              className="inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold text-navy hover:border-orange/60 hover:text-orange"
+              className="inline-flex w-full min-h-11 items-center justify-center gap-1.5 rounded-full border border-border bg-card px-4 py-2.5 text-sm font-semibold text-navy hover:border-orange/60 hover:text-orange"
             >
               <Phone className="h-4 w-4" /> Call instead
             </button>
@@ -81,7 +81,7 @@ export function ContactOptionsUnlocked({
             <a
               href={`tel:${phone}`}
               onClick={() => logContactClick({ customerId, providerId, serviceRequestId, method: "call" })}
-              className="inline-flex w-full items-center justify-center gap-1.5 rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold text-navy hover:border-orange/60 hover:text-orange"
+              className="inline-flex w-full min-h-11 items-center justify-center gap-1.5 rounded-full border border-border bg-card px-4 py-2.5 text-sm font-semibold text-navy hover:border-orange/60 hover:text-orange"
             >
               <Phone className="h-4 w-4" /> {phone}
             </a>
