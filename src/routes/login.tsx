@@ -69,7 +69,8 @@ function Login() {
           await supabase.from("profiles").update({ is_provider: true, full_name: fullName }).eq("id", data.user.id);
         }
         toast.success("Account created!");
-        nav({ to: (search.redirect as never) ?? (isProvider ? "/list-skill" : "/feed") });
+        try { localStorage.removeItem("tuungane_welcome_seen"); } catch { /* ignore */ }
+        nav({ to: (search.redirect as never) ?? "/welcome" });
       } else {
         if (rememberMe) {
           localStorage.setItem("tuungane_remember_me", "true");
