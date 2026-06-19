@@ -6,12 +6,7 @@
  */
 import { toast } from "sonner";
 
-type AnyError =
-  | Error
-  | { message?: string; code?: string; status?: number; details?: string }
-  | string
-  | null
-  | undefined;
+type AnyError = unknown;
 
 const NETWORK_HINT = "Check your internet connection and try again.";
 
