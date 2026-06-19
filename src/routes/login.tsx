@@ -209,25 +209,27 @@ function Login() {
               </div>
             )}
 
-            {error && (
-              <ErrorBlock
-                error={error}
-                onResetPassword={() => nav({ to: "/forgot-password", search: emailValid ? { email } : undefined })}
-                onSwitchToLogin={() => setTab("login")}
-                onSwitchToSignup={() => setTab("signup")}
-                onResendConfirmation={async () => {
-                  try {
-                    const { error: resendErr } = await supabase.auth.resend({ type: "signup", email });
-                    if (resendErr) throw resendErr;
-                    toast.success("Confirmation email sent", { description: "Check your inbox." });
-                    setError(null);
-                  } catch (err) {
-                    await showErr(err, "Couldn't resend confirmation");
-                  }
-                }}
-                onRetry={() => { setError(null); void onEmailSubmit(new Event("submit") as unknown as React.FormEvent); }}
-              />
-            )}
+            <div className="min-h-[4.5rem]">
+              {error && (
+                <ErrorBlock
+                  error={error}
+                  onResetPassword={() => nav({ to: "/forgot-password", search: emailValid ? { email } : undefined })}
+                  onSwitchToLogin={() => setTab("login")}
+                  onSwitchToSignup={() => setTab("signup")}
+                  onResendConfirmation={async () => {
+                    try {
+                      const { error: resendErr } = await supabase.auth.resend({ type: "signup", email });
+                      if (resendErr) throw resendErr;
+                      toast.success("Confirmation email sent", { description: "Check your inbox." });
+                      setError(null);
+                    } catch (err) {
+                      await showErr(err, "Couldn't resend confirmation");
+                    }
+                  }}
+                  onRetry={() => { setError(null); void onEmailSubmit(new Event("submit") as unknown as React.FormEvent); }}
+                />
+              )}
+            </div>
 
             <button type="submit" disabled={!canSubmitEmail} className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-orange py-3 text-sm font-semibold text-orange-foreground transition hover:brightness-110 disabled:opacity-50">
               {busy && <Loader2 className="h-4 w-4 animate-spin" />}
