@@ -53,7 +53,8 @@ function ListSkillPage() {
     setBusy(true);
     // Flip to provider and upsert service profile
     const { error: pErr } = await supabase.from("profiles").update({ is_provider: true }).eq("id", user.id);
-    if (pErr) { setBusy(false); toast.error(pErr.message); return; }
+    if (pErr) { setBusy(false); toastError(pErr, "Couldn't save your profile"); return; }
+
     const { error } = await supabase.from("service_profiles").upsert({
       user_id: user.id,
       business_name: businessName || null,
