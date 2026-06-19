@@ -12,8 +12,8 @@ import { listSkillHref } from "@/lib/cta";
 
 const primaryNav = [
   { to: "/", label: "Home", exact: true },
-  { to: "/services", label: "Services" },
-  { to: "/requests/browse", label: "Requests" },
+  { to: "/services", label: "Find help" },
+  { to: "/requests/browse", label: "Find work" },
   { to: "/profiles", label: "Businesses" },
 ];
 
