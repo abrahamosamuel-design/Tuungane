@@ -55,6 +55,7 @@ function NewRequest() {
   const [file, setFile] = useState<File | null>(null);
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [districtBounds, setDistrictBounds] = useState<Bounds | null>(null);
+  const [showMore, setShowMore] = useState(false);
   const [f, setF] = useState({
     title: search.title || "",
     category_slug: search.category || staticCategories[0].slug,
