@@ -243,21 +243,43 @@ function Login() {
   );
 }
 
-function ErrorBlock({ error, onResetPassword, onSwitchToLogin }: { error: { title: string; description?: string; kind?: UserErrorKind }; onResetPassword: () => void; onSwitchToLogin: () => void }) {
+function ErrorBlock({
+  error,
+  onResetPassword,
+  onSwitchToLogin,
+  onSwitchToSignup,
+  onResendConfirmation,
+  onRetry,
+}: {
+  error: { title: string; description?: string; kind?: UserErrorKind };
+  onResetPassword: () => void;
+  onSwitchToLogin: () => void;
+  onSwitchToSignup: () => void;
+  onResendConfirmation: () => void | Promise<void>;
+  onRetry: () => void;
+}) {
   return (
-    <div className="rounded-lg bg-destructive/10 px-3 py-2.5 text-xs text-destructive">
+    <div role="alert" aria-live="polite" className="rounded-lg bg-destructive/10 px-3 py-2.5 text-xs text-destructive">
       <p className="font-semibold">{error.title}</p>
       {error.description && <p className="mt-0.5 opacity-90">{error.description}</p>}
       {error.kind === "invalid_credentials" && (
-        <button type="button" onClick={onResetPassword} className="mt-1.5 inline-block font-semibold underline">
-          Reset your password →
-        </button>
+        <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1">
+          <button type="button" onClick={onResetPassword} className="font-semibold underline">Reset your password →</button>
+          <button type="button" onClick={onSwitchToSignup} className="font-semibold underline">Create an account →</button>
+        </div>
       )}
       {error.kind === "already_registered" && (
-        <button type="button" onClick={onSwitchToLogin} className="mt-1.5 inline-block font-semibold underline">
-          Log in instead →
-        </button>
+        <button type="button" onClick={onSwitchToLogin} className="mt-1.5 inline-block font-semibold underline">Log in instead →</button>
       )}
+      {error.kind === "email_not_confirmed" && (
+        <button type="button" onClick={() => void onResendConfirmation()} className="mt-1.5 inline-block font-semibold underline">Resend confirmation email →</button>
+      )}
+      {(error.kind === "offline" || error.kind === "server") && (
+        <button type="button" onClick={onRetry} className="mt-1.5 inline-block font-semibold underline">Try again →</button>
+      )}
+    </div>
+  );
+}
     </div>
   );
 }
