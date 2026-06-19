@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { categories as staticCategories } from "@/data/categories";
 import { useCategories } from "@/hooks/use-categories";
 import { toast } from "sonner";
+import { toastError } from "@/lib/user-errors";
 
 export const Route = createFileRoute("/_authenticated/list-skill")({
   head: () => ({ meta: [{ title: "List your skill — Tuungane" }] }),
