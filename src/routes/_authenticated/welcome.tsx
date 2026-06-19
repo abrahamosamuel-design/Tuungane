@@ -1,7 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { Search, Briefcase, MessageSquare, ArrowRight } from "lucide-react";
 import { Layout } from "@/components/Layout";
+import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/_authenticated/welcome")({
   head: () => ({ meta: [{ title: "Welcome to Tuungane" }] }),
@@ -12,20 +13,43 @@ function markSeen() {
   try { localStorage.setItem("tuungane_welcome_seen", "1"); } catch { /* ignore */ }
 }
 
+function getFirstName(user: { user_metadata?: Record<string, unknown> | null; email?: string | null } | null | undefined): string | null {
+  if (!user) return null;
+  const meta = (user.user_metadata ?? {}) as Record<string, unknown>;
+  const candidates = [meta.first_name, meta.given_name, meta.name, meta.full_name, meta.display_name];
+  for (const c of candidates) {
+    if (typeof c === "string" && c.trim()) {
+      const first = c.trim().split(/\s+/)[0];
+      return first.charAt(0).toUpperCase() + first.slice(1);
+    }
+  }
+  if (user.email) {
+    const local = user.email.split("@")[0].replace(/[._-]+/g, " ").trim().split(/\s+/)[0];
+    if (local) return local.charAt(0).toUpperCase() + local.slice(1);
+  }
+  return null;
+}
+
 function Welcome() {
   const nav = useNavigate();
+  const { user } = useAuth();
   useEffect(() => { markSeen(); }, []);
+
+  const firstName = useMemo(() => getFirstName(user), [user]);
 
   return (
     <Layout>
       <section className="mx-auto max-w-2xl px-4 py-10 sm:py-16">
-        <p className="text-xs font-semibold uppercase tracking-wider text-orange">Welcome 👋</p>
+        <p className="text-xs font-semibold uppercase tracking-wider text-orange">
+          {firstName ? `Welcome, ${firstName} 👋` : "Welcome 👋"}
+        </p>
         <h1 className="mt-2 font-display text-3xl font-bold text-navy sm:text-4xl">
           What brings you to Tuungane today?
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
           Pick the path that fits you best. You can always do both later.
         </p>
+
 
         <div className="mt-8 grid gap-4 sm:grid-cols-2">
           <button
