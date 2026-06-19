@@ -209,7 +209,25 @@ function Login() {
               </div>
             )}
 
-            {error && <ErrorBlock error={error} onResetPassword={() => nav({ to: "/forgot-password" })} onSwitchToLogin={() => setTab("login")} />}
+            {error && (
+              <ErrorBlock
+                error={error}
+                onResetPassword={() => nav({ to: "/forgot-password", search: emailValid ? { email } : undefined })}
+                onSwitchToLogin={() => setTab("login")}
+                onSwitchToSignup={() => setTab("signup")}
+                onResendConfirmation={async () => {
+                  try {
+                    const { error: resendErr } = await supabase.auth.resend({ type: "signup", email });
+                    if (resendErr) throw resendErr;
+                    toast.success("Confirmation email sent", { description: "Check your inbox." });
+                    setError(null);
+                  } catch (err) {
+                    await showErr(err, "Couldn't resend confirmation");
+                  }
+                }}
+                onRetry={() => { setError(null); void onEmailSubmit(new Event("submit") as unknown as React.FormEvent); }}
+              />
+            )}
 
             <button type="submit" disabled={!canSubmitEmail} className="mt-2 w-full rounded-xl bg-orange py-3 text-sm font-semibold text-orange-foreground transition hover:brightness-110 disabled:opacity-50">
               {busy ? "Please wait..." : tab === "login" ? "Log in" : "Create account"}
@@ -225,24 +243,44 @@ function Login() {
   );
 }
 
-function ErrorBlock({ error, onResetPassword, onSwitchToLogin }: { error: { title: string; description?: string; kind?: UserErrorKind }; onResetPassword: () => void; onSwitchToLogin: () => void }) {
+function ErrorBlock({
+  error,
+  onResetPassword,
+  onSwitchToLogin,
+  onSwitchToSignup,
+  onResendConfirmation,
+  onRetry,
+}: {
+  error: { title: string; description?: string; kind?: UserErrorKind };
+  onResetPassword: () => void;
+  onSwitchToLogin: () => void;
+  onSwitchToSignup: () => void;
+  onResendConfirmation: () => void | Promise<void>;
+  onRetry: () => void;
+}) {
   return (
-    <div className="rounded-lg bg-destructive/10 px-3 py-2.5 text-xs text-destructive">
+    <div role="alert" aria-live="polite" className="rounded-lg bg-destructive/10 px-3 py-2.5 text-xs text-destructive">
       <p className="font-semibold">{error.title}</p>
       {error.description && <p className="mt-0.5 opacity-90">{error.description}</p>}
       {error.kind === "invalid_credentials" && (
-        <button type="button" onClick={onResetPassword} className="mt-1.5 inline-block font-semibold underline">
-          Reset your password →
-        </button>
+        <div className="mt-1.5 flex flex-wrap gap-x-3 gap-y-1">
+          <button type="button" onClick={onResetPassword} className="font-semibold underline">Reset your password →</button>
+          <button type="button" onClick={onSwitchToSignup} className="font-semibold underline">Create an account →</button>
+        </div>
       )}
       {error.kind === "already_registered" && (
-        <button type="button" onClick={onSwitchToLogin} className="mt-1.5 inline-block font-semibold underline">
-          Log in instead →
-        </button>
+        <button type="button" onClick={onSwitchToLogin} className="mt-1.5 inline-block font-semibold underline">Log in instead →</button>
+      )}
+      {error.kind === "email_not_confirmed" && (
+        <button type="button" onClick={() => void onResendConfirmation()} className="mt-1.5 inline-block font-semibold underline">Resend confirmation email →</button>
+      )}
+      {(error.kind === "offline" || error.kind === "server") && (
+        <button type="button" onClick={onRetry} className="mt-1.5 inline-block font-semibold underline">Try again →</button>
       )}
     </div>
   );
 }
+
 
 function PasswordInput({ value, onChange, onBlur, autoComplete, invalid, valid }: { value: string; onChange: (v: string) => void; onBlur?: () => void; autoComplete?: string; invalid?: boolean; valid?: boolean }) {
   const [show, setShow] = useState(false);
