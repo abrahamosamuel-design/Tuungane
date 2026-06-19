@@ -16,7 +16,7 @@ import {
 } from "@/data/serviceRequestTypes";
 import { uploadMedia } from "@/lib/upload";
 import { toast } from "sonner";
-import { Loader2, MapPin, ShieldAlert, Sparkles, ArrowRight, Pencil } from "lucide-react";
+import { Loader2, MapPin, ShieldAlert, Sparkles, ArrowRight, Pencil, ChevronDown } from "lucide-react";
 import { REQUESTS_SAFETY_TEXT } from "@/data/requestTypes";
 import { useUserLocation } from "@/hooks/use-user-location";
 import { AreaAutocomplete } from "@/components/AreaAutocomplete";
@@ -55,6 +55,7 @@ function NewRequest() {
   const [file, setFile] = useState<File | null>(null);
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [districtBounds, setDistrictBounds] = useState<Bounds | null>(null);
+  const [showMore, setShowMore] = useState(false);
   const [f, setF] = useState({
     title: search.title || "",
     category_slug: search.category || staticCategories[0].slug,
@@ -443,41 +444,6 @@ function NewRequest() {
             />
           </Field>
 
-          <MapPicker
-            latitude={coords?.lat ?? profileLoc?.latitude ?? null}
-            longitude={coords?.lng ?? profileLoc?.longitude ?? null}
-            bounds={districtBounds}
-            onChange={(lat, lng, place) => {
-              setCoords({ lat, lng });
-              if (!place) return;
-              const composed = [place.area, place.town, place.district].filter(Boolean).join(", ");
-              setF((s) => ({
-                ...s,
-                location: composed || s.location,
-                district: place.district ?? s.district,
-                town: place.town ?? s.town,
-                area: place.area ?? s.area,
-              }));
-              if (place.district) {
-                findDistrictBounds(place.district).then((b) => {
-                  if (b) setDistrictBounds(b);
-                });
-              }
-            }}
-          />
-
-          <div className="grid grid-cols-3 gap-3">
-            <Field label="District">
-              <input value={f.district} onChange={(e) => update("district", e.target.value)} className={inp} />
-            </Field>
-            <Field label="Town">
-              <input value={f.town} onChange={(e) => update("town", e.target.value)} className={inp} />
-            </Field>
-            <Field label="Area">
-              <input value={f.area} onChange={(e) => update("area", e.target.value)} className={inp} />
-            </Field>
-          </div>
-
           <button
             type="button"
             onClick={useBrowserGeo}
@@ -488,93 +454,141 @@ function NewRequest() {
             {requestingGeo ? "Detecting…" : "Use my current location"}
           </button>
 
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="When do you need help?">
-              <select value={f.urgency} onChange={(e) => update("urgency", e.target.value as UrgencyValue)} className={inp}>
-                {urgencyOptions.map((u) => (
-                  <option key={u.value} value={u.value}>
-                    {u.label}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <Field label="Budget range">
-              <select value={f.budget_range} onChange={(e) => update("budget_range", e.target.value)} className={inp}>
-                <option value="">Select…</option>
-                {budgetBuckets.map((b) => (
-                  <option key={b} value={b}>
-                    {b}
-                  </option>
-                ))}
-              </select>
-            </Field>
-          </div>
+          <button
+            type="button"
+            onClick={() => setShowMore((v) => !v)}
+            className="flex w-full items-center justify-between rounded-xl border border-dashed border-border bg-surface/40 px-3 py-2.5 text-sm font-medium text-navy hover:border-orange/60"
+          >
+            <span>{showMore ? "Hide extra details" : "Add more details (optional)"}</span>
+            <ChevronDown className={`h-4 w-4 transition ${showMore ? "rotate-180" : ""}`} />
+          </button>
 
-          <label className="flex items-center gap-2 text-sm">
-            <input
-              type="checkbox"
-              checked={f.urgent_flag}
-              onChange={(e) => update("urgent_flag", e.target.checked)}
-            />
-            Mark this request as urgent
-          </label>
-
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Preferred date">
-              <input
-                type="date"
-                value={f.preferred_date}
-                onChange={(e) => update("preferred_date", e.target.value)}
-                className={inp}
+          {showMore && (
+            <div className="space-y-4 rounded-xl border border-border bg-surface/30 p-4">
+              <MapPicker
+                latitude={coords?.lat ?? profileLoc?.latitude ?? null}
+                longitude={coords?.lng ?? profileLoc?.longitude ?? null}
+                bounds={districtBounds}
+                onChange={(lat, lng, place) => {
+                  setCoords({ lat, lng });
+                  if (!place) return;
+                  const composed = [place.area, place.town, place.district].filter(Boolean).join(", ");
+                  setF((s) => ({
+                    ...s,
+                    location: composed || s.location,
+                    district: place.district ?? s.district,
+                    town: place.town ?? s.town,
+                    area: place.area ?? s.area,
+                  }));
+                  if (place.district) {
+                    findDistrictBounds(place.district).then((b) => {
+                      if (b) setDistrictBounds(b);
+                    });
+                  }
+                }}
               />
-            </Field>
-            <Field label="Preferred time">
-              <input
-                value={f.preferred_time}
-                onChange={(e) => update("preferred_time", e.target.value)}
-                placeholder="e.g. Morning"
-                className={inp}
-              />
-            </Field>
-          </div>
 
-          <Field label="Photo (optional)">
-            <input type="file" accept="image/*" onChange={(e) => setFile(e.target.files?.[0] ?? null)} className="text-sm" />
-          </Field>
+              <div className="grid grid-cols-3 gap-3">
+                <Field label="District">
+                  <input value={f.district} onChange={(e) => update("district", e.target.value)} className={inp} />
+                </Field>
+                <Field label="Town">
+                  <input value={f.town} onChange={(e) => update("town", e.target.value)} className={inp} />
+                </Field>
+                <Field label="Area">
+                  <input value={f.area} onChange={(e) => update("area", e.target.value)} className={inp} />
+                </Field>
+              </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="Contact preference">
-              <select
-                value={f.preferred_contact_method}
-                onChange={(e) => update("preferred_contact_method", e.target.value as ContactMethodValue)}
-                className={inp}
-              >
-                {contactMethods.map((c) => (
-                  <option key={c.value} value={c.value}>
-                    {c.label}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <Field label="Visibility">
-              <select
-                value={f.visibility}
-                onChange={(e) => update("visibility", e.target.value as VisibilityValue)}
-                className={inp}
-                disabled={!!search.providerId}
-              >
-                {visibilityOptions.map((v) => (
-                  <option key={v.value} value={v.value}>
-                    {v.label}
-                  </option>
-                ))}
-              </select>
-            </Field>
-          </div>
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="When do you need help?">
+                  <select value={f.urgency} onChange={(e) => update("urgency", e.target.value as UrgencyValue)} className={inp}>
+                    {urgencyOptions.map((u) => (
+                      <option key={u.value} value={u.value}>
+                        {u.label}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+                <Field label="Budget range">
+                  <select value={f.budget_range} onChange={(e) => update("budget_range", e.target.value)} className={inp}>
+                    <option value="">Select…</option>
+                    {budgetBuckets.map((b) => (
+                      <option key={b} value={b}>
+                        {b}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+              </div>
 
-          <Field label="Phone (optional)">
-            <input value={f.customer_phone} onChange={(e) => update("customer_phone", e.target.value)} className={inp} />
-          </Field>
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={f.urgent_flag}
+                  onChange={(e) => update("urgent_flag", e.target.checked)}
+                />
+                Mark this request as urgent
+              </label>
+
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="Preferred date">
+                  <input
+                    type="date"
+                    value={f.preferred_date}
+                    onChange={(e) => update("preferred_date", e.target.value)}
+                    className={inp}
+                  />
+                </Field>
+                <Field label="Preferred time">
+                  <input
+                    value={f.preferred_time}
+                    onChange={(e) => update("preferred_time", e.target.value)}
+                    placeholder="e.g. Morning"
+                    className={inp}
+                  />
+                </Field>
+              </div>
+
+              <Field label="Photo (optional)">
+                <input type="file" accept="image/*" onChange={(e) => setFile(e.target.files?.[0] ?? null)} className="text-sm" />
+              </Field>
+
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="Contact preference">
+                  <select
+                    value={f.preferred_contact_method}
+                    onChange={(e) => update("preferred_contact_method", e.target.value as ContactMethodValue)}
+                    className={inp}
+                  >
+                    {contactMethods.map((c) => (
+                      <option key={c.value} value={c.value}>
+                        {c.label}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+                <Field label="Visibility">
+                  <select
+                    value={f.visibility}
+                    onChange={(e) => update("visibility", e.target.value as VisibilityValue)}
+                    className={inp}
+                    disabled={!!search.providerId}
+                  >
+                    {visibilityOptions.map((v) => (
+                      <option key={v.value} value={v.value}>
+                        {v.label}
+                      </option>
+                    ))}
+                  </select>
+                </Field>
+              </div>
+
+              <Field label="Phone (optional)">
+                <input value={f.customer_phone} onChange={(e) => update("customer_phone", e.target.value)} className={inp} />
+              </Field>
+            </div>
+          )}
 
           <button
             disabled={busy}
