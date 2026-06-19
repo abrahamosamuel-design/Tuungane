@@ -67,8 +67,8 @@ function ListSkillPage() {
       whatsapp: whatsapp || null,
     });
     setBusy(false);
-    if (error) { toast.error(error.message); return; }
-    toast.success("Your skill is live. Welcome aboard!");
+    if (error) { toastError(error, "Couldn't publish your skill"); return; }
+    toast.success("Your skill is live", { description: "Customers nearby can now find and contact you." });
     nav({ to: "/dashboard" });
   };
 
