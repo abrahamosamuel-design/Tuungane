@@ -2473,6 +2473,7 @@ export type Database = {
           min_completed_jobs_for_reviewed: number
           min_verified_reviews_for_reviewed: number
           report_auto_flag_threshold: number
+          report_auto_flag_window_days: number
           show_badges_publicly: boolean
           updated_at: string
           updated_by: string | null
@@ -2485,6 +2486,7 @@ export type Database = {
           min_completed_jobs_for_reviewed?: number
           min_verified_reviews_for_reviewed?: number
           report_auto_flag_threshold?: number
+          report_auto_flag_window_days?: number
           show_badges_publicly?: boolean
           updated_at?: string
           updated_by?: string | null
@@ -2497,6 +2499,7 @@ export type Database = {
           min_completed_jobs_for_reviewed?: number
           min_verified_reviews_for_reviewed?: number
           report_auto_flag_threshold?: number
+          report_auto_flag_window_days?: number
           show_badges_publicly?: boolean
           updated_at?: string
           updated_by?: string | null
