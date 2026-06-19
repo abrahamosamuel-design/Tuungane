@@ -38,6 +38,7 @@ import { Route as GuidesPropertyMaintenanceKampalaRouteImport } from './routes/g
 import { Route as BusinessesNewRouteImport } from './routes/businesses.new'
 import { Route as BusinessesCreateRouteImport } from './routes/businesses.create'
 import { Route as BusinessesSlugRouteImport } from './routes/businesses.$slug'
+import { Route as AuthenticatedWelcomeRouteImport } from './routes/_authenticated/welcome'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedMeRouteImport } from './routes/_authenticated/me'
 import { Route as AuthenticatedListSkillRouteImport } from './routes/_authenticated/list-skill'
@@ -200,6 +201,11 @@ const BusinessesSlugRoute = BusinessesSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => BusinessesRoute,
 } as any)
+const AuthenticatedWelcomeRoute = AuthenticatedWelcomeRouteImport.update({
+  id: '/welcome',
+  path: '/welcome',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -307,6 +313,7 @@ export interface FileRoutesByFullPath {
   '/list-skill': typeof AuthenticatedListSkillRoute
   '/me': typeof AuthenticatedMeRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/welcome': typeof AuthenticatedWelcomeRoute
   '/businesses/$slug': typeof BusinessesSlugRoute
   '/businesses/create': typeof BusinessesCreateRoute
   '/businesses/new': typeof BusinessesNewRoute
@@ -352,6 +359,7 @@ export interface FileRoutesByTo {
   '/list-skill': typeof AuthenticatedListSkillRoute
   '/me': typeof AuthenticatedMeRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/welcome': typeof AuthenticatedWelcomeRoute
   '/businesses/$slug': typeof BusinessesSlugRoute
   '/businesses/create': typeof BusinessesCreateRoute
   '/businesses/new': typeof BusinessesNewRoute
@@ -400,6 +408,7 @@ export interface FileRoutesById {
   '/_authenticated/list-skill': typeof AuthenticatedListSkillRoute
   '/_authenticated/me': typeof AuthenticatedMeRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/welcome': typeof AuthenticatedWelcomeRoute
   '/businesses/$slug': typeof BusinessesSlugRoute
   '/businesses/create': typeof BusinessesCreateRoute
   '/businesses/new': typeof BusinessesNewRoute
@@ -448,6 +457,7 @@ export interface FileRouteTypes {
     | '/list-skill'
     | '/me'
     | '/settings'
+    | '/welcome'
     | '/businesses/$slug'
     | '/businesses/create'
     | '/businesses/new'
@@ -493,6 +503,7 @@ export interface FileRouteTypes {
     | '/list-skill'
     | '/me'
     | '/settings'
+    | '/welcome'
     | '/businesses/$slug'
     | '/businesses/create'
     | '/businesses/new'
@@ -540,6 +551,7 @@ export interface FileRouteTypes {
     | '/_authenticated/list-skill'
     | '/_authenticated/me'
     | '/_authenticated/settings'
+    | '/_authenticated/welcome'
     | '/businesses/$slug'
     | '/businesses/create'
     | '/businesses/new'
@@ -799,6 +811,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BusinessesSlugRouteImport
       parentRoute: typeof BusinessesRoute
     }
+    '/_authenticated/welcome': {
+      id: '/_authenticated/welcome'
+      path: '/welcome'
+      fullPath: '/welcome'
+      preLoaderRoute: typeof AuthenticatedWelcomeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/settings': {
       id: '/_authenticated/settings'
       path: '/settings'
@@ -921,6 +940,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedListSkillRoute: typeof AuthenticatedListSkillRoute
   AuthenticatedMeRoute: typeof AuthenticatedMeRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedWelcomeRoute: typeof AuthenticatedWelcomeRoute
   AuthenticatedMessagesIdRoute: typeof AuthenticatedMessagesIdRoute
   AuthenticatedNotificationsIdRoute: typeof AuthenticatedNotificationsIdRoute
   AuthenticatedNotificationsPreferencesRoute: typeof AuthenticatedNotificationsPreferencesRoute
@@ -940,6 +960,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedListSkillRoute: AuthenticatedListSkillRoute,
   AuthenticatedMeRoute: AuthenticatedMeRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedWelcomeRoute: AuthenticatedWelcomeRoute,
   AuthenticatedMessagesIdRoute: AuthenticatedMessagesIdRoute,
   AuthenticatedNotificationsIdRoute: AuthenticatedNotificationsIdRoute,
   AuthenticatedNotificationsPreferencesRoute:
@@ -1016,13 +1037,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
