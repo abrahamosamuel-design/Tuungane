@@ -16,6 +16,7 @@ import {
 } from "@/data/serviceRequestTypes";
 import { uploadMedia } from "@/lib/upload";
 import { toast } from "sonner";
+import { toastError } from "@/lib/user-errors";
 import { Loader2, MapPin, ShieldAlert, Sparkles, ArrowRight, Pencil, ChevronDown } from "lucide-react";
 import { REQUESTS_SAFETY_TEXT } from "@/data/requestTypes";
 import { useUserLocation } from "@/hooks/use-user-location";
