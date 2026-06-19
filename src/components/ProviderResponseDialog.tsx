@@ -3,6 +3,7 @@ import { X, Loader2, ShieldAlert } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
+import { toastError } from "@/lib/user-errors";
 import type { ProviderResponseRow } from "@/data/serviceRequestTypes";
 
 interface Props {
@@ -54,8 +55,10 @@ export function ProviderResponseDialog({ open, onClose, requestId, existing, onS
       ? await supabase.from("provider_responses").update(payload).eq("id", existing.id)
       : await supabase.from("provider_responses").insert(payload);
     setBusy(false);
-    if (error) return toast.error(error.message);
-    toast.success(existing ? "Response updated" : "Response sent to the customer");
+    if (error) return toastError(error, "Couldn't send your response");
+    toast.success(existing ? "Response updated" : "Response sent", {
+      description: "The customer will see it in their request.",
+    });
     onSaved?.();
     onClose();
   };
@@ -65,7 +68,7 @@ export function ProviderResponseDialog({ open, onClose, requestId, existing, onS
     setBusy(true);
     const { error } = await supabase.from("provider_responses").update({ status: "withdrawn" }).eq("id", existing.id);
     setBusy(false);
-    if (error) return toast.error(error.message);
+    if (error) return toastError(error, "Couldn't withdraw response");
     toast.success("Response withdrawn");
     onSaved?.();
     onClose();

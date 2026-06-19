@@ -85,7 +85,9 @@ function Login() {
         nav({ to: (search.redirect as never) ?? "/services" });
       }
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      const { toUserMessage } = await import("@/lib/user-errors");
+      const { title, description } = toUserMessage(err, tab === "signup" ? "Couldn't create your account" : "Couldn't sign you in");
+      setError(description ? `${title} — ${description}` : title);
     } finally {
       setBusy(false);
     }

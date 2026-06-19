@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { categories as staticCategories } from "@/data/categories";
 import { useCategories } from "@/hooks/use-categories";
 import { toast } from "sonner";
+import { toastError } from "@/lib/user-errors";
 
 export const Route = createFileRoute("/_authenticated/list-skill")({
   head: () => ({ meta: [{ title: "List your skill — Tuungane" }] }),
@@ -52,7 +53,8 @@ function ListSkillPage() {
     setBusy(true);
     // Flip to provider and upsert service profile
     const { error: pErr } = await supabase.from("profiles").update({ is_provider: true }).eq("id", user.id);
-    if (pErr) { setBusy(false); toast.error(pErr.message); return; }
+    if (pErr) { setBusy(false); toastError(pErr, "Couldn't save your profile"); return; }
+
     const { error } = await supabase.from("service_profiles").upsert({
       user_id: user.id,
       business_name: businessName || null,
@@ -65,8 +67,8 @@ function ListSkillPage() {
       whatsapp: whatsapp || null,
     });
     setBusy(false);
-    if (error) { toast.error(error.message); return; }
-    toast.success("Your skill is live. Welcome aboard!");
+    if (error) { toastError(error, "Couldn't publish your skill"); return; }
+    toast.success("Your skill is live", { description: "Customers nearby can now find and contact you." });
     nav({ to: "/dashboard" });
   };
 
