@@ -150,3 +150,15 @@
   main .rounded-2xl { border-radius: 0.875rem; }
 }
 
+/* Mobile tap-target safety net: buttons and link-buttons inside main get a
+   44px minimum touch height on small screens. Excludes plain text links and
+   tiny inline icon triggers (data-icon-only). */
+@media (max-width: 639px) {
+  main button:not(.h-auto):not([data-icon-only]),
+  main a[role="button"]:not([data-icon-only]),
+  main [type="submit"]:not([data-icon-only]) {
+    min-height: 44px;
+  }
+}
+
+
