@@ -117,6 +117,24 @@ export function UserLocationProvider({ children }: { children: ReactNode }) {
       });
       return null;
     }
+    // Geolocation is blocked in cross-origin iframes without an explicit
+    // allow="geolocation" attribute (e.g. the Lovable in-app preview). Detect
+    // this so we show a useful message instead of a confusing "permission denied".
+    const inIframe = typeof window !== "undefined" && window.self !== window.top;
+    if (inIframe) {
+      try {
+        const fp = (document as unknown as { featurePolicy?: { allowsFeature?: (f: string) => boolean } }).featurePolicy;
+        const allowed = fp?.allowsFeature ? fp.allowsFeature("geolocation") : true;
+        if (!allowed) {
+          toast.error("Location blocked in preview", {
+            description: "Open the published site in your browser to use current location, or enter your area manually.",
+          });
+          return null;
+        }
+      } catch {
+        // ignore detection failures and fall through to the actual request
+      }
+    }
     setRequestingGeo(true);
     return new Promise<UserLocation | null>((resolve) => {
       navigator.geolocation.getCurrentPosition(
