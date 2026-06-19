@@ -63,8 +63,8 @@ function Login() {
     setError(null);
     setGoogleBusy(true);
     try {
-      const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
-      if (result.error) throw new Error(typeof result.error === "string" ? result.error : "Google sign-in failed");
+      const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin }) as { error?: unknown; redirected?: boolean };
+      if (result.error) throw result.error instanceof Error ? result.error : new Error(typeof result.error === "string" ? result.error : "Google sign-in failed");
       if (result.redirected) return;
       try { localStorage.removeItem("tuungane_welcome_seen"); } catch { /* ignore */ }
       nav({ to: (search.redirect as never) ?? "/welcome" });
