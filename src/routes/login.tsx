@@ -1,12 +1,13 @@
 import { createFileRoute, Link, useNavigate, useSearch } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
-import { Eye, EyeOff, Check, AlertCircle } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Eye, EyeOff, Check, AlertCircle, Mail, Phone as PhoneIcon, ArrowLeft } from "lucide-react";
 import { Layout } from "@/components/Layout";
 import { Logo } from "@/components/Logo";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
+import type { UserErrorKind } from "@/lib/user-errors";
 
 type Search = { tab?: "login" | "signup"; redirect?: string; intent?: "customer" | "provider" | "both" };
 
@@ -22,18 +23,44 @@ export const Route = createFileRoute("/login")({
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
+// Normalize a Uganda phone to E.164 (+256XXXXXXXXX). Accepts 07xxxxxxxx, 7xxxxxxxx, 256xxxxxxxxx, +256xxxxxxxxx.
+function normalizeUgPhone(raw: string): string | null {
+  const digits = raw.replace(/[^\d+]/g, "");
+  let s = digits;
+  if (s.startsWith("+256")) s = s.slice(4);
+  else if (s.startsWith("256")) s = s.slice(3);
+  else if (s.startsWith("0")) s = s.slice(1);
+  if (!/^\d{9}$/.test(s)) return null;
+  if (!s.startsWith("7")) return null;
+  return `+256${s}`;
+}
+
+type Method = "email" | "phone";
+
 function Login() {
   const search = useSearch({ from: "/login" });
   const nav = useNavigate();
   const { user, loading } = useAuth();
   const [tab, setTab] = useState<"login" | "signup">(search.tab ?? (search.intent ? "signup" : "login"));
+  const [method, setMethod] = useState<Method>("email");
+
+  // Email/password state
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [emailTouched, setEmailTouched] = useState(false);
   const [passwordTouched, setPasswordTouched] = useState(false);
+
+  // Phone OTP state
+  const [phone, setPhone] = useState("");
+  const [phoneTouched, setPhoneTouched] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [resendIn, setResendIn] = useState(0);
+
   const [busy, setBusy] = useState(false);
   const [googleBusy, setGoogleBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<{ title: string; description?: string; kind?: UserErrorKind } | null>(null);
+  const otpRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!loading && user) {
@@ -41,13 +68,21 @@ function Login() {
     }
   }, [loading, user, search.redirect, nav]);
 
+  useEffect(() => {
+    if (resendIn <= 0) return;
+    const t = setTimeout(() => setResendIn((n) => n - 1), 1000);
+    return () => clearTimeout(t);
+  }, [resendIn]);
+
   if (!loading && user) return null;
 
   const emailValid = emailRegex.test(email.trim());
   const passwordValid = password.length >= 6;
   const showEmailError = emailTouched && email.length > 0 && !emailValid;
   const showPasswordError = passwordTouched && password.length > 0 && !passwordValid;
-  const canSubmit = emailValid && passwordValid && !busy;
+  const phoneE164 = useMemo(() => normalizeUgPhone(phone), [phone]);
+  const phoneValid = phoneE164 !== null;
+  const showPhoneError = phoneTouched && phone.length > 0 && !phoneValid;
 
   const passwordStrength = useMemo(() => {
     if (!password) return 0;
@@ -59,24 +94,31 @@ function Login() {
     return s;
   }, [password]);
 
+  const canSubmitEmail = emailValid && passwordValid && !busy;
+  const canSendOtp = phoneValid && !busy;
+  const canVerifyOtp = otp.replace(/\D/g, "").length === 6 && !busy;
+
+  const showErr = async (err: unknown, fallback: string) => {
+    const { toUserMessage } = await import("@/lib/user-errors");
+    setError(toUserMessage(err, fallback));
+  };
+
   const onGoogle = async () => {
     setError(null);
     setGoogleBusy(true);
     try {
-      const result = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin }) as { error?: unknown; redirected?: boolean };
+      const result = (await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin })) as { error?: unknown; redirected?: boolean };
       if (result.error) throw result.error instanceof Error ? result.error : new Error(typeof result.error === "string" ? result.error : "Google sign-in failed");
       if (result.redirected) return;
       try { localStorage.removeItem("tuungane_welcome_seen"); } catch { /* ignore */ }
       nav({ to: (search.redirect as never) ?? "/welcome" });
     } catch (err) {
-      const { toUserMessage } = await import("@/lib/user-errors");
-      const { title, description } = toUserMessage(err, "Couldn't sign in with Google");
-      setError(description ? `${title} — ${description}` : title);
+      await showErr(err, "Couldn't sign in with Google");
       setGoogleBusy(false);
     }
   };
 
-  const onSubmit = async (e: React.FormEvent) => {
+  const onEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setEmailTouched(true);
@@ -99,13 +141,62 @@ function Login() {
         toast.success("Welcome back!");
         nav({ to: (search.redirect as never) ?? "/services" });
       }
-    } catch (err: unknown) {
-      const { toUserMessage } = await import("@/lib/user-errors");
-      const { title, description } = toUserMessage(err, tab === "signup" ? "Couldn't create your account" : "Couldn't sign you in");
-      setError(description ? `${title} — ${description}` : title);
+    } catch (err) {
+      await showErr(err, tab === "signup" ? "Couldn't create your account" : "Couldn't sign you in");
     } finally {
       setBusy(false);
     }
+  };
+
+  const sendOtp = async () => {
+    setError(null);
+    setPhoneTouched(true);
+    if (!phoneE164) return;
+    setBusy(true);
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        phone: phoneE164,
+        options: { shouldCreateUser: true },
+      });
+      if (error) throw error;
+      setOtpSent(true);
+      setResendIn(45);
+      setOtp("");
+      toast.success("Code sent", { description: `We sent a 6-digit code to ${phoneE164}` });
+      setTimeout(() => otpRef.current?.focus(), 50);
+    } catch (err) {
+      await showErr(err, "Couldn't send code");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const verifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    if (!phoneE164 || !canVerifyOtp) return;
+    setBusy(true);
+    try {
+      const { error } = await supabase.auth.verifyOtp({
+        phone: phoneE164,
+        token: otp.replace(/\D/g, ""),
+        type: "sms",
+      });
+      if (error) throw error;
+      try { localStorage.removeItem("tuungane_welcome_seen"); } catch { /* ignore */ }
+      toast.success("Signed in!");
+      nav({ to: (search.redirect as never) ?? (tab === "signup" ? "/welcome" : "/services") });
+    } catch (err) {
+      await showErr(err, "Couldn't verify code");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const resetPhoneFlow = () => {
+    setOtpSent(false);
+    setOtp("");
+    setError(null);
   };
 
   return (
@@ -115,7 +206,7 @@ function Login() {
         <div className="mt-8 w-full rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] sm:p-8">
           <div className="flex rounded-full bg-surface p-1">
             {(["login", "signup"] as const).map((t) => (
-              <button key={t} type="button" onClick={() => setTab(t)} className={`flex-1 rounded-full px-4 py-2 text-sm font-semibold transition ${tab === t ? "bg-navy text-navy-foreground" : "text-muted-foreground"}`}>
+              <button key={t} type="button" onClick={() => { setTab(t); setError(null); }} className={`flex-1 rounded-full px-4 py-2 text-sm font-semibold transition ${tab === t ? "bg-navy text-navy-foreground" : "text-muted-foreground"}`}>
                 {t === "login" ? "Log in" : "Sign up"}
               </button>
             ))}
@@ -140,82 +231,198 @@ function Login() {
 
           <div className="my-5 flex items-center gap-3">
             <div className="h-px flex-1 bg-border" />
-            <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">or use email</span>
+            <span className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">or</span>
             <div className="h-px flex-1 bg-border" />
           </div>
 
-          <form className="space-y-3" onSubmit={onSubmit} noValidate>
-            <div>
-              <label className="text-xs font-medium text-navy">Email</label>
-              <div className="relative mt-1">
-                <input
-                  type="email"
-                  inputMode="email"
-                  autoComplete="email"
-                  enterKeyHint="next"
-                  value={email}
-                  required
-                  onChange={(e) => setEmail(e.target.value)}
-                  onBlur={() => setEmailTouched(true)}
-                  aria-invalid={showEmailError}
-                  className={`w-full rounded-xl border bg-background px-3 py-2.5 pr-9 text-sm outline-none focus:ring-2 ${
-                    showEmailError ? "border-destructive focus:ring-destructive/20" : emailValid ? "border-green focus:ring-green/20" : "border-border focus:border-orange focus:ring-orange/20"
-                  }`}
-                />
-                {email.length > 0 && (
-                  <span className="absolute inset-y-0 right-0 flex items-center px-3">
-                    {emailValid ? <Check className="h-4 w-4 text-green" /> : emailTouched ? <AlertCircle className="h-4 w-4 text-destructive" /> : null}
-                  </span>
-                )}
-              </div>
-              {showEmailError && <p className="mt-1 text-[11px] text-destructive">Enter a valid email like name@example.com</p>}
-            </div>
+          {/* Method picker: Email / Phone */}
+          <div className="mb-4 grid grid-cols-2 gap-2">
+            {(["email", "phone"] as const).map((m) => {
+              const active = method === m;
+              return (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => { setMethod(m); setError(null); resetPhoneFlow(); }}
+                  className={`flex items-center justify-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold transition ${active ? "border-orange bg-orange/5 text-orange" : "border-border text-muted-foreground hover:border-navy/40"}`}
+                >
+                  {m === "email" ? <Mail className="h-4 w-4" /> : <PhoneIcon className="h-4 w-4" />}
+                  {m === "email" ? "Email" : "Phone"}
+                </button>
+              );
+            })}
+          </div>
 
-            <div>
-              <label className="text-xs font-medium text-navy">Password</label>
-              <PasswordInput
-                value={password}
-                onChange={setPassword}
-                onBlur={() => setPasswordTouched(true)}
-                autoComplete={tab === "login" ? "current-password" : "new-password"}
-                invalid={showPasswordError}
-                valid={passwordValid}
-              />
-              {tab === "signup" && password.length > 0 && (
-                <div className="mt-2">
-                  <div className="flex gap-1">
-                    {[0, 1, 2, 3].map((i) => (
-                      <div key={i} className={`h-1 flex-1 rounded-full ${i < passwordStrength ? (passwordStrength <= 1 ? "bg-destructive" : passwordStrength <= 2 ? "bg-orange" : "bg-green") : "bg-border"}`} />
-                    ))}
+          {method === "email" ? (
+            <form className="space-y-3" onSubmit={onEmailSubmit} noValidate>
+              <div>
+                <label className="text-xs font-medium text-navy">Email</label>
+                <div className="relative mt-1">
+                  <input
+                    type="email"
+                    inputMode="email"
+                    autoComplete="email"
+                    enterKeyHint="next"
+                    value={email}
+                    required
+                    onChange={(e) => setEmail(e.target.value)}
+                    onBlur={() => setEmailTouched(true)}
+                    aria-invalid={showEmailError}
+                    className={`w-full rounded-xl border bg-background px-3 py-2.5 pr-9 text-sm outline-none focus:ring-2 ${
+                      showEmailError ? "border-destructive focus:ring-destructive/20" : emailValid ? "border-green focus:ring-green/20" : "border-border focus:border-orange focus:ring-orange/20"
+                    }`}
+                  />
+                  {email.length > 0 && (
+                    <span className="absolute inset-y-0 right-0 flex items-center px-3">
+                      {emailValid ? <Check className="h-4 w-4 text-green" /> : emailTouched ? <AlertCircle className="h-4 w-4 text-destructive" /> : null}
+                    </span>
+                  )}
+                </div>
+                {showEmailError && <p className="mt-1 text-[11px] text-destructive">Enter a valid email like name@example.com</p>}
+              </div>
+
+              <div>
+                <label className="text-xs font-medium text-navy">Password</label>
+                <PasswordInput
+                  value={password}
+                  onChange={setPassword}
+                  onBlur={() => setPasswordTouched(true)}
+                  autoComplete={tab === "login" ? "current-password" : "new-password"}
+                  invalid={showPasswordError}
+                  valid={passwordValid}
+                />
+                {tab === "signup" && password.length > 0 && (
+                  <div className="mt-2">
+                    <div className="flex gap-1">
+                      {[0, 1, 2, 3].map((i) => (
+                        <div key={i} className={`h-1 flex-1 rounded-full ${i < passwordStrength ? (passwordStrength <= 1 ? "bg-destructive" : passwordStrength <= 2 ? "bg-orange" : "bg-green") : "bg-border"}`} />
+                      ))}
+                    </div>
+                    <p className="mt-1 text-[11px] text-muted-foreground">
+                      {passwordStrength <= 1 ? "Weak — try 10+ characters" : passwordStrength <= 2 ? "Okay" : passwordStrength === 3 ? "Good" : "Strong"}
+                    </p>
                   </div>
-                  <p className="mt-1 text-[11px] text-muted-foreground">
-                    {passwordStrength <= 1 ? "Weak — try 10+ characters" : passwordStrength <= 2 ? "Okay" : passwordStrength === 3 ? "Good" : "Strong"}
-                  </p>
+                )}
+                {showPasswordError && <p className="mt-1 text-[11px] text-destructive">Password must be at least 6 characters</p>}
+              </div>
+
+              {tab === "login" && (
+                <div className="flex justify-end">
+                  <Link to="/forgot-password" className="text-xs font-semibold text-orange hover:underline">
+                    Forgot password?
+                  </Link>
                 </div>
               )}
-              {showPasswordError && <p className="mt-1 text-[11px] text-destructive">Password must be at least 6 characters</p>}
+
+              {error && <ErrorBlock error={error} onResetPassword={() => nav({ to: "/forgot-password" })} onSwitchToLogin={() => setTab("login")} />}
+
+              <button type="submit" disabled={!canSubmitEmail} className="mt-2 w-full rounded-xl bg-orange py-3 text-sm font-semibold text-orange-foreground transition hover:brightness-110 disabled:opacity-50">
+                {busy ? "Please wait..." : tab === "login" ? "Log in" : "Create account"}
+              </button>
+            </form>
+          ) : (
+            <div className="space-y-3">
+              {!otpSent ? (
+                <form onSubmit={(e) => { e.preventDefault(); sendOtp(); }} className="space-y-3" noValidate>
+                  <div>
+                    <label className="text-xs font-medium text-navy">Phone number</label>
+                    <div className="relative mt-1">
+                      <input
+                        type="tel"
+                        inputMode="tel"
+                        autoComplete="tel"
+                        enterKeyHint="send"
+                        value={phone}
+                        placeholder="+256 7xx xxx xxx"
+                        onChange={(e) => setPhone(e.target.value)}
+                        onBlur={() => setPhoneTouched(true)}
+                        aria-invalid={showPhoneError}
+                        className={`w-full rounded-xl border bg-background px-3 py-2.5 pr-9 text-sm outline-none focus:ring-2 ${
+                          showPhoneError ? "border-destructive focus:ring-destructive/20" : phoneValid ? "border-green focus:ring-green/20" : "border-border focus:border-orange focus:ring-orange/20"
+                        }`}
+                      />
+                      {phone.length > 0 && (
+                        <span className="absolute inset-y-0 right-0 flex items-center px-3">
+                          {phoneValid ? <Check className="h-4 w-4 text-green" /> : phoneTouched ? <AlertCircle className="h-4 w-4 text-destructive" /> : null}
+                        </span>
+                      )}
+                    </div>
+                    <p className="mt-1 text-[11px] text-muted-foreground">
+                      {showPhoneError ? "Uganda numbers only — e.g. +256 7xx xxx xxx" : "We'll text you a 6-digit code. Uganda numbers only."}
+                    </p>
+                  </div>
+
+                  {error && <ErrorBlock error={error} onResetPassword={() => nav({ to: "/forgot-password" })} onSwitchToLogin={() => setTab("login")} />}
+
+                  <button type="submit" disabled={!canSendOtp} className="w-full rounded-xl bg-orange py-3 text-sm font-semibold text-orange-foreground transition hover:brightness-110 disabled:opacity-50">
+                    {busy ? "Sending…" : "Send code"}
+                  </button>
+                </form>
+              ) : (
+                <form onSubmit={verifyOtp} className="space-y-3" noValidate>
+                  <button type="button" onClick={resetPhoneFlow} className="inline-flex items-center gap-1 text-xs font-semibold text-navy hover:underline">
+                    <ArrowLeft className="h-3.5 w-3.5" /> Change number
+                  </button>
+                  <p className="text-sm text-navy">
+                    Enter the 6-digit code we sent to <span className="font-semibold">{phoneE164}</span>
+                  </p>
+                  <input
+                    ref={otpRef}
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    enterKeyHint="done"
+                    maxLength={6}
+                    value={otp}
+                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                    placeholder="123456"
+                    className="w-full rounded-xl border border-border bg-background px-3 py-3 text-center text-2xl font-mono tracking-[0.5em] outline-none focus:border-orange focus:ring-2 focus:ring-orange/20"
+                  />
+
+                  {error && <ErrorBlock error={error} onResetPassword={() => nav({ to: "/forgot-password" })} onSwitchToLogin={() => setTab("login")} />}
+
+                  <button type="submit" disabled={!canVerifyOtp} className="w-full rounded-xl bg-orange py-3 text-sm font-semibold text-orange-foreground transition hover:brightness-110 disabled:opacity-50">
+                    {busy ? "Verifying…" : "Verify and continue"}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={sendOtp}
+                    disabled={resendIn > 0 || busy}
+                    className="w-full text-center text-xs font-semibold text-navy hover:text-orange disabled:text-muted-foreground"
+                  >
+                    {resendIn > 0 ? `Resend code in ${resendIn}s` : "Didn't get it? Resend code"}
+                  </button>
+                </form>
+              )}
             </div>
+          )}
 
-            {tab === "login" && (
-              <div className="flex justify-end">
-                <Link to="/forgot-password" className="text-xs font-semibold text-orange hover:underline">
-                  Forgot password?
-                </Link>
-              </div>
-            )}
-
-            {error && <p className="rounded-lg bg-destructive/10 px-3 py-2 text-xs text-destructive">{error}</p>}
-
-            <button type="submit" disabled={!canSubmit} className="mt-2 w-full rounded-xl bg-orange py-3 text-sm font-semibold text-orange-foreground transition hover:brightness-110 disabled:opacity-50">
-              {busy ? "Please wait..." : tab === "login" ? "Log in" : "Create account"}
-            </button>
-          </form>
           <p className="mt-4 text-center text-xs text-muted-foreground">
             By continuing you agree to our <Link to="/terms" className="text-orange">Terms & Safety</Link>.
           </p>
         </div>
       </section>
     </Layout>
+  );
+}
+
+function ErrorBlock({ error, onResetPassword, onSwitchToLogin }: { error: { title: string; description?: string; kind?: UserErrorKind }; onResetPassword: () => void; onSwitchToLogin: () => void }) {
+  return (
+    <div className="rounded-lg bg-destructive/10 px-3 py-2.5 text-xs text-destructive">
+      <p className="font-semibold">{error.title}</p>
+      {error.description && <p className="mt-0.5 opacity-90">{error.description}</p>}
+      {error.kind === "invalid_credentials" && (
+        <button type="button" onClick={onResetPassword} className="mt-1.5 inline-block font-semibold underline">
+          Reset your password →
+        </button>
+      )}
+      {error.kind === "already_registered" && (
+        <button type="button" onClick={onSwitchToLogin} className="mt-1.5 inline-block font-semibold underline">
+          Log in instead →
+        </button>
+      )}
+    </div>
   );
 }
 
