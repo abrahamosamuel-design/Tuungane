@@ -215,7 +215,9 @@ function NewRequest() {
     e.preventDefault();
     if (!user) return;
     if (!f.title.trim() || !f.description.trim() || !f.location.trim()) {
-      toast.error("Title, description, and location are required");
+      toast.error("A few things are missing", {
+        description: "Add a title, description, and location so providers can help.",
+      });
       return;
     }
     setBusy(true);
@@ -224,7 +226,7 @@ function NewRequest() {
       if (file) attachment_url = await uploadMedia(user.id, file, "requests");
     } catch (err) {
       console.error(err);
-      toast.error("Photo upload failed");
+      toastError(err, "Photo couldn't upload");
       setBusy(false);
       return;
     }
@@ -263,10 +265,12 @@ function NewRequest() {
     }).select("id").single();
     setBusy(false);
     if (error) {
-      toast.error(error.message);
+      toastError(error, "Couldn't post your request");
       return;
     }
-    toast.success("Request posted");
+    toast.success("Request posted", {
+      description: "Nearby providers will see it and respond shortly.",
+    });
     if (inserted?.id) {
       nav({ to: "/requests/$id", params: { id: inserted.id }, search: { posted: "1" } as never });
     } else {
