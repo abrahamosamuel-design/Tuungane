@@ -24,7 +24,7 @@ export function MobileBottomNav() {
         </div>
       </nav>
 
-      <div className="h-16 md:hidden" aria-hidden />
+      <div className="h-20 md:hidden" aria-hidden />
       <CreateChoiceSheet open={sheetOpen} onClose={() => setSheetOpen(false)} />
     </>
   );
