@@ -280,9 +280,7 @@ function ErrorBlock({
     </div>
   );
 }
-    </div>
-  );
-}
+
 
 function PasswordInput({ value, onChange, onBlur, autoComplete, invalid, valid }: { value: string; onChange: (v: string) => void; onBlur?: () => void; autoComplete?: string; invalid?: boolean; valid?: boolean }) {
   const [show, setShow] = useState(false);
