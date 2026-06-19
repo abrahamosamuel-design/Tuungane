@@ -1,16 +1,22 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
 import { useState } from "react";
 import { Layout } from "@/components/Layout";
 import { Logo } from "@/components/Logo";
 import { supabase } from "@/integrations/supabase/client";
 
+type Search = { email?: string };
+
 export const Route = createFileRoute("/forgot-password")({
   head: () => ({ meta: [{ title: "Reset your password — Tuungane" }] }),
+  validateSearch: (s: Record<string, unknown>): Search => ({
+    email: typeof s.email === "string" ? s.email : undefined,
+  }),
   component: ForgotPassword,
 });
 
 function ForgotPassword() {
-  const [email, setEmail] = useState("");
+  const search = useSearch({ from: "/forgot-password" });
+  const [email, setEmail] = useState(search.email ?? "");
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
