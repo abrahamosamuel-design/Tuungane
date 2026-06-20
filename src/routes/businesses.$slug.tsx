@@ -10,6 +10,8 @@ import { SafetyNote, SAFETY_TIPS } from "@/components/SafetyNote";
 import { TrustBadge } from "@/components/trust/TrustBadge";
 import { useTrustBadge } from "@/hooks/use-trust-badges";
 import { ReportProfileButton } from "@/components/trust/ReportProfileButton";
+import { formatSubcategory } from "@/lib/format-category";
+
 
 import { RouteErrorCard, RouteNotFoundCard } from "@/lib/route-boundaries";
 
@@ -142,7 +144,7 @@ function BusinessDetail() {
                   <h1 className="font-display text-2xl font-bold text-navy sm:text-3xl">{page.name}</h1>
                   <BusinessTrustBadge pageId={page.id} />
                 </div>
-                <div className="mt-1 text-sm text-muted-foreground">{orgTypeLabel(page.org_type)}{page.subcategory ? ` · ${page.subcategory}` : ""}</div>
+                <div className="mt-1 text-sm text-muted-foreground">{orgTypeLabel(page.org_type)}{page.subcategory ? ` · ${formatSubcategory(page.subcategory)}` : ""}</div>
                 {(page.town || page.district) && (
                   <div className="mt-1 flex items-center gap-1 text-sm text-muted-foreground"><MapPin className="h-4 w-4" /> {[page.area, page.town, page.district].filter(Boolean).join(", ")}</div>
                 )}

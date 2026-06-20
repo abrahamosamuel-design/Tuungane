@@ -6,13 +6,17 @@ import { useTrustBadge, type ProfileKind } from "@/hooks/use-trust-badges";
 export function ProfileTrustBadge({
   kind,
   id,
+  size,
+  descriptive,
   className,
 }: {
   kind: ProfileKind;
   id: string | null | undefined;
+  size?: "sm" | "md";
+  descriptive?: boolean;
   className?: string;
 }) {
   const { level } = useTrustBadge(kind, id);
   if (!id || !level) return null;
-  return <TrustBadge level={level} className={className} />;
+  return <TrustBadge level={level} size={size} descriptive={descriptive} className={className} />;
 }

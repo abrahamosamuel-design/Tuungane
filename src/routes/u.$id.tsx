@@ -24,6 +24,8 @@ import { uploadMedia } from "@/lib/upload";
 import { timeAgo } from "@/lib/format";
 
 import { useCategory } from "@/hooks/use-categories";
+import { formatSubcategory } from "@/lib/format-category";
+
 import { toast } from "sonner";
 import { useActiveBoosts } from "@/hooks/use-boosts";
 import { BoostBadge } from "@/components/BoostBadge";
@@ -263,7 +265,7 @@ function UserProfile() {
                   <TrustBadgeInline userId={id} />
                   <ProfileBoostBadges providerId={id} />
                 </h1>
-                {sp && <p className="text-sm font-medium text-orange">{sp.subcategory} {cat && <span className="text-muted-foreground">· {cat.name}</span>}</p>}
+                {sp && <p className="text-sm font-medium text-orange">{formatSubcategory(sp.subcategory)} {cat && <span className="text-muted-foreground">· {cat.name}</span>}</p>}
                 {!sp && <p className="text-sm text-muted-foreground">{isProvider ? "Service provider" : "Customer"}</p>}
                 {(sp?.town || profile.town) && (
                   <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
@@ -382,7 +384,7 @@ function UserProfile() {
                 <p className="rounded-2xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground">No service profile yet.</p>
               ) : (
                 <div className="rounded-2xl border border-border bg-card p-5">
-                  <h3 className="font-display text-lg font-bold text-navy">{sp.subcategory}</h3>
+                  <h3 className="font-display text-lg font-bold text-navy">{formatSubcategory(sp.subcategory)}</h3>
                   <p className="mt-1 text-xs text-muted-foreground">{cat?.name}</p>
                   <p className="mt-3 text-sm text-foreground/85">{sp.bio || "No description yet."}</p>
                   <dl className="mt-4 grid grid-cols-2 gap-3 text-xs">
@@ -487,7 +489,7 @@ function UserProfile() {
               <h3 className="font-display text-lg font-bold text-navy">About</h3>
               <p className="mt-2 whitespace-pre-wrap text-sm text-foreground/85">{sp?.bio || profile.bio || "No bio yet."}</p>
               <dl className="mt-5 space-y-2 text-sm">
-                {sp && <Row label="Service" value={`${sp.subcategory} · ${cat?.name ?? ""}`} />}
+                {sp && <Row label="Service" value={`${formatSubcategory(sp.subcategory)} · ${cat?.name ?? ""}`} />}
                 <Row label="Location" value={`${sp?.town || profile.town || "—"}${(sp?.district || profile.district) ? `, ${sp?.district || profile.district}` : ""}`} />
                 {sp && <Row label="Areas served" value={sp.areas_served.join(", ") || sp.town} />}
                 {sp && <Row label="Experience" value={`${sp.years_experience} years`} />}

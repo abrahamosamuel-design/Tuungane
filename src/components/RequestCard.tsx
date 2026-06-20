@@ -5,6 +5,8 @@ import { useCategory } from "@/hooks/use-categories";
 import { requestStatusMap, type ServiceRequestRow } from "@/data/serviceRequestTypes";
 import { NearYouBadge } from "@/components/NearYouBadge";
 import type { UserLocation } from "@/lib/location";
+import { formatSubcategory } from "@/lib/format-category";
+
 
 export interface RequestRowLite extends ServiceRequestRow {
   response_count?: number;
@@ -78,7 +80,7 @@ export function RequestCard({
         <h3 className="mt-2 line-clamp-2 font-display text-base font-bold text-navy">{title}</h3>
         {cat && (
           <p className="mt-0.5 text-xs text-muted-foreground">
-            {cat.name}{r.subcategory ? ` · ${tidy(r.subcategory)}` : ""}
+            {cat.name}{r.subcategory ? ` · ${formatSubcategory(tidy(r.subcategory))}` : ""}
           </p>
         )}
 

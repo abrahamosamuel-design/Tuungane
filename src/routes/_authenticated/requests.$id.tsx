@@ -19,6 +19,8 @@ import { logContactClick } from "@/hooks/use-contact-gate";
 
 
 import { RouteErrorCard, RouteNotFoundCard } from "@/lib/route-boundaries";
+import { formatSubcategory } from "@/lib/format-category";
+
 
 export const Route = createFileRoute("/_authenticated/requests/$id")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -274,7 +276,7 @@ function RequestDetailsPage() {
             <span className="ml-auto text-[10px] text-muted-foreground">{responseCount} {responseCount === 1 ? "response" : "responses"}</span>
           </div>
           <h1 className="mt-2 font-display text-2xl font-bold text-navy">{req.title || req.service_needed}</h1>
-          {req.subcategory && <p className="text-sm text-muted-foreground">{req.subcategory}</p>}
+          {req.subcategory && <p className="text-sm text-muted-foreground">{formatSubcategory(req.subcategory)}</p>}
           <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
             <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" /> {req.location}{req.town && `, ${req.town}`}</span>
             {req.budget_range && <span className="font-semibold text-orange">Budget: {req.budget_range}</span>}

@@ -49,6 +49,21 @@ const PUBLIC_LABEL: Record<PublicTier, string> = {
   suspended: "Suspended",
 };
 
+// Longer, descriptive labels used by default in product UI for clarity.
+function descriptiveLabel(level: TrustLevel): string {
+  switch (level) {
+    case "verified_provider": return "Verified Provider";
+    case "verified_business": return "Verified Business";
+    case "verified_organization": return "Verified Organization";
+    case "reviewed_provider": return "Reviewed";
+    case "profile_complete": return "Active";
+    case "phone_verified": return "Phone Verified";
+    case "under_review": return "Under Review";
+    case "suspended": return "Suspended";
+    default: return "New Profile";
+  }
+}
+
 function publicTone(tier: PublicTier) {
   switch (tier) {
     case "suspended": return "bg-destructive/10 text-destructive border-destructive/20";
@@ -82,21 +97,33 @@ export function TrustBadge({
   level,
   prefix,
   variant = "public",
+  size = "md",
+  descriptive = false,
   className = "",
 }: {
   level: TrustLevel | null | undefined;
   prefix?: string;
   variant?: "public" | "internal";
+  /** "sm" = compact pill for tight rows (provider cards). "md" = default. */
+  size?: "sm" | "md";
+  /** Use longer descriptive label (e.g. "Verified Provider") with normal case. */
+  descriptive?: boolean;
   className?: string;
 }) {
   const l: TrustLevel = level ?? "new";
+  const sizeCls =
+    size === "sm"
+      ? "px-1.5 py-0.5 text-[9px]"
+      : "px-2 py-0.5 text-[10px]";
+  const caseCls = descriptive ? "font-semibold" : "font-bold uppercase tracking-wider";
+
   if (variant === "internal") {
     return (
       <span
-        className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${internalTone(l)} ${className}`}
+        className={`inline-flex items-center gap-1 rounded-full border ${sizeCls} ${caseCls} ${internalTone(l)} ${className}`}
       >
         {prefix ? <span className="opacity-70">{prefix}·</span> : null}
-        {TRUST_LABEL[l]}
+        {descriptive ? descriptiveLabel(l) : TRUST_LABEL[l]}
       </span>
     );
   }
@@ -104,11 +131,12 @@ export function TrustBadge({
   const Icon = tier === "verified" ? verifiedIcon(l) : null;
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${publicTone(tier)} ${className}`}
+      className={`inline-flex items-center gap-1 rounded-full border ${sizeCls} ${caseCls} ${publicTone(tier)} ${className}`}
     >
       {prefix ? <span className="opacity-70">{prefix}·</span> : null}
       {Icon ? <Icon className="h-3 w-3" /> : null}
-      {PUBLIC_LABEL[tier]}
+      {descriptive ? descriptiveLabel(l) : PUBLIC_LABEL[tier]}
     </span>
   );
 }
+

@@ -11,6 +11,8 @@ import { filterByRadius, sortByProximity, proximityLabel, type UserLocation } fr
 import { RadiusFilter } from "@/components/RadiusFilter";
 import { ProviderQuickContact } from "@/components/ProviderQuickContact";
 import { ProfileTrustBadge } from "@/components/trust/ProfileTrustBadge";
+import { formatSubcategory } from "@/lib/format-category";
+
 
 
 type Row = {
@@ -256,12 +258,13 @@ function RealProviderCard({ p, userLoc }: { p: Row; userLoc: UserLocation | null
       <div className="flex items-start gap-4 p-5">
         <Avatar name={name} url={p.avatar_url ?? null} size={56} />
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-1.5">
-            <h3 className="truncate font-display text-base font-semibold text-navy">{name}</h3>
-            <ProfileTrustBadge kind="service_profile" id={p.user_id} />
-            {p.verified === "featured" && <Sparkles className="h-4 w-4 shrink-0 text-orange" />}
+          <div className="flex flex-wrap items-start gap-x-2 gap-y-1">
+            <h3 className="min-w-0 flex-1 font-display text-base font-semibold leading-tight text-navy line-clamp-2 sm:line-clamp-1 sm:truncate">{name}</h3>
+            {p.verified === "featured" && <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-orange" />}
+            <ProfileTrustBadge kind="service_profile" id={p.user_id} size="sm" descriptive className="shrink-0" />
           </div>
-          <p className="text-sm text-muted-foreground">{p.subcategory}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{formatSubcategory(p.subcategory)}</p>
+
           <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
             {p.town && <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{p.town}</span>}
             {near && <span className="inline-flex items-center gap-1 rounded-full bg-green/10 px-2 py-0.5 font-semibold text-green">{near}</span>}

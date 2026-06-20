@@ -1,6 +1,8 @@
 import { Link } from "@tanstack/react-router";
 import { BadgeCheck, MapPin, Star, Sparkles } from "lucide-react";
 import type { Provider } from "@/data/providers";
+import { formatSubcategory } from "@/lib/format-category";
+
 
 const avatar = (s: string) =>
   `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(s)}&backgroundColor=1e3a8a,f97316,16a34a&fontFamily=Plus%20Jakarta%20Sans`;
@@ -22,7 +24,7 @@ export function ProviderCard({ p }: { p: Provider }) {
             {p.verified === "verified" && <BadgeCheck className="h-4 w-4 shrink-0 text-green" />}
             {p.verified === "featured" && <Sparkles className="h-4 w-4 shrink-0 text-orange" />}
           </div>
-          <p className="text-sm text-muted-foreground">{p.subcategory}</p>
+          <p className="text-sm text-muted-foreground">{formatSubcategory(p.subcategory)}</p>
           <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground">
             <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{p.town}</span>
             <span className="inline-flex items-center gap-1"><Star className="h-3 w-3 fill-orange text-orange" />{p.rating} ({p.reviewsCount})</span>

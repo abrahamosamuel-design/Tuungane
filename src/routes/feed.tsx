@@ -10,6 +10,8 @@ import { PostCard, type PostRow } from "@/components/social/PostCard";
 
 import { OfficialPostCard } from "@/components/OfficialPostCard";
 import { useCategories } from "@/hooks/use-categories";
+import { formatSubcategory } from "@/lib/format-category";
+
 import { postTypes, type PostTypeValue } from "@/data/postTypes";
 import type { OfficialAccountRow, OfficialPostRow } from "@/data/officialPostTypes";
 import { useUserLocation } from "@/hooks/use-user-location";
@@ -213,7 +215,7 @@ function Feed() {
                     {isBoostedProvider(p.user_id) && <span className="ml-1 inline-flex items-center gap-0.5 rounded-full bg-orange/15 px-1.5 py-0 text-[10px] font-semibold text-orange"><Sparkles className="h-2.5 w-2.5" /> Featured</span>}
                     <NearYouBadge user={userLoc} target={p as TargetLocation} className="ml-1" />
                   </div>
-                  <p className="text-xs text-muted-foreground">{p.subcategory}</p>
+                  <p className="text-xs text-muted-foreground">{formatSubcategory(p.subcategory)}</p>
                   <p className="mt-1 line-clamp-2 text-sm text-foreground/70">{p.bio}</p>
                   <p className="mt-1 inline-flex items-center gap-1 text-xs text-muted-foreground"><MapPin className="h-3 w-3" />{p.town}, {p.district}</p>
                 </div>
