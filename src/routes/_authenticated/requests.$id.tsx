@@ -19,6 +19,8 @@ import { logContactClick } from "@/hooks/use-contact-gate";
 
 
 import { RouteErrorCard, RouteNotFoundCard } from "@/lib/route-boundaries";
+import { formatSubcategory } from "@/lib/format-category";
+
 
 export const Route = createFileRoute("/_authenticated/requests/$id")({
   validateSearch: (search: Record<string, unknown>) => ({
