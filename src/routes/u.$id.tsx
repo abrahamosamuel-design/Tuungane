@@ -24,6 +24,8 @@ import { uploadMedia } from "@/lib/upload";
 import { timeAgo } from "@/lib/format";
 
 import { useCategory } from "@/hooks/use-categories";
+import { formatSubcategory } from "@/lib/format-category";
+
 import { toast } from "sonner";
 import { useActiveBoosts } from "@/hooks/use-boosts";
 import { BoostBadge } from "@/components/BoostBadge";
