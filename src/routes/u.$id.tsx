@@ -384,7 +384,7 @@ function UserProfile() {
                 <p className="rounded-2xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground">No service profile yet.</p>
               ) : (
                 <div className="rounded-2xl border border-border bg-card p-5">
-                  <h3 className="font-display text-lg font-bold text-navy">{sp.subcategory}</h3>
+                  <h3 className="font-display text-lg font-bold text-navy">{formatSubcategory(sp.subcategory)}</h3>
                   <p className="mt-1 text-xs text-muted-foreground">{cat?.name}</p>
                   <p className="mt-3 text-sm text-foreground/85">{sp.bio || "No description yet."}</p>
                   <dl className="mt-4 grid grid-cols-2 gap-3 text-xs">
