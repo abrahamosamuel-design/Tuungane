@@ -4,12 +4,13 @@ import { toast } from "sonner";
 import { timeAgo } from "@/lib/format";
 import { TrustBadge, TRUST_LABEL, type TrustLevel } from "@/components/trust/TrustBadge";
 
-type SubTab = "overview" | "requests" | "reports" | "status" | "notes" | "audit" | "settings";
+type SubTab = "overview" | "requests" | "reports" | "appeals" | "status" | "notes" | "audit" | "settings";
 
 const SUBTABS: Array<{ id: SubTab; label: string }> = [
   { id: "overview", label: "Overview" },
   { id: "requests", label: "Verification Requests" },
   { id: "reports", label: "Reported Profiles" },
+  { id: "appeals", label: "Appeals" },
   { id: "status", label: "Trust Status" },
   { id: "notes", label: "Admin Notes" },
   { id: "audit", label: "Audit Log" },
@@ -36,10 +37,105 @@ export function TrustVerificationCenter() {
       {tab === "overview" && <OverviewSub />}
       {tab === "requests" && <RequestsSub />}
       {tab === "reports" && <ReportsSub />}
+      {tab === "appeals" && <AppealsSub />}
       {tab === "status" && <StatusSub />}
       {tab === "notes" && <NotesSub />}
       {tab === "audit" && <AuditSub />}
       {tab === "settings" && <SettingsSub />}
+    </div>
+  );
+}
+
+// ---------- Appeals ----------
+type AppealRow = {
+  id: string;
+  profile_kind: "service_profile" | "business_page";
+  profile_id: string;
+  owner_user_id: string;
+  appeal_kind: "suspension" | "under_review" | "rejected_verification";
+  related_request_id: string | null;
+  message: string;
+  status: "open" | "approved" | "denied" | "withdrawn";
+  decision_note: string | null;
+  decided_at: string | null;
+  created_at: string;
+};
+
+function AppealsSub() {
+  const [rows, setRows] = useState<AppealRow[]>([]);
+  const [filter, setFilter] = useState<string>("open");
+  const [notes, setNotes] = useState<Record<string, string>>({});
+
+  const load = async () => {
+    let q = supabase.from("profile_trust_appeals").select("*").order("created_at", { ascending: false }).limit(100);
+    if (filter !== "all") q = q.eq("status", filter as never);
+    const { data } = await q;
+    setRows((data ?? []) as AppealRow[]);
+  };
+  useEffect(() => { load(); }, [filter]);
+
+  const decide = async (id: string, decision: "approved" | "denied") => {
+    const { error } = await supabase.rpc("admin_decide_trust_appeal" as never, {
+      _appeal_id: id,
+      _decision: decision,
+      _note: notes[id] || null,
+    } as never);
+    if (error) { toast.error(error.message); return; }
+    toast.success(`Appeal ${decision}`);
+    load();
+  };
+
+  const kindLabel: Record<AppealRow["appeal_kind"], string> = {
+    suspension: "Suspension",
+    under_review: "Under review",
+    rejected_verification: "Rejected verification",
+  };
+
+  return (
+    <div className="space-y-3">
+      <div className="flex flex-wrap gap-1 text-xs">
+        {["open", "approved", "denied", "withdrawn", "all"].map((f) => (
+          <button key={f} onClick={() => setFilter(f)} className={`rounded-full px-3 py-1.5 font-semibold capitalize ${filter === f ? "bg-navy text-navy-foreground" : "border border-border text-muted-foreground"}`}>
+            {f}
+          </button>
+        ))}
+      </div>
+      {rows.length === 0 && <p className="text-sm text-muted-foreground">No appeals in this view.</p>}
+      {rows.map((a) => (
+        <div key={a.id} className="rounded-xl border border-border bg-card p-4">
+          <div className="flex flex-wrap items-start justify-between gap-2">
+            <div>
+              <p className="text-sm font-semibold text-navy">{kindLabel[a.appeal_kind]} appeal</p>
+              <p className="text-xs text-muted-foreground">{a.profile_kind} · {a.profile_id.slice(0, 8)} · owner {a.owner_user_id.slice(0, 8)} · {timeAgo(a.created_at)}</p>
+            </div>
+            <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
+              a.status === "open" ? "bg-orange/10 text-orange" :
+              a.status === "approved" ? "bg-green/10 text-green" :
+              a.status === "denied" ? "bg-destructive/10 text-destructive" :
+              "bg-muted text-muted-foreground"
+            }`}>{a.status}</span>
+          </div>
+          <p className="mt-2 whitespace-pre-wrap text-sm text-foreground/80">{a.message}</p>
+          {a.decision_note && <p className="mt-1 text-xs text-muted-foreground"><b>Decision note:</b> {a.decision_note}</p>}
+          {a.status === "open" && (
+            <div className="mt-3 space-y-2">
+              <input
+                value={notes[a.id] || ""}
+                onChange={(e) => setNotes((s) => ({ ...s, [a.id]: e.target.value }))}
+                placeholder="Decision note (optional)…"
+                className="w-full rounded-md border border-border bg-background px-2 py-1 text-xs"
+              />
+              <div className="flex flex-wrap gap-2">
+                <button onClick={() => decide(a.id, "approved")} className="rounded bg-green/10 px-2 py-1 text-xs font-semibold text-green">Approve appeal</button>
+                <button onClick={() => decide(a.id, "denied")} className="rounded bg-destructive/10 px-2 py-1 text-xs font-semibold text-destructive">Deny appeal</button>
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                Approving a suspension/under-review appeal clears the manual status. Approving a rejected-verification appeal reopens the request as pending.
+              </p>
+            </div>
+          )}
+        </div>
+      ))}
     </div>
   );
 }
