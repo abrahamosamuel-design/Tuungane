@@ -4,12 +4,13 @@ import { toast } from "sonner";
 import { timeAgo } from "@/lib/format";
 import { TrustBadge, TRUST_LABEL, type TrustLevel } from "@/components/trust/TrustBadge";
 
-type SubTab = "overview" | "requests" | "reports" | "status" | "notes" | "audit" | "settings";
+type SubTab = "overview" | "requests" | "reports" | "appeals" | "status" | "notes" | "audit" | "settings";
 
 const SUBTABS: Array<{ id: SubTab; label: string }> = [
   { id: "overview", label: "Overview" },
   { id: "requests", label: "Verification Requests" },
   { id: "reports", label: "Reported Profiles" },
+  { id: "appeals", label: "Appeals" },
   { id: "status", label: "Trust Status" },
   { id: "notes", label: "Admin Notes" },
   { id: "audit", label: "Audit Log" },
