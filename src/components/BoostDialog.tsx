@@ -29,6 +29,19 @@ export function BoostDialog({ open, onClose, boostType, entityType, entityId, ti
   const pricing = useBoostPricing(boostType);
   const { balance, refresh } = useCreditWallet();
   const [busy, setBusy] = useState<string | null>(null);
+  const [isVerified, setIsVerified] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const kind = PROFILE_KIND_MAP[entityType];
+    if (!kind) { setIsVerified(null); return; }
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.rpc("get_profile_trust_badge", { _kind: kind, _id: entityId });
+      if (!cancelled) setIsVerified(VERIFIED_LEVELS.has(String(data ?? "")));
+    })();
+    return () => { cancelled = true; };
+  }, [open, entityType, entityId]);
 
   if (!open) return null;
 
