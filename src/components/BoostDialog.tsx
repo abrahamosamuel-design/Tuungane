@@ -1,9 +1,18 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { X, Coins, Loader2, Sparkles } from "lucide-react";
+import { X, Coins, Loader2, Sparkles, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { useBoostPricing, activateBoost, type BoostType } from "@/hooks/use-boosts";
 import { useCreditWallet } from "@/hooks/use-credits";
+import { supabase } from "@/integrations/supabase/client";
+
+const VERIFIED_LEVELS = new Set(["verified_provider", "verified_business", "verified_organization"]);
+const PROFILE_KIND_MAP: Record<string, "service_profile" | "business_page"> = {
+  service_profile: "service_profile",
+  provider: "service_profile",
+  business_page: "business_page",
+  business: "business_page",
+};
 
 interface Props {
   open: boolean;
