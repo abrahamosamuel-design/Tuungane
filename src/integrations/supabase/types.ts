@@ -1340,6 +1340,62 @@ export type Database = {
           },
         ]
       }
+      profile_trust_appeals: {
+        Row: {
+          appeal_kind: Database["public"]["Enums"]["trust_appeal_kind"]
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          decision_note: string | null
+          id: string
+          message: string
+          owner_user_id: string
+          profile_id: string
+          profile_kind: Database["public"]["Enums"]["profile_kind"]
+          related_request_id: string | null
+          status: Database["public"]["Enums"]["trust_appeal_status"]
+          updated_at: string
+        }
+        Insert: {
+          appeal_kind: Database["public"]["Enums"]["trust_appeal_kind"]
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          id?: string
+          message: string
+          owner_user_id: string
+          profile_id: string
+          profile_kind: Database["public"]["Enums"]["profile_kind"]
+          related_request_id?: string | null
+          status?: Database["public"]["Enums"]["trust_appeal_status"]
+          updated_at?: string
+        }
+        Update: {
+          appeal_kind?: Database["public"]["Enums"]["trust_appeal_kind"]
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          id?: string
+          message?: string
+          owner_user_id?: string
+          profile_id?: string
+          profile_kind?: Database["public"]["Enums"]["profile_kind"]
+          related_request_id?: string | null
+          status?: Database["public"]["Enums"]["trust_appeal_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_trust_appeals_related_request_id_fkey"
+            columns: ["related_request_id"]
+            isOneToOne: false
+            referencedRelation: "profile_verification_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profile_trust_status: {
         Row: {
           auto_level: Database["public"]["Enums"]["trust_level"]
@@ -2429,6 +2485,7 @@ export type Database = {
           profile_id: string | null
           profile_kind: Database["public"]["Enums"]["profile_kind"] | null
           reason: string | null
+          related_appeal_id: string | null
           related_report_id: string | null
           related_request_id: string | null
         }
@@ -2444,6 +2501,7 @@ export type Database = {
           profile_id?: string | null
           profile_kind?: Database["public"]["Enums"]["profile_kind"] | null
           reason?: string | null
+          related_appeal_id?: string | null
           related_report_id?: string | null
           related_request_id?: string | null
         }
@@ -2459,10 +2517,19 @@ export type Database = {
           profile_id?: string | null
           profile_kind?: Database["public"]["Enums"]["profile_kind"] | null
           reason?: string | null
+          related_appeal_id?: string | null
           related_report_id?: string | null
           related_request_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "trust_audit_log_related_appeal_id_fkey"
+            columns: ["related_appeal_id"]
+            isOneToOne: false
+            referencedRelation: "profile_trust_appeals"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       trust_settings: {
         Row: {
@@ -2669,6 +2736,10 @@ export type Database = {
           _kind: Database["public"]["Enums"]["profile_kind"]
           _reason?: string
         }
+        Returns: undefined
+      }
+      admin_decide_trust_appeal: {
+        Args: { _appeal_id: string; _decision: string; _note?: string }
         Returns: undefined
       }
       admin_decide_verification_request: {
@@ -2997,6 +3068,16 @@ export type Database = {
         }
         Returns: string
       }
+      submit_trust_appeal: {
+        Args: {
+          _appeal_kind: Database["public"]["Enums"]["trust_appeal_kind"]
+          _id: string
+          _kind: Database["public"]["Enums"]["profile_kind"]
+          _message: string
+          _related_request_id?: string
+        }
+        Returns: string
+      }
       trust_rank: {
         Args: {
           _id: string
@@ -3064,6 +3145,8 @@ export type Database = {
         | "cancelled"
         | "disputed"
       service_urgency: "normal" | "urgent" | "emergency"
+      trust_appeal_kind: "suspension" | "under_review" | "rejected_verification"
+      trust_appeal_status: "open" | "approved" | "denied" | "withdrawn"
       trust_level:
         | "new"
         | "phone_verified"
@@ -3276,6 +3359,12 @@ export const Constants = {
         "disputed",
       ],
       service_urgency: ["normal", "urgent", "emergency"],
+      trust_appeal_kind: [
+        "suspension",
+        "under_review",
+        "rejected_verification",
+      ],
+      trust_appeal_status: ["open", "approved", "denied", "withdrawn"],
       trust_level: [
         "new",
         "phone_verified",
