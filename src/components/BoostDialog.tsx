@@ -1,9 +1,18 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { X, Coins, Loader2, Sparkles } from "lucide-react";
+import { X, Coins, Loader2, Sparkles, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { useBoostPricing, activateBoost, type BoostType } from "@/hooks/use-boosts";
 import { useCreditWallet } from "@/hooks/use-credits";
+import { supabase } from "@/integrations/supabase/client";
+
+const VERIFIED_LEVELS = new Set(["verified_provider", "verified_business", "verified_organization"]);
+const PROFILE_KIND_MAP: Record<string, "service_profile" | "business_page"> = {
+  service_profile: "service_profile",
+  provider: "service_profile",
+  business_page: "business_page",
+  business: "business_page",
+};
 
 interface Props {
   open: boolean;
@@ -20,6 +29,19 @@ export function BoostDialog({ open, onClose, boostType, entityType, entityId, ti
   const pricing = useBoostPricing(boostType);
   const { balance, refresh } = useCreditWallet();
   const [busy, setBusy] = useState<string | null>(null);
+  const [isVerified, setIsVerified] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const kind = PROFILE_KIND_MAP[entityType];
+    if (!kind) { setIsVerified(null); return; }
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase.rpc("get_profile_trust_badge", { _kind: kind, _id: entityId });
+      if (!cancelled) setIsVerified(VERIFIED_LEVELS.has(String(data ?? "")));
+    })();
+    return () => { cancelled = true; };
+  }, [open, entityType, entityId]);
 
   if (!open) return null;
 
@@ -59,6 +81,16 @@ export function BoostDialog({ open, onClose, boostType, entityType, entityId, ti
           <span className="text-muted-foreground">Your balance</span>
           <span className="inline-flex items-center gap-1 font-semibold text-navy"><Coins className="h-4 w-4 text-orange" />{balance ?? 0} credits</span>
         </div>
+
+        {isVerified === false && (
+          <div className="mb-3 flex items-start gap-2 rounded-xl border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900">
+            <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0" />
+            <p>
+              Verified profiles rank higher than boosted unverified ones. Boosts still help, but{" "}
+              <Link to="/me" className="font-semibold underline">request verification</Link> for the biggest visibility lift.
+            </p>
+          </div>
+        )}
 
         <div className="space-y-2">
           {pricing.length === 0 && <p className="text-sm text-muted-foreground">No boost options available.</p>}
