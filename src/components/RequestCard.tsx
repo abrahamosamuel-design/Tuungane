@@ -78,7 +78,7 @@ export function RequestCard({
         <h3 className="mt-2 line-clamp-2 font-display text-base font-bold text-navy">{title}</h3>
         {cat && (
           <p className="mt-0.5 text-xs text-muted-foreground">
-            {cat.name}{r.subcategory ? ` · ${tidy(r.subcategory)}` : ""}
+            {cat.name}{r.subcategory ? ` · ${formatSubcategory(tidy(r.subcategory))}` : ""}
           </p>
         )}
 
