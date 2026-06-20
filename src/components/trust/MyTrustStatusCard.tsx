@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { TrustBadge, type TrustLevel } from "./TrustBadge";
 import { NextStepsCard } from "./NextStepsCard";
 import { RequestVerificationDialog } from "./RequestVerificationDialog";
+import { AppealDialog } from "./AppealDialog";
 
 type Row = {
   kind: "service_profile" | "business_page";
@@ -11,21 +12,28 @@ type Row = {
   name: string;
   level: TrustLevel;
   has_pending: boolean;
+  last_rejected_request_id: string | null;
+  has_open_appeal: boolean;
   requested_type: "verified_provider" | "verified_business" | "verified_organization";
 };
+
+type AppealTarget = { row: Row; kind: "suspension" | "under_review" | "rejected_verification"; relatedRequestId: string | null };
 
 export function MyTrustStatusCard() {
   const { user } = useAuth();
   const [rows, setRows] = useState<Row[]>([]);
   const [open, setOpen] = useState<Row | null>(null);
+  const [appeal, setAppeal] = useState<AppealTarget | null>(null);
 
   const load = async () => {
     if (!user) return;
-    const [sp, bp, ts, pvr] = await Promise.all([
+    const [sp, bp, ts, pvr, rejected, appeals] = await Promise.all([
       supabase.from("service_profiles").select("user_id,business_name,subcategory").eq("user_id", user.id),
       supabase.from("business_pages").select("id,name,org_type").eq("owner_id", user.id),
       supabase.from("profile_trust_status").select("profile_kind,profile_id,manual_level,auto_level").eq("owner_user_id", user.id),
       supabase.from("profile_verification_requests").select("profile_kind,profile_id,status").eq("owner_user_id", user.id).in("status", ["pending", "more_info"]),
+      supabase.from("profile_verification_requests").select("id,profile_kind,profile_id,created_at").eq("owner_user_id", user.id).eq("status", "rejected").order("created_at", { ascending: false }),
+      supabase.from("profile_trust_appeals").select("profile_kind,profile_id,appeal_kind,related_request_id,status").eq("owner_user_id", user.id).eq("status", "open"),
     ]);
     const statusMap = new Map<string, TrustLevel>();
     for (const r of (ts.data ?? []) as Array<{ profile_kind: string; profile_id: string; manual_level: TrustLevel | null; auto_level: TrustLevel }>) {
@@ -34,6 +42,15 @@ export function MyTrustStatusCard() {
     const pending = new Set<string>();
     for (const r of (pvr.data ?? []) as Array<{ profile_kind: string; profile_id: string }>) {
       pending.add(`${r.profile_kind}:${r.profile_id}`);
+    }
+    const lastRejected = new Map<string, string>();
+    for (const r of (rejected.data ?? []) as Array<{ id: string; profile_kind: string; profile_id: string }>) {
+      const key = `${r.profile_kind}:${r.profile_id}`;
+      if (!lastRejected.has(key)) lastRejected.set(key, r.id);
+    }
+    const openAppeals = new Set<string>();
+    for (const a of (appeals.data ?? []) as Array<{ profile_kind: string; profile_id: string }>) {
+      openAppeals.add(`${a.profile_kind}:${a.profile_id}`);
     }
     const out: Row[] = [];
     for (const s of (sp.data ?? []) as Array<{ user_id: string; business_name: string | null; subcategory: string }>) {
@@ -44,6 +61,8 @@ export function MyTrustStatusCard() {
         name: s.business_name || s.subcategory || "Provider profile",
         level: statusMap.get(key) ?? "new",
         has_pending: pending.has(key),
+        last_rejected_request_id: lastRejected.get(key) ?? null,
+        has_open_appeal: openAppeals.has(key),
         requested_type: "verified_provider",
       });
     }
@@ -55,6 +74,8 @@ export function MyTrustStatusCard() {
         name: b.name,
         level: statusMap.get(key) ?? "new",
         has_pending: pending.has(key),
+        last_rejected_request_id: lastRejected.get(key) ?? null,
+        has_open_appeal: openAppeals.has(key),
         requested_type: b.org_type === "business" ? "verified_business" : "verified_organization",
       });
     }
@@ -72,25 +93,52 @@ export function MyTrustStatusCard() {
       <h3 className="font-display text-base font-bold text-navy">Trust & verification</h3>
       <p className="text-xs text-muted-foreground">Your public profiles and their current trust level.</p>
       <div className="mt-2 space-y-2">
-        {rows.map((r) => (
-          <div key={`${r.kind}:${r.id}`} className="rounded-xl border border-border bg-card p-3">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-semibold text-navy truncate">{r.name}</p>
-                <div className="mt-1 flex items-center gap-2">
-                  <TrustBadge level={r.level} variant="internal" />
-                  {r.has_pending && <span className="text-[10px] font-bold uppercase text-orange">Verification pending</span>}
+        {rows.map((r) => {
+          const isVerified = ["verified_provider", "verified_business", "verified_organization"].includes(r.level);
+          const canAppealStatus = r.level === "suspended" || r.level === "under_review";
+          const canAppealRejection = !!r.last_rejected_request_id && !isVerified && !r.has_pending;
+          return (
+            <div key={`${r.kind}:${r.id}`} className="rounded-xl border border-border bg-card p-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-navy truncate">{r.name}</p>
+                  <div className="mt-1 flex flex-wrap items-center gap-2">
+                    <TrustBadge level={r.level} variant="internal" />
+                    {r.has_pending && <span className="text-[10px] font-bold uppercase text-orange">Verification pending</span>}
+                    {r.has_open_appeal && <span className="text-[10px] font-bold uppercase text-orange">Appeal pending</span>}
+                  </div>
                 </div>
+                {!r.has_pending && !isVerified && !canAppealStatus && (
+                  <button onClick={() => setOpen(r)} className="rounded-md bg-orange px-3 py-1.5 text-xs font-semibold text-orange-foreground">
+                    Request verification
+                  </button>
+                )}
               </div>
-              {!r.has_pending && !["verified_provider", "verified_business", "verified_organization"].includes(r.level) && (
-                <button onClick={() => setOpen(r)} className="rounded-md bg-orange px-3 py-1.5 text-xs font-semibold text-orange-foreground">
-                  Request verification
-                </button>
+
+              {(canAppealStatus || canAppealRejection) && !r.has_open_appeal && (
+                <div className="mt-3 flex flex-wrap items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
+                  <div className="flex-1">
+                    {r.level === "suspended" && <p><b>Profile suspended.</b> If you believe this is a mistake, you can submit an appeal.</p>}
+                    {r.level === "under_review" && <p><b>Under review.</b> You can send our team additional context to help the review.</p>}
+                    {canAppealRejection && r.level !== "suspended" && r.level !== "under_review" && <p><b>Verification was rejected.</b> You can appeal the decision and provide more information.</p>}
+                  </div>
+                  <button
+                    onClick={() => setAppeal({
+                      row: r,
+                      kind: r.level === "suspended" ? "suspension" : r.level === "under_review" ? "under_review" : "rejected_verification",
+                      relatedRequestId: r.level === "suspended" || r.level === "under_review" ? null : r.last_rejected_request_id,
+                    })}
+                    className="rounded-md bg-navy px-3 py-1.5 text-xs font-semibold text-navy-foreground"
+                  >
+                    Submit appeal
+                  </button>
+                </div>
               )}
+
+              <NextStepsCard kind={r.kind} id={r.id} />
             </div>
-            <NextStepsCard kind={r.kind} id={r.id} />
-          </div>
-        ))}
+          );
+        })}
       </div>
       {open && (
         <RequestVerificationDialog
@@ -100,6 +148,17 @@ export function MyTrustStatusCard() {
           profileId={open.id}
           ownerUserId={user.id}
           defaultType={open.requested_type}
+          onSubmitted={load}
+        />
+      )}
+      {appeal && (
+        <AppealDialog
+          open={!!appeal}
+          onClose={() => setAppeal(null)}
+          profileKind={appeal.row.kind}
+          profileId={appeal.row.id}
+          appealKind={appeal.kind}
+          relatedRequestId={appeal.relatedRequestId}
           onSubmitted={load}
         />
       )}
