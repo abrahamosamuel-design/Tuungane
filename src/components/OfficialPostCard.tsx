@@ -8,6 +8,8 @@ import { toast } from "sonner";
 import { OfficialAttribution } from "./OfficialBadge";
 import { officialPostTypeMap, type OfficialPostRow, type OfficialAccountRow } from "@/data/officialPostTypes";
 import { useCategory } from "@/hooks/use-categories";
+import { formatSubcategory } from "@/lib/format-category";
+
 import { PostShell } from "./social/PostShell";
 import { PostText } from "./social/PostText";
 import { PostMedia } from "./social/PostMedia";
