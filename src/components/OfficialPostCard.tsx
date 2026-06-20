@@ -90,7 +90,7 @@ export function OfficialPostCard({ post, account, onChanged }: { post: OfficialP
       meta={
         (cat || post.location || post.expires_at) ? (
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-            {cat && <span>{cat.name}{post.subcategory ? ` · ${post.subcategory}` : ""}</span>}
+            {cat && <span>{cat.name}{post.subcategory ? ` · ${formatSubcategory(post.subcategory)}` : ""}</span>}
             {post.location && <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{post.location}</span>}
             {post.expires_at && <span className="inline-flex items-center gap-1"><Calendar className="h-3 w-3" />by {new Date(post.expires_at).toLocaleDateString()}</span>}
           </div>
