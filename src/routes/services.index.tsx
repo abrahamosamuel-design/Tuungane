@@ -15,6 +15,8 @@ import { RadiusFilter } from "@/components/RadiusFilter";
 import { useFeaturedLocations, isFeaturedTarget } from "@/hooks/use-featured-locations";
 import { ProviderQuickContact } from "@/components/ProviderQuickContact";
 import { ProfileTrustBadge } from "@/components/trust/ProfileTrustBadge";
+import { formatSubcategory } from "@/lib/format-category";
+
 
 
 const iconMap: Record<string, any> = { Wrench, Sparkles, Building2, Scissors, Truck, Car, GraduationCap, Camera, ChefHat, Laptop, HeartPulse, Sprout, MoreHorizontal };
