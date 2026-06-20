@@ -71,7 +71,7 @@ export function ServiceRequestCard({ r, viewerRole, onStatus, onFeedback, onDisp
           </div>
 
           <p className="mt-1 font-semibold text-navy">{r.service_needed}</p>
-          {r.subcategory && <p className="text-xs text-muted-foreground">{r.subcategory}</p>}
+          {r.subcategory && <p className="text-xs text-muted-foreground">{formatSubcategory(r.subcategory)}</p>}
 
           <div className="mt-1 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
             <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" /> {r.location}{r.town && `, ${r.town}`}</span>
