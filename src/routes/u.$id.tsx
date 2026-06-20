@@ -263,7 +263,7 @@ function UserProfile() {
                   <TrustBadgeInline userId={id} />
                   <ProfileBoostBadges providerId={id} />
                 </h1>
-                {sp && <p className="text-sm font-medium text-orange">{sp.subcategory} {cat && <span className="text-muted-foreground">· {cat.name}</span>}</p>}
+                {sp && <p className="text-sm font-medium text-orange">{formatSubcategory(sp.subcategory)} {cat && <span className="text-muted-foreground">· {cat.name}</span>}</p>}
                 {!sp && <p className="text-sm text-muted-foreground">{isProvider ? "Service provider" : "Customer"}</p>}
                 {(sp?.town || profile.town) && (
                   <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
