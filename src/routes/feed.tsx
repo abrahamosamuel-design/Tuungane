@@ -10,6 +10,8 @@ import { PostCard, type PostRow } from "@/components/social/PostCard";
 
 import { OfficialPostCard } from "@/components/OfficialPostCard";
 import { useCategories } from "@/hooks/use-categories";
+import { formatSubcategory } from "@/lib/format-category";
+
 import { postTypes, type PostTypeValue } from "@/data/postTypes";
 import type { OfficialAccountRow, OfficialPostRow } from "@/data/officialPostTypes";
 import { useUserLocation } from "@/hooks/use-user-location";
