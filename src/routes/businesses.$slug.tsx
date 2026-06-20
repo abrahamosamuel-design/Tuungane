@@ -10,6 +10,8 @@ import { SafetyNote, SAFETY_TIPS } from "@/components/SafetyNote";
 import { TrustBadge } from "@/components/trust/TrustBadge";
 import { useTrustBadge } from "@/hooks/use-trust-badges";
 import { ReportProfileButton } from "@/components/trust/ReportProfileButton";
+import { formatSubcategory } from "@/lib/format-category";
+
 
 import { RouteErrorCard, RouteNotFoundCard } from "@/lib/route-boundaries";
 
