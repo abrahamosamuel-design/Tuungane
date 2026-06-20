@@ -11,6 +11,8 @@ import { filterByRadius, sortByProximity, proximityLabel, type UserLocation } fr
 import { RadiusFilter } from "@/components/RadiusFilter";
 import { ProviderQuickContact } from "@/components/ProviderQuickContact";
 import { ProfileTrustBadge } from "@/components/trust/ProfileTrustBadge";
+import { formatSubcategory } from "@/lib/format-category";
+
 
 
 type Row = {
