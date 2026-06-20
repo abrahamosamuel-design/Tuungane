@@ -489,7 +489,7 @@ function UserProfile() {
               <h3 className="font-display text-lg font-bold text-navy">About</h3>
               <p className="mt-2 whitespace-pre-wrap text-sm text-foreground/85">{sp?.bio || profile.bio || "No bio yet."}</p>
               <dl className="mt-5 space-y-2 text-sm">
-                {sp && <Row label="Service" value={`${sp.subcategory} · ${cat?.name ?? ""}`} />}
+                {sp && <Row label="Service" value={`${formatSubcategory(sp.subcategory)} · ${cat?.name ?? ""}`} />}
                 <Row label="Location" value={`${sp?.town || profile.town || "—"}${(sp?.district || profile.district) ? `, ${sp?.district || profile.district}` : ""}`} />
                 {sp && <Row label="Areas served" value={sp.areas_served.join(", ") || sp.town} />}
                 {sp && <Row label="Experience" value={`${sp.years_experience} years`} />}
