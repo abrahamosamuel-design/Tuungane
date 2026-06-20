@@ -5,6 +5,8 @@ import { useCategory } from "@/hooks/use-categories";
 import { requestStatusMap, type ServiceRequestRow } from "@/data/serviceRequestTypes";
 import { NearYouBadge } from "@/components/NearYouBadge";
 import type { UserLocation } from "@/lib/location";
+import { formatSubcategory } from "@/lib/format-category";
+
 
 export interface RequestRowLite extends ServiceRequestRow {
   response_count?: number;
