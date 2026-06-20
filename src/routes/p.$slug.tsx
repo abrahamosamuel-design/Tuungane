@@ -162,7 +162,7 @@ function PublicProfilePage() {
           </div>
           <p className="mt-0.5 text-xs uppercase tracking-wide text-navy/60">
             {TYPE_META[profile.profile_type].label}
-            {profile.subcategory ? ` · ${profile.subcategory}` : profile.category_slug ? ` · ${profile.category_slug}` : ""}
+            {profile.subcategory ? ` · ${formatSubcategory(profile.subcategory)}` : profile.category_slug ? ` · ${profile.category_slug}` : ""}
           </p>
           {location && (
             <p className="mt-1 inline-flex items-center gap-1 text-xs text-muted-foreground">
