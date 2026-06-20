@@ -153,7 +153,7 @@ export function MyProfilesPanel() {
                               ) : null}
                             </div>
                             <p className="mt-0.5 truncate text-xs text-muted-foreground">
-                              {p.subcategory || p.category_slug || "Category not set"} · {p.town || p.district || "Location not set"}
+                              {(p.subcategory ? formatSubcategory(p.subcategory) : p.category_slug) || "Category not set"} · {p.town || p.district || "Location not set"}
                             </p>
                             <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-navy/80">
                               <span>{p.serviceCount} service{p.serviceCount === 1 ? "" : "s"}</span>
