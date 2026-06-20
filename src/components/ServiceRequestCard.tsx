@@ -8,6 +8,8 @@ import { VerifiedReviewBadge } from "./VerifiedReviewBadge";
 import { useActiveBoosts } from "@/hooks/use-boosts";
 import { BoostBadge } from "./BoostBadge";
 import { BoostButton } from "./BoostButton";
+import { formatSubcategory } from "@/lib/format-category";
+
 
 export interface RequestWithParty extends ServiceRequestRow {
   customer?: { full_name: string; avatar_url: string | null };
