@@ -246,13 +246,14 @@ export function NearYouHomeSection() {
                   key={p.user_id}
                   className="block w-[78%] shrink-0 snap-start rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)] transition hover:border-orange sm:w-auto sm:p-5"
                 >
-                  <div className="flex items-center gap-1.5">
-                    <h4 className="truncate text-sm font-bold text-navy">{name}</h4>
-                    <ProfileTrustBadge kind="service_profile" id={p.user_id} />
+                  <div className="flex flex-wrap items-start gap-x-1.5 gap-y-1">
+                    <h4 className="min-w-0 flex-1 text-sm font-bold leading-tight text-navy line-clamp-2">{name}</h4>
+                    <ProfileTrustBadge kind="service_profile" id={p.user_id} size="sm" descriptive className="shrink-0" />
                   </div>
-                  <p className="mt-0.5 text-xs text-muted-foreground">{p.subcategory}</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">{formatSubcategory(p.subcategory)}</p>
                   <p className="mt-1 inline-flex items-center gap-1 text-[11px] text-muted-foreground">
                     <MapPin className="h-3 w-3" /> {p.area || p.town || p.district || "Uganda"}
+
                   </p>
                   <div className="mt-2 flex flex-wrap items-center gap-1.5">
                     {near && (
