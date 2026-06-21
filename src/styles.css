@@ -161,4 +161,44 @@
   }
 }
 
+/*
+ * Mobile typography polish — match the readability of Facebook, LinkedIn,
+ * ChatGPT and Lovable on small screens. We lift the smallest text sizes
+ * (text-xs / text-sm) to a comfortable floor, nudge body line-height up,
+ * and slightly darken muted-foreground for better contrast. Desktop is
+ * untouched (no changes above 640px).
+ */
+@media (max-width: 639px) {
+  html {
+    /* Anchor rem-based sizes — Tailwind text-* are in rem. */
+    font-size: 16.5px;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  body {
+    line-height: 1.5;
+  }
+  /* Lift the smallest utility sizes to readable floors. */
+  main .text-xs,
+  main .text-\[10px\],
+  main .text-\[11px\],
+  main .text-\[12px\] {
+    font-size: 0.8125rem; /* ~13.4px */
+    line-height: 1.35rem;
+  }
+  main .text-sm {
+    font-size: 0.9375rem; /* ~15.5px */
+    line-height: 1.45rem;
+  }
+  main .text-base {
+    font-size: 1rem;       /* ~16.5px */
+    line-height: 1.55rem;
+  }
+  /* Stronger contrast on muted text for outdoor / mobile use. */
+  main .text-muted-foreground {
+    color: #4b4f56;
+  }
+}
+
+
 
