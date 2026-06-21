@@ -125,24 +125,26 @@ function Services() {
   useEffect(() => {
     (async () => {
       setLoadingReal(true);
-      let qy = supabase.from("service_profiles").select("user_id,business_name,subcategory,bio,town,district,area,latitude,longitude,areas_served,service_radius_km,category_slug,verified,seeded_by_official,seeded_status,updated_at,availability").eq("suspended", false).order("updated_at", { ascending: false }).limit(60);
+      let qy = supabase.from("service_profiles").select("user_id,business_name,subcategory,bio,town,district,area,latitude,longitude,areas_served,service_radius_km,category_slug,verified,seeded_by_official,seeded_status,updated_at,availability,cover_url").eq("suspended", false).order("updated_at", { ascending: false }).limit(60);
       if (filter === "featured") qy = qy.eq("verified", "featured");
       if (filter === "verified") qy = qy.in("verified", ["verified", "featured"]);
       if (filter === "available") qy = qy.eq("availability", "available");
       const { data } = await qy;
       const ids = (data ?? []).map((p) => p.user_id);
       const profMap = new Map<string, { full_name: string; avatar_url: string | null }>();
-      const trustMap = new Map<string, { trust_score: number; average_rating: number; completed_jobs: number }>();
+      const trustMap = new Map<string, { trust_score: number; average_rating: number; completed_jobs: number; verified_reviews: number; response_rate: number }>();
       if (ids.length) {
         const [profsRes, trustRes] = await Promise.all([
           supabase.from("profiles").select("id,full_name,avatar_url").in("id", ids),
-          supabase.from("provider_trust_stats").select("provider_id,trust_score,average_rating,completed_service_requests").in("provider_id", ids),
+          supabase.from("provider_trust_stats").select("provider_id,trust_score,average_rating,completed_service_requests,total_verified_reviews,response_rate").in("provider_id", ids),
         ]);
         (profsRes.data ?? []).forEach((p) => profMap.set(p.id, p));
         (trustRes.data ?? []).forEach((t: any) => trustMap.set(t.provider_id, {
           trust_score: Number(t.trust_score ?? 0),
           average_rating: Number(t.average_rating ?? 0),
           completed_jobs: Number(t.completed_service_requests ?? 0),
+          verified_reviews: Number(t.total_verified_reviews ?? 0),
+          response_rate: Number(t.response_rate ?? 0),
         }));
       }
       setReal((data ?? []).map((p: any) => ({
@@ -151,6 +153,8 @@ function Services() {
         trust_score: trustMap.get(p.user_id)?.trust_score ?? 0,
         average_rating: trustMap.get(p.user_id)?.average_rating ?? 0,
         completed_jobs: trustMap.get(p.user_id)?.completed_jobs ?? 0,
+        verified_reviews: trustMap.get(p.user_id)?.verified_reviews ?? 0,
+        response_rate: trustMap.get(p.user_id)?.response_rate ?? 0,
       })) as RealProvider[]);
       setLoadingReal(false);
     })();
