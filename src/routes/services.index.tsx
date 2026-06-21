@@ -51,10 +51,13 @@ type RealProvider = {
   longitude?: number | null;
   areas_served?: string[] | null;
   service_radius_km?: number | null;
+  cover_url?: string | null;
   profile: { full_name: string; avatar_url: string | null } | null;
   trust_score: number;
   average_rating: number;
   completed_jobs: number;
+  verified_reviews: number;
+  response_rate: number;
 };
 
 const POPULAR_SERVICES = ["Plumber", "Electrician", "Cleaner", "Mechanic", "Tailor", "Tutor", "Driver", "Hairdresser", "Caterer", "Web Designer"];
@@ -122,24 +125,26 @@ function Services() {
   useEffect(() => {
     (async () => {
       setLoadingReal(true);
-      let qy = supabase.from("service_profiles").select("user_id,business_name,subcategory,bio,town,district,area,latitude,longitude,areas_served,service_radius_km,category_slug,verified,seeded_by_official,seeded_status,updated_at,availability").eq("suspended", false).order("updated_at", { ascending: false }).limit(60);
+      let qy = supabase.from("service_profiles").select("user_id,business_name,subcategory,bio,town,district,area,latitude,longitude,areas_served,service_radius_km,category_slug,verified,seeded_by_official,seeded_status,updated_at,availability,cover_url").eq("suspended", false).order("updated_at", { ascending: false }).limit(60);
       if (filter === "featured") qy = qy.eq("verified", "featured");
       if (filter === "verified") qy = qy.in("verified", ["verified", "featured"]);
       if (filter === "available") qy = qy.eq("availability", "available");
       const { data } = await qy;
       const ids = (data ?? []).map((p) => p.user_id);
       const profMap = new Map<string, { full_name: string; avatar_url: string | null }>();
-      const trustMap = new Map<string, { trust_score: number; average_rating: number; completed_jobs: number }>();
+      const trustMap = new Map<string, { trust_score: number; average_rating: number; completed_jobs: number; verified_reviews: number; response_rate: number }>();
       if (ids.length) {
         const [profsRes, trustRes] = await Promise.all([
           supabase.from("profiles").select("id,full_name,avatar_url").in("id", ids),
-          supabase.from("provider_trust_stats").select("provider_id,trust_score,average_rating,completed_service_requests").in("provider_id", ids),
+          supabase.from("provider_trust_stats").select("provider_id,trust_score,average_rating,completed_service_requests,total_verified_reviews,response_rate").in("provider_id", ids),
         ]);
         (profsRes.data ?? []).forEach((p) => profMap.set(p.id, p));
         (trustRes.data ?? []).forEach((t: any) => trustMap.set(t.provider_id, {
           trust_score: Number(t.trust_score ?? 0),
           average_rating: Number(t.average_rating ?? 0),
           completed_jobs: Number(t.completed_service_requests ?? 0),
+          verified_reviews: Number(t.total_verified_reviews ?? 0),
+          response_rate: Number(t.response_rate ?? 0),
         }));
       }
       setReal((data ?? []).map((p: any) => ({
@@ -148,6 +153,8 @@ function Services() {
         trust_score: trustMap.get(p.user_id)?.trust_score ?? 0,
         average_rating: trustMap.get(p.user_id)?.average_rating ?? 0,
         completed_jobs: trustMap.get(p.user_id)?.completed_jobs ?? 0,
+        verified_reviews: trustMap.get(p.user_id)?.verified_reviews ?? 0,
+        response_rate: trustMap.get(p.user_id)?.response_rate ?? 0,
       })) as RealProvider[]);
       setLoadingReal(false);
     })();
@@ -382,36 +389,73 @@ function Services() {
 function ProviderRow({ p, isBoosted, userLoc, onRequest }: { p: RealProvider; isBoosted: boolean; userLoc?: UserLocation | null; onRequest: () => void }) {
   const name = p.business_name || p.profile?.full_name || "Provider";
   const available = (p.availability ?? "").toLowerCase() === "available";
+  const isVerified = p.verified === "verified" || p.verified === "featured";
+  const hasRating = p.average_rating > 0 && p.verified_reviews > 0;
+  const isNew = !hasRating && p.completed_jobs === 0;
+  const isTopRated = hasRating && p.average_rating >= 4.5 && p.verified_reviews >= 5;
+  const isFastResponder = p.response_rate >= 80 && p.completed_jobs >= 3;
 
   return (
-    <div className="flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)] transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-elevated)]">
-      <Link to="/u/$id" params={{ id: p.user_id }} className="flex items-start gap-3 p-4">
+    <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)] transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-elevated)]">
+      {isVerified && <div className="h-1 w-full bg-gradient-to-r from-green via-green/70 to-orange/60" />}
+
+      <Link to="/u/$id" params={{ id: p.user_id }} className="flex items-start gap-3 p-4 pb-3">
         <Avatar name={name} src={p.profile?.avatar_url} size={56} />
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-start gap-x-2 gap-y-1">
-            <h3 className="min-w-0 flex-1 font-display text-base font-semibold leading-tight text-navy line-clamp-2 sm:line-clamp-1 sm:truncate">
+          <div className="flex items-start gap-2">
+            <h3 className="min-w-0 flex-1 font-display text-[15px] font-bold leading-tight text-navy line-clamp-2">
               {name}
             </h3>
             {isBoosted && <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-orange" />}
             <ProfileTrustBadge kind="service_profile" id={p.user_id} size="sm" descriptive className="shrink-0" />
           </div>
-          <p className="mt-1 text-sm text-muted-foreground">{formatSubcategory(p.subcategory)}</p>
-          <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-muted-foreground">
-            <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{p.town}</span>
-            {p.average_rating > 0 && (
-              <span className="inline-flex items-center gap-1"><Star className="h-3 w-3 fill-orange text-orange" />{p.average_rating.toFixed(1)} · {p.completed_jobs} reviews</span>
-            )}
-          </div>
+          <p className="mt-0.5 text-[13px] font-medium text-foreground/80">{formatSubcategory(p.subcategory)}</p>
+          <p className="mt-0.5 inline-flex items-center gap-1 text-xs text-muted-foreground">
+            <MapPin className="h-3 w-3" />{p.town || p.district || "Location not provided"}
+          </p>
         </div>
       </Link>
-      {p.bio && <p className="line-clamp-2 px-4 text-sm text-foreground/70">{p.bio}</p>}
-      <div className="mt-3 flex flex-wrap items-center gap-1.5 px-4">
+
+      {/* Trust summary */}
+      <div className="px-4 text-xs text-muted-foreground">
+        {hasRating ? (
+          <span className="inline-flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
+            <Star className="h-3.5 w-3.5 fill-orange text-orange" />
+            <span className="font-semibold text-navy">{p.average_rating.toFixed(1)}</span>
+            <span>· {p.verified_reviews} {p.verified_reviews === 1 ? "review" : "reviews"}</span>
+            {p.completed_jobs > 0 && <span>· {p.completed_jobs} completed</span>}
+          </span>
+        ) : isNew ? (
+          <span className="text-muted-foreground">New provider · No reviews yet</span>
+        ) : p.completed_jobs > 0 ? (
+          <span>{p.completed_jobs} completed {p.completed_jobs === 1 ? "job" : "jobs"}</span>
+        ) : null}
+      </div>
+
+      {p.bio && <p className="mt-2 line-clamp-2 px-4 text-[13px] leading-snug text-foreground/75">{p.bio}</p>}
+
+      {/* Badge strip */}
+      <div className="mt-2.5 flex flex-wrap items-center gap-1.5 px-4">
         <NearYouBadge user={userLoc} target={p} />
+        {isTopRated && (
+          <span className="inline-flex items-center gap-1 rounded-full bg-orange/10 px-2 py-0.5 text-[10px] font-semibold text-orange">
+            <Star className="h-3 w-3 fill-orange text-orange" /> Top Rated
+          </span>
+        )}
+        {isFastResponder && (
+          <span className="inline-flex items-center gap-1 rounded-full bg-green/10 px-2 py-0.5 text-[10px] font-semibold text-green">
+            <Sparkles className="h-3 w-3" /> Fast Responder
+          </span>
+        )}
         {p.seeded_by_official && p.seeded_status !== "claimed" && (
-          <span className="inline-flex items-center gap-1 rounded-full bg-navy/10 px-2 py-0.5 text-[10px] font-semibold text-navy"><ShieldCheck className="h-3 w-3" /> Added by Tuungane Official</span>
+          <span className="inline-flex items-center gap-1 rounded-full bg-navy/10 px-2 py-0.5 text-[10px] font-semibold text-navy">
+            <ShieldCheck className="h-3 w-3" /> Added by Tuungane
+          </span>
         )}
       </div>
-      <div className="mt-3 flex items-center justify-between gap-2 border-t border-border bg-surface px-3 py-2.5 sm:px-4 sm:py-3">
+
+      {/* Action row */}
+      <div className="mt-3 flex items-center justify-between gap-2 border-t border-border bg-surface px-3 py-2.5 sm:px-4">
         <span className={`inline-flex items-center gap-1.5 text-[11px] font-semibold sm:text-xs ${available ? "text-green" : "text-muted-foreground"}`}>
           <span className={`h-1.5 w-1.5 rounded-full ${available ? "bg-green" : "bg-muted-foreground"}`} />
           {available ? "Available now" : "Check availability"}
@@ -427,7 +471,7 @@ function ProviderRow({ p, isBoosted, userLoc, onRequest }: { p: RealProvider; is
           </Link>
           <button
             onClick={onRequest}
-            className="inline-flex items-center gap-1 rounded-lg bg-orange px-2.5 py-1.5 text-xs font-semibold text-orange-foreground shadow-sm transition hover:brightness-110 sm:px-3"
+            className="inline-flex items-center gap-1 rounded-lg bg-orange px-3 py-1.5 text-xs font-bold text-orange-foreground shadow-sm transition hover:brightness-110 sm:px-3.5"
           >
             <ClipboardList className="h-3.5 w-3.5" /> Request
           </button>
