@@ -51,10 +51,13 @@ type RealProvider = {
   longitude?: number | null;
   areas_served?: string[] | null;
   service_radius_km?: number | null;
+  cover_url?: string | null;
   profile: { full_name: string; avatar_url: string | null } | null;
   trust_score: number;
   average_rating: number;
   completed_jobs: number;
+  verified_reviews: number;
+  response_rate: number;
 };
 
 const POPULAR_SERVICES = ["Plumber", "Electrician", "Cleaner", "Mechanic", "Tailor", "Tutor", "Driver", "Hairdresser", "Caterer", "Web Designer"];
