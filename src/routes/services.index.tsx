@@ -456,19 +456,12 @@ function ProviderRow({ p, isBoosted, userLoc, onRequest }: { p: RealProvider; is
 
       {/* Action row */}
       <div className="mt-3 flex items-center justify-between gap-2 border-t border-border bg-surface px-3 py-2.5 sm:px-4">
-        <span className={`inline-flex items-center gap-1.5 text-[11px] font-semibold sm:text-xs ${available ? "text-green" : "text-muted-foreground"}`}>
+        <span className={`inline-flex items-center gap-1.5 text-xs font-semibold ${available ? "text-green" : "text-muted-foreground"}`}>
           <span className={`h-1.5 w-1.5 rounded-full ${available ? "bg-green" : "bg-muted-foreground"}`} />
           {available ? "Available now" : "Check availability"}
         </span>
         <div className="flex items-center gap-1.5 sm:gap-2">
           <ProviderQuickContact providerId={p.user_id} source="search_result" variant="compact" />
-          <Link
-            to="/u/$id"
-            params={{ id: p.user_id }}
-            className="rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs font-semibold text-navy transition hover:border-navy sm:px-3"
-          >
-            View
-          </Link>
           <button
             onClick={onRequest}
             className="inline-flex items-center gap-1 rounded-lg bg-orange px-3 py-1.5 text-xs font-bold text-orange-foreground shadow-sm transition hover:brightness-110 sm:px-3.5"
