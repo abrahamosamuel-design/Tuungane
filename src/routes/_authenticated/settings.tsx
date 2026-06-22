@@ -21,11 +21,19 @@ function SettingsPage() {
   const [isProvider, setIsProvider] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [dirty, setDirty] = useState(false);
 
   const [phone, setPhone] = useState("");
   const [notif, setNotif] = useState({ requests: true, messages: true, credits: true, official: true });
   const [privacy, setPrivacy] = useState({ showPhone: true, whatsapp: true, calls: true, chatOnly: false });
   const [provider, setProvider] = useState({ availability: "", areas: "", category: "", contactPref: "" });
+
+  // Original values for dirty tracking
+  const [origName, setOrigName] = useState("");
+  const [origPhone, setOrigPhone] = useState("");
+  const [origNotif, setOrigNotif] = useState({ requests: true, messages: true, credits: true, official: true });
+  const [origPrivacy, setOrigPrivacy] = useState({ showPhone: true, whatsapp: true, calls: true, chatOnly: false });
+  const [origProvider, setOrigProvider] = useState({ availability: "", areas: "", category: "", contactPref: "" });
 
   useEffect(() => {
     if (!user) return;
@@ -36,7 +44,9 @@ function SettingsPage() {
         .eq("id", user.id)
         .maybeSingle();
       if (data) {
-        setFullName(data.full_name ?? "");
+        const name = data.full_name ?? "";
+        setFullName(name);
+        setOrigName(name);
         setIsProvider(!!data.is_provider);
       }
       setLoaded(true);
@@ -45,33 +55,59 @@ function SettingsPage() {
       const p = localStorage.getItem("tuungane_settings_prefs");
       if (p) {
         const parsed = JSON.parse(p);
-        if (parsed.phone) setPhone(parsed.phone);
-        if (parsed.notif) setNotif(parsed.notif);
-        if (parsed.privacy) setPrivacy(parsed.privacy);
-        if (parsed.provider) setProvider(parsed.provider);
+        if (parsed.phone) { setPhone(parsed.phone); setOrigPhone(parsed.phone); }
+        if (parsed.notif) { setNotif(parsed.notif); setOrigNotif(parsed.notif); }
+        if (parsed.privacy) { setPrivacy(parsed.privacy); setOrigPrivacy(parsed.privacy); }
+        if (parsed.provider) { setProvider(parsed.provider); setOrigProvider(parsed.provider); }
       }
     } catch {}
   }, [user?.id]);
 
-  const persist = (next: { phone?: string; notif?: typeof notif; privacy?: typeof privacy; provider?: typeof provider }) => {
-    const current = { phone, notif, privacy, provider, ...next };
-    if (next.phone !== undefined) setPhone(next.phone);
-    if (next.notif) setNotif(next.notif);
-    if (next.privacy) setPrivacy(next.privacy);
-    if (next.provider) setProvider(next.provider);
-    localStorage.setItem("tuungane_settings_prefs", JSON.stringify(current));
+  const checkDirty = (next: { fullName?: string; phone?: string; notif?: typeof notif; privacy?: typeof privacy; provider?: typeof provider }) => {
+    let d = false;
+    if (next.fullName !== undefined && next.fullName !== origName) d = true;
+    if (next.phone !== undefined && next.phone !== origPhone) d = true;
+    if (next.notif && JSON.stringify(next.notif) !== JSON.stringify(origNotif)) d = true;
+    if (next.privacy && JSON.stringify(next.privacy) !== JSON.stringify(origPrivacy)) d = true;
+    if (next.provider && JSON.stringify(next.provider) !== JSON.stringify(origProvider)) d = true;
+    setDirty(d);
+  };
+
+  const saveAll = async () => {
+    if (!user) return;
+    setBusy(true);
+    const tasks: Promise<unknown>[] = [];
+
+    if (fullName !== origName) {
+      tasks.push(
+        supabase.from("profiles").update({ full_name: fullName }).eq("id", user.id).then(({ error }) => {
+          if (error) throw new Error(error.message);
+          setOrigName(fullName);
+        })
+      );
+    }
+
+    const prefs = { phone, notif, privacy, provider };
+    if (phone !== origPhone || JSON.stringify(notif) !== JSON.stringify(origNotif) || JSON.stringify(privacy) !== JSON.stringify(origPrivacy) || JSON.stringify(provider) !== JSON.stringify(origProvider)) {
+      localStorage.setItem("tuungane_settings_prefs", JSON.stringify(prefs));
+      setOrigPhone(phone);
+      setOrigNotif({ ...notif });
+      setOrigPrivacy({ ...privacy });
+      setOrigProvider({ ...provider });
+    }
+
+    try {
+      await Promise.all(tasks);
+      toast.success("All changes saved");
+      setDirty(false);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Save failed");
+    } finally {
+      setBusy(false);
+    }
   };
 
   if (!user || !loaded) return null;
-
-  const saveName = async (v: string) => {
-    if (v === fullName) return;
-    setBusy(true);
-    const { error } = await supabase.from("profiles").update({ full_name: v }).eq("id", user.id);
-    setBusy(false);
-    if (error) toast.error(error.message);
-    else { setFullName(v); toast.success("Saved"); }
-  };
 
   const changePassword = async () => {
     const np = prompt("Enter a new password (min 6 characters):");
