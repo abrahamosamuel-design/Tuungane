@@ -80,7 +80,7 @@ function SettingsPage() {
 
     if (fullName !== origName) {
       tasks.push(
-        supabase.from("profiles").update({ full_name: fullName }).eq("id", user.id).then(({ error }) => {
+        Promise.resolve(supabase.from("profiles").update({ full_name: fullName }).eq("id", user.id)).then(({ error }) => {
           if (error) throw new Error(error.message);
           setOrigName(fullName);
         })
