@@ -120,13 +120,25 @@ function SettingsPage() {
   return (
     <Layout>
       <section className="mx-auto max-w-2xl px-4 py-6">
-        <h1 className="font-display text-2xl font-bold text-navy">Settings</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Manage your account and preferences.</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="font-display text-2xl font-bold text-navy">Settings</h1>
+            <p className="mt-1 text-sm text-muted-foreground">Manage your account and preferences.</p>
+          </div>
+          <button
+            onClick={saveAll}
+            disabled={!dirty || busy}
+            className="inline-flex items-center gap-2 rounded-full bg-orange px-4 py-2 text-sm font-semibold text-orange-foreground shadow-sm transition hover:brightness-110 disabled:opacity-50"
+          >
+            {busy && <Loader2 className="h-4 w-4 animate-spin" />}
+            Save changes
+          </button>
+        </div>
 
         <Section title="Account">
-          <Field label="Name" defaultValue={fullName} onSave={saveName} disabled={busy} />
+          <Field label="Name" defaultValue={fullName} onSave={(v) => { setFullName(v); checkDirty({ fullName: v }); }} disabled={busy} />
           <Field label="Email" defaultValue={user.email ?? ""} readOnly />
-          <Field label="Phone number" defaultValue={phone} onSave={(v) => persist({ phone: v })} />
+          <Field label="Phone number" defaultValue={phone} onSave={(v) => { setPhone(v); checkDirty({ phone: v }); }} />
           <button onClick={changePassword} className="mt-2 inline-flex rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold text-navy hover:border-orange">
             Change password
           </button>
@@ -136,16 +148,16 @@ function SettingsPage() {
 
 
         <Section title="Notifications">
-          <Toggle label="Request responses" checked={notif.requests} onChange={(v) => persist({ notif: { ...notif, requests: v } })} />
-          <Toggle label="Messages" checked={notif.messages} onChange={(v) => persist({ notif: { ...notif, messages: v } })} />
-          <Toggle label="Credit updates" checked={notif.credits} onChange={(v) => persist({ notif: { ...notif, credits: v } })} />
-          <Toggle label="Official Tuungane updates" checked={notif.official} onChange={(v) => persist({ notif: { ...notif, official: v } })} />
+          <Toggle label="Request responses" checked={notif.requests} onChange={(v) => { const next = { ...notif, requests: v }; setNotif(next); checkDirty({ notif: next }); }} />
+          <Toggle label="Messages" checked={notif.messages} onChange={(v) => { const next = { ...notif, messages: v }; setNotif(next); checkDirty({ notif: next }); }} />
+          <Toggle label="Credit updates" checked={notif.credits} onChange={(v) => { const next = { ...notif, credits: v }; setNotif(next); checkDirty({ notif: next }); }} />
+          <Toggle label="Official Tuungane updates" checked={notif.official} onChange={(v) => { const next = { ...notif, official: v }; setNotif(next); checkDirty({ notif: next }); }} />
         </Section>
 
         <Section title="Privacy & contact">
-          <Toggle label="Show phone number" checked={privacy.showPhone} onChange={(v) => persist({ privacy: { ...privacy, showPhone: v } })} />
-          <Toggle label="Allow phone calls" checked={privacy.calls} onChange={(v) => persist({ privacy: { ...privacy, calls: v } })} />
-          <Toggle label="Use Tuungane messages only" checked={privacy.chatOnly} onChange={(v) => persist({ privacy: { ...privacy, chatOnly: v } })} />
+          <Toggle label="Show phone number" checked={privacy.showPhone} onChange={(v) => { const next = { ...privacy, showPhone: v }; setPrivacy(next); checkDirty({ privacy: next }); }} />
+          <Toggle label="Allow phone calls" checked={privacy.calls} onChange={(v) => { const next = { ...privacy, calls: v }; setPrivacy(next); checkDirty({ privacy: next }); }} />
+          <Toggle label="Use Tuungane messages only" checked={privacy.chatOnly} onChange={(v) => { const next = { ...privacy, chatOnly: v }; setPrivacy(next); checkDirty({ privacy: next }); }} />
           <p className="text-[11px] text-muted-foreground">For safety, tracking, and verified reviews, Tuungane recommends keeping communication on the platform.</p>
         </Section>
 
@@ -153,10 +165,10 @@ function SettingsPage() {
 
         {isProvider && (
           <Section title="Provider settings">
-            <Field label="Availability" defaultValue={provider.availability} onSave={(v) => persist({ provider: { ...provider, availability: v } })} />
-            <Field label="Areas served" defaultValue={provider.areas} onSave={(v) => persist({ provider: { ...provider, areas: v } })} />
-            <Field label="Main skill / category" defaultValue={provider.category} onSave={(v) => persist({ provider: { ...provider, category: v } })} />
-            <Field label="Contact preference" defaultValue={provider.contactPref} onSave={(v) => persist({ provider: { ...provider, contactPref: v } })} />
+            <Field label="Availability" defaultValue={provider.availability} onSave={(v) => { const next = { ...provider, availability: v }; setProvider(next); checkDirty({ provider: next }); }} />
+            <Field label="Areas served" defaultValue={provider.areas} onSave={(v) => { const next = { ...provider, areas: v }; setProvider(next); checkDirty({ provider: next }); }} />
+            <Field label="Main skill / category" defaultValue={provider.category} onSave={(v) => { const next = { ...provider, category: v }; setProvider(next); checkDirty({ provider: next }); }} />
+            <Field label="Contact preference" defaultValue={provider.contactPref} onSave={(v) => { const next = { ...provider, contactPref: v }; setProvider(next); checkDirty({ provider: next }); }} />
           </Section>
         )}
 
