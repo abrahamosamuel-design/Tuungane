@@ -44,8 +44,6 @@ function Login() {
     }
   }, [loading, user, search.redirect, nav]);
 
-  if (!loading && user) return null;
-
   const emailValid = emailRegex.test(email.trim());
   const passwordValid = password.length >= 6;
   const showEmailError = emailTouched && email.length > 0 && !emailValid;
@@ -62,6 +60,8 @@ function Login() {
   }, [password]);
 
   const canSubmitEmail = emailValid && passwordValid && !busy;
+
+  if (!loading && user) return null;
 
   const showErr = async (err: unknown, fallback: string) => {
     const { toUserMessage } = await import("@/lib/user-errors");
