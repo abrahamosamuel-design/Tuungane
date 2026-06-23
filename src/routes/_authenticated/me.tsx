@@ -74,15 +74,28 @@ function Me() {
       <section className="mx-auto max-w-2xl px-4 py-8">
         <div className="rounded-2xl border border-border bg-card p-6">
           <div className="flex items-center gap-4">
-            <Avatar name={profile.full_name} url={profile.avatar_url} size={80} />
+            <Avatar name={profile.full_name} url={profile.avatar_url} size={80} verifiedRing={!!profile.avatar_url} />
             <div className="flex-1">
               <input defaultValue={profile.full_name} onBlur={(e) => e.target.value !== profile.full_name && save({ full_name: e.target.value })} className="w-full rounded-lg border border-transparent bg-transparent font-display text-xl font-bold text-navy hover:border-border focus:border-orange focus:outline-none px-2 py-1" />
-              <label className="mt-1 inline-block cursor-pointer text-xs text-orange">
-                Change photo
+              <label className="mt-1 inline-flex cursor-pointer items-center gap-1 text-xs font-semibold text-orange hover:text-orange/80">
+                {profile.avatar_url ? "Change photo" : "Add a profile photo"}
                 <input type="file" accept="image/*" className="hidden" disabled={busy} onChange={(e) => e.target.files?.[0] && onAvatar(e.target.files[0])} />
               </label>
+              {profile.avatar_url && (
+                <button
+                  type="button"
+                  onClick={() => save({ avatar_url: null })}
+                  className="ml-3 text-xs text-muted-foreground hover:text-navy"
+                >
+                  Remove
+                </button>
+              )}
+              <p className="mt-1 text-[11px] text-muted-foreground">
+                Your photo helps people recognize you on Tuungane. You can change or remove it anytime.
+              </p>
             </div>
           </div>
+
           <div className="mt-4 grid grid-cols-2 gap-3">
             <Field label="District" value={profile.district ?? ""} onSave={(v) => save({ district: v })} />
             <Field label="Town" value={profile.town ?? ""} onSave={(v) => save({ town: v })} />
