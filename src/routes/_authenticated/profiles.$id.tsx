@@ -354,3 +354,54 @@ function Field({ label, value, onChange, placeholder }: { label: string; value: 
     </div>
   );
 }
+
+function ProfileAvatarUpload({ profile, onUpdated }: { profile: PublicProfile; onUpdated: () => void }) {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState(false);
+
+  const upload = async (file: File) => {
+    if (!file.type.startsWith("image/")) { toast.error("Please choose an image file"); return; }
+    if (file.size > 8 * 1024 * 1024) { toast.error("Image must be smaller than 8MB"); return; }
+    setBusy(true);
+    try {
+      const url = await uploadMedia(profile.owner_id, file, "avatars");
+      const { error } = await supabase.from("public_profiles").update({ avatar_url: url }).eq("id", profile.id);
+      if (error) throw error;
+      toast.success("Profile photo updated");
+      onUpdated();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Upload failed");
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <div className="relative shrink-0">
+      <Avatar
+        name={profile.name}
+        url={profile.avatar_url}
+        size={72}
+        categorySlug={profile.category_slug}
+        verifiedRing={!!profile.avatar_url}
+      />
+      <button
+        type="button"
+        onClick={() => fileRef.current?.click()}
+        disabled={busy}
+        aria-label={profile.avatar_url ? "Change profile photo" : "Add profile photo"}
+        className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full bg-orange text-orange-foreground shadow-md ring-2 ring-card hover:bg-orange/90 disabled:opacity-60"
+      >
+        <Camera className="h-3.5 w-3.5" />
+      </button>
+      <input
+        ref={fileRef}
+        id={`profile-avatar-${profile.id}`}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])}
+      />
+    </div>
+  );
+}
