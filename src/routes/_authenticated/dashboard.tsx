@@ -14,6 +14,9 @@ import { ContactedProvidersList } from "@/components/ContactedProvidersList";
 import { ProviderContactsList } from "@/components/ProviderContactsList";
 
 import { MyProfilesPanel } from "@/components/profiles/MyProfilesPanel";
+import { ProfileStrengthCard } from "@/components/ProfileStrengthCard";
+import { AddPhotoNudge } from "@/components/AddPhotoNudge";
+import { computeProfileStrength } from "@/lib/profile-strength";
 import { toast } from "sonner";
 
 
@@ -124,6 +127,60 @@ function Dashboard() {
             <QuickAction to="/u/$id" params={{ id: user.id }} icon={<UserCircle2 className="h-5 w-5" />} label="View public profile" hint="See how customers see you" />
           </div>
         </div>
+
+        {/* Profile photo nudge — providers only, dismissible */}
+        {profile?.is_provider && profile && !profile.avatar_url && (
+          <div className="mt-6">
+            <AddPhotoNudge userId={user.id} hasPhoto={!!profile.avatar_url} onUploaded={() => load()} />
+          </div>
+        )}
+
+        {/* Profile strength — positive, trust-building */}
+        {profile && (
+          <div className="mt-6">
+            <ProfileStrengthCard
+              result={computeProfileStrength({
+                isProvider: !!profile.is_provider,
+                avatarUrl: profile.avatar_url,
+                fullName: profile.full_name,
+                bio: sp?.bio,
+                district: sp?.district,
+                town: sp?.town,
+                phone: sp?.phone ?? null,
+                category: sp?.category_slug,
+                servicesCount: sp ? 1 : 0,
+                reviewsCount: stats.reviews,
+              })}
+              primaryAction={{
+                label: "Add profile photo",
+                onClick: () => document.getElementById("dashboard-avatar-input")?.click(),
+              }}
+            />
+            <input
+              id="dashboard-avatar-input"
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                if (!file.type.startsWith("image/")) { toast.error("Please choose an image file"); return; }
+                if (file.size > 8 * 1024 * 1024) { toast.error("Image must be smaller than 8MB"); return; }
+                try {
+                  const { uploadMedia } = await import("@/lib/upload");
+                  const url = await uploadMedia(user.id, file, "avatars");
+                  const { error } = await supabase.from("profiles").update({ avatar_url: url }).eq("id", user.id);
+                  if (error) throw error;
+                  toast.success("Profile photo added — looking great!");
+                  load();
+                } catch (err) {
+                  toast.error(err instanceof Error ? err.message : "Upload failed");
+                }
+              }}
+            />
+          </div>
+        )}
+
 
         {/* 3. Main stats — simplified */}
         {profile?.is_provider && (
