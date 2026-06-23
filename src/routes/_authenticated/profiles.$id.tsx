@@ -1,10 +1,14 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { uploadMedia } from "@/lib/upload";
+import { Avatar } from "@/components/social/Avatar";
+import { ProfileStrengthCard } from "@/components/ProfileStrengthCard";
+import { computeProfileStrength } from "@/lib/profile-strength";
 import { toast } from "sonner";
-import { ArrowLeft, Plus, Trash2, Save } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Save, Camera } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/profiles/$id")({
   head: () => ({ meta: [{ title: "Manage Profile — Tuungane" }] }),
@@ -131,16 +135,42 @@ function ManageProfile() {
         </Link>
 
         <header className="mt-3 flex items-start justify-between gap-3">
-          <div>
-            <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-navy/70">
-              {profile.profile_type}
-            </span>
-            <h1 className="mt-1 font-display text-2xl font-bold text-navy">{profile.name}</h1>
-            <p className="text-xs text-muted-foreground">
-              {profile.subcategory || profile.category_slug || "—"} · {profile.town || profile.district || "Location not set"}
-            </p>
+          <div className="flex items-start gap-3 min-w-0">
+            <ProfileAvatarUpload profile={profile} onUpdated={load} />
+            <div className="min-w-0">
+              <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-navy/70">
+                {profile.profile_type}
+              </span>
+              <h1 className="mt-1 font-display text-2xl font-bold text-navy">{profile.name}</h1>
+              <p className="text-xs text-muted-foreground">
+                {profile.subcategory || profile.category_slug || "—"} · {profile.town || profile.district || "Location not set"}
+              </p>
+            </div>
           </div>
         </header>
+
+        <div className="mt-4">
+          <ProfileStrengthCard
+            result={computeProfileStrength({
+              isProvider: true,
+              avatarUrl: profile.avatar_url,
+              fullName: profile.name,
+              bio: profile.bio,
+              district: profile.district,
+              town: profile.town,
+              phone: profile.phone,
+              category: profile.category_slug,
+              servicesCount: services.length,
+              reviewsCount: 0,
+              verified: profile.verified === "verified",
+            })}
+            primaryAction={{
+              label: "Add profile photo",
+              onClick: () => document.getElementById(`profile-avatar-${profile.id}`)?.click(),
+            }}
+          />
+        </div>
+
 
         <nav className="mt-4 flex gap-1 rounded-xl bg-muted p-1 text-xs font-semibold">
           {(["services", "requests", "details"] as const).map((t) => (
