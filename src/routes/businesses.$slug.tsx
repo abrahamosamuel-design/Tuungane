@@ -11,6 +11,7 @@ import { TrustBadge } from "@/components/trust/TrustBadge";
 import { useTrustBadge } from "@/hooks/use-trust-badges";
 import { ReportProfileButton } from "@/components/trust/ReportProfileButton";
 import { formatSubcategory } from "@/lib/format-category";
+import { Avatar } from "@/components/social/Avatar";
 
 
 import { RouteErrorCard, RouteNotFoundCard } from "@/lib/route-boundaries";
