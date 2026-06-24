@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
-import { MapPin, BadgeCheck } from "lucide-react";
+import { Building2, MapPin, BadgeCheck, Sparkles, User, SearchX } from "lucide-react";
 import { EmptyState } from "@/components/EmptyState";
 import { Avatar } from "@/components/social/Avatar";
 
