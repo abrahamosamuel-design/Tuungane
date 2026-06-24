@@ -111,16 +111,15 @@ function ProfilesBrowsePage() {
                 params={{ slug: p.slug }}
                 className="flex gap-3 rounded-2xl border border-border bg-card p-3 transition hover:border-orange/40 hover:shadow-sm"
               >
-                <div className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-full bg-muted">
-                  {p.avatar_url ? (
-                    <img src={p.avatar_url} alt={p.name} className="h-full w-full object-cover" />
-                  ) : p.profile_type === "individual" ? (
-                    <User className="h-5 w-5 text-muted-foreground" />
-                  ) : (
-                    <Building2 className="h-5 w-5 text-muted-foreground" />
-                  )}
-                </div>
+                <Avatar
+                  name={p.name}
+                  url={p.avatar_url}
+                  verifiedRing={p.verified === "verified"}
+                  size={48}
+                />
                 <div className="min-w-0 flex-1">
+                  {p.profile_type !== "individual" && !p.avatar_url ? <Building2 className="hidden" /> : null}
+                  {p.profile_type === "individual" && !p.avatar_url ? <User className="hidden" /> : null}
                   <div className="flex items-center gap-1.5">
                     <h3 className="truncate font-semibold text-navy">{p.name}</h3>
                     {p.verified === "verified" && <BadgeCheck className="h-4 w-4 shrink-0 text-orange" />}
