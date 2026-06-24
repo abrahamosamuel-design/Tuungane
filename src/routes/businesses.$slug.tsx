@@ -136,7 +136,7 @@ function BusinessDetail() {
               <Avatar
                 name={page.name}
                 businessLogoUrl={page.logo_url}
-                categorySlug={page.subcategory ?? "other"}
+                categorySlug={page.category_slug}
                 size={72}
               />
             </div>
