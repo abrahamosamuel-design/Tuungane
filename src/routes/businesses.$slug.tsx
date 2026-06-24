@@ -132,9 +132,12 @@ function BusinessDetail() {
           </div>
           <div className="-mt-10 px-5 sm:px-8">
             <div className="h-20 w-20 overflow-hidden rounded-2xl border-4 border-card bg-muted">
-              {page.logo_url
-                ? <img src={page.logo_url} alt="" className="h-full w-full object-cover" />
-                : <div className="flex h-full w-full items-center justify-center text-navy"><Building2 className="h-8 w-8" /></div>}
+              <Avatar
+                name={page.name}
+                businessLogoUrl={page.logo_url}
+                categorySlug={page.subcategory ?? "other"}
+                size={72}
+              />
             </div>
           </div>
           <div className="px-5 pb-5 pt-3 sm:px-8 sm:pb-6">
