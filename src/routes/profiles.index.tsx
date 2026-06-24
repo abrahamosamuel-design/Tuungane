@@ -118,8 +118,6 @@ function ProfilesBrowsePage() {
                   size={48}
                 />
                 <div className="min-w-0 flex-1">
-                  {p.profile_type !== "individual" && !p.avatar_url ? <Building2 className="hidden" /> : null}
-                  {p.profile_type === "individual" && !p.avatar_url ? <User className="hidden" /> : null}
                   <div className="flex items-center gap-1.5">
                     <h3 className="truncate font-semibold text-navy">{p.name}</h3>
                     {p.verified === "verified" && <BadgeCheck className="h-4 w-4 shrink-0 text-orange" />}
