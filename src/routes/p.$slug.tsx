@@ -115,7 +115,7 @@ function PublicProfilePage() {
   }
 
   const isOwner = user?.id === profile.owner_id;
-  const Icon = TYPE_META[profile.profile_type].icon;
+  void TYPE_META;
   const avgRating = reviews.length ? reviews.reduce((a, r) => a + r.rating, 0) / reviews.length : null;
   const location = [profile.area, profile.town, profile.district].filter(Boolean).join(", ");
 
