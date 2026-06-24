@@ -16,6 +16,7 @@ import { useFeaturedLocations, isFeaturedTarget } from "@/hooks/use-featured-loc
 import { ProviderQuickContact } from "@/components/ProviderQuickContact";
 import { ProfileTrustBadge } from "@/components/trust/ProfileTrustBadge";
 import { formatSubcategory } from "@/lib/format-category";
+import { Avatar } from "@/components/social/Avatar";
 
 
 
