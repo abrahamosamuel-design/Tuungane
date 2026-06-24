@@ -380,7 +380,13 @@ function ProviderRow({ p, isBoosted, userLoc, onRequest }: { p: RealProvider; is
       {isVerified && <div className="h-1 w-full bg-gradient-to-r from-green via-green/70 to-orange/60" />}
 
       <Link to="/u/$id" params={{ id: p.user_id }} className="flex items-start gap-3 p-4 pb-3">
-        <Avatar name={name} src={p.profile?.avatar_url} size={56} />
+        <Avatar
+          name={name}
+          url={p.profile?.avatar_url}
+          categorySlug={p.category_slug}
+          verifiedRing={isVerified}
+          size={56}
+        />
         <div className="min-w-0 flex-1">
           <div className="flex items-start gap-2">
             <h3 className="min-w-0 flex-1 font-display text-[15px] font-bold leading-tight text-navy line-clamp-2">
