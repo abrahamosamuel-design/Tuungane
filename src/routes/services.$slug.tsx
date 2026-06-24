@@ -247,6 +247,7 @@ function CategoryPage() {
 }
 
 function RealProviderCard({ p, userLoc }: { p: Row; userLoc: UserLocation | null }) {
+  const params = Route.useParams();
   const name = p.business_name || p.full_name || "Provider";
   const near = proximityLabel(userLoc, p);
   return (
@@ -256,7 +257,13 @@ function RealProviderCard({ p, userLoc }: { p: Row; userLoc: UserLocation | null
       className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)] transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-elevated)]"
     >
       <div className="flex items-start gap-4 p-5">
-        <Avatar name={name} url={p.avatar_url ?? null} size={56} />
+        <Avatar
+          name={name}
+          url={p.avatar_url ?? null}
+          categorySlug={params.slug}
+          verifiedRing={p.verified === "verified" || p.verified === "featured"}
+          size={56}
+        />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-start gap-x-2 gap-y-1">
             <h3 className="min-w-0 flex-1 font-display text-base font-semibold leading-tight text-navy line-clamp-2 sm:line-clamp-1 sm:truncate">{name}</h3>
