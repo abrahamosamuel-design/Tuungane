@@ -16,6 +16,7 @@ import { useFeaturedLocations, isFeaturedTarget } from "@/hooks/use-featured-loc
 import { ProviderQuickContact } from "@/components/ProviderQuickContact";
 import { ProfileTrustBadge } from "@/components/trust/ProfileTrustBadge";
 import { formatSubcategory } from "@/lib/format-category";
+import { Avatar } from "@/components/social/Avatar";
 
 
 
@@ -62,29 +63,8 @@ type RealProvider = {
 
 const POPULAR_SERVICES = ["Plumber", "Electrician", "Cleaner", "Mechanic", "Tailor", "Tutor", "Driver", "Hairdresser", "Caterer", "Web Designer"];
 
-function initialsOf(name: string) {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  if (parts.length === 0) return "T";
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return (parts[0][0] + parts[1][0]).toUpperCase();
-}
 
-function Avatar({ name, src, size = 56 }: { name: string; src?: string | null; size?: number }) {
-  const [failed, setFailed] = useState(false);
-  const show = src && !failed;
-  return (
-    <div
-      className="flex shrink-0 items-center justify-center overflow-hidden rounded-xl border border-border bg-navy/10 font-display font-bold text-navy"
-      style={{ width: size, height: size, fontSize: size * 0.34 }}
-    >
-      {show ? (
-        <img src={src!} alt={name} className="h-full w-full object-cover" onError={() => setFailed(true)} />
-      ) : (
-        <span>{initialsOf(name)}</span>
-      )}
-    </div>
-  );
-}
+
 
 function Services() {
   const nav = useNavigate();
@@ -400,7 +380,13 @@ function ProviderRow({ p, isBoosted, userLoc, onRequest }: { p: RealProvider; is
       {isVerified && <div className="h-1 w-full bg-gradient-to-r from-green via-green/70 to-orange/60" />}
 
       <Link to="/u/$id" params={{ id: p.user_id }} className="flex items-start gap-3 p-4 pb-3">
-        <Avatar name={name} src={p.profile?.avatar_url} size={56} />
+        <Avatar
+          name={name}
+          url={p.profile?.avatar_url}
+          categorySlug={p.category_slug}
+          verifiedRing={isVerified}
+          size={56}
+        />
         <div className="min-w-0 flex-1">
           <div className="flex items-start gap-2">
             <h3 className="min-w-0 flex-1 font-display text-[15px] font-bold leading-tight text-navy line-clamp-2">

@@ -2,8 +2,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
-import { Building2, MapPin, BadgeCheck, Sparkles, User, SearchX } from "lucide-react";
+import { MapPin, BadgeCheck, Sparkles, SearchX } from "lucide-react";
 import { EmptyState } from "@/components/EmptyState";
+import { Avatar } from "@/components/social/Avatar";
 
 export const Route = createFileRoute("/profiles/")({
   head: () => ({ meta: [
@@ -110,15 +111,12 @@ function ProfilesBrowsePage() {
                 params={{ slug: p.slug }}
                 className="flex gap-3 rounded-2xl border border-border bg-card p-3 transition hover:border-orange/40 hover:shadow-sm"
               >
-                <div className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-full bg-muted">
-                  {p.avatar_url ? (
-                    <img src={p.avatar_url} alt={p.name} className="h-full w-full object-cover" />
-                  ) : p.profile_type === "individual" ? (
-                    <User className="h-5 w-5 text-muted-foreground" />
-                  ) : (
-                    <Building2 className="h-5 w-5 text-muted-foreground" />
-                  )}
-                </div>
+                <Avatar
+                  name={p.name}
+                  url={p.avatar_url}
+                  verifiedRing={p.verified === "verified"}
+                  size={48}
+                />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5">
                     <h3 className="truncate font-semibold text-navy">{p.name}</h3>
