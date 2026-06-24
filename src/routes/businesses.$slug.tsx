@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import { Building2, MapPin, Phone, Mail, Sparkles, Edit3, Users } from "lucide-react";
+import { MapPin, Phone, Mail, Sparkles, Edit3, Users } from "lucide-react";
 import { toast } from "sonner";
 import { orgTypeLabel } from "@/data/businessTypes";
 import { SafetyNote, SAFETY_TIPS } from "@/components/SafetyNote";
@@ -11,6 +11,7 @@ import { TrustBadge } from "@/components/trust/TrustBadge";
 import { useTrustBadge } from "@/hooks/use-trust-badges";
 import { ReportProfileButton } from "@/components/trust/ReportProfileButton";
 import { formatSubcategory } from "@/lib/format-category";
+import { Avatar } from "@/components/social/Avatar";
 
 
 import { RouteErrorCard, RouteNotFoundCard } from "@/lib/route-boundaries";
@@ -132,9 +133,12 @@ function BusinessDetail() {
           </div>
           <div className="-mt-10 px-5 sm:px-8">
             <div className="h-20 w-20 overflow-hidden rounded-2xl border-4 border-card bg-muted">
-              {page.logo_url
-                ? <img src={page.logo_url} alt="" className="h-full w-full object-cover" />
-                : <div className="flex h-full w-full items-center justify-center text-navy"><Building2 className="h-8 w-8" /></div>}
+              <Avatar
+                name={page.name}
+                businessLogoUrl={page.logo_url}
+                categorySlug={page.category_slug}
+                size={72}
+              />
             </div>
           </div>
           <div className="px-5 pb-5 pt-3 sm:px-8 sm:pb-6">

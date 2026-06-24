@@ -7,6 +7,7 @@ import { Building2, User as UserIcon, Landmark, Star, MapPin, MessageSquare, Pho
 import { ReviewDialog } from "@/components/social/ReviewDialog";
 import { ProfileTrustBadge } from "@/components/trust/ProfileTrustBadge";
 import { formatSubcategory } from "@/lib/format-category";
+import { Avatar } from "@/components/social/Avatar";
 
 
 type ProfileType = "individual" | "business" | "organization";
@@ -114,7 +115,7 @@ function PublicProfilePage() {
   }
 
   const isOwner = user?.id === profile.owner_id;
-  const Icon = TYPE_META[profile.profile_type].icon;
+  void TYPE_META;
   const avgRating = reviews.length ? reviews.reduce((a, r) => a + r.rating, 0) / reviews.length : null;
   const location = [profile.area, profile.town, profile.district].filter(Boolean).join(", ");
 
@@ -140,12 +141,14 @@ function PublicProfilePage() {
 
       <section className="mx-auto -mt-10 max-w-2xl px-4 pb-24">
         <div className="flex items-end gap-3">
-          <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border-4 border-background bg-muted shadow">
-            {profile.avatar_url ? (
-              <img src={profile.avatar_url} alt={profile.name} className="h-full w-full object-cover" />
-            ) : (
-              <Icon className="h-8 w-8 text-navy/60" />
-            )}
+          <div className="h-20 w-20 shrink-0 overflow-hidden rounded-2xl border-4 border-background bg-muted shadow">
+            <Avatar
+              name={profile.name}
+              url={profile.avatar_url}
+              categorySlug={profile.category_slug}
+              verifiedRing={profile.verified === "verified"}
+              size={72}
+            />
           </div>
         </div>
 

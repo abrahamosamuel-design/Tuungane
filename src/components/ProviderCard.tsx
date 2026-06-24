@@ -2,10 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { BadgeCheck, MapPin, Star, Sparkles } from "lucide-react";
 import type { Provider } from "@/data/providers";
 import { formatSubcategory } from "@/lib/format-category";
-
-
-const avatar = (s: string) =>
-  `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(s)}&backgroundColor=1e3a8a,f97316,16a34a&fontFamily=Plus%20Jakarta%20Sans`;
+import { Avatar } from "@/components/social/Avatar";
 
 export function ProviderCard({ p }: { p: Provider }) {
   return (
@@ -15,7 +12,12 @@ export function ProviderCard({ p }: { p: Provider }) {
       className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)] transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-elevated)]"
     >
       <div className="flex items-start gap-4 p-5">
-        <img src={avatar(p.avatarSeed)} alt={p.name} className="h-14 w-14 rounded-xl border border-border" />
+        <Avatar
+          name={p.businessName ?? p.name}
+          categorySlug={p.categorySlug}
+          size={56}
+          verifiedRing={p.verified === "verified" || p.verified === "featured"}
+        />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
             <h3 className="truncate font-display text-base font-semibold text-navy">
