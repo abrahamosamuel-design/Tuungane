@@ -16,7 +16,7 @@ export function ProviderCard({ p }: { p: Provider }) {
           name={p.businessName ?? p.name}
           categorySlug={p.categorySlug}
           size={56}
-          className="rounded-xl"
+          verifiedRing={p.verified === "verified" || p.verified === "featured"}
         />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
