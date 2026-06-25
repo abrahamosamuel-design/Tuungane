@@ -83,13 +83,9 @@ function Me() {
                 <input type="file" accept="image/*" className="hidden" disabled={busy} onChange={(e) => e.target.files?.[0] && onAvatar(e.target.files[0])} />
               </label>
               {profile.avatar_url && (
-                <button
-                  type="button"
-                  onClick={() => save({ avatar_url: null })}
-                  className="ml-3 text-xs text-muted-foreground hover:text-navy"
-                >
-                  Remove
-                </button>
+                <span className="ml-3 inline-block">
+                  <RemovePhotoConfirm onConfirm={() => save({ avatar_url: null })} disabled={busy} />
+                </span>
               )}
               <p className="mt-1 text-[11px] text-muted-foreground">
                 Your photo helps people recognize you on Tuungane. You can change or remove it anytime.
