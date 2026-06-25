@@ -377,6 +377,13 @@ function ProfileAvatarUpload({ profile, onUpdated }: { profile: PublicProfile; o
     }
   };
 
+  const remove = async () => {
+    const { error } = await supabase.from("public_profiles").update({ avatar_url: null }).eq("id", profile.id);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Photo removed");
+    onUpdated();
+  };
+
   return (
     <div className="relative shrink-0">
       <Avatar
@@ -403,6 +410,11 @@ function ProfileAvatarUpload({ profile, onUpdated }: { profile: PublicProfile; o
         className="hidden"
         onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])}
       />
+      {profile.avatar_url && (
+        <div className="mt-2 text-center">
+          <RemovePhotoConfirm onConfirm={remove} disabled={busy} />
+        </div>
+      )}
     </div>
   );
 }
