@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { uploadMedia } from "@/lib/upload";
 import { Avatar } from "@/components/social/Avatar";
+import { RemovePhotoConfirm } from "@/components/RemovePhotoConfirm";
 import { MyRequestsSummary } from "@/components/MyRequestsSummary";
 import { MyTrustStatusCard } from "@/components/trust/MyTrustStatusCard";
 import { toast } from "sonner";
