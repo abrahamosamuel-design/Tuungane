@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { uploadMedia } from "@/lib/upload";
 import { Avatar } from "@/components/social/Avatar";
 import { ProfileStrengthCard } from "@/components/ProfileStrengthCard";
+import { RemovePhotoConfirm } from "@/components/RemovePhotoConfirm";
 import { computeProfileStrength } from "@/lib/profile-strength";
 import { toast } from "sonner";
 import { ArrowLeft, Plus, Trash2, Save, Camera } from "lucide-react";
@@ -376,6 +377,13 @@ function ProfileAvatarUpload({ profile, onUpdated }: { profile: PublicProfile; o
     }
   };
 
+  const remove = async () => {
+    const { error } = await supabase.from("public_profiles").update({ avatar_url: null }).eq("id", profile.id);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Photo removed");
+    onUpdated();
+  };
+
   return (
     <div className="relative shrink-0">
       <Avatar
@@ -402,6 +410,11 @@ function ProfileAvatarUpload({ profile, onUpdated }: { profile: PublicProfile; o
         className="hidden"
         onChange={(e) => e.target.files?.[0] && upload(e.target.files[0])}
       />
+      {profile.avatar_url && (
+        <div className="mt-2 text-center">
+          <RemovePhotoConfirm onConfirm={remove} disabled={busy} />
+        </div>
+      )}
     </div>
   );
 }
