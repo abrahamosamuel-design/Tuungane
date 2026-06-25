@@ -144,8 +144,8 @@ function BPageCard({ p, featured, userLoc }: { p: BPage; featured?: boolean; use
         )}
       </div>
       <div className="-mt-6 flex items-end gap-3 px-4">
-        <div className="h-12 w-12 overflow-hidden rounded-xl border-2 border-card bg-muted">
-          {p.logo_url ? <img src={p.logo_url} alt="" className="h-full w-full object-cover" /> : <div className="flex h-full w-full items-center justify-center text-navy"><Building2 className="h-5 w-5" /></div>}
+        <div className="rounded-xl border-2 border-card">
+          <Avatar name={p.name} businessLogoUrl={p.logo_url} categorySlug={p.category_slug} size={48} className="!rounded-xl" />
         </div>
       </div>
       <div className="p-4 pt-3">
