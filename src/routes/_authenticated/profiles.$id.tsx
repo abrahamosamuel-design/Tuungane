@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { uploadMedia } from "@/lib/upload";
 import { Avatar } from "@/components/social/Avatar";
 import { ProfileStrengthCard } from "@/components/ProfileStrengthCard";
+import { RemovePhotoConfirm } from "@/components/RemovePhotoConfirm";
 import { computeProfileStrength } from "@/lib/profile-strength";
 import { toast } from "sonner";
 import { ArrowLeft, Plus, Trash2, Save, Camera } from "lucide-react";
