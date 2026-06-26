@@ -1,10 +1,13 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Camera, Check, X } from "lucide-react";
 import { Layout } from "@/components/Layout";
+import { Avatar } from "@/components/social/Avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { categories as staticCategories } from "@/data/categories";
 import { useCategories } from "@/hooks/use-categories";
+import { uploadMedia } from "@/lib/upload";
 import { toast } from "sonner";
 import { toastError } from "@/lib/user-errors";
 
@@ -32,6 +35,12 @@ function ListSkillPage() {
   const [whatsapp, setWhatsapp] = useState("");
   const [busy, setBusy] = useState(false);
 
+  // photo step
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [photoSkipped, setPhotoSkipped] = useState(false);
+  const [photoBusy, setPhotoBusy] = useState(false);
+  const photoRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
     (async () => {
       if (!user) return;
@@ -41,9 +50,34 @@ function ListSkillPage() {
         .eq("user_id", user.id)
         .maybeSingle();
       setAlreadyHas(!!sp);
+      const { data: pr } = await supabase
+        .from("profiles")
+        .select("avatar_url")
+        .eq("id", user.id)
+        .maybeSingle();
+      setAvatarUrl((pr?.avatar_url as string | null) ?? null);
       setChecking(false);
     })();
   }, [user]);
+
+  const handlePhoto = async (file: File) => {
+    if (!user) return;
+    if (!file.type.startsWith("image/")) { toast.error("Please choose an image file"); return; }
+    if (file.size > 8 * 1024 * 1024) { toast.error("Image must be smaller than 8MB"); return; }
+    setPhotoBusy(true);
+    try {
+      const url = await uploadMedia(user.id, file, "avatars");
+      const { error } = await supabase.from("profiles").update({ avatar_url: url }).eq("id", user.id);
+      if (error) throw error;
+      setAvatarUrl(url);
+      setPhotoSkipped(false);
+      toast.success("Photo added — your card will look great");
+    } catch (e) {
+      toastError(e, "Couldn't upload your photo");
+    } finally {
+      setPhotoBusy(false);
+    }
+  };
 
   const cat = categories.find((c) => c.slug === categorySlug) ?? staticCategories[0];
 
@@ -109,6 +143,61 @@ function ListSkillPage() {
         <form onSubmit={submit} className="space-y-4 rounded-2xl border border-border bg-card p-5">
           {step === 1 && (
             <>
+              <div className="rounded-xl border border-orange/30 bg-orange/5 p-4">
+                <div className="flex items-start gap-3">
+                  <div className="relative">
+                    <Avatar name={businessName || user?.email || "You"} url={avatarUrl} size={64} />
+                    {avatarUrl && (
+                      <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-green text-white ring-2 ring-card">
+                        <Check className="h-3 w-3" />
+                      </span>
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-display text-sm font-bold text-navy">
+                      {avatarUrl ? "Looking good — this is your card photo" : "Add a service photo"}
+                    </p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      {avatarUrl
+                        ? "Customers will see this on every card and chat. You can change it any time."
+                        : "Profiles with a clear photo receive more requests. It only takes a moment — and you can skip if you'd rather add one later."}
+                    </p>
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => photoRef.current?.click()}
+                        disabled={photoBusy}
+                        className="inline-flex items-center gap-1.5 rounded-full bg-orange px-3 py-1.5 text-xs font-semibold text-orange-foreground hover:brightness-110 disabled:opacity-50"
+                      >
+                        <Camera className="h-3.5 w-3.5" />
+                        {photoBusy ? "Uploading…" : avatarUrl ? "Replace photo" : "Add photo"}
+                      </button>
+                      {!avatarUrl && !photoSkipped && (
+                        <button
+                          type="button"
+                          onClick={() => setPhotoSkipped(true)}
+                          className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-navy/70 hover:border-navy/30"
+                        >
+                          I'll add one later
+                        </button>
+                      )}
+                      {!avatarUrl && photoSkipped && (
+                        <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+                          <X className="h-3 w-3" /> Skipped — you can add one any time from Settings
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <input
+                  ref={photoRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => e.target.files?.[0] && handlePhoto(e.target.files[0])}
+                />
+              </div>
+
               <Field label="Business name (optional)">
                 <input value={businessName} onChange={(e) => setBusinessName(e.target.value)} placeholder="e.g. Bright Sparks Electrical" className="input" />
               </Field>
