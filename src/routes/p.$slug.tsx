@@ -144,7 +144,7 @@ function PublicProfilePage() {
           <div className="h-20 w-20 shrink-0 overflow-hidden rounded-2xl border-4 border-background bg-muted shadow">
             <Avatar
               name={profile.name}
-              url={profile.avatar_url}
+              url={profile.avatar_url ?? profile.cover_url}
               categorySlug={profile.category_slug}
               verifiedRing={profile.verified === "verified"}
               size={72}
