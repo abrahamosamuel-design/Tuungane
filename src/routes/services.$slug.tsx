@@ -260,7 +260,7 @@ function RealProviderCard({ p, userLoc }: { p: Row; userLoc: UserLocation | null
       <div className="flex items-start gap-4 p-5">
         <Avatar
           name={name}
-          url={p.avatar_url ?? null}
+          url={p.cover_url ?? p.avatar_url ?? null}
           categorySlug={params.slug}
           verifiedRing={p.verified === "verified" || p.verified === "featured"}
           size={56}
