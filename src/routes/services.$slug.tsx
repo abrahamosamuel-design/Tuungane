@@ -83,7 +83,7 @@ function CategoryPage() {
     (async () => {
       const { data: sps } = await supabase
         .from("service_profiles")
-        .select("user_id,business_name,subcategory,bio,town,district,area,latitude,longitude,verified,category_slug")
+        .select("user_id,business_name,subcategory,bio,town,district,area,latitude,longitude,verified,category_slug,cover_url")
         .eq("suspended", false)
         .limit(200);
       const all = (sps ?? []) as (Row & { category_slug: string })[];
