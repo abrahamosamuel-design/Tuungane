@@ -143,6 +143,61 @@ function ListSkillPage() {
         <form onSubmit={submit} className="space-y-4 rounded-2xl border border-border bg-card p-5">
           {step === 1 && (
             <>
+              <div className="rounded-xl border border-orange/30 bg-orange/5 p-4">
+                <div className="flex items-start gap-3">
+                  <div className="relative">
+                    <Avatar name={businessName || user?.email || "You"} url={avatarUrl} size={64} />
+                    {avatarUrl && (
+                      <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-green text-white ring-2 ring-card">
+                        <Check className="h-3 w-3" />
+                      </span>
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-display text-sm font-bold text-navy">
+                      {avatarUrl ? "Looking good — this is your card photo" : "Add a service photo"}
+                    </p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      {avatarUrl
+                        ? "Customers will see this on every card and chat. You can change it any time."
+                        : "Profiles with a clear photo receive more requests. It only takes a moment — and you can skip if you'd rather add one later."}
+                    </p>
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => photoRef.current?.click()}
+                        disabled={photoBusy}
+                        className="inline-flex items-center gap-1.5 rounded-full bg-orange px-3 py-1.5 text-xs font-semibold text-orange-foreground hover:brightness-110 disabled:opacity-50"
+                      >
+                        <Camera className="h-3.5 w-3.5" />
+                        {photoBusy ? "Uploading…" : avatarUrl ? "Replace photo" : "Add photo"}
+                      </button>
+                      {!avatarUrl && !photoSkipped && (
+                        <button
+                          type="button"
+                          onClick={() => setPhotoSkipped(true)}
+                          className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-navy/70 hover:border-navy/30"
+                        >
+                          I'll add one later
+                        </button>
+                      )}
+                      {!avatarUrl && photoSkipped && (
+                        <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+                          <X className="h-3 w-3" /> Skipped — you can add one any time from Settings
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <input
+                  ref={photoRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => e.target.files?.[0] && handlePhoto(e.target.files[0])}
+                />
+              </div>
+
               <Field label="Business name (optional)">
                 <input value={businessName} onChange={(e) => setBusinessName(e.target.value)} placeholder="e.g. Bright Sparks Electrical" className="input" />
               </Field>
