@@ -26,6 +26,7 @@ type Row = {
   latitude: number | null;
   longitude: number | null;
   verified: string | null;
+  cover_url?: string | null;
   full_name?: string;
   avatar_url?: string | null;
   rating?: number;
