@@ -26,6 +26,7 @@ type Row = {
   latitude: number | null;
   longitude: number | null;
   verified: string | null;
+  cover_url?: string | null;
   full_name?: string;
   avatar_url?: string | null;
   rating?: number;
@@ -82,7 +83,7 @@ function CategoryPage() {
     (async () => {
       const { data: sps } = await supabase
         .from("service_profiles")
-        .select("user_id,business_name,subcategory,bio,town,district,area,latitude,longitude,verified,category_slug")
+        .select("user_id,business_name,subcategory,bio,town,district,area,latitude,longitude,verified,category_slug,cover_url")
         .eq("suspended", false)
         .limit(200);
       const all = (sps ?? []) as (Row & { category_slug: string })[];
@@ -259,7 +260,7 @@ function RealProviderCard({ p, userLoc }: { p: Row; userLoc: UserLocation | null
       <div className="flex items-start gap-4 p-5">
         <Avatar
           name={name}
-          url={p.avatar_url ?? null}
+          url={p.cover_url ?? p.avatar_url ?? null}
           categorySlug={params.slug}
           verifiedRing={p.verified === "verified" || p.verified === "featured"}
           size={56}
