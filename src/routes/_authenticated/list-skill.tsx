@@ -35,6 +35,12 @@ function ListSkillPage() {
   const [whatsapp, setWhatsapp] = useState("");
   const [busy, setBusy] = useState(false);
 
+  // photo step
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [photoSkipped, setPhotoSkipped] = useState(false);
+  const [photoBusy, setPhotoBusy] = useState(false);
+  const photoRef = useRef<HTMLInputElement>(null);
+
   useEffect(() => {
     (async () => {
       if (!user) return;
@@ -44,9 +50,34 @@ function ListSkillPage() {
         .eq("user_id", user.id)
         .maybeSingle();
       setAlreadyHas(!!sp);
+      const { data: pr } = await supabase
+        .from("profiles")
+        .select("avatar_url")
+        .eq("id", user.id)
+        .maybeSingle();
+      setAvatarUrl((pr?.avatar_url as string | null) ?? null);
       setChecking(false);
     })();
   }, [user]);
+
+  const handlePhoto = async (file: File) => {
+    if (!user) return;
+    if (!file.type.startsWith("image/")) { toast.error("Please choose an image file"); return; }
+    if (file.size > 8 * 1024 * 1024) { toast.error("Image must be smaller than 8MB"); return; }
+    setPhotoBusy(true);
+    try {
+      const url = await uploadMedia(user.id, file, "avatars");
+      const { error } = await supabase.from("profiles").update({ avatar_url: url }).eq("id", user.id);
+      if (error) throw error;
+      setAvatarUrl(url);
+      setPhotoSkipped(false);
+      toast.success("Photo added — your card will look great");
+    } catch (e) {
+      toastError(e, "Couldn't upload your photo");
+    } finally {
+      setPhotoBusy(false);
+    }
+  };
 
   const cat = categories.find((c) => c.slug === categorySlug) ?? staticCategories[0];
 
