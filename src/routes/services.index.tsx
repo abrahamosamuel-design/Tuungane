@@ -382,7 +382,7 @@ function ProviderRow({ p, isBoosted, userLoc, onRequest }: { p: RealProvider; is
       <Link to="/u/$id" params={{ id: p.user_id }} className="flex items-start gap-3 p-4 pb-3">
         <Avatar
           name={name}
-          url={p.profile?.avatar_url}
+          url={p.cover_url ?? p.profile?.avatar_url}
           categorySlug={p.category_slug}
           verifiedRing={isVerified}
           size={56}
