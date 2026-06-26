@@ -1,10 +1,13 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Camera, Check, X } from "lucide-react";
 import { Layout } from "@/components/Layout";
+import { Avatar } from "@/components/social/Avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { categories as staticCategories } from "@/data/categories";
 import { useCategories } from "@/hooks/use-categories";
+import { uploadMedia } from "@/lib/upload";
 import { toast } from "sonner";
 import { toastError } from "@/lib/user-errors";
 
