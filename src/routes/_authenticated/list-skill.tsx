@@ -10,6 +10,7 @@ import { useCategories } from "@/hooks/use-categories";
 import { uploadMedia } from "@/lib/upload";
 import { toast } from "sonner";
 import { toastError } from "@/lib/user-errors";
+import { ImageCropDialog } from "@/components/media/ImageCropDialog";
 
 export const Route = createFileRoute("/_authenticated/list-skill")({
   validateSearch: (s: Record<string, unknown>) => ({
@@ -44,6 +45,7 @@ function ListSkillPage() {
   const [photoSkipped, setPhotoSkipped] = useState(false);
   const [photoBusy, setPhotoBusy] = useState(false);
   const photoRef = useRef<HTMLInputElement>(null);
+  const [cropFile, setCropFile] = useState<File | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -78,23 +80,39 @@ function ListSkillPage() {
   const MAX_PHOTO_BYTES = 8 * 1024 * 1024;
   const [photoError, setPhotoError] = useState<string | null>(null);
 
-  const handlePhoto = async (file: File) => {
-    if (!user) return;
+  const validatePhoto = (file: File): boolean => {
     setPhotoError(null);
     const isAccepted = ACCEPTED_PHOTO_TYPES.includes(file.type) || /\.(jpe?g|png|webp|heic|heif)$/i.test(file.name);
     if (!isAccepted) {
       const msg = "That file type isn't supported. Please use JPG, PNG, WEBP, or HEIC.";
-      setPhotoError(msg); toast.error(msg); return;
+      setPhotoError(msg); toast.error(msg); return false;
     }
     if (file.size === 0) {
       const msg = "That file looks empty. Try choosing a different photo.";
-      setPhotoError(msg); toast.error(msg); return;
+      setPhotoError(msg); toast.error(msg); return false;
     }
     if (file.size > MAX_PHOTO_BYTES) {
       const mb = (file.size / (1024 * 1024)).toFixed(1);
       const msg = `Photo is ${mb}MB — please choose one under 8MB.`;
-      setPhotoError(msg); toast.error(msg); return;
+      setPhotoError(msg); toast.error(msg); return false;
     }
+    return true;
+  };
+
+  const openCropper = (file: File) => {
+    if (!user) return;
+    if (!validatePhoto(file)) return;
+    // HEIC can't be rendered in a <canvas> in most browsers — upload as-is.
+    if (/heic|heif/i.test(file.type) || /\.(heic|heif)$/i.test(file.name)) {
+      void handlePhoto(file);
+      return;
+    }
+    setCropFile(file);
+  };
+
+  const handlePhoto = async (file: File) => {
+    if (!user) return;
+    if (!validatePhoto(file)) return;
     setPhotoBusy(true);
     try {
       const url = await uploadMedia(user.id, file, "avatars");
@@ -242,7 +260,7 @@ function ListSkillPage() {
                   className="hidden"
                   onChange={(e) => {
                     const f = e.target.files?.[0];
-                    if (f) handlePhoto(f);
+                    if (f) openCropper(f);
                     e.target.value = "";
                   }}
                 />
@@ -297,6 +315,14 @@ function ListSkillPage() {
       </section>
 
       <style>{`.input{margin-top:.25rem;width:100%;border-radius:.75rem;border:1px solid hsl(var(--border));background:hsl(var(--background));padding:.5rem .75rem;font-size:.875rem;outline:none}.input:focus{border-color:hsl(var(--orange,24 95% 53%))}`}</style>
+
+      <ImageCropDialog
+        file={cropFile}
+        open={!!cropFile}
+        onCancel={() => setCropFile(null)}
+        onConfirm={(f) => { setCropFile(null); void handlePhoto(f); }}
+        onUseOriginal={(f) => { setCropFile(null); void handlePhoto(f); }}
+      />
     </Layout>
   );
 }
