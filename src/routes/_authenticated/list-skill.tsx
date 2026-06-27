@@ -223,10 +223,14 @@ function ListSkillPage() {
                           I'll add one later
                         </button>
                       )}
-                      {!avatarUrl && photoSkipped && (
+                      {!avatarUrl && photoSkipped && !photoError && (
                         <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
                           <X className="h-3 w-3" /> Skipped — you can add one any time from Settings
                         </span>
+                      )}
+                      <p className="text-[11px] text-muted-foreground mt-1">JPG, PNG, WEBP or HEIC · up to 8MB</p>
+                      {photoError && (
+                        <p role="alert" className="text-[12px] text-destructive mt-1">{photoError}</p>
                       )}
                     </div>
                   </div>
@@ -234,11 +238,16 @@ function ListSkillPage() {
                 <input
                   ref={photoRef}
                   type="file"
-                  accept="image/*"
+                  accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
                   className="hidden"
-                  onChange={(e) => e.target.files?.[0] && handlePhoto(e.target.files[0])}
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) handlePhoto(f);
+                    e.target.value = "";
+                  }}
                 />
               </div>
+
 
               <Field label="Business name (optional)">
                 <input value={businessName} onChange={(e) => setBusinessName(e.target.value)} placeholder="e.g. Bright Sparks Electrical" className="input" />
