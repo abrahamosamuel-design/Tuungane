@@ -80,23 +80,39 @@ function ListSkillPage() {
   const MAX_PHOTO_BYTES = 8 * 1024 * 1024;
   const [photoError, setPhotoError] = useState<string | null>(null);
 
-  const handlePhoto = async (file: File) => {
-    if (!user) return;
+  const validatePhoto = (file: File): boolean => {
     setPhotoError(null);
     const isAccepted = ACCEPTED_PHOTO_TYPES.includes(file.type) || /\.(jpe?g|png|webp|heic|heif)$/i.test(file.name);
     if (!isAccepted) {
       const msg = "That file type isn't supported. Please use JPG, PNG, WEBP, or HEIC.";
-      setPhotoError(msg); toast.error(msg); return;
+      setPhotoError(msg); toast.error(msg); return false;
     }
     if (file.size === 0) {
       const msg = "That file looks empty. Try choosing a different photo.";
-      setPhotoError(msg); toast.error(msg); return;
+      setPhotoError(msg); toast.error(msg); return false;
     }
     if (file.size > MAX_PHOTO_BYTES) {
       const mb = (file.size / (1024 * 1024)).toFixed(1);
       const msg = `Photo is ${mb}MB — please choose one under 8MB.`;
-      setPhotoError(msg); toast.error(msg); return;
+      setPhotoError(msg); toast.error(msg); return false;
     }
+    return true;
+  };
+
+  const openCropper = (file: File) => {
+    if (!user) return;
+    if (!validatePhoto(file)) return;
+    // HEIC can't be rendered in a <canvas> in most browsers — upload as-is.
+    if (/heic|heif/i.test(file.type) || /\.(heic|heif)$/i.test(file.name)) {
+      void handlePhoto(file);
+      return;
+    }
+    setCropFile(file);
+  };
+
+  const handlePhoto = async (file: File) => {
+    if (!user) return;
+    if (!validatePhoto(file)) return;
     setPhotoBusy(true);
     try {
       const url = await uploadMedia(user.id, file, "avatars");
