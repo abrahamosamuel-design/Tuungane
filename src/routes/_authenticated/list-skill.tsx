@@ -124,26 +124,28 @@ function ListSkillPage() {
     return <Layout><div className="mx-auto max-w-2xl px-4 py-12 text-sm text-muted-foreground">Loading…</div></Layout>;
   }
 
-  if (alreadyHas) {
-    return (
-      <Layout>
-        <section className="mx-auto max-w-2xl px-4 py-12 text-center">
-          <h1 className="font-display text-3xl font-bold text-navy">You already have a skill listed</h1>
-          <p className="mt-2 text-sm text-muted-foreground">Manage it from your dashboard.</p>
-          <Link to="/dashboard" className="mt-6 inline-block rounded-xl bg-orange px-5 py-3 text-sm font-semibold text-orange-foreground">Go to dashboard</Link>
-        </section>
-      </Layout>
-    );
-  }
-
   return (
     <Layout>
       <section className="mx-auto max-w-2xl px-4 py-8">
         <div className="mb-6">
-          <p className="text-xs font-semibold uppercase tracking-wide text-green">Become a provider</p>
-          <h1 className="mt-1 font-display text-3xl font-bold text-navy">List your skill</h1>
-          <p className="mt-2 text-sm text-muted-foreground">Tell people what you do and where you work. Customers nearby will be able to find and contact you.</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-green">
+            {editMode ? "Edit your service profile" : "Become a provider"}
+          </p>
+          <h1 className="mt-1 font-display text-3xl font-bold text-navy">
+            {editMode ? "Update your skill" : "List your skill"}
+          </h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {editMode
+              ? "Change your service photo or update the details customers see on your card."
+              : "Tell people what you do and where you work. Customers nearby will be able to find and contact you."}
+          </p>
+          {editMode && (
+            <Link to="/dashboard" className="mt-3 inline-block text-xs font-semibold text-orange">
+              ← Back to dashboard
+            </Link>
+          )}
         </div>
+
 
         {/* Stepper */}
         <div className="mb-6 flex items-center gap-2 text-xs">
