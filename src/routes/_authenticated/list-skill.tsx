@@ -12,6 +12,9 @@ import { toast } from "sonner";
 import { toastError } from "@/lib/user-errors";
 
 export const Route = createFileRoute("/_authenticated/list-skill")({
+  validateSearch: (s: Record<string, unknown>) => ({
+    edit: s.edit === "1" || s.edit === 1 || s.edit === true,
+  }),
   head: () => ({ meta: [{ title: "List your skill — Tuungane" }] }),
   component: ListSkillPage,
 });
@@ -19,10 +22,11 @@ export const Route = createFileRoute("/_authenticated/list-skill")({
 function ListSkillPage() {
   const { user } = useAuth();
   const { categories } = useCategories();
+  const { edit } = Route.useSearch();
   const nav = useNavigate();
   const [step, setStep] = useState(1);
   const [checking, setChecking] = useState(true);
-  const [alreadyHas, setAlreadyHas] = useState(false);
+  const [editMode, setEditMode] = useState(false);
 
   // form
   const [businessName, setBusinessName] = useState("");
@@ -46,10 +50,20 @@ function ListSkillPage() {
       if (!user) return;
       const { data: sp } = await supabase
         .from("service_profiles")
-        .select("id")
+        .select("business_name,category_slug,subcategory,bio,district,town,phone,whatsapp")
         .eq("user_id", user.id)
         .maybeSingle();
-      setAlreadyHas(!!sp);
+      if (sp) {
+        setEditMode(true);
+        setBusinessName(sp.business_name ?? "");
+        setCategorySlug(sp.category_slug ?? staticCategories[0].slug);
+        setSubcategory(sp.subcategory ?? staticCategories[0].subcategories[0]);
+        setBio(sp.bio ?? "");
+        setDistrict(sp.district ?? "");
+        setTown(sp.town ?? "");
+        setPhone(sp.phone ?? "");
+        setWhatsapp(sp.whatsapp ?? "");
+      }
       const { data: pr } = await supabase
         .from("profiles")
         .select("avatar_url")
@@ -101,8 +115,10 @@ function ListSkillPage() {
       whatsapp: whatsapp || null,
     });
     setBusy(false);
-    if (error) { toastError(error, "Couldn't publish your skill"); return; }
-    toast.success("Your skill is live", { description: "Customers nearby can now find and contact you." });
+    if (error) { toastError(error, editMode ? "Couldn't save changes" : "Couldn't publish your skill"); return; }
+    toast.success(editMode ? "Changes saved" : "Your skill is live", {
+      description: editMode ? "Your service profile has been updated." : "Customers nearby can now find and contact you.",
+    });
     nav({ to: "/dashboard" });
   };
 
@@ -110,26 +126,28 @@ function ListSkillPage() {
     return <Layout><div className="mx-auto max-w-2xl px-4 py-12 text-sm text-muted-foreground">Loading…</div></Layout>;
   }
 
-  if (alreadyHas) {
-    return (
-      <Layout>
-        <section className="mx-auto max-w-2xl px-4 py-12 text-center">
-          <h1 className="font-display text-3xl font-bold text-navy">You already have a skill listed</h1>
-          <p className="mt-2 text-sm text-muted-foreground">Manage it from your dashboard.</p>
-          <Link to="/dashboard" className="mt-6 inline-block rounded-xl bg-orange px-5 py-3 text-sm font-semibold text-orange-foreground">Go to dashboard</Link>
-        </section>
-      </Layout>
-    );
-  }
-
   return (
     <Layout>
       <section className="mx-auto max-w-2xl px-4 py-8">
         <div className="mb-6">
-          <p className="text-xs font-semibold uppercase tracking-wide text-green">Become a provider</p>
-          <h1 className="mt-1 font-display text-3xl font-bold text-navy">List your skill</h1>
-          <p className="mt-2 text-sm text-muted-foreground">Tell people what you do and where you work. Customers nearby will be able to find and contact you.</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-green">
+            {editMode ? "Edit your service profile" : "Become a provider"}
+          </p>
+          <h1 className="mt-1 font-display text-3xl font-bold text-navy">
+            {editMode ? "Update your skill" : "List your skill"}
+          </h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {editMode
+              ? "Change your service photo or update the details customers see on your card."
+              : "Tell people what you do and where you work. Customers nearby will be able to find and contact you."}
+          </p>
+          {editMode && (
+            <Link to="/dashboard" className="mt-3 inline-block text-xs font-semibold text-orange">
+              ← Back to dashboard
+            </Link>
+          )}
         </div>
+
 
         {/* Stepper */}
         <div className="mb-6 flex items-center gap-2 text-xs">
@@ -234,7 +252,7 @@ function ListSkillPage() {
               <p className="text-xs text-muted-foreground">Customers reach you through Tuungane Messages. Your phone number is only revealed based on your contact preference in settings.</p>
               <div className="flex items-center justify-between pt-2">
                 <button type="button" onClick={() => setStep(2)} className="text-sm font-medium text-muted-foreground">Back</button>
-                <button disabled={busy} className="rounded-xl bg-green px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50">{busy ? "Publishing…" : "Publish my skill"}</button>
+                <button disabled={busy} className="rounded-xl bg-green px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50">{busy ? (editMode ? "Saving…" : "Publishing…") : (editMode ? "Save changes" : "Publish my skill")}</button>
               </div>
             </>
           )}
