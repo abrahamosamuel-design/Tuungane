@@ -74,10 +74,27 @@ function ListSkillPage() {
     })();
   }, [user]);
 
+  const ACCEPTED_PHOTO_TYPES = ["image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"];
+  const MAX_PHOTO_BYTES = 8 * 1024 * 1024;
+  const [photoError, setPhotoError] = useState<string | null>(null);
+
   const handlePhoto = async (file: File) => {
     if (!user) return;
-    if (!file.type.startsWith("image/")) { toast.error("Please choose an image file"); return; }
-    if (file.size > 8 * 1024 * 1024) { toast.error("Image must be smaller than 8MB"); return; }
+    setPhotoError(null);
+    const isAccepted = ACCEPTED_PHOTO_TYPES.includes(file.type) || /\.(jpe?g|png|webp|heic|heif)$/i.test(file.name);
+    if (!isAccepted) {
+      const msg = "That file type isn't supported. Please use JPG, PNG, WEBP, or HEIC.";
+      setPhotoError(msg); toast.error(msg); return;
+    }
+    if (file.size === 0) {
+      const msg = "That file looks empty. Try choosing a different photo.";
+      setPhotoError(msg); toast.error(msg); return;
+    }
+    if (file.size > MAX_PHOTO_BYTES) {
+      const mb = (file.size / (1024 * 1024)).toFixed(1);
+      const msg = `Photo is ${mb}MB — please choose one under 8MB.`;
+      setPhotoError(msg); toast.error(msg); return;
+    }
     setPhotoBusy(true);
     try {
       const url = await uploadMedia(user.id, file, "avatars");
@@ -86,8 +103,15 @@ function ListSkillPage() {
       setAvatarUrl(url);
       setPhotoSkipped(false);
       toast.success("Photo added — your card will look great");
-    } catch (e) {
-      toastError(e, "Couldn't upload your photo");
+    } catch (e: any) {
+      const raw = String(e?.message ?? e ?? "");
+      let msg = "Couldn't upload your photo. Please check your connection and try again.";
+      if (/network|fetch|offline/i.test(raw)) msg = "Upload failed — you appear to be offline. Try again when you're back online.";
+      else if (/timeout/i.test(raw)) msg = "Upload timed out. Try a smaller photo or a stronger connection.";
+      else if (/size|large|payload/i.test(raw)) msg = "Photo is too large for upload. Please pick one under 8MB.";
+      else if (/permission|unauthor|denied|403|401/i.test(raw)) msg = "We couldn't save the photo to your profile. Please sign out and back in, then try again.";
+      setPhotoError(msg);
+      toastError(e, msg);
     } finally {
       setPhotoBusy(false);
     }
