@@ -260,7 +260,7 @@ function ListSkillPage() {
                   className="hidden"
                   onChange={(e) => {
                     const f = e.target.files?.[0];
-                    if (f) handlePhoto(f);
+                    if (f) openCropper(f);
                     e.target.value = "";
                   }}
                 />
