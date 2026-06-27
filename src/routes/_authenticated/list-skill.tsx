@@ -315,6 +315,14 @@ function ListSkillPage() {
       </section>
 
       <style>{`.input{margin-top:.25rem;width:100%;border-radius:.75rem;border:1px solid hsl(var(--border));background:hsl(var(--background));padding:.5rem .75rem;font-size:.875rem;outline:none}.input:focus{border-color:hsl(var(--orange,24 95% 53%))}`}</style>
+
+      <ImageCropDialog
+        file={cropFile}
+        open={!!cropFile}
+        onCancel={() => setCropFile(null)}
+        onConfirm={(f) => { setCropFile(null); void handlePhoto(f); }}
+        onUseOriginal={(f) => { setCropFile(null); void handlePhoto(f); }}
+      />
     </Layout>
   );
 }
