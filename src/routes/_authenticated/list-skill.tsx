@@ -45,6 +45,7 @@ function ListSkillPage() {
   const [photoSkipped, setPhotoSkipped] = useState(false);
   const [photoBusy, setPhotoBusy] = useState(false);
   const photoRef = useRef<HTMLInputElement>(null);
+  const [cropFile, setCropFile] = useState<File | null>(null);
 
   useEffect(() => {
     (async () => {
