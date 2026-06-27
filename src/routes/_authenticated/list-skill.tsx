@@ -22,10 +22,11 @@ export const Route = createFileRoute("/_authenticated/list-skill")({
 function ListSkillPage() {
   const { user } = useAuth();
   const { categories } = useCategories();
+  const { edit } = Route.useSearch();
   const nav = useNavigate();
   const [step, setStep] = useState(1);
   const [checking, setChecking] = useState(true);
-  const [alreadyHas, setAlreadyHas] = useState(false);
+  const [editMode, setEditMode] = useState(false);
 
   // form
   const [businessName, setBusinessName] = useState("");
@@ -49,10 +50,20 @@ function ListSkillPage() {
       if (!user) return;
       const { data: sp } = await supabase
         .from("service_profiles")
-        .select("id")
+        .select("business_name,category_slug,subcategory,bio,district,town,phone,whatsapp")
         .eq("user_id", user.id)
         .maybeSingle();
-      setAlreadyHas(!!sp);
+      if (sp) {
+        setEditMode(true);
+        setBusinessName(sp.business_name ?? "");
+        setCategorySlug(sp.category_slug ?? staticCategories[0].slug);
+        setSubcategory(sp.subcategory ?? staticCategories[0].subcategories[0]);
+        setBio(sp.bio ?? "");
+        setDistrict(sp.district ?? "");
+        setTown(sp.town ?? "");
+        setPhone(sp.phone ?? "");
+        setWhatsapp(sp.whatsapp ?? "");
+      }
       const { data: pr } = await supabase
         .from("profiles")
         .select("avatar_url")
