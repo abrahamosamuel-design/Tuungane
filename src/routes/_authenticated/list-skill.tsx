@@ -12,6 +12,9 @@ import { toast } from "sonner";
 import { toastError } from "@/lib/user-errors";
 
 export const Route = createFileRoute("/_authenticated/list-skill")({
+  validateSearch: (s: Record<string, unknown>) => ({
+    edit: s.edit === "1" || s.edit === 1 || s.edit === true,
+  }),
   head: () => ({ meta: [{ title: "List your skill — Tuungane" }] }),
   component: ListSkillPage,
 });
