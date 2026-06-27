@@ -115,8 +115,10 @@ function ListSkillPage() {
       whatsapp: whatsapp || null,
     });
     setBusy(false);
-    if (error) { toastError(error, "Couldn't publish your skill"); return; }
-    toast.success("Your skill is live", { description: "Customers nearby can now find and contact you." });
+    if (error) { toastError(error, editMode ? "Couldn't save changes" : "Couldn't publish your skill"); return; }
+    toast.success(editMode ? "Changes saved" : "Your skill is live", {
+      description: editMode ? "Your service profile has been updated." : "Customers nearby can now find and contact you.",
+    });
     nav({ to: "/dashboard" });
   };
 
