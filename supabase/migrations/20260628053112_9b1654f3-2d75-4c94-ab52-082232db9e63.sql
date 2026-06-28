@@ -1,0 +1,1 @@
+ALTER TABLE public.service_profiles ADD COLUMN IF NOT EXISTS header_url text;

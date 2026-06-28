@@ -2109,6 +2109,7 @@ export type Database = {
           created_at: string
           district: string
           email: string | null
+          header_url: string | null
           latitude: number | null
           longitude: number | null
           phone: string | null
@@ -2139,6 +2140,7 @@ export type Database = {
           created_at?: string
           district?: string
           email?: string | null
+          header_url?: string | null
           latitude?: number | null
           longitude?: number | null
           phone?: string | null
@@ -2169,6 +2171,7 @@ export type Database = {
           created_at?: string
           district?: string
           email?: string | null
+          header_url?: string | null
           latitude?: number | null
           longitude?: number | null
           phone?: string | null
