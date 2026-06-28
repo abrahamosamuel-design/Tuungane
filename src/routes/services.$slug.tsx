@@ -258,12 +258,13 @@ function RealProviderCard({ p, userLoc }: { p: Row; userLoc: UserLocation | null
       className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)] transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-elevated)]"
     >
       <div className="flex items-start gap-4 p-5">
-        <Avatar
-          name={name}
-          url={p.cover_url ?? p.avatar_url ?? null}
+        <CoverImage
+          variant="square"
+          imageUrl={p.cover_url ?? p.avatar_url ?? null}
           categorySlug={params.slug}
+          name={name}
           verifiedRing={p.verified === "verified" || p.verified === "featured"}
-          size={56}
+          className="h-14 w-14 shrink-0"
         />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-start gap-x-2 gap-y-1">
