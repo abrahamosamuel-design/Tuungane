@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Camera, Check, X } from "lucide-react";
+import { CoverImage } from "@/components/media/CoverImage";
 import { Layout } from "@/components/Layout";
 import { Avatar } from "@/components/social/Avatar";
 import { supabase } from "@/integrations/supabase/client";
