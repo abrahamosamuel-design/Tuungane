@@ -42,10 +42,13 @@ function ListSkillPage() {
 
   // photo step
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [coverUrl, setCoverUrl] = useState<string | null>(null);
+  const [headerUrl, setHeaderUrl] = useState<string | null>(null);
   const [photoSkipped, setPhotoSkipped] = useState(false);
-  const [photoBusy, setPhotoBusy] = useState(false);
+  const [photoBusy, setPhotoBusy] = useState<null | CropAspect>(null);
   const photoRef = useRef<HTMLInputElement>(null);
   const [cropFile, setCropFile] = useState<File | null>(null);
+  const [cropInitialAspect, setCropInitialAspect] = useState<CropAspect>("square");
 
   useEffect(() => {
     (async () => {
