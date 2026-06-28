@@ -1,8 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import { Camera, Check, X } from "lucide-react";
+import { CoverImage } from "@/components/media/CoverImage";
 import { Layout } from "@/components/Layout";
-import { Avatar } from "@/components/social/Avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { categories as staticCategories } from "@/data/categories";
@@ -233,10 +233,17 @@ function ListSkillPage() {
             <>
               {/* Card photo (square) */}
               <div className="rounded-xl border border-orange/30 bg-orange/5 p-4">
-                <div className="flex items-start gap-3">
-                  <div className="relative">
-                    <Avatar name={businessName || user?.email || "You"} url={coverUrl ?? avatarUrl} size={64} />
-                    {(coverUrl ?? avatarUrl) && (
+              <div className="flex items-start gap-3">
+                <div className="relative">
+                  <CoverImage
+                    variant="square"
+                    imageUrl={coverUrl ?? avatarUrl}
+                    categorySlug={categorySlug}
+                    name={businessName || user?.email || "You"}
+                    label="No card photo yet"
+                    className="h-16 w-16"
+                  />
+                  {(coverUrl ?? avatarUrl) && (
                       <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-green text-white ring-2 ring-card">
                         <Check className="h-3 w-3" />
                       </span>
@@ -284,15 +291,14 @@ function ListSkillPage() {
 
               {/* Header banner (wide) */}
               <div className="rounded-xl border border-navy/20 bg-navy/5 p-4">
-                <div className="mb-3 w-full overflow-hidden rounded-lg bg-muted" style={{ aspectRatio: "3 / 1" }}>
-                  {headerUrl ? (
-                    <img src={headerUrl} alt="Profile header" className="h-full w-full object-cover" />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-[11px] text-muted-foreground">
-                      Wide banner shown at the top of your profile
-                    </div>
-                  )}
-                </div>
+                <CoverImage
+                  variant="wide"
+                  imageUrl={headerUrl}
+                  categorySlug={categorySlug}
+                  name={businessName || user?.email || "You"}
+                  label="Wide banner shown at the top of your profile"
+                  className="mb-3 h-32 w-full rounded-lg"
+                />
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="min-w-0">
                     <p className="font-display text-sm font-bold text-navy">

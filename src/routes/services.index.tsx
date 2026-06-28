@@ -16,7 +16,7 @@ import { useFeaturedLocations, isFeaturedTarget } from "@/hooks/use-featured-loc
 import { ProviderQuickContact } from "@/components/ProviderQuickContact";
 import { ProfileTrustBadge } from "@/components/trust/ProfileTrustBadge";
 import { formatSubcategory } from "@/lib/format-category";
-import { Avatar } from "@/components/social/Avatar";
+import { CoverImage } from "@/components/media/CoverImage";
 
 
 
@@ -380,12 +380,13 @@ function ProviderRow({ p, isBoosted, userLoc, onRequest }: { p: RealProvider; is
       {isVerified && <div className="h-1 w-full bg-gradient-to-r from-green via-green/70 to-orange/60" />}
 
       <Link to="/u/$id" params={{ id: p.user_id }} className="flex items-start gap-3 p-4 pb-3">
-        <Avatar
-          name={name}
-          url={p.cover_url ?? p.profile?.avatar_url}
+        <CoverImage
+          variant="square"
+          imageUrl={p.cover_url ?? p.profile?.avatar_url}
           categorySlug={p.category_slug}
+          name={name}
           verifiedRing={isVerified}
-          size={56}
+          className="h-14 w-14 shrink-0"
         />
         <div className="min-w-0 flex-1">
           <div className="flex items-start gap-2">

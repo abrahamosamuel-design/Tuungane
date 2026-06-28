@@ -8,6 +8,7 @@ import { ReviewDialog } from "@/components/social/ReviewDialog";
 import { ProfileTrustBadge } from "@/components/trust/ProfileTrustBadge";
 import { formatSubcategory } from "@/lib/format-category";
 import { Avatar } from "@/components/social/Avatar";
+import { CoverImage } from "@/components/media/CoverImage";
 
 
 type ProfileType = "individual" | "business" | "organization";
@@ -133,10 +134,15 @@ function PublicProfilePage() {
   return (
     <Layout>
       {/* Cover */}
-      <div className="relative h-32 w-full bg-gradient-to-br from-navy to-navy/70 sm:h-44">
-        {profile.cover_url && (
-          <img src={profile.cover_url} alt="" className="absolute inset-0 h-full w-full object-cover" />
-        )}
+      <div className="relative h-32 w-full sm:h-44">
+        <CoverImage
+          variant="wide"
+          imageUrl={profile.cover_url}
+          categorySlug={profile.category_slug}
+          name={profile.name}
+          label="No profile banner yet"
+          className="h-32 w-full rounded-none sm:h-44"
+        />
       </div>
 
       <section className="mx-auto -mt-10 max-w-2xl px-4 pb-24">

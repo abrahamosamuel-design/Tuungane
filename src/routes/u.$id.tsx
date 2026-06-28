@@ -5,6 +5,7 @@ import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { Avatar } from "@/components/social/Avatar";
+import { CoverImage } from "@/components/media/CoverImage";
 import { FollowButton } from "@/components/social/FollowButton";
 import { PostComposer } from "@/components/social/PostComposer";
 import { PostCard, type PostRow } from "@/components/social/PostCard";
@@ -109,7 +110,7 @@ function UserProfile() {
   const { user } = useAuth();
   const nav = useNavigate();
   const [profile, setProfile] = useState<{ full_name: string; avatar_url: string | null; bio: string | null; town: string | null; district: string | null; area: string | null; location_visibility: string | null; is_provider: boolean } | null>(null);
-  const [sp, setSp] = useState<{ business_name: string | null; subcategory: string; bio: string; town: string; district: string; phone: string | null; whatsapp: string | null; email: string | null; verified: string; category_slug: string; years_experience: number; areas_served: string[]; availability: string; cover_url: string | null; seeded_by_official: boolean; seeded_status: string | null } | null>(null);
+  const [sp, setSp] = useState<{ business_name: string | null; subcategory: string; bio: string; town: string; district: string; phone: string | null; whatsapp: string | null; email: string | null; verified: string; category_slug: string; years_experience: number; areas_served: string[]; availability: string; cover_url: string | null; header_url: string | null; seeded_by_official: boolean; seeded_status: string | null } | null>(null);
   const [posts, setPosts] = useState<PostRow[]>([]);
   
   const [followers, setFollowers] = useState(0);
@@ -135,8 +136,8 @@ function UserProfile() {
       .maybeSingle();
     setProfile(p as typeof profile);
     const { data: s } = user
-      ? await supabase.from("service_profiles").select("business_name,subcategory,bio,town,district,phone,whatsapp,email,verified,category_slug,years_experience,areas_served,availability,cover_url,seeded_by_official,seeded_status").eq("user_id", id).maybeSingle()
-      : await supabase.from("service_profiles").select("business_name,subcategory,bio,town,district,verified,category_slug,years_experience,areas_served,availability,cover_url,seeded_by_official,seeded_status").eq("user_id", id).maybeSingle();
+      ? await supabase.from("service_profiles").select("business_name,subcategory,bio,town,district,phone,whatsapp,email,verified,category_slug,years_experience,areas_served,availability,cover_url,header_url,seeded_by_official,seeded_status").eq("user_id", id).maybeSingle()
+      : await supabase.from("service_profiles").select("business_name,subcategory,bio,town,district,verified,category_slug,years_experience,areas_served,availability,cover_url,header_url,seeded_by_official,seeded_status").eq("user_id", id).maybeSingle();
     setSp(s as typeof sp);
     const { data: ps } = await supabase.from("timeline_posts").select("*").eq("provider_user_id", id).eq("hidden", false).order("created_at", { ascending: false });
     setPosts((ps ?? []).map((r) => ({ ...r, author: p ?? undefined })) as PostRow[]);
@@ -187,10 +188,10 @@ function UserProfile() {
     if (!file || !user) return;
     setUploadingCover(true);
     try {
-      const url = await uploadMedia(user.id, file, "covers");
-      await supabase.from("service_profiles").update({ cover_url: url }).eq("user_id", user.id);
+      const url = await uploadMedia(user.id, file, "avatars");
+      await supabase.from("service_profiles").update({ header_url: url }).eq("user_id", user.id);
       load();
-      toast.success("Cover updated");
+      toast.success("Header banner updated");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Upload failed");
     } finally { setUploadingCover(false); }
@@ -223,10 +224,18 @@ function UserProfile() {
   return (
     <Layout>
       {/* Cover */}
-      <div className="relative h-40 w-full sm:h-56" style={{ background: sp?.cover_url ? `url(${sp.cover_url}) center/cover` : "var(--gradient-hero)" }}>
+      <div className="relative h-40 w-full sm:h-56">
+        <CoverImage
+          variant="wide"
+          imageUrl={sp?.header_url ?? sp?.cover_url}
+          categorySlug={sp?.category_slug}
+          name={sp?.business_name || profile?.full_name}
+          label="No profile banner yet"
+          className="h-40 w-full rounded-none sm:h-56"
+        />
         {isOwn && isProvider && (
           <label className="absolute right-4 top-4 inline-flex cursor-pointer items-center gap-1 rounded-full bg-black/50 px-3 py-1.5 text-xs font-medium text-white backdrop-blur hover:bg-black/70">
-            <Camera className="h-3.5 w-3.5" /> {uploadingCover ? "Uploading…" : "Edit cover"}
+            <Camera className="h-3.5 w-3.5" /> {uploadingCover ? "Uploading…" : "Edit banner"}
             <input type="file" accept="image/*" className="hidden" onChange={(e) => uploadCover(e.target.files?.[0] ?? null)} disabled={uploadingCover} />
           </label>
         )}
