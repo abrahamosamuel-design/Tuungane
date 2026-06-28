@@ -8,6 +8,7 @@ import { ReviewDialog } from "@/components/social/ReviewDialog";
 import { ProfileTrustBadge } from "@/components/trust/ProfileTrustBadge";
 import { formatSubcategory } from "@/lib/format-category";
 import { Avatar } from "@/components/social/Avatar";
+import { CoverImage } from "@/components/media/CoverImage";
 
 
 type ProfileType = "individual" | "business" | "organization";
