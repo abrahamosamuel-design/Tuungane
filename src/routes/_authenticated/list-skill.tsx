@@ -104,28 +104,49 @@ function ListSkillPage() {
     return true;
   };
 
-  const openCropper = (file: File) => {
+  const openCropper = (file: File, initialAspect: CropAspect) => {
     if (!user) return;
     if (!validatePhoto(file)) return;
-    // HEIC can't be rendered in a <canvas> in most browsers — upload as-is.
+    setCropInitialAspect(initialAspect);
+    // HEIC can't be rendered in a <canvas> in most browsers — upload as-is at the requested aspect.
     if (/heic|heif/i.test(file.type) || /\.(heic|heif)$/i.test(file.name)) {
-      void handlePhoto(file);
+      void handlePhoto(file, initialAspect);
       return;
     }
     setCropFile(file);
   };
 
-  const handlePhoto = async (file: File) => {
+  const handlePhoto = async (file: File, aspect: CropAspect) => {
     if (!user) return;
     if (!validatePhoto(file)) return;
-    setPhotoBusy(true);
+    setPhotoBusy(aspect);
     try {
       const url = await uploadMedia(user.id, file, "avatars");
-      const { error } = await supabase.from("profiles").update({ avatar_url: url }).eq("id", user.id);
-      if (error) throw error;
-      setAvatarUrl(url);
-      setPhotoSkipped(false);
-      toast.success("Photo added — your card will look great");
+      if (aspect === "square") {
+        // Square crop powers both the avatar (chat/messages) and provider cards (cover_url).
+        const [{ error: pErr }, { error: spErr }] = await Promise.all([
+          supabase.from("profiles").update({ avatar_url: url }).eq("id", user.id),
+          supabase.from("service_profiles").update({ cover_url: url }).eq("user_id", user.id),
+        ]);
+        if (pErr) throw pErr;
+        if (spErr && spErr.code !== "PGRST116") {
+          // ignore "no rows" when service profile doesn't exist yet — submit() will upsert it with cover_url
+        }
+        setAvatarUrl(url);
+        setCoverUrl(url);
+        setPhotoSkipped(false);
+        toast.success("Card photo saved — looks great on your provider card");
+      } else {
+        const { error: spErr } = await supabase
+          .from("service_profiles")
+          .update({ header_url: url })
+          .eq("user_id", user.id);
+        if (spErr && spErr.code !== "PGRST116") {
+          // service profile may not exist yet — submit() will upsert with header_url
+        }
+        setHeaderUrl(url);
+        toast.success("Header banner saved");
+      }
     } catch (e: any) {
       const raw = String(e?.message ?? e ?? "");
       let msg = "Couldn't upload your photo. Please check your connection and try again.";
@@ -136,7 +157,7 @@ function ListSkillPage() {
       setPhotoError(msg);
       toastError(e, msg);
     } finally {
-      setPhotoBusy(false);
+      setPhotoBusy(null);
     }
   };
 
