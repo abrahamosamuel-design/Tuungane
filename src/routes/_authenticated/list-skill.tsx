@@ -55,7 +55,7 @@ function ListSkillPage() {
       if (!user) return;
       const { data: sp } = await supabase
         .from("service_profiles")
-        .select("business_name,category_slug,subcategory,bio,district,town,phone,whatsapp")
+        .select("business_name,category_slug,subcategory,bio,district,town,phone,whatsapp,cover_url,header_url")
         .eq("user_id", user.id)
         .maybeSingle();
       if (sp) {
@@ -68,6 +68,8 @@ function ListSkillPage() {
         setTown(sp.town ?? "");
         setPhone(sp.phone ?? "");
         setWhatsapp(sp.whatsapp ?? "");
+        setCoverUrl((sp as any).cover_url ?? null);
+        setHeaderUrl((sp as any).header_url ?? null);
       }
       const { data: pr } = await supabase
         .from("profiles")
