@@ -181,6 +181,8 @@ function ListSkillPage() {
       town,
       phone: phone || null,
       whatsapp: whatsapp || null,
+      cover_url: coverUrl,
+      header_url: headerUrl,
     });
     setBusy(false);
     if (error) { toastError(error, editMode ? "Couldn't save changes" : "Couldn't publish your skill"); return; }
