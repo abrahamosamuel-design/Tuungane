@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { ArrowLeft, BadgeCheck, MapPin, Star, Sparkles, ShieldCheck } from "lucide-react";
 import { Layout } from "@/components/Layout";
-import { Avatar } from "@/components/social/Avatar";
+import { CoverImage } from "@/components/media/CoverImage";
 import { getCategory } from "@/data/categories";
 import { useCategory } from "@/hooks/use-categories";
 import { supabase } from "@/integrations/supabase/client";
