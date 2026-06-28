@@ -4,6 +4,18 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogD
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 
+export type CropAspect = "square" | "wide";
+
+export const CROP_ASPECT_RATIOS: Record<CropAspect, number> = {
+  square: 1,
+  wide: 3, // 3:1 — good banner ratio for profile headers
+};
+
+const ASPECT_LABELS: Record<CropAspect, string> = {
+  square: "Square · for cards",
+  wide: "Wide · for header",
+};
+
 async function getCroppedBlob(src: string, area: Area, mime = "image/jpeg"): Promise<Blob> {
   const img = await new Promise<HTMLImageElement>((resolve, reject) => {
     const i = new Image();
@@ -13,11 +25,12 @@ async function getCroppedBlob(src: string, area: Area, mime = "image/jpeg"): Pro
     i.src = src;
   });
   const canvas = document.createElement("canvas");
-  const size = Math.min(1600, Math.round(area.width));
-  canvas.width = size;
-  canvas.height = size;
+  const maxW = 1600;
+  const scale = Math.min(1, maxW / area.width);
+  canvas.width = Math.round(area.width * scale);
+  canvas.height = Math.round(area.height * scale);
   const ctx = canvas.getContext("2d")!;
-  ctx.drawImage(img, area.x, area.y, area.width, area.height, 0, 0, size, size);
+  ctx.drawImage(img, area.x, area.y, area.width, area.height, 0, 0, canvas.width, canvas.height);
   return new Promise<Blob>((resolve, reject) =>
     canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("Crop failed"))), mime, 0.9)
   );
@@ -26,17 +39,32 @@ async function getCroppedBlob(src: string, area: Area, mime = "image/jpeg"): Pro
 type Props = {
   file: File | null;
   open: boolean;
+  /** Default aspect when dialog opens. */
+  initialAspect?: CropAspect;
+  /** Which aspect presets to expose to the user. Defaults to both. */
+  aspects?: CropAspect[];
   onCancel: () => void;
-  onConfirm: (cropped: File) => void;
+  onConfirm: (cropped: File, aspect: CropAspect) => void;
   onUseOriginal: (file: File) => void;
 };
 
-export function ImageCropDialog({ file, open, onCancel, onConfirm, onUseOriginal }: Props) {
+export function ImageCropDialog({
+  file,
+  open,
+  initialAspect = "square",
+  aspects = ["square", "wide"],
+  onCancel,
+  onConfirm,
+  onUseOriginal,
+}: Props) {
   const [url, setUrl] = useState<string | null>(null);
+  const [aspect, setAspect] = useState<CropAspect>(initialAspect);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [area, setArea] = useState<Area | null>(null);
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => { setAspect(initialAspect); }, [initialAspect, file]);
 
   useEffect(() => {
     if (!file) { setUrl(null); return; }
@@ -47,6 +75,9 @@ export function ImageCropDialog({ file, open, onCancel, onConfirm, onUseOriginal
     return () => URL.revokeObjectURL(u);
   }, [file]);
 
+  // reset crop when aspect changes so the new frame fits
+  useEffect(() => { setCrop({ x: 0, y: 0 }); setZoom(1); }, [aspect]);
+
   const onComplete = useCallback((_: Area, pixels: Area) => setArea(pixels), []);
 
   const handleConfirm = async () => {
@@ -54,27 +85,54 @@ export function ImageCropDialog({ file, open, onCancel, onConfirm, onUseOriginal
     try {
       setBusy(true);
       const blob = await getCroppedBlob(url, area, "image/jpeg");
-      const name = file.name.replace(/\.[^.]+$/, "") + ".jpg";
-      onConfirm(new File([blob], name, { type: "image/jpeg" }));
+      const name = file.name.replace(/\.[^.]+$/, "") + `-${aspect}.jpg`;
+      onConfirm(new File([blob], name, { type: "image/jpeg" }), aspect);
     } finally {
       setBusy(false);
     }
   };
+
+  const ratio = CROP_ASPECT_RATIOS[aspect];
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onCancel()}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Crop your photo</DialogTitle>
-          <DialogDescription>Square crops look best on provider cards. Drag to reposition, pinch or slide to zoom.</DialogDescription>
+          <DialogDescription>
+            Pick a shape. Square looks best on provider cards; wide is for your profile header.
+          </DialogDescription>
         </DialogHeader>
-        <div className="relative w-full aspect-square bg-muted rounded-md overflow-hidden">
+
+        {aspects.length > 1 && (
+          <div className="flex gap-2">
+            {aspects.map((a) => (
+              <button
+                key={a}
+                type="button"
+                onClick={() => setAspect(a)}
+                className={`flex-1 rounded-full px-3 py-1.5 text-xs font-semibold border transition ${
+                  aspect === a
+                    ? "bg-navy text-white border-navy"
+                    : "bg-card text-navy/70 border-border hover:border-navy/30"
+                }`}
+              >
+                {ASPECT_LABELS[a]}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <div
+          className="relative w-full bg-muted rounded-md overflow-hidden"
+          style={{ aspectRatio: String(ratio) }}
+        >
           {url && (
             <Cropper
               image={url}
               crop={crop}
               zoom={zoom}
-              aspect={1}
+              aspect={ratio}
               cropShape="rect"
               showGrid
               onCropChange={setCrop}
