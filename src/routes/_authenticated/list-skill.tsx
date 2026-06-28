@@ -10,7 +10,7 @@ import { useCategories } from "@/hooks/use-categories";
 import { uploadMedia } from "@/lib/upload";
 import { toast } from "sonner";
 import { toastError } from "@/lib/user-errors";
-import { ImageCropDialog } from "@/components/media/ImageCropDialog";
+import { ImageCropDialog, type CropAspect } from "@/components/media/ImageCropDialog";
 
 export const Route = createFileRoute("/_authenticated/list-skill")({
   validateSearch: (s: Record<string, unknown>) => ({
