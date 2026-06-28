@@ -10,7 +10,7 @@ import { useCategories } from "@/hooks/use-categories";
 import { uploadMedia } from "@/lib/upload";
 import { toast } from "sonner";
 import { toastError } from "@/lib/user-errors";
-import { ImageCropDialog } from "@/components/media/ImageCropDialog";
+import { ImageCropDialog, type CropAspect } from "@/components/media/ImageCropDialog";
 
 export const Route = createFileRoute("/_authenticated/list-skill")({
   validateSearch: (s: Record<string, unknown>) => ({
@@ -42,17 +42,20 @@ function ListSkillPage() {
 
   // photo step
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [coverUrl, setCoverUrl] = useState<string | null>(null);
+  const [headerUrl, setHeaderUrl] = useState<string | null>(null);
   const [photoSkipped, setPhotoSkipped] = useState(false);
-  const [photoBusy, setPhotoBusy] = useState(false);
+  const [photoBusy, setPhotoBusy] = useState<null | CropAspect>(null);
   const photoRef = useRef<HTMLInputElement>(null);
   const [cropFile, setCropFile] = useState<File | null>(null);
+  const [cropInitialAspect, setCropInitialAspect] = useState<CropAspect>("square");
 
   useEffect(() => {
     (async () => {
       if (!user) return;
       const { data: sp } = await supabase
         .from("service_profiles")
-        .select("business_name,category_slug,subcategory,bio,district,town,phone,whatsapp")
+        .select("business_name,category_slug,subcategory,bio,district,town,phone,whatsapp,cover_url,header_url")
         .eq("user_id", user.id)
         .maybeSingle();
       if (sp) {
@@ -65,6 +68,8 @@ function ListSkillPage() {
         setTown(sp.town ?? "");
         setPhone(sp.phone ?? "");
         setWhatsapp(sp.whatsapp ?? "");
+        setCoverUrl((sp as any).cover_url ?? null);
+        setHeaderUrl((sp as any).header_url ?? null);
       }
       const { data: pr } = await supabase
         .from("profiles")
@@ -99,28 +104,49 @@ function ListSkillPage() {
     return true;
   };
 
-  const openCropper = (file: File) => {
+  const openCropper = (file: File, initialAspect: CropAspect) => {
     if (!user) return;
     if (!validatePhoto(file)) return;
-    // HEIC can't be rendered in a <canvas> in most browsers — upload as-is.
+    setCropInitialAspect(initialAspect);
+    // HEIC can't be rendered in a <canvas> in most browsers — upload as-is at the requested aspect.
     if (/heic|heif/i.test(file.type) || /\.(heic|heif)$/i.test(file.name)) {
-      void handlePhoto(file);
+      void handlePhoto(file, initialAspect);
       return;
     }
     setCropFile(file);
   };
 
-  const handlePhoto = async (file: File) => {
+  const handlePhoto = async (file: File, aspect: CropAspect) => {
     if (!user) return;
     if (!validatePhoto(file)) return;
-    setPhotoBusy(true);
+    setPhotoBusy(aspect);
     try {
       const url = await uploadMedia(user.id, file, "avatars");
-      const { error } = await supabase.from("profiles").update({ avatar_url: url }).eq("id", user.id);
-      if (error) throw error;
-      setAvatarUrl(url);
-      setPhotoSkipped(false);
-      toast.success("Photo added — your card will look great");
+      if (aspect === "square") {
+        // Square crop powers both the avatar (chat/messages) and provider cards (cover_url).
+        const [{ error: pErr }, { error: spErr }] = await Promise.all([
+          supabase.from("profiles").update({ avatar_url: url }).eq("id", user.id),
+          supabase.from("service_profiles").update({ cover_url: url }).eq("user_id", user.id),
+        ]);
+        if (pErr) throw pErr;
+        if (spErr && spErr.code !== "PGRST116") {
+          // ignore "no rows" when service profile doesn't exist yet — submit() will upsert it with cover_url
+        }
+        setAvatarUrl(url);
+        setCoverUrl(url);
+        setPhotoSkipped(false);
+        toast.success("Card photo saved — looks great on your provider card");
+      } else {
+        const { error: spErr } = await supabase
+          .from("service_profiles")
+          .update({ header_url: url })
+          .eq("user_id", user.id);
+        if (spErr && spErr.code !== "PGRST116") {
+          // service profile may not exist yet — submit() will upsert with header_url
+        }
+        setHeaderUrl(url);
+        toast.success("Header banner saved");
+      }
     } catch (e: any) {
       const raw = String(e?.message ?? e ?? "");
       let msg = "Couldn't upload your photo. Please check your connection and try again.";
@@ -131,7 +157,7 @@ function ListSkillPage() {
       setPhotoError(msg);
       toastError(e, msg);
     } finally {
-      setPhotoBusy(false);
+      setPhotoBusy(null);
     }
   };
 
@@ -155,6 +181,8 @@ function ListSkillPage() {
       town,
       phone: phone || null,
       whatsapp: whatsapp || null,
+      cover_url: coverUrl,
+      header_url: headerUrl,
     });
     setBusy(false);
     if (error) { toastError(error, editMode ? "Couldn't save changes" : "Couldn't publish your skill"); return; }
@@ -203,11 +231,12 @@ function ListSkillPage() {
         <form onSubmit={submit} className="space-y-4 rounded-2xl border border-border bg-card p-5">
           {step === 1 && (
             <>
+              {/* Card photo (square) */}
               <div className="rounded-xl border border-orange/30 bg-orange/5 p-4">
                 <div className="flex items-start gap-3">
                   <div className="relative">
-                    <Avatar name={businessName || user?.email || "You"} url={avatarUrl} size={64} />
-                    {avatarUrl && (
+                    <Avatar name={businessName || user?.email || "You"} url={coverUrl ?? avatarUrl} size={64} />
+                    {(coverUrl ?? avatarUrl) && (
                       <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-green text-white ring-2 ring-card">
                         <Check className="h-3 w-3" />
                       </span>
@@ -215,24 +244,22 @@ function ListSkillPage() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="font-display text-sm font-bold text-navy">
-                      {avatarUrl ? "Looking good — this is your card photo" : "Add a service photo"}
+                      {coverUrl ?? avatarUrl ? "Card photo — square crop" : "Add a card photo (square)"}
                     </p>
                     <p className="mt-0.5 text-xs text-muted-foreground">
-                      {avatarUrl
-                        ? "Customers will see this on every card and chat. You can change it any time."
-                        : "Profiles with a clear photo receive more requests. It only takes a moment — and you can skip if you'd rather add one later."}
+                      Shown on provider cards, chat and search results. Square crops look best here.
                     </p>
                     <div className="mt-3 flex flex-wrap items-center gap-2">
                       <button
                         type="button"
-                        onClick={() => photoRef.current?.click()}
-                        disabled={photoBusy}
+                        onClick={() => { setCropInitialAspect("square"); photoRef.current?.click(); }}
+                        disabled={photoBusy === "square"}
                         className="inline-flex items-center gap-1.5 rounded-full bg-orange px-3 py-1.5 text-xs font-semibold text-orange-foreground hover:brightness-110 disabled:opacity-50"
                       >
                         <Camera className="h-3.5 w-3.5" />
-                        {photoBusy ? "Uploading…" : avatarUrl ? "Replace photo" : "Add photo"}
+                        {photoBusy === "square" ? "Uploading…" : (coverUrl ?? avatarUrl) ? "Replace card photo" : "Add card photo"}
                       </button>
-                      {!avatarUrl && !photoSkipped && (
+                      {!(coverUrl ?? avatarUrl) && !photoSkipped && (
                         <button
                           type="button"
                           onClick={() => setPhotoSkipped(true)}
@@ -241,30 +268,64 @@ function ListSkillPage() {
                           I'll add one later
                         </button>
                       )}
-                      {!avatarUrl && photoSkipped && !photoError && (
+                      {!(coverUrl ?? avatarUrl) && photoSkipped && !photoError && (
                         <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
                           <X className="h-3 w-3" /> Skipped — you can add one any time from Settings
                         </span>
                       )}
-                      <p className="text-[11px] text-muted-foreground mt-1">JPG, PNG, WEBP or HEIC · up to 8MB</p>
+                      <p className="text-[11px] text-muted-foreground mt-1 w-full">JPG, PNG, WEBP or HEIC · up to 8MB</p>
                       {photoError && (
-                        <p role="alert" className="text-[12px] text-destructive mt-1">{photoError}</p>
+                        <p role="alert" className="text-[12px] text-destructive mt-1 w-full">{photoError}</p>
                       )}
                     </div>
                   </div>
                 </div>
-                <input
-                  ref={photoRef}
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
-                  className="hidden"
-                  onChange={(e) => {
-                    const f = e.target.files?.[0];
-                    if (f) openCropper(f);
-                    e.target.value = "";
-                  }}
-                />
               </div>
+
+              {/* Header banner (wide) */}
+              <div className="rounded-xl border border-navy/20 bg-navy/5 p-4">
+                <div className="mb-3 w-full overflow-hidden rounded-lg bg-muted" style={{ aspectRatio: "3 / 1" }}>
+                  {headerUrl ? (
+                    <img src={headerUrl} alt="Profile header" className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-[11px] text-muted-foreground">
+                      Wide banner shown at the top of your profile
+                    </div>
+                  )}
+                </div>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="font-display text-sm font-bold text-navy">
+                      {headerUrl ? "Profile header — wide crop" : "Add a header banner (optional)"}
+                    </p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      A 3:1 banner that appears on your public profile page.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => { setCropInitialAspect("wide"); photoRef.current?.click(); }}
+                    disabled={photoBusy === "wide"}
+                    className="inline-flex items-center gap-1.5 rounded-full bg-navy px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110 disabled:opacity-50"
+                  >
+                    <Camera className="h-3.5 w-3.5" />
+                    {photoBusy === "wide" ? "Uploading…" : headerUrl ? "Replace banner" : "Add banner"}
+                  </button>
+                </div>
+              </div>
+
+              <input
+                ref={photoRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) openCropper(f, cropInitialAspect);
+                  e.target.value = "";
+                }}
+              />
+
 
 
               <Field label="Business name (optional)">
@@ -319,9 +380,10 @@ function ListSkillPage() {
       <ImageCropDialog
         file={cropFile}
         open={!!cropFile}
+        initialAspect={cropInitialAspect}
         onCancel={() => setCropFile(null)}
-        onConfirm={(f) => { setCropFile(null); void handlePhoto(f); }}
-        onUseOriginal={(f) => { setCropFile(null); void handlePhoto(f); }}
+        onConfirm={(f, aspect) => { setCropFile(null); void handlePhoto(f, aspect); }}
+        onUseOriginal={(f) => { setCropFile(null); void handlePhoto(f, cropInitialAspect); }}
       />
     </Layout>
   );
