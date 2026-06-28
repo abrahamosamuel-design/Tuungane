@@ -188,10 +188,10 @@ function UserProfile() {
     if (!file || !user) return;
     setUploadingCover(true);
     try {
-      const url = await uploadMedia(user.id, file, "covers");
-      await supabase.from("service_profiles").update({ cover_url: url }).eq("user_id", user.id);
+      const url = await uploadMedia(user.id, file, "avatars");
+      await supabase.from("service_profiles").update({ header_url: url }).eq("user_id", user.id);
       load();
-      toast.success("Cover updated");
+      toast.success("Header banner updated");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Upload failed");
     } finally { setUploadingCover(false); }
