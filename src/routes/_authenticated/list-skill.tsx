@@ -231,11 +231,12 @@ function ListSkillPage() {
         <form onSubmit={submit} className="space-y-4 rounded-2xl border border-border bg-card p-5">
           {step === 1 && (
             <>
+              {/* Card photo (square) */}
               <div className="rounded-xl border border-orange/30 bg-orange/5 p-4">
                 <div className="flex items-start gap-3">
                   <div className="relative">
-                    <Avatar name={businessName || user?.email || "You"} url={avatarUrl} size={64} />
-                    {avatarUrl && (
+                    <Avatar name={businessName || user?.email || "You"} url={coverUrl ?? avatarUrl} size={64} />
+                    {(coverUrl ?? avatarUrl) && (
                       <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-green text-white ring-2 ring-card">
                         <Check className="h-3 w-3" />
                       </span>
@@ -243,24 +244,22 @@ function ListSkillPage() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="font-display text-sm font-bold text-navy">
-                      {avatarUrl ? "Looking good — this is your card photo" : "Add a service photo"}
+                      {coverUrl ?? avatarUrl ? "Card photo — square crop" : "Add a card photo (square)"}
                     </p>
                     <p className="mt-0.5 text-xs text-muted-foreground">
-                      {avatarUrl
-                        ? "Customers will see this on every card and chat. You can change it any time."
-                        : "Profiles with a clear photo receive more requests. It only takes a moment — and you can skip if you'd rather add one later."}
+                      Shown on provider cards, chat and search results. Square crops look best here.
                     </p>
                     <div className="mt-3 flex flex-wrap items-center gap-2">
                       <button
                         type="button"
-                        onClick={() => photoRef.current?.click()}
-                        disabled={photoBusy}
+                        onClick={() => { setCropInitialAspect("square"); photoRef.current?.click(); }}
+                        disabled={photoBusy === "square"}
                         className="inline-flex items-center gap-1.5 rounded-full bg-orange px-3 py-1.5 text-xs font-semibold text-orange-foreground hover:brightness-110 disabled:opacity-50"
                       >
                         <Camera className="h-3.5 w-3.5" />
-                        {photoBusy ? "Uploading…" : avatarUrl ? "Replace photo" : "Add photo"}
+                        {photoBusy === "square" ? "Uploading…" : (coverUrl ?? avatarUrl) ? "Replace card photo" : "Add card photo"}
                       </button>
-                      {!avatarUrl && !photoSkipped && (
+                      {!(coverUrl ?? avatarUrl) && !photoSkipped && (
                         <button
                           type="button"
                           onClick={() => setPhotoSkipped(true)}
@@ -269,30 +268,64 @@ function ListSkillPage() {
                           I'll add one later
                         </button>
                       )}
-                      {!avatarUrl && photoSkipped && !photoError && (
+                      {!(coverUrl ?? avatarUrl) && photoSkipped && !photoError && (
                         <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
                           <X className="h-3 w-3" /> Skipped — you can add one any time from Settings
                         </span>
                       )}
-                      <p className="text-[11px] text-muted-foreground mt-1">JPG, PNG, WEBP or HEIC · up to 8MB</p>
+                      <p className="text-[11px] text-muted-foreground mt-1 w-full">JPG, PNG, WEBP or HEIC · up to 8MB</p>
                       {photoError && (
-                        <p role="alert" className="text-[12px] text-destructive mt-1">{photoError}</p>
+                        <p role="alert" className="text-[12px] text-destructive mt-1 w-full">{photoError}</p>
                       )}
                     </div>
                   </div>
                 </div>
-                <input
-                  ref={photoRef}
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
-                  className="hidden"
-                  onChange={(e) => {
-                    const f = e.target.files?.[0];
-                    if (f) openCropper(f);
-                    e.target.value = "";
-                  }}
-                />
               </div>
+
+              {/* Header banner (wide) */}
+              <div className="rounded-xl border border-navy/20 bg-navy/5 p-4">
+                <div className="mb-3 w-full overflow-hidden rounded-lg bg-muted" style={{ aspectRatio: "3 / 1" }}>
+                  {headerUrl ? (
+                    <img src={headerUrl} alt="Profile header" className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-[11px] text-muted-foreground">
+                      Wide banner shown at the top of your profile
+                    </div>
+                  )}
+                </div>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="font-display text-sm font-bold text-navy">
+                      {headerUrl ? "Profile header — wide crop" : "Add a header banner (optional)"}
+                    </p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      A 3:1 banner that appears on your public profile page.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => { setCropInitialAspect("wide"); photoRef.current?.click(); }}
+                    disabled={photoBusy === "wide"}
+                    className="inline-flex items-center gap-1.5 rounded-full bg-navy px-3 py-1.5 text-xs font-semibold text-white hover:brightness-110 disabled:opacity-50"
+                  >
+                    <Camera className="h-3.5 w-3.5" />
+                    {photoBusy === "wide" ? "Uploading…" : headerUrl ? "Replace banner" : "Add banner"}
+                  </button>
+                </div>
+              </div>
+
+              <input
+                ref={photoRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/heic,image/heif"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) openCropper(f, cropInitialAspect);
+                  e.target.value = "";
+                }}
+              />
+
 
 
               <Field label="Business name (optional)">
