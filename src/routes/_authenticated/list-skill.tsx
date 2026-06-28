@@ -380,9 +380,10 @@ function ListSkillPage() {
       <ImageCropDialog
         file={cropFile}
         open={!!cropFile}
+        initialAspect={cropInitialAspect}
         onCancel={() => setCropFile(null)}
-        onConfirm={(f) => { setCropFile(null); void handlePhoto(f); }}
-        onUseOriginal={(f) => { setCropFile(null); void handlePhoto(f); }}
+        onConfirm={(f, aspect) => { setCropFile(null); void handlePhoto(f, aspect); }}
+        onUseOriginal={(f) => { setCropFile(null); void handlePhoto(f, cropInitialAspect); }}
       />
     </Layout>
   );
