@@ -233,10 +233,17 @@ function ListSkillPage() {
             <>
               {/* Card photo (square) */}
               <div className="rounded-xl border border-orange/30 bg-orange/5 p-4">
-                <div className="flex items-start gap-3">
-                  <div className="relative">
-                    <Avatar name={businessName || user?.email || "You"} url={coverUrl ?? avatarUrl} size={64} />
-                    {(coverUrl ?? avatarUrl) && (
+              <div className="flex items-start gap-3">
+                <div className="relative">
+                  <CoverImage
+                    variant="square"
+                    imageUrl={coverUrl ?? avatarUrl}
+                    categorySlug={categorySlug}
+                    name={businessName || user?.email || "You"}
+                    label="No card photo yet"
+                    className="h-16 w-16"
+                  />
+                  {(coverUrl ?? avatarUrl) && (
                       <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-green text-white ring-2 ring-card">
                         <Check className="h-3 w-3" />
                       </span>
