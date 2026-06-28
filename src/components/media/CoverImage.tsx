@@ -45,6 +45,8 @@ type CoverImageProps = {
   name?: string;
   /** Friendly label shown when no image is set. */
   label?: string;
+  /** Optional green trust ring for verified square photos. */
+  verifiedRing?: boolean;
   className?: string;
 };
 
@@ -60,6 +62,7 @@ export function CoverImage({
   categorySlug,
   name,
   label,
+  verifiedRing,
   className,
 }: CoverImageProps) {
   const [failed, setFailed] = useState(false);
@@ -86,7 +89,11 @@ export function CoverImage({
           src={imageUrl}
           alt={name || "Provider photo"}
           onError={() => setFailed(true)}
-          className="h-full w-full object-cover"
+          className={cn(
+            "h-full w-full object-cover",
+            verifiedRing && variant === "square" &&
+              "ring-2 ring-green/60 ring-offset-1 ring-offset-background"
+          )}
           loading="lazy"
         />
       ) : (
