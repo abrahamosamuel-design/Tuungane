@@ -291,15 +291,14 @@ function ListSkillPage() {
 
               {/* Header banner (wide) */}
               <div className="rounded-xl border border-navy/20 bg-navy/5 p-4">
-                <div className="mb-3 w-full overflow-hidden rounded-lg bg-muted" style={{ aspectRatio: "3 / 1" }}>
-                  {headerUrl ? (
-                    <img src={headerUrl} alt="Profile header" className="h-full w-full object-cover" />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-[11px] text-muted-foreground">
-                      Wide banner shown at the top of your profile
-                    </div>
-                  )}
-                </div>
+                <CoverImage
+                  variant="wide"
+                  imageUrl={headerUrl}
+                  categorySlug={categorySlug}
+                  name={businessName || user?.email || "You"}
+                  label="Wide banner shown at the top of your profile"
+                  className="mb-3 h-32 w-full rounded-lg"
+                />
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="min-w-0">
                     <p className="font-display text-sm font-bold text-navy">
