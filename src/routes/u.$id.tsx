@@ -224,10 +224,18 @@ function UserProfile() {
   return (
     <Layout>
       {/* Cover */}
-      <div className="relative h-40 w-full sm:h-56" style={{ background: sp?.cover_url ? `url(${sp.cover_url}) center/cover` : "var(--gradient-hero)" }}>
+      <div className="relative h-40 w-full sm:h-56">
+        <CoverImage
+          variant="wide"
+          imageUrl={sp?.header_url ?? sp?.cover_url}
+          categorySlug={sp?.category_slug}
+          name={sp?.business_name || profile?.full_name}
+          label="No profile banner yet"
+          className="h-40 w-full rounded-none sm:h-56"
+        />
         {isOwn && isProvider && (
           <label className="absolute right-4 top-4 inline-flex cursor-pointer items-center gap-1 rounded-full bg-black/50 px-3 py-1.5 text-xs font-medium text-white backdrop-blur hover:bg-black/70">
-            <Camera className="h-3.5 w-3.5" /> {uploadingCover ? "Uploading…" : "Edit cover"}
+            <Camera className="h-3.5 w-3.5" /> {uploadingCover ? "Uploading…" : "Edit banner"}
             <input type="file" accept="image/*" className="hidden" onChange={(e) => uploadCover(e.target.files?.[0] ?? null)} disabled={uploadingCover} />
           </label>
         )}
