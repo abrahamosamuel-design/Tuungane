@@ -393,13 +393,13 @@ function RequestCard({
           View request
         </Link>
         {isProvider && (
-          <Link
-            to="/requests/$id"
-            params={{ id: r.id }}
+          <button
+            type="button"
+            onClick={onRespond}
             className="inline-flex items-center justify-center gap-1 rounded-full bg-orange px-3 py-2 text-xs font-semibold text-orange-foreground hover:brightness-110"
           >
             <Send className="h-3 w-3" /> Send quote
-          </Link>
+          </button>
         )}
       </div>
     </article>
