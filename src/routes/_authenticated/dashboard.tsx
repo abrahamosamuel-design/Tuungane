@@ -47,8 +47,8 @@ function Dashboard() {
     if (!user) return;
     const { data: p } = await supabase.from("profiles").select("full_name,avatar_url,is_provider").eq("id", user.id).maybeSingle();
     setProfile(p);
-    const { data: s } = await supabase.from("service_profiles").select("category_slug,subcategory,business_name,bio,district,town,phone,whatsapp").eq("user_id", user.id).maybeSingle();
-    setSp(s);
+    const { data: s } = await supabase.rpc("get_my_service_profile").maybeSingle();
+    setSp(s as never);
     const { data: ps } = await supabase.from("timeline_posts").select("*").eq("provider_user_id", user.id).order("created_at", { ascending: false });
     setPosts((ps ?? []).map((r) => ({ ...r, author: p ?? undefined })) as PostRow[]);
     const postIds = (ps ?? []).map((r) => r.id);
