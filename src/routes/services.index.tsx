@@ -308,7 +308,7 @@ function Services() {
             {/* Mobile: snap carousel */}
             <div className="mt-3 flex items-start gap-3 overflow-x-auto overflow-y-hidden px-4 pb-2 snap-x snap-mandatory [scrollbar-width:none] sm:hidden [&::-webkit-scrollbar]:hidden">
               {recommended.map((p) => (
-                <div key={p.user_id} className="h-[280px] w-[85vw] max-w-[320px] shrink-0 snap-start">
+                <div key={p.user_id} className="w-[85vw] max-w-[320px] shrink-0 snap-start">
                   <ProviderCardCompact p={p} userLoc={userLoc} onRequest={() => nav({ to: "/u/$id", params: { id: p.user_id } })} />
                 </div>
               ))}
