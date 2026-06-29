@@ -147,7 +147,7 @@ function BrowseRequests() {
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                placeholder="Search requests…"
+                placeholder="Search service requests…"
                 className="w-full bg-transparent text-sm outline-none"
               />
             </div>
