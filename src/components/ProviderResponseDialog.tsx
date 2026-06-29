@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { toastError } from "@/lib/user-errors";
-import type { ProviderResponseRow } from "@/data/serviceRequestTypes";
+import { contactMethods, type ContactMethodValue, type ProviderResponseRow } from "@/data/serviceRequestTypes";
 
 interface Props {
   open: boolean;
@@ -22,6 +22,7 @@ export function ProviderResponseDialog({ open, onClose, requestId, existing, onS
     quote_amount: "" as string,
     availability_note: "",
     estimated_time: "",
+    contact_preference: "in_app" as ContactMethodValue,
   });
 
   useEffect(() => {
@@ -31,9 +32,10 @@ export function ProviderResponseDialog({ open, onClose, requestId, existing, onS
         quote_amount: existing.quote_amount?.toString() ?? "",
         availability_note: existing.availability_note ?? "",
         estimated_time: existing.estimated_time ?? "",
+        contact_preference: (existing.contact_preference ?? "in_app") as ContactMethodValue,
       });
     } else if (open) {
-      setForm({ message: "", quote_amount: "", availability_note: "", estimated_time: "" });
+      setForm({ message: "", quote_amount: "", availability_note: "", estimated_time: "", contact_preference: "in_app" });
     }
   }, [open, existing]);
 
