@@ -106,27 +106,8 @@ export function CoverImage({
           loading="lazy"
         />
       ) : (
-        <div className="flex h-full w-full flex-col items-center justify-center gap-2 border border-dashed border-border p-3 text-center">
-          <Icon
-            className={cn(
-              "shrink-0 text-navy/40",
-              variant === "wide"
-                ? "h-8 w-8 sm:h-10 sm:w-10"
-                : "h-6 w-6 sm:h-8 sm:w-8"
-            )}
-            strokeWidth={1.75}
-          />
-          <span
-            className={cn(
-              "font-medium leading-tight text-muted-foreground",
-              variant === "wide"
-                ? "text-xs sm:text-sm"
-                : "text-[10px] sm:text-xs"
-            )}
-          >
-            {displayLabel}
-          </span>
-          {showUpload && (
+        <div className="flex h-full w-full flex-col items-center justify-center gap-2 border border-dashed border-border p-4 text-center">
+          {showUpload ? (
             <>
               <input
                 ref={setInputRef}
@@ -147,7 +128,7 @@ export function CoverImage({
                 className={cn(
                   "inline-flex items-center justify-center gap-1.5 rounded-full bg-navy px-3.5 font-semibold text-white shadow-sm transition-colors hover:bg-navy/90 focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 focus:ring-offset-background",
                   variant === "wide"
-                    ? "mt-1 py-2 text-xs sm:px-4 sm:text-sm"
+                    ? "py-2 text-xs sm:px-4 sm:text-sm"
                     : "py-1.5 text-[11px]"
                 )}
               >
@@ -163,6 +144,47 @@ export function CoverImage({
                   </>
                 )}
               </button>
+              <Icon
+                className={cn(
+                  "shrink-0 text-navy/40",
+                  variant === "wide"
+                    ? "h-7 w-7 sm:h-8 sm:w-8"
+                    : "h-6 w-6 sm:h-8 sm:w-8"
+                )}
+                strokeWidth={1.75}
+              />
+              <span
+                className={cn(
+                  "font-medium leading-tight text-muted-foreground",
+                  variant === "wide"
+                    ? "text-xs sm:text-sm"
+                    : "text-[10px] sm:text-xs"
+                )}
+              >
+                {displayLabel}
+              </span>
+            </>
+          ) : (
+            <>
+              <Icon
+                className={cn(
+                  "shrink-0 text-navy/40",
+                  variant === "wide"
+                    ? "h-8 w-8 sm:h-10 sm:w-10"
+                    : "h-6 w-6 sm:h-8 sm:w-8"
+                )}
+                strokeWidth={1.75}
+              />
+              <span
+                className={cn(
+                  "font-medium leading-tight text-muted-foreground",
+                  variant === "wide"
+                    ? "text-xs sm:text-sm"
+                    : "text-[10px] sm:text-xs"
+                )}
+              >
+                {displayLabel}
+              </span>
             </>
           )}
         </div>
