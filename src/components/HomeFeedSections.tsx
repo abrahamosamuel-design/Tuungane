@@ -58,16 +58,20 @@ type NearbyProvider = {
   profile?: { full_name: string; avatar_url: string | null } | null;
 };
 
-type RecentPost = {
-  id: string;
-  provider_user_id: string;
-  text: string;
+type RecentListing = {
+  user_id: string;
+  business_name: string | null;
   category_slug: string | null;
-  media_urls: string[];
+  subcategory: string;
+  bio: string | null;
   town: string | null;
   district: string | null;
   area: string | null;
-  post_type: string;
+  latitude: number | null;
+  longitude: number | null;
+  verified: string;
+  availability?: string | null;
+  cover_url?: string | null;
   created_at: string;
   profile?: { full_name: string; avatar_url: string | null } | null;
 };
