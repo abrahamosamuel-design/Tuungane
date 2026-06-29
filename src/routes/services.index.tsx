@@ -574,7 +574,12 @@ function ProviderCardCompact({ p, userLoc, onRequest }: { p: RealProvider; userL
         )}
       </div>
 
-      
+      {p.bio && (
+        <p className="mt-2 px-3 text-[12px] leading-snug text-muted-foreground line-clamp-2">
+          {p.bio}
+        </p>
+      )}
+
 
       <div className="mt-auto flex items-center justify-between gap-2 border-t border-border bg-surface px-3 py-2">
         <span className={`inline-flex items-center gap-1.5 text-[11px] font-semibold ${available ? "text-green" : "text-muted-foreground"}`}>
