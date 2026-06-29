@@ -356,6 +356,17 @@ function ListSkillPage() {
               <Field label="Short bio">
                 <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={4} placeholder="Years of experience, what makes your work stand out…" className="input resize-none" />
               </Field>
+              {user && (
+                <MediaUploader
+                  userId={user.id}
+                  folder="services"
+                  value={portfolioUrls}
+                  onChange={setPortfolioUrls}
+                  max={6}
+                  label="Add work / service photos (optional)"
+                  hint="Showcase completed jobs or examples of your work — up to 6 photos."
+                />
+              )}
               <NavRow onNext={() => setStep(2)} canNext={!!bio.trim()} />
             </>
           )}
