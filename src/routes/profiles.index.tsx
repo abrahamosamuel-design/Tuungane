@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { MapPin, BadgeCheck, Sparkles, SearchX } from "lucide-react";
 import { EmptyState } from "@/components/EmptyState";
 import { Avatar } from "@/components/social/Avatar";
+import { ExpandableText } from "@/components/feed/ExpandableText";
 
 export const Route = createFileRoute("/profiles/")({
   head: () => ({ meta: [
@@ -123,7 +124,7 @@ function ProfilesBrowsePage() {
                     {p.verified === "verified" && <BadgeCheck className="h-4 w-4 shrink-0 text-orange" />}
                   </div>
                   <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{p.profile_type}</p>
-                  {p.bio && <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{p.bio}</p>}
+                  {p.bio && <ExpandableText text={p.bio} clampLines={3} maxLines={10} className="mt-1" />}
                   {(p.town || p.district) && (
                     <p className="mt-1 flex items-center gap-1 text-[11px] text-muted-foreground">
                       <MapPin className="h-3 w-3" />

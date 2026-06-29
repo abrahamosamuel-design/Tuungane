@@ -10,6 +10,7 @@ import { RemovePhotoConfirm } from "@/components/RemovePhotoConfirm";
 import { computeProfileStrength } from "@/lib/profile-strength";
 import { toast } from "sonner";
 import { ArrowLeft, Plus, Trash2, Save, Camera } from "lucide-react";
+import { ExpandableText } from "@/components/feed/ExpandableText";
 
 export const Route = createFileRoute("/_authenticated/profiles/$id")({
   head: () => ({ meta: [{ title: "Manage Profile — Tuungane" }] }),
@@ -276,7 +277,7 @@ function ServicesTab({ profileId, services, onChanged }: { profileId: string; se
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
               <p className="truncate font-semibold text-navy">{s.title}</p>
-              {s.description && <p className="mt-0.5 text-xs text-muted-foreground line-clamp-2">{s.description}</p>}
+              {s.description && <ExpandableText text={s.description} clampLines={3} maxLines={10} className="mt-0.5" />}
               {s.price_guidance_ugx && (
                 <p className="mt-1 text-xs font-semibold text-orange">From UGX {s.price_guidance_ugx.toLocaleString()}</p>
               )}
