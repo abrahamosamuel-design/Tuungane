@@ -237,8 +237,8 @@ function Services() {
       <section className="px-4 pt-6 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
           <ProviderTrackCTA
-            title="Offer what you do"
-            text="Create your provider profile, list your services, add photos of your work, and let customers find you."
+            title="Offer a service on Tuungane"
+            text="Create your service listing, add photos of your work, and let people looking for services find you."
           />
         </div>
       </section>
