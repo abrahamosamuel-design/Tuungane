@@ -212,7 +212,7 @@ function Index() {
             Create a free provider profile, show your work, and let customers near you find you.
           </p>
           <div className="mt-5">
-            <ListYourSkillButton variant="solid" className="px-6 py-3">List Your Service</ListYourSkillButton>
+            <ListYourSkillButton variant="solid" className="px-6 py-3" label="List Your Service" />
           </div>
           <Link to="/requests/browse" className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-navy hover:text-orange">
             Browse open requests <ArrowRight className="h-3.5 w-3.5" />
