@@ -479,7 +479,7 @@ function ProviderRow({ p, isBoosted, userLoc, onRequest }: { p: RealProvider; is
         </div>
       )}
 
-      {p.bio && <ExpandableText text={p.bio} clampLines={3} maxLines={7} className="mt-2 px-4" />}
+      {p.bio && <ExpandableText text={p.bio} clampLines={3} maxLines={8} className="mt-2 px-4" />}
 
       {Array.isArray(p.media_urls) && p.media_urls.length > 0 && (
         <div className="mt-2 px-4">
@@ -577,7 +577,7 @@ function ProviderCardCompact({ p, userLoc, onRequest }: { p: RealProvider; userL
 
       {p.bio && (
         <div className="mt-2 px-3">
-          <ExpandableText text={p.bio} clampLines={3} maxLines={7} />
+          <ExpandableText text={p.bio} clampLines={3} maxLines={8} />
         </div>
       )}
 
