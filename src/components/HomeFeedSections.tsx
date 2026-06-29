@@ -298,20 +298,21 @@ export function HomeFeedSections() {
         <MobileViewAll to="/services" label="View all providers" />
       </section>
 
-      {/* RECENT PROVIDER WORK — only when we have real work posts */}
-      {!loading && recent.length > 0 && (
+      {/* RECENTLY LISTED SERVICES — hidden when none exist */}
+      {!loading && topListings.length > 0 && (
         <section className={SECTION_WRAP}>
           <SectionTitle
-            title="Recent provider work"
-            subtitle="See real work shared by providers on Tuungane."
-            link={{ label: "View all", to: "/feed" }}
+            title="Recently listed services"
+            subtitle="New services added by providers on Tuungane."
+            link={{ label: "View all", to: "/services" }}
           />
-          <div className={`${SCROLLER} lg:grid-cols-4`}>
-            {recent.map((p) => (
-              <RecentWorkCard key={p.id} p={p} />
+          <div className={`${SCROLLER} lg:grid-cols-3`}>
+            {topListings.map((l) => (
+              <ServiceListingCard key={l.user_id} l={l} userLoc={userLoc} />
             ))}
             <div aria-hidden className="shrink-0 w-1 sm:hidden" />
           </div>
+          <MobileViewAll to="/services" label="View all services" />
         </section>
       )}
 
