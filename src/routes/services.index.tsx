@@ -303,9 +303,9 @@ function Services() {
         {!loadingReal && recommended.length > 0 && (
           <>
             {/* Mobile: snap carousel */}
-            <div className="mt-3 flex gap-3 overflow-x-auto px-4 pb-2 snap-x snap-mandatory [scrollbar-width:none] sm:hidden [&::-webkit-scrollbar]:hidden">
+            <div className="mt-3 flex items-start gap-3 overflow-x-auto overflow-y-hidden px-4 pb-2 snap-x snap-mandatory [scrollbar-width:none] sm:hidden [&::-webkit-scrollbar]:hidden">
               {recommended.map((p) => (
-                <div key={p.user_id} className="w-[85vw] max-w-[320px] shrink-0 snap-start">
+                <div key={p.user_id} className="h-[230px] w-[85vw] max-w-[320px] shrink-0 snap-start">
                   <ProviderCardCompact p={p} userLoc={userLoc} onRequest={() => nav({ to: "/u/$id", params: { id: p.user_id } })} />
                 </div>
               ))}
@@ -565,7 +565,7 @@ function ProviderCardCompact({ p, userLoc, onRequest }: { p: RealProvider; userL
         )}
       </div>
 
-      {p.bio && <p className="mt-1.5 hidden min-[380px]:line-clamp-2 px-3 text-[12px] leading-snug text-foreground/75 min-[380px]:block">{p.bio}</p>}
+      
 
       <div className="mt-auto flex items-center justify-between gap-2 border-t border-border bg-surface px-3 py-2">
         <span className={`inline-flex items-center gap-1.5 text-[11px] font-semibold ${available ? "text-green" : "text-muted-foreground"}`}>
