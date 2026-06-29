@@ -14,7 +14,6 @@ import {
   type UrgencyValue,
   type VisibilityValue,
 } from "@/data/serviceRequestTypes";
-import { uploadMedia } from "@/lib/upload";
 import { MediaUploader } from "@/components/feed/MediaUploader";
 import { toast } from "sonner";
 import { toastError } from "@/lib/user-errors";
