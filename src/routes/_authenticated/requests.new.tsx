@@ -599,7 +599,7 @@ function NewRequest() {
             disabled={busy}
             className="rounded-full bg-orange px-5 py-2.5 text-sm font-semibold text-orange-foreground disabled:opacity-50"
           >
-            {busy ? "Posting…" : "Post request"}
+            {busy ? "Posting…" : "Post Service Request"}
           </button>
         </form>
         )}
