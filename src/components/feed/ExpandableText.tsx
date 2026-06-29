@@ -4,7 +4,7 @@ import { useLayoutEffect, useRef, useState } from "react";
  * Renders post-style body text that preserves line breaks and offers a
  * "Show more / Show less" toggle when the content exceeds `clampLines`.
  *
- * When expanded, content is still clamped to `maxLines` (default 10) so
+ * When expanded, content is still clamped to `maxLines` (default 8) so
  * very long bios/descriptions don't blow out card heights.
  *
  * Overflow detection uses the actual rendered DOM, so it stays accurate
@@ -13,7 +13,7 @@ import { useLayoutEffect, useRef, useState } from "react";
 export function ExpandableText({
   text,
   clampLines = 3,
-  maxLines = 7,
+  maxLines = 8,
   className = "",
 }: {
   text?: string | null;

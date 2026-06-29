@@ -284,7 +284,7 @@ function RealProviderCard({ p, userLoc }: { p: Row; userLoc: UserLocation | null
           </div>
         </div>
       </div>
-      {p.bio && <ExpandableText text={p.bio} clampLines={3} maxLines={7} className="px-5 pb-4 text-foreground/70" />}
+      {p.bio && <ExpandableText text={p.bio} clampLines={3} maxLines={8} className="px-5 pb-4 text-foreground/70" />}
       <div className="mt-auto flex items-center justify-between border-t border-border bg-surface px-5 py-3">
         <span className="text-xs text-muted-foreground">{p.district ?? ""}</span>
         <div className="flex items-center gap-2" onClick={(e) => e.preventDefault()}>

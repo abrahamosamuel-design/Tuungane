@@ -455,7 +455,7 @@ function RequestCard({
             {cat.name}{r.subcategory ? ` · ${formatSubcategory(r.subcategory)}` : ""}
           </p>
         ) : null}
-        {r.description ? <ExpandableText text={r.description} clampLines={3} maxLines={7} className="mt-2" /> : null}
+        {r.description ? <ExpandableText text={r.description} clampLines={3} maxLines={8} className="mt-2" /> : null}
       </Link>
 
       {media.length > 0 && (
@@ -576,7 +576,7 @@ function ProviderCard({ p, userLoc }: { p: NearbyProvider; userLoc: ReturnType<t
         ) : null}
       </div>
 
-      {p.bio ? <ExpandableText text={p.bio} clampLines={3} maxLines={7} className="px-4 pt-2" /> : null}
+      {p.bio ? <ExpandableText text={p.bio} clampLines={3} maxLines={8} className="px-4 pt-2" /> : null}
 
       {media.length > 0 && (
         <div className="px-4 pt-1">
@@ -664,7 +664,7 @@ function ServiceListingCard({
         ) : null}
       </div>
 
-      {l.bio ? <ExpandableText text={l.bio} clampLines={3} maxLines={7} className="mt-2" /> : null}
+      {l.bio ? <ExpandableText text={l.bio} clampLines={3} maxLines={8} className="mt-2" /> : null}
 
       <div className="mt-auto flex items-center gap-2 pt-3">
         <Link

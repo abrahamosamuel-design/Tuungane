@@ -215,7 +215,7 @@ function Feed() {
                     <NearYouBadge user={userLoc} target={p as TargetLocation} className="ml-1" />
                   </div>
                   <p className="text-xs text-muted-foreground">{formatSubcategory(p.subcategory)}</p>
-                  {p.bio && <ExpandableText text={p.bio} clampLines={3} maxLines={7} className="mt-1" />}
+                  {p.bio && <ExpandableText text={p.bio} clampLines={3} maxLines={8} className="mt-1" />}
                   <p className="mt-1 inline-flex items-center gap-1 text-xs text-muted-foreground"><MapPin className="h-3 w-3" />{p.town}, {p.district}</p>
                 </div>
               </Link>

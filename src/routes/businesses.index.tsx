@@ -155,7 +155,7 @@ function BPageCard({ p, featured, userLoc }: { p: BPage; featured?: boolean; use
           <ProfileTrustBadge kind="business_page" id={p.id} />
         </div>
         <div className="text-xs text-muted-foreground">{orgTypeLabel(p.org_type)}{p.town ? ` · ${p.town}` : ""}{p.district ? `, ${p.district}` : ""}</div>
-        <ExpandableText text={p.description || "No description yet."} clampLines={3} maxLines={7} className="mt-2" />
+        <ExpandableText text={p.description || "No description yet."} clampLines={3} maxLines={8} className="mt-2" />
       </div>
     </Link>
   );
