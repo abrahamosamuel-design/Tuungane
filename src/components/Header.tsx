@@ -29,10 +29,10 @@ export function Header() {
   const { user, loading, isModerator, signOut } = useAuth();
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link to="/" className="flex items-center" aria-label="Tuungane home">
-          <Logo className="h-11 w-auto sm:h-12" />
+    <header className="sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur-md supports-[backdrop-filter]:bg-background/75">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-3 sm:px-6 lg:px-8">
+        <Link to="/" className="-ml-1 flex items-center" aria-label="Tuungane home">
+          <Logo className="h-12 w-auto sm:h-14" />
         </Link>
         <nav className="hidden items-center gap-8 md:flex">
           {primaryNav.map((n) => (
