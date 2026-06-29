@@ -15,6 +15,7 @@ import {
   type VisibilityValue,
 } from "@/data/serviceRequestTypes";
 import { uploadMedia } from "@/lib/upload";
+import { MediaUploader } from "@/components/feed/MediaUploader";
 import { toast } from "sonner";
 import { toastError } from "@/lib/user-errors";
 import { Loader2, MapPin, ShieldAlert, Sparkles, ArrowRight, Pencil, ChevronDown } from "lucide-react";
@@ -54,6 +55,7 @@ function NewRequest() {
   const [busy, setBusy] = useState(false);
   const [autofilled, setAutofilled] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const [mediaUrls, setMediaUrls] = useState<string[]>([]);
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [districtBounds, setDistrictBounds] = useState<Bounds | null>(null);
   const [showMore, setShowMore] = useState(false);
@@ -221,15 +223,25 @@ function NewRequest() {
       return;
     }
     setBusy(true);
-    let attachment_url: string | null = null;
+    let attachment_url: string | null = mediaUrls[0] ?? null;
     try {
-      if (file) attachment_url = await uploadMedia(user.id, file, "requests");
+      if (file) {
+        const url = await uploadMedia(user.id, file, "requests");
+        if (!attachment_url) attachment_url = url;
+        setMediaUrls((cur) => (cur.includes(url) ? cur : [...cur, url]));
+      }
     } catch (err) {
       console.error(err);
       toastError(err, "Photo couldn't upload");
       setBusy(false);
       return;
     }
+
+    const allMedia = (() => {
+      const arr = [...mediaUrls];
+      if (file && attachment_url && !arr.includes(attachment_url)) arr.unshift(attachment_url);
+      return arr;
+    })();
 
     // If the request targets a public profile, infer the provider for individual profiles.
     const targetedProvider =
@@ -261,6 +273,7 @@ function NewRequest() {
       customer_phone: f.customer_phone || null,
       customer_whatsapp: f.customer_whatsapp || null,
       attachment_url,
+      media_urls: allMedia,
       status: "requested",
     }).select("id").single();
     setBusy(false);
