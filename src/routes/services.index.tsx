@@ -254,6 +254,7 @@ function Services() {
 
       {/* POPULAR SERVICES */}
       <section className="px-4 pt-4 sm:px-6 sm:pt-6 lg:px-8">
+
         <div className="mx-auto max-w-7xl">
           <h2 className="font-display text-base font-bold text-navy sm:text-xl">Popular services</h2>
           <div className="-mx-4 mt-2 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden">
