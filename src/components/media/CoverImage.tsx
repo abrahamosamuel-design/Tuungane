@@ -15,6 +15,7 @@ import {
   Sprout,
   MoreHorizontal,
   ImageOff,
+  Upload,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -47,6 +48,10 @@ type CoverImageProps = {
   label?: string;
   /** Optional green trust ring for verified square photos. */
   verifiedRing?: boolean;
+  /** If provided, a clear upload button is shown inside the placeholder. */
+  onUpload?: (file: File) => void;
+  /** Whether an upload is currently in progress. */
+  uploading?: boolean;
   className?: string;
 };
 
@@ -63,10 +68,14 @@ export function CoverImage({
   name,
   label,
   verifiedRing,
+  onUpload,
+  uploading,
   className,
 }: CoverImageProps) {
   const [failed, setFailed] = useState(false);
+  const [inputRef, setInputRef] = useState<HTMLInputElement | null>(null);
   const showImage = imageUrl && !failed;
+  const showUpload = !showImage && !!onUpload;
 
   const Icon = ICONS[categorySlug || ""] || ImageOff;
   const defaultLabel =
@@ -117,6 +126,45 @@ export function CoverImage({
           >
             {displayLabel}
           </span>
+          {showUpload && (
+            <>
+              <input
+                ref={setInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                disabled={uploading}
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) onUpload?.(f);
+                  if (e.target) e.target.value = "";
+                }}
+              />
+              <button
+                type="button"
+                disabled={uploading}
+                onClick={() => inputRef?.click()}
+                className={cn(
+                  "inline-flex items-center justify-center gap-1.5 rounded-full bg-navy px-3.5 font-semibold text-white shadow-sm transition-colors hover:bg-navy/90 focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 focus:ring-offset-background",
+                  variant === "wide"
+                    ? "mt-1 py-2 text-xs sm:px-4 sm:text-sm"
+                    : "py-1.5 text-[11px]"
+                )}
+              >
+                {uploading ? (
+                  <>
+                    <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                    Uploading…
+                  </>
+                ) : (
+                  <>
+                    <Upload className={cn("shrink-0", variant === "wide" ? "h-3.5 w-3.5" : "h-3 w-3")} />
+                    {variant === "wide" ? "Upload a cover/header photo" : "Upload a photo"}
+                  </>
+                )}
+              </button>
+            </>
+          )}
         </div>
       )}
     </div>
