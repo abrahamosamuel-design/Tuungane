@@ -333,11 +333,13 @@ function RequestCard({
   userLoc,
   featured,
   isProvider,
+  onRespond,
 }: {
   r: NearbyRequest;
   userLoc: ReturnType<typeof useUserLocation>["location"];
   featured: boolean;
   isProvider: boolean;
+  onRespond: () => void;
 }) {
   const cat = useCategory(r.category_slug ?? undefined);
   const near = proximityLabel(userLoc, r);
