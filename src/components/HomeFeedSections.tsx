@@ -36,6 +36,7 @@ type NearbyRequest = {
   longitude: number | null;
   category_slug?: string | null;
   subcategory?: string | null;
+  media_urls?: string[] | null;
 };
 
 type NearbyProvider = {
@@ -55,6 +56,7 @@ type NearbyProvider = {
   availability?: string | null;
   years_experience?: number | null;
   cover_url?: string | null;
+  media_urls?: string[] | null;
   profile?: { full_name: string; avatar_url: string | null } | null;
 };
 
@@ -121,7 +123,7 @@ export function HomeFeedSections() {
       if (!reqs || reqs.length === 0) {
         const { data } = await supabase
           .from("service_requests")
-          .select("id,title,service_needed,description,budget_range,urgent_flag,created_at,district,town,area,location,latitude,longitude,category_slug,subcategory")
+          .select("id,title,service_needed,description,budget_range,urgent_flag,created_at,district,town,area,location,latitude,longitude,category_slug,subcategory,media_urls")
           .eq("visibility", "public")
           .eq("status", "requested")
           .is("provider_id", null)
@@ -134,7 +136,7 @@ export function HomeFeedSections() {
       if (!provs || provs.length === 0) {
         const { data } = await supabase
           .from("service_profiles")
-          .select("user_id,business_name,category_slug,subcategory,bio,town,district,area,latitude,longitude,service_radius_km,areas_served,verified,availability,years_experience,cover_url")
+          .select("user_id,business_name,category_slug,subcategory,bio,town,district,area,latitude,longitude,service_radius_km,areas_served,verified,availability,years_experience,cover_url,media_urls")
           .eq("suspended", false)
           .order("verified", { ascending: false })
           .order("updated_at", { ascending: false })
