@@ -108,7 +108,8 @@ export function CoverImage({
       ) : (
         <div
           className={cn(
-            "flex h-full w-full flex-col items-center gap-2 border border-dashed border-border p-4 text-center",
+            "flex h-full w-full flex-col items-center gap-2 bg-navy p-4 text-center",
+            variant === "square" && "rounded-xl",
             showUpload && variant === "wide" ? "justify-start pt-7" : "justify-center"
           )}
         >
@@ -131,7 +132,7 @@ export function CoverImage({
                 disabled={uploading}
                 onClick={() => inputRef?.click()}
                 className={cn(
-                  "inline-flex items-center justify-center gap-1.5 rounded-full bg-navy px-3.5 font-semibold text-white shadow-sm transition-colors hover:bg-navy/90 focus:outline-none focus:ring-2 focus:ring-navy focus:ring-offset-2 focus:ring-offset-background",
+                  "inline-flex items-center justify-center gap-1.5 rounded-full bg-navy-foreground px-3.5 font-semibold text-navy shadow-sm transition-colors hover:bg-navy-foreground/90 focus:outline-none focus:ring-2 focus:ring-navy-foreground focus:ring-offset-2 focus:ring-offset-navy",
                   variant === "wide"
                     ? "py-2 text-xs sm:px-4 sm:text-sm"
                     : "py-1.5 text-[11px]"
@@ -139,7 +140,7 @@ export function CoverImage({
               >
                 {uploading ? (
                   <>
-                    <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                    <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-navy/30 border-t-navy" />
                     Uploading…
                   </>
                 ) : (
@@ -151,7 +152,7 @@ export function CoverImage({
               </button>
               <Icon
                 className={cn(
-                  "shrink-0 text-navy/40",
+                  "shrink-0 text-navy-foreground/60",
                   variant === "wide"
                     ? "h-7 w-7 sm:h-8 sm:w-8"
                     : "h-6 w-6 sm:h-8 sm:w-8"
@@ -160,7 +161,7 @@ export function CoverImage({
               />
               <span
                 className={cn(
-                  "font-medium leading-tight text-muted-foreground",
+                  "font-medium leading-tight text-navy-foreground/80",
                   variant === "wide"
                     ? "text-xs sm:text-sm"
                     : "text-[10px] sm:text-xs"
@@ -173,7 +174,7 @@ export function CoverImage({
             <>
               <Icon
                 className={cn(
-                  "shrink-0 text-navy/40",
+                  "shrink-0 text-navy-foreground/70",
                   variant === "wide"
                     ? "h-8 w-8 sm:h-10 sm:w-10"
                     : "h-6 w-6 sm:h-8 sm:w-8"
@@ -182,7 +183,7 @@ export function CoverImage({
               />
               <span
                 className={cn(
-                  "font-medium leading-tight text-muted-foreground",
+                  "font-medium leading-tight text-navy-foreground/90",
                   variant === "wide"
                     ? "text-xs sm:text-sm"
                     : "text-[10px] sm:text-xs"
