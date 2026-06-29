@@ -85,16 +85,13 @@ export async function logContactClick(args: {
  */
 export async function getRevealablePhone(providerId: string): Promise<string | null> {
   try {
-    const [{ data: sp }, { data: pp }] = await Promise.all([
-      supabase.from("service_profiles").select("phone").eq("user_id", providerId).maybeSingle(),
-      supabase.from("provider_privacy_settings").select("phone_visibility").eq("user_id", providerId).maybeSingle(),
-    ]);
-    const phone = sp?.phone ?? null;
-    if (!phone) return null;
-    const vis = (pp as { phone_visibility?: string } | null)?.phone_visibility ?? "logged_in_only";
-    if (vis === "hidden" || vis === "messages_first") return null;
-    // allow_calls and logged_in_only both reveal to the signed-in customer
-    return phone;
+    // get_provider_contact is a SECURITY DEFINER RPC that enforces
+    // phone_visibility + the active service-request contact gate
+    // server-side. Returns no row when the viewer is not allowed.
+    const { data } = await supabase
+      .rpc("get_provider_contact", { _provider: providerId })
+      .maybeSingle();
+    return (data as { phone?: string | null } | null)?.phone ?? null;
   } catch {
     return null;
   }
