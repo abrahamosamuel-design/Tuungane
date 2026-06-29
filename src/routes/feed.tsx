@@ -62,8 +62,8 @@ function Feed() {
     }
     if (filter === "nearby") {
       if (!user) { toast.error("Sign in to see providers near you"); setPosts([]); return; }
-      const { data: me } = await supabase.from("profiles").select("district").eq("id", user.id).maybeSingle();
-      const district = me?.district?.trim();
+      const { data: me } = await supabase.rpc("get_my_profile").maybeSingle();
+      const district = (me as { district?: string | null } | null)?.district?.trim();
       if (!district) { toast.info("Add your district in your profile to see nearby posts"); setPosts([]); return; }
       const { data } = await supabase.from("service_profiles").select("user_id").eq("district", district);
       providerIds = (data ?? []).map((p) => p.user_id);
