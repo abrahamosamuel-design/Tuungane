@@ -247,9 +247,9 @@ function BrowseRequests() {
           {!loading && rankedItems.length === 0 && !radiusExpanded && (
             <EmptyState
               icon={Plus}
-              title="No requests yet"
-              description="Be the first to create a request, or check back soon for requests near you."
-              action={{ label: "Create a request", to: "/requests/new" }}
+              title="No service requests available yet"
+              description="Requests from people looking for services will appear here."
+              action={{ label: "Post a Service Request", to: "/requests/new" }}
             />
           )}
           <div className="grid gap-3 sm:grid-cols-2">
@@ -259,8 +259,8 @@ function BrowseRequests() {
                 {idx === 1 && (
                   <div className="sm:col-span-2">
                     <ProviderTrackCTA
-                      title="Want customers to find you too?"
-                      text="List your skill so people can discover you."
+                      title="Want people to find you too?"
+                      text="List your service so people looking for it can discover you."
                     />
                   </div>
                 )}
