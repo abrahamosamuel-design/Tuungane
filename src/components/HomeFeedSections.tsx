@@ -98,7 +98,7 @@ export function HomeFeedSections() {
   const [requests, setRequests] = useState<NearbyRequest[]>([]);
   const [hasNearbyReqs, setHasNearbyReqs] = useState(false);
   const [providers, setProviders] = useState<NearbyProvider[]>([]);
-  const [recent, setRecent] = useState<RecentPost[]>([]);
+  const [recentListings, setRecentListings] = useState<RecentListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [isProvider, setIsProvider] = useState(false);
   const [respondTo, setRespondTo] = useState<string | null>(null);
