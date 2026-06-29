@@ -231,9 +231,11 @@ function UserProfile() {
           categorySlug={sp?.category_slug}
           name={sp?.business_name || profile?.full_name}
           label="No profile banner yet"
+          onUpload={isOwn ? uploadCover : undefined}
+          uploading={uploadingCover}
           className="h-40 w-full rounded-none sm:h-56"
         />
-        {isOwn && isProvider && (
+        {isOwn && isProvider && (sp?.header_url ?? sp?.cover_url) && (
           <label className="absolute right-4 top-4 inline-flex cursor-pointer items-center gap-1 rounded-full bg-black/50 px-3 py-1.5 text-xs font-medium text-white backdrop-blur hover:bg-black/70">
             <Camera className="h-3.5 w-3.5" /> {uploadingCover ? "Uploading…" : "Edit banner"}
             <input type="file" accept="image/*" className="hidden" onChange={(e) => uploadCover(e.target.files?.[0] ?? null)} disabled={uploadingCover} />
