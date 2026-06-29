@@ -68,10 +68,14 @@ export function CoverImage({
   name,
   label,
   verifiedRing,
+  onUpload,
+  uploading,
   className,
 }: CoverImageProps) {
   const [failed, setFailed] = useState(false);
+  const [inputRef, setInputRef] = useState<HTMLInputElement | null>(null);
   const showImage = imageUrl && !failed;
+  const showUpload = !showImage && !!onUpload;
 
   const Icon = ICONS[categorySlug || ""] || ImageOff;
   const defaultLabel =
