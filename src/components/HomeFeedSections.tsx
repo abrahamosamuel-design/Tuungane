@@ -21,6 +21,7 @@ import { formatSubcategory } from "@/lib/format-category";
 import { ProfileTrustBadge } from "@/components/trust/ProfileTrustBadge";
 import { useCategory } from "@/hooks/use-categories";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ProviderResponseDialog } from "@/components/ProviderResponseDialog";
 
 type NearbyRequest = {
   id: string;
@@ -85,6 +86,7 @@ export function HomeFeedSections() {
   const [recent, setRecent] = useState<RecentPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [isProvider, setIsProvider] = useState(false);
+  const [respondTo, setRespondTo] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -226,7 +228,7 @@ export function HomeFeedSections() {
         ) : (
           <div className="-mx-4 mt-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-3 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-3">
             {topRequests.map((r) => (
-              <RequestCard key={r.id} r={r} userLoc={userLoc} featured={Boolean(isFeaturedTarget(r, featured))} isProvider={isProvider} />
+              <RequestCard key={r.id} r={r} userLoc={userLoc} featured={Boolean(isFeaturedTarget(r, featured))} isProvider={isProvider} onRespond={() => setRespondTo(r.id)} />
             ))}
           </div>
         )}
@@ -270,6 +272,14 @@ export function HomeFeedSections() {
             ))}
           </div>
         </section>
+      )}
+
+      {respondTo && (
+        <ProviderResponseDialog
+          open
+          onClose={() => setRespondTo(null)}
+          requestId={respondTo}
+        />
       )}
     </>
   );
@@ -331,11 +341,13 @@ function RequestCard({
   userLoc,
   featured,
   isProvider,
+  onRespond,
 }: {
   r: NearbyRequest;
   userLoc: ReturnType<typeof useUserLocation>["location"];
   featured: boolean;
   isProvider: boolean;
+  onRespond: () => void;
 }) {
   const cat = useCategory(r.category_slug ?? undefined);
   const near = proximityLabel(userLoc, r);
@@ -389,13 +401,13 @@ function RequestCard({
           View request
         </Link>
         {isProvider && (
-          <Link
-            to="/requests/$id"
-            params={{ id: r.id }}
+          <button
+            type="button"
+            onClick={onRespond}
             className="inline-flex items-center justify-center gap-1 rounded-full bg-orange px-3 py-2 text-xs font-semibold text-orange-foreground hover:brightness-110"
           >
             <Send className="h-3 w-3" /> Send quote
-          </Link>
+          </button>
         )}
       </div>
     </article>
