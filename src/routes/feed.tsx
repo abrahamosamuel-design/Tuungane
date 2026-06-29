@@ -78,13 +78,11 @@ function Feed() {
     type AuthorLoc = { full_name: string; avatar_url: string | null; is_provider: boolean; district: string | null; town: string | null; area: string | null; latitude: number | null; longitude: number | null };
     const profMap = new Map<string, AuthorLoc>();
     if (ids.length) {
-      // Anon visitors don't have column-level SELECT on location fields
-      // (DB-level enforcement of profiles.location_visibility). Fetch the
-      // safe subset for anon, full set for signed-in users.
-      const { data: profs } = user
-        ? await supabase.from("profiles").select("id,full_name,avatar_url,is_provider,district,town,area,latitude,longitude").in("id", ids)
-        : await supabase.from("profiles").select("id,full_name,avatar_url,is_provider").in("id", ids);
-      (profs ?? []).forEach((p) => profMap.set(p.id, p as unknown as AuthorLoc));
+      // get_profile_cards is a SECURITY DEFINER RPC that returns location
+      // fields masked per each user's location_visibility (raw lat/long are
+      // not exposed to other users). Safe for both anon and authenticated.
+      const { data: profs } = await supabase.rpc("get_profile_cards", { _ids: ids });
+      (profs ?? []).forEach((p) => profMap.set(p.id, { ...p, latitude: null, longitude: null } as unknown as AuthorLoc));
     }
     let mapped = (rows ?? []).map((r) => ({ ...r, author: profMap.get(r.provider_user_id) })) as PostRow[];
     if (filter === "popular") {
