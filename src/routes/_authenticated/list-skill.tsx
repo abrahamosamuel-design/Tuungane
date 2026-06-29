@@ -201,15 +201,15 @@ function ListSkillPage() {
       <section className="mx-auto max-w-2xl px-4 py-8">
         <div className="mb-6">
           <p className="text-xs font-semibold uppercase tracking-wide text-green">
-            {editMode ? "Edit your service profile" : "Become a provider"}
+            {editMode ? "Edit your service profile" : "Offer a service"}
           </p>
           <h1 className="mt-1 font-display text-3xl font-bold text-navy">
-            {editMode ? "Update your skill" : "List your skill"}
+            {editMode ? "Update your service" : "List Your Service"}
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
             {editMode
-              ? "Change your service photo or update the details customers see on your card."
-              : "Tell people what you do and where you work. Customers nearby will be able to find and contact you."}
+              ? "Change your service photo or update the details people see on your card."
+              : "Create a service listing so people can find and contact you."}
           </p>
           {editMode && (
             <Link to="/dashboard" className="mt-3 inline-block text-xs font-semibold text-orange">
