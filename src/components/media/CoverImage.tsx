@@ -106,8 +106,12 @@ export function CoverImage({
           loading="lazy"
         />
       ) : (
-        <div className="flex h-full w-full flex-col items-center justify-center gap-2 border border-dashed border-border p-4 text-center">
-          {showUpload ? (
+        <div
+          className={cn(
+            "flex h-full w-full flex-col items-center gap-2 border border-dashed border-border p-4 text-center",
+            showUpload && variant === "wide" ? "justify-start pt-7" : "justify-center"
+          )}
+        >
             <>
               <input
                 ref={setInputRef}
