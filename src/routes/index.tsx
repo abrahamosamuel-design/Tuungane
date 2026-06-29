@@ -83,7 +83,7 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const { user } = useAuth();
-  const { categories } = useCategories();
+
 
   return (
     <Layout>
