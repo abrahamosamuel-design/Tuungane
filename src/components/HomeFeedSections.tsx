@@ -74,12 +74,12 @@ type RecentPost = {
 
 const SECTION_WRAP = "mx-auto max-w-6xl px-4 pt-8 sm:px-6 sm:pt-10";
 // Only show genuine provider work, never promotions/marketing announcements
-const REAL_WORK_POST_TYPES = new Set([
+const REAL_WORK_POST_TYPES = [
   "completed_job",
   "work_update",
   "before_after",
   "new_service",
-]);
+] as const;
 
 export function HomeFeedSections() {
   const { user } = useAuth();
