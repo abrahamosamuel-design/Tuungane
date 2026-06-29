@@ -69,10 +69,10 @@ export function Header() {
             <MessagesIconLink />
             <NotificationsBell />
             <Link to={listSkillHref(user) as never} className="hidden lg:inline-flex items-center gap-1.5 rounded-full border border-green/40 bg-green/5 px-3 py-2 text-sm font-semibold text-green transition hover:bg-green/10">
-              <Sparkles className="h-4 w-4" /> List Your Skill
+              <Sparkles className="h-4 w-4" /> List Your Service
             </Link>
             <Link to="/requests/new" className="inline-flex items-center gap-1.5 rounded-full bg-orange px-4 py-2 text-sm font-semibold text-orange-foreground shadow-sm transition-all hover:brightness-110">
-              <Plus className="h-4 w-4" /> Create a Request
+              <Plus className="h-4 w-4" /> Post a Service Request
             </Link>
             <div className="relative">
               <button onClick={() => setMenu((m) => !m)} className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1.5 text-sm font-medium text-navy hover:border-orange/60">
@@ -85,8 +85,8 @@ export function Header() {
                     <MenuItem to="/dashboard" icon={<LayoutDashboard className="h-4 w-4" />} label="My dashboard" onClick={() => setMenu(false)} />
                     <MenuItem to="/messages" icon={<MessageSquare className="h-4 w-4" />} label="Messages" onClick={() => setMenu(false)} />
                     <MenuItem to="/requests" icon={<ClipboardList className="h-4 w-4" />} label="My Requests" onClick={() => setMenu(false)} />
-                    <MenuItem to="/requests/new" icon={<Plus className="h-4 w-4" />} label="Create a Request" onClick={() => setMenu(false)} />
-                    <MenuItem to={listSkillHref(user) as never} icon={<Sparkles className="h-4 w-4 text-green" />} label="List Your Skill" onClick={() => setMenu(false)} />
+                    <MenuItem to="/requests/new" icon={<Plus className="h-4 w-4" />} label="Post a Service Request" onClick={() => setMenu(false)} />
+                    <MenuItem to={listSkillHref(user) as never} icon={<Sparkles className="h-4 w-4 text-green" />} label="List Your Service" onClick={() => setMenu(false)} />
                     <MenuItem to="/me" icon={<UserIcon className="h-4 w-4" />} label="My profile" onClick={() => setMenu(false)} />
                     <MenuItem to="/credits" icon={<Coins className="h-4 w-4" />} label="Tuungane Credits" onClick={() => setMenu(false)} />
                     <div className="border-t border-border" />
@@ -105,10 +105,10 @@ export function Header() {
             <>
               <Link to="/login" className="text-sm font-medium text-navy hover:text-orange">Sign in</Link>
               <Link to={listSkillHref(null) as never} className="hidden lg:inline-flex items-center gap-1.5 rounded-full border border-green/40 bg-green/5 px-3 py-2 text-sm font-semibold text-green transition hover:bg-green/10">
-                <Sparkles className="h-4 w-4" /> List Your Skill
+                <Sparkles className="h-4 w-4" /> List Your Service
               </Link>
               <Link to="/requests/new" className="inline-flex items-center gap-1.5 rounded-full bg-orange px-4 py-2 text-sm font-semibold text-orange-foreground shadow-sm transition-all hover:brightness-110">
-                <Plus className="h-4 w-4" /> Create a Request
+                <Plus className="h-4 w-4" /> Post a Service Request
               </Link>
             </>
           )}
@@ -158,10 +158,10 @@ export function Header() {
                 )}
                 <div className="my-2 border-t border-border" />
                 <Link to="/requests/new" onClick={() => setOpen(false)} className="mt-2 block rounded-full bg-orange px-4 py-2 text-center text-sm font-semibold text-orange-foreground">
-                  Create a Request
+                  Post a Service Request
                 </Link>
                 <Link to={listSkillHref(user) as never} onClick={() => setOpen(false)} className="mt-2 block rounded-full border border-green/40 bg-green/5 px-4 py-2 text-center text-sm font-semibold text-green">
-                  List Your Skill
+                  List Your Service
                 </Link>
                 <button onClick={() => { setOpen(false); signOut(); }} className="mt-2 block w-full rounded-md px-3 py-2 text-left text-sm font-medium text-destructive hover:bg-muted">Sign out</button>
               </>
@@ -169,10 +169,10 @@ export function Header() {
               <>
                 <div className="my-2 border-t border-border" />
                 <Link to="/requests/new" onClick={() => setOpen(false)} className="mt-2 block rounded-full bg-orange px-4 py-2 text-center text-sm font-semibold text-orange-foreground">
-                  Create a Request
+                  Post a Service Request
                 </Link>
                 <Link to={listSkillHref(null) as never} onClick={() => setOpen(false)} className="mt-2 block rounded-full border border-green/40 bg-green/5 px-4 py-2 text-center text-sm font-semibold text-green">
-                  List Your Skill
+                  List Your Service
                 </Link>
               </>
             )}

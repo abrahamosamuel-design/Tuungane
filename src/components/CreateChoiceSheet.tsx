@@ -40,7 +40,7 @@ export function CreateChoiceSheet({
               <ClipboardList className="h-5 w-5" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="font-display text-base font-bold text-navy">Create a Request</p>
+              <p className="font-display text-base font-bold text-navy">Post a Service Request</p>
               <p className="text-xs text-foreground/75">For customers who need help.</p>
             </div>
             <ArrowRight className="mt-2 h-5 w-5 shrink-0 text-orange" />
@@ -55,7 +55,7 @@ export function CreateChoiceSheet({
               <Sparkles className="h-5 w-5" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="font-display text-base font-bold text-navy">List Your Skill</p>
+              <p className="font-display text-base font-bold text-navy">List Your Service</p>
               <p className="text-xs text-foreground/75">For skilled people who want to offer their work.</p>
             </div>
             <ArrowRight className="mt-2 h-5 w-5 shrink-0 text-green" />

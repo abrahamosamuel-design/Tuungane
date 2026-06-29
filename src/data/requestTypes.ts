@@ -26,14 +26,14 @@ export const REQUESTS_COPY = {
   heading: "Find Open Requests Near You",
   supporting:
     "Browse real requests from people and businesses looking for skilled help nearby.",
-  primaryCTA: "Create a Request",
+  primaryCTA: "Post a Service Request",
   searchPlaceholder: "Search requests...",
   locationPlaceholder: "Location e.g. Entebbe, Kampala, Wakiso",
   listTitle: "Recent Requests",
   emptyTitle: "No requests yet",
   emptyDescription:
     "Be the first to create a request, or check back soon for requests near you.",
-  emptyCTA: "Create a Request",
+  emptyCTA: "Post a Service Request",
   detailsTitle: "Request Details",
   dashboardTitle: "My Requests",
   providerAction: "Respond",

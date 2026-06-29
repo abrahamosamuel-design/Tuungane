@@ -123,13 +123,13 @@ function Index() {
               to="/requests/new"
               className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-orange px-5 py-2.5 text-sm font-semibold text-orange-foreground shadow-lg shadow-orange/30 transition hover:brightness-110 sm:w-auto sm:px-7 sm:py-3"
             >
-              <ClipboardList className="h-4 w-4" /> Create a Request
+              <ClipboardList className="h-4 w-4" /> Post a Service Request
             </Link>
             <Link
               to={listSkillHref(user) as never}
               className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-green px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-green/30 transition hover:brightness-110 sm:w-auto sm:px-7 sm:py-3"
             >
-              <UserIcon className="h-4 w-4" /> List Your Skill
+              <UserIcon className="h-4 w-4" /> List Your Service
             </Link>
           </div>
 
