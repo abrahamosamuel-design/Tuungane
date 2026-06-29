@@ -10,21 +10,21 @@ export function MobileBottomNav() {
 
   return (
     <>
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md md:hidden">
-        <div className="mx-auto flex max-w-md items-stretch justify-around px-1">
-          <Tab to="/" icon={<Home className="h-5 w-5" />} label="Home" exact />
-          <Tab to="/services" icon={<Wrench className="h-5 w-5" />} label="Services" />
+      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background pb-[env(safe-area-inset-bottom)] shadow-[0_-2px_10px_rgba(0,0,0,0.04)] backdrop-blur-md md:hidden">
+        <div className="mx-auto grid h-16 max-w-md grid-cols-5 items-stretch">
+          <Tab to="/" icon={<Home className="h-6 w-6" />} label="Home" exact />
+          <Tab to="/services" icon={<Wrench className="h-6 w-6" />} label="Services" />
           <CreateTab onClick={() => setSheetOpen(true)} />
-          <Tab to="/requests/browse" icon={<ClipboardList className="h-5 w-5" />} label="Service Requests" />
+          <Tab to="/requests/browse" icon={<ClipboardList className="h-6 w-6" />} label="Service Requests" />
           {user ? (
-            <Tab to="/u/$id" params={{ id: user.id }} icon={<UserIcon className="h-5 w-5" />} label="Profile" />
+            <Tab to="/u/$id" params={{ id: user.id }} icon={<UserIcon className="h-6 w-6" />} label="Profile" />
           ) : (
-            <Tab to="/login" icon={<UserIcon className="h-5 w-5" />} label="Sign in" />
+            <Tab to="/login" icon={<UserIcon className="h-6 w-6" />} label="Sign in" />
           )}
         </div>
       </nav>
 
-      <div className="h-20 md:hidden" aria-hidden />
+      <div className="h-16 md:hidden" aria-hidden />
       <CreateChoiceSheet open={sheetOpen} onClose={() => setSheetOpen(false)} />
     </>
   );
@@ -35,12 +35,16 @@ function CreateTab({ onClick }: { onClick: () => void }) {
     <button
       onClick={onClick}
       aria-label="Create on Tuungane"
-      className="relative flex flex-1 flex-col items-center justify-end gap-0.5 px-2 pb-2 pt-1 text-[10px] font-semibold text-orange-foreground"
+      className="grid h-16 grid-rows-[26px_26px] content-center items-center justify-items-center gap-1 px-1"
     >
-      <span className="-mt-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-orange text-orange-foreground shadow-lg shadow-orange/30">
-        <Plus className="h-5 w-5" />
+      <span className="flex items-center justify-center">
+        <span className="-mt-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-orange text-orange-foreground shadow-lg shadow-orange/30">
+          <Plus className="h-6 w-6" />
+        </span>
       </span>
-      <span className="text-orange">Create</span>
+      <span className="flex items-end justify-center text-[11px] font-semibold leading-[1.1] text-orange">
+        Create
+      </span>
     </button>
   );
 }
@@ -52,10 +56,12 @@ function Tab({ to, icon, label, exact, params }: { to: string; icon: React.React
       params={params as never}
       activeOptions={{ exact }}
       activeProps={{ className: "text-orange" }}
-      className="flex min-h-11 flex-1 flex-col items-center justify-center gap-0.5 px-2 py-2 text-[10px] font-medium text-muted-foreground"
+      className="grid h-16 grid-rows-[26px_26px] content-center items-center justify-items-center gap-1 px-1 text-muted-foreground transition-colors hover:text-foreground"
     >
-      {icon}
-      <span>{label}</span>
+      <span className="flex items-center justify-center">{icon}</span>
+      <span className="flex h-full items-end justify-center text-[11px] font-medium leading-[1.1]">
+        <span className="max-w-[3rem] text-center whitespace-normal">{label}</span>
+      </span>
     </Link>
   );
 }
