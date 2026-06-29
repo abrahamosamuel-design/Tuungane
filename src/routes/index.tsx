@@ -23,13 +23,13 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Create a request and get matched with skilled providers in Entebbe, Kampala and across Uganda — or list your skill and get discovered.",
+          "Post a service request and get matched with people offering services in Entebbe, Kampala and across Uganda — or list your service and get discovered.",
       },
       { property: "og:title", content: "Tuungane — Connect to trusted services nearby" },
       {
         property: "og:description",
         content:
-          "Create a request and get matched with skilled providers in Entebbe, Kampala and across Uganda — or list your skill and get discovered.",
+          "Post a service request and get matched with people offering services in Entebbe, Kampala and across Uganda — or list your service and get discovered.",
       },
       { property: "og:url", content: "https://tuungane.com/" },
       { property: "og:type", content: "website" },

@@ -279,7 +279,7 @@ export function NearYouHomeSection() {
           to="/requests/new"
           className="inline-flex items-center gap-2 rounded-full bg-orange px-5 py-2 text-sm font-semibold text-orange-foreground hover:brightness-110"
         >
-          <ClipboardList className="h-4 w-4" /> Create a request
+          <ClipboardList className="h-4 w-4" /> Post a service request
         </Link>
         <Link to="/services" className="text-sm font-semibold text-navy hover:text-orange">
           Browse providers <ArrowRight className="inline h-3 w-3" />
