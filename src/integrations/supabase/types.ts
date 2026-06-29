@@ -2720,6 +2720,7 @@ export type Database = {
         Args: { lat1: number; lat2: number; lon1: number; lon2: number }
         Returns: number
       }
+      _is_owner_or_staff: { Args: { _uid: string }; Returns: boolean }
       _slugify: { Args: { _text: string }; Returns: string }
       _trust_profile_owner: {
         Args: {
@@ -2883,8 +2884,92 @@ export type Database = {
       }
       get_application_phone: { Args: { _app_id: string }; Returns: string }
       get_completion_code: { Args: { _request_id: string }; Returns: string }
+      get_my_profile: {
+        Args: never
+        Returns: {
+          address_description: string | null
+          area: string | null
+          avatar_url: string | null
+          bio: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          district: string | null
+          full_name: string
+          id: string
+          is_provider: boolean
+          latitude: number | null
+          location_updated_at: string | null
+          location_visibility: string
+          longitude: number | null
+          region: string | null
+          town: string | null
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "profiles"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      get_my_service_profile: {
+        Args: never
+        Returns: {
+          area: string | null
+          areas_served: string[]
+          availability: Database["public"]["Enums"]["availability_status"]
+          bio: string
+          business_name: string | null
+          category_slug: string
+          country: string | null
+          cover_url: string | null
+          created_at: string
+          district: string
+          email: string | null
+          header_url: string | null
+          latitude: number | null
+          longitude: number | null
+          media_urls: string[]
+          phone: string | null
+          region: string | null
+          seeded_by_official: boolean
+          seeded_status:
+            | Database["public"]["Enums"]["seeded_profile_status"]
+            | null
+          service_radius_km: number | null
+          subcategory: string
+          suspended: boolean
+          town: string
+          updated_at: string
+          user_id: string
+          verified: Database["public"]["Enums"]["verification_status"]
+          whatsapp: string | null
+          years_experience: number
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "service_profiles"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       get_profile_card: {
         Args: { _id: string }
+        Returns: {
+          area: string
+          avatar_url: string
+          bio: string
+          district: string
+          full_name: string
+          id: string
+          is_provider: boolean
+          location_visibility: string
+          town: string
+        }[]
+      }
+      get_profile_cards: {
+        Args: { _ids: string[] }
         Returns: {
           area: string
           avatar_url: string
@@ -2923,6 +3008,14 @@ export type Database = {
           key: string
           label: string
           unlocks: string
+        }[]
+      }
+      get_provider_contact: {
+        Args: { _provider: string }
+        Returns: {
+          email: string
+          phone: string
+          whatsapp: string
         }[]
       }
       get_unread_message_count: { Args: never; Returns: number }
