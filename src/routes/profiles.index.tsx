@@ -124,7 +124,7 @@ function ProfilesBrowsePage() {
                     {p.verified === "verified" && <BadgeCheck className="h-4 w-4 shrink-0 text-orange" />}
                   </div>
                   <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{p.profile_type}</p>
-                  {p.bio && <ExpandableText text={p.bio} clampLines={3} maxLines={10} className="mt-1" />}
+                  {p.bio && <ExpandableText text={p.bio} clampLines={3} maxLines={7} className="mt-1" />}
                   {(p.town || p.district) && (
                     <p className="mt-1 flex items-center gap-1 text-[11px] text-muted-foreground">
                       <MapPin className="h-3 w-3" />

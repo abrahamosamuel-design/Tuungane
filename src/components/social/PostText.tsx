@@ -6,5 +6,5 @@ import { ExpandableText } from "@/components/feed/ExpandableText";
  */
 export function PostText({ text, className = "" }: { text: string; className?: string }) {
   if (!text) return null;
-  return <ExpandableText text={text} clampLines={3} maxLines={10} className={className} />;
+  return <ExpandableText text={text} clampLines={3} maxLines={7} className={className} />;
 }
