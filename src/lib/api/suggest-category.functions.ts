@@ -21,6 +21,7 @@ interface Suggestion {
 }
 
 export const suggestCategory = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator(InputSchema)
   .handler(async ({ data }): Promise<Suggestion | null> => {
     const apiKey = process.env.LOVABLE_API_KEY;
