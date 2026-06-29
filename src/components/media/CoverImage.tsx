@@ -18,6 +18,7 @@ import {
   Upload,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { initials } from "@/lib/format";
 
 const ICONS: Record<string, LucideIcon> = {
   "home-repair": Wrench,
