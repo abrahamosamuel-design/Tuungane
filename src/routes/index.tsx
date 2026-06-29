@@ -202,7 +202,7 @@ function Index() {
 
 
       {/* Provider CTA banner */}
-      <section className="mx-auto max-w-6xl px-4 pb-32 pt-10 sm:px-6 sm:pb-16">
+      <section className="mx-auto max-w-6xl px-4 pb-32 pt-6 sm:px-6 sm:pb-16 sm:pt-10">
         <div className="overflow-hidden rounded-3xl border border-border bg-card p-6 text-center shadow-[var(--shadow-elevated)] sm:p-10">
           <p className="text-xs font-semibold uppercase tracking-wider text-green">FOR SERVICE PROVIDERS</p>
           <h2 className="mt-2 font-display text-2xl font-bold text-navy sm:text-3xl">
