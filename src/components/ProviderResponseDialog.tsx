@@ -52,6 +52,7 @@ export function ProviderResponseDialog({ open, onClose, requestId, existing, onS
       quote_amount: form.quote_amount ? Number(form.quote_amount) : null,
       availability_note: form.availability_note.trim().slice(0, 200) || null,
       estimated_time: form.estimated_time.trim().slice(0, 100) || null,
+      contact_preference: form.contact_preference,
     };
     const { error } = existing
       ? await supabase.from("provider_responses").update(payload).eq("id", existing.id)
@@ -106,6 +107,23 @@ export function ProviderResponseDialog({ open, onClose, requestId, existing, onS
           </div>
           <Field label="Availability">
             <input value={form.availability_note} onChange={(e) => setForm({ ...form, availability_note: e.target.value })} className={input} placeholder="e.g. Available tomorrow morning" />
+          </Field>
+          <Field label="Preferred contact method">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+              {contactMethods.map((m) => {
+                const active = form.contact_preference === m.value;
+                return (
+                  <button
+                    type="button"
+                    key={m.value}
+                    onClick={() => setForm({ ...form, contact_preference: m.value })}
+                    className={`rounded-lg border px-3 py-2 text-xs font-semibold transition ${active ? "border-orange bg-orange/10 text-orange" : "border-border bg-background text-navy hover:border-orange/60"}`}
+                  >
+                    {m.label}
+                  </button>
+                );
+              })}
+            </div>
           </Field>
         </div>
 
