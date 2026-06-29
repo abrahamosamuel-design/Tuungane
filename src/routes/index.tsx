@@ -223,22 +223,6 @@ function Index() {
   );
 }
 
-function SectionHeader({ title, link }: { title: string; link?: { label: string; to: string } }) {
-  return (
-    <div className="flex items-end justify-between">
-      <h2 className="font-display text-lg font-bold text-navy sm:text-xl">
-        {title}
-        <span className="mt-1 block h-1 w-10 rounded-full bg-green/80" />
-      </h2>
-      {link ? (
-        <Link to={link.to} className="text-sm font-semibold text-navy hover:text-orange">
-          {link.label}
-        </Link>
-      ) : null}
-    </div>
-  );
-}
-
 function TrustItem({ Icon, label }: { Icon: any; label: string }) {
   return (
     <div className="flex items-center justify-center gap-2 px-1 py-1 text-left">
@@ -250,34 +234,3 @@ function TrustItem({ Icon, label }: { Icon: any; label: string }) {
   );
 }
 
-function Step({
-  n,
-  title,
-  desc,
-  Icon,
-  tint,
-}: {
-  n: number;
-  title: string;
-  desc: string;
-  Icon: any;
-  tint: "green" | "navy" | "orange";
-}) {
-  const tints = {
-    green: { bg: "bg-green/10", fg: "text-green", num: "bg-green text-white" },
-    navy: { bg: "bg-navy/5", fg: "text-navy", num: "bg-navy text-white" },
-    orange: { bg: "bg-orange/10", fg: "text-orange", num: "bg-orange text-orange-foreground" },
-  }[tint];
-  return (
-    <div className="rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)]">
-      <div className="flex items-center gap-3">
-        <span className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold ${tints.num}`}>{n}</span>
-        <span className={`flex h-12 w-12 items-center justify-center rounded-xl ${tints.bg} ${tints.fg}`}>
-          <Icon className="h-6 w-6" />
-        </span>
-      </div>
-      <h3 className="mt-3 font-display text-sm font-bold text-navy">{title}</h3>
-      <p className="mt-1 text-xs text-muted-foreground">{desc}</p>
-    </div>
-  );
-}
