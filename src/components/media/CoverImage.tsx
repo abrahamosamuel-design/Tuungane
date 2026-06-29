@@ -15,6 +15,7 @@ import {
   Sprout,
   MoreHorizontal,
   ImageOff,
+  Upload,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -47,6 +48,10 @@ type CoverImageProps = {
   label?: string;
   /** Optional green trust ring for verified square photos. */
   verifiedRing?: boolean;
+  /** If provided, a clear upload button is shown inside the placeholder. */
+  onUpload?: (file: File) => void;
+  /** Whether an upload is currently in progress. */
+  uploading?: boolean;
   className?: string;
 };
 
