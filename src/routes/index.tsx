@@ -5,22 +5,9 @@ import {
   MapPin,
   Zap,
   ClipboardList,
-  MessageSquare,
-  UserCheck,
-  Wrench,
-  Sparkles as SparklesIcon,
-  Scissors,
-  Car,
-  GraduationCap,
-  MoreHorizontal,
-  Star,
-  BadgeCheck,
-  Bookmark,
-  
   User as UserIcon,
 } from "lucide-react";
 import { Layout } from "@/components/Layout";
-import { useCategories } from "@/hooks/use-categories";
 import { ListYourSkillButton } from "@/components/cta/ListYourSkillButton";
 import { useAuth } from "@/hooks/use-auth";
 import { listSkillHref } from "@/lib/cta";
@@ -28,22 +15,6 @@ import heroNetwork from "@/assets/hero-network.jpg";
 import { HomeFeedSections } from "@/components/HomeFeedSections";
 import { SetLocationNudge } from "@/components/SetLocationNudge";
 
-// Curated category set for the homepage tile grid
-const HOME_CATEGORY_SLUGS = ["home-repair", "cleaning", "automotive", "beauty", "education"];
-const homeCategoryIcons: Record<string, any> = {
-  "home-repair": Wrench,
-  cleaning: SparklesIcon,
-  automotive: Car,
-  beauty: Scissors,
-  education: GraduationCap,
-};
-const homeCategoryLabels: Record<string, string> = {
-  "home-repair": "Plumbing",
-  cleaning: "Cleaning",
-  automotive: "Mechanics",
-  beauty: "Beauty",
-  education: "Tutoring",
-};
 
 export const Route = createFileRoute("/")({
   head: () => ({
