@@ -31,8 +31,8 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link to="/" className="flex items-center gap-2">
-          <Logo className="h-9 w-auto" />
+        <Link to="/" className="flex items-center" aria-label="Tuungane home">
+          <Logo className="h-11 w-auto sm:h-12" />
         </Link>
         <nav className="hidden items-center gap-8 md:flex">
           {primaryNav.map((n) => (

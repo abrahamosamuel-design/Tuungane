@@ -202,20 +202,20 @@ function Index() {
 
 
       {/* Provider CTA banner */}
-      <section className="mx-auto max-w-6xl px-4 pb-28 pt-10 sm:px-6 sm:pb-16">
+      <section className="mx-auto max-w-6xl px-4 pb-32 pt-10 sm:px-6 sm:pb-16">
         <div className="overflow-hidden rounded-3xl border border-border bg-card p-6 text-center shadow-[var(--shadow-elevated)] sm:p-10">
           <p className="text-xs font-semibold uppercase tracking-wider text-green">FOR SERVICE PROVIDERS</p>
           <h2 className="mt-2 font-display text-2xl font-bold text-navy sm:text-3xl">
-            List your skill. Get discovered.
+            List your service. Get discovered.
           </h2>
           <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
             Create a free provider profile, show your work, and let customers near you find you.
           </p>
           <div className="mt-5">
-            <ListYourSkillButton variant="solid" className="px-6 py-3" />
+            <ListYourSkillButton variant="solid" className="px-6 py-3" label="List Your Service" />
           </div>
           <Link to="/requests/browse" className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-navy hover:text-orange">
-            Or browse open requests <ArrowRight className="h-3.5 w-3.5" />
+            Browse open requests <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>
       </section>
