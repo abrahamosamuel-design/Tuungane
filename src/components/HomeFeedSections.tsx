@@ -536,78 +536,83 @@ function ProviderCard({ p, userLoc }: { p: NearbyProvider; userLoc: ReturnType<t
   const near = proximityLabel(userLoc, p);
   const avail = availabilityMeta(p.availability);
   const verified = p.verified === "verified";
-  const avatar = p.profile?.avatar_url;
+  const avatar = p.cover_url || p.profile?.avatar_url || null;
   const years = typeof p.years_experience === "number" ? p.years_experience : 0;
+  const media = (p.media_urls ?? []).filter(Boolean) as string[];
 
   return (
-    <article className={`flex ${CARD_W} shrink-0 snap-start flex-col rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)] transition hover:border-orange sm:w-auto sm:max-w-none`}>
-      <div className="flex items-start gap-3">
-        {avatar ? (
-          <img src={avatar} alt={name} loading="lazy" className="h-12 w-12 shrink-0 rounded-full object-cover" />
-        ) : (
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-navy/10 text-sm font-bold text-navy">
-            {initialsOf(name)}
-          </div>
-        )}
+    <article className={`flex ${CARD_W} shrink-0 snap-start flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)] transition hover:border-orange sm:w-auto sm:max-w-none`}>
+      <div className="flex items-start gap-3 p-4 pb-2">
+        <Link to="/u/$id" params={{ id: p.user_id }} className="shrink-0">
+          <FeedAvatar src={avatar} name={name} size={44} ring={verified} />
+        </Link>
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-1.5">
-            <h3 className="truncate text-sm font-bold text-navy">{name}</h3>
-            {verified ? <BadgeCheck className="h-4 w-4 shrink-0 text-green" /> : null}
+          <div className="flex flex-wrap items-center gap-x-1.5">
+            <Link to="/u/$id" params={{ id: p.user_id }} className="truncate text-[14px] font-semibold text-navy hover:underline">
+              {name}
+            </Link>
+            {verified ? <BadgeCheck className="h-4 w-4 shrink-0 text-green" aria-label="Verified" /> : null}
           </div>
-          <p className="truncate text-[11px] text-muted-foreground">
+          <p className="truncate text-[12px] text-muted-foreground">
             {formatSubcategory(p.subcategory)}{cat ? ` · ${cat.name}` : ""}
           </p>
           <p className="mt-0.5 inline-flex items-center gap-1 text-[11px] text-muted-foreground">
             <MapPin className="h-3 w-3" /> {p.area || p.town || p.district || "Uganda"}
+            {near ? (
+              <span className="ml-1 rounded-full bg-green/10 px-1.5 py-0.5 text-[10px] font-semibold text-green">{near}</span>
+            ) : null}
           </p>
         </div>
+        <button type="button" aria-label="More" className="hidden shrink-0 rounded-full p-1.5 text-muted-foreground hover:bg-muted hover:text-navy sm:inline-flex">
+          <MoreHorizontal className="h-4 w-4" />
+        </button>
       </div>
 
-      <div className="mt-2 flex flex-wrap items-center gap-1.5">
+      <div className="flex flex-wrap items-center gap-1.5 px-4">
         <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${avail.cls}`}>{avail.label}</span>
         <ProfileTrustBadge kind="service_profile" id={p.user_id} size="sm" className="shrink-0" />
         {years > 0 ? (
-          <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold text-navy">
-            {years} yrs experience
-          </span>
-        ) : null}
-        {near ? (
-          <span className="inline-flex items-center gap-1 rounded-full bg-green/10 px-2 py-0.5 text-[10px] font-semibold text-green">
-            {near}
-          </span>
+          <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold text-navy">{years} yrs experience</span>
         ) : null}
       </div>
 
-      {p.bio ? <p className="mt-2 line-clamp-2 text-xs text-foreground/80">{p.bio}</p> : null}
+      {p.bio ? <ExpandableText text={p.bio} clampLines={4} className="px-4 pt-2" /> : null}
 
-      <div className="mt-auto flex items-center gap-2 pt-3">
-        <Link
-          to="/u/$id"
-          params={{ id: p.user_id }}
-          className="flex-1 truncate rounded-full bg-orange px-3 py-2 text-center text-xs font-semibold text-orange-foreground hover:brightness-110"
-        >
-          View profile
-        </Link>
+      {media.length > 0 && (
+        <div className="px-4 pt-1">
+          <MediaGrid urls={media} alt={name} />
+        </div>
+      )}
+
+      <div className="mt-auto flex items-center gap-2 border-t border-border bg-surface px-3 py-2.5">
         <Link
           to="/requests/new"
-          className="inline-flex shrink-0 items-center justify-center gap-1 rounded-full border border-border px-3 py-2 text-xs font-semibold text-navy hover:border-navy"
-          aria-label={`Request ${name}`}
+          search={{ providerId: p.user_id } as never}
+          className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-orange px-3 py-2 text-xs font-semibold text-orange-foreground hover:brightness-110"
         >
-          <Briefcase className="h-3.5 w-3.5" />
-          <span className="hidden xs:inline">Request</span>
+          <Briefcase className="h-3.5 w-3.5" /> Request service
         </Link>
         <Link
           to="/u/$id"
           params={{ id: p.user_id }}
-          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border text-navy hover:border-navy"
+          className="inline-flex items-center justify-center gap-1 rounded-full border border-border px-3 py-2 text-xs font-semibold text-navy hover:border-navy"
           aria-label={`Message ${name}`}
         >
-          <MessageSquare className="h-4 w-4" />
+          <MessageSquare className="h-3.5 w-3.5" />
+        </Link>
+        <Link
+          to="/u/$id"
+          params={{ id: p.user_id }}
+          className="rounded-full border border-border px-3 py-2 text-xs font-semibold text-navy hover:border-navy"
+        >
+          View
         </Link>
       </div>
     </article>
   );
 }
+
+
 
 function ServiceListingCard({
   l,
