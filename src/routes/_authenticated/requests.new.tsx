@@ -41,7 +41,7 @@ export const Route = createFileRoute("/_authenticated/requests/new")({
     town: s(search.town),
     area: s(search.area),
   }),
-  head: () => ({ meta: [{ title: "Create a Request — Tuungane" }] }),
+  head: () => ({ meta: [{ title: "Post a Service Request — Tuungane" }] }),
   component: NewRequest,
 });
 
