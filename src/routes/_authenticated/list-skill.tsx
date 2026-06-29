@@ -186,8 +186,8 @@ function ListSkillPage() {
     });
     setBusy(false);
     if (error) { toastError(error, editMode ? "Couldn't save changes" : "Couldn't publish your skill"); return; }
-    toast.success(editMode ? "Changes saved" : "Your skill is live", {
-      description: editMode ? "Your service profile has been updated." : "Customers nearby can now find and contact you.",
+    toast.success(editMode ? "Changes saved" : "Your service has been listed successfully", {
+      description: editMode ? "Your service profile has been updated." : "People looking for this service can now find you.",
     });
     nav({ to: "/dashboard" });
   };
