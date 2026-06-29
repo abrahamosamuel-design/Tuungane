@@ -82,13 +82,6 @@ const CARD_W = "w-[88vw] max-w-[340px]";
 // Horizontal scroller: edge padding so first/last cards aren't flush to the edge
 const SCROLLER =
   "-mx-4 mt-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-3 scroll-px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0";
-// Only show genuine provider work, never promotions/marketing announcements
-const REAL_WORK_POST_TYPES = [
-  "completed_job",
-  "work_update",
-  "before_after",
-  "new_service",
-] as const;
 
 export function HomeFeedSections() {
   const { user } = useAuth();
