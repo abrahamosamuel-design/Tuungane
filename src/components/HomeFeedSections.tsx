@@ -149,17 +149,13 @@ export function HomeFeedSections() {
         provs = (data ?? []) as NearbyProvider[];
       }
 
-      const { data: postsRows } = await supabase
-        .from("timeline_posts")
-        .select("id,provider_user_id,text,category_slug,media_urls,town,district,area,post_type,created_at")
-        .eq("hidden", false)
-        .in("post_type", [...REAL_WORK_POST_TYPES])
-        .not("media_urls", "eq", "{}")
+      const { data: listingRows } = await supabase
+        .from("service_profiles")
+        .select("user_id,business_name,category_slug,subcategory,bio,town,district,area,latitude,longitude,verified,availability,cover_url,created_at")
+        .eq("suspended", false)
         .order("created_at", { ascending: false })
-        .limit(8);
-      const posts = ((postsRows ?? []) as RecentPost[]).filter(
-        (p) => Array.isArray(p.media_urls) && p.media_urls.length > 0,
-      );
+        .limit(12);
+      const listings = (listingRows ?? []) as RecentListing[];
 
       if (cancelled) return;
 
