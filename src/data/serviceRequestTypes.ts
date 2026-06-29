@@ -175,6 +175,7 @@ export interface ProviderResponseRow {
   availability_note: string | null;
   estimated_time: string | null;
   portfolio_post_id: string | null;
+  contact_preference: ContactMethodValue | null;
   status: ResponseStatus;
   created_at: string;
   updated_at: string;

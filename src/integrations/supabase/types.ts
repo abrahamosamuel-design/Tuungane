@@ -1624,6 +1624,7 @@ export type Database = {
       provider_responses: {
         Row: {
           availability_note: string | null
+          contact_preference: string | null
           created_at: string
           estimated_time: string | null
           id: string
@@ -1637,6 +1638,7 @@ export type Database = {
         }
         Insert: {
           availability_note?: string | null
+          contact_preference?: string | null
           created_at?: string
           estimated_time?: string | null
           id?: string
@@ -1650,6 +1652,7 @@ export type Database = {
         }
         Update: {
           availability_note?: string | null
+          contact_preference?: string | null
           created_at?: string
           estimated_time?: string | null
           id?: string
