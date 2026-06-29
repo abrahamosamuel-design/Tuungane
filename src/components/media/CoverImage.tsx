@@ -112,6 +112,7 @@ export function CoverImage({
             showUpload && variant === "wide" ? "justify-start pt-7" : "justify-center"
           )}
         >
+          {showUpload ? (
             <>
               <input
                 ref={setInputRef}
