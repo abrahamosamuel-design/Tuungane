@@ -568,9 +568,16 @@ function NewRequest() {
                 </Field>
               </div>
 
-              <Field label="Photo (optional)">
-                <input type="file" accept="image/*" onChange={(e) => setFile(e.target.files?.[0] ?? null)} className="text-sm" />
-              </Field>
+              <MediaUploader
+                userId={user.id}
+                folder="requests"
+                value={mediaUrls}
+                onChange={setMediaUrls}
+                max={6}
+                label="Add photos (optional)"
+                hint="Photos help providers give you a more accurate quote. Up to 6 images, 8MB each."
+              />
+
 
               <div className="grid grid-cols-2 gap-3">
                 <Field label="Contact preference">
