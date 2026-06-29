@@ -59,7 +59,7 @@ function BrowseRequests() {
     setLoading(true);
     let query = supabase
       .from("service_requests")
-      .select("id,customer_id,provider_id,category_slug,subcategory,service_needed,title,visibility,location,district,town,area,latitude,longitude,description,preferred_date,preferred_time,urgency,budget_range,preferred_contact_method,attachment_url,status,urgent_flag,created_at,updated_at,completed_at,cancelled_at,disputed_at,service_profile_id,selected_provider_id,provider_confirmed_completion,customer_confirmed_completion")
+      .select("id,customer_id,provider_id,category_slug,subcategory,service_needed,title,visibility,location,district,town,area,latitude,longitude,description,preferred_date,preferred_time,urgency,budget_range,preferred_contact_method,attachment_url,media_urls,status,urgent_flag,created_at,updated_at,completed_at,cancelled_at,disputed_at,service_profile_id,selected_provider_id,provider_confirmed_completion,customer_confirmed_completion")
       .eq("visibility", "public")
       .eq("status", "requested")
       
@@ -83,18 +83,20 @@ function BrowseRequests() {
     const requestIds = list.map((r) => r.id);
     const [{ data: profs }, { data: resps }] = await Promise.all([
       customerIds.length
-        ? supabase.from("profiles").select("id,full_name").in("id", customerIds)
-        : Promise.resolve({ data: [] as Array<{ id: string; full_name: string }> }),
+        ? supabase.from("profiles").select("id,full_name,avatar_url").in("id", customerIds)
+        : Promise.resolve({ data: [] as Array<{ id: string; full_name: string; avatar_url: string | null }> }),
       requestIds.length
         ? supabase.from("provider_responses").select("request_id").in("request_id", requestIds)
         : Promise.resolve({ data: [] as Array<{ request_id: string }> }),
     ]);
-    const nameMap = new Map((profs ?? []).map((p) => [p.id, p.full_name]));
+    const nameMap = new Map((profs ?? []).map((p) => [p.id, p.full_name] as const));
+    const avatarMap = new Map((profs ?? []).map((p) => [p.id, p.avatar_url] as const));
     const countMap = new Map<string, number>();
     (resps ?? []).forEach((r) => countMap.set(r.request_id, (countMap.get(r.request_id) ?? 0) + 1));
     list = list.map((r) => ({
       ...r,
       customer_name: nameMap.get(r.customer_id) ?? null,
+      customer_avatar_url: avatarMap.get(r.customer_id) ?? null,
       response_count: countMap.get(r.id) ?? 0,
     }));
 
