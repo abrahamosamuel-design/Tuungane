@@ -16,7 +16,7 @@ export const Route = createFileRoute("/_authenticated/list-skill")({
   validateSearch: (s: Record<string, unknown>) => ({
     edit: s.edit === "1" || s.edit === 1 || s.edit === true,
   }),
-  head: () => ({ meta: [{ title: "List your skill — Tuungane" }] }),
+  head: () => ({ meta: [{ title: "List your service — Tuungane" }] }),
   component: ListSkillPage,
 });
 
