@@ -151,47 +151,63 @@ export function CoverImage({
                   </>
                 )}
               </button>
-              <Icon
-                className={cn(
-                  "shrink-0 text-navy-foreground/60",
-                  variant === "wide"
-                    ? "h-7 w-7 sm:h-8 sm:w-8"
-                    : "h-6 w-6 sm:h-8 sm:w-8"
-                )}
-                strokeWidth={1.75}
-              />
-              <span
-                className={cn(
-                  "font-medium leading-tight text-navy-foreground/80",
-                  variant === "wide"
-                    ? "text-xs sm:text-sm"
-                    : "text-[10px] sm:text-xs"
-                )}
-              >
-                {displayLabel}
-              </span>
+              {variant === "wide" ? (
+                <Icon
+                  className={cn(
+                    "shrink-0 text-navy-foreground/60",
+                    variant === "wide"
+                      ? "h-7 w-7 sm:h-8 sm:w-8"
+                      : "h-6 w-6 sm:h-8 sm:w-8"
+                  )}
+                  strokeWidth={1.75}
+                />
+              ) : (
+                <span className="font-display text-2xl font-bold text-navy-foreground">
+                  {name ? initials(name) : "?"}
+                </span>
+              )}
+              {variant === "wide" && (
+                <span
+                  className={cn(
+                    "font-medium leading-tight text-navy-foreground/80",
+                    variant === "wide"
+                      ? "text-xs sm:text-sm"
+                      : "text-[10px] sm:text-xs"
+                  )}
+                >
+                  {displayLabel}
+                </span>
+              )}
             </>
           ) : (
             <>
-              <Icon
-                className={cn(
-                  "shrink-0 text-navy-foreground/70",
-                  variant === "wide"
-                    ? "h-8 w-8 sm:h-10 sm:w-10"
-                    : "h-6 w-6 sm:h-8 sm:w-8"
-                )}
-                strokeWidth={1.75}
-              />
-              <span
-                className={cn(
-                  "font-medium leading-tight text-navy-foreground/90",
-                  variant === "wide"
-                    ? "text-xs sm:text-sm"
-                    : "text-[10px] sm:text-xs"
-                )}
-              >
-                {displayLabel}
-              </span>
+              {variant === "wide" ? (
+                <Icon
+                  className={cn(
+                    "shrink-0 text-navy-foreground/70",
+                    variant === "wide"
+                      ? "h-8 w-8 sm:h-10 sm:w-10"
+                      : "h-6 w-6 sm:h-8 sm:w-8"
+                  )}
+                  strokeWidth={1.75}
+                />
+              ) : (
+                <span className="font-display text-3xl font-bold text-navy-foreground sm:text-4xl">
+                  {name ? initials(name) : "?"}
+                </span>
+              )}
+              {variant === "wide" && (
+                <span
+                  className={cn(
+                    "font-medium leading-tight text-navy-foreground/90",
+                    variant === "wide"
+                      ? "text-xs sm:text-sm"
+                      : "text-[10px] sm:text-xs"
+                  )}
+                >
+                  {displayLabel}
+                </span>
+              )}
             </>
           )}
         </div>
