@@ -185,7 +185,6 @@ export function HomeFeedSections() {
       const af = isFeaturedTarget(a, featured) ? 1 : 0;
       const bf = isFeaturedTarget(b, featured) ? 1 : 0;
       if (bf !== af) return bf - af;
-      // Urgent slightly above non-urgent within same tier
       return (b.urgent_flag ? 1 : 0) - (a.urgent_flag ? 1 : 0);
     });
     const withinDefault = filterByRadius(boosted, userLoc, (r) => r, 20);
