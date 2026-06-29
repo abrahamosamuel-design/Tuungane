@@ -59,6 +59,7 @@ type RealProvider = {
   completed_jobs: number;
   verified_reviews: number;
   response_rate: number;
+  years_experience?: number | null;
 };
 
 const POPULAR_SERVICES = ["Plumber", "Electrician", "Cleaner", "Mechanic", "Tailor", "Tutor", "Driver", "Hairdresser", "Caterer", "Web Designer"];
@@ -105,7 +106,7 @@ function Services() {
   useEffect(() => {
     (async () => {
       setLoadingReal(true);
-      let qy = supabase.from("service_profiles").select("user_id,business_name,subcategory,bio,town,district,area,latitude,longitude,areas_served,service_radius_km,category_slug,verified,seeded_by_official,seeded_status,updated_at,availability,cover_url").eq("suspended", false).order("updated_at", { ascending: false }).limit(60);
+      let qy = supabase.from("service_profiles").select("user_id,business_name,subcategory,bio,town,district,area,latitude,longitude,areas_served,service_radius_km,category_slug,verified,seeded_by_official,seeded_status,updated_at,availability,cover_url,years_experience").eq("suspended", false).order("updated_at", { ascending: false }).limit(60);
       if (filter === "featured") qy = qy.eq("verified", "featured");
       if (filter === "verified") qy = qy.in("verified", ["verified", "featured"]);
       if (filter === "available") qy = qy.eq("availability", "available");
@@ -374,6 +375,8 @@ function ProviderRow({ p, isBoosted, userLoc, onRequest }: { p: RealProvider; is
   const isNew = !hasRating && p.completed_jobs === 0;
   const isTopRated = hasRating && p.average_rating >= 4.5 && p.verified_reviews >= 5;
   const isFastResponder = p.response_rate >= 80 && p.completed_jobs >= 3;
+  const years = p.years_experience ?? 0;
+  const recentlyJoined = isNew && (Date.now() - new Date(p.updated_at).getTime()) < 60 * 86400000;
 
   return (
     <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)] transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-elevated)]">
@@ -403,21 +406,23 @@ function ProviderRow({ p, isBoosted, userLoc, onRequest }: { p: RealProvider; is
         </div>
       </Link>
 
-      {/* Trust summary */}
-      <div className="px-4 text-xs text-muted-foreground">
-        {hasRating ? (
-          <span className="inline-flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
-            <Star className="h-3.5 w-3.5 fill-orange text-orange" />
-            <span className="font-semibold text-navy">{p.average_rating.toFixed(1)}</span>
-            <span>· {p.verified_reviews} {p.verified_reviews === 1 ? "review" : "reviews"}</span>
-            {p.completed_jobs > 0 && <span>· {p.completed_jobs} completed</span>}
-          </span>
-        ) : isNew ? (
-          <span className="text-muted-foreground">New provider · No reviews yet</span>
-        ) : p.completed_jobs > 0 ? (
-          <span>{p.completed_jobs} completed {p.completed_jobs === 1 ? "job" : "jobs"}</span>
-        ) : null}
-      </div>
+      {/* Trust summary — positive signals only */}
+      {(hasRating || p.completed_jobs > 0 || years > 0) && (
+        <div className="px-4 text-xs text-muted-foreground">
+          {hasRating ? (
+            <span className="inline-flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
+              <Star className="h-3.5 w-3.5 fill-orange text-orange" />
+              <span className="font-semibold text-navy">{p.average_rating.toFixed(1)}</span>
+              <span>· {p.verified_reviews} {p.verified_reviews === 1 ? "review" : "reviews"}</span>
+              {p.completed_jobs > 0 && <span>· {p.completed_jobs} completed</span>}
+            </span>
+          ) : p.completed_jobs > 0 ? (
+            <span className="font-medium text-navy">{p.completed_jobs} completed {p.completed_jobs === 1 ? "job" : "jobs"}{years > 0 ? ` · ${years} yrs experience` : ""}</span>
+          ) : years > 0 ? (
+            <span className="font-medium text-navy">{years} yrs experience</span>
+          ) : null}
+        </div>
+      )}
 
       {p.bio && <p className="mt-2 line-clamp-2 px-4 text-[13px] leading-snug text-foreground/75">{p.bio}</p>}
 
