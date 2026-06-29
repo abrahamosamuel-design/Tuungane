@@ -479,7 +479,7 @@ function ProviderRow({ p, isBoosted, userLoc, onRequest }: { p: RealProvider; is
         </div>
       )}
 
-      {p.bio && <p className="mt-2 line-clamp-2 px-4 text-[13px] leading-snug text-foreground/75">{p.bio}</p>}
+      {p.bio && <ExpandableText text={p.bio} clampLines={3} maxLines={10} className="mt-2 px-4" />}
 
       {Array.isArray(p.media_urls) && p.media_urls.length > 0 && (
         <div className="mt-2 px-4">

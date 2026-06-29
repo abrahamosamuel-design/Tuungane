@@ -10,6 +10,7 @@ import { useUserLocation } from "@/hooks/use-user-location";
 import { filterByRadius, proximityLabel, sortByProximity, type UserLocation } from "@/lib/location";
 import { RadiusFilter } from "@/components/RadiusFilter";
 import { ProfileTrustBadge } from "@/components/trust/ProfileTrustBadge";
+import { ExpandableText } from "@/components/feed/ExpandableText";
 
 export const Route = createFileRoute("/businesses/")({
   head: () => ({ meta: [
@@ -154,7 +155,7 @@ function BPageCard({ p, featured, userLoc }: { p: BPage; featured?: boolean; use
           <ProfileTrustBadge kind="business_page" id={p.id} />
         </div>
         <div className="text-xs text-muted-foreground">{orgTypeLabel(p.org_type)}{p.town ? ` · ${p.town}` : ""}{p.district ? `, ${p.district}` : ""}</div>
-        <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">{p.description || "No description yet."}</p>
+        <ExpandableText text={p.description || "No description yet."} clampLines={3} maxLines={10} className="mt-2" />
       </div>
     </Link>
   );

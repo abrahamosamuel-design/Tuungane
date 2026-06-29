@@ -664,7 +664,7 @@ function ServiceListingCard({
         ) : null}
       </div>
 
-      {l.bio ? <p className="mt-2 line-clamp-2 text-xs text-foreground/80">{l.bio}</p> : null}
+      {l.bio ? <ExpandableText text={l.bio} clampLines={3} maxLines={10} className="mt-2" /> : null}
 
       <div className="mt-auto flex items-center gap-2 pt-3">
         <Link
