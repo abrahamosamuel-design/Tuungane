@@ -78,6 +78,7 @@ function Services() {
   const [real, setReal] = useState<RealProvider[]>([]);
   const [loadingReal, setLoadingReal] = useState(true);
   const [dbCats, setDbCats] = useState<Array<{ slug: string; name: string; icon: string; blurb: string; subCount: number; examples: string }> | null>(null);
+  const [showAllCats, setShowAllCats] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -247,13 +248,14 @@ function Services() {
         <div className="mx-auto max-w-7xl">
           <ProviderTrackCTA
             title="Offer a service on Tuungane"
-            text="Create your service listing and get discovered."
+            text="Get discovered by customers near you."
           />
         </div>
       </section>
 
       {/* POPULAR SERVICES */}
       <section className="px-4 pt-4 sm:px-6 sm:pt-6 lg:px-8">
+
         <div className="mx-auto max-w-7xl">
           <h2 className="font-display text-base font-bold text-navy sm:text-xl">Popular services</h2>
           <div className="-mx-4 mt-2 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden">
@@ -271,13 +273,20 @@ function Services() {
       </section>
 
       {/* RECOMMENDED PROVIDERS — horizontal carousel on mobile */}
-      <section className="pt-5 sm:pt-8">
+      <section className="pt-4 sm:pt-8">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex items-end justify-between gap-3">
             <div className="min-w-0">
               <h2 className="font-display text-base font-bold text-navy sm:text-xl">Recommended providers</h2>
               <p className="mt-0.5 text-xs text-muted-foreground sm:text-sm">Trusted picks you can contact or request.</p>
             </div>
+            <a
+              href="#providers-section"
+              onClick={(e) => { e.preventDefault(); document.getElementById("providers-section")?.scrollIntoView({ behavior: "smooth" }); }}
+              className="shrink-0 text-xs font-semibold text-orange hover:underline sm:text-sm"
+            >
+              View all →
+            </a>
           </div>
         </div>
 
@@ -312,38 +321,56 @@ function Services() {
       </section>
 
       {/* BROWSE BY CATEGORY — moved up */}
-      <section className="px-4 pt-6 sm:px-6 sm:pt-10 lg:px-8">
+      <section className="px-4 pt-5 sm:px-6 sm:pt-10 lg:px-8">
         <div className="mx-auto max-w-7xl">
           <h2 className="font-display text-base font-bold text-navy sm:text-xl">Browse services by category</h2>
-          <div className="mt-3 grid gap-2.5 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3">
-            {(dbCats ?? categories.map((c) => ({ slug: c.slug, name: c.name, icon: c.icon, blurb: c.blurb, subCount: c.subcategories.length, examples: c.subcategories.slice(0, 3).join(" · ") }))).map((c) => {
-              const Icon = iconMap[c.icon] ?? Wrench;
-              return (
-                <Link
-                  key={c.slug}
-                  to="/services/$slug"
-                  params={{ slug: c.slug }}
-                  className="group flex items-center gap-3 rounded-2xl border border-border bg-card p-3 transition hover:border-orange hover:shadow-[var(--shadow-card)] sm:p-4"
-                >
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-navy/5 text-navy transition group-hover:bg-orange group-hover:text-orange-foreground sm:h-12 sm:w-12">
-                    <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
+          {(() => {
+            const allCats = dbCats ?? categories.map((c) => ({ slug: c.slug, name: c.name, icon: c.icon, blurb: c.blurb, subCount: c.subcategories.length, examples: c.subcategories.slice(0, 3).join(" · ") }));
+            const visible = showAllCats ? allCats : allCats.slice(0, 6);
+            return (
+              <>
+                <div className="mt-3 grid gap-2.5 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3">
+                  {visible.map((c) => {
+                    const Icon = iconMap[c.icon] ?? Wrench;
+                    return (
+                      <Link
+                        key={c.slug}
+                        to="/services/$slug"
+                        params={{ slug: c.slug }}
+                        className="group flex items-center gap-3 rounded-2xl border border-border bg-card p-2.5 transition hover:border-orange hover:shadow-[var(--shadow-card)] sm:p-4"
+                      >
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-navy/5 text-navy transition group-hover:bg-orange group-hover:text-orange-foreground sm:h-12 sm:w-12">
+                          <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="font-display text-sm font-semibold text-navy">{c.name}</p>
+                          <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">{c.examples || c.blurb}</p>
+                          <p className="mt-0.5 text-[11px] font-medium text-orange">{c.subCount} services</p>
+                        </div>
+                        <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground transition group-hover:text-orange" />
+                      </Link>
+                    );
+                  })}
+                </div>
+                {allCats.length > 6 && (
+                  <div className="mt-3 flex justify-center sm:hidden">
+                    <button
+                      onClick={() => setShowAllCats((v) => !v)}
+                      className="rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-navy hover:border-orange"
+                    >
+                      {showAllCats ? "Show fewer categories" : `View all categories (${allCats.length})`}
+                    </button>
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="font-display text-sm font-semibold text-navy">{c.name}</p>
-                    <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">{c.examples || c.blurb}</p>
-                    <p className="mt-0.5 text-[11px] font-medium text-orange">{c.subCount} services</p>
-                  </div>
-                  <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground transition group-hover:text-orange" />
-                </Link>
-              );
-            })}
-          </div>
+                )}
+              </>
+            );
+          })()}
         </div>
       </section>
 
 
       {/* SECTION 5: SERVICE PROVIDERS ON TUUNGANE */}
-      <section id="providers-section" className="px-4 pb-24 pt-10 sm:px-6 sm:pb-16 lg:px-8">
+      <section id="providers-section" className="px-4 pb-32 pt-6 sm:px-6 sm:pb-16 sm:pt-10 lg:px-8">
         <div className="mx-auto max-w-7xl">
           <div className="flex items-end justify-between gap-3">
             <h2 className="font-display text-lg font-bold text-navy sm:text-xl">Service providers on Tuungane</h2>
@@ -538,7 +565,7 @@ function ProviderCardCompact({ p, userLoc, onRequest }: { p: RealProvider; userL
         )}
       </div>
 
-      {p.bio && <p className="mt-1.5 line-clamp-2 px-3 text-[12px] leading-snug text-foreground/75">{p.bio}</p>}
+      {p.bio && <p className="mt-1.5 hidden min-[380px]:line-clamp-2 px-3 text-[12px] leading-snug text-foreground/75 min-[380px]:block">{p.bio}</p>}
 
       <div className="mt-auto flex items-center justify-between gap-2 border-t border-border bg-surface px-3 py-2">
         <span className={`inline-flex items-center gap-1.5 text-[11px] font-semibold ${available ? "text-green" : "text-muted-foreground"}`}>

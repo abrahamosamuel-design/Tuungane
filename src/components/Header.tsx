@@ -30,9 +30,9 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur-md supports-[backdrop-filter]:bg-background/75">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-3 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-12 max-w-7xl items-center justify-between px-3 sm:h-16 sm:px-6 lg:px-8">
         <Link to="/" className="-ml-1 flex items-center" aria-label="Tuungane home">
-          <Logo className="h-12 w-auto sm:h-14" />
+          <Logo className="h-8 w-auto sm:h-14" />
         </Link>
         <nav className="hidden items-center gap-8 md:flex">
           {primaryNav.map((n) => (
