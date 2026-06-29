@@ -72,7 +72,12 @@ type RecentPost = {
   profile?: { full_name: string; avatar_url: string | null } | null;
 };
 
-const SECTION_WRAP = "mx-auto max-w-6xl px-4 pt-8 sm:px-6 sm:pt-10";
+const SECTION_WRAP = "mx-auto max-w-6xl px-4 pt-6 sm:px-6 sm:pt-10";
+// Mobile carousel card sizing — keep cards within viewport with a hint of the next card
+const CARD_W = "w-[88vw] max-w-[340px]";
+// Horizontal scroller: edge padding so first/last cards aren't flush to the edge
+const SCROLLER =
+  "-mx-4 mt-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-3 scroll-px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0";
 // Only show genuine provider work, never promotions/marketing announcements
 const REAL_WORK_POST_TYPES = [
   "completed_job",
@@ -240,10 +245,11 @@ export function HomeFeedSections() {
             cta={{ label: "Create a Request", to: "/requests/new" }}
           />
         ) : (
-          <div className="-mx-4 mt-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-3 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-3">
+          <div className={`${SCROLLER} lg:grid-cols-3`}>
             {topRequests.map((r) => (
               <RequestCard key={r.id} r={r} userLoc={userLoc} featured={Boolean(isFeaturedTarget(r, featured))} isProvider={isProvider} onRespond={() => setRespondTo(r.id)} />
             ))}
+            <div aria-hidden className="shrink-0 w-1 sm:hidden" />
           </div>
         )}
         <MobileViewAll to="/requests/browse" label="View all open requests" />
@@ -265,10 +271,11 @@ export function HomeFeedSections() {
             cta={{ label: "List Your Service", to: "/list-skill" }}
           />
         ) : (
-          <div className="-mx-4 mt-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-3 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-3">
+          <div className={`${SCROLLER} lg:grid-cols-3`}>
             {topProviders.map((p) => (
               <ProviderCard key={p.user_id} p={p} userLoc={userLoc} />
             ))}
+            <div aria-hidden className="shrink-0 w-1 sm:hidden" />
           </div>
         )}
         <MobileViewAll to="/services" label="View all providers" />
@@ -282,10 +289,11 @@ export function HomeFeedSections() {
             subtitle="See real work shared by providers on Tuungane."
             link={{ label: "View all", to: "/feed" }}
           />
-          <div className="-mx-4 mt-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-3 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-4">
+          <div className={`${SCROLLER} lg:grid-cols-4`}>
             {recent.map((p) => (
               <RecentWorkCard key={p.id} p={p} />
             ))}
+            <div aria-hidden className="shrink-0 w-1 sm:hidden" />
           </div>
         </section>
       )}
@@ -344,14 +352,14 @@ function CardSkeletonRow() {
 
 function CompactEmptyState({ message, hint, cta }: { message: string; hint: string; cta: { label: string; to: string } }) {
   return (
-    <div className="mt-3 flex min-h-[120px] items-center justify-between gap-3 rounded-2xl border border-dashed border-border bg-card p-4">
+    <div className="mt-3 flex flex-col gap-3 rounded-2xl border border-dashed border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0">
         <p className="text-sm font-semibold text-navy">{message}</p>
         <p className="mt-0.5 text-xs text-muted-foreground">{hint}</p>
       </div>
       <Link
         to={cta.to}
-        className="shrink-0 rounded-full bg-orange px-4 py-2 text-center text-xs font-semibold text-orange-foreground hover:brightness-110"
+        className="inline-flex shrink-0 items-center justify-center rounded-full bg-orange px-4 py-2.5 text-center text-sm font-semibold text-orange-foreground hover:brightness-110 sm:py-2 sm:text-xs"
       >
         {cta.label}
       </Link>
