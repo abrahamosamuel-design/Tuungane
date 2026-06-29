@@ -35,14 +35,14 @@ function CreateTab({ onClick }: { onClick: () => void }) {
     <button
       onClick={onClick}
       aria-label="Create on Tuungane"
-      className="grid h-16 grid-rows-[26px_26px] content-center items-center justify-items-center gap-1 px-1"
+      className="flex min-h-16 flex-col items-center justify-center px-1"
     >
-      <span className="flex items-center justify-center">
+      <span className="flex h-6 items-center justify-center">
         <span className="-mt-4 inline-flex h-12 w-12 items-center justify-center rounded-full bg-orange text-orange-foreground shadow-lg shadow-orange/30">
           <Plus className="h-6 w-6" />
         </span>
       </span>
-      <span className="flex items-end justify-center text-[11px] font-semibold leading-[1.1] text-orange">
+      <span className="mt-1 flex h-7 items-end justify-center text-[11px] font-semibold leading-[1.1] text-orange">
         Create
       </span>
     </button>
@@ -56,10 +56,10 @@ function Tab({ to, icon, label, exact, params }: { to: string; icon: React.React
       params={params as never}
       activeOptions={{ exact }}
       activeProps={{ className: "text-orange" }}
-      className="grid h-16 grid-rows-[26px_26px] content-center items-center justify-items-center gap-1 px-1 text-muted-foreground transition-colors hover:text-foreground"
+      className="flex min-h-16 flex-col items-center justify-center px-1 text-muted-foreground transition-colors hover:text-foreground"
     >
-      <span className="flex items-center justify-center">{icon}</span>
-      <span className="flex h-full items-end justify-center text-[11px] font-medium leading-[1.1]">
+      <span className="flex h-6 items-center justify-center">{icon}</span>
+      <span className="mt-1 flex h-7 items-end justify-center text-[11px] font-medium leading-[1.1]">
         <span className="max-w-[3rem] text-center whitespace-normal">{label}</span>
       </span>
     </Link>
