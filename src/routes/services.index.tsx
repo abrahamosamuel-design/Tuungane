@@ -201,58 +201,67 @@ function Services() {
 
   return (
     <Layout>
-      {/* SECTION 1: HERO / SEARCH */}
-      <section className="border-b border-border bg-surface px-4 pb-6 pt-6 sm:px-6 sm:pt-10 lg:px-8">
+      {/* SECTION 1: COMPACT SEARCH */}
+      <section className="border-b border-border bg-surface px-4 pb-3 pt-4 sm:px-6 sm:pb-5 sm:pt-8 lg:px-8">
         <div className="mx-auto max-w-7xl">
-          <h1 className="font-display text-2xl font-bold text-navy sm:text-3xl">Find services near you</h1>
-          <p className="mt-1 text-sm text-muted-foreground sm:text-base">Search for people offering services by category, skill, or location.</p>
+          <h1 className="font-display text-xl font-bold leading-tight text-navy sm:text-3xl">Find services near you</h1>
+          <p className="mt-0.5 text-xs text-muted-foreground sm:text-base">Search by service, skill, or location.</p>
 
-          <div className="mt-4 grid gap-2.5 rounded-2xl border border-border bg-card p-2.5 shadow-[var(--shadow-card)] sm:p-3">
-            <div className="flex items-center gap-2 rounded-xl bg-surface px-3">
-              <Search className="h-4 w-4 text-muted-foreground" />
-              <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="What service are you looking for?" className="w-full bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground" />
+          <div className="mt-3 rounded-2xl border border-border bg-card p-2 shadow-[var(--shadow-card)] sm:p-3">
+            <div className="flex items-center gap-2">
+              <div className="flex flex-1 items-center gap-2 rounded-xl bg-surface px-3">
+                <Search className="h-4 w-4 text-muted-foreground" />
+                <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="What service do you need?" className="w-full bg-transparent py-2.5 text-sm outline-none placeholder:text-muted-foreground" />
+              </div>
+              <button
+                onClick={() => document.getElementById("providers-section")?.scrollIntoView({ behavior: "smooth" })}
+                className="shrink-0 rounded-xl bg-orange px-4 py-2.5 text-sm font-semibold text-orange-foreground transition hover:brightness-110"
+              >
+                Search
+              </button>
             </div>
-            <div className="flex items-center gap-2 rounded-xl bg-surface px-3">
-              <MapPin className="h-4 w-4 text-muted-foreground" />
-              <input value={loc} onChange={(e) => setLoc(e.target.value)} placeholder="Town or district e.g. Entebbe" className="w-full bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground" />
+            <div className="mt-2 flex items-center gap-2 rounded-xl bg-surface px-3">
+              <MapPin className="h-4 w-4 shrink-0 text-muted-foreground" />
+              <input
+                value={loc}
+                onChange={(e) => setLoc(e.target.value)}
+                placeholder={userLoc?.town ? `Near: ${userLoc.town}` : "Choose location"}
+                className="w-full bg-transparent py-2 text-sm outline-none placeholder:text-muted-foreground"
+              />
             </div>
-            <button
-              onClick={() => document.getElementById("providers-section")?.scrollIntoView({ behavior: "smooth" })}
-              className="rounded-xl bg-orange px-6 py-3 text-sm font-semibold text-orange-foreground transition hover:brightness-110"
-            >
-              Search
-            </button>
           </div>
 
-          <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-dashed border-orange/40 bg-orange/5 px-3 py-2.5">
-            <p className="text-xs font-medium text-navy sm:text-sm">Can't find what you need?</p>
-            <Link to="/requests/new" className="rounded-lg bg-orange px-3 py-2 text-xs font-semibold text-orange-foreground transition hover:brightness-110 sm:text-sm">
-              Post a Service Request
-            </Link>
-          </div>
+          {/* Slim Post a Service Request row */}
+          <Link
+            to="/requests/new"
+            className="mt-2 flex items-center justify-between gap-3 rounded-xl border border-dashed border-orange/40 bg-orange/5 px-3 py-2 text-xs text-navy transition hover:bg-orange/10 sm:text-sm"
+          >
+            <span className="min-w-0 truncate font-medium">Can't find what you need?</span>
+            <span className="shrink-0 rounded-lg bg-orange px-2.5 py-1 text-[11px] font-semibold text-orange-foreground sm:text-xs">Post a Service Request</span>
+          </Link>
         </div>
       </section>
 
-      {/* PROVIDER TRACK CTA */}
-      <section className="px-4 pt-6 sm:px-6 lg:px-8">
+      {/* PROVIDER TRACK CTA — compact */}
+      <section className="px-4 pt-3 sm:px-6 sm:pt-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
           <ProviderTrackCTA
             title="Offer a service on Tuungane"
-            text="Create your service listing, add photos of your work, and let people looking for services find you."
+            text="Create your service listing and get discovered."
           />
         </div>
       </section>
 
-      {/* SECTION 2: POPULAR SERVICES */}
-      <section className="px-4 pt-6 sm:px-6 lg:px-8">
+      {/* POPULAR SERVICES */}
+      <section className="px-4 pt-4 sm:px-6 sm:pt-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
-          <h2 className="font-display text-lg font-bold text-navy sm:text-xl">Popular services</h2>
-          <div className="-mx-4 mt-3 flex gap-2 overflow-x-auto px-4 pb-2 [scrollbar-width:none] sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden">
+          <h2 className="font-display text-base font-bold text-navy sm:text-xl">Popular services</h2>
+          <div className="-mx-4 mt-2 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden">
             {POPULAR_SERVICES.map((s) => (
               <button
                 key={s}
                 onClick={() => handleChipSearch(s)}
-                className={`shrink-0 rounded-full border px-4 py-2 text-xs font-semibold transition ${q.toLowerCase() === s.toLowerCase() ? "border-orange bg-orange text-orange-foreground" : "border-border bg-card text-navy hover:border-orange"}`}
+                className={`shrink-0 rounded-full border px-3.5 py-1.5 text-xs font-semibold transition ${q.toLowerCase() === s.toLowerCase() ? "border-orange bg-orange text-orange-foreground" : "border-border bg-card text-navy hover:border-orange"}`}
               >
                 {s}
               </button>
@@ -261,37 +270,52 @@ function Services() {
         </div>
       </section>
 
-      {/* SECTION 3: RECOMMENDED PROVIDERS */}
-      <section className="px-4 pt-8 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-7xl">
+      {/* RECOMMENDED PROVIDERS — horizontal carousel on mobile */}
+      <section className="pt-5 sm:pt-8">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex items-end justify-between gap-3">
-            <div>
-              <h2 className="font-display text-lg font-bold text-navy sm:text-xl">Recommended providers</h2>
-              <p className="mt-0.5 text-xs text-muted-foreground sm:text-sm">Trusted providers you can contact or request.</p>
+            <div className="min-w-0">
+              <h2 className="font-display text-base font-bold text-navy sm:text-xl">Recommended providers</h2>
+              <p className="mt-0.5 text-xs text-muted-foreground sm:text-sm">Trusted picks you can contact or request.</p>
             </div>
           </div>
-
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {loadingReal && <p className="text-sm text-muted-foreground">Loading providers…</p>}
-            {!loadingReal && recommended.length === 0 && (
-              <div className="col-span-full">
-                <div className="rounded-2xl border border-dashed border-border bg-card p-8 text-center">
-                  <h3 className="font-display text-lg font-bold text-navy">No services found yet</h3>
-                  <p className="mt-1 text-sm text-muted-foreground">No services found yet. Try another service or location, or post a service request so people offering services can respond.</p>
-                  <div className="mt-4 inline-flex"><ListYourSkillButton variant="solid" /></div>
-                </div>
-              </div>
-            )}
-            {!loadingReal && recommended.map((p) => <ProviderRow key={p.user_id} p={p} isBoosted={isBoostedProvider(p.user_id)} userLoc={userLoc} onRequest={() => nav({ to: "/u/$id", params: { id: p.user_id } })} />)}
-          </div>
         </div>
+
+        {loadingReal && <p className="px-4 pt-3 text-sm text-muted-foreground sm:px-6 lg:px-8">Loading providers…</p>}
+        {!loadingReal && recommended.length === 0 && (
+          <div className="mx-auto mt-3 max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="rounded-2xl border border-dashed border-border bg-card p-6 text-center">
+              <h3 className="font-display text-base font-bold text-navy">No services found yet</h3>
+              <p className="mt-1 text-sm text-muted-foreground">Try another service or location, or post a service request so providers can respond.</p>
+              <div className="mt-3 inline-flex"><ListYourSkillButton variant="solid" /></div>
+            </div>
+          </div>
+        )}
+        {!loadingReal && recommended.length > 0 && (
+          <>
+            {/* Mobile: snap carousel */}
+            <div className="mt-3 flex gap-3 overflow-x-auto px-4 pb-2 snap-x snap-mandatory [scrollbar-width:none] sm:hidden [&::-webkit-scrollbar]:hidden">
+              {recommended.map((p) => (
+                <div key={p.user_id} className="w-[85vw] max-w-[320px] shrink-0 snap-start">
+                  <ProviderCardCompact p={p} userLoc={userLoc} onRequest={() => nav({ to: "/u/$id", params: { id: p.user_id } })} />
+                </div>
+              ))}
+            </div>
+            {/* Tablet/Desktop: responsive grid */}
+            <div className="mx-auto hidden max-w-7xl px-4 pt-3 sm:grid sm:grid-cols-2 sm:gap-3 sm:px-6 lg:grid-cols-3 lg:px-8">
+              {recommended.map((p) => (
+                <ProviderRow key={p.user_id} p={p} isBoosted={isBoostedProvider(p.user_id)} userLoc={userLoc} onRequest={() => nav({ to: "/u/$id", params: { id: p.user_id } })} />
+              ))}
+            </div>
+          </>
+        )}
       </section>
 
-      {/* SECTION 4: BROWSE BY CATEGORY */}
-      <section className="px-4 pt-10 sm:px-6 lg:px-8">
+      {/* BROWSE BY CATEGORY — moved up */}
+      <section className="px-4 pt-6 sm:px-6 sm:pt-10 lg:px-8">
         <div className="mx-auto max-w-7xl">
-          <h2 className="font-display text-lg font-bold text-navy sm:text-xl">Browse services by category</h2>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <h2 className="font-display text-base font-bold text-navy sm:text-xl">Browse services by category</h2>
+          <div className="mt-3 grid gap-2.5 sm:grid-cols-2 sm:gap-3 lg:grid-cols-3">
             {(dbCats ?? categories.map((c) => ({ slug: c.slug, name: c.name, icon: c.icon, blurb: c.blurb, subCount: c.subcategories.length, examples: c.subcategories.slice(0, 3).join(" · ") }))).map((c) => {
               const Icon = iconMap[c.icon] ?? Wrench;
               return (
@@ -299,10 +323,10 @@ function Services() {
                   key={c.slug}
                   to="/services/$slug"
                   params={{ slug: c.slug }}
-                  className="group flex items-center gap-3 rounded-2xl border border-border bg-card p-4 transition hover:border-orange hover:shadow-[var(--shadow-card)]"
+                  className="group flex items-center gap-3 rounded-2xl border border-border bg-card p-3 transition hover:border-orange hover:shadow-[var(--shadow-card)] sm:p-4"
                 >
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-navy/5 text-navy transition group-hover:bg-orange group-hover:text-orange-foreground">
-                    <Icon className="h-6 w-6" />
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-navy/5 text-navy transition group-hover:bg-orange group-hover:text-orange-foreground sm:h-12 sm:w-12">
+                    <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="font-display text-sm font-semibold text-navy">{c.name}</p>
@@ -316,6 +340,7 @@ function Services() {
           </div>
         </div>
       </section>
+
 
       {/* SECTION 5: SERVICE PROVIDERS ON TUUNGANE */}
       <section id="providers-section" className="px-4 pb-24 pt-10 sm:px-6 sm:pb-16 lg:px-8">
