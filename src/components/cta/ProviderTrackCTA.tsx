@@ -19,7 +19,7 @@ export function ProviderTrackCTA({
       </div>
       <div className="min-w-0 flex-1">
         <p className="font-display text-xs font-bold text-navy sm:text-sm">{title}</p>
-        <p className="mt-0.5 line-clamp-1 text-[11px] text-foreground/70 sm:text-xs">{text}</p>
+        <p className="mt-0.5 hidden truncate text-[11px] text-foreground/70 min-[380px]:block sm:text-xs">{text}</p>
       </div>
       <ListYourSkillButton
         variant="solid"
