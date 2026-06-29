@@ -370,7 +370,7 @@ function ListSkillPage() {
               <p className="text-xs text-muted-foreground">Customers reach you through Tuungane Messages. Your phone number is only revealed based on your contact preference in settings.</p>
               <div className="flex items-center justify-between pt-2">
                 <button type="button" onClick={() => setStep(2)} className="text-sm font-medium text-muted-foreground">Back</button>
-                <button disabled={busy} className="rounded-xl bg-green px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50">{busy ? (editMode ? "Saving…" : "Publishing…") : (editMode ? "Save changes" : "Publish my skill")}</button>
+                <button disabled={busy} className="rounded-xl bg-green px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50">{busy ? (editMode ? "Saving…" : "Publishing…") : (editMode ? "Save changes" : "List My Service")}</button>
               </div>
             </>
           )}
