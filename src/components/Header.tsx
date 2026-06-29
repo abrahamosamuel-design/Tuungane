@@ -84,7 +84,7 @@ export function Header() {
                   <div className="absolute right-0 z-50 mt-2 w-56 overflow-hidden rounded-xl border border-border bg-card shadow-lg">
                     <MenuItem to="/dashboard" icon={<LayoutDashboard className="h-4 w-4" />} label="My dashboard" onClick={() => setMenu(false)} />
                     <MenuItem to="/messages" icon={<MessageSquare className="h-4 w-4" />} label="Messages" onClick={() => setMenu(false)} />
-                    <MenuItem to="/requests" icon={<ClipboardList className="h-4 w-4" />} label="My Requests" onClick={() => setMenu(false)} />
+                    <MenuItem to="/requests" icon={<ClipboardList className="h-4 w-4" />} label="My Service Requests" onClick={() => setMenu(false)} />
                     <MenuItem to="/requests/new" icon={<Plus className="h-4 w-4" />} label="Post a Service Request" onClick={() => setMenu(false)} />
                     <MenuItem to={listSkillHref(user) as never} icon={<Sparkles className="h-4 w-4 text-green" />} label="List Your Service" onClick={() => setMenu(false)} />
                     <MenuItem to="/me" icon={<UserIcon className="h-4 w-4" />} label="My profile" onClick={() => setMenu(false)} />
@@ -143,7 +143,7 @@ export function Header() {
                 <p className="px-3 pt-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">My Account</p>
                 <CountedLink to="/messages" label="Messages" count={<MsgCount />} onClick={() => setOpen(false)} />
                 <CountedLink to="/notifications" label="Notifications" count={<NotifCount />} onClick={() => setOpen(false)} />
-                <CountedLink to="/requests" label="My Requests" count={<ActiveRequestsCount />} onClick={() => setOpen(false)} />
+                <CountedLink to="/requests" label="My Service Requests" count={<ActiveRequestsCount />} onClick={() => setOpen(false)} />
                 <Link to="/dashboard" onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-navy hover:bg-muted">My Dashboard</Link>
                 <Link to="/me" onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-navy hover:bg-muted">My Profile</Link>
                 <MyCreditsLink onClick={() => setOpen(false)} />
