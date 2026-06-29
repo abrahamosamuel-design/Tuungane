@@ -201,6 +201,9 @@ function Index() {
       {/* DYNAMIC FEED: Open requests + Skilled people + Recent work */}
       <HomeFeedSections />
 
+      {/* Popular categories — discovery after dynamic marketplace content */}
+      <PopularCategoriesSection />
+
 
       {/* Provider CTA banner */}
       <section className="mx-auto max-w-6xl px-4 pb-32 pt-6 sm:px-6 sm:pb-16 sm:pt-10">
