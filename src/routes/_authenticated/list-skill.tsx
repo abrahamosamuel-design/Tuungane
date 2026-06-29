@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { categories as staticCategories } from "@/data/categories";
 import { useCategories } from "@/hooks/use-categories";
 import { uploadMedia } from "@/lib/upload";
+import { MediaUploader } from "@/components/feed/MediaUploader";
 import { toast } from "sonner";
 import { toastError } from "@/lib/user-errors";
 import { ImageCropDialog, type CropAspect } from "@/components/media/ImageCropDialog";
@@ -44,6 +45,7 @@ function ListSkillPage() {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [coverUrl, setCoverUrl] = useState<string | null>(null);
   const [headerUrl, setHeaderUrl] = useState<string | null>(null);
+  const [portfolioUrls, setPortfolioUrls] = useState<string[]>([]);
   const [photoSkipped, setPhotoSkipped] = useState(false);
   const [photoBusy, setPhotoBusy] = useState<null | CropAspect>(null);
   const photoRef = useRef<HTMLInputElement>(null);
@@ -55,7 +57,7 @@ function ListSkillPage() {
       if (!user) return;
       const { data: sp } = await supabase
         .from("service_profiles")
-        .select("business_name,category_slug,subcategory,bio,district,town,phone,whatsapp,cover_url,header_url")
+        .select("business_name,category_slug,subcategory,bio,district,town,phone,whatsapp,cover_url,header_url,media_urls")
         .eq("user_id", user.id)
         .maybeSingle();
       if (sp) {
@@ -70,6 +72,7 @@ function ListSkillPage() {
         setWhatsapp(sp.whatsapp ?? "");
         setCoverUrl((sp as any).cover_url ?? null);
         setHeaderUrl((sp as any).header_url ?? null);
+        setPortfolioUrls(Array.isArray((sp as any).media_urls) ? (sp as any).media_urls : []);
       }
       const { data: pr } = await supabase
         .from("profiles")
@@ -183,6 +186,7 @@ function ListSkillPage() {
       whatsapp: whatsapp || null,
       cover_url: coverUrl,
       header_url: headerUrl,
+      media_urls: portfolioUrls,
     });
     setBusy(false);
     if (error) { toastError(error, editMode ? "Couldn't save changes" : "Couldn't publish your skill"); return; }
