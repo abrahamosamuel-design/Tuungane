@@ -496,3 +496,67 @@ function ProviderRow({ p, isBoosted, userLoc, onRequest }: { p: RealProvider; is
   );
 }
 
+function ProviderCardCompact({ p, userLoc, onRequest }: { p: RealProvider; userLoc?: UserLocation | null; onRequest: () => void }) {
+  const name = p.business_name || p.profile?.full_name || "Provider";
+  const available = (p.availability ?? "").toLowerCase() === "available";
+  const isVerified = p.verified === "verified" || p.verified === "featured";
+  const isNew = p.average_rating === 0 && p.completed_jobs === 0;
+  const recentlyJoined = isNew && (Date.now() - new Date(p.updated_at).getTime()) < 60 * 86400000;
+
+  return (
+    <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)]">
+      {isVerified && <div className="h-1 w-full bg-gradient-to-r from-green via-green/70 to-orange/60" />}
+      <Link to="/u/$id" params={{ id: p.user_id }} className="flex items-start gap-2.5 p-3">
+        <CoverImage
+          variant="square"
+          imageUrl={p.cover_url ?? p.profile?.avatar_url}
+          categorySlug={p.category_slug}
+          name={name}
+          verifiedRing={isVerified}
+          className="h-12 w-12 shrink-0"
+        />
+        <div className="min-w-0 flex-1">
+          <h3 className="truncate font-display text-[14px] font-bold leading-tight text-navy">{name}</h3>
+          <p className="mt-0.5 truncate text-[12px] font-medium text-foreground/80">{formatSubcategory(p.subcategory)}</p>
+          <p className="mt-0.5 inline-flex items-center gap-1 truncate text-[11px] text-muted-foreground">
+            <MapPin className="h-3 w-3 shrink-0" />{p.town || p.district || "Location"}
+          </p>
+        </div>
+      </Link>
+
+      <div className="flex flex-wrap items-center gap-1.5 px-3">
+        {isVerified && (
+          <span className="inline-flex items-center gap-1 rounded-full bg-green/10 px-2 py-0.5 text-[10px] font-semibold text-green">
+            <BadgeCheck className="h-3 w-3" /> Verified
+          </span>
+        )}
+        <NearYouBadge user={userLoc} target={p} />
+        {recentlyJoined && !isVerified && (
+          <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+            Recently joined
+          </span>
+        )}
+      </div>
+
+      {p.bio && <p className="mt-1.5 line-clamp-2 px-3 text-[12px] leading-snug text-foreground/75">{p.bio}</p>}
+
+      <div className="mt-auto flex items-center justify-between gap-2 border-t border-border bg-surface px-3 py-2">
+        <span className={`inline-flex items-center gap-1.5 text-[11px] font-semibold ${available ? "text-green" : "text-muted-foreground"}`}>
+          <span className={`h-1.5 w-1.5 rounded-full ${available ? "bg-green" : "bg-muted-foreground"}`} />
+          {available ? "Available now" : "Check"}
+        </span>
+        <div className="flex items-center gap-1.5">
+          <ProviderQuickContact providerId={p.user_id} source="search_result" variant="compact" />
+          <button
+            onClick={onRequest}
+            className="inline-flex items-center gap-1 rounded-lg bg-orange px-2.5 py-1.5 text-[11px] font-bold text-orange-foreground shadow-sm transition hover:brightness-110"
+          >
+            <ClipboardList className="h-3.5 w-3.5" /> Request
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
