@@ -273,6 +273,14 @@ export function HomeFeedSections() {
           </div>
         </section>
       )}
+
+      {respondTo && (
+        <ProviderResponseDialog
+          open
+          onClose={() => setRespondTo(null)}
+          requestId={respondTo}
+        />
+      )}
     </>
   );
 }
