@@ -204,13 +204,13 @@ function Services() {
       {/* SECTION 1: HERO / SEARCH */}
       <section className="border-b border-border bg-surface px-4 pb-6 pt-6 sm:px-6 sm:pt-10 lg:px-8">
         <div className="mx-auto max-w-7xl">
-          <h1 className="font-display text-2xl font-bold text-navy sm:text-3xl">Find trusted services near you</h1>
-          <p className="mt-1 text-sm text-muted-foreground sm:text-base">Search providers by service, skill, or location.</p>
+          <h1 className="font-display text-2xl font-bold text-navy sm:text-3xl">Find services near you</h1>
+          <p className="mt-1 text-sm text-muted-foreground sm:text-base">Search for people offering services by category, skill, or location.</p>
 
           <div className="mt-4 grid gap-2.5 rounded-2xl border border-border bg-card p-2.5 shadow-[var(--shadow-card)] sm:p-3">
             <div className="flex items-center gap-2 rounded-xl bg-surface px-3">
               <Search className="h-4 w-4 text-muted-foreground" />
-              <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Plumber, tutor, mechanic..." className="w-full bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground" />
+              <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="What service are you looking for?" className="w-full bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground" />
             </div>
             <div className="flex items-center gap-2 rounded-xl bg-surface px-3">
               <MapPin className="h-4 w-4 text-muted-foreground" />
@@ -225,9 +225,9 @@ function Services() {
           </div>
 
           <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-dashed border-orange/40 bg-orange/5 px-3 py-2.5">
-            <p className="text-xs font-medium text-navy sm:text-sm">Not sure who to choose?</p>
+            <p className="text-xs font-medium text-navy sm:text-sm">Can't find what you need?</p>
             <Link to="/requests/new" className="rounded-lg bg-orange px-3 py-2 text-xs font-semibold text-orange-foreground transition hover:brightness-110 sm:text-sm">
-              Post a Request
+              Post a Service Request
             </Link>
           </div>
         </div>
