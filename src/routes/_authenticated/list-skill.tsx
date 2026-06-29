@@ -55,10 +55,10 @@ function ListSkillPage() {
   useEffect(() => {
     (async () => {
       if (!user) return;
+      // Owner-only RPC: column-level GRANTs on service_profiles.phone/whatsapp/email
+      // are revoked from authenticated to enforce phone_visibility at the DB level.
       const { data: sp } = await supabase
-        .from("service_profiles")
-        .select("business_name,category_slug,subcategory,bio,district,town,phone,whatsapp,cover_url,header_url,media_urls")
-        .eq("user_id", user.id)
+        .rpc("get_my_service_profile")
         .maybeSingle();
       if (sp) {
         setEditMode(true);
