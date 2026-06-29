@@ -21,6 +21,7 @@ import { formatSubcategory } from "@/lib/format-category";
 import { ProfileTrustBadge } from "@/components/trust/ProfileTrustBadge";
 import { useCategory } from "@/hooks/use-categories";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ProviderResponseDialog } from "@/components/ProviderResponseDialog";
 
 type NearbyRequest = {
   id: string;
