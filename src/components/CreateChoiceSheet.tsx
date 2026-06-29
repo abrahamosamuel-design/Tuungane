@@ -56,7 +56,7 @@ export function CreateChoiceSheet({
             </div>
             <div className="min-w-0 flex-1">
               <p className="font-display text-base font-bold text-navy">List Your Service</p>
-              <p className="text-xs text-foreground/75">For skilled people who want to offer their work.</p>
+              <p className="text-xs text-foreground/75">For people who want to offer a service.</p>
             </div>
             <ArrowRight className="mt-2 h-5 w-5 shrink-0 text-green" />
           </Link>
