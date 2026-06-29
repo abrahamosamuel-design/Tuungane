@@ -227,6 +227,21 @@ export function HomeFeedSections() {
     return (withinDefault.length >= 3 ? withinDefault : boosted).slice(0, 6);
   }, [providers, userLoc, featured]);
 
+  const topListings = useMemo(() => {
+    // Newest first (already from query), then prioritize verified + available + nearby
+    const sorted = sortByProximity(recentListings, userLoc, (l) => l);
+    const ranked = [...sorted].sort((a, b) => {
+      const av = a.verified === "verified" ? 1 : 0;
+      const bv = b.verified === "verified" ? 1 : 0;
+      if (bv !== av) return bv - av;
+      const aa = (a.availability || "available").toLowerCase() === "available" ? 1 : 0;
+      const ba = (b.availability || "available").toLowerCase() === "available" ? 1 : 0;
+      if (ba !== aa) return ba - aa;
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
+    return ranked.slice(0, 6);
+  }, [recentListings, userLoc]);
+
   const requestsTitle = hasNearbyReqs ? "Open requests near you" : "Latest open requests";
 
   return (
