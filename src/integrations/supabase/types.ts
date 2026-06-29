@@ -2115,6 +2115,7 @@ export type Database = {
           header_url: string | null
           latitude: number | null
           longitude: number | null
+          media_urls: string[]
           phone: string | null
           region: string | null
           seeded_by_official: boolean
@@ -2146,6 +2147,7 @@ export type Database = {
           header_url?: string | null
           latitude?: number | null
           longitude?: number | null
+          media_urls?: string[]
           phone?: string | null
           region?: string | null
           seeded_by_official?: boolean
@@ -2177,6 +2179,7 @@ export type Database = {
           header_url?: string | null
           latitude?: number | null
           longitude?: number | null
+          media_urls?: string[]
           phone?: string | null
           region?: string | null
           seeded_by_official?: boolean
@@ -2261,6 +2264,7 @@ export type Database = {
           latitude: number | null
           location: string
           longitude: number | null
+          media_urls: string[]
           preferred_contact_method: Database["public"]["Enums"]["contact_method"]
           preferred_date: string | null
           preferred_time: string | null
@@ -2302,6 +2306,7 @@ export type Database = {
           latitude?: number | null
           location?: string
           longitude?: number | null
+          media_urls?: string[]
           preferred_contact_method?: Database["public"]["Enums"]["contact_method"]
           preferred_date?: string | null
           preferred_time?: string | null
@@ -2343,6 +2348,7 @@ export type Database = {
           latitude?: number | null
           location?: string
           longitude?: number | null
+          media_urls?: string[]
           preferred_contact_method?: Database["public"]["Enums"]["contact_method"]
           preferred_date?: string | null
           preferred_time?: string | null
@@ -2964,6 +2970,7 @@ export type Database = {
           latitude: number | null
           location: string
           longitude: number | null
+          media_urls: string[]
           preferred_contact_method: Database["public"]["Enums"]["contact_method"]
           preferred_date: string | null
           preferred_time: string | null

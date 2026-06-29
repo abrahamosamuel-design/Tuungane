@@ -14,7 +14,7 @@ import {
   type UrgencyValue,
   type VisibilityValue,
 } from "@/data/serviceRequestTypes";
-import { uploadMedia } from "@/lib/upload";
+import { MediaUploader } from "@/components/feed/MediaUploader";
 import { toast } from "sonner";
 import { toastError } from "@/lib/user-errors";
 import { Loader2, MapPin, ShieldAlert, Sparkles, ArrowRight, Pencil, ChevronDown } from "lucide-react";
@@ -53,7 +53,7 @@ function NewRequest() {
   const nav = useNavigate();
   const [busy, setBusy] = useState(false);
   const [autofilled, setAutofilled] = useState(false);
-  const [file, setFile] = useState<File | null>(null);
+  const [mediaUrls, setMediaUrls] = useState<string[]>([]);
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [districtBounds, setDistrictBounds] = useState<Bounds | null>(null);
   const [showMore, setShowMore] = useState(false);
@@ -221,15 +221,10 @@ function NewRequest() {
       return;
     }
     setBusy(true);
-    let attachment_url: string | null = null;
-    try {
-      if (file) attachment_url = await uploadMedia(user.id, file, "requests");
-    } catch (err) {
-      console.error(err);
-      toastError(err, "Photo couldn't upload");
-      setBusy(false);
-      return;
-    }
+    const allMedia = mediaUrls;
+    const attachment_url: string | null = allMedia[0] ?? null;
+
+
 
     // If the request targets a public profile, infer the provider for individual profiles.
     const targetedProvider =
@@ -261,6 +256,7 @@ function NewRequest() {
       customer_phone: f.customer_phone || null,
       customer_whatsapp: f.customer_whatsapp || null,
       attachment_url,
+      media_urls: allMedia,
       status: "requested",
     }).select("id").single();
     setBusy(false);
@@ -555,9 +551,16 @@ function NewRequest() {
                 </Field>
               </div>
 
-              <Field label="Photo (optional)">
-                <input type="file" accept="image/*" onChange={(e) => setFile(e.target.files?.[0] ?? null)} className="text-sm" />
-              </Field>
+              <MediaUploader
+                userId={user.id}
+                folder="requests"
+                value={mediaUrls}
+                onChange={setMediaUrls}
+                max={6}
+                label="Add photos (optional)"
+                hint="Photos help providers give you a more accurate quote. Up to 6 images, 8MB each."
+              />
+
 
               <div className="grid grid-cols-2 gap-3">
                 <Field label="Contact preference">

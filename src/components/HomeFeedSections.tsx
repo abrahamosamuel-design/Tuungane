@@ -7,6 +7,9 @@ import {
   BadgeCheck,
   Briefcase,
   Send,
+  Wallet,
+  Clock,
+  MoreHorizontal,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
@@ -19,6 +22,10 @@ import { ProfileTrustBadge } from "@/components/trust/ProfileTrustBadge";
 import { useCategory } from "@/hooks/use-categories";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ProviderResponseDialog } from "@/components/ProviderResponseDialog";
+import { FeedAvatar } from "@/components/feed/FeedAvatar";
+import { ExpandableText } from "@/components/feed/ExpandableText";
+import { MediaGrid } from "@/components/feed/MediaGrid";
+
 
 type NearbyRequest = {
   id: string;
@@ -36,6 +43,7 @@ type NearbyRequest = {
   longitude: number | null;
   category_slug?: string | null;
   subcategory?: string | null;
+  media_urls?: string[] | null;
 };
 
 type NearbyProvider = {
@@ -55,6 +63,7 @@ type NearbyProvider = {
   availability?: string | null;
   years_experience?: number | null;
   cover_url?: string | null;
+  media_urls?: string[] | null;
   profile?: { full_name: string; avatar_url: string | null } | null;
 };
 
@@ -121,7 +130,7 @@ export function HomeFeedSections() {
       if (!reqs || reqs.length === 0) {
         const { data } = await supabase
           .from("service_requests")
-          .select("id,title,service_needed,description,budget_range,urgent_flag,created_at,district,town,area,location,latitude,longitude,category_slug,subcategory")
+          .select("id,title,service_needed,description,budget_range,urgent_flag,created_at,district,town,area,location,latitude,longitude,category_slug,subcategory,media_urls")
           .eq("visibility", "public")
           .eq("status", "requested")
           .is("provider_id", null)
@@ -134,7 +143,7 @@ export function HomeFeedSections() {
       if (!provs || provs.length === 0) {
         const { data } = await supabase
           .from("service_profiles")
-          .select("user_id,business_name,category_slug,subcategory,bio,town,district,area,latitude,longitude,service_radius_km,areas_served,verified,availability,years_experience,cover_url")
+          .select("user_id,business_name,category_slug,subcategory,bio,town,district,area,latitude,longitude,service_radius_km,areas_served,verified,availability,years_experience,cover_url,media_urls")
           .eq("suspended", false)
           .order("verified", { ascending: false })
           .order("updated_at", { ascending: false })
@@ -401,65 +410,106 @@ function RequestCard({
   const title = r.title?.trim() || r.service_needed || "Request";
   const loc = r.area || r.town || r.district || r.location || "Uganda";
   const urg = urgencyMeta(r);
+  const media = (r.media_urls ?? []).filter(Boolean) as string[];
 
   return (
     <article
-      className={`flex ${CARD_W} shrink-0 snap-start flex-col rounded-2xl border bg-card p-4 shadow-[var(--shadow-card)] transition hover:border-orange sm:w-auto sm:max-w-none ${
+      className={`flex ${CARD_W} shrink-0 snap-start flex-col overflow-hidden rounded-2xl border bg-card shadow-[var(--shadow-card)] transition hover:border-orange sm:w-auto sm:max-w-none ${
         r.urgent_flag ? "border-orange/40" : "border-border"
       }`}
     >
-      <div className="flex flex-wrap items-center gap-1.5">
-        <span className="rounded-full bg-green/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-green">Open</span>
-        <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${urg.cls}`}>{urg.label}</span>
+      {/* Header — anonymous neighbour avatar + meta */}
+      <div className="flex items-start gap-3 p-4 pb-2">
+        <FeedAvatar src={null} name="Neighbour" size={40} />
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-x-1.5 text-[13px] font-semibold text-navy">
+            <span>Open request</span>
+            <span className="text-muted-foreground">·</span>
+            <span className="text-[12px] font-medium text-muted-foreground">{timeAgo(r.created_at)}</span>
+          </div>
+          <p className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+            <MapPin className="h-3 w-3" /> {loc}
+            {near ? (
+              <span className="ml-1 rounded-full bg-green/10 px-1.5 py-0.5 text-[10px] font-semibold text-green">{near}</span>
+            ) : null}
+          </p>
+        </div>
+        <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${urg.cls}`}>{urg.label}</span>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-1.5 px-4">
         {featured && (
           <span className="inline-flex items-center gap-1 rounded-full bg-orange/10 px-2 py-0.5 text-[10px] font-semibold text-orange">
             <Star className="h-3 w-3" /> Featured
           </span>
         )}
-        <span className="ml-auto text-[11px] text-muted-foreground">{timeAgo(r.created_at)}</span>
+        {r.urgent_flag && (
+          <span className="rounded-full bg-orange/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-orange">Urgent</span>
+        )}
       </div>
 
-      <Link to="/requests/$id" params={{ id: r.id }} className="mt-2 block">
-        <h3 className="line-clamp-2 font-display text-sm font-bold text-navy">{title}</h3>
+      <Link to="/requests/$id" params={{ id: r.id }} className="block px-4 pt-2">
+        <h3 className="font-display text-[15px] font-bold leading-snug text-navy">{title}</h3>
         {cat ? (
           <p className="mt-0.5 text-[11px] text-muted-foreground">
             {cat.name}{r.subcategory ? ` · ${formatSubcategory(r.subcategory)}` : ""}
           </p>
         ) : null}
-        {r.description ? <p className="mt-1.5 line-clamp-2 text-xs text-foreground/80">{r.description}</p> : null}
-
-        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
-          <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" /> {loc}</span>
-          {r.budget_range ? <span className="font-semibold text-orange">{r.budget_range}</span> : null}
-          {near ? (
-            <span className="inline-flex items-center gap-1 rounded-full bg-green/10 px-1.5 py-0.5 text-[10px] font-semibold text-green">
-              {near}
-            </span>
-          ) : null}
-        </div>
+        {r.description ? <ExpandableText text={r.description} clampLines={5} className="mt-2" /> : null}
       </Link>
 
-      <div className="mt-auto pt-3 flex gap-2">
-        <Link
-          to="/requests/$id"
-          params={{ id: r.id }}
-          className="flex-1 rounded-full border border-border px-3 py-2 text-center text-xs font-semibold text-navy hover:border-navy"
-        >
-          View request
-        </Link>
+      {media.length > 0 && (
+        <div className="px-4">
+          <MediaGrid urls={media} alt={title} />
+        </div>
+      )}
+
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 pt-3 text-[11px] text-muted-foreground">
+        {r.budget_range ? (
+          <span className="inline-flex items-center gap-1 font-bold text-orange">
+            <Wallet className="h-3 w-3" /> {r.budget_range}
+          </span>
+        ) : null}
+      </div>
+
+      <div className="mt-auto flex items-center gap-2 border-t border-border bg-surface px-3 py-2.5">
         {isProvider ? (
           <button
             type="button"
             onClick={onRespond}
-            className="inline-flex items-center justify-center gap-1 rounded-full bg-orange px-3 py-2 text-xs font-semibold text-orange-foreground hover:brightness-110"
+            className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-orange px-3 py-2 text-xs font-semibold text-orange-foreground hover:brightness-110"
           >
-            <Send className="h-3 w-3" /> Respond
+            <Send className="h-3.5 w-3.5" /> Send quote
           </button>
-        ) : null}
+        ) : (
+          <Link
+            to="/requests/$id"
+            params={{ id: r.id }}
+            className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-orange px-3 py-2 text-xs font-semibold text-orange-foreground hover:brightness-110"
+          >
+            <Send className="h-3.5 w-3.5" /> Respond
+          </Link>
+        )}
+        <Link
+          to="/requests/$id"
+          params={{ id: r.id }}
+          className="inline-flex items-center justify-center gap-1 rounded-full border border-border px-3 py-2 text-xs font-semibold text-navy hover:border-navy"
+          aria-label="Message"
+        >
+          <MessageSquare className="h-3.5 w-3.5" />
+        </Link>
+        <Link
+          to="/requests/$id"
+          params={{ id: r.id }}
+          className="rounded-full border border-border px-3 py-2 text-xs font-semibold text-navy hover:border-navy"
+        >
+          View
+        </Link>
       </div>
     </article>
   );
 }
+
 
 function availabilityMeta(a?: string | null) {
   switch ((a || "available").toLowerCase()) {
@@ -486,78 +536,83 @@ function ProviderCard({ p, userLoc }: { p: NearbyProvider; userLoc: ReturnType<t
   const near = proximityLabel(userLoc, p);
   const avail = availabilityMeta(p.availability);
   const verified = p.verified === "verified";
-  const avatar = p.profile?.avatar_url;
+  const avatar = p.cover_url || p.profile?.avatar_url || null;
   const years = typeof p.years_experience === "number" ? p.years_experience : 0;
+  const media = (p.media_urls ?? []).filter(Boolean) as string[];
 
   return (
-    <article className={`flex ${CARD_W} shrink-0 snap-start flex-col rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)] transition hover:border-orange sm:w-auto sm:max-w-none`}>
-      <div className="flex items-start gap-3">
-        {avatar ? (
-          <img src={avatar} alt={name} loading="lazy" className="h-12 w-12 shrink-0 rounded-full object-cover" />
-        ) : (
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-navy/10 text-sm font-bold text-navy">
-            {initialsOf(name)}
-          </div>
-        )}
+    <article className={`flex ${CARD_W} shrink-0 snap-start flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)] transition hover:border-orange sm:w-auto sm:max-w-none`}>
+      <div className="flex items-start gap-3 p-4 pb-2">
+        <Link to="/u/$id" params={{ id: p.user_id }} className="shrink-0">
+          <FeedAvatar src={avatar} name={name} size={44} ring={verified} />
+        </Link>
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-1.5">
-            <h3 className="truncate text-sm font-bold text-navy">{name}</h3>
-            {verified ? <BadgeCheck className="h-4 w-4 shrink-0 text-green" /> : null}
+          <div className="flex flex-wrap items-center gap-x-1.5">
+            <Link to="/u/$id" params={{ id: p.user_id }} className="truncate text-[14px] font-semibold text-navy hover:underline">
+              {name}
+            </Link>
+            {verified ? <BadgeCheck className="h-4 w-4 shrink-0 text-green" aria-label="Verified" /> : null}
           </div>
-          <p className="truncate text-[11px] text-muted-foreground">
+          <p className="truncate text-[12px] text-muted-foreground">
             {formatSubcategory(p.subcategory)}{cat ? ` · ${cat.name}` : ""}
           </p>
           <p className="mt-0.5 inline-flex items-center gap-1 text-[11px] text-muted-foreground">
             <MapPin className="h-3 w-3" /> {p.area || p.town || p.district || "Uganda"}
+            {near ? (
+              <span className="ml-1 rounded-full bg-green/10 px-1.5 py-0.5 text-[10px] font-semibold text-green">{near}</span>
+            ) : null}
           </p>
         </div>
+        <button type="button" aria-label="More" className="hidden shrink-0 rounded-full p-1.5 text-muted-foreground hover:bg-muted hover:text-navy sm:inline-flex">
+          <MoreHorizontal className="h-4 w-4" />
+        </button>
       </div>
 
-      <div className="mt-2 flex flex-wrap items-center gap-1.5">
+      <div className="flex flex-wrap items-center gap-1.5 px-4">
         <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${avail.cls}`}>{avail.label}</span>
         <ProfileTrustBadge kind="service_profile" id={p.user_id} size="sm" className="shrink-0" />
         {years > 0 ? (
-          <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold text-navy">
-            {years} yrs experience
-          </span>
-        ) : null}
-        {near ? (
-          <span className="inline-flex items-center gap-1 rounded-full bg-green/10 px-2 py-0.5 text-[10px] font-semibold text-green">
-            {near}
-          </span>
+          <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold text-navy">{years} yrs experience</span>
         ) : null}
       </div>
 
-      {p.bio ? <p className="mt-2 line-clamp-2 text-xs text-foreground/80">{p.bio}</p> : null}
+      {p.bio ? <ExpandableText text={p.bio} clampLines={4} className="px-4 pt-2" /> : null}
 
-      <div className="mt-auto flex items-center gap-2 pt-3">
-        <Link
-          to="/u/$id"
-          params={{ id: p.user_id }}
-          className="flex-1 truncate rounded-full bg-orange px-3 py-2 text-center text-xs font-semibold text-orange-foreground hover:brightness-110"
-        >
-          View profile
-        </Link>
+      {media.length > 0 && (
+        <div className="px-4 pt-1">
+          <MediaGrid urls={media} alt={name} />
+        </div>
+      )}
+
+      <div className="mt-auto flex items-center gap-2 border-t border-border bg-surface px-3 py-2.5">
         <Link
           to="/requests/new"
-          className="inline-flex shrink-0 items-center justify-center gap-1 rounded-full border border-border px-3 py-2 text-xs font-semibold text-navy hover:border-navy"
-          aria-label={`Request ${name}`}
+          search={{ providerId: p.user_id } as never}
+          className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-orange px-3 py-2 text-xs font-semibold text-orange-foreground hover:brightness-110"
         >
-          <Briefcase className="h-3.5 w-3.5" />
-          <span className="hidden xs:inline">Request</span>
+          <Briefcase className="h-3.5 w-3.5" /> Request service
         </Link>
         <Link
           to="/u/$id"
           params={{ id: p.user_id }}
-          className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border text-navy hover:border-navy"
+          className="inline-flex items-center justify-center gap-1 rounded-full border border-border px-3 py-2 text-xs font-semibold text-navy hover:border-navy"
           aria-label={`Message ${name}`}
         >
-          <MessageSquare className="h-4 w-4" />
+          <MessageSquare className="h-3.5 w-3.5" />
+        </Link>
+        <Link
+          to="/u/$id"
+          params={{ id: p.user_id }}
+          className="rounded-full border border-border px-3 py-2 text-xs font-semibold text-navy hover:border-navy"
+        >
+          View
         </Link>
       </div>
     </article>
   );
 }
+
+
 
 function ServiceListingCard({
   l,
