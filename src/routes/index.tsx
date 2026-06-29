@@ -25,7 +25,7 @@ import { ListYourSkillButton } from "@/components/cta/ListYourSkillButton";
 import { useAuth } from "@/hooks/use-auth";
 import { listSkillHref } from "@/lib/cta";
 import heroNetwork from "@/assets/hero-network.jpg";
-import { NearYouHomeSection } from "@/components/NearYouHomeSection";
+import { HomeFeedSections } from "@/components/HomeFeedSections";
 import { SetLocationNudge } from "@/components/SetLocationNudge";
 
 // Curated category set for the homepage tile grid
