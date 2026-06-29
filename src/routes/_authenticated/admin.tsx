@@ -151,10 +151,18 @@ function UsersTab() {
 
   useEffect(() => {
     (async () => {
-      const { data } = await supabase.from("profiles").select("id,full_name,district,town,is_provider,created_at").order("created_at", { ascending: false }).limit(200);
-      const list = data ?? [];
+      const { data } = await supabase.from("profiles").select("id,full_name,is_provider,created_at").order("created_at", { ascending: false }).limit(200);
+      const baseList = data ?? [];
+      const ids = baseList.map((r) => r.id);
+      // Location columns on profiles are restricted at the DB level; fetch them
+      // via the masking RPC (admins/moderators see unmasked values).
+      const locMap = new Map<string, { district: string | null; town: string | null }>();
+      if (ids.length) {
+        const { data: cards } = await supabase.rpc("get_profile_cards", { _ids: ids });
+        (cards ?? []).forEach((c) => locMap.set(c.id, { district: c.district ?? null, town: c.town ?? null }));
+      }
+      const list = baseList.map((r) => ({ ...r, district: locMap.get(r.id)?.district ?? null, town: locMap.get(r.id)?.town ?? null }));
       setRows(list);
-      const ids = list.map((r) => r.id);
       if (ids.length) {
         const { data: cs } = await supabase.rpc("admin_list_user_contacts", { _ids: ids });
         const cmap: Record<string, { email: string | null; phone: string | null }> = {};

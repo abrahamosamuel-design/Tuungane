@@ -2,6 +2,8 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
 import { categories } from "@/data/categories";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+
 
 // Classifies a free-text service description into one of the platform's
 // categories + subcategories using Lovable AI. Called from the "describe
@@ -19,6 +21,7 @@ interface Suggestion {
 }
 
 export const suggestCategory = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
   .inputValidator(InputSchema)
   .handler(async ({ data }): Promise<Suggestion | null> => {
     const apiKey = process.env.LOVABLE_API_KEY;

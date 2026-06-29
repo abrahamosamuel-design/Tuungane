@@ -30,8 +30,8 @@ function Me() {
 
   const load = async () => {
     if (!user) return;
-    const { data: p } = await supabase.from("profiles").select("full_name,avatar_url,bio,town,district").eq("id", user.id).maybeSingle();
-    setProfile(p);
+    const { data: p } = await supabase.rpc("get_my_profile").maybeSingle();
+    setProfile(p ? { full_name: p.full_name ?? "", avatar_url: p.avatar_url ?? null, bio: p.bio ?? null, town: p.town ?? null, district: p.district ?? null } as never : null);
     const { data: f } = await supabase.from("follows").select("provider_user_id").eq("follower_id", user.id);
     const ids = (f ?? []).map((x) => x.provider_user_id);
     if (ids.length) {

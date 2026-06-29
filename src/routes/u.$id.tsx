@@ -45,7 +45,8 @@ export const Route = createFileRoute("/u/$id")({
   loader: async ({ params }) => {
     try {
       const [{ data: profile }, { data: sp }] = await Promise.all([
-        supabase.from("profiles").select("id,full_name,bio,is_provider,district,town,avatar_url").eq("id", params.id).maybeSingle(),
+        // get_profile_card masks location per visibility and is safe for anon.
+        supabase.rpc("get_profile_card", { _id: params.id }).maybeSingle(),
         supabase.from("service_profiles").select("business_name,subcategory,bio,category_slug,district,town,verified").eq("user_id", params.id).maybeSingle(),
       ]);
       return { profile, sp };
@@ -135,10 +136,16 @@ function UserProfile() {
       .rpc("get_profile_card", { _id: id })
       .maybeSingle();
     setProfile(p as typeof profile);
-    const { data: s } = user
-      ? await supabase.from("service_profiles").select("business_name,subcategory,bio,town,district,phone,whatsapp,email,verified,category_slug,years_experience,areas_served,availability,cover_url,header_url,seeded_by_official,seeded_status").eq("user_id", id).maybeSingle()
-      : await supabase.from("service_profiles").select("business_name,subcategory,bio,town,district,verified,category_slug,years_experience,areas_served,availability,cover_url,header_url,seeded_by_official,seeded_status").eq("user_id", id).maybeSingle();
-    setSp(s as typeof sp);
+    // service_profiles.phone/whatsapp/email reads go through get_provider_contact
+    // which enforces phone_visibility + the contact gate server-side.
+    const { data: s } = await supabase.from("service_profiles").select("business_name,subcategory,bio,town,district,verified,category_slug,years_experience,areas_served,availability,cover_url,header_url,seeded_by_official,seeded_status").eq("user_id", id).maybeSingle();
+    if (user && s) {
+      const { data: contact } = await supabase.rpc("get_provider_contact", { _provider: id }).maybeSingle();
+      const c = (contact ?? {}) as { phone?: string | null; whatsapp?: string | null; email?: string | null };
+      setSp({ ...(s as object), phone: c.phone ?? null, whatsapp: c.whatsapp ?? null, email: c.email ?? null } as typeof sp);
+    } else {
+      setSp(s as typeof sp);
+    }
     const { data: ps } = await supabase.from("timeline_posts").select("*").eq("provider_user_id", id).eq("hidden", false).order("created_at", { ascending: false });
     setPosts((ps ?? []).map((r) => ({ ...r, author: p ?? undefined })) as PostRow[]);
 
