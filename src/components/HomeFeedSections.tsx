@@ -2,14 +2,11 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   MapPin,
-  ArrowRight,
-  ClipboardList,
   MessageSquare,
   Star,
   BadgeCheck,
   Briefcase,
   Send,
-  UserPlus,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
@@ -70,11 +67,19 @@ type RecentPost = {
   town: string | null;
   district: string | null;
   area: string | null;
+  post_type: string;
   created_at: string;
   profile?: { full_name: string; avatar_url: string | null } | null;
 };
 
-const SECTION_WRAP = "mx-auto max-w-6xl px-4 pt-10 sm:px-6";
+const SECTION_WRAP = "mx-auto max-w-6xl px-4 pt-8 sm:px-6 sm:pt-10";
+// Only show genuine provider work, never promotions/marketing announcements
+const REAL_WORK_POST_TYPES = new Set([
+  "completed_job",
+  "work_update",
+  "before_after",
+  "new_service",
+]);
 
 export function HomeFeedSections() {
   const { user } = useAuth();
@@ -82,6 +87,7 @@ export function HomeFeedSections() {
   const { locations: featured } = useFeaturedLocations();
 
   const [requests, setRequests] = useState<NearbyRequest[]>([]);
+  const [hasNearbyReqs, setHasNearbyReqs] = useState(false);
   const [providers, setProviders] = useState<NearbyProvider[]>([]);
   const [recent, setRecent] = useState<RecentPost[]>([]);
   const [loading, setLoading] = useState(true);
@@ -96,6 +102,7 @@ export function HomeFeedSections() {
       const hasCoords = userLoc?.latitude != null && userLoc?.longitude != null;
       let reqs: NearbyRequest[] | null = null;
       let provs: NearbyProvider[] | null = null;
+      let nearbyFlag = false;
 
       if (hasCoords) {
         const lat = userLoc!.latitude as number;
@@ -106,6 +113,7 @@ export function HomeFeedSections() {
         ]);
         reqs = (rpcReqs ?? null) as NearbyRequest[] | null;
         provs = (rpcProvs ?? null) as NearbyProvider[] | null;
+        nearbyFlag = (reqs?.length ?? 0) > 0;
       }
 
       if (!reqs || reqs.length === 0) {
@@ -117,7 +125,7 @@ export function HomeFeedSections() {
           .is("provider_id", null)
           .order("urgent_flag", { ascending: false })
           .order("created_at", { ascending: false })
-          .limit(24);
+          .limit(12);
         reqs = (data ?? []) as NearbyRequest[];
       }
 
@@ -134,16 +142,18 @@ export function HomeFeedSections() {
 
       const { data: postsRows } = await supabase
         .from("timeline_posts")
-        .select("id,provider_user_id,text,category_slug,media_urls,town,district,area,created_at")
+        .select("id,provider_user_id,text,category_slug,media_urls,town,district,area,post_type,created_at")
         .eq("hidden", false)
+        .in("post_type", Array.from(REAL_WORK_POST_TYPES))
         .not("media_urls", "eq", "{}")
         .order("created_at", { ascending: false })
         .limit(8);
-      const posts = (postsRows ?? []) as RecentPost[];
+      const posts = ((postsRows ?? []) as RecentPost[]).filter(
+        (p) => Array.isArray(p.media_urls) && p.media_urls.length > 0,
+      );
 
       if (cancelled) return;
 
-      // Enrich providers + posts with profile names/avatars
       const ids = Array.from(new Set([
         ...(provs ?? []).map((p) => p.user_id),
         ...posts.map((p) => p.provider_user_id),
@@ -157,7 +167,6 @@ export function HomeFeedSections() {
         (profs ?? []).forEach((p) => profMap.set(p.id, p));
       }
 
-      // Check if current user has a service profile (= provider role on the home feed)
       let provider = false;
       if (user) {
         const { data: sp } = await supabase
@@ -171,6 +180,7 @@ export function HomeFeedSections() {
       if (cancelled) return;
 
       setRequests(reqs ?? []);
+      setHasNearbyReqs(nearbyFlag);
       setProviders(
         (provs ?? []).map((p) => ({ ...p, profile: profMap.get(p.user_id) ?? null })),
       );
@@ -190,16 +200,18 @@ export function HomeFeedSections() {
       return (b.urgent_flag ? 1 : 0) - (a.urgent_flag ? 1 : 0);
     });
     const withinDefault = filterByRadius(boosted, userLoc, (r) => r, 20);
-    return (withinDefault.length >= 3 ? withinDefault : boosted).slice(0, 6);
+    return (withinDefault.length >= 3 ? withinDefault : boosted).slice(0, 3);
   }, [requests, userLoc, featured]);
 
   const topProviders = useMemo(() => {
     const sorted = sortByProximity(providers, userLoc, (p) => p);
     const boosted = [...sorted].sort((a, b) => {
-      // verified first, then featured area
       const av = a.verified === "verified" ? 1 : 0;
       const bv = b.verified === "verified" ? 1 : 0;
       if (bv !== av) return bv - av;
+      const aa = (a.availability || "available").toLowerCase() === "available" ? 1 : 0;
+      const ba = (b.availability || "available").toLowerCase() === "available" ? 1 : 0;
+      if (ba !== aa) return ba - aa;
       const af = isFeaturedTarget(a, featured) ? 1 : 0;
       const bf = isFeaturedTarget(b, featured) ? 1 : 0;
       return bf - af;
@@ -208,21 +220,23 @@ export function HomeFeedSections() {
     return (withinDefault.length >= 3 ? withinDefault : boosted).slice(0, 6);
   }, [providers, userLoc, featured]);
 
+  const requestsTitle = hasNearbyReqs ? "Open requests near you" : "Latest open requests";
+
   return (
-    <>
-      {/* OPEN REQUESTS NEAR YOU */}
+    <div className="overflow-x-hidden">
+      {/* OPEN REQUESTS */}
       <section className={SECTION_WRAP}>
         <SectionTitle
-          title="Open requests near you"
+          title={requestsTitle}
           subtitle="See what people nearby need help with today."
-          link={{ label: "Browse all", to: "/requests/browse" }}
+          link={{ label: "View all", to: "/requests/browse" }}
         />
         {loading ? (
           <CardSkeletonRow />
         ) : topRequests.length === 0 ? (
-          <EmptyState
+          <CompactEmptyState
             message="No open requests near you yet."
-            hint="Check again soon or create the first request in your area."
+            hint="Create the first request in your area."
             cta={{ label: "Create a Request", to: "/requests/new" }}
           />
         ) : (
@@ -232,22 +246,23 @@ export function HomeFeedSections() {
             ))}
           </div>
         )}
+        <MobileViewAll to="/requests/browse" label="View all open requests" />
       </section>
 
-      {/* SKILLED PEOPLE NEAR YOU */}
+      {/* TRUSTED PROVIDERS */}
       <section className={SECTION_WRAP}>
         <SectionTitle
-          title="Skilled people near you"
-          subtitle="Find trusted providers offering services around your area."
-          link={{ label: "Browse all", to: "/services" }}
+          title="Trusted providers near you"
+          subtitle="Find local providers offering services around your area."
+          link={{ label: "View all", to: "/services" }}
         />
         {loading ? (
           <CardSkeletonRow />
         ) : topProviders.length === 0 ? (
-          <EmptyState
-            message="No service providers listed near you yet."
-            hint="Be the first to list your skill and get discovered."
-            cta={{ label: "List Your Skill", to: "/list-skill" }}
+          <CompactEmptyState
+            message="No providers listed near you yet."
+            hint="Be among the first to list your service."
+            cta={{ label: "List Your Service", to: "/list-skill" }}
           />
         ) : (
           <div className="-mx-4 mt-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-3 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-3">
@@ -256,15 +271,16 @@ export function HomeFeedSections() {
             ))}
           </div>
         )}
+        <MobileViewAll to="/services" label="View all providers" />
       </section>
 
-      {/* RECENT WORK */}
-      {(!loading && recent.length > 0) && (
+      {/* RECENT PROVIDER WORK — only when we have real work posts */}
+      {!loading && recent.length > 0 && (
         <section className={SECTION_WRAP}>
           <SectionTitle
-            title="Recent work from providers"
-            subtitle="See services being offered by people on Tuungane."
-            link={{ label: "Open feed", to: "/feed" }}
+            title="Recent provider work"
+            subtitle="See real work shared by providers on Tuungane."
+            link={{ label: "View all", to: "/feed" }}
           />
           <div className="-mx-4 mt-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-3 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-4">
             {recent.map((p) => (
@@ -281,7 +297,7 @@ export function HomeFeedSections() {
           requestId={respondTo}
         />
       )}
-    </>
+    </div>
   );
 }
 
@@ -304,26 +320,38 @@ function SectionTitle({ title, subtitle, link }: { title: string; subtitle?: str
   );
 }
 
+function MobileViewAll({ to, label }: { to: string; label: string }) {
+  return (
+    <div className="mt-2 sm:hidden">
+      <Link to={to} className="inline-flex text-sm font-semibold text-navy hover:text-orange">
+        {label} →
+      </Link>
+    </div>
+  );
+}
+
 function CardSkeletonRow() {
   return (
     <div className="-mx-4 mt-4 flex gap-3 overflow-hidden px-4 sm:mx-0 sm:grid sm:grid-cols-2 sm:px-0 lg:grid-cols-3">
       {Array.from({ length: 3 }).map((_, i) => (
-        <div key={i} className="w-[78%] shrink-0 sm:w-auto">
-          <Skeleton className="h-44 w-full rounded-2xl" />
+        <div key={i} className="w-[85%] shrink-0 sm:w-auto">
+          <Skeleton className="h-40 w-full rounded-2xl" />
         </div>
       ))}
     </div>
   );
 }
 
-function EmptyState({ message, hint, cta }: { message: string; hint: string; cta: { label: string; to: string } }) {
+function CompactEmptyState({ message, hint, cta }: { message: string; hint: string; cta: { label: string; to: string } }) {
   return (
-    <div className="mt-4 rounded-2xl border border-dashed border-border bg-card p-6 text-center">
-      <p className="text-sm font-semibold text-navy">{message}</p>
-      <p className="mt-1 text-xs text-muted-foreground">{hint}</p>
+    <div className="mt-3 flex min-h-[120px] items-center justify-between gap-3 rounded-2xl border border-dashed border-border bg-card p-4">
+      <div className="min-w-0">
+        <p className="text-sm font-semibold text-navy">{message}</p>
+        <p className="mt-0.5 text-xs text-muted-foreground">{hint}</p>
+      </div>
       <Link
         to={cta.to}
-        className="mt-4 inline-flex items-center gap-2 rounded-full bg-orange px-5 py-2 text-sm font-semibold text-orange-foreground hover:brightness-110"
+        className="shrink-0 rounded-full bg-orange px-4 py-2 text-center text-xs font-semibold text-orange-foreground hover:brightness-110"
       >
         {cta.label}
       </Link>
@@ -357,7 +385,7 @@ function RequestCard({
 
   return (
     <article
-      className={`block w-[78%] shrink-0 snap-start rounded-2xl border bg-card p-4 shadow-[var(--shadow-card)] transition hover:border-orange sm:w-auto ${
+      className={`flex w-[85%] shrink-0 snap-start flex-col rounded-2xl border bg-card p-4 shadow-[var(--shadow-card)] transition hover:border-orange sm:w-auto ${
         r.urgent_flag ? "border-orange/40" : "border-border"
       }`}
     >
@@ -369,30 +397,30 @@ function RequestCard({
             <Star className="h-3 w-3" /> Featured
           </span>
         )}
-        <span className="ml-auto text-[11px] text-muted-foreground">Posted {timeAgo(r.created_at)}</span>
+        <span className="ml-auto text-[11px] text-muted-foreground">{timeAgo(r.created_at)}</span>
       </div>
 
       <Link to="/requests/$id" params={{ id: r.id }} className="mt-2 block">
         <h3 className="line-clamp-2 font-display text-sm font-bold text-navy">{title}</h3>
-        {cat && (
+        {cat ? (
           <p className="mt-0.5 text-[11px] text-muted-foreground">
             {cat.name}{r.subcategory ? ` · ${formatSubcategory(r.subcategory)}` : ""}
           </p>
-        )}
-        {r.description && <p className="mt-1.5 line-clamp-2 text-xs text-foreground/80">{r.description}</p>}
+        ) : null}
+        {r.description ? <p className="mt-1.5 line-clamp-2 text-xs text-foreground/80">{r.description}</p> : null}
 
         <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
           <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" /> {loc}</span>
-          {r.budget_range && <span className="font-semibold text-orange">{r.budget_range}</span>}
-          {near && (
+          {r.budget_range ? <span className="font-semibold text-orange">{r.budget_range}</span> : null}
+          {near ? (
             <span className="inline-flex items-center gap-1 rounded-full bg-green/10 px-1.5 py-0.5 text-[10px] font-semibold text-green">
               {near}
             </span>
-          )}
+          ) : null}
         </div>
       </Link>
 
-      <div className="mt-3 flex gap-2">
+      <div className="mt-auto pt-3 flex gap-2">
         <Link
           to="/requests/$id"
           params={{ id: r.id }}
@@ -400,15 +428,15 @@ function RequestCard({
         >
           View request
         </Link>
-        {isProvider && (
+        {isProvider ? (
           <button
             type="button"
             onClick={onRespond}
             className="inline-flex items-center justify-center gap-1 rounded-full bg-orange px-3 py-2 text-xs font-semibold text-orange-foreground hover:brightness-110"
           >
-            <Send className="h-3 w-3" /> Send quote
+            <Send className="h-3 w-3" /> Respond
           </button>
-        )}
+        ) : null}
       </div>
     </article>
   );
@@ -440,9 +468,10 @@ function ProviderCard({ p, userLoc }: { p: NearbyProvider; userLoc: ReturnType<t
   const avail = availabilityMeta(p.availability);
   const verified = p.verified === "verified";
   const avatar = p.profile?.avatar_url;
+  const years = typeof p.years_experience === "number" ? p.years_experience : 0;
 
   return (
-    <article className="flex w-[78%] shrink-0 snap-start flex-col rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)] transition hover:border-orange sm:w-auto">
+    <article className="flex w-[85%] shrink-0 snap-start flex-col rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)] transition hover:border-orange sm:w-auto">
       <div className="flex items-start gap-3">
         {avatar ? (
           <img src={avatar} alt={name} loading="lazy" className="h-12 w-12 shrink-0 rounded-full object-cover" />
@@ -454,7 +483,7 @@ function ProviderCard({ p, userLoc }: { p: NearbyProvider; userLoc: ReturnType<t
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5">
             <h3 className="truncate text-sm font-bold text-navy">{name}</h3>
-            {verified && <BadgeCheck className="h-4 w-4 shrink-0 text-green" />}
+            {verified ? <BadgeCheck className="h-4 w-4 shrink-0 text-green" /> : null}
           </div>
           <p className="truncate text-[11px] text-muted-foreground">
             {formatSubcategory(p.subcategory)}{cat ? ` · ${cat.name}` : ""}
@@ -468,21 +497,21 @@ function ProviderCard({ p, userLoc }: { p: NearbyProvider; userLoc: ReturnType<t
       <div className="mt-2 flex flex-wrap items-center gap-1.5">
         <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${avail.cls}`}>{avail.label}</span>
         <ProfileTrustBadge kind="service_profile" id={p.user_id} size="sm" className="shrink-0" />
-        {p.years_experience && p.years_experience > 0 && (
+        {years > 0 ? (
           <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold text-navy">
-            {p.years_experience} yrs experience
+            {years} yrs experience
           </span>
-        )}
-        {near && (
+        ) : null}
+        {near ? (
           <span className="inline-flex items-center gap-1 rounded-full bg-green/10 px-2 py-0.5 text-[10px] font-semibold text-green">
             {near}
           </span>
-        )}
+        ) : null}
       </div>
 
-      {p.bio && <p className="mt-2 line-clamp-2 text-xs text-foreground/80">{p.bio}</p>}
+      {p.bio ? <p className="mt-2 line-clamp-2 text-xs text-foreground/80">{p.bio}</p> : null}
 
-      <div className="mt-auto pt-3 flex flex-wrap gap-2">
+      <div className="mt-auto flex items-center gap-2 pt-3">
         <Link
           to="/u/$id"
           params={{ id: p.user_id }}
@@ -499,10 +528,10 @@ function ProviderCard({ p, userLoc }: { p: NearbyProvider; userLoc: ReturnType<t
         <Link
           to="/u/$id"
           params={{ id: p.user_id }}
-          className="inline-flex items-center justify-center gap-1 rounded-full border border-border px-3 py-2 text-xs font-semibold text-navy hover:border-navy"
+          className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border text-navy hover:border-navy"
           aria-label={`Message ${name}`}
         >
-          <MessageSquare className="h-3 w-3" />
+          <MessageSquare className="h-4 w-4" />
         </Link>
       </div>
     </article>
@@ -519,32 +548,29 @@ function RecentWorkCard({ p }: { p: RecentPost }) {
     <Link
       to="/u/$id"
       params={{ id: p.provider_user_id }}
-      className="block w-[78%] shrink-0 snap-start overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)] transition hover:border-orange sm:w-auto"
+      className="block w-[85%] shrink-0 snap-start overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)] transition hover:border-orange sm:w-auto"
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-muted">
         {img ? (
           <img src={img} alt={p.text.slice(0, 80)} loading="lazy" className="h-full w-full object-cover" />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-            <UserPlus className="h-8 w-8" />
-          </div>
-        )}
-        {cat && (
+        ) : null}
+        {cat ? (
           <span className="absolute left-2 top-2 rounded-md bg-navy px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-white">
             {cat.name}
           </span>
-        )}
+        ) : null}
       </div>
       <div className="p-3">
         <p className="line-clamp-2 text-xs text-foreground/80">{p.text}</p>
         <div className="mt-2 flex items-center justify-between gap-2">
           <span className="truncate text-xs font-semibold text-navy">{name}</span>
-          {loc && (
+          {loc ? (
             <span className="inline-flex shrink-0 items-center gap-1 text-[11px] text-muted-foreground">
               <MapPin className="h-3 w-3" /> {loc}
             </span>
-          )}
+          ) : null}
         </div>
+        <span className="mt-2 inline-block text-[11px] font-semibold text-orange">View profile →</span>
       </div>
     </Link>
   );
