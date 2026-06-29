@@ -78,6 +78,7 @@ function Services() {
   const [real, setReal] = useState<RealProvider[]>([]);
   const [loadingReal, setLoadingReal] = useState(true);
   const [dbCats, setDbCats] = useState<Array<{ slug: string; name: string; icon: string; blurb: string; subCount: number; examples: string }> | null>(null);
+  const [showAllCats, setShowAllCats] = useState(false);
 
   useEffect(() => {
     (async () => {
