@@ -54,7 +54,6 @@ function NewRequest() {
   const nav = useNavigate();
   const [busy, setBusy] = useState(false);
   const [autofilled, setAutofilled] = useState(false);
-  const [file, setFile] = useState<File | null>(null);
   const [mediaUrls, setMediaUrls] = useState<string[]>([]);
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [districtBounds, setDistrictBounds] = useState<Bounds | null>(null);
@@ -223,25 +222,10 @@ function NewRequest() {
       return;
     }
     setBusy(true);
-    let attachment_url: string | null = mediaUrls[0] ?? null;
-    try {
-      if (file) {
-        const url = await uploadMedia(user.id, file, "requests");
-        if (!attachment_url) attachment_url = url;
-        setMediaUrls((cur) => (cur.includes(url) ? cur : [...cur, url]));
-      }
-    } catch (err) {
-      console.error(err);
-      toastError(err, "Photo couldn't upload");
-      setBusy(false);
-      return;
-    }
+    const allMedia = mediaUrls;
+    const attachment_url: string | null = allMedia[0] ?? null;
 
-    const allMedia = (() => {
-      const arr = [...mediaUrls];
-      if (file && attachment_url && !arr.includes(attachment_url)) arr.unshift(attachment_url);
-      return arr;
-    })();
+
 
     // If the request targets a public profile, infer the provider for individual profiles.
     const targetedProvider =
