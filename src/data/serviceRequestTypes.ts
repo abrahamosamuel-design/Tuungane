@@ -156,6 +156,7 @@ export interface ServiceRequestRow {
   customer_phone: string | null;
   customer_whatsapp: string | null;
   attachment_url: string | null;
+  media_urls?: string[] | null;
   status: RequestStatusValue;
   created_at: string;
   updated_at: string;
