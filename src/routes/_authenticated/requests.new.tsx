@@ -290,8 +290,8 @@ function NewRequest() {
   return (
     <Layout>
       <section className="mx-auto max-w-2xl px-4 py-8">
-        <h1 className="font-display text-3xl font-bold text-navy">Create a Request</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Tell providers what you need.</p>
+        <h1 className="font-display text-3xl font-bold text-navy">Post a Service Request</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Tell people what service you are looking for.</p>
 
         {targetProfile && (
           <div className="mt-3 rounded-xl border border-orange/40 bg-orange/5 p-3 text-xs">
