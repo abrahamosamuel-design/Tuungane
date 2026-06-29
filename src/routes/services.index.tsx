@@ -272,13 +272,20 @@ function Services() {
       </section>
 
       {/* RECOMMENDED PROVIDERS — horizontal carousel on mobile */}
-      <section className="pt-5 sm:pt-8">
+      <section className="pt-4 sm:pt-8">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex items-end justify-between gap-3">
             <div className="min-w-0">
               <h2 className="font-display text-base font-bold text-navy sm:text-xl">Recommended providers</h2>
               <p className="mt-0.5 text-xs text-muted-foreground sm:text-sm">Trusted picks you can contact or request.</p>
             </div>
+            <a
+              href="#providers-section"
+              onClick={(e) => { e.preventDefault(); document.getElementById("providers-section")?.scrollIntoView({ behavior: "smooth" }); }}
+              className="shrink-0 text-xs font-semibold text-orange hover:underline sm:text-sm"
+            >
+              View all →
+            </a>
           </div>
         </div>
 
