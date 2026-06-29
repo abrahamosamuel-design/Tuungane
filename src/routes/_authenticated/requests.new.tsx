@@ -265,11 +265,11 @@ function NewRequest() {
     }).select("id").single();
     setBusy(false);
     if (error) {
-      toastError(error, "Couldn't post your request");
+      toastError(error, "Couldn't post your service request");
       return;
     }
-    toast.success("Request posted", {
-      description: "Nearby providers will see it and respond shortly.",
+    toast.success("Your service request has been posted successfully", {
+      description: "People offering this service can now respond.",
     });
     if (inserted?.id) {
       nav({ to: "/requests/$id", params: { id: inserted.id }, search: { posted: "1" } as never });
