@@ -4,16 +4,21 @@ import { useLayoutEffect, useRef, useState } from "react";
  * Renders post-style body text that preserves line breaks and offers a
  * "Show more / Show less" toggle when the content exceeds `clampLines`.
  *
- * The overflow check uses the actual rendered DOM, so it stays accurate
+ * When expanded, content is still clamped to `maxLines` (default 10) so
+ * very long bios/descriptions don't blow out card heights.
+ *
+ * Overflow detection uses the actual rendered DOM, so it stays accurate
  * across font sizes, viewport widths, and emoji.
  */
 export function ExpandableText({
   text,
-  clampLines = 5,
+  clampLines = 3,
+  maxLines = 10,
   className = "",
 }: {
   text?: string | null;
   clampLines?: number;
+  maxLines?: number;
   className?: string;
 }) {
   const ref = useRef<HTMLParagraphElement | null>(null);
@@ -24,36 +29,33 @@ export function ExpandableText({
     const el = ref.current;
     if (!el) return;
     const measure = () => {
-      // When clamped, scrollHeight is greater than clientHeight if overflow exists.
       setOverflows(el.scrollHeight - 1 > el.clientHeight);
     };
     measure();
     const ro = new ResizeObserver(measure);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [text, clampLines]);
+  }, [text, clampLines, expanded, maxLines]);
 
   if (!text) return null;
+
+  const activeLines = expanded ? maxLines : clampLines;
 
   return (
     <div className={className}>
       <p
         ref={ref}
         className="whitespace-pre-wrap break-words text-[14px] leading-relaxed text-foreground/85"
-        style={
-          expanded
-            ? undefined
-            : {
-                display: "-webkit-box",
-                WebkitLineClamp: clampLines,
-                WebkitBoxOrient: "vertical",
-                overflow: "hidden",
-              }
-        }
+        style={{
+          display: "-webkit-box",
+          WebkitLineClamp: activeLines,
+          WebkitBoxOrient: "vertical",
+          overflow: "hidden",
+        }}
       >
         {text}
       </p>
-      {overflows && (
+      {(overflows || expanded) && (
         <button
           type="button"
           onClick={(e) => {
