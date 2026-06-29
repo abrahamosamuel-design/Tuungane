@@ -576,10 +576,11 @@ function ProviderCardCompact({ p, userLoc, onRequest }: { p: RealProvider; userL
       </div>
 
       {p.bio && (
-        <p className="mt-2 px-3 text-[12px] leading-snug text-muted-foreground line-clamp-2">
-          {p.bio}
-        </p>
+        <div className="mt-2 px-3">
+          <ExpandableText text={p.bio} clampLines={3} />
+        </div>
       )}
+
 
 
       <div className="mt-auto flex items-center justify-between gap-2 border-t border-border bg-surface px-3 py-2">
