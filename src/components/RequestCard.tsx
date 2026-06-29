@@ -124,7 +124,7 @@ export function RequestCard({
             {cat.name}{r.subcategory ? ` · ${formatSubcategory(tidy(r.subcategory))}` : ""}
           </p>
         )}
-        {description && <ExpandableText text={description} clampLines={3} maxLines={10} className="mt-2" />}
+        {description && <ExpandableText text={description} clampLines={3} maxLines={7} className="mt-2" />}
       </Link>
 
       {/* Media grid */}

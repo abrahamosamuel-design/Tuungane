@@ -232,7 +232,7 @@ function PublicProfilePage() {
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <p className="font-semibold text-navy">{s.title}</p>
-                      {s.description && <ExpandableText text={s.description} clampLines={3} maxLines={10} className="mt-0.5" />}
+                      {s.description && <ExpandableText text={s.description} clampLines={3} maxLines={7} className="mt-0.5" />}
                       {s.price_guidance_ugx && (
                         <p className="mt-1 text-xs font-semibold text-orange">From UGX {s.price_guidance_ugx.toLocaleString()}</p>
                       )}

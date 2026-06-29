@@ -13,7 +13,7 @@ import { useLayoutEffect, useRef, useState } from "react";
 export function ExpandableText({
   text,
   clampLines = 3,
-  maxLines = 10,
+  maxLines = 7,
   className = "",
 }: {
   text?: string | null;

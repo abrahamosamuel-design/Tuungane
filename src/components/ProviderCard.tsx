@@ -34,7 +34,7 @@ export function ProviderCard({ p }: { p: Provider }) {
           </div>
         </div>
       </div>
-      {p.bio && <ExpandableText text={p.bio} clampLines={3} maxLines={10} className="px-5 text-foreground/70" />}
+      {p.bio && <ExpandableText text={p.bio} clampLines={3} maxLines={7} className="px-5 text-foreground/70" />}
       <div className="mt-4 flex items-center justify-between border-t border-border bg-surface px-5 py-3">
         <span className={`inline-flex items-center gap-1.5 text-xs font-medium ${p.availability === "Available now" ? "text-green" : "text-muted-foreground"}`}>
           <span className={`h-1.5 w-1.5 rounded-full ${p.availability === "Available now" ? "bg-green" : "bg-muted-foreground"}`} />
