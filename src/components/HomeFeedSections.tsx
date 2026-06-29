@@ -144,7 +144,7 @@ export function HomeFeedSections() {
         .from("timeline_posts")
         .select("id,provider_user_id,text,category_slug,media_urls,town,district,area,post_type,created_at")
         .eq("hidden", false)
-        .in("post_type", REAL_WORK_POST_TYPES as unknown as string[])
+        .in("post_type", [...REAL_WORK_POST_TYPES])
         .not("media_urls", "eq", "{}")
         .order("created_at", { ascending: false })
         .limit(8);
