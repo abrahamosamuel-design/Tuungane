@@ -65,14 +65,13 @@ export function UserLocationProvider({ children }: { children: ReactNode }) {
     let cancelled = false;
     setLoading(true);
     (async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("country,region,district,city,town,area,latitude,longitude,location_visibility")
-        .eq("id", user.id)
-        .maybeSingle();
+      // Use get_my_profile RPC because column-level GRANTs on profiles.area/town/
+      // district/latitude/longitude were revoked from authenticated to enforce
+      // location_visibility at the database level.
+      const { data } = await supabase.rpc("get_my_profile").maybeSingle();
       if (cancelled) return;
       if (data) {
-        const next = data as UserLocation;
+        const next = data as unknown as UserLocation;
         setLocation(next);
         writeLocalFor(user.id, next);
       }
