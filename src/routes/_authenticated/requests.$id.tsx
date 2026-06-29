@@ -86,26 +86,18 @@ function RequestDetailsPage() {
     setHasFeedback((count ?? 0) > 0);
 
     // For the customer on an open/in-progress request, fetch revealable phones
-    // for every responding provider (respecting their phone_visibility setting)
-    // so Call/View Phone can appear directly on the response card.
+    // for every responding provider (respecting phone_visibility) via the
+    // get_provider_contact RPC, which enforces visibility server-side.
     if (user.id === sr.customer_id && provIds.length) {
-      const [{ data: sps }, ppsRes] = await Promise.all([
-        supabase.from("service_profiles").select("user_id,phone").in("user_id", provIds),
-        // phone_visibility column added in recent migration; types may not be regenerated yet
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (supabase.from("provider_privacy_settings") as any).select("user_id,phone_visibility").in("user_id", provIds) as Promise<{ data: Array<{ user_id: string; phone_visibility?: string }> | null }>,
-      ]);
-      const pps = ppsRes.data;
-      const visMap = new Map<string, string>();
-      ((pps ?? []) as Array<{ user_id: string; phone_visibility?: string }>).forEach((p) => {
-        visMap.set(p.user_id, p.phone_visibility ?? "logged_in_only");
-      });
       const phoneMap: Record<string, string | null> = {};
-      ((sps ?? []) as Array<{ user_id: string; phone: string | null }>).forEach((s) => {
-        const vis = visMap.get(s.user_id) ?? "logged_in_only";
-        const allowed = vis !== "hidden" && vis !== "messages_first";
-        phoneMap[s.user_id] = allowed ? (s.phone ?? null) : null;
-      });
+      await Promise.all(
+        provIds.map(async (pid) => {
+          const { data } = await supabase
+            .rpc("get_provider_contact", { _provider: pid })
+            .maybeSingle();
+          phoneMap[pid] = (data as { phone?: string | null } | null)?.phone ?? null;
+        }),
+      );
       setResponsePhones(phoneMap);
     } else {
       setResponsePhones({});
@@ -114,13 +106,17 @@ function RequestDetailsPage() {
     // Fetch contact info of the assigned provider (or original provider for direct requests)
     const assigned = sr.selected_provider_id ?? sr.provider_id;
     if (assigned) {
-      const { data: sp } = await supabase.from("service_profiles").select("phone,whatsapp,email,business_name").eq("user_id", assigned).maybeSingle();
-      const { data: pp } = await supabase.from("profiles").select("full_name").eq("id", assigned).maybeSingle();
+      const [{ data: contact }, { data: sp2 }, { data: pp }] = await Promise.all([
+        supabase.rpc("get_provider_contact", { _provider: assigned }).maybeSingle(),
+        supabase.from("service_profiles").select("business_name").eq("user_id", assigned).maybeSingle(),
+        supabase.from("profiles").select("full_name").eq("id", assigned).maybeSingle(),
+      ]);
+      const c = (contact ?? {}) as { phone?: string | null; whatsapp?: string | null; email?: string | null };
       setProviderContact({
-        phone: sp?.phone ?? null,
-        whatsapp: sp?.whatsapp ?? null,
-        email: sp?.email ?? null,
-        name: sp?.business_name || pp?.full_name || null,
+        phone: c.phone ?? null,
+        whatsapp: c.whatsapp ?? null,
+        email: c.email ?? null,
+        name: sp2?.business_name || pp?.full_name || null,
       });
     } else {
       setProviderContact(null);
