@@ -16,7 +16,7 @@ export function TwoSidedHeroCards() {
           <div className="min-w-0 flex-1">
             <h3 className="font-display text-lg font-bold text-navy">Need help?</h3>
             <p className="mt-1 text-sm text-foreground/80">
-              Create a request and get responses from skilled people near you.
+              Post a service request and get responses from people offering services near you.
             </p>
             <Link
               to={CTA.createRequest.href}
@@ -35,7 +35,7 @@ export function TwoSidedHeroCards() {
           <div className="min-w-0 flex-1">
             <h3 className="font-display text-lg font-bold text-navy">Have a skill?</h3>
             <p className="mt-1 text-sm text-foreground/80">
-              List your skill, show your work, and get discovered by customers looking for trusted help.
+              List your service, show your work, and get discovered by people looking for services.
             </p>
             <Link
               to={listSkillHref(user) as never}

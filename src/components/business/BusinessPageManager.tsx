@@ -337,7 +337,7 @@ export function MyBusinessPagesPanel() {
                 <Link to="/businesses/$slug" params={{ slug: page.slug }} className="rounded-full border border-border px-3 py-1.5 text-xs font-semibold text-navy hover:border-orange">View page</Link>
                 <Link to="/businesses/$slug" params={{ slug: page.slug }} className="rounded-full border border-border px-3 py-1.5 text-xs font-semibold text-navy hover:border-orange">Edit page</Link>
                 <Link to="/dashboard" search={{ composeBusiness: page.id } as never} className="rounded-full border border-border px-3 py-1.5 text-xs font-semibold text-navy hover:border-orange">Post update</Link>
-                <Link to="/requests/new" className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs font-semibold text-navy hover:border-orange"><Briefcase className="h-3.5 w-3.5" /> Create a Request</Link>
+                <Link to="/requests/new" className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs font-semibold text-navy hover:border-orange"><Briefcase className="h-3.5 w-3.5" /> Post a Service Request</Link>
                 <BoostButton boostType="feature_business_page" entityType="business_page" entityId={page.id} label="Feature page" dialogTitle="Feature this business page" dialogDescription="Highlight this page in business discovery areas across Tuungane." isActive={page.is_featured} className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1.5 text-xs font-semibold text-navy hover:border-orange" />
                 <DeleteBusinessPageButton pageId={page.id} pageName={page.name} onDeleted={() => setPages((current) => current.filter((item) => item.id !== page.id))} />
               </div>

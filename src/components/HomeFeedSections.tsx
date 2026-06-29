@@ -252,7 +252,7 @@ export function HomeFeedSections() {
           <CompactEmptyState
             message="No open requests near you yet."
             hint="Create the first request in your area."
-            cta={{ label: "Create a Request", to: "/requests/new" }}
+            cta={{ label: "Post a Service Request", to: "/requests/new" }}
           />
         ) : (
           <div className={`${SCROLLER} lg:grid-cols-3`}>

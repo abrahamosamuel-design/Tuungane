@@ -22,19 +22,19 @@ export const REQUESTS_SAFETY_TEXT =
   "Verify the customer, location, and request details before starting work. Do not share sensitive information or make unsafe payments. Report suspicious requests.";
 
 export const REQUESTS_COPY = {
-  eyebrow: "OPEN REQUESTS",
-  heading: "Find Open Requests Near You",
+  eyebrow: "SERVICE REQUESTS",
+  heading: "Service Requests Near You",
   supporting:
-    "Browse real requests from people and businesses looking for skilled help nearby.",
-  primaryCTA: "Create a Request",
-  searchPlaceholder: "Search requests...",
+    "Browse requests from people looking for services and respond to the ones you can do.",
+  primaryCTA: "Post a Service Request",
+  searchPlaceholder: "Search service requests...",
   locationPlaceholder: "Location e.g. Entebbe, Kampala, Wakiso",
-  listTitle: "Recent Requests",
-  emptyTitle: "No requests yet",
+  listTitle: "Recent Service Requests",
+  emptyTitle: "No service requests available yet",
   emptyDescription:
-    "Be the first to create a request, or check back soon for requests near you.",
-  emptyCTA: "Create a Request",
-  detailsTitle: "Request Details",
-  dashboardTitle: "My Requests",
+    "Requests from people looking for services will appear here.",
+  emptyCTA: "Post a Service Request",
+  detailsTitle: "Service Request Details",
+  dashboardTitle: "My Service Requests",
   providerAction: "Respond",
 } as const;

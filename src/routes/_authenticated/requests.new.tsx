@@ -41,7 +41,7 @@ export const Route = createFileRoute("/_authenticated/requests/new")({
     town: s(search.town),
     area: s(search.area),
   }),
-  head: () => ({ meta: [{ title: "Create a Request — Tuungane" }] }),
+  head: () => ({ meta: [{ title: "Post a Service Request — Tuungane" }] }),
   component: NewRequest,
 });
 
@@ -265,11 +265,11 @@ function NewRequest() {
     }).select("id").single();
     setBusy(false);
     if (error) {
-      toastError(error, "Couldn't post your request");
+      toastError(error, "Couldn't post your service request");
       return;
     }
-    toast.success("Request posted", {
-      description: "Nearby providers will see it and respond shortly.",
+    toast.success("Your service request has been posted successfully", {
+      description: "People offering this service can now respond.",
     });
     if (inserted?.id) {
       nav({ to: "/requests/$id", params: { id: inserted.id }, search: { posted: "1" } as never });
@@ -290,8 +290,8 @@ function NewRequest() {
   return (
     <Layout>
       <section className="mx-auto max-w-2xl px-4 py-8">
-        <h1 className="font-display text-3xl font-bold text-navy">Create a Request</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Tell providers what you need.</p>
+        <h1 className="font-display text-3xl font-bold text-navy">Post a Service Request</h1>
+        <p className="mt-1 text-sm text-muted-foreground">Tell people what service you are looking for.</p>
 
         {targetProfile && (
           <div className="mt-3 rounded-xl border border-orange/40 bg-orange/5 p-3 text-xs">
@@ -599,7 +599,7 @@ function NewRequest() {
             disabled={busy}
             className="rounded-full bg-orange px-5 py-2.5 text-sm font-semibold text-orange-foreground disabled:opacity-50"
           >
-            {busy ? "Posting…" : "Post request"}
+            {busy ? "Posting…" : "Post Service Request"}
           </button>
         </form>
         )}

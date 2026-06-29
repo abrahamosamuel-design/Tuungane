@@ -35,7 +35,7 @@ export function Footer() {
           <div>
             <h4 className="text-sm font-semibold text-white">For providers</h4>
             <ul className="mt-3 space-y-2 text-sm text-white/70">
-              <li><Link to="/login" search={{ tab: "signup", intent: "provider" } as never} className="hover:text-orange">List Your Skill</Link></li>
+              <li><Link to="/login" search={{ tab: "signup", intent: "provider" } as never} className="hover:text-orange">List Your Service</Link></li>
               <li><Link to="/requests/browse" className="hover:text-orange">Open Requests</Link></li>
               <li><Link to="/about" className="hover:text-orange">How to get discovered</Link></li>
               <li><Link to="/terms" className="hover:text-orange">Verification</Link></li>

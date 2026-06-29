@@ -16,7 +16,7 @@ export const Route = createFileRoute("/_authenticated/list-skill")({
   validateSearch: (s: Record<string, unknown>) => ({
     edit: s.edit === "1" || s.edit === 1 || s.edit === true,
   }),
-  head: () => ({ meta: [{ title: "List your skill — Tuungane" }] }),
+  head: () => ({ meta: [{ title: "List your service — Tuungane" }] }),
   component: ListSkillPage,
 });
 
@@ -186,8 +186,8 @@ function ListSkillPage() {
     });
     setBusy(false);
     if (error) { toastError(error, editMode ? "Couldn't save changes" : "Couldn't publish your skill"); return; }
-    toast.success(editMode ? "Changes saved" : "Your skill is live", {
-      description: editMode ? "Your service profile has been updated." : "Customers nearby can now find and contact you.",
+    toast.success(editMode ? "Changes saved" : "Your service has been listed successfully", {
+      description: editMode ? "Your service profile has been updated." : "People looking for this service can now find you.",
     });
     nav({ to: "/dashboard" });
   };
@@ -201,15 +201,15 @@ function ListSkillPage() {
       <section className="mx-auto max-w-2xl px-4 py-8">
         <div className="mb-6">
           <p className="text-xs font-semibold uppercase tracking-wide text-green">
-            {editMode ? "Edit your service profile" : "Become a provider"}
+            {editMode ? "Edit your service profile" : "Offer a service"}
           </p>
           <h1 className="mt-1 font-display text-3xl font-bold text-navy">
-            {editMode ? "Update your skill" : "List your skill"}
+            {editMode ? "Update your service" : "List Your Service"}
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
             {editMode
-              ? "Change your service photo or update the details customers see on your card."
-              : "Tell people what you do and where you work. Customers nearby will be able to find and contact you."}
+              ? "Change your service photo or update the details people see on your card."
+              : "Create a service listing so people can find and contact you."}
           </p>
           {editMode && (
             <Link to="/dashboard" className="mt-3 inline-block text-xs font-semibold text-orange">
@@ -370,7 +370,7 @@ function ListSkillPage() {
               <p className="text-xs text-muted-foreground">Customers reach you through Tuungane Messages. Your phone number is only revealed based on your contact preference in settings.</p>
               <div className="flex items-center justify-between pt-2">
                 <button type="button" onClick={() => setStep(2)} className="text-sm font-medium text-muted-foreground">Back</button>
-                <button disabled={busy} className="rounded-xl bg-green px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50">{busy ? (editMode ? "Saving…" : "Publishing…") : (editMode ? "Save changes" : "Publish my skill")}</button>
+                <button disabled={busy} className="rounded-xl bg-green px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-50">{busy ? (editMode ? "Saving…" : "Publishing…") : (editMode ? "Save changes" : "List My Service")}</button>
               </div>
             </>
           )}

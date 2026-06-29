@@ -122,17 +122,17 @@ function BrowseRequests() {
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <h1 className="font-display text-lg font-bold leading-tight sm:text-2xl">
-                Open Requests Near You
+                Service Requests Near You
               </h1>
               <p className="mt-0.5 max-w-2xl text-[11px] text-white/70 sm:text-sm">
-                Browse real customer requests near you and respond with your offer.
+                Browse requests from people looking for services and respond to the ones you can do.
               </p>
             </div>
             <Link
               to="/requests/new"
               className="inline-flex shrink-0 items-center gap-1 rounded-full border border-white/30 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-white/10"
             >
-              <Plus className="h-3 w-3" /> Post Request
+              <Plus className="h-3 w-3" /> Post a Service Request
             </Link>
           </div>
           <form
@@ -147,7 +147,7 @@ function BrowseRequests() {
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                placeholder="Search requests…"
+                placeholder="Search service requests…"
                 className="w-full bg-transparent text-sm outline-none"
               />
             </div>
@@ -247,9 +247,9 @@ function BrowseRequests() {
           {!loading && rankedItems.length === 0 && !radiusExpanded && (
             <EmptyState
               icon={Plus}
-              title="No requests yet"
-              description="Be the first to create a request, or check back soon for requests near you."
-              action={{ label: "Create a request", to: "/requests/new" }}
+              title="No service requests available yet"
+              description="Requests from people looking for services will appear here."
+              action={{ label: "Post a Service Request", to: "/requests/new" }}
             />
           )}
           <div className="grid gap-3 sm:grid-cols-2">
@@ -259,8 +259,8 @@ function BrowseRequests() {
                 {idx === 1 && (
                   <div className="sm:col-span-2">
                     <ProviderTrackCTA
-                      title="Want customers to find you too?"
-                      text="List your skill so people can discover you."
+                      title="Want people to find you too?"
+                      text="List your service so people looking for it can discover you."
                     />
                   </div>
                 )}

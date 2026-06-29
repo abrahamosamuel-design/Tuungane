@@ -23,13 +23,13 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Create a request and get matched with skilled providers in Entebbe, Kampala and across Uganda — or list your skill and get discovered.",
+          "Post a service request and get matched with people offering services in Entebbe, Kampala and across Uganda — or list your service and get discovered.",
       },
       { property: "og:title", content: "Tuungane — Connect to trusted services nearby" },
       {
         property: "og:description",
         content:
-          "Create a request and get matched with skilled providers in Entebbe, Kampala and across Uganda — or list your skill and get discovered.",
+          "Post a service request and get matched with people offering services in Entebbe, Kampala and across Uganda — or list your service and get discovered.",
       },
       { property: "og:url", content: "https://tuungane.com/" },
       { property: "og:type", content: "website" },
@@ -112,7 +112,7 @@ function Index() {
               Grow your <span className="text-orange">customer base</span>.
             </h1>
             <p className="mx-auto mt-2.5 max-w-md text-xs text-white/75 sm:mt-4 sm:text-base">
-              Create requests, discover skilled people, or list your skill so customers near you can find you.
+              Post a service request, find people offering services, or list your service so people can find you.
             </p>
           </div>
 
@@ -123,13 +123,13 @@ function Index() {
               to="/requests/new"
               className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-orange px-5 py-2.5 text-sm font-semibold text-orange-foreground shadow-lg shadow-orange/30 transition hover:brightness-110 sm:w-auto sm:px-7 sm:py-3"
             >
-              <ClipboardList className="h-4 w-4" /> Create a Request
+              <ClipboardList className="h-4 w-4" /> Post a Service Request
             </Link>
             <Link
               to={listSkillHref(user) as never}
               className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-green px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-green/30 transition hover:brightness-110 sm:w-auto sm:px-7 sm:py-3"
             >
-              <UserIcon className="h-4 w-4" /> List Your Skill
+              <UserIcon className="h-4 w-4" /> List Your Service
             </Link>
           </div>
 

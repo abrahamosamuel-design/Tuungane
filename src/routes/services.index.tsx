@@ -204,13 +204,13 @@ function Services() {
       {/* SECTION 1: HERO / SEARCH */}
       <section className="border-b border-border bg-surface px-4 pb-6 pt-6 sm:px-6 sm:pt-10 lg:px-8">
         <div className="mx-auto max-w-7xl">
-          <h1 className="font-display text-2xl font-bold text-navy sm:text-3xl">Find trusted services near you</h1>
-          <p className="mt-1 text-sm text-muted-foreground sm:text-base">Search providers by service, skill, or location.</p>
+          <h1 className="font-display text-2xl font-bold text-navy sm:text-3xl">Find services near you</h1>
+          <p className="mt-1 text-sm text-muted-foreground sm:text-base">Search for people offering services by category, skill, or location.</p>
 
           <div className="mt-4 grid gap-2.5 rounded-2xl border border-border bg-card p-2.5 shadow-[var(--shadow-card)] sm:p-3">
             <div className="flex items-center gap-2 rounded-xl bg-surface px-3">
               <Search className="h-4 w-4 text-muted-foreground" />
-              <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Plumber, tutor, mechanic..." className="w-full bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground" />
+              <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="What service are you looking for?" className="w-full bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground" />
             </div>
             <div className="flex items-center gap-2 rounded-xl bg-surface px-3">
               <MapPin className="h-4 w-4 text-muted-foreground" />
@@ -225,9 +225,9 @@ function Services() {
           </div>
 
           <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-dashed border-orange/40 bg-orange/5 px-3 py-2.5">
-            <p className="text-xs font-medium text-navy sm:text-sm">Not sure who to choose?</p>
+            <p className="text-xs font-medium text-navy sm:text-sm">Can't find what you need?</p>
             <Link to="/requests/new" className="rounded-lg bg-orange px-3 py-2 text-xs font-semibold text-orange-foreground transition hover:brightness-110 sm:text-sm">
-              Post a Request
+              Post a Service Request
             </Link>
           </div>
         </div>
@@ -237,8 +237,8 @@ function Services() {
       <section className="px-4 pt-6 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-7xl">
           <ProviderTrackCTA
-            title="Offer what you do"
-            text="Create your provider profile, list your skills, add photos of your work, and let customers find you."
+            title="Offer a service on Tuungane"
+            text="Create your service listing, add photos of your work, and let people looking for services find you."
           />
         </div>
       </section>
@@ -276,8 +276,8 @@ function Services() {
             {!loadingReal && recommended.length === 0 && (
               <div className="col-span-full">
                 <div className="rounded-2xl border border-dashed border-border bg-card p-8 text-center">
-                  <h3 className="font-display text-lg font-bold text-navy">No providers listed yet</h3>
-                  <p className="mt-1 text-sm text-muted-foreground">Be among the first skilled people to list your skill and get discovered by customers near you.</p>
+                  <h3 className="font-display text-lg font-bold text-navy">No services found yet</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">No services found yet. Try another service or location, or post a service request so people offering services can respond.</p>
                   <div className="mt-4 inline-flex"><ListYourSkillButton variant="solid" /></div>
                 </div>
               </div>
@@ -354,8 +354,8 @@ function Services() {
             {!loadingReal && realFiltered.length === 0 && !radiusExpanded && (
               <div className="col-span-full">
                 <div className="rounded-2xl border border-dashed border-border bg-card p-8 text-center">
-                  <h3 className="font-display text-lg font-bold text-navy">No providers listed yet</h3>
-                  <p className="mt-1 text-sm text-muted-foreground">Be among the first skilled people to list your skill and get discovered by customers near you.</p>
+                  <h3 className="font-display text-lg font-bold text-navy">No services found yet</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">No services found yet. Try another service or location, or post a service request so people offering services can respond.</p>
                   <div className="mt-4 inline-flex"><ListYourSkillButton variant="solid" /></div>
                 </div>
               </div>
