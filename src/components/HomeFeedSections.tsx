@@ -228,7 +228,7 @@ export function HomeFeedSections() {
         ) : (
           <div className="-mx-4 mt-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-3 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-3">
             {topRequests.map((r) => (
-              <RequestCard key={r.id} r={r} userLoc={userLoc} featured={Boolean(isFeaturedTarget(r, featured))} isProvider={isProvider} />
+              <RequestCard key={r.id} r={r} userLoc={userLoc} featured={Boolean(isFeaturedTarget(r, featured))} isProvider={isProvider} onRespond={() => setRespondTo(r.id)} />
             ))}
           </div>
         )}
