@@ -277,7 +277,7 @@ function Services() {
               <div className="col-span-full">
                 <div className="rounded-2xl border border-dashed border-border bg-card p-8 text-center">
                   <h3 className="font-display text-lg font-bold text-navy">No providers listed yet</h3>
-                  <p className="mt-1 text-sm text-muted-foreground">Be among the first skilled people to list your service and get discovered by customers near you.</p>
+                  <p className="mt-1 text-sm text-muted-foreground">No services found yet. Try another service or location, or post a service request so people offering services can respond.</p>
                   <div className="mt-4 inline-flex"><ListYourSkillButton variant="solid" /></div>
                 </div>
               </div>
@@ -355,7 +355,7 @@ function Services() {
               <div className="col-span-full">
                 <div className="rounded-2xl border border-dashed border-border bg-card p-8 text-center">
                   <h3 className="font-display text-lg font-bold text-navy">No providers listed yet</h3>
-                  <p className="mt-1 text-sm text-muted-foreground">Be among the first skilled people to list your service and get discovered by customers near you.</p>
+                  <p className="mt-1 text-sm text-muted-foreground">No services found yet. Try another service or location, or post a service request so people offering services can respond.</p>
                   <div className="mt-4 inline-flex"><ListYourSkillButton variant="solid" /></div>
                 </div>
               </div>
