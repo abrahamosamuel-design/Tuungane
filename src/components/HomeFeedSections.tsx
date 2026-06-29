@@ -7,6 +7,9 @@ import {
   BadgeCheck,
   Briefcase,
   Send,
+  Wallet,
+  Clock,
+  MoreHorizontal,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
@@ -19,6 +22,10 @@ import { ProfileTrustBadge } from "@/components/trust/ProfileTrustBadge";
 import { useCategory } from "@/hooks/use-categories";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ProviderResponseDialog } from "@/components/ProviderResponseDialog";
+import { FeedAvatar } from "@/components/feed/FeedAvatar";
+import { ExpandableText } from "@/components/feed/ExpandableText";
+import { MediaGrid } from "@/components/feed/MediaGrid";
+
 
 type NearbyRequest = {
   id: string;
