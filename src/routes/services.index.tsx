@@ -53,6 +53,7 @@ type RealProvider = {
   areas_served?: string[] | null;
   service_radius_km?: number | null;
   cover_url?: string | null;
+  media_urls?: string[] | null;
   profile: { full_name: string; avatar_url: string | null } | null;
   trust_score: number;
   average_rating: number;
@@ -107,7 +108,7 @@ function Services() {
   useEffect(() => {
     (async () => {
       setLoadingReal(true);
-      let qy = supabase.from("service_profiles").select("user_id,business_name,subcategory,bio,town,district,area,latitude,longitude,areas_served,service_radius_km,category_slug,verified,seeded_by_official,seeded_status,updated_at,availability,cover_url,years_experience").eq("suspended", false).order("updated_at", { ascending: false }).limit(60);
+      let qy = supabase.from("service_profiles").select("user_id,business_name,subcategory,bio,town,district,area,latitude,longitude,areas_served,service_radius_km,category_slug,verified,seeded_by_official,seeded_status,updated_at,availability,cover_url,media_urls,years_experience").eq("suspended", false).order("updated_at", { ascending: false }).limit(60);
       if (filter === "featured") qy = qy.eq("verified", "featured");
       if (filter === "verified") qy = qy.in("verified", ["verified", "featured"]);
       if (filter === "available") qy = qy.eq("availability", "available");
@@ -477,6 +478,13 @@ function ProviderRow({ p, isBoosted, userLoc, onRequest }: { p: RealProvider; is
       )}
 
       {p.bio && <p className="mt-2 line-clamp-2 px-4 text-[13px] leading-snug text-foreground/75">{p.bio}</p>}
+
+      {Array.isArray(p.media_urls) && p.media_urls.length > 0 && (
+        <div className="mt-2 px-4">
+          <MediaGrid urls={p.media_urls} alt={name} />
+        </div>
+      )}
+
 
       {/* Badge strip */}
       <div className="mt-2.5 flex flex-wrap items-center gap-1.5 px-4">
