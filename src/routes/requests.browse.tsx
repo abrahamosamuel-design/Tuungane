@@ -50,8 +50,8 @@ function BrowseRequests() {
   useEffect(() => {
     (async () => {
       if (!user) return;
-      const { data } = await supabase.from("profiles").select("district").eq("id", user.id).maybeSingle();
-      setMyDistrict(data?.district ?? null);
+      const { data } = await supabase.rpc("get_my_profile").maybeSingle();
+      setMyDistrict((data as { district?: string | null } | null)?.district ?? null);
     })();
   }, [user]);
 
