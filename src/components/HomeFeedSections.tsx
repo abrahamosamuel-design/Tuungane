@@ -161,7 +161,7 @@ export function HomeFeedSections() {
 
       const ids = Array.from(new Set([
         ...(provs ?? []).map((p) => p.user_id),
-        ...posts.map((p) => p.provider_user_id),
+        ...listings.map((l) => l.user_id),
       ]));
       const profMap = new Map<string, { full_name: string; avatar_url: string | null }>();
       if (ids.length) {
@@ -189,7 +189,9 @@ export function HomeFeedSections() {
       setProviders(
         (provs ?? []).map((p) => ({ ...p, profile: profMap.get(p.user_id) ?? null })),
       );
-      setRecent(posts.map((p) => ({ ...p, profile: profMap.get(p.provider_user_id) ?? null })));
+      setRecentListings(
+        listings.map((l) => ({ ...l, profile: profMap.get(l.user_id) ?? null })),
+      );
       setIsProvider(provider);
       setLoading(false);
     })();
