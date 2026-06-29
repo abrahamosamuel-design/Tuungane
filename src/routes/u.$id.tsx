@@ -45,7 +45,8 @@ export const Route = createFileRoute("/u/$id")({
   loader: async ({ params }) => {
     try {
       const [{ data: profile }, { data: sp }] = await Promise.all([
-        supabase.from("profiles").select("id,full_name,bio,is_provider,district,town,avatar_url").eq("id", params.id).maybeSingle(),
+        // get_profile_card masks location per visibility and is safe for anon.
+        supabase.rpc("get_profile_card", { _id: params.id }).maybeSingle(),
         supabase.from("service_profiles").select("business_name,subcategory,bio,category_slug,district,town,verified").eq("user_id", params.id).maybeSingle(),
       ]);
       return { profile, sp };
