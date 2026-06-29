@@ -62,7 +62,7 @@ type RealProvider = {
   years_experience?: number | null;
 };
 
-const POPULAR_SERVICES = ["Plumber", "Electrician", "Cleaner", "Mechanic", "Tailor", "Tutor", "Driver", "Hairdresser", "Caterer", "Web Designer"];
+const POPULAR_SERVICES = ["Plumber", "Electrician", "Cleaner", "Mechanic", "Tutor", "Barber", "Tailor", "Driver", "Real Estate Agent"];
 
 
 
