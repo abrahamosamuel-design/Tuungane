@@ -17,6 +17,7 @@ import { ProviderQuickContact } from "@/components/ProviderQuickContact";
 import { ProfileTrustBadge } from "@/components/trust/ProfileTrustBadge";
 import { formatSubcategory } from "@/lib/format-category";
 import { CoverImage } from "@/components/media/CoverImage";
+import { MediaGrid } from "@/components/feed/MediaGrid";
 
 
 
