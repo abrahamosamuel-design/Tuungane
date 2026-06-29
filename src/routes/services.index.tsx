@@ -577,7 +577,7 @@ function ProviderCardCompact({ p, userLoc, onRequest }: { p: RealProvider; userL
 
       {p.bio && (
         <div className="mt-2 px-3">
-          <ExpandableText text={p.bio} clampLines={3} />
+          <ExpandableText text={p.bio} clampLines={3} maxLines={10} />
         </div>
       )}
 
