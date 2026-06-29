@@ -1,15 +1,15 @@
 // Single source of truth for two-sided platform CTAs.
-// Customer track = orange ("Create a Request").
-// Provider track = green ("List Your Skill").
+// Customer track = orange ("Post a Service Request").
+// Provider track = green ("List Your Service").
 
 import type { User } from "@supabase/supabase-js";
 
 export const CTA = {
-  createRequest: { label: "Create a Request", href: "/requests/new" },
-  listSkill: { label: "List Your Skill" },
-  browseRequests: { label: "Browse Requests", href: "/requests/browse" },
+  createRequest: { label: "Post a Service Request", href: "/requests/new" },
+  listSkill: { label: "List Your Service" },
+  browseRequests: { label: "Browse Service Requests", href: "/requests/browse" },
   postYourWork: { label: "Post Your Work", href: "/dashboard" },
-  becomeProvider: { label: "Become a Provider" },
+  becomeProvider: { label: "Become a Service Provider" },
 } as const;
 
 /**
