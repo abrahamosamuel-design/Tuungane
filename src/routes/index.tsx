@@ -13,6 +13,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { listSkillHref } from "@/lib/cta";
 import heroNetwork from "@/assets/hero-network.jpg";
 import { HomeFeedSections } from "@/components/HomeFeedSections";
+import { PopularCategoriesSection } from "@/components/PopularCategoriesSection";
 import { SetLocationNudge } from "@/components/SetLocationNudge";
 
 
