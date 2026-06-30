@@ -113,6 +113,28 @@ function Dashboard() {
           </Link>
         </div>
 
+
+        {/* Member → Provider prompt */}
+        {profile && !profile.is_provider && (
+          <div className="mt-6 rounded-2xl border border-green/40 bg-gradient-to-br from-green/10 to-green/5 p-5">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-start gap-3">
+                <div className="rounded-full bg-green/15 p-2 text-green"><Sparkles className="h-5 w-5" /></div>
+                <div>
+                  <p className="font-semibold text-navy">Offer a service too</p>
+                  <p className="mt-0.5 text-sm text-muted-foreground">You're a Tuungane member — list a skill and start receiving requests. It takes just a few minutes.</p>
+                </div>
+              </div>
+              <Link
+                to="/list-skill"
+                className="shrink-0 rounded-full bg-green px-5 py-2.5 text-center text-sm font-semibold text-white shadow-sm hover:brightness-110"
+              >
+                List Your Service
+              </Link>
+            </div>
+          </div>
+        )}
+
         {/* 2. Quick actions */}
         <div className="mt-6">
           <h2 className="mb-3 font-display text-sm font-bold uppercase tracking-wide text-muted-foreground">Quick actions</h2>
