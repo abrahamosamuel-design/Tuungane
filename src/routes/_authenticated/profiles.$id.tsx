@@ -421,7 +421,7 @@ function ServiceEditor({
       price_fixed_ugx: guide.price_fixed_ugx,
       price_min_ugx: guide.price_min_ugx,
       price_max_ugx: guide.price_max_ugx,
-      price_currency: guide.price_currency,
+      price_currency: "UGX",
       price_note: guide.price_note,
     };
     if (mode === "create") {
