@@ -58,6 +58,15 @@ export function EditProfileDialog({ open, onClose, userId, hasServiceProfile, in
   );
 
   const save = async () => {
+    if (hasServiceProfile) {
+      const v = validatePriceGuide({
+        price_type: (form.price_type ?? null) as PriceType | null,
+        price_fixed_ugx: form.price_fixed_ugx ?? null,
+        price_min_ugx: form.price_min_ugx ?? null,
+        price_max_ugx: form.price_max_ugx ?? null,
+      });
+      if (!v.ok) { toast.error(v.error); return; }
+    }
     setBusy(true);
     try {
       const { error: e1 } = await supabase.from("profiles").update({
@@ -70,6 +79,7 @@ export function EditProfileDialog({ open, onClose, userId, hasServiceProfile, in
 
       if (hasServiceProfile) {
         const availability = (form.availability ?? "available") as "available" | "away" | "busy";
+        const priceType = form.price_type || null;
         const { error: e2 } = await supabase.from("service_profiles").update({
           business_name: form.business_name || undefined,
           bio: form.sp_bio || undefined,
@@ -83,6 +93,12 @@ export function EditProfileDialog({ open, onClose, userId, hasServiceProfile, in
           areas_served: form.areas_served ?? [],
           category_slug: form.category_slug || undefined,
           subcategory: form.subcategory || undefined,
+          price_type: priceType,
+          price_fixed_ugx: priceType === "fixed" ? (form.price_fixed_ugx ?? null) : null,
+          price_min_ugx: priceType === "starting_from" || priceType === "range" ? (form.price_min_ugx ?? null) : null,
+          price_max_ugx: priceType === "range" ? (form.price_max_ugx ?? null) : null,
+          price_currency: "UGX",
+          price_note: form.price_note?.trim() ? form.price_note.trim() : null,
         }).eq("user_id", userId);
         if (e2) throw e2;
       }
