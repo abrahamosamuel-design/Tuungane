@@ -1294,6 +1294,7 @@ export type Database = {
           created_at: string
           description: string
           id: string
+          is_primary: boolean
           location_served: string | null
           photos: string[]
           price_currency: string
@@ -1314,6 +1315,7 @@ export type Database = {
           created_at?: string
           description?: string
           id?: string
+          is_primary?: boolean
           location_served?: string | null
           photos?: string[]
           price_currency?: string
@@ -1334,6 +1336,7 @@ export type Database = {
           created_at?: string
           description?: string
           id?: string
+          is_primary?: boolean
           location_served?: string | null
           photos?: string[]
           price_currency?: string
