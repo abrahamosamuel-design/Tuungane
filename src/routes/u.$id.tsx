@@ -378,8 +378,18 @@ function UserProfile() {
             )}
             {isOwn && <Link to="/dashboard" className="rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-navy hover:border-orange">My Dashboard</Link>}
             {!isOwn && user && <ReportProfileButton kind="service_profile" id={id} className="ml-auto" />}
-          </div>
         </div>
+
+        {sp && (sp.price_type || isOwn) && (
+          <div className="mt-4">
+            {sp.price_type ? (
+              <PriceGuideCard guide={sp} />
+            ) : isOwn ? (
+              <PriceGuideEmptyOwner onAdd={() => setEditOpen(true)} />
+            ) : null}
+          </div>
+        )}
+
 
         {!isOwn && isProvider && user && (
           gate.unlocked && gate.requestId ? (
