@@ -80,18 +80,8 @@ function Dashboard() {
 
   useEffect(() => { if (user) load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [user]);
 
-  // Auto-flip to provider mode when arriving with ?becomeProvider=1
-  useEffect(() => {
-    if (!user || !search.becomeProvider) return;
-    if (profile && !profile.is_provider) {
-      (async () => {
-        await supabase.from("profiles").update({ is_provider: true }).eq("id", user.id);
-        toast.success("You're now a provider. Complete your profile to get discovered.");
-        load();
-      })();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [user, profile, search.becomeProvider]);
+  // Provider status is automatic — derived from having a service profile or listed service.
+  // The ?becomeProvider=1 flag is kept as a no-op for backward-compatible links.
 
   if (!user) return null;
 
@@ -295,14 +285,10 @@ function Dashboard() {
         )}
 
         {!profile?.is_provider && (
-          <button
-            onClick={async () => {
-              await supabase.from("profiles").update({ is_provider: true }).eq("id", user.id);
-              toast.success("You're now a service provider. Complete your profile to start posting.");
-              load();
-            }}
-            className="mt-6 rounded-xl bg-green px-4 py-3 text-sm font-semibold text-white"
-          >List Your Skill</button>
+          <Link
+            to="/list-skill"
+            className="mt-6 inline-block rounded-xl bg-green px-4 py-3 text-sm font-semibold text-white hover:brightness-110"
+          >List Your Service</Link>
         )}
       </section>
     </Layout>
