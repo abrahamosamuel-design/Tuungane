@@ -157,6 +157,16 @@ function ProfilesBrowsePage() {
                       {[p.area, p.town, p.district].filter(Boolean).join(", ")}
                     </p>
                   )}
+                  {primaryByProfile[p.id] && (
+                    <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                      <PriceGuideChip guide={primaryByProfile[p.id] as PriceGuide} />
+                      {primaryByProfile[p.id].title && (
+                        <span className="truncate text-[11px] text-muted-foreground">
+                          for {primaryByProfile[p.id].title}
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
               </Link>
             ))}
