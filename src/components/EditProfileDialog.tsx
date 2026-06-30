@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { categories } from "@/data/categories";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
@@ -26,6 +27,8 @@ type Props = {
     years_experience?: number;
     availability?: string;
     areas_served?: string[];
+    category_slug?: string;
+    subcategory?: string;
   };
   onSaved?: () => void;
 };
@@ -38,6 +41,11 @@ export function EditProfileDialog({ open, onClose, userId, hasServiceProfile, in
 
   const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) => setForm((f) => ({ ...f, [k]: v }));
   const dirty = JSON.stringify(form) !== JSON.stringify(initial);
+
+  const subOptions = useMemo(
+    () => categories.find((c) => c.slug === form.category_slug)?.subcategories ?? [],
+    [form.category_slug],
+  );
 
   const save = async () => {
     setBusy(true);
@@ -63,6 +71,8 @@ export function EditProfileDialog({ open, onClose, userId, hasServiceProfile, in
           years_experience: form.years_experience ?? 0,
           availability,
           areas_served: form.areas_served ?? [],
+          category_slug: form.category_slug || undefined,
+          subcategory: form.subcategory || undefined,
         }).eq("user_id", userId);
         if (e2) throw e2;
       }
@@ -97,10 +107,41 @@ export function EditProfileDialog({ open, onClose, userId, hasServiceProfile, in
           </div>
 
           {hasServiceProfile && (
-            <div>
-              <Label>Service description</Label>
-              <Textarea rows={4} value={form.sp_bio ?? ""} onChange={(e) => set("sp_bio", e.target.value)} placeholder="Describe the service you offer" />
-            </div>
+            <>
+              <div>
+                <Label>Service description</Label>
+                <Textarea rows={4} value={form.sp_bio ?? ""} onChange={(e) => set("sp_bio", e.target.value)} placeholder="Describe the service you offer" />
+              </div>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div>
+                  <Label>Category</Label>
+                  <select
+                    className="mt-1 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                    value={form.category_slug ?? ""}
+                    onChange={(e) => setForm((f) => ({ ...f, category_slug: e.target.value, subcategory: "" }))}
+                  >
+                    <option value="">Select category</option>
+                    {categories.map((c) => (
+                      <option key={c.slug} value={c.slug}>{c.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <Label>Subcategory</Label>
+                  <select
+                    className="mt-1 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                    value={form.subcategory ?? ""}
+                    onChange={(e) => set("subcategory", e.target.value)}
+                    disabled={!form.category_slug}
+                  >
+                    <option value="">{form.category_slug ? "Select subcategory" : "Select category first"}</option>
+                    {subOptions.map((s) => (
+                      <option key={s} value={s}>{s}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </>
           )}
 
           <div className="grid grid-cols-2 gap-3">
@@ -123,7 +164,16 @@ export function EditProfileDialog({ open, onClose, userId, hasServiceProfile, in
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label>Years experience</Label>
-                  <Input type="number" min={0} value={form.years_experience ?? 0} onChange={(e) => set("years_experience", Number(e.target.value))} />
+                  <Input
+                    type="number"
+                    min={0}
+                    placeholder="e.g. 3"
+                    value={form.years_experience ? String(form.years_experience) : ""}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      set("years_experience", v === "" ? undefined : Math.max(0, Number(v)));
+                    }}
+                  />
                 </div>
                 <div>
                   <Label>Availability</Label>
