@@ -393,7 +393,7 @@ function UserProfile() {
                 </div>
               </div>
               <Link
-                to="/onboarding/provider"
+                to="/list-skill"
                 className="shrink-0 rounded-full bg-orange px-5 py-2.5 text-center text-sm font-semibold text-orange-foreground shadow-sm hover:brightness-110"
               >
                 Offer a service
