@@ -126,17 +126,27 @@ function Services() {
   useEffect(() => {
     (async () => {
       setLoadingReal(true);
-      let qy = supabase.from("service_profiles").select("user_id,business_name,subcategory,bio,town,district,area,latitude,longitude,areas_served,service_radius_km,category_slug,verified,seeded_by_official,seeded_status,updated_at,availability,cover_url,media_urls,years_experience,price_type,price_fixed_ugx,price_min_ugx,price_max_ugx,price_currency,price_note").eq("suspended", false).order("updated_at", { ascending: false }).limit(60);
+      const isRecent = filter === "recent";
+      let qy = supabase.from("service_profiles").select("user_id,business_name,subcategory,bio,town,district,area,latitude,longitude,areas_served,service_radius_km,category_slug,verified,seeded_by_official,seeded_status,updated_at,created_at,availability,cover_url,media_urls,years_experience,price_type,price_fixed_ugx,price_min_ugx,price_max_ugx,price_currency,price_note").eq("suspended", false);
+      qy = isRecent
+        ? qy.order("created_at", { ascending: false }).order("user_id", { ascending: false })
+        : qy.order("updated_at", { ascending: false });
+      qy = qy.limit(60);
       if (filter === "featured") qy = qy.eq("verified", "featured");
       if (filter === "verified") qy = qy.in("verified", ["verified", "featured"]);
       if (filter === "available") qy = qy.eq("availability", "available");
 
       // Also pull public/business pages (claimed legacy listings) so their owners
       // appear as provider cards even when they don't have a service_profile row.
-      let pqy = supabase.from("public_profiles").select("owner_id,name,avatar_url,subcategory,bio,town,district,area,latitude,longitude,areas_served,service_radius_km,category_slug,verified,seeded_by_official,claim_status,updated_at,availability,cover_url").eq("suspended", false).not("owner_id", "is", null).order("updated_at", { ascending: false }).limit(60);
+      let pqy = supabase.from("public_profiles").select("owner_id,name,avatar_url,subcategory,bio,town,district,area,latitude,longitude,areas_served,service_radius_km,category_slug,verified,seeded_by_official,claim_status,updated_at,created_at,availability,cover_url").eq("suspended", false).not("owner_id", "is", null);
+      pqy = isRecent
+        ? pqy.order("created_at", { ascending: false }).order("owner_id", { ascending: false })
+        : pqy.order("updated_at", { ascending: false });
+      pqy = pqy.limit(60);
       if (filter === "featured") pqy = pqy.eq("verified", "featured");
       if (filter === "verified") pqy = pqy.in("verified", ["verified", "featured"]);
       if (filter === "available") pqy = pqy.eq("availability", "available");
+
 
       const [{ data }, { data: ppData }] = await Promise.all([qy, pqy]);
 
