@@ -204,35 +204,43 @@ function Dashboard() {
         )}
 
 
-        {/* 3. Main stats — simplified */}
-        {profile?.is_provider && (
-          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <Stat label="Services" value={sp ? 1 : 0} />
-            <Stat label="Work posts" value={stats.posts} />
-            <Stat label="Reviews" value={stats.reviews} />
-            <Stat label="Responses" value={stats.opps} />
+        {/* 3. Unified stats — both sides */}
+        <div className="mt-6 space-y-4">
+          <div>
+            <h2 className="mb-2 font-display text-sm font-bold uppercase tracking-wide text-muted-foreground">Your activity</h2>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <Stat label="Following" value={customerStats.following} />
+              <Stat label="Saved providers" value={customerStats.saved} />
+              <Stat label="Saved requests" value={customerStats.savedOpps} />
+              <Stat label="Reviews written" value={customerStats.reviewsWritten} />
+            </div>
           </div>
-        )}
 
-        {!profile?.is_provider && (
-          <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <Stat label="Following" value={customerStats.following} />
-            <Stat label="Saved providers" value={customerStats.saved} />
-            <Stat label="Saved requests" value={customerStats.savedOpps} />
-            <Stat label="Reviews written" value={customerStats.reviewsWritten} />
-          </div>
-        )}
+          {sp && (
+            <div>
+              <h2 className="mb-2 font-display text-sm font-bold uppercase tracking-wide text-muted-foreground">Your services</h2>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+                <Stat label="Services" value={1} />
+                <Stat label="Work posts" value={stats.posts} />
+                <Stat label="Reviews" value={stats.reviews} />
+                <Stat label="Responses" value={stats.opps} />
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* 4. Requests I created */}
         <div className="mt-6 space-y-4">
           <MyRequestsSummary title="Requests I created" />
 
-          {/* 5. Requests matching my services */}
-          {profile?.is_provider && <MatchingRequestsSection />}
+          {/* 5. Requests matching my services — visible if user has a service profile */}
+          {sp && <MatchingRequestsSection />}
 
-          {/* 6. Recent customer contacts */}
-          {profile?.is_provider ? <ProviderContactsList /> : <ContactedProvidersList />}
+          {/* 6. Contacts — both sides when relevant */}
+          <ContactedProvidersList />
+          {sp && <ProviderContactsList />}
         </div>
+
 
         {/* 7. Profiles & services */}
         <MyProfilesPanel />
