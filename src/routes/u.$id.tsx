@@ -329,7 +329,12 @@ function UserProfile() {
                 <BoostButton boostType="feature_business_page" entityType="provider_profile" entityId={id} label="Feature business" dialogTitle="Feature your business page" dialogDescription="Highlight your business page in featured rails." />
               </>
             )}
-            {isOwn && <Link to="/dashboard" className="ml-auto rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-navy hover:border-orange">My Dashboard</Link>}
+            {isOwn && (
+              <button onClick={() => setEditOpen(true)} className="ml-auto rounded-full bg-orange px-4 py-2 text-xs font-semibold text-orange-foreground hover:brightness-110">
+                Edit profile
+              </button>
+            )}
+            {isOwn && <Link to="/dashboard" className="rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-navy hover:border-orange">My Dashboard</Link>}
             {!isOwn && user && <ReportProfileButton kind="service_profile" id={id} className="ml-auto" />}
           </div>
         </div>
