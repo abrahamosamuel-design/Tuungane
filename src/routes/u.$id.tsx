@@ -303,11 +303,10 @@ function UserProfile() {
                         Uploading…
                       </span>
                     )}
-                    {!profile.avatar_url && !uploadingAvatar && (
-                      <span className="pointer-events-none absolute -bottom-1 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-orange px-2 py-0.5 text-[10px] font-semibold text-white shadow">
-                        Add photo
-                      </span>
-                    )}
+                    <span className="pointer-events-none absolute -bottom-1 right-0 flex items-center gap-1 rounded-full bg-orange px-2 py-0.5 text-[10px] font-semibold text-white shadow">
+                      <Camera className="h-3 w-3" />
+                      {profile.avatar_url ? "Edit" : "Upload"}
+                    </span>
                     <input
                       type="file"
                       accept="image/*"
