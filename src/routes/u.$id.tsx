@@ -553,6 +553,8 @@ function UserProfile() {
               years_experience: sp?.years_experience ?? 0,
               availability: sp?.availability ?? "available",
               areas_served: sp?.areas_served ?? [],
+              category_slug: sp?.category_slug ?? "",
+              subcategory: sp?.subcategory ?? "",
             }}
             onSaved={load}
           />
