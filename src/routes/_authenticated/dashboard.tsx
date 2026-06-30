@@ -295,14 +295,10 @@ function Dashboard() {
         )}
 
         {!profile?.is_provider && (
-          <button
-            onClick={async () => {
-              await supabase.from("profiles").update({ is_provider: true }).eq("id", user.id);
-              toast.success("You're now a service provider. Complete your profile to start posting.");
-              load();
-            }}
-            className="mt-6 rounded-xl bg-green px-4 py-3 text-sm font-semibold text-white"
-          >List Your Skill</button>
+          <Link
+            to="/list-skill"
+            className="mt-6 inline-block rounded-xl bg-green px-4 py-3 text-sm font-semibold text-white hover:brightness-110"
+          >List Your Service</Link>
         )}
       </section>
     </Layout>
