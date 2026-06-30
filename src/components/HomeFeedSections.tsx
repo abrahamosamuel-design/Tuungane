@@ -391,7 +391,7 @@ export function HomeFeedSections() {
   );
 }
 
-function SectionTitle({ title, subtitle, link }: { title: string; subtitle?: string; link?: { label: string; to: string } }) {
+function SectionTitle({ title, subtitle, link }: { title: string; subtitle?: string; link?: { label: string; to: string; search?: Record<string, any> } }) {
   return (
     <div className="flex items-end justify-between gap-3">
       <div className="min-w-0">
@@ -402,7 +402,7 @@ function SectionTitle({ title, subtitle, link }: { title: string; subtitle?: str
         {subtitle && <p className="mt-1 text-xs text-muted-foreground sm:text-sm">{subtitle}</p>}
       </div>
       {link && (
-        <Link to={link.to} className="hidden shrink-0 text-sm font-semibold text-navy hover:text-orange sm:inline">
+        <Link to={link.to} search={link.search as any} className="hidden shrink-0 text-sm font-semibold text-navy hover:text-orange sm:inline">
           {link.label} →
         </Link>
       )}
@@ -410,15 +410,16 @@ function SectionTitle({ title, subtitle, link }: { title: string; subtitle?: str
   );
 }
 
-function MobileViewAll({ to, label }: { to: string; label: string }) {
+function MobileViewAll({ to, label, search }: { to: string; label: string; search?: Record<string, any> }) {
   return (
     <div className="mt-2 sm:hidden">
-      <Link to={to} className="inline-flex text-sm font-semibold text-navy hover:text-orange">
+      <Link to={to} search={search as any} className="inline-flex text-sm font-semibold text-navy hover:text-orange">
         {label} →
       </Link>
     </div>
   );
 }
+
 
 function CardSkeletonRow() {
   return (
