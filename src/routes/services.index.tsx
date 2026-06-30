@@ -19,6 +19,8 @@ import { formatSubcategory } from "@/lib/format-category";
 import { CoverImage } from "@/components/media/CoverImage";
 import { MediaGrid } from "@/components/feed/MediaGrid";
 import { ExpandableText } from "@/components/feed/ExpandableText";
+import { PriceGuideChip } from "@/components/PriceGuide";
+import type { PriceType } from "@/lib/price-guide";
 
 
 
