@@ -237,13 +237,28 @@ function PublicProfilePage() {
           ) : (
             <ul className="mt-2 space-y-2">
               {services.map((s) => (
-                <li key={s.id} className="rounded-2xl border border-border bg-card p-3">
+                <li key={s.id} className={`rounded-2xl border bg-card p-3 ${s.is_primary ? "border-orange/40 ring-1 ring-orange/15" : "border-border"}`}>
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="font-semibold text-navy">{s.title}</p>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <p className="font-semibold text-navy">{s.title}</p>
+                        {s.is_primary && (
+                          <span className="inline-flex items-center gap-0.5 rounded-full bg-orange/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-orange">
+                            <Star className="h-3 w-3 fill-orange" /> Main
+                          </span>
+                        )}
+                      </div>
                       {s.description && <ExpandableText text={s.description} clampLines={3} maxLines={8} className="mt-0.5" />}
-                      {s.price_guidance_ugx && (
-                        <p className="mt-1 text-xs font-semibold text-orange">From UGX {s.price_guidance_ugx.toLocaleString()}</p>
+                      <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                        <PriceGuideChip guide={s as PriceGuide} />
+                        {!s.price_type && s.price_guidance_ugx && (
+                          <span className="inline-flex items-center rounded-full bg-orange/10 px-2 py-0.5 text-[11px] font-semibold text-orange">
+                            From UGX {s.price_guidance_ugx.toLocaleString()}
+                          </span>
+                        )}
+                      </div>
+                      {s.price_note && (
+                        <p className="mt-1 text-[11px] text-muted-foreground">{s.price_note}</p>
                       )}
                     </div>
                     {!isOwner && (
