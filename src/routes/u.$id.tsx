@@ -141,7 +141,7 @@ function UserProfile() {
     setProfile(p as typeof profile);
     // service_profiles.phone/whatsapp/email reads go through get_provider_contact
     // which enforces phone_visibility + the contact gate server-side.
-    const { data: s } = await supabase.from("service_profiles").select("business_name,subcategory,bio,town,district,verified,category_slug,years_experience,areas_served,availability,cover_url,header_url,seeded_by_official,seeded_status").eq("user_id", id).maybeSingle();
+    const { data: s } = await supabase.from("service_profiles").select("business_name,subcategory,bio,town,district,verified,category_slug,years_experience,areas_served,availability,cover_url,header_url,seeded_by_official,seeded_status,price_type,price_fixed_ugx,price_min_ugx,price_max_ugx,price_currency,price_note").eq("user_id", id).maybeSingle();
     if (user && s) {
       const { data: contact } = await supabase.rpc("get_provider_contact", { _provider: id }).maybeSingle();
       const c = (contact ?? {}) as { phone?: string | null; whatsapp?: string | null; email?: string | null };
