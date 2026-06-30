@@ -98,7 +98,7 @@ function PublicProfilePage() {
     setProfile(prof);
 
     const [{ data: s }, { data: r }, { count: completed }] = await Promise.all([
-      supabase.from("profile_services").select("id,title,description,price_guidance_ugx,active").eq("profile_id", prof.id).eq("active", true).order("sort_order"),
+      supabase.from("profile_services").select("id,title,description,price_guidance_ugx,active,is_primary,price_type,price_fixed_ugx,price_min_ugx,price_max_ugx,price_currency,price_note").eq("profile_id", prof.id).eq("active", true).order("is_primary", { ascending: false }).order("sort_order"),
       supabase.from("reviews").select("id,rating,text,created_at,user_id").eq("public_profile_id", prof.id).eq("hidden", false).order("created_at", { ascending: false }).limit(20),
       supabase.from("service_requests").select("*", { count: "exact", head: true }).eq("public_profile_id", prof.id).eq("status", "completed"),
     ]);
