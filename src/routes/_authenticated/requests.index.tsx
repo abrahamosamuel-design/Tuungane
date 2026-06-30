@@ -90,8 +90,8 @@ function RequestsPage() {
         <p className="mt-1 text-sm text-muted-foreground">Track requests, mark progress, and leave verified reviews.</p>
 
         <div className="mt-4 inline-flex rounded-full border border-border bg-card p-1">
-          <button onClick={() => setRole("customer")} className={`rounded-full px-4 py-1.5 text-xs font-semibold ${role === "customer" ? "bg-orange text-orange-foreground" : "text-muted-foreground"}`}>As customer</button>
-          <button onClick={() => setRole("provider")} className={`rounded-full px-4 py-1.5 text-xs font-semibold ${role === "provider" ? "bg-orange text-orange-foreground" : "text-muted-foreground"}`}>As provider</button>
+          <button onClick={() => setRole("customer")} className={`rounded-full px-4 py-1.5 text-xs font-semibold ${role === "customer" ? "bg-orange text-orange-foreground" : "text-muted-foreground"}`}>Requests I sent</button>
+          <button onClick={() => setRole("provider")} className={`rounded-full px-4 py-1.5 text-xs font-semibold ${role === "provider" ? "bg-orange text-orange-foreground" : "text-muted-foreground"}`}>Requests I received</button>
         </div>
 
         <div className="mt-4 flex flex-wrap gap-1.5">
