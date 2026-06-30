@@ -249,8 +249,18 @@ function Services() {
         const matchesL = !loc || p.town.toLowerCase().includes(loc.toLowerCase()) || p.district.toLowerCase().includes(loc.toLowerCase());
         return matchesQ && matchesL;
       })
-      .sort((a, b) => scoreProvider(b) - scoreProvider(a));
+      .sort((a, b) => {
+        if (filter === "recent") {
+          const tb = new Date(b.created_at ?? b.updated_at).getTime();
+          const ta = new Date(a.created_at ?? a.updated_at).getTime();
+          if (tb !== ta) return tb - ta;
+          return b.user_id.localeCompare(a.user_id);
+        }
+        return scoreProvider(b) - scoreProvider(a);
+      });
+    if (filter === "recent") return base;
     return filterByRadius(base, userLoc, (p) => p, radiusKm);
+
   }, [real, q, loc, filter, radiusKm, userLoc, featuredLocs]); // eslint-disable-line react-hooks/exhaustive-deps
   const radiusExpanded = radiusKm != null && userLoc && realFiltered.length === 0 && real.length > 0;
 
