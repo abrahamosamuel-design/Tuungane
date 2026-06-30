@@ -34,6 +34,11 @@ type Props = {
     areas_served?: string[];
     category_slug?: string;
     subcategory?: string;
+    price_type?: PriceType | null;
+    price_fixed_ugx?: number | null;
+    price_min_ugx?: number | null;
+    price_max_ugx?: number | null;
+    price_note?: string | null;
   };
   onSaved?: () => void;
 };
