@@ -43,7 +43,7 @@ export function ProviderResponseDialog({ open, onClose, requestId, existing, onS
 
   const submit = async () => {
     if (!user) return toast.error("Please sign in");
-    if (!form.message.trim()) return toast.error("Add a short message to the customer");
+    if (!form.message.trim()) return toast.error("Add a short message to the requester");
     setBusy(true);
     const payload = {
       request_id: requestId,
@@ -60,7 +60,7 @@ export function ProviderResponseDialog({ open, onClose, requestId, existing, onS
     setBusy(false);
     if (error) return toastError(error, "Couldn't send your response");
     toast.success(existing ? "Response updated" : "Response sent", {
-      description: "The customer will see it in their request.",
+      description: "The requester will see it in their request.",
     });
     onSaved?.();
     onClose();
@@ -83,7 +83,7 @@ export function ProviderResponseDialog({ open, onClose, requestId, existing, onS
         <div className="mb-3 flex items-start justify-between">
           <div>
             <h2 className="font-display text-xl font-bold text-navy">{existing ? "Update your response" : "Respond to this request"}</h2>
-            <p className="text-xs text-muted-foreground">Send a quote and message. The customer can compare responses and choose a provider.</p>
+            <p className="text-xs text-muted-foreground">Send a quote and message. The requester can compare responses and choose a provider.</p>
           </div>
           <button onClick={onClose} className="rounded-full p-1 text-muted-foreground hover:bg-muted"><X className="h-5 w-5" /></button>
         </div>
@@ -94,7 +94,7 @@ export function ProviderResponseDialog({ open, onClose, requestId, existing, onS
         </div>
 
         <div className="space-y-3">
-          <Field label="Message to customer *">
+          <Field label="Message to requester *">
             <textarea rows={4} maxLength={2000} value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} className={input} placeholder="Hi, I can help with this. Here's what I'd do…" />
           </Field>
           <div className="grid gap-3 sm:grid-cols-2">

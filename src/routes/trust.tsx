@@ -40,7 +40,7 @@ const TIERS = [
     icon: Star,
     name: "Reviewed",
     tone: "bg-emerald-50 text-emerald-700 border-emerald-200",
-    summary: "Has completed real service requests on Tuungane and received verified reviews from customers.",
+    summary: "Has completed real service requests on Tuungane and received verified reviews from members.",
     means: "There's a track record on the platform. Read the reviews — they came from real bookings.",
   },
   {
@@ -54,14 +54,14 @@ const TIERS = [
 
 const STEPS = [
   { from: "New", to: "Active", how: "Add a profile photo or logo, pick a category, set your location, write a short bio, list at least one service, and add a phone, WhatsApp, or email." },
-  { from: "Active", to: "Reviewed", how: "Complete service requests on Tuungane and ask happy customers to leave a verified review." },
+  { from: "Active", to: "Reviewed", how: "Complete service requests on Tuungane and ask happy members to leave a verified review." },
   { from: "Reviewed", to: "Verified", how: "Open your profile, tap Request verification, and submit ID or business documents. Our team reviews within a few days." },
 ];
 
 const FAQS = [
   {
     q: "Do I have to be verified to use Tuungane?",
-    a: "No. Anyone can create a profile and start receiving requests. Verification is optional but helps customers trust you faster.",
+    a: "No. Anyone can create a profile and start receiving requests. Verification is optional but helps members trust you faster.",
   },
   {
     q: "Is verification free?",
