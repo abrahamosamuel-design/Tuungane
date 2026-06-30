@@ -10,6 +10,8 @@ import { formatSubcategory } from "@/lib/format-category";
 import { Avatar } from "@/components/social/Avatar";
 import { CoverImage } from "@/components/media/CoverImage";
 import { ExpandableText } from "@/components/feed/ExpandableText";
+import { PriceGuideChip } from "@/components/PriceGuide";
+import type { PriceType, PriceGuide } from "@/lib/price-guide";
 
 
 type ProfileType = "individual" | "business" | "organization";
