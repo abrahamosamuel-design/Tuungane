@@ -64,16 +64,18 @@ function Dashboard() {
         supabase.from("opportunities").select("*", { count: "exact", head: true }).eq("poster_id", user.id),
       ]);
       setStats({ followers: f ?? 0, posts: ps?.length ?? 0, recs: r ?? 0, likes: likesRes.count ?? 0, comments: commentsRes.count ?? 0, reviews: rv ?? 0, saves: sv ?? 0, opps: op ?? 0 });
-    } else {
-      const [{ count: fol }, { count: sp2 }, { count: so }, { count: rw }, { count: rg }] = await Promise.all([
-        supabase.from("follows").select("*", { count: "exact", head: true }).eq("follower_id", user.id),
-        supabase.from("saved_providers").select("*", { count: "exact", head: true }).eq("user_id", user.id),
-        supabase.from("saved_opportunities").select("*", { count: "exact", head: true }).eq("user_id", user.id),
-        supabase.from("reviews").select("*", { count: "exact", head: true }).eq("user_id", user.id),
-        supabase.from("provider_recommendations").select("*", { count: "exact", head: true }).eq("user_id", user.id),
-      ]);
-      setCustomerStats({ following: fol ?? 0, saved: sp2 ?? 0, savedOpps: so ?? 0, reviewsWritten: rw ?? 0, recsGiven: rg ?? 0 });
     }
+
+    // Always load customer-side stats — every member can save, follow, and review.
+    const [{ count: fol }, { count: sp2 }, { count: so }, { count: rw }, { count: rg }] = await Promise.all([
+      supabase.from("follows").select("*", { count: "exact", head: true }).eq("follower_id", user.id),
+      supabase.from("saved_providers").select("*", { count: "exact", head: true }).eq("user_id", user.id),
+      supabase.from("saved_opportunities").select("*", { count: "exact", head: true }).eq("user_id", user.id),
+      supabase.from("reviews").select("*", { count: "exact", head: true }).eq("user_id", user.id),
+      supabase.from("provider_recommendations").select("*", { count: "exact", head: true }).eq("user_id", user.id),
+    ]);
+    setCustomerStats({ following: fol ?? 0, saved: sp2 ?? 0, savedOpps: so ?? 0, reviewsWritten: rw ?? 0, recsGiven: rg ?? 0 });
+
   };
 
   useEffect(() => { if (user) load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [user]);
