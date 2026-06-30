@@ -1,4 +1,4 @@
-import { Coins } from "lucide-react";
+import { Coins, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   formatPriceGuideLong,
@@ -14,20 +14,32 @@ const DISCLAIMER =
 export function PriceGuideCard({
   guide,
   className,
+  onEdit,
 }: {
   guide: PriceGuide | null | undefined;
   className?: string;
+  onEdit?: () => void;
 }) {
   if (!hasPriceGuide(guide)) return null;
   const main = formatPriceGuideLong(guide)!;
   return (
     <div
       className={cn(
-        "rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)]",
+        "relative rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)]",
         className,
       )}
     >
-      <div className="flex items-start gap-3">
+      {onEdit && (
+        <button
+          type="button"
+          onClick={onEdit}
+          aria-label="Edit price guide"
+          className="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-full bg-muted text-muted-foreground transition hover:bg-orange/10 hover:text-orange"
+        >
+          <Pencil className="h-3.5 w-3.5" />
+        </button>
+      )}
+      <div className="flex items-start gap-3 pr-8">
         <span className="mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-orange/10 text-orange">
           <Coins className="h-4 w-4" />
         </span>

@@ -385,7 +385,10 @@ function UserProfile() {
         {sp && (sp.price_type || isOwn) && (
           <div className="mt-4">
             {sp.price_type ? (
-              <PriceGuideCard guide={{ ...sp, price_type: sp.price_type as PriceType | null }} />
+              <PriceGuideCard
+                guide={{ ...sp, price_type: sp.price_type as PriceType | null }}
+                onEdit={isOwn ? () => setEditOpen(true) : undefined}
+              />
             ) : isOwn ? (
               <PriceGuideEmptyOwner onAdd={() => setEditOpen(true)} />
             ) : null}
