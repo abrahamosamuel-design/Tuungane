@@ -275,8 +275,48 @@ export function EditProfileDialog({ open, onClose, userId, hasServiceProfile, in
           {hasServiceProfile && (
             <>
               <div>
-                <Label>Areas served (comma separated)</Label>
-                <Input value={(form.areas_served ?? []).join(", ")} onChange={(e) => set("areas_served", e.target.value.split(",").map((s) => s.trim()).filter(Boolean))} />
+                <Label>Areas served</Label>
+                <p className="mb-2 text-xs text-muted-foreground">
+                  Add each place where you work. Type an area and tap Add, or press Enter/comma.
+                </p>
+                <div className="flex flex-wrap gap-2 rounded-md border border-input bg-background p-2">
+                  {(form.areas_served ?? []).map((area, i) => (
+                    <span key={`${area}-${i}`} className="inline-flex items-center gap-1 rounded-full bg-secondary px-2.5 py-1 text-xs">
+                      {area}
+                      <button
+                        type="button"
+                        onClick={() => removeArea(i)}
+                        className="rounded-full p-0.5 hover:bg-muted"
+                        aria-label={`Remove ${area}`}
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+                <div className="mt-2 flex gap-2">
+                  <Input
+                    value={areaInput}
+                    onChange={(e) => setAreaInput(e.target.value)}
+                    placeholder="e.g. Entebbe, Kajjansi"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === ",") {
+                        e.preventDefault();
+                        addArea(areaInput);
+                      }
+                    }}
+                    onBlur={() => addArea(areaInput)}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="shrink-0"
+                    onClick={() => addArea(areaInput)}
+                  >
+                    Add
+                  </Button>
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
