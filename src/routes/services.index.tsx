@@ -54,6 +54,8 @@ type RealProvider = {
   seeded_by_official: boolean;
   seeded_status: string | null;
   updated_at: string;
+  created_at?: string;
+
   availability?: string | null;
   area?: string | null;
   latitude?: number | null;
