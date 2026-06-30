@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { categories } from "@/data/categories";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, X } from "lucide-react";
 import {
   PRICE_TYPE_OPTIONS,
   validatePriceGuide,
@@ -46,11 +46,21 @@ type Props = {
 export function EditProfileDialog({ open, onClose, userId, hasServiceProfile, initial, onSaved }: Props) {
   const [form, setForm] = useState(initial);
   const [busy, setBusy] = useState(false);
+  const [areaInput, setAreaInput] = useState("");
 
-  useEffect(() => { setForm(initial); }, [initial, open]);
+  useEffect(() => { setForm(initial); setAreaInput(""); }, [initial, open]);
 
   const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) => setForm((f) => ({ ...f, [k]: v }));
   const dirty = JSON.stringify(form) !== JSON.stringify(initial);
+
+  const addArea = (raw: string) => {
+    const v = raw.trim().replace(/,$/, "").trim();
+    if (!v) return;
+    if ((form.areas_served ?? []).includes(v)) { setAreaInput(""); return; }
+    set("areas_served", [...(form.areas_served ?? []), v]);
+    setAreaInput("");
+  };
+  const removeArea = (i: number) => set("areas_served", (form.areas_served ?? []).filter((_, idx) => idx !== i));
 
   const subOptions = useMemo(
     () => categories.find((c) => c.slug === form.category_slug)?.subcategories ?? [],
@@ -265,8 +275,48 @@ export function EditProfileDialog({ open, onClose, userId, hasServiceProfile, in
           {hasServiceProfile && (
             <>
               <div>
-                <Label>Areas served (comma separated)</Label>
-                <Input value={(form.areas_served ?? []).join(", ")} onChange={(e) => set("areas_served", e.target.value.split(",").map((s) => s.trim()).filter(Boolean))} />
+                <Label>Areas served</Label>
+                <p className="mb-2 text-xs text-muted-foreground">
+                  Add each place where you work. Type an area and tap Add, or press Enter/comma.
+                </p>
+                <div className="flex flex-wrap gap-2 rounded-md border border-input bg-background p-2">
+                  {(form.areas_served ?? []).map((area, i) => (
+                    <span key={`${area}-${i}`} className="inline-flex items-center gap-1 rounded-full bg-secondary px-2.5 py-1 text-xs">
+                      {area}
+                      <button
+                        type="button"
+                        onClick={() => removeArea(i)}
+                        className="rounded-full p-0.5 hover:bg-muted"
+                        aria-label={`Remove ${area}`}
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+                <div className="mt-2 flex gap-2">
+                  <Input
+                    value={areaInput}
+                    onChange={(e) => setAreaInput(e.target.value)}
+                    placeholder="e.g. Entebbe, Kajjansi"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === ",") {
+                        e.preventDefault();
+                        addArea(areaInput);
+                      }
+                    }}
+                    onBlur={() => addArea(areaInput)}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="shrink-0"
+                    onClick={() => addArea(areaInput)}
+                  >
+                    Add
+                  </Button>
+                </div>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
