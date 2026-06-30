@@ -1296,7 +1296,13 @@ export type Database = {
           id: string
           location_served: string | null
           photos: string[]
+          price_currency: string
+          price_fixed_ugx: number | null
           price_guidance_ugx: number | null
+          price_max_ugx: number | null
+          price_min_ugx: number | null
+          price_note: string | null
+          price_type: string | null
           profile_id: string
           sort_order: number
           title: string
@@ -1310,7 +1316,13 @@ export type Database = {
           id?: string
           location_served?: string | null
           photos?: string[]
+          price_currency?: string
+          price_fixed_ugx?: number | null
           price_guidance_ugx?: number | null
+          price_max_ugx?: number | null
+          price_min_ugx?: number | null
+          price_note?: string | null
+          price_type?: string | null
           profile_id: string
           sort_order?: number
           title: string
@@ -1324,7 +1336,13 @@ export type Database = {
           id?: string
           location_served?: string | null
           photos?: string[]
+          price_currency?: string
+          price_fixed_ugx?: number | null
           price_guidance_ugx?: number | null
+          price_max_ugx?: number | null
+          price_min_ugx?: number | null
+          price_note?: string | null
+          price_type?: string | null
           profile_id?: string
           sort_order?: number
           title?: string
@@ -2117,6 +2135,13 @@ export type Database = {
           longitude: number | null
           media_urls: string[]
           phone: string | null
+          price_currency: string
+          price_fixed_ugx: number | null
+          price_max_ugx: number | null
+          price_min_ugx: number | null
+          price_note: string | null
+          price_type: string | null
+          price_updated_at: string | null
           region: string | null
           seeded_by_official: boolean
           seeded_status:
@@ -2149,6 +2174,13 @@ export type Database = {
           longitude?: number | null
           media_urls?: string[]
           phone?: string | null
+          price_currency?: string
+          price_fixed_ugx?: number | null
+          price_max_ugx?: number | null
+          price_min_ugx?: number | null
+          price_note?: string | null
+          price_type?: string | null
+          price_updated_at?: string | null
           region?: string | null
           seeded_by_official?: boolean
           seeded_status?:
@@ -2181,6 +2213,13 @@ export type Database = {
           longitude?: number | null
           media_urls?: string[]
           phone?: string | null
+          price_currency?: string
+          price_fixed_ugx?: number | null
+          price_max_ugx?: number | null
+          price_min_ugx?: number | null
+          price_note?: string | null
+          price_type?: string | null
+          price_updated_at?: string | null
           region?: string | null
           seeded_by_official?: boolean
           seeded_status?:
@@ -2932,6 +2971,13 @@ export type Database = {
           longitude: number | null
           media_urls: string[]
           phone: string | null
+          price_currency: string
+          price_fixed_ugx: number | null
+          price_max_ugx: number | null
+          price_min_ugx: number | null
+          price_note: string | null
+          price_type: string | null
+          price_updated_at: string | null
           region: string | null
           seeded_by_official: boolean
           seeded_status:
