@@ -42,6 +42,13 @@ type Service = {
   description: string;
   price_guidance_ugx: number | null;
   active: boolean;
+  is_primary: boolean;
+  price_type: PriceType | null;
+  price_fixed_ugx: number | null;
+  price_min_ugx: number | null;
+  price_max_ugx: number | null;
+  price_currency: string | null;
+  price_note: string | null;
 };
 
 type Review = {
