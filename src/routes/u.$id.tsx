@@ -126,6 +126,7 @@ function UserProfile() {
   const [claimOpen, setClaimOpen] = useState(false);
   const [requestOpen, setRequestOpen] = useState(false);
   const [contactModalOpen, setContactModalOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
   const [feedback, setFeedback] = useState<Array<{ id: string; rating: number; review_text: string; service_provided: string; created_at: string; customer_id: string; would_recommend: boolean; profile?: { full_name: string; avatar_url: string | null } }>>([]);
   const [canReview, setCanReview] = useState(false);
 
