@@ -72,7 +72,7 @@ function ManageProfile() {
   const load = async () => {
     const [{ data: p }, { data: s }, { data: r }] = await Promise.all([
       supabase.from("public_profiles").select("*").eq("id", id).maybeSingle(),
-      supabase.from("profile_services").select("id,title,description,price_guidance_ugx,active,sort_order").eq("profile_id", id).order("sort_order"),
+      supabase.from("profile_services").select("id,title,description,price_guidance_ugx,active,sort_order,is_primary,price_type,price_fixed_ugx,price_min_ugx,price_max_ugx,price_currency,price_note").eq("profile_id", id).order("is_primary", { ascending: false }).order("sort_order"),
       supabase.from("service_requests").select("id,title,status,created_at,customer_id").eq("public_profile_id", id).order("created_at", { ascending: false }).limit(50),
     ]);
     setProfile((p as PublicProfile | null) ?? null);
