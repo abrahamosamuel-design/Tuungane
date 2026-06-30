@@ -207,6 +207,20 @@ function UserProfile() {
     } finally { setUploadingCover(false); }
   };
 
+  const uploadAvatar = async (file: File | null) => {
+    if (!file || !user) return;
+    setUploadingAvatar(true);
+    try {
+      const url = await uploadMedia(user.id, file, "avatars");
+      const { error } = await supabase.from("profiles").update({ avatar_url: url }).eq("id", user.id);
+      if (error) throw error;
+      load();
+      toast.success("Profile photo updated");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Upload failed");
+    } finally { setUploadingAvatar(false); }
+  };
+
   const share = async () => {
     const url = `${window.location.origin}/u/${id}`;
     if (navigator.share) navigator.share({ title: profile?.full_name ?? "Profile", url }).catch(() => {});
