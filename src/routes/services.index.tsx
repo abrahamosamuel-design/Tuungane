@@ -171,6 +171,8 @@ function Services() {
           seeded_by_official: !!pp.seeded_by_official,
           seeded_status: pp.claim_status ?? null,
           updated_at: pp.updated_at,
+          created_at: pp.created_at,
+
           availability: pp.availability ?? null,
           cover_url: pp.cover_url ?? pp.avatar_url ?? null,
           media_urls: null,
