@@ -303,7 +303,7 @@ function UserProfile() {
                         Uploading…
                       </span>
                     )}
-                    <span className="pointer-events-none absolute -bottom-1 right-0 flex items-center gap-1 rounded-full bg-orange px-2 py-0.5 text-[10px] font-semibold text-white shadow">
+                    <span className="pointer-events-none absolute -bottom-1 right-0 flex items-center gap-1 rounded-full bg-black/70 px-2 py-0.5 text-[10px] font-semibold text-white shadow backdrop-blur-sm">
                       <Camera className="h-3 w-3" />
                       {profile.avatar_url ? "Edit" : "Upload"}
                     </span>
