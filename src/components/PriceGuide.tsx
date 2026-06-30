@@ -1,4 +1,4 @@
-import { Coins } from "lucide-react";
+import { Coins, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   formatPriceGuideLong,
