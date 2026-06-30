@@ -88,10 +88,12 @@ function Services() {
   const nav = useNavigate();
   const { location: userLoc } = useUserLocation();
   const { locations: featuredLocs } = useFeaturedLocations();
+  const search = Route.useSearch();
   const [q, setQ] = useState("");
   const [loc, setLoc] = useState("");
-  const [filter, setFilter] = useState<RealFilter>("all");
+  const [filter, setFilter] = useState<RealFilter>(search.sort === "recent" ? "recent" : "all");
   const [radiusKm, setRadiusKm] = useState<number | null>(null);
+
   const [real, setReal] = useState<RealProvider[]>([]);
   const [loadingReal, setLoadingReal] = useState(true);
   const [dbCats, setDbCats] = useState<Array<{ slug: string; name: string; icon: string; blurb: string; subCount: number; examples: string }> | null>(null);
