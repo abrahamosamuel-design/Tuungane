@@ -224,6 +224,87 @@ export function EditProfileDialog({ open, onClose, userId, hasServiceProfile, in
                   <Input type="email" value={form.email ?? ""} onChange={(e) => set("email", e.target.value)} />
                 </div>
               </div>
+
+              {/* Price Guide */}
+              <div className="rounded-xl border border-border bg-surface/50 p-3">
+                <div className="mb-2">
+                  <Label className="text-sm font-semibold text-navy">Price Guide</Label>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    Help customers know what to expect. This is not a final quote unless you choose
+                    Fixed price.
+                  </p>
+                </div>
+                <select
+                  className="mt-1 h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                  value={form.price_type ?? ""}
+                  onChange={(e) => {
+                    const v = (e.target.value || null) as PriceType | null;
+                    setForm((f) => ({
+                      ...f,
+                      price_type: v,
+                      price_fixed_ugx: v === "fixed" ? f.price_fixed_ugx : null,
+                      price_min_ugx: v === "starting_from" || v === "range" ? f.price_min_ugx : null,
+                      price_max_ugx: v === "range" ? f.price_max_ugx : null,
+                    }));
+                  }}
+                >
+                  <option value="">No price guide</option>
+                  {PRICE_TYPE_OPTIONS.map((o) => (
+                    <option key={o.value} value={o.value}>{o.label}</option>
+                  ))}
+                </select>
+
+                {form.price_type === "fixed" && (
+                  <div className="mt-3">
+                    <Label className="text-xs">Fixed price (UGX)</Label>
+                    <Input
+                      type="number" min={0} inputMode="numeric" placeholder="e.g. 15000"
+                      value={form.price_fixed_ugx ?? ""}
+                      onChange={(e) => set("price_fixed_ugx", e.target.value === "" ? null : Math.max(0, Number(e.target.value)))}
+                    />
+                  </div>
+                )}
+                {form.price_type === "starting_from" && (
+                  <div className="mt-3">
+                    <Label className="text-xs">Starting from (UGX)</Label>
+                    <Input
+                      type="number" min={0} inputMode="numeric" placeholder="e.g. 20000"
+                      value={form.price_min_ugx ?? ""}
+                      onChange={(e) => set("price_min_ugx", e.target.value === "" ? null : Math.max(0, Number(e.target.value)))}
+                    />
+                  </div>
+                )}
+                {form.price_type === "range" && (
+                  <div className="mt-3 grid grid-cols-2 gap-3">
+                    <div>
+                      <Label className="text-xs">Minimum (UGX)</Label>
+                      <Input
+                        type="number" min={0} inputMode="numeric" placeholder="20000"
+                        value={form.price_min_ugx ?? ""}
+                        onChange={(e) => set("price_min_ugx", e.target.value === "" ? null : Math.max(0, Number(e.target.value)))}
+                      />
+                    </div>
+                    <div>
+                      <Label className="text-xs">Maximum (UGX)</Label>
+                      <Input
+                        type="number" min={0} inputMode="numeric" placeholder="50000"
+                        value={form.price_max_ugx ?? ""}
+                        onChange={(e) => set("price_max_ugx", e.target.value === "" ? null : Math.max(0, Number(e.target.value)))}
+                      />
+                    </div>
+                  </div>
+                )}
+                {form.price_type && (
+                  <div className="mt-3">
+                    <Label className="text-xs">Note (optional)</Label>
+                    <Input
+                      placeholder="e.g. Depends on car size, transport may apply"
+                      value={form.price_note ?? ""}
+                      onChange={(e) => set("price_note", e.target.value)}
+                    />
+                  </div>
+                )}
+              </div>
             </>
           )}
         </div>
