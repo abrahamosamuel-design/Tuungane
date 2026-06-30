@@ -33,6 +33,7 @@ import { BoostBadge } from "@/components/BoostBadge";
 import { BoostButton } from "@/components/BoostButton";
 import { MobileActionBar } from "@/components/MobileActionBar";
 import { ContactProviderModal } from "@/components/ContactProviderModal";
+import { EditProfileDialog } from "@/components/EditProfileDialog";
 import { ContactOptionsUnlocked } from "@/components/ContactOptionsUnlocked";
 import { ProviderQuickContact } from "@/components/ProviderQuickContact";
 import { useContactGate } from "@/hooks/use-contact-gate";
