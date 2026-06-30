@@ -8,6 +8,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { categories } from "@/data/categories";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import {
+  PRICE_TYPE_OPTIONS,
+  validatePriceGuide,
+  type PriceType,
+} from "@/lib/price-guide";
 
 type Props = {
   open: boolean;
