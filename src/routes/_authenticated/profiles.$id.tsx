@@ -238,27 +238,6 @@ function ManageProfile() {
 
 function ServicesTab({ profileId, services, onChanged }: { profileId: string; services: Service[]; onChanged: () => void }) {
   const [adding, setAdding] = useState(false);
-  const [title, setTitle] = useState("");
-  const [desc, setDesc] = useState("");
-  const [price, setPrice] = useState("");
-  const [busy, setBusy] = useState(false);
-
-  const add = async () => {
-    if (!title.trim()) { toast.error("Service title required"); return; }
-    setBusy(true);
-    const { error } = await supabase.from("profile_services").insert({
-      profile_id: profileId,
-      title: title.trim(),
-      description: desc,
-      price_guidance_ugx: price ? parseInt(price.replace(/[^0-9]/g, ""), 10) || null : null,
-      sort_order: services.length,
-    });
-    setBusy(false);
-    if (error) { toast.error(error.message); return; }
-    setTitle(""); setDesc(""); setPrice(""); setAdding(false);
-    toast.success("Service added");
-    onChanged();
-  };
 
   const remove = async (sid: string) => {
     if (!confirm("Remove this service?")) return;
@@ -273,56 +252,239 @@ function ServicesTab({ profileId, services, onChanged }: { profileId: string; se
     else onChanged();
   };
 
+  const makePrimary = async (s: Service) => {
+    if (s.is_primary) return;
+    const { error } = await supabase.from("profile_services").update({ is_primary: true }).eq("id", s.id);
+    if (error) { toast.error(error.message); return; }
+    toast.success(`"${s.title}" is now your main service`);
+    onChanged();
+  };
+
   return (
     <div className="mt-4 space-y-3">
       {services.length === 0 && !adding && (
         <div className="rounded-2xl border border-dashed border-border bg-card p-5 text-center text-sm text-muted-foreground">
-          No services yet. Add the things customers can request here.
+          No services yet. Add the things customers can request here. The first one you add becomes your main service shown on cards.
         </div>
       )}
 
       {services.map((s) => (
-        <div key={s.id} className="rounded-2xl border border-border bg-card p-3">
-          <div className="flex items-start justify-between gap-2">
-            <div className="min-w-0">
-              <p className="truncate font-semibold text-navy">{s.title}</p>
-              {s.description && <ExpandableText text={s.description} clampLines={3} maxLines={8} className="mt-0.5" />}
-              {s.price_guidance_ugx && (
-                <p className="mt-1 text-xs font-semibold text-orange">From UGX {s.price_guidance_ugx.toLocaleString()}</p>
-              )}
-            </div>
-            <div className="flex flex-col items-end gap-1">
-              <button onClick={() => toggleActive(s)} className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${s.active ? "bg-green/10 text-green" : "bg-muted text-navy/60"}`}>
-                {s.active ? "Active" : "Hidden"}
-              </button>
-              <button onClick={() => remove(s.id)} className="text-muted-foreground hover:text-destructive">
-                <Trash2 className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-        </div>
+        <ServiceRow
+          key={s.id}
+          service={s}
+          onChanged={onChanged}
+          onRemove={() => remove(s.id)}
+          onToggleActive={() => toggleActive(s)}
+          onMakePrimary={() => makePrimary(s)}
+        />
       ))}
 
       {adding ? (
-        <div className="space-y-2 rounded-2xl border border-border bg-card p-4">
-          <Field label="Service title" value={title} onChange={setTitle} placeholder="e.g. Engine wash" />
-          <div>
-            <label className="text-xs font-medium text-navy">Description (optional)</label>
-            <textarea value={desc} onChange={(e) => setDesc(e.target.value)} rows={2} className="mt-1 w-full resize-none rounded-xl border border-border px-3 py-2 text-sm outline-none focus:border-orange" />
-          </div>
-          <Field label="Price guidance UGX (optional)" value={price} onChange={setPrice} placeholder="e.g. 20000" />
-          <div className="flex justify-end gap-2">
-            <button onClick={() => setAdding(false)} className="rounded-xl border border-border px-3 py-2 text-xs font-semibold text-navy">Cancel</button>
-            <button onClick={add} disabled={busy} className="rounded-xl bg-orange px-3 py-2 text-xs font-semibold text-orange-foreground disabled:opacity-50">
-              {busy ? "Adding…" : "Add service"}
-            </button>
-          </div>
-        </div>
+        <ServiceEditor
+          mode="create"
+          profileId={profileId}
+          sortOrder={services.length}
+          onDone={() => { setAdding(false); onChanged(); }}
+          onCancel={() => setAdding(false)}
+        />
       ) : (
         <button onClick={() => setAdding(true)} className="inline-flex w-full items-center justify-center gap-1 rounded-xl border border-dashed border-orange/40 bg-orange/5 px-3 py-3 text-sm font-semibold text-orange">
           <Plus className="h-4 w-4" /> Add service
         </button>
       )}
+    </div>
+  );
+}
+
+function ServiceRow({
+  service,
+  onChanged,
+  onRemove,
+  onToggleActive,
+  onMakePrimary,
+}: {
+  service: Service;
+  onChanged: () => void;
+  onRemove: () => void;
+  onToggleActive: () => void;
+  onMakePrimary: () => void;
+}) {
+  const [editing, setEditing] = useState(false);
+  if (editing) {
+    return (
+      <ServiceEditor
+        mode="edit"
+        service={service}
+        onDone={() => { setEditing(false); onChanged(); }}
+        onCancel={() => setEditing(false)}
+      />
+    );
+  }
+  return (
+    <div className={`rounded-2xl border bg-card p-3 ${service.is_primary ? "border-orange/50 ring-1 ring-orange/20" : "border-border"}`}>
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <p className="font-semibold text-navy">{service.title}</p>
+            {service.is_primary && (
+              <span className="inline-flex items-center gap-0.5 rounded-full bg-orange/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-orange">
+                <Star className="h-3 w-3 fill-orange" /> Main service
+              </span>
+            )}
+          </div>
+          {service.description && <ExpandableText text={service.description} clampLines={3} maxLines={8} className="mt-0.5" />}
+          <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+            <PriceGuideChip guide={service as PriceGuide} />
+            {!service.price_type && service.price_guidance_ugx && (
+              <span className="inline-flex items-center rounded-full bg-orange/10 px-2 py-0.5 text-[11px] font-semibold text-orange">
+                From UGX {service.price_guidance_ugx.toLocaleString()}
+              </span>
+            )}
+            {!service.price_type && !service.price_guidance_ugx && (
+              <span className="text-[11px] text-muted-foreground">No price guide set</span>
+            )}
+          </div>
+        </div>
+        <div className="flex flex-col items-end gap-1">
+          <button onClick={onToggleActive} className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${service.active ? "bg-green/10 text-green" : "bg-muted text-navy/60"}`}>
+            {service.active ? "Active" : "Hidden"}
+          </button>
+          <button onClick={() => setEditing(true)} aria-label="Edit service" className="text-muted-foreground hover:text-navy">
+            <Pencil className="h-4 w-4" />
+          </button>
+          <button onClick={onRemove} aria-label="Remove service" className="text-muted-foreground hover:text-destructive">
+            <Trash2 className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+      {!service.is_primary && (
+        <button
+          onClick={onMakePrimary}
+          className="mt-2 inline-flex items-center gap-1 rounded-full border border-orange/40 bg-orange/5 px-2.5 py-1 text-[11px] font-semibold text-orange hover:bg-orange/10"
+        >
+          <Star className="h-3 w-3" /> Set as main service
+        </button>
+      )}
+    </div>
+  );
+}
+
+function ServiceEditor({
+  mode,
+  service,
+  profileId,
+  sortOrder,
+  onDone,
+  onCancel,
+}: {
+  mode: "create" | "edit";
+  service?: Service;
+  profileId?: string;
+  sortOrder?: number;
+  onDone: () => void;
+  onCancel: () => void;
+}) {
+  const [title, setTitle] = useState(service?.title ?? "");
+  const [desc, setDesc] = useState(service?.description ?? "");
+  const [priceType, setPriceType] = useState<PriceType | "">((service?.price_type ?? "") as PriceType | "");
+  const [fixed, setFixed] = useState<string>(service?.price_fixed_ugx?.toString() ?? "");
+  const [minP, setMinP] = useState<string>(service?.price_min_ugx?.toString() ?? "");
+  const [maxP, setMaxP] = useState<string>(service?.price_max_ugx?.toString() ?? "");
+  const [note, setNote] = useState<string>(service?.price_note ?? "");
+  const [busy, setBusy] = useState(false);
+
+  const parseNum = (v: string): number | null => {
+    const cleaned = v.replace(/[^0-9]/g, "");
+    if (!cleaned) return null;
+    const n = parseInt(cleaned, 10);
+    return isNaN(n) ? null : n;
+  };
+
+  const save = async () => {
+    if (!title.trim()) { toast.error("Service title required"); return; }
+    const guide: PriceGuide = {
+      price_type: (priceType || null) as PriceType | null,
+      price_fixed_ugx: priceType === "fixed" ? parseNum(fixed) : null,
+      price_min_ugx: priceType === "starting_from" || priceType === "range" ? parseNum(minP) : null,
+      price_max_ugx: priceType === "range" ? parseNum(maxP) : null,
+      price_currency: priceType ? "UGX" : null,
+      price_note: priceType ? (note.trim() || null) : null,
+    };
+    const validation = validatePriceGuide(guide);
+    if (!validation.ok) { toast.error(validation.error); return; }
+
+    setBusy(true);
+    const payload = {
+      title: title.trim(),
+      description: desc,
+      price_type: guide.price_type,
+      price_fixed_ugx: guide.price_fixed_ugx,
+      price_min_ugx: guide.price_min_ugx,
+      price_max_ugx: guide.price_max_ugx,
+      price_currency: guide.price_currency,
+      price_note: guide.price_note,
+    };
+    if (mode === "create") {
+      const { error } = await supabase.from("profile_services").insert({
+        ...payload,
+        profile_id: profileId!,
+        sort_order: sortOrder ?? 0,
+      });
+      setBusy(false);
+      if (error) { toast.error(error.message); return; }
+      toast.success("Service added");
+    } else {
+      const { error } = await supabase.from("profile_services").update(payload).eq("id", service!.id);
+      setBusy(false);
+      if (error) { toast.error(error.message); return; }
+      toast.success("Service updated");
+    }
+    onDone();
+  };
+
+  return (
+    <div className="space-y-3 rounded-2xl border border-orange/40 bg-card p-4">
+      <Field label="Service title" value={title} onChange={setTitle} placeholder="e.g. Engine wash" />
+      <div>
+        <label className="text-xs font-medium text-navy">Description (optional)</label>
+        <textarea value={desc} onChange={(e) => setDesc(e.target.value)} rows={2} className="mt-1 w-full resize-none rounded-xl border border-border px-3 py-2 text-sm outline-none focus:border-orange" />
+      </div>
+
+      <div className="rounded-xl border border-border bg-background/50 p-3">
+        <label className="text-xs font-semibold uppercase tracking-wide text-navy/70">Price guide for this service</label>
+        <select
+          value={priceType}
+          onChange={(e) => setPriceType(e.target.value as PriceType | "")}
+          className="mt-1.5 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-orange"
+        >
+          <option value="">No price guide</option>
+          {PRICE_TYPE_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>{o.label}</option>
+          ))}
+        </select>
+        {priceType === "fixed" && (
+          <Field label="Fixed price (UGX)" value={fixed} onChange={setFixed} placeholder="e.g. 50000" />
+        )}
+        {priceType === "starting_from" && (
+          <Field label="Starting from (UGX)" value={minP} onChange={setMinP} placeholder="e.g. 20000" />
+        )}
+        {priceType === "range" && (
+          <div className="grid grid-cols-2 gap-2">
+            <Field label="Min (UGX)" value={minP} onChange={setMinP} placeholder="20000" />
+            <Field label="Max (UGX)" value={maxP} onChange={setMaxP} placeholder="80000" />
+          </div>
+        )}
+        {priceType && (
+          <Field label="Note (optional)" value={note} onChange={setNote} placeholder="e.g. excludes materials" />
+        )}
+      </div>
+
+      <div className="flex justify-end gap-2">
+        <button onClick={onCancel} className="rounded-xl border border-border px-3 py-2 text-xs font-semibold text-navy">Cancel</button>
+        <button onClick={save} disabled={busy} className="rounded-xl bg-orange px-3 py-2 text-xs font-semibold text-orange-foreground disabled:opacity-50">
+          {busy ? "Saving…" : mode === "create" ? "Add service" : "Save changes"}
+        </button>
+      </div>
     </div>
   );
 }
