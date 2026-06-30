@@ -63,6 +63,12 @@ type RealProvider = {
   verified_reviews: number;
   response_rate: number;
   years_experience?: number | null;
+  price_type?: string | null;
+  price_fixed_ugx?: number | null;
+  price_min_ugx?: number | null;
+  price_max_ugx?: number | null;
+  price_currency?: string | null;
+  price_note?: string | null;
 };
 
 const POPULAR_SERVICES = ["Plumber", "Electrician", "Cleaner", "Mechanic", "Tutor", "Barber", "Tailor", "Driver", "Real Estate Agent"];
