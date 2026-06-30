@@ -19,6 +19,8 @@ import { formatSubcategory } from "@/lib/format-category";
 import { CoverImage } from "@/components/media/CoverImage";
 import { MediaGrid } from "@/components/feed/MediaGrid";
 import { ExpandableText } from "@/components/feed/ExpandableText";
+import { PriceGuideChip } from "@/components/PriceGuide";
+import type { PriceType } from "@/lib/price-guide";
 
 
 
@@ -63,6 +65,12 @@ type RealProvider = {
   verified_reviews: number;
   response_rate: number;
   years_experience?: number | null;
+  price_type?: string | null;
+  price_fixed_ugx?: number | null;
+  price_min_ugx?: number | null;
+  price_max_ugx?: number | null;
+  price_currency?: string | null;
+  price_note?: string | null;
 };
 
 const POPULAR_SERVICES = ["Plumber", "Electrician", "Cleaner", "Mechanic", "Tutor", "Barber", "Tailor", "Driver", "Real Estate Agent"];
@@ -110,7 +118,7 @@ function Services() {
   useEffect(() => {
     (async () => {
       setLoadingReal(true);
-      let qy = supabase.from("service_profiles").select("user_id,business_name,subcategory,bio,town,district,area,latitude,longitude,areas_served,service_radius_km,category_slug,verified,seeded_by_official,seeded_status,updated_at,availability,cover_url,media_urls,years_experience").eq("suspended", false).order("updated_at", { ascending: false }).limit(60);
+      let qy = supabase.from("service_profiles").select("user_id,business_name,subcategory,bio,town,district,area,latitude,longitude,areas_served,service_radius_km,category_slug,verified,seeded_by_official,seeded_status,updated_at,availability,cover_url,media_urls,years_experience,price_type,price_fixed_ugx,price_min_ugx,price_max_ugx,price_currency,price_note").eq("suspended", false).order("updated_at", { ascending: false }).limit(60);
       if (filter === "featured") qy = qy.eq("verified", "featured");
       if (filter === "verified") qy = qy.in("verified", ["verified", "featured"]);
       if (filter === "available") qy = qy.eq("availability", "available");
@@ -490,6 +498,9 @@ function ProviderRow({ p, isBoosted, userLoc, onRequest }: { p: RealProvider; is
 
       {/* Badge strip */}
       <div className="mt-2.5 flex flex-wrap items-center gap-1.5 px-4">
+        {p.price_type && (
+          <PriceGuideChip guide={{ price_type: p.price_type as PriceType, price_fixed_ugx: p.price_fixed_ugx ?? null, price_min_ugx: p.price_min_ugx ?? null, price_max_ugx: p.price_max_ugx ?? null }} />
+        )}
         <NearYouBadge user={userLoc} target={p} />
         {isTopRated && (
           <span className="inline-flex items-center gap-1 rounded-full bg-orange/10 px-2 py-0.5 text-[10px] font-semibold text-orange">
@@ -562,6 +573,9 @@ function ProviderCardCompact({ p, userLoc, onRequest }: { p: RealProvider; userL
       </Link>
 
       <div className="flex flex-wrap items-center gap-1.5 px-3">
+        {p.price_type && (
+          <PriceGuideChip guide={{ price_type: p.price_type as PriceType, price_fixed_ugx: p.price_fixed_ugx ?? null, price_min_ugx: p.price_min_ugx ?? null, price_max_ugx: p.price_max_ugx ?? null }} />
+        )}
         {isVerified && (
           <span className="inline-flex items-center gap-1 rounded-full bg-green/10 px-2 py-0.5 text-[10px] font-semibold text-green">
             <BadgeCheck className="h-3 w-3" /> Verified

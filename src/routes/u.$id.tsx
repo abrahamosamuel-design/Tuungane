@@ -34,6 +34,8 @@ import { BoostButton } from "@/components/BoostButton";
 import { MobileActionBar } from "@/components/MobileActionBar";
 import { ContactProviderModal } from "@/components/ContactProviderModal";
 import { EditProfileDialog } from "@/components/EditProfileDialog";
+import { PriceGuideCard, PriceGuideEmptyOwner } from "@/components/PriceGuide";
+import type { PriceType } from "@/lib/price-guide";
 import { ContactOptionsUnlocked } from "@/components/ContactOptionsUnlocked";
 import { ProviderQuickContact } from "@/components/ProviderQuickContact";
 import { useContactGate } from "@/hooks/use-contact-gate";
@@ -112,7 +114,7 @@ function UserProfile() {
   const { user } = useAuth();
   const nav = useNavigate();
   const [profile, setProfile] = useState<{ full_name: string; avatar_url: string | null; bio: string | null; town: string | null; district: string | null; area: string | null; location_visibility: string | null; is_provider: boolean } | null>(null);
-  const [sp, setSp] = useState<{ business_name: string | null; subcategory: string; bio: string; town: string; district: string; phone: string | null; whatsapp: string | null; email: string | null; verified: string; category_slug: string; years_experience: number; areas_served: string[]; availability: string; cover_url: string | null; header_url: string | null; seeded_by_official: boolean; seeded_status: string | null } | null>(null);
+  const [sp, setSp] = useState<{ business_name: string | null; subcategory: string; bio: string; town: string; district: string; phone: string | null; whatsapp: string | null; email: string | null; verified: string; category_slug: string; years_experience: number; areas_served: string[]; availability: string; cover_url: string | null; header_url: string | null; seeded_by_official: boolean; seeded_status: string | null; price_type: string | null; price_fixed_ugx: number | null; price_min_ugx: number | null; price_max_ugx: number | null; price_currency: string | null; price_note: string | null } | null>(null);
   const [posts, setPosts] = useState<PostRow[]>([]);
   
   const [followers, setFollowers] = useState(0);
@@ -141,7 +143,7 @@ function UserProfile() {
     setProfile(p as typeof profile);
     // service_profiles.phone/whatsapp/email reads go through get_provider_contact
     // which enforces phone_visibility + the contact gate server-side.
-    const { data: s } = await supabase.from("service_profiles").select("business_name,subcategory,bio,town,district,verified,category_slug,years_experience,areas_served,availability,cover_url,header_url,seeded_by_official,seeded_status").eq("user_id", id).maybeSingle();
+    const { data: s } = await supabase.from("service_profiles").select("business_name,subcategory,bio,town,district,verified,category_slug,years_experience,areas_served,availability,cover_url,header_url,seeded_by_official,seeded_status,price_type,price_fixed_ugx,price_min_ugx,price_max_ugx,price_currency,price_note").eq("user_id", id).maybeSingle();
     if (user && s) {
       const { data: contact } = await supabase.rpc("get_provider_contact", { _provider: id }).maybeSingle();
       const c = (contact ?? {}) as { phone?: string | null; whatsapp?: string | null; email?: string | null };
@@ -379,6 +381,18 @@ function UserProfile() {
           </div>
         </div>
 
+
+        {sp && (sp.price_type || isOwn) && (
+          <div className="mt-4">
+            {sp.price_type ? (
+              <PriceGuideCard guide={{ ...sp, price_type: sp.price_type as PriceType | null }} />
+            ) : isOwn ? (
+              <PriceGuideEmptyOwner onAdd={() => setEditOpen(true)} />
+            ) : null}
+          </div>
+        )}
+
+
         {!isOwn && isProvider && user && (
           gate.unlocked && gate.requestId ? (
             <div className="mt-4">
@@ -595,6 +609,11 @@ function UserProfile() {
               areas_served: sp?.areas_served ?? [],
               category_slug: sp?.category_slug ?? "",
               subcategory: sp?.subcategory ?? "",
+              price_type: (sp?.price_type ?? null) as PriceType | null,
+              price_fixed_ugx: sp?.price_fixed_ugx ?? null,
+              price_min_ugx: sp?.price_min_ugx ?? null,
+              price_max_ugx: sp?.price_max_ugx ?? null,
+              price_note: sp?.price_note ?? "",
             }}
             onSaved={load}
           />
