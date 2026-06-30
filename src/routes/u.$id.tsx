@@ -33,6 +33,7 @@ import { BoostBadge } from "@/components/BoostBadge";
 import { BoostButton } from "@/components/BoostButton";
 import { MobileActionBar } from "@/components/MobileActionBar";
 import { ContactProviderModal } from "@/components/ContactProviderModal";
+import { EditProfileDialog } from "@/components/EditProfileDialog";
 import { ContactOptionsUnlocked } from "@/components/ContactOptionsUnlocked";
 import { ProviderQuickContact } from "@/components/ProviderQuickContact";
 import { useContactGate } from "@/hooks/use-contact-gate";
@@ -125,6 +126,7 @@ function UserProfile() {
   const [claimOpen, setClaimOpen] = useState(false);
   const [requestOpen, setRequestOpen] = useState(false);
   const [contactModalOpen, setContactModalOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
   const [feedback, setFeedback] = useState<Array<{ id: string; rating: number; review_text: string; service_provided: string; created_at: string; customer_id: string; would_recommend: boolean; profile?: { full_name: string; avatar_url: string | null } }>>([]);
   const [canReview, setCanReview] = useState(false);
 
@@ -327,7 +329,12 @@ function UserProfile() {
                 <BoostButton boostType="feature_business_page" entityType="provider_profile" entityId={id} label="Feature business" dialogTitle="Feature your business page" dialogDescription="Highlight your business page in featured rails." />
               </>
             )}
-            {isOwn && <Link to="/dashboard" className="ml-auto rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-navy hover:border-orange">My Dashboard</Link>}
+            {isOwn && (
+              <button onClick={() => setEditOpen(true)} className="ml-auto rounded-full bg-orange px-4 py-2 text-xs font-semibold text-orange-foreground hover:brightness-110">
+                Edit profile
+              </button>
+            )}
+            {isOwn && <Link to="/dashboard" className="rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-navy hover:border-orange">My Dashboard</Link>}
             {!isOwn && user && <ReportProfileButton kind="service_profile" id={id} className="ml-auto" />}
           </div>
         </div>
@@ -527,6 +534,29 @@ function UserProfile() {
         <ClaimProfileDialog serviceProfileUserId={id} open={claimOpen} onClose={() => setClaimOpen(false)} onSubmitted={load} />
         <RequestServiceDialog open={requestOpen} onClose={() => setRequestOpen(false)} providerId={id} providerName={sp?.business_name || profile.full_name} defaultCategorySlug={sp?.category_slug} defaultSubcategory={sp?.subcategory} onSubmitted={() => { load(); gate.refresh(); }} />
         <ContactProviderModal open={contactModalOpen} onClose={() => setContactModalOpen(false)} providerName={sp?.business_name || profile.full_name} onRequestService={() => setRequestOpen(true)} />
+        {isOwn && (
+          <EditProfileDialog
+            open={editOpen}
+            onClose={() => setEditOpen(false)}
+            userId={id}
+            hasServiceProfile={!!sp}
+            initial={{
+              full_name: profile.full_name ?? "",
+              bio: profile.bio ?? "",
+              town: profile.town ?? "",
+              district: profile.district ?? "",
+              business_name: sp?.business_name ?? "",
+              sp_bio: sp?.bio ?? "",
+              phone: sp?.phone ?? "",
+              whatsapp: sp?.whatsapp ?? "",
+              email: sp?.email ?? "",
+              years_experience: sp?.years_experience ?? 0,
+              availability: sp?.availability ?? "available",
+              areas_served: sp?.areas_served ?? [],
+            }}
+            onSaved={load}
+          />
+        )}
       </section>
 
       {!isOwn && isProvider && (
