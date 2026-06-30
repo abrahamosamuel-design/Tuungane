@@ -224,6 +224,7 @@ export function EditProfileDialog({ open, onClose, userId, hasServiceProfile, in
                   <Input type="email" value={form.email ?? ""} onChange={(e) => set("email", e.target.value)} />
                 </div>
               </div>
+            </>
           )}
         </div>
         <DialogFooter className="gap-2">
