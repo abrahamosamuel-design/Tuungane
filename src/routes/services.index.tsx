@@ -573,6 +573,9 @@ function ProviderCardCompact({ p, userLoc, onRequest }: { p: RealProvider; userL
       </Link>
 
       <div className="flex flex-wrap items-center gap-1.5 px-3">
+        {p.price_type && (
+          <PriceGuideChip guide={{ price_type: p.price_type as PriceType, price_fixed_ugx: p.price_fixed_ugx ?? null, price_min_ugx: p.price_min_ugx ?? null, price_max_ugx: p.price_max_ugx ?? null }} compact />
+        )}
         {isVerified && (
           <span className="inline-flex items-center gap-1 rounded-full bg-green/10 px-2 py-0.5 text-[10px] font-semibold text-green">
             <BadgeCheck className="h-3 w-3" /> Verified
