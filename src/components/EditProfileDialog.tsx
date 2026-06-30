@@ -51,16 +51,17 @@ export function EditProfileDialog({ open, onClose, userId, hasServiceProfile, in
       if (e1) throw e1;
 
       if (hasServiceProfile) {
+        const availability = (form.availability ?? "available") as "available" | "away" | "busy";
         const { error: e2 } = await supabase.from("service_profiles").update({
-          business_name: form.business_name || null,
-          bio: form.sp_bio || null,
+          business_name: form.business_name || undefined,
+          bio: form.sp_bio || undefined,
           town: form.town,
           district: form.district,
-          phone: form.phone || null,
-          whatsapp: form.whatsapp || null,
-          email: form.email || null,
+          phone: form.phone || undefined,
+          whatsapp: form.whatsapp || undefined,
+          email: form.email || undefined,
           years_experience: form.years_experience ?? 0,
-          availability: form.availability || "flexible",
+          availability,
           areas_served: form.areas_served ?? [],
         }).eq("user_id", userId);
         if (e2) throw e2;
