@@ -3233,6 +3233,10 @@ export type Database = {
         }
         Returns: string
       }
+      sync_is_provider_for_user: {
+        Args: { p_user_id: string }
+        Returns: undefined
+      }
       trust_rank: {
         Args: {
           _id: string
