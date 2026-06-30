@@ -127,12 +127,10 @@ export function EditProfileDialog({ open, onClose, userId, hasServiceProfile, in
                 </div>
                 <div>
                   <Label>Availability</Label>
-                  <select className="mt-1 h-10 w-full rounded-md border border-input bg-background px-3 text-sm capitalize" value={form.availability ?? "flexible"} onChange={(e) => set("availability", e.target.value)}>
-                    <option value="flexible">Flexible</option>
-                    <option value="weekdays">Weekdays</option>
-                    <option value="weekends">Weekends</option>
-                    <option value="evenings">Evenings</option>
-                    <option value="full_time">Full time</option>
+                  <select className="mt-1 h-10 w-full rounded-md border border-input bg-background px-3 text-sm capitalize" value={form.availability ?? "available"} onChange={(e) => set("availability", e.target.value)}>
+                    <option value="available">Available</option>
+                    <option value="busy">Busy</option>
+                    <option value="away">Away</option>
                   </select>
                 </div>
               </div>
