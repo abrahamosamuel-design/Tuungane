@@ -27,6 +27,9 @@ import type { PriceType } from "@/lib/price-guide";
 const iconMap: Record<string, any> = { Wrench, Sparkles, Building2, Scissors, Truck, Car, GraduationCap, Camera, ChefHat, Laptop, HeartPulse, Sprout, MoreHorizontal };
 
 export const Route = createFileRoute("/services/")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    sort: (search.sort === "recent" ? "recent" : undefined) as "recent" | undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Find Trusted Services Near You — Tuungane" },
@@ -35,6 +38,7 @@ export const Route = createFileRoute("/services/")({
   }),
   component: Services,
 });
+
 
 type RealFilter = "all" | "verified" | "featured" | "recent" | "available" | "near";
 
