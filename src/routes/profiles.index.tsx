@@ -187,16 +187,44 @@ function ProfilesBrowsePage() {
                       {[p.area, p.town, p.district].filter(Boolean).join(", ")}
                     </p>
                   )}
-                  {primaryByProfile[p.id] && (
-                    <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                      <PriceGuideChip guide={primaryByProfile[p.id] as PriceGuide} />
-                      {primaryByProfile[p.id].title && (
-                        <span className="truncate text-[11px] text-muted-foreground">
-                          for {primaryByProfile[p.id].title}
-                        </span>
-                      )}
-                    </div>
-                  )}
+                  {(() => {
+                    const svcs = servicesByProfile[p.id] ?? [];
+                    const primary = svcs.find((s) => s.is_primary);
+                    const isOwner = userId === p.owner_id;
+                    if (!primary && !isOwner) return null;
+                    return (
+                      <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                        {primary && <PriceGuideChip guide={primary as PriceGuide} />}
+                        {primary?.title && !isOwner && (
+                          <span className="truncate text-[11px] text-muted-foreground">
+                            for {primary.title}
+                          </span>
+                        )}
+                        {isOwner && svcs.length > 0 && (
+                          <select
+                            value={primary?.id ?? ""}
+                            disabled={savingId === p.id || svcs.length < 2}
+                            onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                            onChange={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              const id = e.target.value;
+                              if (id && id !== primary?.id) setMainService(p.id, id);
+                            }}
+                            className="max-w-[60%] truncate rounded-full border border-border bg-background px-2 py-0.5 text-[11px] text-navy disabled:opacity-60"
+                            title="Set main service"
+                          >
+                            {!primary && <option value="">Choose main service…</option>}
+                            {svcs.map((s) => (
+                              <option key={s.id} value={s.id}>
+                                {s.is_primary ? "★ " : ""}{s.title || "Untitled service"}
+                              </option>
+                            ))}
+                          </select>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </div>
               </Link>
             ))}
