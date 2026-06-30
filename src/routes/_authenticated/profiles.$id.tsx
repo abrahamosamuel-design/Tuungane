@@ -407,7 +407,7 @@ function ServiceEditor({
       price_fixed_ugx: priceType === "fixed" ? parseNum(fixed) : null,
       price_min_ugx: priceType === "starting_from" || priceType === "range" ? parseNum(minP) : null,
       price_max_ugx: priceType === "range" ? parseNum(maxP) : null,
-      price_currency: priceType ? "UGX" : null,
+      price_currency: "UGX",
       price_note: priceType ? (note.trim() || null) : null,
     };
     const validation = validatePriceGuide(guide);
