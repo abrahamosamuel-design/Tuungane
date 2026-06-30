@@ -6,6 +6,8 @@ import { MapPin, BadgeCheck, Sparkles, SearchX } from "lucide-react";
 import { EmptyState } from "@/components/EmptyState";
 import { Avatar } from "@/components/social/Avatar";
 import { ExpandableText } from "@/components/feed/ExpandableText";
+import { PriceGuideChip } from "@/components/PriceGuide";
+import type { PriceType, PriceGuide } from "@/lib/price-guide";
 
 export const Route = createFileRoute("/profiles/")({
   head: () => ({ meta: [
@@ -22,8 +24,19 @@ type PProfile = {
   verified: string; is_featured: boolean;
 };
 
+type PrimaryService = {
+  profile_id: string;
+  title: string | null;
+  price_type: PriceType | null;
+  price_fixed_ugx: number | null;
+  price_min_ugx: number | null;
+  price_max_ugx: number | null;
+  price_currency: string | null;
+};
+
 function ProfilesBrowsePage() {
   const [profiles, setProfiles] = useState<PProfile[]>([]);
+  const [primaryByProfile, setPrimaryByProfile] = useState<Record<string, PrimaryService>>({});
   const [q, setQ] = useState("");
   const [type, setType] = useState<string>("");
   const [loading, setLoading] = useState(true);
@@ -38,7 +51,20 @@ function ProfilesBrowsePage() {
         .order("is_featured", { ascending: false })
         .order("created_at", { ascending: false })
         .limit(100);
-      setProfiles((data as PProfile[]) || []);
+      const list = (data as PProfile[]) || [];
+      setProfiles(list);
+      if (list.length) {
+        const ids = list.map((p) => p.id);
+        const { data: ps } = await supabase
+          .from("profile_services")
+          .select("profile_id,title,price_type,price_fixed_ugx,price_min_ugx,price_max_ugx,price_currency")
+          .in("profile_id", ids)
+          .eq("is_primary", true)
+          .eq("active", true);
+        const map: Record<string, PrimaryService> = {};
+        for (const row of (ps ?? []) as PrimaryService[]) map[row.profile_id] = row;
+        setPrimaryByProfile(map);
+      }
       setLoading(false);
     })();
   }, []);
