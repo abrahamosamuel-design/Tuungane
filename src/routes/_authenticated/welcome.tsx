@@ -51,12 +51,29 @@ function Welcome() {
           What brings you to Tuungane today?
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Pick the path that fits you best. You can always do both later.
+          Many people on Tuungane both find services and offer services. Pick any path — you can do all of them later.
         </p>
 
         {user && <WelcomePhotoStep userId={user.id} name={firstName ?? user.email ?? "You"} />}
 
         <div className="mt-8 grid gap-4 sm:grid-cols-2">
+          <button
+            type="button"
+            onClick={() => { markSeen(); nav({ to: "/services" }); }}
+            className="group rounded-2xl border-2 border-navy/20 bg-navy/5 p-5 text-left transition hover:border-navy/60 hover:bg-navy/10 sm:col-span-2"
+          >
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-navy text-white">
+              <MessageSquare className="h-5 w-5" />
+            </div>
+            <h2 className="mt-4 font-display text-lg font-bold text-navy">Find a service</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Browse people offering services near you — plumbers, tutors, cleaners, designers and more. No commitment.
+            </p>
+            <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-navy">
+              Browse services <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
+            </span>
+          </button>
+
           <button
             type="button"
             onClick={() => { markSeen(); nav({ to: "/requests/new" }); }}
@@ -65,9 +82,9 @@ function Welcome() {
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-orange text-orange-foreground">
               <Search className="h-5 w-5" />
             </div>
-            <h2 className="mt-4 font-display text-lg font-bold text-navy">I need help with something</h2>
+            <h2 className="mt-4 font-display text-lg font-bold text-navy">Post a service request</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Describe a job — like a leaking sink or a delivery — and skilled people will reach out.
+              Describe what you need — like a leaking sink or a delivery — and skilled people will reach out to you.
             </p>
             <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-orange">
               Post a request <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
@@ -82,46 +99,30 @@ function Welcome() {
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-green text-green-foreground">
               <Briefcase className="h-5 w-5" />
             </div>
-            <h2 className="mt-4 font-display text-lg font-bold text-navy">I offer a skill or service</h2>
+            <h2 className="mt-4 font-display text-lg font-bold text-navy">Offer a service</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Create a free profile so customers can find you, see your work, and message you directly.
+              Do you have a skill people can pay for? List your service for free and start getting discovered.
             </p>
             <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-green">
-              List my skill <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
+              List your service <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
             </span>
           </button>
         </div>
 
-        <div className="mt-6 rounded-2xl border border-border bg-card p-5">
-          <div className="flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-navy/5 text-navy">
-              <MessageSquare className="h-5 w-5" />
-            </div>
-            <div>
-              <h3 className="font-display text-base font-semibold text-navy">Just looking around?</h3>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Browse what people in your area are offering — no commitment.
-              </p>
-              <Link
-                to="/services"
-                onClick={markSeen}
-                className="mt-3 inline-flex items-center gap-1 text-sm font-semibold text-navy hover:underline"
-              >
-                Browse services <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-          </div>
-        </div>
+        <p className="mt-6 text-center text-xs text-muted-foreground">
+          You're a Tuungane member — find help, offer help, or do both.
+        </p>
 
-        <div className="mt-8 text-center">
+        <div className="mt-6 text-center">
           <button
             type="button"
-            onClick={() => { markSeen(); nav({ to: "/services" }); }}
+            onClick={() => { markSeen(); nav({ to: "/" }); }}
             className="text-xs font-medium text-muted-foreground hover:text-navy"
           >
             Skip for now
           </button>
         </div>
+
       </section>
     </Layout>
   );
