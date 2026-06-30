@@ -367,7 +367,7 @@ export function HomeFeedSections() {
           <SectionTitle
             title="Recently listed services"
             subtitle="New services added by providers on Tuungane."
-            link={{ label: "View all", to: "/services" }}
+            link={{ label: "View all", to: "/services", search: { sort: "recent" } }}
           />
           <div className={`${SCROLLER} lg:grid-cols-3`}>
             {topListings.map((l) => (
@@ -375,9 +375,10 @@ export function HomeFeedSections() {
             ))}
             <div aria-hidden className="shrink-0 w-1 sm:hidden" />
           </div>
-          <MobileViewAll to="/services" label="View all services" />
+          <MobileViewAll to="/services" label="View all services" search={{ sort: "recent" }} />
         </section>
       )}
+
 
       {respondTo && (
         <ProviderResponseDialog
