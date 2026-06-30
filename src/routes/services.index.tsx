@@ -259,7 +259,7 @@ function Services() {
         <div className="mx-auto max-w-7xl">
           <ProviderTrackCTA
             title="Offer a service on Tuungane"
-            text="Get discovered by customers near you."
+            text="Get discovered by people near you."
           />
         </div>
       </section>

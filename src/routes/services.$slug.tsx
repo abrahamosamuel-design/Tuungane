@@ -224,7 +224,7 @@ function CategoryPage() {
                   <div className="mt-6 space-y-6">
                     <div className="rounded-2xl border border-dashed border-border bg-card p-8 text-center">
                       <p className="font-semibold text-navy">No providers in {category.name} yet.</p>
-                      <p className="mt-1 text-sm text-muted-foreground">Be among the first — list your service and reach customers in this category.</p>
+                      <p className="mt-1 text-sm text-muted-foreground">Be among the first — list your service and reach people in this category.</p>
                       <Link to="/login" search={{ tab: "signup", intent: "provider", redirect: "/list-skill" } as never} className="mt-5 inline-flex rounded-full bg-orange px-5 py-2 text-sm font-semibold text-orange-foreground">List your service</Link>
                     </div>
                     {others.length > 0 && (

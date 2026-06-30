@@ -296,7 +296,7 @@ function SafetyNotice() {
       <div className="flex items-start gap-2">
         <ShieldAlert className="h-3.5 w-3.5 shrink-0 text-orange" />
         <div className="flex-1">
-          <p>Stay safe: verify the customer, location, and request details before starting work.</p>
+          <p>Stay safe: verify the requester, location, and request details before starting work.</p>
           {!expanded && (
             <button
               onClick={() => setExpanded(true)}

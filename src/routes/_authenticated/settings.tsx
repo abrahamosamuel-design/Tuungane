@@ -441,22 +441,22 @@ function ProviderContactPolicySection() {
   if (!loaded) return null;
 
   const options: { value: typeof policy; label: string; hint: string }[] = [
-    { value: "after_request", label: "After I respond to a request", hint: "Default — phone shown to a customer once you've responded to their request." },
-    { value: "after_selected", label: "Only after the customer selects me", hint: "Phone shown only when the customer chooses you." },
-    { value: "never", label: "Use Tuungane messages only", hint: "Phone never shown. Customers can only reach you via Tuungane messages." },
+    { value: "after_request", label: "After I respond to a request", hint: "Default — phone shown to a member once you've responded to their request." },
+    { value: "after_selected", label: "Only after the member selects me", hint: "Phone shown only when the member chooses you." },
+    { value: "never", label: "Use Tuungane messages only", hint: "Phone never shown. Members can only reach you via Tuungane messages." },
   ];
 
   const phoneOptions: { value: typeof phoneVis; label: string; hint: string }[] = [
-    { value: "allow_calls", label: "Allow customers to call me", hint: "Phone is shown to any signed-in customer who finds you on Tuungane." },
-    { value: "logged_in_only", label: "Show phone only to logged-in customers", hint: "Default. Phone is shown to signed-in customers, never to anonymous visitors." },
-    { value: "messages_first", label: "Tuungane messages first", hint: "Phone is hidden by default — customers must start a Tuungane conversation first." },
+    { value: "allow_calls", label: "Allow members to call me", hint: "Phone is shown to any signed-in member who finds you on Tuungane." },
+    { value: "logged_in_only", label: "Show phone only to logged-in members", hint: "Default. Phone is shown to signed-in members, never to anonymous visitors." },
+    { value: "messages_first", label: "Tuungane messages first", hint: "Phone is hidden by default — members must start a Tuungane conversation first." },
     { value: "hidden", label: "Hide phone number completely", hint: "Phone is never shown. Only Tuungane messages." },
   ];
 
   return (
     <>
       <Section title="Phone visibility">
-        <p className="text-xs text-muted-foreground">Controls whether customers can see your phone number on Tuungane. Tuungane messages remain the recommended way to talk.</p>
+        <p className="text-xs text-muted-foreground">Controls whether members can see your phone number on Tuungane. Tuungane messages remain the recommended way to talk.</p>
         <div className="space-y-2">
           {phoneOptions.map((o) => (
             <label key={o.value} className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3 ${phoneVis === o.value ? "border-orange bg-orange/5" : "border-border bg-background"}`}>
@@ -471,7 +471,7 @@ function ProviderContactPolicySection() {
       </Section>
 
       <Section title="Contact reveal timing">
-        <p className="text-xs text-muted-foreground">When your phone is allowed to be shown, choose how early in the request flow customers can see it.</p>
+        <p className="text-xs text-muted-foreground">When your phone is allowed to be shown, choose how early in the request flow members can see it.</p>
         <div className="space-y-2">
           {options.map((o) => (
             <label key={o.value} className={`flex cursor-pointer items-start gap-3 rounded-xl border p-3 ${policy === o.value ? "border-orange bg-orange/5" : "border-border bg-background"}`}>

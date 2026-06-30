@@ -279,7 +279,7 @@ function UserProfile() {
                   Added by Tuungane Official
                   {sp.seeded_status === "claim_pending" && <span className="ml-2 rounded-full bg-orange/20 px-2 py-0.5 text-[10px] font-semibold text-orange">Claim under review</span>}
                 </p>
-                <p className="mt-0.5 text-xs text-muted-foreground">This profile was added by Tuungane to help customers discover this provider. If this is your business, claim it to manage it directly.</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">This profile was added by Tuungane to help people discover this provider. If this is your business, claim it to manage it directly.</p>
               </div>
             </div>
             {user && user.id !== id && sp.seeded_status === "unclaimed" && (
@@ -328,7 +328,7 @@ function UserProfile() {
                   <ProfileBoostBadges providerId={id} />
                 </h1>
                 {sp && <p className="text-sm font-medium text-orange">{formatSubcategory(sp.subcategory)} {cat && <span className="text-muted-foreground">· {cat.name}</span>}</p>}
-                {!sp && <p className="text-sm text-muted-foreground">{isProvider ? "Service provider" : "Customer"}</p>}
+                {!sp && <p className="text-sm text-muted-foreground">{isProvider ? "Service provider" : "Member"}</p>}
                 {(sp?.town || profile.town) && (
                   <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
                     <MapPin className="h-3 w-3" /> {sp?.town || profile.town}{(sp?.district || profile.district) && `, ${sp?.district || profile.district}`}
@@ -536,9 +536,9 @@ function UserProfile() {
                     {feedback.map((f) => (
                       <div key={f.id} className="rounded-2xl border border-green/30 bg-green/5 p-4">
                         <div className="flex items-center gap-3">
-                          <Avatar name={f.profile?.full_name ?? "Customer"} url={f.profile?.avatar_url ?? null} size={36} />
+                          <Avatar name={f.profile?.full_name ?? "Member"} url={f.profile?.avatar_url ?? null} size={36} />
                           <div>
-                            <p className="flex flex-wrap items-center gap-2 text-sm font-semibold text-navy">{f.profile?.full_name ?? "Customer"} <VerifiedReviewBadge /></p>
+                            <p className="flex flex-wrap items-center gap-2 text-sm font-semibold text-navy">{f.profile?.full_name ?? "Member"} <VerifiedReviewBadge /></p>
                             <p className="text-xs text-muted-foreground">{f.service_provided} · {timeAgo(f.created_at)}</p>
                           </div>
                           <span className="ml-auto text-sm text-orange">{"★".repeat(f.rating)}{"☆".repeat(5 - f.rating)}</span>

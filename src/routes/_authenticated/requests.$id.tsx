@@ -170,10 +170,10 @@ function RequestDetailsPage() {
     const { error } = await supabase.rpc("confirm_completion", { _request_id: req.id, _code: code });
     setBusy(false);
     if (error) {
-      if (error.message.includes("invalid_code")) return toast.error("Code does not match. Ask the customer for the correct code.");
+      if (error.message.includes("invalid_code")) return toast.error("Code does not match. Ask the requester for the correct code.");
       return toast.error(error.message);
     }
-    toast.success("Code accepted. Waiting for customer confirmation.");
+    toast.success("Code accepted. Waiting for requester to confirm.");
     load();
   };
 
@@ -393,7 +393,7 @@ function RequestDetailsPage() {
         {/* Provider-side safety note */}
         {!isCustomer && (
           <div className="mt-3 rounded-2xl border border-border bg-surface p-3 text-xs text-foreground/80">
-            This customer contacted you through Tuungane. Please communicate clearly, agree on service details, and update the request status so feedback can be collected after completion.
+            This member contacted you through Tuungane. Please communicate clearly, agree on service details, and update the request status so feedback can be collected after completion.
           </div>
         )}
 
@@ -465,12 +465,12 @@ function RequestDetailsPage() {
         {(req.status === "accepted" || req.status === "in_progress" || req.status === "completed") && (isCustomer || isAssignedProvider) && (
           <div className="mt-6 rounded-2xl border border-border bg-card p-5">
             <h2 className="font-display text-lg font-bold text-navy">Job tracking</h2>
-            <p className="mt-1 text-xs text-muted-foreground">{isCustomer ? <>Once the service is done, tap <strong>Confirm completion</strong> to close the job and leave a review.</> : <>The customer will tap <strong>Confirm completion</strong> once the service is done.</>}</p>
+            <p className="mt-1 text-xs text-muted-foreground">{isCustomer ? <>Once the service is done, tap <strong>Confirm completion</strong> to close the job and leave a review.</> : <>The requester will tap <strong>Confirm completion</strong> once the service is done.</>}</p>
 
             {(req.provider_confirmed_completion || req.customer_confirmed_completion) && (
               <div className="mt-3 rounded-xl border border-orange/40 bg-orange/5 p-3">
                 <p className="text-xs text-muted-foreground">
-                  {req.provider_confirmed_completion ? "✓ Provider confirmed" : "○ Provider pending"} · {req.customer_confirmed_completion ? "✓ Customer confirmed" : "○ Customer pending"}
+                  {req.provider_confirmed_completion ? "✓ Provider confirmed" : "○ Provider pending"} · {req.customer_confirmed_completion ? "✓ Requester confirmed" : "○ Requester pending"}
                 </p>
               </div>
             )}
@@ -501,7 +501,7 @@ function RequestDetailsPage() {
         <FeedbackDialog open={feedbackOpen} onClose={() => setFeedbackOpen(false)} request={req} onSubmitted={() => { load(); setFeedbackOpen(false); }} />
 
         <div className="mt-6 mb-12 text-xs text-muted-foreground">
-          <p>Customer: <span className="font-semibold text-navy">{customer?.full_name ?? "—"}</span></p>
+          <p>Requested by: <span className="font-semibold text-navy">{customer?.full_name ?? "—"}</span></p>
         </div>
       </section>
 
