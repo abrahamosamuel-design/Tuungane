@@ -291,19 +291,19 @@ export function HomeFeedSections() {
   }, [providers, userLoc, featured]);
 
   const topListings = useMemo(() => {
-    // Newest first (already from query), then prioritize verified + available + nearby
-    const sorted = sortByProximity(recentListings, userLoc, (l) => l);
-    const ranked = [...sorted].sort((a, b) => {
-      const av = a.verified === "verified" ? 1 : 0;
-      const bv = b.verified === "verified" ? 1 : 0;
-      if (bv !== av) return bv - av;
-      const aa = (a.availability || "available").toLowerCase() === "available" ? 1 : 0;
-      const ba = (b.availability || "available").toLowerCase() === "available" ? 1 : 0;
-      if (ba !== aa) return ba - aa;
-      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-    });
-    return ranked.slice(0, 6);
-  }, [recentListings, userLoc]);
+    // Strict "Recently listed" order: newest created_at first.
+    // Stable tiebreak on user_id (most recent insertion tends to have a higher uuid lex order;
+    // we just need determinism — never reorder by rating, verification, availability, or proximity).
+    return [...recentListings]
+      .sort((a, b) => {
+        const tb = new Date(b.created_at).getTime();
+        const ta = new Date(a.created_at).getTime();
+        if (tb !== ta) return tb - ta;
+        return b.user_id.localeCompare(a.user_id);
+      })
+      .slice(0, 6);
+  }, [recentListings]);
+
 
   const requestsTitle = hasNearbyReqs ? "Open requests near you" : "Latest open requests";
 
@@ -367,7 +367,7 @@ export function HomeFeedSections() {
           <SectionTitle
             title="Recently listed services"
             subtitle="New services added by providers on Tuungane."
-            link={{ label: "View all", to: "/services" }}
+            link={{ label: "View all", to: "/services", search: { sort: "recent" } }}
           />
           <div className={`${SCROLLER} lg:grid-cols-3`}>
             {topListings.map((l) => (
@@ -375,9 +375,10 @@ export function HomeFeedSections() {
             ))}
             <div aria-hidden className="shrink-0 w-1 sm:hidden" />
           </div>
-          <MobileViewAll to="/services" label="View all services" />
+          <MobileViewAll to="/services" label="View all services" search={{ sort: "recent" }} />
         </section>
       )}
+
 
       {respondTo && (
         <ProviderResponseDialog
@@ -390,7 +391,7 @@ export function HomeFeedSections() {
   );
 }
 
-function SectionTitle({ title, subtitle, link }: { title: string; subtitle?: string; link?: { label: string; to: string } }) {
+function SectionTitle({ title, subtitle, link }: { title: string; subtitle?: string; link?: { label: string; to: string; search?: Record<string, any> } }) {
   return (
     <div className="flex items-end justify-between gap-3">
       <div className="min-w-0">
@@ -401,7 +402,7 @@ function SectionTitle({ title, subtitle, link }: { title: string; subtitle?: str
         {subtitle && <p className="mt-1 text-xs text-muted-foreground sm:text-sm">{subtitle}</p>}
       </div>
       {link && (
-        <Link to={link.to} className="hidden shrink-0 text-sm font-semibold text-navy hover:text-orange sm:inline">
+        <Link to={link.to} search={link.search as any} className="hidden shrink-0 text-sm font-semibold text-navy hover:text-orange sm:inline">
           {link.label} →
         </Link>
       )}
@@ -409,15 +410,16 @@ function SectionTitle({ title, subtitle, link }: { title: string; subtitle?: str
   );
 }
 
-function MobileViewAll({ to, label }: { to: string; label: string }) {
+function MobileViewAll({ to, label, search }: { to: string; label: string; search?: Record<string, any> }) {
   return (
     <div className="mt-2 sm:hidden">
-      <Link to={to} className="inline-flex text-sm font-semibold text-navy hover:text-orange">
+      <Link to={to} search={search as any} className="inline-flex text-sm font-semibold text-navy hover:text-orange">
         {label} →
       </Link>
     </div>
   );
 }
+
 
 function CardSkeletonRow() {
   return (

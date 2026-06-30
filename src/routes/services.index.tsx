@@ -27,6 +27,9 @@ import type { PriceType } from "@/lib/price-guide";
 const iconMap: Record<string, any> = { Wrench, Sparkles, Building2, Scissors, Truck, Car, GraduationCap, Camera, ChefHat, Laptop, HeartPulse, Sprout, MoreHorizontal };
 
 export const Route = createFileRoute("/services/")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    sort: (search.sort === "recent" ? "recent" : undefined) as "recent" | undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Find Trusted Services Near You — Tuungane" },
@@ -35,6 +38,7 @@ export const Route = createFileRoute("/services/")({
   }),
   component: Services,
 });
+
 
 type RealFilter = "all" | "verified" | "featured" | "recent" | "available" | "near";
 
@@ -50,6 +54,8 @@ type RealProvider = {
   seeded_by_official: boolean;
   seeded_status: string | null;
   updated_at: string;
+  created_at?: string;
+
   availability?: string | null;
   area?: string | null;
   latitude?: number | null;
@@ -82,10 +88,12 @@ function Services() {
   const nav = useNavigate();
   const { location: userLoc } = useUserLocation();
   const { locations: featuredLocs } = useFeaturedLocations();
+  const search = Route.useSearch();
   const [q, setQ] = useState("");
   const [loc, setLoc] = useState("");
-  const [filter, setFilter] = useState<RealFilter>("all");
+  const [filter, setFilter] = useState<RealFilter>(search.sort === "recent" ? "recent" : "all");
   const [radiusKm, setRadiusKm] = useState<number | null>(null);
+
   const [real, setReal] = useState<RealProvider[]>([]);
   const [loadingReal, setLoadingReal] = useState(true);
   const [dbCats, setDbCats] = useState<Array<{ slug: string; name: string; icon: string; blurb: string; subCount: number; examples: string }> | null>(null);
@@ -118,17 +126,27 @@ function Services() {
   useEffect(() => {
     (async () => {
       setLoadingReal(true);
-      let qy = supabase.from("service_profiles").select("user_id,business_name,subcategory,bio,town,district,area,latitude,longitude,areas_served,service_radius_km,category_slug,verified,seeded_by_official,seeded_status,updated_at,availability,cover_url,media_urls,years_experience,price_type,price_fixed_ugx,price_min_ugx,price_max_ugx,price_currency,price_note").eq("suspended", false).order("updated_at", { ascending: false }).limit(60);
+      const isRecent = filter === "recent";
+      let qy = supabase.from("service_profiles").select("user_id,business_name,subcategory,bio,town,district,area,latitude,longitude,areas_served,service_radius_km,category_slug,verified,seeded_by_official,seeded_status,updated_at,created_at,availability,cover_url,media_urls,years_experience,price_type,price_fixed_ugx,price_min_ugx,price_max_ugx,price_currency,price_note").eq("suspended", false);
+      qy = isRecent
+        ? qy.order("created_at", { ascending: false }).order("user_id", { ascending: false })
+        : qy.order("updated_at", { ascending: false });
+      qy = qy.limit(60);
       if (filter === "featured") qy = qy.eq("verified", "featured");
       if (filter === "verified") qy = qy.in("verified", ["verified", "featured"]);
       if (filter === "available") qy = qy.eq("availability", "available");
 
       // Also pull public/business pages (claimed legacy listings) so their owners
       // appear as provider cards even when they don't have a service_profile row.
-      let pqy = supabase.from("public_profiles").select("owner_id,name,avatar_url,subcategory,bio,town,district,area,latitude,longitude,areas_served,service_radius_km,category_slug,verified,seeded_by_official,claim_status,updated_at,availability,cover_url").eq("suspended", false).not("owner_id", "is", null).order("updated_at", { ascending: false }).limit(60);
+      let pqy = supabase.from("public_profiles").select("owner_id,name,avatar_url,subcategory,bio,town,district,area,latitude,longitude,areas_served,service_radius_km,category_slug,verified,seeded_by_official,claim_status,updated_at,created_at,availability,cover_url").eq("suspended", false).not("owner_id", "is", null);
+      pqy = isRecent
+        ? pqy.order("created_at", { ascending: false }).order("owner_id", { ascending: false })
+        : pqy.order("updated_at", { ascending: false });
+      pqy = pqy.limit(60);
       if (filter === "featured") pqy = pqy.eq("verified", "featured");
       if (filter === "verified") pqy = pqy.in("verified", ["verified", "featured"]);
       if (filter === "available") pqy = pqy.eq("availability", "available");
+
 
       const [{ data }, { data: ppData }] = await Promise.all([qy, pqy]);
 
@@ -153,6 +171,8 @@ function Services() {
           seeded_by_official: !!pp.seeded_by_official,
           seeded_status: pp.claim_status ?? null,
           updated_at: pp.updated_at,
+          created_at: pp.created_at,
+
           availability: pp.availability ?? null,
           cover_url: pp.cover_url ?? pp.avatar_url ?? null,
           media_urls: null,
@@ -229,8 +249,18 @@ function Services() {
         const matchesL = !loc || p.town.toLowerCase().includes(loc.toLowerCase()) || p.district.toLowerCase().includes(loc.toLowerCase());
         return matchesQ && matchesL;
       })
-      .sort((a, b) => scoreProvider(b) - scoreProvider(a));
+      .sort((a, b) => {
+        if (filter === "recent") {
+          const tb = new Date(b.created_at ?? b.updated_at).getTime();
+          const ta = new Date(a.created_at ?? a.updated_at).getTime();
+          if (tb !== ta) return tb - ta;
+          return b.user_id.localeCompare(a.user_id);
+        }
+        return scoreProvider(b) - scoreProvider(a);
+      });
+    if (filter === "recent") return base;
     return filterByRadius(base, userLoc, (p) => p, radiusKm);
+
   }, [real, q, loc, filter, radiusKm, userLoc, featuredLocs]); // eslint-disable-line react-hooks/exhaustive-deps
   const radiusExpanded = radiusKm != null && userLoc && realFiltered.length === 0 && real.length > 0;
 
