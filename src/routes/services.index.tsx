@@ -122,8 +122,51 @@ function Services() {
       if (filter === "featured") qy = qy.eq("verified", "featured");
       if (filter === "verified") qy = qy.in("verified", ["verified", "featured"]);
       if (filter === "available") qy = qy.eq("availability", "available");
-      const { data } = await qy;
-      const ids = (data ?? []).map((p) => p.user_id);
+
+      // Also pull public/business pages (claimed legacy listings) so their owners
+      // appear as provider cards even when they don't have a service_profile row.
+      let pqy = supabase.from("public_profiles").select("owner_id,name,avatar_url,subcategory,bio,town,district,area,latitude,longitude,areas_served,service_radius_km,category_slug,verified,seeded_by_official,claim_status,updated_at,availability,cover_url").eq("suspended", false).not("owner_id", "is", null).order("updated_at", { ascending: false }).limit(60);
+      if (filter === "featured") pqy = pqy.eq("verified", "featured");
+      if (filter === "verified") pqy = pqy.in("verified", ["verified", "featured"]);
+      if (filter === "available") pqy = pqy.eq("availability", "available");
+
+      const [{ data }, { data: ppData }] = await Promise.all([qy, pqy]);
+
+      const spRows = (data ?? []) as any[];
+      const spOwners = new Set(spRows.map((p) => p.user_id));
+      const ppRows = ((ppData ?? []) as any[])
+        .filter((pp) => pp.owner_id && !spOwners.has(pp.owner_id))
+        .map((pp) => ({
+          user_id: pp.owner_id,
+          business_name: pp.name,
+          subcategory: pp.subcategory ?? "",
+          bio: pp.bio ?? "",
+          town: pp.town ?? "",
+          district: pp.district ?? "",
+          area: pp.area ?? null,
+          latitude: pp.latitude,
+          longitude: pp.longitude,
+          areas_served: pp.areas_served ?? null,
+          service_radius_km: pp.service_radius_km ?? null,
+          category_slug: pp.category_slug ?? "other",
+          verified: pp.verified ?? "none",
+          seeded_by_official: !!pp.seeded_by_official,
+          seeded_status: pp.claim_status ?? null,
+          updated_at: pp.updated_at,
+          availability: pp.availability ?? null,
+          cover_url: pp.cover_url ?? pp.avatar_url ?? null,
+          media_urls: null,
+          years_experience: null,
+          price_type: null,
+          price_fixed_ugx: null,
+          price_min_ugx: null,
+          price_max_ugx: null,
+          price_currency: null,
+          price_note: null,
+        }));
+
+      const merged = [...spRows, ...ppRows];
+      const ids = merged.map((p) => p.user_id);
       const profMap = new Map<string, { full_name: string; avatar_url: string | null }>();
       const trustMap = new Map<string, { trust_score: number; average_rating: number; completed_jobs: number; verified_reviews: number; response_rate: number }>();
       if (ids.length) {
@@ -140,7 +183,7 @@ function Services() {
           response_rate: Number(t.response_rate ?? 0),
         }));
       }
-      setReal((data ?? []).map((p: any) => ({
+      setReal(merged.map((p: any) => ({
         ...p,
         profile: profMap.get(p.user_id) ?? null,
         trust_score: trustMap.get(p.user_id)?.trust_score ?? 0,
