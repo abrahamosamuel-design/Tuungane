@@ -46,11 +46,21 @@ type Props = {
 export function EditProfileDialog({ open, onClose, userId, hasServiceProfile, initial, onSaved }: Props) {
   const [form, setForm] = useState(initial);
   const [busy, setBusy] = useState(false);
+  const [areaInput, setAreaInput] = useState("");
 
-  useEffect(() => { setForm(initial); }, [initial, open]);
+  useEffect(() => { setForm(initial); setAreaInput(""); }, [initial, open]);
 
   const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) => setForm((f) => ({ ...f, [k]: v }));
   const dirty = JSON.stringify(form) !== JSON.stringify(initial);
+
+  const addArea = (raw: string) => {
+    const v = raw.trim().replace(/,$/, "").trim();
+    if (!v) return;
+    if ((form.areas_served ?? []).includes(v)) { setAreaInput(""); return; }
+    set("areas_served", [...(form.areas_served ?? []), v]);
+    setAreaInput("");
+  };
+  const removeArea = (i: number) => set("areas_served", (form.areas_served ?? []).filter((_, idx) => idx !== i));
 
   const subOptions = useMemo(
     () => categories.find((c) => c.slug === form.category_slug)?.subcategories ?? [],
