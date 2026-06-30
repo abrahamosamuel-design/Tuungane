@@ -18,15 +18,17 @@ export const Route = createFileRoute("/profiles/")({
 });
 
 type PProfile = {
-  id: string; slug: string; name: string; profile_type: string;
+  id: string; owner_id: string; slug: string; name: string; profile_type: string;
   bio: string; avatar_url: string | null; cover_url: string | null;
   district: string | null; town: string | null; area: string | null;
   verified: string; is_featured: boolean;
 };
 
-type PrimaryService = {
+type ServiceRow = {
+  id: string;
   profile_id: string;
   title: string | null;
+  is_primary: boolean;
   price_type: PriceType | null;
   price_fixed_ugx: number | null;
   price_min_ugx: number | null;
@@ -36,17 +38,21 @@ type PrimaryService = {
 
 function ProfilesBrowsePage() {
   const [profiles, setProfiles] = useState<PProfile[]>([]);
-  const [primaryByProfile, setPrimaryByProfile] = useState<Record<string, PrimaryService>>({});
+  const [servicesByProfile, setServicesByProfile] = useState<Record<string, ServiceRow[]>>({});
+  const [userId, setUserId] = useState<string | null>(null);
   const [q, setQ] = useState("");
   const [type, setType] = useState<string>("");
   const [loading, setLoading] = useState(true);
+  const [savingId, setSavingId] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
       setLoading(true);
+      const { data: auth } = await supabase.auth.getUser();
+      setUserId(auth.user?.id ?? null);
       const { data } = await supabase
         .from("public_profiles")
-        .select("id,slug,name,profile_type,bio,avatar_url,cover_url,district,town,area,verified,is_featured")
+        .select("id,owner_id,slug,name,profile_type,bio,avatar_url,cover_url,district,town,area,verified,is_featured")
         .eq("suspended", false)
         .order("is_featured", { ascending: false })
         .order("created_at", { ascending: false })
@@ -57,17 +63,41 @@ function ProfilesBrowsePage() {
         const ids = list.map((p) => p.id);
         const { data: ps } = await supabase
           .from("profile_services")
-          .select("profile_id,title,price_type,price_fixed_ugx,price_min_ugx,price_max_ugx,price_currency")
+          .select("id,profile_id,title,is_primary,price_type,price_fixed_ugx,price_min_ugx,price_max_ugx,price_currency")
           .in("profile_id", ids)
-          .eq("is_primary", true)
-          .eq("active", true);
-        const map: Record<string, PrimaryService> = {};
-        for (const row of (ps ?? []) as PrimaryService[]) map[row.profile_id] = row;
-        setPrimaryByProfile(map);
+          .eq("active", true)
+          .order("is_primary", { ascending: false })
+          .order("sort_order");
+        const map: Record<string, ServiceRow[]> = {};
+        for (const row of (ps ?? []) as ServiceRow[]) {
+          (map[row.profile_id] ||= []).push(row);
+        }
+        setServicesByProfile(map);
       }
       setLoading(false);
     })();
   }, []);
+
+  async function setMainService(profileId: string, serviceId: string) {
+    setSavingId(profileId);
+    const prev = servicesByProfile[profileId] ?? [];
+    // optimistic update
+    setServicesByProfile((m) => ({
+      ...m,
+      [profileId]: [...prev]
+        .map((s) => ({ ...s, is_primary: s.id === serviceId }))
+        .sort((a, b) => Number(b.is_primary) - Number(a.is_primary)),
+    }));
+    const { error } = await supabase
+      .from("profile_services")
+      .update({ is_primary: true })
+      .eq("id", serviceId);
+    if (error) {
+      // revert
+      setServicesByProfile((m) => ({ ...m, [profileId]: prev }));
+    }
+    setSavingId(null);
+  }
 
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
