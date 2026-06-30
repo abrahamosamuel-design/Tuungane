@@ -609,6 +609,11 @@ function UserProfile() {
               areas_served: sp?.areas_served ?? [],
               category_slug: sp?.category_slug ?? "",
               subcategory: sp?.subcategory ?? "",
+              price_type: (sp?.price_type ?? null) as PriceType | null,
+              price_fixed_ugx: sp?.price_fixed_ugx ?? null,
+              price_min_ugx: sp?.price_min_ugx ?? null,
+              price_max_ugx: sp?.price_max_ugx ?? null,
+              price_note: sp?.price_note ?? "",
             }}
             onSaved={load}
           />
