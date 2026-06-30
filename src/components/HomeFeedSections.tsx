@@ -291,19 +291,19 @@ export function HomeFeedSections() {
   }, [providers, userLoc, featured]);
 
   const topListings = useMemo(() => {
-    // Newest first (already from query), then prioritize verified + available + nearby
-    const sorted = sortByProximity(recentListings, userLoc, (l) => l);
-    const ranked = [...sorted].sort((a, b) => {
-      const av = a.verified === "verified" ? 1 : 0;
-      const bv = b.verified === "verified" ? 1 : 0;
-      if (bv !== av) return bv - av;
-      const aa = (a.availability || "available").toLowerCase() === "available" ? 1 : 0;
-      const ba = (b.availability || "available").toLowerCase() === "available" ? 1 : 0;
-      if (ba !== aa) return ba - aa;
-      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-    });
-    return ranked.slice(0, 6);
-  }, [recentListings, userLoc]);
+    // Strict "Recently listed" order: newest created_at first.
+    // Stable tiebreak on user_id (most recent insertion tends to have a higher uuid lex order;
+    // we just need determinism — never reorder by rating, verification, availability, or proximity).
+    return [...recentListings]
+      .sort((a, b) => {
+        const tb = new Date(b.created_at).getTime();
+        const ta = new Date(a.created_at).getTime();
+        if (tb !== ta) return tb - ta;
+        return b.user_id.localeCompare(a.user_id);
+      })
+      .slice(0, 6);
+  }, [recentListings]);
+
 
   const requestsTitle = hasNearbyReqs ? "Open requests near you" : "Latest open requests";
 
