@@ -167,63 +167,6 @@ export function EditProfileDialog({ open, onClose, userId, hasServiceProfile, in
                   </select>
                 </div>
               </div>
-            </>
-          )}
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label>District</Label>
-              <Input value={form.district} onChange={(e) => set("district", e.target.value)} />
-            </div>
-            <div>
-              <Label>Town</Label>
-              <Input value={form.town} onChange={(e) => set("town", e.target.value)} />
-            </div>
-          </div>
-
-          {hasServiceProfile && (
-            <>
-              <div>
-                <Label>Areas served (comma separated)</Label>
-                <Input value={(form.areas_served ?? []).join(", ")} onChange={(e) => set("areas_served", e.target.value.split(",").map((s) => s.trim()).filter(Boolean))} />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label>Years experience</Label>
-                  <Input
-                    type="number"
-                    min={0}
-                    placeholder="e.g. 3"
-                    value={form.years_experience ? String(form.years_experience) : ""}
-                    onChange={(e) => {
-                      const v = e.target.value;
-                      set("years_experience", v === "" ? undefined : Math.max(0, Number(v)));
-                    }}
-                  />
-                </div>
-                <div>
-                  <Label>Availability</Label>
-                  <select className="mt-1 h-10 w-full rounded-md border border-input bg-background px-3 text-sm capitalize" value={form.availability ?? "available"} onChange={(e) => set("availability", e.target.value)}>
-                    <option value="available">Available</option>
-                    <option value="busy">Busy</option>
-                    <option value="away">Away</option>
-                  </select>
-                </div>
-              </div>
-              <div className="grid grid-cols-1 gap-3">
-                <div>
-                  <Label>Phone</Label>
-                  <Input value={form.phone ?? ""} onChange={(e) => set("phone", e.target.value)} />
-                </div>
-                <div>
-                  <Label>WhatsApp</Label>
-                  <Input value={form.whatsapp ?? ""} onChange={(e) => set("whatsapp", e.target.value)} />
-                </div>
-                <div>
-                  <Label>Email</Label>
-                  <Input type="email" value={form.email ?? ""} onChange={(e) => set("email", e.target.value)} />
-                </div>
-              </div>
 
               {/* Price Guide */}
               <div className="rounded-xl border border-border bg-surface/50 p-3">
@@ -304,6 +247,63 @@ export function EditProfileDialog({ open, onClose, userId, hasServiceProfile, in
                     />
                   </div>
                 )}
+              </div>
+            </>
+          )}
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <Label>District</Label>
+              <Input value={form.district} onChange={(e) => set("district", e.target.value)} />
+            </div>
+            <div>
+              <Label>Town</Label>
+              <Input value={form.town} onChange={(e) => set("town", e.target.value)} />
+            </div>
+          </div>
+
+          {hasServiceProfile && (
+            <>
+              <div>
+                <Label>Areas served (comma separated)</Label>
+                <Input value={(form.areas_served ?? []).join(", ")} onChange={(e) => set("areas_served", e.target.value.split(",").map((s) => s.trim()).filter(Boolean))} />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Years experience</Label>
+                  <Input
+                    type="number"
+                    min={0}
+                    placeholder="e.g. 3"
+                    value={form.years_experience ? String(form.years_experience) : ""}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      set("years_experience", v === "" ? undefined : Math.max(0, Number(v)));
+                    }}
+                  />
+                </div>
+                <div>
+                  <Label>Availability</Label>
+                  <select className="mt-1 h-10 w-full rounded-md border border-input bg-background px-3 text-sm capitalize" value={form.availability ?? "available"} onChange={(e) => set("availability", e.target.value)}>
+                    <option value="available">Available</option>
+                    <option value="busy">Busy</option>
+                    <option value="away">Away</option>
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 gap-3">
+                <div>
+                  <Label>Phone</Label>
+                  <Input value={form.phone ?? ""} onChange={(e) => set("phone", e.target.value)} />
+                </div>
+                <div>
+                  <Label>WhatsApp</Label>
+                  <Input value={form.whatsapp ?? ""} onChange={(e) => set("whatsapp", e.target.value)} />
+                </div>
+                <div>
+                  <Label>Email</Label>
+                  <Input type="email" value={form.email ?? ""} onChange={(e) => set("email", e.target.value)} />
+                </div>
               </div>
             </>
           )}
