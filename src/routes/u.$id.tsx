@@ -672,24 +672,36 @@ function UserProfile() {
 
           {tab === "services" && (
             <>
+              {isOwn && ownerPublicProfileId && (
+                <div className="flex justify-end">
+                  <button
+                    onClick={() => setSvcDialog({ open: true, mode: "create", initial: { is_primary: services.length === 0 } })}
+                    className="inline-flex items-center gap-1 rounded-full bg-orange px-4 py-2 text-xs font-semibold text-orange-foreground hover:brightness-110"
+                  >
+                    <Plus className="h-3.5 w-3.5" /> Add service
+                  </button>
+                </div>
+              )}
+              {isOwn && !ownerPublicProfileId && (
+                <div className="rounded-2xl border border-dashed border-border bg-card p-4 text-center text-sm">
+                  <p className="font-semibold text-navy">Create your provider profile first</p>
+                  <p className="mt-1 text-xs text-muted-foreground">You need a provider profile before you can add service packages.</p>
+                  <Link to="/list-skill" className="mt-2 inline-block rounded-full bg-orange px-4 py-2 text-xs font-semibold text-orange-foreground">List your service</Link>
+                </div>
+              )}
               {services.length === 0 ? (
                 <div className="rounded-2xl border border-dashed border-border bg-card p-6 text-center text-sm">
-                  <p className="font-semibold text-navy">No detailed service packages yet.</p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {isOwn
-                      ? "Add service packages so customers can see exactly what you offer, with prices and clear descriptions."
-                      : "You can still message this provider or create a service request."}
+                  <p className="font-semibold text-navy">
+                    {isOwn ? "Add your first service so customers know exactly what they can request." : "This provider hasn't added detailed service packages yet."}
                   </p>
-                  {isOwn && (
-                    <button onClick={() => setEditOpen(true)} className="mt-3 rounded-full bg-orange px-4 py-2 text-xs font-semibold text-orange-foreground">
-                      Add a service package
-                    </button>
-                  )}
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {isOwn ? "Add service packages with prices and clear descriptions." : "You can still message them or create a service request."}
+                  </p>
                 </div>
               ) : (
                 <ul className="space-y-3">
                   {services.map((s) => (
-                    <li key={s.id} className={`rounded-2xl border bg-card p-4 ${s.is_primary ? "border-orange/40 ring-1 ring-orange/15" : "border-border"}`}>
+                    <li key={s.id} className={`rounded-2xl border bg-card p-4 ${s.is_primary ? "border-orange/40 ring-1 ring-orange/15" : "border-border"} ${!s.active ? "opacity-70" : ""}`}>
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
                           <div className="flex flex-wrap items-center gap-1.5">
@@ -698,6 +710,9 @@ function UserProfile() {
                               <span className="inline-flex items-center gap-0.5 rounded-full bg-orange/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-orange">
                                 <Star className="h-3 w-3 fill-orange" /> Main
                               </span>
+                            )}
+                            {isOwn && !s.active && (
+                              <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Hidden</span>
                             )}
                           </div>
                           {s.description && <p className="mt-1 whitespace-pre-wrap text-sm text-foreground/85">{s.description}</p>}
@@ -730,7 +745,61 @@ function UserProfile() {
                             Request
                           </button>
                         )}
+                        {isOwn && (
+                          <button
+                            onClick={() => setSvcDialog({ open: true, mode: "edit", initial: {
+                              id: s.id,
+                              title: s.title,
+                              description: s.description,
+                              active: s.active,
+                              is_primary: s.is_primary,
+                              price_type: s.price_type,
+                              price_fixed_ugx: s.price_fixed_ugx,
+                              price_min_ugx: s.price_min_ugx,
+                              price_max_ugx: s.price_max_ugx,
+                              price_note: s.price_note,
+                            } })}
+                            aria-label="Edit service"
+                            className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-orange/10 hover:text-orange"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </button>
+                        )}
                       </div>
+                      {isOwn && (
+                        <div className="mt-3 flex flex-wrap gap-2 border-t border-border/60 pt-2 text-[11px] font-semibold">
+                          {!s.is_primary && (
+                            <button
+                              onClick={async () => {
+                                const { error } = await supabase.from("profile_services").update({ is_primary: true } as never).eq("id", s.id);
+                                if (error) toast.error(error.message); else { toast.success(`"${s.title}" is now your main service`); load(); }
+                              }}
+                              className="inline-flex items-center gap-1 rounded-full border border-orange/40 bg-orange/5 px-2.5 py-1 text-orange hover:bg-orange/10"
+                            >
+                              <Star className="h-3 w-3" /> Set as main
+                            </button>
+                          )}
+                          <button
+                            onClick={async () => {
+                              const { error } = await supabase.from("profile_services").update({ active: !s.active } as never).eq("id", s.id);
+                              if (error) toast.error(error.message); else { toast.success(s.active ? "Service hidden" : "Service activated"); load(); }
+                            }}
+                            className="rounded-full border border-border bg-card px-2.5 py-1 text-navy hover:border-orange"
+                          >
+                            {s.active ? "Deactivate" : "Activate"}
+                          </button>
+                          <button
+                            onClick={async () => {
+                              if (!confirm("Are you sure you want to delete this service? This action cannot be undone.")) return;
+                              const { error } = await supabase.from("profile_services").delete().eq("id", s.id);
+                              if (error) toast.error(error.message); else { toast.success("Service deleted"); load(); }
+                            }}
+                            className="rounded-full border border-destructive/40 bg-card px-2.5 py-1 text-destructive hover:bg-destructive/5"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      )}
                     </li>
                   ))}
                 </ul>
