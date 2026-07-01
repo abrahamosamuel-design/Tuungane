@@ -26,13 +26,6 @@ export const heroSlides: Slide[] = [
     altText: "A Ugandan customer connected to multiple trusted skilled providers on Tuungane",
   },
   {
-    key: "providers",
-    image: heroProviders,
-    caption: "List your service",
-    supportingText: "Create a profile and grow your customer base.",
-    altText: "Local Ugandan service providers — cleaner, electrician, tailor, plumber and tutor standing together",
-  },
-  {
     key: "request",
     image: heroRequest,
     caption: "Post a request",
@@ -45,6 +38,27 @@ export const heroSlides: Slide[] = [
     caption: "Find trusted providers",
     supportingText: "Compare options and connect with trusted people near you.",
     altText: "A customer greeting a trusted local service provider at her doorstep",
+  },
+  {
+    key: "providers",
+    image: heroProviders,
+    caption: "List your service",
+    supportingText: "Create a profile and grow your customer base.",
+    altText: "Local Ugandan service providers — cleaner, electrician, tailor, plumber and tutor standing together",
+  },
+  {
+    key: "creative",
+    image: heroCreative,
+    caption: "Creative and business services",
+    supportingText: "Find photographers, marketers, designers, and other business support services.",
+    altText: "Ugandan photographer, marketing professional, designer and branding provider standing together in a modern studio",
+  },
+  {
+    key: "property",
+    image: heroProperty,
+    caption: "Property and professional services",
+    supportingText: "Discover real estate, financial, and other trusted professional services near you.",
+    altText: "Ugandan real estate agent holding house keys with a financial consultant and professional advisor in front of a modern property",
   },
 ];
 
