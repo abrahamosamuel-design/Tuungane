@@ -563,8 +563,18 @@ function UserProfile() {
                       .slice(0, 6)
                       .map((m) => (
                         <button key={m.key} onClick={() => setTab("timeline")} className="group relative aspect-square overflow-hidden rounded-lg border border-border bg-surface">
-                          <img src={m.url} alt={m.alt} className="h-full w-full object-cover transition group-hover:scale-105" loading="lazy" />
+                          <img
+                            src={m.url}
+                            alt={m.alt}
+                            className="h-full w-full object-cover transition group-hover:scale-105"
+                            loading="lazy"
+                            onError={(e) => {
+                              const btn = (e.currentTarget as HTMLImageElement).closest("button");
+                              if (btn) (btn as HTMLElement).style.display = "none";
+                            }}
+                          />
                         </button>
+
                       ))}
                   </div>
 
