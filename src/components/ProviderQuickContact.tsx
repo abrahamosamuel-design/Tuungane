@@ -5,8 +5,10 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
 import { getRevealablePhone, logContactClick } from "@/hooks/use-contact-gate";
 import { startDirectConversation } from "@/lib/messaging";
+import { useAuthGate } from "@/components/RequireAuthDialog";
 
 type Source = "request_response" | "provider_profile" | "service_listing" | "search_result" | "request_detail" | "message_thread";
+
 
 interface Props {
   providerId: string;
