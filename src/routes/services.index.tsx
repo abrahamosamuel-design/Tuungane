@@ -149,7 +149,7 @@ function Services() {
 
       // Also pull public/business pages (claimed legacy listings) so their owners
       // appear as provider cards even when they don't have a service_profile row.
-      let pqy = supabase.from("public_profiles").select(ppCols).eq("suspended", false).not("owner_id", "is", null);
+      let pqy: any = supabase.from("public_profiles").select(ppCols as string).eq("suspended", false).not("owner_id", "is", null);
       pqy = isRecent
         ? pqy.order("created_at", { ascending: false }).order("owner_id", { ascending: false })
         : pqy.order("updated_at", { ascending: false });
