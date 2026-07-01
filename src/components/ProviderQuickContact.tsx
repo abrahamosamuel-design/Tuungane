@@ -66,23 +66,31 @@ export function ProviderQuickContact({
   const handleCall = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (user) {
-      logContactClick({
-        customerId: user.id,
-        providerId,
-        serviceId: serviceId ?? null,
-        source,
-        method: "call",
-      }).catch(() => {});
+    if (!user) {
+      requireAuth(undefined, {
+        title: "Sign in to call this provider",
+        message: "Create a free Tuungane account to view phone numbers and contact providers directly.",
+      });
+      return;
     }
-    window.location.href = `tel:${phone}`;
+    logContactClick({
+      customerId: user.id,
+      providerId,
+      serviceId: serviceId ?? null,
+      source,
+      method: "call",
+    }).catch(() => {});
+    if (phone) window.location.href = `tel:${phone}`;
   };
 
   const handleMessage = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (!user) {
-      navigate({ to: "/login" });
+      requireAuth(undefined, {
+        title: "Sign in to message this provider",
+        message: "Create a free Tuungane account to message providers and get help fast.",
+      });
       return;
     }
     if (user.id === providerId) {
@@ -110,7 +118,7 @@ export function ProviderQuickContact({
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>
-      {phone && (
+      {showCallButton && (
         <button onClick={handleCall} aria-label="Call provider" className={base}>
           <Phone className={compact ? "h-4 w-4" : "h-3.5 w-3.5"} />
           {!compact && <span>Call</span>}
