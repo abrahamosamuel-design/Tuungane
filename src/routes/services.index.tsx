@@ -138,7 +138,7 @@ function Services() {
         ? "owner_id,name,avatar_url,subcategory,bio,town,district,areas_served,service_radius_km,category_slug,verified,claim_status,updated_at,created_at,availability,cover_url"
         : "owner_id,name,avatar_url,subcategory,bio,town,district,area,latitude,longitude,areas_served,service_radius_km,category_slug,verified,seeded_by_official,claim_status,updated_at,created_at,availability,cover_url";
 
-      let qy: any = supabase.from("service_profiles").select(spCols).eq("suspended", false);
+      let qy: any = supabase.from("service_profiles").select(spCols as string).eq("suspended", false);
       qy = isRecent
         ? qy.order("created_at", { ascending: false }).order("user_id", { ascending: false })
         : qy.order("updated_at", { ascending: false });
