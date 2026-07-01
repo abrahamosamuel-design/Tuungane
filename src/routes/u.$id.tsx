@@ -813,6 +813,16 @@ function UserProfile() {
         <ReviewDialog open={revOpen} onClose={() => setRevOpen(false)} providerUserId={id} onPosted={load} />
         
         <ClaimProfileDialog serviceProfileUserId={id} open={claimOpen} onClose={() => setClaimOpen(false)} onSubmitted={load} />
+        {isOwn && ownerPublicProfileId && (
+          <ManageServiceDialog
+            open={svcDialog.open}
+            onClose={() => setSvcDialog((s) => ({ ...s, open: false }))}
+            mode={svcDialog.mode}
+            profileId={ownerPublicProfileId}
+            initial={svcDialog.initial}
+            onSaved={load}
+          />
+        )}
         <RequestServiceDialog open={requestOpen} onClose={() => setRequestOpen(false)} providerId={id} providerName={sp?.business_name || profile.full_name} defaultCategorySlug={sp?.category_slug} defaultSubcategory={sp?.subcategory} onSubmitted={() => { load(); gate.refresh(); }} />
         <ContactProviderModal open={contactModalOpen} onClose={() => setContactModalOpen(false)} providerName={sp?.business_name || profile.full_name} onRequestService={() => setRequestOpen(true)} />
         {isOwn && (
