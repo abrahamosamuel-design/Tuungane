@@ -33,6 +33,7 @@ export function ProviderQuickContact({
 }: Props) {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { requireAuth } = useAuthGate();
   const [phone, setPhone] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -53,7 +54,9 @@ export function ProviderQuickContact({
 
   if (!loaded) return null;
   const canMessage = showMessage && (!user || user.id !== providerId);
-  if (!phone && !canMessage) return null;
+  // Guests always see Call + Message; clicking prompts sign-in via the auth gate.
+  const showCallButton = !!phone || !user;
+  if (!showCallButton && !canMessage) return null;
 
   const compact = variant === "compact";
   const base = compact
