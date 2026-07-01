@@ -50,7 +50,7 @@ export function EditPostDialog({ open, onClose, post, onSaved }: Props) {
       location: location.trim() || null,
       media_urls: mediaUrls,
     };
-    const { error } = await supabase.from("timeline_posts").update(payload).eq("id", post.id);
+    const { error } = await (supabase.from("timeline_posts") as unknown as { update: (v: unknown) => { eq: (c: string, id: string) => Promise<{ error: { message: string } | null }> } }).update(payload).eq("id", post.id);
     setBusy(false);
     if (error) { toast.error(error.message || "Could not save changes. Please try again."); return; }
     toast.success("Post updated");
