@@ -237,7 +237,7 @@ export function CommunityUpdatesSection() {
         className="-mx-4 mt-4 flex snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain px-4 pb-3 scroll-px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:px-0"
       >
         {top.map((p) => (
-          <div key={p.id} data-cu-card className="shrink-0 snap-start">
+          <div key={p.id} data-cu-card className="w-[85vw] max-w-[340px] shrink-0 snap-start sm:w-[320px]">
             <CommunityCard p={p} userLoc={userLoc} />
           </div>
         ))}
