@@ -648,7 +648,7 @@ function UserProfile() {
 
       {!isOwn && isProvider && (
         <MobileActionBar>
-          <button onClick={() => { if (!user) { nav({ to: "/login", search: { tab: "login", redirect: `/u/${id}` } as never }); return; } setRequestOpen(true); }} className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-orange px-4 py-2.5 text-sm font-semibold text-orange-foreground shadow-sm"><ClipboardList className="h-4 w-4" /> Request service</button>
+          <button onClick={() => requireAuth(() => setRequestOpen(true), { title: "Sign in to request this service", message: "Create a free Tuungane account to send a request to this provider.", redirect: `/u/${id}` })} className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-orange px-4 py-2.5 text-sm font-semibold text-orange-foreground shadow-sm"><ClipboardList className="h-4 w-4" /> Request service</button>
           {sp?.phone && <a href={`tel:${sp.phone}`} aria-label="Call provider" className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-card text-navy"><Phone className="h-4 w-4" /></a>}
         </MobileActionBar>
       )}
