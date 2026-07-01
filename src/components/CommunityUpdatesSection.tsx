@@ -277,7 +277,7 @@ function CommunityCard({ p, userLoc }: { p: CUPost; userLoc: ReturnType<typeof u
   const isServiceLike = p.post_type === "available" || p.post_type === "new_service" || p.post_type === "completed_job";
 
   return (
-    <article className="flex w-[88vw] max-w-[340px] shrink-0 snap-start flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)] transition hover:border-orange sm:w-auto sm:max-w-none">
+    <article className="flex w-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)] transition hover:border-orange">
       <div className="flex items-start gap-3 p-4 pb-2">
         <Link to="/u/$id" params={{ id: p.provider_user_id }} className="shrink-0">
           <FeedAvatar src={p.author?.avatar_url ?? null} name={authorName} size={40} ring={p.is_verified} />
