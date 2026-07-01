@@ -256,6 +256,34 @@ function SlideChips({ slideKey }: { slideKey: SlideKey }) {
       </>
     );
   }
+  if (slideKey === "creative") {
+    return (
+      <>
+        <Chip dot="green" className="absolute left-3 top-[8%]">Photographer</Chip>
+        <Chip className="absolute right-3 top-[10%]">
+          <BadgeCheck className="h-3 w-3 text-green" /> Verified
+        </Chip>
+        <Chip dot="orange" className="absolute left-3 top-[36%]">Marketing</Chip>
+        <Chip className="absolute right-3 top-[38%]">
+          <Star className="h-3 w-3 fill-orange text-orange" /> 4.9
+        </Chip>
+      </>
+    );
+  }
+  if (slideKey === "property") {
+    return (
+      <>
+        <Chip dot="green" className="absolute left-3 top-[8%]">Real Estate</Chip>
+        <Chip className="absolute right-3 top-[10%]">
+          <BadgeCheck className="h-3 w-3 text-green" /> Verified
+        </Chip>
+        <Chip dot="orange" className="absolute left-3 top-[36%]">Financial services</Chip>
+        <Chip className="absolute right-3 top-[38%]">
+          <MapPin className="h-3 w-3 text-orange" /> Near you
+        </Chip>
+      </>
+    );
+  }
   // trust
   return (
     <>
