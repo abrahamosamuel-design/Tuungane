@@ -4,6 +4,7 @@ import { Footer } from "./Footer";
 import { MobileBottomNav } from "./MobileBottomNav";
 import { RequestFab } from "./RequestFab";
 import { OfflineBanner } from "./OfflineBanner";
+import { InstallPrompt } from "./InstallPrompt";
 
 export function Layout({ children, hideFooter = false }: { children: ReactNode; hideFooter?: boolean }) {
   return (
@@ -14,6 +15,7 @@ export function Layout({ children, hideFooter = false }: { children: ReactNode; 
       {!hideFooter && <Footer />}
       <RequestFab />
       <MobileBottomNav />
+      <InstallPrompt />
     </div>
   );
 }
