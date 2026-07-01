@@ -122,7 +122,7 @@ export function PostCard({ post, onChanged, userLoc }: Props) {
   };
 
   const deletePost = async () => {
-    if (!confirm("Delete this post?")) return;
+    if (!confirm("Are you sure you want to delete this post? This action cannot be undone.")) return;
     await supabase.from("timeline_posts").delete().eq("id", post.id);
     toast.success("Post deleted");
     onChanged?.();
