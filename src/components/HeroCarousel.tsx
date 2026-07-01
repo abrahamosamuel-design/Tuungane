@@ -1,16 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import heroNetwork from "@/assets/hero-network.jpg";
-import heroProvidersAsset from "@/assets/hero-providers.jpg.asset.json";
-import heroRequestAsset from "@/assets/hero-request.jpg.asset.json";
-import heroTrustAsset from "@/assets/hero-trust.jpg.asset.json";
-import heroMarketplaceAsset from "@/assets/hero-marketplace.jpg.asset.json";
-import heroGrowthAsset from "@/assets/hero-growth.jpg.asset.json";
-
-const heroProviders = heroProvidersAsset.url;
-const heroRequest = heroRequestAsset.url;
-const heroTrust = heroTrustAsset.url;
-const heroMarketplace = heroMarketplaceAsset.url;
-const heroGrowth = heroGrowthAsset.url;
+import heroProviders from "@/assets/hero-providers-real.jpg";
+import heroRequest from "@/assets/hero-request-real.jpg";
+import heroTrust from "@/assets/hero-trust-real.jpg";
 
 type Slide = {
   image: string;
@@ -32,31 +24,19 @@ export const heroSlides: Slide[] = [
     image: heroProviders,
     caption: "List your service",
     supportingText: "Create a free profile, show what you do, and grow your customer base.",
-    altText: "Local Ugandan service providers — photographer, cleaner, tutor, tailor, electrician and beauty provider",
+    altText: "Local Ugandan service providers — cleaner, electrician, tailor, plumber and tutor standing together",
   },
   {
     image: heroRequest,
     caption: "Post a request",
     supportingText: "Tell providers what you need and get responses from people near you.",
-    altText: "A customer using a smartphone to post a service request on Tuungane",
+    altText: "A Ugandan customer using her phone at home to post a service request on Tuungane",
   },
   {
     image: heroTrust,
     caption: "Find trusted providers",
-    supportingText: "View profiles, message providers, compare responses, and choose who to contact.",
-    altText: "Trusted local Tuungane providers and customers connecting through profiles, ratings and messages",
-  },
-  {
-    image: heroMarketplace,
-    caption: "Services and requests in one place",
-    supportingText: "Discover providers, browse open requests, and connect with local opportunities.",
-    altText: "Tuungane local services marketplace with service cards, open requests and category icons",
-  },
-  {
-    image: heroGrowth,
-    caption: "Grow your customer base",
-    supportingText: "Tuungane helps service providers become visible and easier to reach.",
-    altText: "A Ugandan service provider receiving new customer inquiries and ratings on their phone",
+    supportingText: "Discover services, compare options, and connect with people near you.",
+    altText: "A customer greeting a trusted local service provider at her doorstep",
   },
 ];
 
@@ -79,7 +59,6 @@ export function HeroCarousel() {
     setIndex(((next % heroSlides.length) + heroSlides.length) % heroSlides.length);
   }, []);
 
-  // Auto-advance
   useEffect(() => {
     if (paused || reduceMotion.current) return;
     const t = setTimeout(() => go(index + 1), AUTO_MS);
@@ -121,7 +100,6 @@ export function HeroCarousel() {
       aria-label="Tuungane highlights"
     >
       <div className="relative overflow-hidden rounded-3xl">
-        {/* Slides */}
         <div className="relative aspect-[4/5] w-full">
           {heroSlides.map((s, i) => (
             <img
@@ -140,55 +118,45 @@ export function HeroCarousel() {
             />
           ))}
 
-          {/* Edge fade into navy */}
+          {/* Subtle dark gradient at bottom for caption readability */}
           <div
             className="pointer-events-none absolute inset-0"
             style={{
               background:
-                "radial-gradient(ellipse at center, transparent 60%, oklch(0.22 0.05 250 / 0.6) 88%, oklch(0.22 0.05 250) 100%)",
+                "linear-gradient(to top, oklch(0.22 0.05 250 / 0.75) 0%, oklch(0.22 0.05 250 / 0.15) 35%, transparent 60%)",
             }}
           />
 
-          {/* Floating provider badges — only on slide 1 (matches original hero) */}
           {current.badges && (
             <>
-              <span className="absolute left-2 top-[18%] rounded-full bg-white/95 px-2 py-1 text-[10px] font-semibold text-navy shadow-md backdrop-blur sm:left-4 sm:px-2.5 sm:text-[11px]">
+              <span className="absolute left-2 top-[10%] rounded-full bg-white/95 px-2 py-1 text-[10px] font-semibold text-navy shadow-md backdrop-blur sm:left-4 sm:px-2.5 sm:text-[11px]">
                 <span className="mr-1 inline-block h-1.5 w-1.5 rounded-full bg-green align-middle" />
                 Electrician
               </span>
-              <span className="absolute right-2 top-[14%] rounded-full bg-white/95 px-2 py-1 text-[10px] font-semibold text-navy shadow-md backdrop-blur sm:right-4 sm:px-2.5 sm:text-[11px]">
+              <span className="absolute right-2 top-[8%] rounded-full bg-white/95 px-2 py-1 text-[10px] font-semibold text-navy shadow-md backdrop-blur sm:right-4 sm:px-2.5 sm:text-[11px]">
                 <span className="mr-1 inline-block h-1.5 w-1.5 rounded-full bg-green align-middle" />
                 Tutor
               </span>
-              <span className="absolute left-1 top-[42%] rounded-full bg-white/95 px-2 py-1 text-[10px] font-semibold text-navy shadow-md backdrop-blur sm:left-3 sm:px-2.5 sm:text-[11px]">
-                <span className="mr-1 inline-block h-1.5 w-1.5 rounded-full bg-green align-middle" />
+              <span className="absolute left-3 top-[38%] rounded-full bg-white/95 px-2 py-1 text-[10px] font-semibold text-navy shadow-md backdrop-blur sm:px-2.5 sm:text-[11px]">
+                <span className="mr-1 inline-block h-1.5 w-1.5 rounded-full bg-orange align-middle" />
                 Cleaner
               </span>
-              <span className="absolute right-1 top-[44%] rounded-full bg-white/95 px-2 py-1 text-[10px] font-semibold text-navy shadow-md backdrop-blur sm:right-3 sm:px-2.5 sm:text-[11px]">
-                <span className="mr-1 inline-block h-1.5 w-1.5 rounded-full bg-green align-middle" />
+              <span className="absolute right-3 top-[40%] rounded-full bg-white/95 px-2 py-1 text-[10px] font-semibold text-navy shadow-md backdrop-blur sm:px-2.5 sm:text-[11px]">
+                <span className="mr-1 inline-block h-1.5 w-1.5 rounded-full bg-orange align-middle" />
                 Tailor
-              </span>
-              <span className="absolute left-4 bottom-[22%] rounded-full bg-white/95 px-2 py-1 text-[10px] font-semibold text-navy shadow-md backdrop-blur sm:left-8 sm:px-2.5 sm:text-[11px]">
-                <span className="mr-1 inline-block h-1.5 w-1.5 rounded-full bg-orange align-middle" />
-                House Help
-              </span>
-              <span className="absolute right-4 bottom-[22%] rounded-full bg-white/95 px-2 py-1 text-[10px] font-semibold text-navy shadow-md backdrop-blur sm:right-8 sm:px-2.5 sm:text-[11px]">
-                <span className="mr-1 inline-block h-1.5 w-1.5 rounded-full bg-orange align-middle" />
-                Web Designer
               </span>
             </>
           )}
 
-          {/* Caption overlay */}
           <div className="absolute inset-x-0 bottom-0 p-3 sm:p-4">
             <div
               key={index}
-              className="mx-auto max-w-[92%] animate-fade-in rounded-2xl bg-navy/70 px-3 py-2 text-center text-white shadow-lg backdrop-blur-sm sm:px-4 sm:py-2.5"
+              className="mx-auto max-w-[92%] animate-fade-in rounded-2xl bg-navy/60 px-3 py-2 text-center text-white shadow-lg backdrop-blur-sm sm:px-4 sm:py-2.5"
             >
-              <p className="text-[11px] font-semibold leading-tight sm:text-sm" aria-live="polite">
+              <p className="text-[12px] font-semibold leading-tight sm:text-sm" aria-live="polite">
                 {current.caption}
               </p>
-              <p className="mt-0.5 text-[10px] leading-snug text-white/85 sm:text-xs">
+              <p className="mt-0.5 text-[11px] leading-snug text-white/90 sm:text-xs">
                 {current.supportingText}
               </p>
             </div>
@@ -196,7 +164,6 @@ export function HeroCarousel() {
         </div>
       </div>
 
-      {/* Pagination dots */}
       <div className="mt-3 flex items-center justify-center gap-1.5" role="tablist" aria-label="Hero slides">
         {heroSlides.map((s, i) => (
           <button
