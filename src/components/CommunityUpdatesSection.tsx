@@ -73,12 +73,14 @@ export function CommunityUpdatesSection() {
       if (!raw.length) { if (!cancelled) setPosts([]); return; }
 
       const ids = Array.from(new Set(raw.map((p) => p.provider_user_id)));
-      const [{ data: profs }, { data: sps }] = await Promise.all([
+      const [{ data: profs }, { data: sps }, { data: pps }] = await Promise.all([
         supabase.from("profiles").select("id,full_name,avatar_url,is_provider").in("id", ids),
-        supabase.from("service_profiles").select("user_id,verified,suspended").in("user_id", ids),
+        supabase.from("service_profiles").select("user_id,business_name,verified,suspended,cover_url").in("user_id", ids),
+        supabase.from("public_profiles").select("owner_id,name,avatar_url,cover_url,verified").in("owner_id", ids),
       ]);
       const profMap = new Map((profs ?? []).map((p: any) => [p.id, p]));
       const spMap = new Map((sps ?? []).map((s: any) => [s.user_id, s]));
+      const ppMap = new Map((pps ?? []).filter((p: any) => p.owner_id).map((p: any) => [p.owner_id, p]));
 
       // Fetch like/comment counts in parallel per post (cheap for ~40).
       const counts = await Promise.all(
