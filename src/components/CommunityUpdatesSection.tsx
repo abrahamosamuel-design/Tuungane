@@ -353,8 +353,8 @@ function CommunityCard({ p, userLoc }: { p: CUPost; userLoc: ReturnType<typeof u
 
       <div className="mt-auto flex items-center gap-2 border-t border-border bg-surface px-3 py-2.5">
         <Link
-          to="/u/$id"
-          params={{ id: p.provider_user_id }}
+          to="/posts/$id"
+          params={{ id: p.id }}
           className="inline-flex flex-1 items-center justify-center rounded-full bg-orange px-3 py-2 text-xs font-semibold text-orange-foreground hover:brightness-110"
         >
           View post
