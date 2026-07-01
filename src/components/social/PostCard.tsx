@@ -260,6 +260,9 @@ export function PostCard({ post, onChanged, userLoc }: Props) {
 
       <ReportDialog open={reportOpen} onClose={() => setReportOpen(false)} targetType="post" targetId={post.id} />
       <RecommendDialog open={recOpen} onClose={() => setRecOpen(false)} providerUserId={post.provider_user_id} />
+      {user?.id === post.provider_user_id && (
+        <EditPostDialog open={editOpen} onClose={() => setEditOpen(false)} post={post} onSaved={onChanged} />
+      )}
     </>
   );
 }
