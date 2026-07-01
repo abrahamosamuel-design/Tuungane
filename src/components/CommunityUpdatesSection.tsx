@@ -98,13 +98,22 @@ export function CommunityUpdatesSection() {
         .map((p) => {
           const prof = profMap.get(p.provider_user_id) as any;
           const sp = spMap.get(p.provider_user_id) as any;
+          const pp = ppMap.get(p.provider_user_id) as any;
           if (sp?.suspended) return null;
           const c = countMap.get(p.id);
+          const fullName =
+            sp?.business_name ||
+            pp?.name ||
+            prof?.full_name ||
+            "Service Provider";
+          const avatar = prof?.avatar_url || pp?.avatar_url || pp?.cover_url || sp?.cover_url || null;
+          const isProvider = !!prof?.is_provider || !!sp || !!pp;
+          const isVerified = sp?.verified === "verified" || pp?.verified === "verified";
           return {
             ...p,
-            author: prof ? { full_name: prof.full_name, avatar_url: prof.avatar_url } : null,
-            is_provider: !!prof?.is_provider,
-            is_verified: sp?.verified === "verified",
+            author: { full_name: fullName, avatar_url: avatar },
+            is_provider: isProvider,
+            is_verified: isVerified,
             likes: c?.likes ?? 0,
             comments: c?.comments ?? 0,
           } as CUPost;
