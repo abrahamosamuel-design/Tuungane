@@ -169,15 +169,24 @@ function UserProfile() {
       setSp(s as typeof sp);
     }
 
-    // Load service packages for the Services tab.
-    const { data: svcRows } = await supabase
-      .from("profile_services")
-      .select("id,title,description,active,is_primary,price_type,price_fixed_ugx,price_min_ugx,price_max_ugx,price_currency,price_note,price_guidance_ugx,provider_user_id,sort_order")
-      .eq("provider_user_id", id)
-      .eq("active", true)
-      .order("is_primary", { ascending: false })
-      .order("sort_order", { ascending: true });
-    setServices((svcRows ?? []) as unknown as ProfileServiceRow[]);
+    // Load service packages for the Services tab (via linked public_profiles).
+    const { data: pubProfiles } = await supabase
+      .from("public_profiles")
+      .select("id")
+      .eq("owner_id", id);
+    const pubIds = (pubProfiles ?? []).map((p) => p.id);
+    if (pubIds.length) {
+      const { data: svcRows } = await supabase
+        .from("profile_services")
+        .select("id,title,description,active,is_primary,price_type,price_fixed_ugx,price_min_ugx,price_max_ugx,price_currency,price_note,price_guidance_ugx")
+        .in("profile_id", pubIds)
+        .eq("active", true)
+        .order("is_primary", { ascending: false })
+        .order("sort_order", { ascending: true });
+      setServices((svcRows ?? []) as unknown as ProfileServiceRow[]);
+    } else {
+      setServices([]);
+    }
     const { data: ps } = await supabase.from("timeline_posts").select("*").eq("provider_user_id", id).eq("hidden", false).order("created_at", { ascending: false });
     setPosts((ps ?? []).map((r) => ({ ...r, author: p ?? undefined })) as PostRow[]);
 
