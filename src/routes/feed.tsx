@@ -84,6 +84,14 @@ function Feed() {
       // not exposed to other users). Safe for both anon and authenticated.
       const { data: profs } = await supabase.rpc("get_profile_cards", { _ids: ids });
       (profs ?? []).forEach((p) => profMap.set(p.id, { ...p, latitude: null, longitude: null } as unknown as AuthorLoc));
+      // Prefer business name for providers
+      const { data: sps } = await supabase.from("service_profiles").select("user_id,business_name").in("user_id", ids);
+      (sps ?? []).forEach((sp) => {
+        const bn = (sp.business_name ?? "").trim();
+        if (!bn) return;
+        const cur = profMap.get(sp.user_id);
+        if (cur) profMap.set(sp.user_id, { ...cur, full_name: bn });
+      });
     }
     let mapped = (rows ?? []).map((r) => ({ ...r, author: profMap.get(r.provider_user_id) })) as PostRow[];
     if (filter === "popular") {
