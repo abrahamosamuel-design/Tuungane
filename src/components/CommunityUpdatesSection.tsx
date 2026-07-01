@@ -207,6 +207,13 @@ export function CommunityUpdatesSection() {
     return () => window.clearInterval(id);
   }, [top.length, activeIdx]);
 
+  if (posts === null) return null;
+  if (top.length === 0) return null;
+
+  return (
+    <section className="mx-auto max-w-6xl px-4 pt-6 sm:px-6 sm:pt-10">
+      <div className="flex items-end justify-between gap-3">
+        <div className="min-w-0">
           <h2 className="font-display text-lg font-bold text-navy sm:text-xl">
             Community updates
             <span className="mt-1 block h-1 w-10 rounded-full bg-green/80" />
@@ -215,26 +222,44 @@ export function CommunityUpdatesSection() {
             See what people and providers are sharing on Tuungane.
           </p>
         </div>
-        <Link to="/feed" className="hidden shrink-0 text-sm font-semibold text-navy hover:text-orange sm:inline">
+        <Link to="/feed" className="shrink-0 text-sm font-semibold text-navy hover:text-orange">
           View all →
         </Link>
       </div>
 
-      <div className="-mx-4 mt-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-3 scroll-px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-3">
+      <div
+        ref={scrollerRef}
+        onPointerDown={pauseInteraction}
+        onTouchStart={pauseInteraction}
+        onMouseEnter={pauseInteraction}
+        onFocusCapture={pauseInteraction}
+        onWheel={pauseInteraction}
+        className="-mx-4 mt-4 flex snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain px-4 pb-3 scroll-px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:px-0"
+      >
         {top.map((p) => (
-          <CommunityCard key={p.id} p={p} userLoc={userLoc} />
+          <div key={p.id} data-cu-card className="shrink-0 snap-start">
+            <CommunityCard p={p} userLoc={userLoc} />
+          </div>
         ))}
-        <div aria-hidden className="shrink-0 w-1 sm:hidden" />
+        <div aria-hidden className="shrink-0 w-1" />
       </div>
 
-      <div className="mt-2 sm:hidden">
-        <Link to="/feed" className="inline-flex text-sm font-semibold text-navy hover:text-orange">
-          View all updates →
-        </Link>
-      </div>
+      {top.length > 1 && (
+        <div className="mt-2 flex items-center justify-center gap-1.5" aria-hidden>
+          {top.map((_, i) => (
+            <span
+              key={i}
+              className={`h-1.5 rounded-full transition-all ${
+                i === activeIdx ? "w-4 bg-orange" : "w-1.5 bg-navy/20"
+              }`}
+            />
+          ))}
+        </div>
+      )}
     </section>
   );
 }
+
 
 function CommunityCard({ p, userLoc }: { p: CUPost; userLoc: ReturnType<typeof useUserLocation>["location"] }) {
   const cat = useCategory(p.category_slug ?? undefined);
