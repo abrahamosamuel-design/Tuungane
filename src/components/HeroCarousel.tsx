@@ -168,8 +168,32 @@ export function HeroCarousel() {
               >
                 {current.supportingText}
               </p>
-            </div>
           </div>
+
+          {/* Prev / Next arrows — overlaid, vertically centered on side edges */}
+          <button
+            type="button"
+            aria-label="Previous hero image"
+            onClick={() => {
+              go(index - 1);
+              pauseThenResume();
+            }}
+            className="group absolute left-2 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/70 text-navy shadow-md backdrop-blur transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange sm:left-3 sm:h-10 sm:w-10"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+          <button
+            type="button"
+            aria-label="Next hero image"
+            onClick={() => {
+              go(index + 1);
+              pauseThenResume();
+            }}
+            className="group absolute right-2 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/70 text-navy shadow-md backdrop-blur transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange sm:right-3 sm:h-10 sm:w-10"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </button>
+        </div>
         </div>
       </div>
 
