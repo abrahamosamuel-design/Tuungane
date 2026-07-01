@@ -14,6 +14,7 @@ import { listSkillHref } from "@/lib/cta";
 import { HeroCarousel } from "@/components/HeroCarousel";
 import { HomeFeedSections } from "@/components/HomeFeedSections";
 import { PopularCategoriesSection } from "@/components/PopularCategoriesSection";
+import { CommunityUpdatesSection } from "@/components/CommunityUpdatesSection";
 import { SetLocationNudge } from "@/components/SetLocationNudge";
 
 
@@ -157,6 +158,9 @@ function Index() {
 
       {/* Popular categories — discovery after dynamic marketplace content */}
       <PopularCategoriesSection />
+
+      {/* Community updates — curated public posts */}
+      <CommunityUpdatesSection />
 
 
       {/* Provider CTA banner */}

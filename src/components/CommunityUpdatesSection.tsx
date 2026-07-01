@@ -1,0 +1,281 @@
+import { useEffect, useMemo, useState } from "react";
+import { Link } from "@tanstack/react-router";
+import { MapPin, Heart, MessageCircle, BadgeCheck, Briefcase } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useUserLocation } from "@/hooks/use-user-location";
+import { proximityLabel, sortByProximity } from "@/lib/location";
+import { timeAgo } from "@/lib/format";
+import { FeedAvatar } from "@/components/feed/FeedAvatar";
+import { postTypeMap, type PostTypeValue } from "@/data/postTypes";
+import { useCategory } from "@/hooks/use-categories";
+
+// Post types acceptable for homepage community updates.
+const ALLOWED_TYPES: PostTypeValue[] = [
+  "work_update",
+  "available",
+  "new_service",
+  "completed_job",
+  "before_after",
+  "opportunity_shared",
+];
+
+type CUPost = {
+  id: string;
+  provider_user_id: string;
+  text: string | null;
+  category_slug: string | null;
+  location: string | null;
+  media_urls: string[] | null;
+  featured: boolean;
+  created_at: string;
+  post_type: PostTypeValue | null;
+  district: string | null;
+  town: string | null;
+  area: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  author?: { full_name: string; avatar_url: string | null } | null;
+  is_provider?: boolean;
+  is_verified?: boolean;
+  likes?: number;
+  comments?: number;
+};
+
+// Bare-bones phone-like sequence detector (7+ consecutive digits, tolerating spaces/dashes)
+const PHONE_RE = /(?:\+?\d[\s\-().]?){7,}\d/;
+
+// Very light quality filter — drop tiny/empty posts w/ no media.
+function isQuality(p: CUPost) {
+  const text = (p.text ?? "").trim();
+  const hasMedia = (p.media_urls ?? []).length > 0;
+  if (!text && !hasMedia) return false;
+  if (text && text.length < 12 && !hasMedia) return false;
+  if (PHONE_RE.test(text)) return false;
+  return true;
+}
+
+export function CommunityUpdatesSection() {
+  const { location: userLoc } = useUserLocation();
+  const [posts, setPosts] = useState<CUPost[] | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("timeline_posts")
+        .select("id,provider_user_id,text,category_slug,location,media_urls,featured,created_at,post_type,district,town,area,latitude,longitude")
+        .eq("hidden", false)
+        .in("post_type", ALLOWED_TYPES as unknown as never)
+        .order("created_at", { ascending: false })
+        .limit(40);
+
+      const raw = ((data ?? []) as CUPost[]).filter(isQuality);
+      if (!raw.length) { if (!cancelled) setPosts([]); return; }
+
+      const ids = Array.from(new Set(raw.map((p) => p.provider_user_id)));
+      const [{ data: profs }, { data: sps }] = await Promise.all([
+        supabase.from("profiles").select("id,full_name,avatar_url,is_provider").in("id", ids),
+        supabase.from("service_profiles").select("user_id,verified,suspended").in("user_id", ids),
+      ]);
+      const profMap = new Map((profs ?? []).map((p: any) => [p.id, p]));
+      const spMap = new Map((sps ?? []).map((s: any) => [s.user_id, s]));
+
+      // Fetch like/comment counts in parallel per post (cheap for ~40).
+      const counts = await Promise.all(
+        raw.map(async (p) => {
+          const [{ count: lc }, { count: cc }] = await Promise.all([
+            supabase.from("post_likes").select("*", { count: "exact", head: true }).eq("post_id", p.id),
+            supabase.from("post_comments").select("*", { count: "exact", head: true }).eq("post_id", p.id).eq("hidden", false),
+          ]);
+          return { id: p.id, likes: lc ?? 0, comments: cc ?? 0 };
+        })
+      );
+      const countMap = new Map(counts.map((c) => [c.id, c]));
+
+      const enriched: CUPost[] = raw
+        .map((p) => {
+          const prof = profMap.get(p.provider_user_id) as any;
+          const sp = spMap.get(p.provider_user_id) as any;
+          if (sp?.suspended) return null;
+          const c = countMap.get(p.id);
+          return {
+            ...p,
+            author: prof ? { full_name: prof.full_name, avatar_url: prof.avatar_url } : null,
+            is_provider: !!prof?.is_provider,
+            is_verified: sp?.verified === "verified",
+            likes: c?.likes ?? 0,
+            comments: c?.comments ?? 0,
+          } as CUPost;
+        })
+        .filter(Boolean) as CUPost[];
+
+      if (!cancelled) setPosts(enriched);
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  const top = useMemo(() => {
+    if (!posts) return [];
+    const withLoc = posts.map((p) => ({
+      ...p,
+      _loc: {
+        district: p.district,
+        town: p.town,
+        area: p.area,
+        latitude: p.latitude,
+        longitude: p.longitude,
+      },
+    }));
+    const sorted = sortByProximity(withLoc, userLoc, (p) => p._loc);
+    // Quality ranking: verified > has media > has text, then recency preserved as sub-order.
+    const ranked = [...sorted].sort((a, b) => {
+      const av = (a.is_verified ? 2 : 0) + ((a.media_urls?.length ?? 0) > 0 ? 1 : 0);
+      const bv = (b.is_verified ? 2 : 0) + ((b.media_urls?.length ?? 0) > 0 ? 1 : 0);
+      if (bv !== av) return bv - av;
+      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+    });
+    return ranked.slice(0, 5);
+  }, [posts, userLoc]);
+
+  if (posts === null) return null; // don't render skeleton to keep homepage compact
+  if (top.length === 0) return null; // hide entirely when nothing qualifies
+
+  return (
+    <section className="mx-auto max-w-6xl px-4 pt-6 sm:px-6 sm:pt-10">
+      <div className="flex items-end justify-between gap-3">
+        <div className="min-w-0">
+          <h2 className="font-display text-lg font-bold text-navy sm:text-xl">
+            Community updates
+            <span className="mt-1 block h-1 w-10 rounded-full bg-green/80" />
+          </h2>
+          <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
+            See what people and providers are sharing on Tuungane.
+          </p>
+        </div>
+        <Link to="/feed" className="hidden shrink-0 text-sm font-semibold text-navy hover:text-orange sm:inline">
+          View all →
+        </Link>
+      </div>
+
+      <div className="-mx-4 mt-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-3 scroll-px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-3">
+        {top.map((p) => (
+          <CommunityCard key={p.id} p={p} userLoc={userLoc} />
+        ))}
+        <div aria-hidden className="shrink-0 w-1 sm:hidden" />
+      </div>
+
+      <div className="mt-2 sm:hidden">
+        <Link to="/feed" className="inline-flex text-sm font-semibold text-navy hover:text-orange">
+          View all updates →
+        </Link>
+      </div>
+    </section>
+  );
+}
+
+function CommunityCard({ p, userLoc }: { p: CUPost; userLoc: ReturnType<typeof useUserLocation>["location"] }) {
+  const cat = useCategory(p.category_slug ?? undefined);
+  const near = proximityLabel(userLoc, {
+    district: p.district,
+    town: p.town,
+    area: p.area,
+    latitude: p.latitude,
+    longitude: p.longitude,
+  });
+  const authorName = p.author?.full_name || "Member";
+  const loc = p.area || p.town || p.district || p.location || null;
+  const typeMeta = p.post_type ? postTypeMap[p.post_type] : null;
+  const firstImg = (p.media_urls ?? []).find((u) => u && !/\.(mp4|webm|mov|m4v)(\?|$)/i.test(u)) || null;
+  const isServiceLike = p.post_type === "available" || p.post_type === "new_service" || p.post_type === "completed_job";
+
+  return (
+    <article className="flex w-[88vw] max-w-[340px] shrink-0 snap-start flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)] transition hover:border-orange sm:w-auto sm:max-w-none">
+      <div className="flex items-start gap-3 p-4 pb-2">
+        <Link to="/u/$id" params={{ id: p.provider_user_id }} className="shrink-0">
+          <FeedAvatar src={p.author?.avatar_url ?? null} name={authorName} size={40} ring={p.is_verified} />
+        </Link>
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-x-1.5">
+            <Link to="/u/$id" params={{ id: p.provider_user_id }} className="truncate text-[14px] font-semibold text-navy hover:underline">
+              {authorName}
+            </Link>
+            {p.is_verified ? <BadgeCheck className="h-4 w-4 shrink-0 text-green" aria-label="Verified" /> : null}
+          </div>
+          <p className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+            {loc ? (<><MapPin className="h-3 w-3" /> {loc}{near ? <span className="ml-1 rounded-full bg-green/10 px-1.5 py-0.5 text-[10px] font-semibold text-green">{near}</span> : null} · </>) : null}
+            {timeAgo(p.created_at)}
+          </p>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-1.5 px-4">
+        {typeMeta && (
+          <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${typeMeta.color}`}>
+            {typeMeta.label}
+          </span>
+        )}
+        {cat && (
+          <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold text-navy">{cat.name}</span>
+        )}
+      </div>
+
+      {p.text ? (
+        <Link to="/u/$id" params={{ id: p.provider_user_id }} className="block px-4 pt-2">
+          <p className="line-clamp-3 text-sm text-navy/90">{p.text}</p>
+        </Link>
+      ) : null}
+
+      {firstImg && (
+        <Link to="/u/$id" params={{ id: p.provider_user_id }} className="mt-3 block">
+          <img
+            src={firstImg}
+            alt=""
+            loading="lazy"
+            className="h-40 w-full object-cover"
+            onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+          />
+        </Link>
+      )}
+
+      {((p.likes ?? 0) > 0 || (p.comments ?? 0) > 0) && (
+        <div className="flex items-center gap-3 px-4 pt-2 text-[11px] text-muted-foreground">
+          {(p.likes ?? 0) > 0 && (
+            <span className="inline-flex items-center gap-1"><Heart className="h-3 w-3" /> {p.likes}</span>
+          )}
+          {(p.comments ?? 0) > 0 && (
+            <span className="inline-flex items-center gap-1"><MessageCircle className="h-3 w-3" /> {p.comments}</span>
+          )}
+        </div>
+      )}
+
+      <div className="mt-auto flex items-center gap-2 border-t border-border bg-surface px-3 py-2.5">
+        <Link
+          to="/u/$id"
+          params={{ id: p.provider_user_id }}
+          className="inline-flex flex-1 items-center justify-center rounded-full bg-orange px-3 py-2 text-xs font-semibold text-orange-foreground hover:brightness-110"
+        >
+          View post
+        </Link>
+        {p.is_provider && (
+          <Link
+            to="/u/$id"
+            params={{ id: p.provider_user_id }}
+            className="rounded-full border border-border px-3 py-2 text-xs font-semibold text-navy hover:border-navy"
+          >
+            View profile
+          </Link>
+        )}
+        {isServiceLike && (
+          <Link
+            to="/requests/new"
+            search={{ providerId: p.provider_user_id } as never}
+            className="inline-flex items-center justify-center gap-1 rounded-full border border-border px-3 py-2 text-xs font-semibold text-navy hover:border-navy"
+            aria-label="Request service"
+          >
+            <Briefcase className="h-3.5 w-3.5" />
+          </Link>
+        )}
+      </div>
+    </article>
+  );
+}
