@@ -20,7 +20,6 @@ type Props = {
 
 export function EditPostDialog({ open, onClose, post, onSaved }: Props) {
   const [text, setText] = useState(post.text);
-  const [title, setTitle] = useState(post.title ?? "");
   const [postType, setPostType] = useState<PostTypeValue>((post.post_type ?? "work_update") as PostTypeValue);
   const [categorySlug, setCategorySlug] = useState(post.category_slug ?? "");
   const [location, setLocation] = useState(post.location ?? "");
@@ -30,7 +29,6 @@ export function EditPostDialog({ open, onClose, post, onSaved }: Props) {
   useEffect(() => {
     if (!open) return;
     setText(post.text);
-    setTitle(post.title ?? "");
     setPostType((post.post_type ?? "work_update") as PostTypeValue);
     setCategorySlug(post.category_slug ?? "");
     setLocation(post.location ?? "");
@@ -46,7 +44,6 @@ export function EditPostDialog({ open, onClose, post, onSaved }: Props) {
       .from("timeline_posts")
       .update({
         text: text.trim(),
-        title: title.trim() || null,
         post_type: postType,
         category_slug: categorySlug || null,
         location: location.trim() || null,
@@ -67,10 +64,6 @@ export function EditPostDialog({ open, onClose, post, onSaved }: Props) {
           <DialogTitle>Edit post</DialogTitle>
         </DialogHeader>
         <div className="space-y-3">
-          <div>
-            <Label>Title (optional)</Label>
-            <Input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} placeholder="Short headline" />
-          </div>
           <div>
             <Label>Post text</Label>
             <Textarea value={text} onChange={(e) => setText(e.target.value)} rows={5} maxLength={2000} />
