@@ -5,8 +5,10 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
 import { getRevealablePhone, logContactClick } from "@/hooks/use-contact-gate";
 import { startDirectConversation } from "@/lib/messaging";
+import { useAuthGate } from "@/components/RequireAuthDialog";
 
 type Source = "request_response" | "provider_profile" | "service_listing" | "search_result" | "request_detail" | "message_thread";
+
 
 interface Props {
   providerId: string;
@@ -31,6 +33,7 @@ export function ProviderQuickContact({
 }: Props) {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { requireAuth } = useAuthGate();
   const [phone, setPhone] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -51,7 +54,9 @@ export function ProviderQuickContact({
 
   if (!loaded) return null;
   const canMessage = showMessage && (!user || user.id !== providerId);
-  if (!phone && !canMessage) return null;
+  // Guests always see Call + Message; clicking prompts sign-in via the auth gate.
+  const showCallButton = !!phone || !user;
+  if (!showCallButton && !canMessage) return null;
 
   const compact = variant === "compact";
   const base = compact
@@ -61,23 +66,31 @@ export function ProviderQuickContact({
   const handleCall = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    if (user) {
-      logContactClick({
-        customerId: user.id,
-        providerId,
-        serviceId: serviceId ?? null,
-        source,
-        method: "call",
-      }).catch(() => {});
+    if (!user) {
+      requireAuth(undefined, {
+        title: "Sign in to call this provider",
+        message: "Create a free Tuungane account to view phone numbers and contact providers directly.",
+      });
+      return;
     }
-    window.location.href = `tel:${phone}`;
+    logContactClick({
+      customerId: user.id,
+      providerId,
+      serviceId: serviceId ?? null,
+      source,
+      method: "call",
+    }).catch(() => {});
+    if (phone) window.location.href = `tel:${phone}`;
   };
 
   const handleMessage = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (!user) {
-      navigate({ to: "/login" });
+      requireAuth(undefined, {
+        title: "Sign in to message this provider",
+        message: "Create a free Tuungane account to message providers and get help fast.",
+      });
       return;
     }
     if (user.id === providerId) {
@@ -105,7 +118,7 @@ export function ProviderQuickContact({
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>
-      {phone && (
+      {showCallButton && (
         <button onClick={handleCall} aria-label="Call provider" className={base}>
           <Phone className={compact ? "h-4 w-4" : "h-3.5 w-3.5"} />
           {!compact && <span>Call</span>}

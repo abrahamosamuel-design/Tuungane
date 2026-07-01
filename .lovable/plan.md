@@ -1,102 +1,72 @@
-# Tuungane Feed Card Redesign
+# Guest Browsing Mode
 
-A unified, mobile-first feed-style card system inspired by modern social feeds (avatar left, metadata top, expandable text, image grid, action row) — built with Tuungane's brand (navy / orange / green, white card, soft borders, rounded corners). No X branding, no WhatsApp.
+## Root cause of current "empty for guests"
 
-## Scope
+Live check confirmed the problem: guest requests to `service_requests`, `service_profiles`, and `public_profiles` are returning **401 Unauthorized**. Past security work revoked anon SELECT on contact + coordinate columns, but no anon SELECT was ever granted on the safe subset — so guests can't read anything. Skeletons stay forever.
 
-1. New reusable card system used by Provider Service Cards and Service Request Cards (and ready for Portfolio/Completed Work cards later).
-2. Image attachment support on both Service Listings and Service Requests, including create/edit forms.
-3. Long-description support with Show more / Show less.
-4. Replace weak trust labels ("No reviews yet", "New provider") with softer phrasing.
-5. Keep all existing functionality (filters, search, navigation, request flows, phone contact where already allowed).
+The fix is not to relax security; it's to add narrow, column-scoped anon read paths and update the client queries to only request safe columns when signed out.
 
-## New / refactored components
+## Plan
 
-Created under `src/components/feed/`:
+### 1. Database — safe anon reads (migration)
 
-- `FeedCard` — base shell (avatar + header + body + media + actions).
-- `FeedCardHeader` — avatar, name, verification badge, category chip, location, time, overflow menu.
-- `ExpandableText` — 4–6 line preview on mobile, expands; reuses pattern from existing `PostText`.
-- `MediaGrid` — 1–4 image responsive grid with `+N` overlay, rounded corners, lightbox via existing dialog.
-- `ActionButtonRow` — primary + secondary actions with consistent sizing/tap targets (44px min).
-- `LocationBadge`, `UrgencyBadge` — small chips reusing existing tokens.
+Add `TO anon` SELECT policies + column-level GRANTs on the guest-safe subset only:
 
-New consumer cards:
+- `service_profiles`, `public_profiles` (anon): `user_id/owner_id, business_name/name, category_slug, subcategory, bio, town, district, verified, availability, cover_url, avatar_url, years_experience, service_radius_km, created_at, updated_at`. **Excluded from anon:** phone, email, whatsapp, latitude, longitude, area, exact address, contact_preference.
+- `service_requests` (anon, only where `visibility='public' AND status='requested'`): `id, title, service_needed, description, budget_range, urgent_flag, urgency, created_at, district, town, category_slug, subcategory, preferred_date`. **Excluded:** customer_id (or exposed only as opaque), phone/contact fields, latitude, longitude, area, attachment_url, media_urls (unless already public-safe).
+- Keep existing authenticated policies untouched.
 
-- `ProviderServiceCard` (replaces existing `ProviderCard` usage in feeds; old `ProviderCardCompact` kept for the compact carousel on Services page).
-- `ServiceRequestFeedCard` (replaces homepage `RequestCard` and the requests browse list card; the dashboard `ServiceRequestCard` stays as-is — it's a workflow/management card, not a feed card).
+### 2. Client — split queries by auth state
 
-Reused as-is: `TrustBadge`, `Avatar` (`social/Avatar`), `NearYouBadge`, `BoostBadge`, `ContactProviderModal`, `ProviderResponseDialog`, `MessageButton`, lightbox dialog primitives.
+For every guest-visible feed (`HomeFeedSections`, `services.index`, `requests.browse`, `providers.$id`, category pages):
 
-## Card structure
+- When `!user`, project only the safe columns above.
+- Never call `useUserLocation`-based proximity queries; sort by `verified` + `updated_at`.
+- Never render phone, email, exact area/coordinates, or media requiring signed-in view.
 
-Top row: avatar · name + verification · category · location · time · ⋯ menu.
-Body: title, expandable description (4–6 lines mobile, 6–8 desktop), supporting chips (budget, urgency, availability, price guidance).
-Media: 1–4 image grid; tap → lightbox; "+N" overlay; no reserved space when empty.
-Actions:
-- Provider card: **Request Service** (primary, orange) · Message · Call (if `contact_phone` allowed) · Save · View Profile (in overflow on mobile).
-- Request card: **Send Quote / Respond** (primary, orange) · Message · Save · Share · View Details (overflow).
+### 3. Sign-in gate — `RequireAuthDialog`
 
-## Soft trust language
+New `src/components/RequireAuthDialog.tsx` and hook `useAuthGate()`:
 
-Mapping applied in `TrustBadge` and provider cards:
+- Title: "Create a free Tuungane account"
+- Body: "Sign up to contact providers, respond to requests, post your own request, and grow your opportunities on Tuungane."
+- Buttons: **Create account** → `/login?tab=signup&redirect=...`, **Sign in** → `/login?redirect=...`, **Continue browsing** → close.
 
-- "No reviews yet" → omitted, or "Profile details available".
-- "New provider" → "Recently joined" / "Available for requests".
-- Existing verified / claimed / trusted tiers unchanged.
+Wire the gate into every protected action for guests (no navigation for signed-in users):
 
-## Image attachments
+- `MessageButton`, `ProviderQuickContact` (Call + Message), `SaveButton`, `ProviderResponseDialog` trigger, "Request service", "Post request" FAB, "List your service", follow, review, recommend, report.
 
-Database (one safe additive migration):
+Guest provider cards should still render **View profile**, **Message**, **Call** buttons (the last two open the gate on click) so the UI never looks half-empty.
 
-- Add `media_urls text[] not null default '{}'` to `service_profiles` (provider listings) and `service_requests`. Existing single `attachment_url` on `service_requests` is preserved and backfilled into `media_urls` at read time so nothing breaks.
-- No RLS / GRANT changes (columns inherit existing table grants and policies).
+### 4. Public content safety
 
-Storage: reuse existing `tuungane-media` bucket via `src/lib/upload.ts`. Add a small `MediaUploader` component (multi-select, max 6, type/size validation, per-file progress, remove-before-submit, mobile-friendly file input + camera capture). Used by:
+- `maskProfileLocation` already handles owner masking; extend so guest viewer forces `district`-level precision regardless of stored visibility.
+- Provider profile route (`/u/$id`, `/providers/$id`) loads only guest-safe columns for anon; hide contact strip; show "Sign in to see contact options".
+- Suspended / flagged / incomplete profiles: existing `suspended=eq.false` filter kept; also require `verified != 'flagged'` for guests.
 
-- `src/routes/_authenticated/requests.new.tsx` (Service Request form).
-- `src/routes/_authenticated/profiles.new.tsx` and `profiles.$id.tsx` (Provider Service listing form/edit).
+### 5. Empty & loading states
 
-Read path: `media_urls` (fallback to `[attachment_url]` for requests) is passed into `MediaGrid`.
+Replace endless skeleton with:
+- After successful fetch with 0 rows: friendly empty state ("No providers found yet in this category. Be among the first to list your service.") with CTA button that opens the auth gate.
+- Loading skeleton shown only during first fetch, capped to <8 items.
 
-## Feed integrations
+### 6. Routing
 
-Swap card components in:
+- No changes to `_authenticated/` gate — keep dashboard, messages, notifications, credits, settings, requests.new, list-skill, profiles.new protected.
+- Remove any incidental redirects from public marketplace pages (spot check `services.index`, `requests.browse`, `providers.$id`, `p.$slug`, `services.$slug`, `u.$id`).
 
-- `src/components/HomeFeedSections.tsx` — homepage "Latest open requests" + "Recently listed services".
-- `src/routes/services.index.tsx` — main provider list (compact carousel keeps `ProviderCardCompact`).
-- `src/routes/requests.browse.tsx` and `src/routes/services.requests.tsx` — request feeds.
-- `src/components/NearYouHomeSection.tsx`, `MatchingRequestsSection.tsx` — wherever full provider/request cards are rendered.
+### 7. Verification
 
-Existing filters, sort, search, `useUserLocation`, and pagination untouched.
-
-## Mobile-first details
-
-- Full-width card with 16px padding; 12px on <360px.
-- Body text 15–16px, line-height 1.55.
-- Tap targets ≥44px (already enforced globally).
-- Image grid: 1 image full width 16:9; 2 = side-by-side 1:1; 3 = 1 large + 2 stacked; 4 = 2×2.
-- Sticky-safe spacing for bottom nav (existing `pb-32` patterns).
-
-## Out of scope (explicit)
-
-- No WhatsApp anywhere.
-- No changes to dashboard workflow `ServiceRequestCard` (status flow, accept/complete buttons) — it's not a feed card.
-- No new auth / role / RLS changes.
-- No destructive migrations.
+Playwright pass as anonymous user:
+- `/`, `/services`, `/requests/browse`, one category page, one provider profile → content renders, no 401s.
+- Click Message, Call, Save, Respond, Request service, Post request → auth dialog appears; browsing not blocked.
+- Confirm no phone/email/lat/lng in the network responses for anon.
 
 ## Technical notes
 
-- Migration order respects `<public-schema-grants>`: columns added to existing tables, so no new GRANT block needed; RLS unchanged.
-- Image upload via existing `uploadMedia()` — signed publishable client, RLS enforced.
-- Lightbox: existing `Dialog` primitive + `<img>`; no new dep.
-- All new components typed; no `any`.
-- Tokens only — no hardcoded hex.
+- Migration adds policies **and** column-level `GRANT SELECT (col1, col2, ...) ON public.<table> TO anon`.
+- Existing `authenticated` grants stay `GRANT SELECT` (all columns) so signed-in flows are unchanged.
+- Public-safe media (`cover_url`, `avatar_url`) are already storage-public; `media_urls` remains authenticated-only for now to avoid leaking unreviewed content.
+- No changes to messaging, contact_logs, contact_reveals, or `get_provider_contact` RPC — those stay authenticated.
 
-## Acceptance check before finishing
-
-- Provider + request cards render correctly with 0, 1, 2, 3, 4, and 6 images on 360px and 1280px viewports (Playwright screenshots).
-- Show more / Show less works and doesn't shift layout above the card.
-- Request creation with 3 images persists `media_urls` and renders in feed.
-- Existing routes still build and navigate.
-- No "No reviews yet" / "New provider" text remains in feed cards.
+Scope is bounded to guest-read surface + a single reusable auth-gate dialog; existing signed-in behavior is untouched.

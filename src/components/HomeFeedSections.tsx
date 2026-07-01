@@ -25,6 +25,29 @@ import { ProviderResponseDialog } from "@/components/ProviderResponseDialog";
 import { FeedAvatar } from "@/components/feed/FeedAvatar";
 import { ExpandableText } from "@/components/feed/ExpandableText";
 import { MediaGrid } from "@/components/feed/MediaGrid";
+import { useAuthGate } from "@/components/RequireAuthDialog";
+
+// Column lists — guests can only SELECT a safe subset (no lat/long/area/location).
+const SR_COLS_AUTH =
+  "id,title,service_needed,description,budget_range,urgent_flag,created_at,district,town,area,location,latitude,longitude,category_slug,subcategory,media_urls";
+const SR_COLS_GUEST =
+  "id,title,service_needed,description,budget_range,urgent_flag,created_at,district,town,category_slug,subcategory,media_urls";
+const SP_COLS_AUTH =
+  "user_id,business_name,category_slug,subcategory,bio,town,district,area,latitude,longitude,service_radius_km,areas_served,verified,availability,years_experience,cover_url,media_urls";
+const SP_COLS_GUEST =
+  "user_id,business_name,category_slug,subcategory,bio,town,district,service_radius_km,areas_served,verified,availability,years_experience,cover_url,media_urls";
+const PP_COLS_AUTH =
+  "owner_id,name,category_slug,subcategory,bio,town,district,area,latitude,longitude,service_radius_km,areas_served,verified,availability,cover_url,avatar_url,updated_at";
+const PP_COLS_GUEST =
+  "owner_id,name,category_slug,subcategory,bio,town,district,service_radius_km,areas_served,verified,availability,cover_url,avatar_url,updated_at";
+const SP_LISTING_COLS_AUTH =
+  "user_id,business_name,category_slug,subcategory,bio,town,district,area,latitude,longitude,verified,availability,cover_url,created_at";
+const SP_LISTING_COLS_GUEST =
+  "user_id,business_name,category_slug,subcategory,bio,town,district,verified,availability,cover_url,created_at";
+const PP_LISTING_COLS_AUTH =
+  "owner_id,name,category_slug,subcategory,bio,town,district,area,latitude,longitude,verified,availability,cover_url,avatar_url,created_at";
+const PP_LISTING_COLS_GUEST =
+  "owner_id,name,category_slug,subcategory,bio,town,district,verified,availability,cover_url,avatar_url,created_at";
 
 
 type NearbyRequest = {
@@ -130,31 +153,31 @@ export function HomeFeedSections() {
       if (!reqs || reqs.length === 0) {
         const { data } = await supabase
           .from("service_requests")
-          .select("id,title,service_needed,description,budget_range,urgent_flag,created_at,district,town,area,location,latitude,longitude,category_slug,subcategory,media_urls")
+          .select(user ? SR_COLS_AUTH : SR_COLS_GUEST)
           .eq("visibility", "public")
           .eq("status", "requested")
           .is("provider_id", null)
           .order("urgent_flag", { ascending: false })
           .order("created_at", { ascending: false })
           .limit(12);
-        reqs = (data ?? []) as NearbyRequest[];
+        reqs = (data ?? []) as unknown as NearbyRequest[];
       }
 
       if (!provs || provs.length === 0) {
         const { data } = await supabase
           .from("service_profiles")
-          .select("user_id,business_name,category_slug,subcategory,bio,town,district,area,latitude,longitude,service_radius_km,areas_served,verified,availability,years_experience,cover_url,media_urls")
+          .select(user ? SP_COLS_AUTH : SP_COLS_GUEST)
           .eq("suspended", false)
           .order("verified", { ascending: false })
           .order("updated_at", { ascending: false })
           .limit(24);
-        provs = (data ?? []) as NearbyProvider[];
+        provs = (data ?? []) as unknown as NearbyProvider[];
       }
 
       // Merge in claimed public/business pages so their owners appear too.
       const { data: ppProvRows } = await supabase
         .from("public_profiles")
-        .select("owner_id,name,category_slug,subcategory,bio,town,district,area,latitude,longitude,service_radius_km,areas_served,verified,availability,cover_url,avatar_url,updated_at")
+        .select(user ? PP_COLS_AUTH : PP_COLS_GUEST)
         .eq("suspended", false)
         .not("owner_id", "is", null)
         .order("updated_at", { ascending: false })
@@ -171,8 +194,8 @@ export function HomeFeedSections() {
           town: pp.town ?? "",
           district: pp.district ?? "",
           area: pp.area ?? null,
-          latitude: pp.latitude,
-          longitude: pp.longitude,
+          latitude: pp.latitude ?? null,
+          longitude: pp.longitude ?? null,
           service_radius_km: pp.service_radius_km ?? null,
           areas_served: pp.areas_served ?? null,
           verified: pp.verified ?? "none",
@@ -185,14 +208,14 @@ export function HomeFeedSections() {
 
       const { data: listingRows } = await supabase
         .from("service_profiles")
-        .select("user_id,business_name,category_slug,subcategory,bio,town,district,area,latitude,longitude,verified,availability,cover_url,created_at")
+        .select(user ? SP_LISTING_COLS_AUTH : SP_LISTING_COLS_GUEST)
         .eq("suspended", false)
         .order("created_at", { ascending: false })
         .limit(12);
-      const spListings = (listingRows ?? []) as RecentListing[];
+      const spListings = (listingRows ?? []) as unknown as RecentListing[];
       const { data: ppListingRows } = await supabase
         .from("public_profiles")
-        .select("owner_id,name,category_slug,subcategory,bio,town,district,area,latitude,longitude,verified,availability,cover_url,avatar_url,created_at")
+        .select(user ? PP_LISTING_COLS_AUTH : PP_LISTING_COLS_GUEST)
         .eq("suspended", false)
         .not("owner_id", "is", null)
         .order("created_at", { ascending: false })
@@ -209,8 +232,8 @@ export function HomeFeedSections() {
           town: pp.town ?? "",
           district: pp.district ?? "",
           area: pp.area ?? null,
-          latitude: pp.latitude,
-          longitude: pp.longitude,
+          latitude: pp.latitude ?? null,
+          longitude: pp.longitude ?? null,
           verified: pp.verified ?? "none",
           availability: pp.availability ?? null,
           cover_url: pp.cover_url ?? pp.avatar_url ?? null,
@@ -222,12 +245,14 @@ export function HomeFeedSections() {
 
       if (cancelled) return;
 
+      // The public `profiles` table is auth-only. Only fetch fallback names/avatars
+      // for signed-in visitors; guests use `business_name` / `public_profiles.name`.
       const ids = Array.from(new Set([
         ...(provs ?? []).map((p) => p.user_id),
         ...listings.map((l) => l.user_id),
       ]));
       const profMap = new Map<string, { full_name: string; avatar_url: string | null }>();
-      if (ids.length) {
+      if (user && ids.length) {
         const { data: profs } = await supabase
           .from("profiles")
           .select("id,full_name,avatar_url")
