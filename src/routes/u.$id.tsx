@@ -136,7 +136,8 @@ function UserProfile() {
   const [followers, setFollowers] = useState(0);
   const [recs, setRecs] = useState<Array<{ id: string; service: string; message: string; rating: number | null; created_at: string; user_id: string; profile?: { full_name: string; avatar_url: string | null } }>>([]);
   const [reviews, setReviews] = useState<Array<{ id: string; rating: number; text: string; created_at: string; user_id: string; profile?: { full_name: string; avatar_url: string | null } }>>([]);
-  const [tab, setTab] = useState<Tab>("services");
+  const [tab, setTab] = useState<Tab>("about");
+  const [services, setServices] = useState<ProfileServiceRow[]>([]);
   const [recOpen, setRecOpen] = useState(false);
   const [revOpen, setRevOpen] = useState(false);
   
