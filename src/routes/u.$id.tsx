@@ -100,15 +100,29 @@ export const Route = createFileRoute("/u/$id")({
   notFoundComponent: () => <RouteNotFoundCard title="Profile not found" message="This user profile may have been removed." />,
 });
 
-type Tab = "timeline" | "portfolio" | "services" | "reviews" | "about";
+type Tab = "about" | "timeline" | "reviews" | "services";
 
 const TABS: { id: Tab; label: string; providerOnly?: boolean }[] = [
-  { id: "services", label: "Services", providerOnly: true },
-  { id: "portfolio", label: "Portfolio", providerOnly: true },
-  { id: "reviews", label: "Reviews", providerOnly: true },
-  { id: "timeline", label: "Timeline" },
   { id: "about", label: "About" },
+  { id: "timeline", label: "Timeline" },
+  { id: "reviews", label: "Reviews", providerOnly: true },
+  { id: "services", label: "Services", providerOnly: true },
 ];
+
+type ProfileServiceRow = {
+  id: string;
+  title: string;
+  description: string | null;
+  active: boolean;
+  is_primary: boolean;
+  price_type: PriceType | null;
+  price_fixed_ugx: number | null;
+  price_min_ugx: number | null;
+  price_max_ugx: number | null;
+  price_currency: string | null;
+  price_note: string | null;
+  price_guidance_ugx: number | null;
+};
 
 function UserProfile() {
   const { id } = useParams({ from: "/u/$id" });
