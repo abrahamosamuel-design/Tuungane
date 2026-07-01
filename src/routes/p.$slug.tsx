@@ -80,6 +80,7 @@ function PublicProfilePage() {
   const { slug } = Route.useParams();
   const { user } = useAuth();
   const nav = useNavigate();
+  const { requireAuth } = useAuthGate();
   const [profile, setProfile] = useState<PublicProfile | null>(null);
   const [services, setServices] = useState<Service[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
