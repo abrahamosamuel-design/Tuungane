@@ -510,14 +510,7 @@ function UserProfile() {
                   {sp?.phone && <Row label="Phone" value={sp.phone} />}
                   {sp?.email && <Row label="Email" value={sp.email} />}
                 </dl>
-                {sp && (sp.price_type || sp.price_note) && (
-                  <div className="mt-4">
-                    <PriceGuideCard
-                      guide={{ ...sp, price_type: sp.price_type as PriceType | null }}
-                      onEdit={isOwn ? () => setEditOpen(true) : undefined}
-                    />
-                  </div>
-                )}
+                {/* Price guide is shown once above the tabs to avoid duplication */}
 
                 {!isOwn && isProvider && (
                   <div className="mt-5 flex flex-wrap gap-2">
