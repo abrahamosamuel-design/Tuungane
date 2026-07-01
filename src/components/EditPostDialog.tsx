@@ -42,15 +42,17 @@ export function EditPostDialog({ open, onClose, post, onSaved }: Props) {
   const save = async () => {
     if (!text.trim()) { toast.error("Post text can't be empty"); return; }
     setBusy(true);
-    const payload: Record<string, unknown> = {
-      text: text.trim(),
-      title: title.trim() || null,
-      post_type: postType,
-      category_slug: categorySlug || null,
-      location: location.trim() || null,
-      media_urls: mediaUrls,
-    };
-    const { error } = await (supabase.from("timeline_posts") as unknown as { update: (v: unknown) => { eq: (c: string, id: string) => Promise<{ error: { message: string } | null }> } }).update(payload).eq("id", post.id);
+    const { error } = await supabase
+      .from("timeline_posts")
+      .update({
+        text: text.trim(),
+        title: title.trim() || null,
+        post_type: postType,
+        category_slug: categorySlug || null,
+        location: location.trim() || null,
+        media_urls: mediaUrls,
+      } as never)
+      .eq("id", post.id);
     setBusy(false);
     if (error) { toast.error(error.message || "Could not save changes. Please try again."); return; }
     toast.success("Post updated");
