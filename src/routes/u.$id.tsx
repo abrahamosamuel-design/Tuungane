@@ -353,11 +353,11 @@ function UserProfile() {
             {!isOwn && isProvider && (
               <button
                 onClick={() => {
-                  if (!user) {
-                    nav({ to: "/login", search: { tab: "login", redirect: `/u/${id}` } as never });
-                    return;
-                  }
-                  setRequestOpen(true);
+                  requireAuth(() => setRequestOpen(true), {
+                    title: "Sign in to request this service",
+                    message: "Create a free Tuungane account to send a request to this provider.",
+                    redirect: `/u/${id}`,
+                  });
                 }}
                 className="rounded-full bg-orange px-5 py-2.5 text-sm font-semibold text-orange-foreground shadow-sm hover:brightness-110"
               >
