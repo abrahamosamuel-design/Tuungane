@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { useAuthGate } from "@/components/RequireAuthDialog";
 import { Building2, User as UserIcon, Landmark, Star, MapPin, MessageSquare, Phone, ShieldCheck } from "lucide-react";
 import { ReviewDialog } from "@/components/social/ReviewDialog";
 import { ProfileTrustBadge } from "@/components/trust/ProfileTrustBadge";
@@ -79,6 +80,7 @@ function PublicProfilePage() {
   const { slug } = Route.useParams();
   const { user } = useAuth();
   const nav = useNavigate();
+  const { requireAuth } = useAuthGate();
   const [profile, setProfile] = useState<PublicProfile | null>(null);
   const [services, setServices] = useState<Service[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -131,14 +133,17 @@ function PublicProfilePage() {
   const location = [profile.area, profile.town, profile.district].filter(Boolean).join(", ");
 
   const requestService = (serviceId?: string) => {
-    if (!user) {
-      nav({ to: "/login", search: { tab: "signup", redirect: `/p/${profile.slug}` } as never });
-      return;
-    }
-    nav({
-      to: "/requests/new",
-      search: { profileId: profile.id, serviceId: serviceId ?? "" } as never,
-    });
+    requireAuth(
+      () => nav({
+        to: "/requests/new",
+        search: { profileId: profile.id, serviceId: serviceId ?? "" } as never,
+      }),
+      {
+        title: "Sign in to request this service",
+        message: "Create a free Tuungane account to send a request to this provider.",
+        redirect: `/p/${profile.slug}`,
+      },
+    );
   };
 
   return (

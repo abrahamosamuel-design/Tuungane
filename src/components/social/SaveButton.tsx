@@ -2,12 +2,12 @@ import { useEffect, useState } from "react";
 import { Bookmark } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
+import { useAuthGate } from "@/components/RequireAuthDialog";
 
 export function SaveButton({ providerUserId, variant = "icon" }: { providerUserId: string; variant?: "icon" | "full" }) {
   const { user } = useAuth();
-  const nav = useNavigate();
+  const { requireAuth } = useAuthGate();
   const [saved, setSaved] = useState(false);
   const [busy, setBusy] = useState(false);
 
@@ -25,7 +25,13 @@ export function SaveButton({ providerUserId, variant = "icon" }: { providerUserI
   }, [user, providerUserId]);
 
   const toggle = async () => {
-    if (!user) { nav({ to: "/login", search: { tab: "login" } as never }); return; }
+    if (!user) {
+      requireAuth(undefined, {
+        title: "Sign in to save providers",
+        message: "Create a free Tuungane account to keep a shortlist of providers you like.",
+      });
+      return;
+    }
     if (user.id === providerUserId) { toast.info("You can't save your own profile"); return; }
     setBusy(true);
     if (saved) {

@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
 import { startOrGetConversation } from "@/lib/messaging";
 import { logContactClick } from "@/hooks/use-contact-gate";
+import { useAuthGate } from "@/components/RequireAuthDialog";
 
 interface Props {
   serviceRequestId: string;
@@ -31,11 +32,15 @@ export function MessageButton({
 }: Props) {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { requireAuth } = useAuthGate();
   const [busy, setBusy] = useState(false);
 
   const onClick = async () => {
     if (!user) {
-      navigate({ to: "/login" });
+      requireAuth(undefined, {
+        title: "Sign in to message this provider",
+        message: "Create a free Tuungane account to message providers and track your conversations.",
+      });
       return;
     }
     if (user.id === providerId) {

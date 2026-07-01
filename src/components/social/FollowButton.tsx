@@ -2,11 +2,11 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
-import { useNavigate } from "@tanstack/react-router";
+import { useAuthGate } from "@/components/RequireAuthDialog";
 
 export function FollowButton({ providerUserId, onChange }: { providerUserId: string; onChange?: (followers: number) => void }) {
   const { user } = useAuth();
-  const nav = useNavigate();
+  const { requireAuth } = useAuthGate();
   const [following, setFollowing] = useState(false);
   const [count, setCount] = useState(0);
   const [busy, setBusy] = useState(false);
@@ -23,7 +23,13 @@ export function FollowButton({ providerUserId, onChange }: { providerUserId: str
   }, [providerUserId, user]);
 
   const toggle = async () => {
-    if (!user) { nav({ to: "/login", search: { tab: "login" } as never }); return; }
+    if (!user) {
+      requireAuth(undefined, {
+        title: "Sign in to follow providers",
+        message: "Create a free Tuungane account to follow providers and see their updates in your feed.",
+      });
+      return;
+    }
     if (user.id === providerUserId) { toast.info("You can't follow yourself"); return; }
     setBusy(true);
     if (following) {

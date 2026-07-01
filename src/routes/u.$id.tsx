@@ -4,6 +4,7 @@ import { MapPin, Phone, BadgeCheck, Star, Share2, Camera, Users, ThumbsUp, Clipb
 import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { useAuthGate } from "@/components/RequireAuthDialog";
 import { Avatar } from "@/components/social/Avatar";
 import { CoverImage } from "@/components/media/CoverImage";
 import { FollowButton } from "@/components/social/FollowButton";
@@ -113,6 +114,7 @@ function UserProfile() {
   const { id } = useParams({ from: "/u/$id" });
   const { user } = useAuth();
   const nav = useNavigate();
+  const { requireAuth } = useAuthGate();
   const [profile, setProfile] = useState<{ full_name: string; avatar_url: string | null; bio: string | null; town: string | null; district: string | null; area: string | null; location_visibility: string | null; is_provider: boolean } | null>(null);
   const [sp, setSp] = useState<{ business_name: string | null; subcategory: string; bio: string; town: string; district: string; phone: string | null; whatsapp: string | null; email: string | null; verified: string; category_slug: string; years_experience: number; areas_served: string[]; availability: string; cover_url: string | null; header_url: string | null; seeded_by_official: boolean; seeded_status: string | null; price_type: string | null; price_fixed_ugx: number | null; price_min_ugx: number | null; price_max_ugx: number | null; price_currency: string | null; price_note: string | null } | null>(null);
   const [posts, setPosts] = useState<PostRow[]>([]);
@@ -351,11 +353,11 @@ function UserProfile() {
             {!isOwn && isProvider && (
               <button
                 onClick={() => {
-                  if (!user) {
-                    nav({ to: "/login", search: { tab: "login", redirect: `/u/${id}` } as never });
-                    return;
-                  }
-                  setRequestOpen(true);
+                  requireAuth(() => setRequestOpen(true), {
+                    title: "Sign in to request this service",
+                    message: "Create a free Tuungane account to send a request to this provider.",
+                    redirect: `/u/${id}`,
+                  });
                 }}
                 className="rounded-full bg-orange px-5 py-2.5 text-sm font-semibold text-orange-foreground shadow-sm hover:brightness-110"
               >
@@ -646,7 +648,7 @@ function UserProfile() {
 
       {!isOwn && isProvider && (
         <MobileActionBar>
-          <button onClick={() => { if (!user) { nav({ to: "/login", search: { tab: "login", redirect: `/u/${id}` } as never }); return; } setRequestOpen(true); }} className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-orange px-4 py-2.5 text-sm font-semibold text-orange-foreground shadow-sm"><ClipboardList className="h-4 w-4" /> Request service</button>
+          <button onClick={() => requireAuth(() => setRequestOpen(true), { title: "Sign in to request this service", message: "Create a free Tuungane account to send a request to this provider.", redirect: `/u/${id}` })} className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-orange px-4 py-2.5 text-sm font-semibold text-orange-foreground shadow-sm"><ClipboardList className="h-4 w-4" /> Request service</button>
           {sp?.phone && <a href={`tel:${sp.phone}`} aria-label="Call provider" className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-card text-navy"><Phone className="h-4 w-4" /></a>}
         </MobileActionBar>
       )}
