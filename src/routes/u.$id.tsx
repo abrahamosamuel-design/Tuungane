@@ -1,6 +1,7 @@
 import { createFileRoute, useParams, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { MapPin, Phone, BadgeCheck, Star, Share2, Camera, Users, ThumbsUp, ClipboardList } from "lucide-react";
+import { MapPin, Phone, BadgeCheck, Star, Share2, Camera, Users, ThumbsUp, ClipboardList, Pencil, Plus } from "lucide-react";
+import { ManageServiceDialog, type ServiceForm } from "@/components/ManageServiceDialog";
 import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
