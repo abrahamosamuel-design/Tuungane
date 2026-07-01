@@ -53,9 +53,14 @@ export function AuthGateProvider({ children }: { children: ReactNode }) {
 
   const ctx = useMemo<Ctx>(() => ({ requireAuth, isAuthed: !!user }), [requireAuth, user]);
 
-  const redirectSearch = opts.redirect
-    ? ({ redirect: opts.redirect } as never)
-    : (undefined as never);
+  const signupSearch = {
+    tab: "signup",
+    ...(opts.redirect ? { redirect: opts.redirect } : {}),
+  } as never;
+  const loginSearch = {
+    tab: "login",
+    ...(opts.redirect ? { redirect: opts.redirect } : {}),
+  } as never;
 
   return (
     <AuthGateContext.Provider value={ctx}>
@@ -72,8 +77,8 @@ export function AuthGateProvider({ children }: { children: ReactNode }) {
           </DialogHeader>
           <div className="mt-2 flex flex-col gap-2">
             <Link
-              to="/signup"
-              search={redirectSearch}
+              to="/login"
+              search={signupSearch}
               onClick={() => setOpen(false)}
               className="inline-flex items-center justify-center rounded-full bg-orange px-4 py-2.5 text-sm font-semibold text-orange-foreground hover:brightness-110"
             >
@@ -81,7 +86,7 @@ export function AuthGateProvider({ children }: { children: ReactNode }) {
             </Link>
             <Link
               to="/login"
-              search={redirectSearch}
+              search={loginSearch}
               onClick={() => setOpen(false)}
               className="inline-flex items-center justify-center rounded-full border border-border bg-card px-4 py-2.5 text-sm font-semibold text-navy hover:border-navy"
             >
