@@ -9,6 +9,7 @@ import { EmptyState } from "@/components/EmptyState";
 import { ProviderTrackCTA } from "@/components/cta/ProviderTrackCTA";
 import { ListYourSkillButton } from "@/components/cta/ListYourSkillButton";
 import { useUserLocation } from "@/hooks/use-user-location";
+import { useAuth } from "@/hooks/use-auth";
 import { filterByRadius, proximityScore, type UserLocation } from "@/lib/location";
 import { NearYouBadge } from "@/components/NearYouBadge";
 import { RadiusFilter } from "@/components/RadiusFilter";
