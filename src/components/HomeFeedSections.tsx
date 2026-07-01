@@ -160,7 +160,7 @@ export function HomeFeedSections() {
           .order("urgent_flag", { ascending: false })
           .order("created_at", { ascending: false })
           .limit(12);
-        reqs = (data ?? []) as NearbyRequest[];
+        reqs = (data ?? []) as unknown as NearbyRequest[];
       }
 
       if (!provs || provs.length === 0) {
@@ -171,7 +171,7 @@ export function HomeFeedSections() {
           .order("verified", { ascending: false })
           .order("updated_at", { ascending: false })
           .limit(24);
-        provs = (data ?? []) as NearbyProvider[];
+        provs = (data ?? []) as unknown as NearbyProvider[];
       }
 
       // Merge in claimed public/business pages so their owners appear too.
@@ -212,7 +212,7 @@ export function HomeFeedSections() {
         .eq("suspended", false)
         .order("created_at", { ascending: false })
         .limit(12);
-      const spListings = (listingRows ?? []) as RecentListing[];
+      const spListings = (listingRows ?? []) as unknown as RecentListing[];
       const { data: ppListingRows } = await supabase
         .from("public_profiles")
         .select(user ? PP_LISTING_COLS_AUTH : PP_LISTING_COLS_GUEST)
