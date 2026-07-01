@@ -1,41 +1,47 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { BadgeCheck, MapPin, MessageCircle, Star } from "lucide-react";
 import heroNetwork from "@/assets/hero-network.jpg";
 import heroProviders from "@/assets/hero-providers-real.jpg";
 import heroRequest from "@/assets/hero-request-real.jpg";
 import heroTrust from "@/assets/hero-trust-real.jpg";
 
+type SlideKey = "network" | "providers" | "request" | "trust";
+
 type Slide = {
+  key: SlideKey;
   image: string;
   caption: string;
   supportingText: string;
   altText: string;
-  badges?: boolean; // show floating provider badges (slide 1)
 };
 
 export const heroSlides: Slide[] = [
   {
+    key: "network",
     image: heroNetwork,
     caption: "Connect to Opportunity",
     supportingText: "Find services, post requests, and connect with people near you.",
     altText: "A Ugandan customer connected to multiple trusted skilled providers on Tuungane",
-    badges: true,
   },
   {
+    key: "providers",
     image: heroProviders,
     caption: "List your service",
-    supportingText: "Create a free profile, show what you do, and grow your customer base.",
+    supportingText: "Create a profile and grow your customer base.",
     altText: "Local Ugandan service providers — cleaner, electrician, tailor, plumber and tutor standing together",
   },
   {
+    key: "request",
     image: heroRequest,
     caption: "Post a request",
-    supportingText: "Tell providers what you need and get responses from people near you.",
+    supportingText: "Tell providers what you need and get responses nearby.",
     altText: "A Ugandan customer using her phone at home to post a service request on Tuungane",
   },
   {
+    key: "trust",
     image: heroTrust,
     caption: "Find trusted providers",
-    supportingText: "Discover services, compare options, and connect with people near you.",
+    supportingText: "Compare options and connect with trusted people near you.",
     altText: "A customer greeting a trusted local service provider at her doorstep",
   },
 ];
@@ -118,45 +124,32 @@ export function HeroCarousel() {
             />
           ))}
 
-          {/* Subtle dark gradient at bottom for caption readability */}
+          {/* Subtle bottom gradient — lighter than before, focused only at bottom */}
           <div
-            className="pointer-events-none absolute inset-0"
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-2/5"
             style={{
               background:
-                "linear-gradient(to top, oklch(0.22 0.05 250 / 0.75) 0%, oklch(0.22 0.05 250 / 0.15) 35%, transparent 60%)",
+                "linear-gradient(to top, oklch(0.18 0.04 250 / 0.78) 0%, oklch(0.18 0.04 250 / 0.35) 55%, transparent 100%)",
             }}
           />
 
-          {current.badges && (
-            <>
-              <span className="absolute left-2 top-[10%] rounded-full bg-white/95 px-2 py-1 text-[10px] font-semibold text-navy shadow-md backdrop-blur sm:left-4 sm:px-2.5 sm:text-[11px]">
-                <span className="mr-1 inline-block h-1.5 w-1.5 rounded-full bg-green align-middle" />
-                Electrician
-              </span>
-              <span className="absolute right-2 top-[8%] rounded-full bg-white/95 px-2 py-1 text-[10px] font-semibold text-navy shadow-md backdrop-blur sm:right-4 sm:px-2.5 sm:text-[11px]">
-                <span className="mr-1 inline-block h-1.5 w-1.5 rounded-full bg-green align-middle" />
-                Tutor
-              </span>
-              <span className="absolute left-3 top-[38%] rounded-full bg-white/95 px-2 py-1 text-[10px] font-semibold text-navy shadow-md backdrop-blur sm:px-2.5 sm:text-[11px]">
-                <span className="mr-1 inline-block h-1.5 w-1.5 rounded-full bg-orange align-middle" />
-                Cleaner
-              </span>
-              <span className="absolute right-3 top-[40%] rounded-full bg-white/95 px-2 py-1 text-[10px] font-semibold text-navy shadow-md backdrop-blur sm:px-2.5 sm:text-[11px]">
-                <span className="mr-1 inline-block h-1.5 w-1.5 rounded-full bg-orange align-middle" />
-                Tailor
-              </span>
-            </>
-          )}
+          {/* Per-slide subtle UI cues */}
+          <SlideChips slideKey={current.key} />
 
-          <div className="absolute inset-x-0 bottom-0 p-3 sm:p-4">
-            <div
-              key={index}
-              className="mx-auto max-w-[92%] animate-fade-in rounded-2xl bg-navy/60 px-3 py-2 text-center text-white shadow-lg backdrop-blur-sm sm:px-4 sm:py-2.5"
-            >
-              <p className="text-[12px] font-semibold leading-tight sm:text-sm" aria-live="polite">
+          {/* Text directly on gradient — no boxed card */}
+          <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5">
+            <div key={index} className="animate-fade-in text-white">
+              <p
+                className="font-display text-lg font-bold leading-tight sm:text-xl"
+                style={{ textShadow: "0 2px 12px oklch(0.15 0.03 250 / 0.55)" }}
+                aria-live="polite"
+              >
                 {current.caption}
               </p>
-              <p className="mt-0.5 text-[11px] leading-snug text-white/90 sm:text-xs">
+              <p
+                className="mt-1 text-[12px] leading-snug text-white/90 sm:text-sm"
+                style={{ textShadow: "0 1px 8px oklch(0.15 0.03 250 / 0.55)" }}
+              >
                 {current.supportingText}
               </p>
             </div>
@@ -176,11 +169,89 @@ export function HeroCarousel() {
               pauseThenResume();
             }}
             className={`h-1.5 rounded-full transition-all ${
-              i === index ? "w-6 bg-white" : "w-1.5 bg-white/40 hover:bg-white/70"
+              i === index ? "w-6 bg-navy" : "w-1.5 bg-navy/25 hover:bg-navy/50"
             }`}
           />
         ))}
       </div>
     </div>
+  );
+}
+
+function Chip({
+  children,
+  className = "",
+  dot,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  dot?: "green" | "orange";
+}) {
+  return (
+    <span
+      className={`inline-flex items-center gap-1 rounded-full bg-white/95 px-2 py-1 text-[10px] font-semibold text-navy shadow-md backdrop-blur sm:px-2.5 sm:text-[11px] ${className}`}
+    >
+      {dot && (
+        <span
+          className={`inline-block h-1.5 w-1.5 rounded-full ${
+            dot === "green" ? "bg-green" : "bg-orange"
+          }`}
+        />
+      )}
+      {children}
+    </span>
+  );
+}
+
+function SlideChips({ slideKey }: { slideKey: SlideKey }) {
+  if (slideKey === "network") {
+    return (
+      <>
+        <Chip dot="green" className="absolute left-2 top-[10%] sm:left-4">Electrician</Chip>
+        <Chip dot="green" className="absolute right-2 top-[8%] sm:right-4">Tutor</Chip>
+        <Chip dot="orange" className="absolute left-3 top-[38%]">Cleaner</Chip>
+        <Chip dot="orange" className="absolute right-3 top-[40%]">Tailor</Chip>
+      </>
+    );
+  }
+  if (slideKey === "providers") {
+    return (
+      <>
+        <Chip className="absolute left-3 top-[8%]">
+          <BadgeCheck className="h-3 w-3 text-green" /> Verified
+        </Chip>
+        <Chip dot="green" className="absolute right-3 top-[10%]">Plumber</Chip>
+        <Chip className="absolute left-3 top-[34%]">
+          <Star className="h-3 w-3 fill-orange text-orange" /> 4.9
+        </Chip>
+      </>
+    );
+  }
+  if (slideKey === "request") {
+    return (
+      <>
+        <Chip dot="orange" className="absolute right-3 top-[8%]">New request</Chip>
+        <Chip className="absolute left-3 top-[12%]">
+          <MessageCircle className="h-3 w-3 text-navy" /> 3 responses
+        </Chip>
+        <Chip className="absolute left-3 top-[36%]">
+          <MapPin className="h-3 w-3 text-orange" /> Near you
+        </Chip>
+      </>
+    );
+  }
+  // trust
+  return (
+    <>
+      <Chip className="absolute left-3 top-[8%]">
+        <BadgeCheck className="h-3 w-3 text-green" /> Verified
+      </Chip>
+      <Chip className="absolute right-3 top-[10%]">
+        <Star className="h-3 w-3 fill-orange text-orange" /> 4.8
+      </Chip>
+      <Chip className="absolute left-3 top-[36%]">
+        <MapPin className="h-3 w-3 text-orange" /> Entebbe
+      </Chip>
+    </>
   );
 }
