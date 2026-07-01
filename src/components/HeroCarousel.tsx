@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { BadgeCheck, MapPin, MessageCircle, Star } from "lucide-react";
+import { BadgeCheck, ChevronLeft, ChevronRight, MapPin, MessageCircle, Star } from "lucide-react";
 import heroNetwork from "@/assets/hero-network.jpg";
 import heroProviders from "@/assets/hero-providers-real.jpg";
 import heroRequest from "@/assets/hero-request-real.jpg";
