@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Heart, MessageCircle, ThumbsUp, Share2, Flag, MapPin, Trash2, EyeOff } from "lucide-react";
+import { Heart, MessageCircle, ThumbsUp, Share2, Flag, MapPin, Trash2, EyeOff, Pencil } from "lucide-react";
+import { EditPostDialog } from "@/components/EditPostDialog";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
@@ -60,6 +61,7 @@ export function PostCard({ post, onChanged, userLoc }: Props) {
   const [newComment, setNewComment] = useState("");
   const [reportOpen, setReportOpen] = useState(false);
   const [recOpen, setRecOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
   const { boosts, refresh: refreshBoosts, has: hasBoost } = useActiveBoosts("post", post.id);
 
   useEffect(() => {
@@ -120,7 +122,7 @@ export function PostCard({ post, onChanged, userLoc }: Props) {
   };
 
   const deletePost = async () => {
-    if (!confirm("Delete this post?")) return;
+    if (!confirm("Are you sure you want to delete this post? This action cannot be undone.")) return;
     await supabase.from("timeline_posts").delete().eq("id", post.id);
     toast.success("Post deleted");
     onChanged?.();
@@ -224,6 +226,7 @@ export function PostCard({ post, onChanged, userLoc }: Props) {
                 );
               })()}
               <ActionBtn onClick={() => { if (requireAuth()) setReportOpen(true); }} icon={<Flag className="h-4 w-4" />} label="" small />
+              {user?.id === post.provider_user_id && <ActionBtn onClick={() => setEditOpen(true)} icon={<Pencil className="h-4 w-4" />} label="" small />}
               {user?.id === post.provider_user_id && <ActionBtn onClick={deletePost} icon={<Trash2 className="h-4 w-4 text-destructive" />} label="" small />}
               {isModerator && <ActionBtn onClick={hidePost} icon={<EyeOff className="h-4 w-4 text-amber-600" />} label="" small />}
             </div>
@@ -257,6 +260,9 @@ export function PostCard({ post, onChanged, userLoc }: Props) {
 
       <ReportDialog open={reportOpen} onClose={() => setReportOpen(false)} targetType="post" targetId={post.id} />
       <RecommendDialog open={recOpen} onClose={() => setRecOpen(false)} providerUserId={post.provider_user_id} />
+      {user?.id === post.provider_user_id && (
+        <EditPostDialog open={editOpen} onClose={() => setEditOpen(false)} post={post} onSaved={onChanged} />
+      )}
     </>
   );
 }
