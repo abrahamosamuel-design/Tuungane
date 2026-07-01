@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Heart, MessageCircle, BadgeCheck } from "lucide-react";
+import { MapPin, Heart, MessageCircle, BadgeCheck, Briefcase } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useUserLocation } from "@/hooks/use-user-location";
+import { proximityLabel, sortByProximity } from "@/lib/location";
 import { timeAgo } from "@/lib/format";
 import { FeedAvatar } from "@/components/feed/FeedAvatar";
 import { postTypeMap, type PostTypeValue } from "@/data/postTypes";
@@ -53,6 +55,7 @@ function isQuality(p: CUPost) {
 }
 
 export function CommunityUpdatesSection() {
+  const { location: userLoc } = useUserLocation();
   const [posts, setPosts] = useState<CUPost[] | null>(null);
 
   useEffect(() => {
@@ -122,18 +125,29 @@ export function CommunityUpdatesSection() {
     return () => { cancelled = true; };
   }, []);
 
-  // Homepage preview: newest first, limit to 4 cards so the section stays compact.
   const top = useMemo(() => {
     if (!posts) return [];
-    return [...posts]
-      .sort((a, b) => {
-        const ta = new Date(a.created_at).getTime();
-        const tb = new Date(b.created_at).getTime();
-        if (tb !== ta) return tb - ta;
-        return a.id < b.id ? 1 : -1;
-      })
-      .slice(0, 4);
-  }, [posts]);
+    const withLoc = posts.map((p) => ({
+      ...p,
+      _loc: {
+        district: p.district,
+        town: p.town,
+        area: p.area,
+        latitude: p.latitude,
+        longitude: p.longitude,
+      },
+    }));
+    const sorted = sortByProximity(withLoc, userLoc, (p) => p._loc);
+    // Newest first, tiebreak by id for stability.
+    const ranked = [...sorted].sort((a, b) => {
+      const ta = new Date(a.created_at).getTime();
+      const tb = new Date(b.created_at).getTime();
+      if (tb !== ta) return tb - ta;
+      return a.id < b.id ? 1 : -1;
+    });
+    return ranked.slice(0, 10);
+  }, [posts, userLoc]);
+
 
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [activeIdx, setActiveIdx] = useState(0);
@@ -198,22 +212,19 @@ export function CommunityUpdatesSection() {
   if (top.length === 0) return null;
 
   return (
-    <section className="mx-auto max-w-6xl px-4 pt-3 sm:px-6 sm:pt-4">
+    <section className="mx-auto max-w-6xl px-4 pt-6 sm:px-6 sm:pt-10">
       <div className="flex items-end justify-between gap-3">
         <div className="min-w-0">
           <h2 className="font-display text-lg font-bold text-navy sm:text-xl">
             Community updates
             <span className="mt-1 block h-1 w-10 rounded-full bg-green/80" />
           </h2>
-          <p className="mt-0.5 text-xs text-muted-foreground">
+          <p className="mt-1 text-xs text-muted-foreground sm:text-sm">
             See what people and providers are sharing on Tuungane.
           </p>
         </div>
-        <Link
-          to="/feed"
-          className="shrink-0 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-semibold text-navy transition hover:border-navy hover:bg-navy hover:text-white"
-        >
-          View all updates
+        <Link to="/feed" className="shrink-0 text-sm font-semibold text-navy hover:text-orange">
+          View all →
         </Link>
       </div>
 
@@ -224,11 +235,11 @@ export function CommunityUpdatesSection() {
         onMouseEnter={pauseInteraction}
         onFocusCapture={pauseInteraction}
         onWheel={pauseInteraction}
-        className="-mx-4 mt-2 flex snap-x snap-mandatory gap-2 overflow-x-auto overscroll-x-contain px-4 pb-2 scroll-px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:px-0"
+        className="-mx-4 mt-4 flex snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain px-4 pb-3 scroll-px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:px-0"
       >
         {top.map((p) => (
-          <div key={p.id} data-cu-card className="w-[72vw] max-w-[260px] shrink-0 snap-start sm:w-[260px]">
-            <CommunityCard p={p} />
+          <div key={p.id} data-cu-card className="w-[85vw] max-w-[340px] shrink-0 snap-start sm:w-[320px]">
+            <CommunityCard p={p} userLoc={userLoc} />
           </div>
         ))}
         <div aria-hidden className="shrink-0 w-1" />
@@ -250,44 +261,63 @@ export function CommunityUpdatesSection() {
   );
 }
 
-function CommunityCard({ p }: { p: CUPost }) {
+
+function CommunityCard({ p, userLoc }: { p: CUPost; userLoc: ReturnType<typeof useUserLocation>["location"] }) {
   const cat = useCategory(p.category_slug ?? undefined);
+  const near = proximityLabel(userLoc, {
+    district: p.district,
+    town: p.town,
+    area: p.area,
+    latitude: p.latitude,
+    longitude: p.longitude,
+  });
   const authorName = p.author?.full_name || "Member";
+  const loc = p.area || p.town || p.district || p.location || null;
   const typeMeta = p.post_type ? postTypeMap[p.post_type] : null;
   const firstImg = (p.media_urls ?? []).find((u) => u && !/\.(mp4|webm|mov|m4v)(\?|$)/i.test(u)) || null;
+  const isServiceLike = p.post_type === "available" || p.post_type === "new_service" || p.post_type === "completed_job";
 
   return (
     <article className="flex w-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)] transition hover:border-orange">
-      <div className="flex items-start gap-2.5 p-2.5 pb-1.5">
+      <div className="flex items-start gap-3 p-4 pb-2">
         <Link to="/u/$id" params={{ id: p.provider_user_id }} className="shrink-0">
-          <FeedAvatar src={p.author?.avatar_url ?? null} name={authorName} size={36} ring={p.is_verified} />
+          <FeedAvatar src={p.author?.avatar_url ?? null} name={authorName} size={40} ring={p.is_verified} />
         </Link>
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-x-1">
-            <Link to="/u/$id" params={{ id: p.provider_user_id }} className="truncate text-sm font-semibold text-navy hover:underline">
+          <div className="flex flex-wrap items-center gap-x-1.5">
+            <Link to="/u/$id" params={{ id: p.provider_user_id }} className="truncate text-[14px] font-semibold text-navy hover:underline">
               {authorName}
             </Link>
-            {p.is_verified ? <BadgeCheck className="h-3.5 w-3.5 shrink-0 text-green" aria-label="Verified" /> : null}
+            {p.is_verified ? <BadgeCheck className="h-4 w-4 shrink-0 text-green" aria-label="Verified" /> : null}
           </div>
-          <p className="text-[11px] text-muted-foreground">{timeAgo(p.created_at)}</p>
+          <p className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+            {loc ? (<><MapPin className="h-3 w-3" /> {loc}{near ? <span className="ml-1 rounded-full bg-green/10 px-1.5 py-0.5 text-[10px] font-semibold text-green">{near}</span> : null} · </>) : null}
+            {timeAgo(p.created_at)}
+          </p>
         </div>
       </div>
 
-      <div className="flex items-center gap-1.5 px-2.5">
+      <div className="flex flex-wrap items-center gap-1.5 px-4">
         {typeMeta && (
-          <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${typeMeta.color}`}>
+          <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${typeMeta.color}`}>
             {typeMeta.label}
           </span>
         )}
         {cat && (
-          <span className="min-w-0 truncate rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold text-navy">{cat.name}</span>
+          <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold text-navy">{cat.name}</span>
         )}
       </div>
+
+      {p.text ? (
+        <Link to="/u/$id" params={{ id: p.provider_user_id }} className="block px-4 pt-2">
+          <p className="line-clamp-2 text-sm text-navy/90">{p.text}</p>
+        </Link>
+      ) : null}
 
       <Link
         to="/u/$id"
         params={{ id: p.provider_user_id }}
-        className="mt-2 block h-24 w-full overflow-hidden bg-navy/5 sm:h-28"
+        className="mt-3 block aspect-[16/9] w-full overflow-hidden bg-navy/5"
       >
         {firstImg ? (
           <img
@@ -304,13 +334,13 @@ function CommunityCard({ p }: { p: CUPost }) {
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-navy/90 via-navy to-green/70 text-white">
-            <span className="font-display text-sm font-bold tracking-wide">Tuungane</span>
+            <span className="font-display text-base font-bold tracking-wide">Tuungane</span>
           </div>
         )}
       </Link>
 
       {((p.likes ?? 0) > 0 || (p.comments ?? 0) > 0) && (
-        <div className="flex items-center gap-3 px-2.5 pt-1 text-[10px] text-muted-foreground">
+        <div className="flex items-center gap-3 px-4 pt-2 text-[11px] text-muted-foreground">
           {(p.likes ?? 0) > 0 && (
             <span className="inline-flex items-center gap-1"><Heart className="h-3 w-3" /> {p.likes}</span>
           )}
@@ -320,23 +350,35 @@ function CommunityCard({ p }: { p: CUPost }) {
         </div>
       )}
 
-      <div className="mt-auto flex items-center gap-2 border-t border-border bg-surface px-2.5 py-1">
+
+      <div className="mt-auto flex items-center gap-2 border-t border-border bg-surface px-3 py-2.5">
         <Link
           to="/u/$id"
           params={{ id: p.provider_user_id }}
-          className="inline-flex min-h-11 flex-1 items-center justify-center rounded-full bg-orange px-3 py-1 text-xs font-semibold text-orange-foreground hover:brightness-110"
+          className="inline-flex flex-1 items-center justify-center rounded-full bg-orange px-3 py-2 text-xs font-semibold text-orange-foreground hover:brightness-110"
         >
           View post
         </Link>
-        <Link
-          to="/u/$id"
-          params={{ id: p.provider_user_id }}
-          className="inline-flex min-h-11 items-center justify-center rounded-full border border-border px-3 py-1 text-xs font-semibold text-navy hover:border-navy"
-        >
-          View profile
-        </Link>
+        {p.is_provider && (
+          <Link
+            to="/u/$id"
+            params={{ id: p.provider_user_id }}
+            className="rounded-full border border-border px-3 py-2 text-xs font-semibold text-navy hover:border-navy"
+          >
+            View profile
+          </Link>
+        )}
+        {isServiceLike && (
+          <Link
+            to="/requests/new"
+            search={{ providerId: p.provider_user_id } as never}
+            className="inline-flex items-center justify-center gap-1 rounded-full border border-border px-3 py-2 text-xs font-semibold text-navy hover:border-navy"
+            aria-label="Request service"
+          >
+            <Briefcase className="h-3.5 w-3.5" />
+          </Link>
+        )}
       </div>
     </article>
   );
 }
-
