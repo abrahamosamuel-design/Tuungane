@@ -226,6 +226,7 @@ export function PostCard({ post, onChanged, userLoc }: Props) {
                 );
               })()}
               <ActionBtn onClick={() => { if (requireAuth()) setReportOpen(true); }} icon={<Flag className="h-4 w-4" />} label="" small />
+              {user?.id === post.provider_user_id && <ActionBtn onClick={() => setEditOpen(true)} icon={<Pencil className="h-4 w-4" />} label="" small />}
               {user?.id === post.provider_user_id && <ActionBtn onClick={deletePost} icon={<Trash2 className="h-4 w-4 text-destructive" />} label="" small />}
               {isModerator && <ActionBtn onClick={hidePost} icon={<EyeOff className="h-4 w-4 text-amber-600" />} label="" small />}
             </div>
