@@ -65,10 +65,6 @@ export function EditPostDialog({ open, onClose, post, onSaved }: Props) {
         </DialogHeader>
         <div className="space-y-3">
           <div>
-            <Label>Title (optional)</Label>
-            <Input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={120} placeholder="Short headline" />
-          </div>
-          <div>
             <Label>Post text</Label>
             <Textarea value={text} onChange={(e) => setText(e.target.value)} rows={5} maxLength={2000} />
           </div>
