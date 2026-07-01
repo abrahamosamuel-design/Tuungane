@@ -1,10 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import heroNetwork from "@/assets/hero-network.jpg";
-import heroProviders from "@/assets/hero-providers.jpg";
-import heroRequest from "@/assets/hero-request.jpg";
-import heroTrust from "@/assets/hero-trust.jpg";
-import heroMarketplace from "@/assets/hero-marketplace.jpg";
-import heroGrowth from "@/assets/hero-growth.jpg";
+import heroProvidersAsset from "@/assets/hero-providers.jpg.asset.json";
+import heroRequestAsset from "@/assets/hero-request.jpg.asset.json";
+import heroTrustAsset from "@/assets/hero-trust.jpg.asset.json";
+import heroMarketplaceAsset from "@/assets/hero-marketplace.jpg.asset.json";
+import heroGrowthAsset from "@/assets/hero-growth.jpg.asset.json";
+
+const heroProviders = heroProvidersAsset.url;
+const heroRequest = heroRequestAsset.url;
+const heroTrust = heroTrustAsset.url;
+const heroMarketplace = heroMarketplaceAsset.url;
+const heroGrowth = heroGrowthAsset.url;
 
 type Slide = {
   image: string;
