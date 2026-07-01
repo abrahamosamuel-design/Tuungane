@@ -138,15 +138,16 @@ export function CommunityUpdatesSection() {
       },
     }));
     const sorted = sortByProximity(withLoc, userLoc, (p) => p._loc);
-    // Quality ranking: verified > has media > has text, then recency preserved as sub-order.
+    // Newest first, tiebreak by id for stability.
     const ranked = [...sorted].sort((a, b) => {
-      const av = (a.is_verified ? 2 : 0) + ((a.media_urls?.length ?? 0) > 0 ? 1 : 0);
-      const bv = (b.is_verified ? 2 : 0) + ((b.media_urls?.length ?? 0) > 0 ? 1 : 0);
-      if (bv !== av) return bv - av;
-      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      const ta = new Date(a.created_at).getTime();
+      const tb = new Date(b.created_at).getTime();
+      if (tb !== ta) return tb - ta;
+      return a.id < b.id ? 1 : -1;
     });
     return ranked.slice(0, 10);
   }, [posts, userLoc]);
+
 
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [activeIdx, setActiveIdx] = useState(0);
@@ -309,21 +310,34 @@ function CommunityCard({ p, userLoc }: { p: CUPost; userLoc: ReturnType<typeof u
 
       {p.text ? (
         <Link to="/u/$id" params={{ id: p.provider_user_id }} className="block px-4 pt-2">
-          <p className="line-clamp-3 text-sm text-navy/90">{p.text}</p>
+          <p className="line-clamp-2 text-sm text-navy/90">{p.text}</p>
         </Link>
       ) : null}
 
-      {firstImg && (
-        <Link to="/u/$id" params={{ id: p.provider_user_id }} className="mt-3 block">
+      <Link
+        to="/u/$id"
+        params={{ id: p.provider_user_id }}
+        className="mt-3 block aspect-[16/9] w-full overflow-hidden bg-navy/5"
+      >
+        {firstImg ? (
           <img
             src={firstImg}
             alt=""
             loading="lazy"
-            className="h-40 w-full object-cover"
-            onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+            className="h-full w-full object-cover object-center"
+            onError={(e) => {
+              const img = e.currentTarget as HTMLImageElement;
+              img.style.display = "none";
+              const parent = img.parentElement;
+              if (parent) parent.classList.add("cu-fallback");
+            }}
           />
-        </Link>
-      )}
+        ) : (
+          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-navy/90 via-navy to-green/70 text-white">
+            <span className="font-display text-base font-bold tracking-wide">Tuungane</span>
+          </div>
+        )}
+      </Link>
 
       {((p.likes ?? 0) > 0 || (p.comments ?? 0) > 0) && (
         <div className="flex items-center gap-3 px-4 pt-2 text-[11px] text-muted-foreground">
@@ -335,6 +349,7 @@ function CommunityCard({ p, userLoc }: { p: CUPost; userLoc: ReturnType<typeof u
           )}
         </div>
       )}
+
 
       <div className="mt-auto flex items-center gap-2 border-t border-border bg-surface px-3 py-2.5">
         <Link
