@@ -277,8 +277,8 @@ function SlideChips({ slideKey }: { slideKey: SlideKey }) {
         <Chip className="absolute right-3 top-[8%]">
           <BadgeCheck className="h-3 w-3 text-green" /> Verified
         </Chip>
-        <Chip dot="orange" className="absolute left-3 bottom-[26%]">Financial services</Chip>
-        <Chip className="absolute right-3 bottom-[28%]">
+        <Chip dot="orange" className="absolute left-3 top-[54%]">Financial services</Chip>
+        <Chip className="absolute right-3 top-[56%]">
           <MapPin className="h-3 w-3 text-orange" /> Near you
         </Chip>
       </>
