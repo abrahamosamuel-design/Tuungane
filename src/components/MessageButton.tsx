@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { useAuth } from "@/hooks/use-auth";
 import { startOrGetConversation } from "@/lib/messaging";
 import { logContactClick } from "@/hooks/use-contact-gate";
+import { useAuthGate } from "@/components/RequireAuthDialog";
 
 interface Props {
   serviceRequestId: string;
