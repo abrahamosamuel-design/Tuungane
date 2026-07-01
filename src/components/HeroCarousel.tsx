@@ -273,12 +273,12 @@ function SlideChips({ slideKey }: { slideKey: SlideKey }) {
   if (slideKey === "property") {
     return (
       <>
-        <Chip dot="green" className="absolute left-3 top-[8%]">Real Estate</Chip>
-        <Chip className="absolute right-3 top-[10%]">
+        <Chip dot="green" className="absolute left-3 top-[6%]">Real Estate</Chip>
+        <Chip className="absolute right-3 top-[8%]">
           <BadgeCheck className="h-3 w-3 text-green" /> Verified
         </Chip>
-        <Chip dot="orange" className="absolute left-3 top-[36%]">Financial services</Chip>
-        <Chip className="absolute right-3 top-[38%]">
+        <Chip dot="orange" className="absolute left-3 bottom-[26%]">Financial services</Chip>
+        <Chip className="absolute right-3 bottom-[28%]">
           <MapPin className="h-3 w-3 text-orange" /> Near you
         </Chip>
       </>
