@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { Heart, MessageCircle, ThumbsUp, Share2, Flag, MapPin, Trash2, EyeOff } from "lucide-react";
+import { Heart, MessageCircle, ThumbsUp, Share2, Flag, MapPin, Trash2, EyeOff, Pencil } from "lucide-react";
+import { EditPostDialog } from "@/components/EditPostDialog";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
