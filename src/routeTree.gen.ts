@@ -31,6 +31,7 @@ import { Route as ServicesRequestsRouteImport } from './routes/services.requests
 import { Route as ServicesSlugRouteImport } from './routes/services.$slug'
 import { Route as RequestsBrowseRouteImport } from './routes/requests.browse'
 import { Route as ProvidersIdRouteImport } from './routes/providers.$id'
+import { Route as PostsIdRouteImport } from './routes/posts.$id'
 import { Route as PSlugRouteImport } from './routes/p.$slug'
 import { Route as OpportunitiesNewRouteImport } from './routes/opportunities.new'
 import { Route as OpportunitiesIdRouteImport } from './routes/opportunities.$id'
@@ -164,6 +165,11 @@ const RequestsBrowseRoute = RequestsBrowseRouteImport.update({
 const ProvidersIdRoute = ProvidersIdRouteImport.update({
   id: '/providers/$id',
   path: '/providers/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PostsIdRoute = PostsIdRouteImport.update({
+  id: '/posts/$id',
+  path: '/posts/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PSlugRoute = PSlugRouteImport.update({
@@ -329,6 +335,7 @@ export interface FileRoutesByFullPath {
   '/opportunities/$id': typeof OpportunitiesIdRoute
   '/opportunities/new': typeof OpportunitiesNewRoute
   '/p/$slug': typeof PSlugRoute
+  '/posts/$id': typeof PostsIdRoute
   '/providers/$id': typeof ProvidersIdRoute
   '/requests/browse': typeof RequestsBrowseRoute
   '/services/$slug': typeof ServicesSlugRoute
@@ -376,6 +383,7 @@ export interface FileRoutesByTo {
   '/opportunities/$id': typeof OpportunitiesIdRoute
   '/opportunities/new': typeof OpportunitiesNewRoute
   '/p/$slug': typeof PSlugRoute
+  '/posts/$id': typeof PostsIdRoute
   '/providers/$id': typeof ProvidersIdRoute
   '/requests/browse': typeof RequestsBrowseRoute
   '/services/$slug': typeof ServicesSlugRoute
@@ -426,6 +434,7 @@ export interface FileRoutesById {
   '/opportunities/$id': typeof OpportunitiesIdRoute
   '/opportunities/new': typeof OpportunitiesNewRoute
   '/p/$slug': typeof PSlugRoute
+  '/posts/$id': typeof PostsIdRoute
   '/providers/$id': typeof ProvidersIdRoute
   '/requests/browse': typeof RequestsBrowseRoute
   '/services/$slug': typeof ServicesSlugRoute
@@ -476,6 +485,7 @@ export interface FileRouteTypes {
     | '/opportunities/$id'
     | '/opportunities/new'
     | '/p/$slug'
+    | '/posts/$id'
     | '/providers/$id'
     | '/requests/browse'
     | '/services/$slug'
@@ -523,6 +533,7 @@ export interface FileRouteTypes {
     | '/opportunities/$id'
     | '/opportunities/new'
     | '/p/$slug'
+    | '/posts/$id'
     | '/providers/$id'
     | '/requests/browse'
     | '/services/$slug'
@@ -572,6 +583,7 @@ export interface FileRouteTypes {
     | '/opportunities/$id'
     | '/opportunities/new'
     | '/p/$slug'
+    | '/posts/$id'
     | '/providers/$id'
     | '/requests/browse'
     | '/services/$slug'
@@ -610,6 +622,7 @@ export interface RootRouteChildren {
   GuidesPropertyMaintenanceKampalaRoute: typeof GuidesPropertyMaintenanceKampalaRoute
   OfficialPostsIdRoute: typeof OfficialPostsIdRoute
   PSlugRoute: typeof PSlugRoute
+  PostsIdRoute: typeof PostsIdRoute
   ProvidersIdRoute: typeof ProvidersIdRoute
   RequestsBrowseRoute: typeof RequestsBrowseRoute
   ServicesSlugRoute: typeof ServicesSlugRoute
@@ -773,6 +786,13 @@ declare module '@tanstack/react-router' {
       path: '/providers/$id'
       fullPath: '/providers/$id'
       preLoaderRoute: typeof ProvidersIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/posts/$id': {
+      id: '/posts/$id'
+      path: '/posts/$id'
+      fullPath: '/posts/$id'
+      preLoaderRoute: typeof PostsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/p/$slug': {
@@ -1047,6 +1067,7 @@ const rootRouteChildren: RootRouteChildren = {
   GuidesPropertyMaintenanceKampalaRoute: GuidesPropertyMaintenanceKampalaRoute,
   OfficialPostsIdRoute: OfficialPostsIdRoute,
   PSlugRoute: PSlugRoute,
+  PostsIdRoute: PostsIdRoute,
   ProvidersIdRoute: ProvidersIdRoute,
   RequestsBrowseRoute: RequestsBrowseRoute,
   ServicesSlugRoute: ServicesSlugRoute,
