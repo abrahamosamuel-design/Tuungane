@@ -559,6 +559,7 @@ function UserProfile() {
                   <div className="grid grid-cols-3 gap-2">
                     {portfolioPosts
                       .flatMap((p) => p.media_urls.map((u, i) => ({ url: u, alt: p.text.slice(0, 60), key: `${p.id}-${i}` })))
+                      .filter((m) => !/\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(m.url))
                       .slice(0, 6)
                       .map((m) => (
                         <button key={m.key} onClick={() => setTab("timeline")} className="group relative aspect-square overflow-hidden rounded-lg border border-border bg-surface">
@@ -566,6 +567,7 @@ function UserProfile() {
                         </button>
                       ))}
                   </div>
+
                 </div>
               )}
             </>
