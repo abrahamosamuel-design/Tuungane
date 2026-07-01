@@ -11,7 +11,7 @@ import { Layout } from "@/components/Layout";
 import { ListYourSkillButton } from "@/components/cta/ListYourSkillButton";
 import { useAuth } from "@/hooks/use-auth";
 import { listSkillHref } from "@/lib/cta";
-import heroNetwork from "@/assets/hero-network.jpg";
+import { HeroCarousel } from "@/components/HeroCarousel";
 import { HomeFeedSections } from "@/components/HomeFeedSections";
 import { PopularCategoriesSection } from "@/components/PopularCategoriesSection";
 import { SetLocationNudge } from "@/components/SetLocationNudge";
@@ -134,56 +134,10 @@ function Index() {
             </Link>
           </div>
 
-          {/* Hero network composition */}
-          <div className="relative mx-auto mt-4 max-w-md sm:mt-10 sm:max-w-lg">
-
-            <div className="relative overflow-hidden rounded-3xl">
-              <img
-                src={heroNetwork}
-                alt="A Ugandan customer connected to multiple trusted skilled providers on Tuungane"
-                width={1024}
-                height={1280}
-                fetchPriority="high"
-                decoding="async"
-                className="block w-full"
-              />
-              {/* Edge fade into navy */}
-              <div
-                className="pointer-events-none absolute inset-0"
-                style={{
-                  background:
-                    "radial-gradient(ellipse at center, transparent 60%, oklch(0.22 0.05 250 / 0.6) 88%, oklch(0.22 0.05 250) 100%)",
-                }}
-              />
-
-              {/* Floating provider badges */}
-              <span className="absolute left-2 top-[18%] rounded-full bg-white/95 px-2 py-1 text-[10px] font-semibold text-navy shadow-md backdrop-blur sm:left-4 sm:px-2.5 sm:text-[11px]">
-                <span className="mr-1 inline-block h-1.5 w-1.5 rounded-full bg-green align-middle" />
-                Electrician
-              </span>
-              <span className="absolute right-2 top-[14%] rounded-full bg-white/95 px-2 py-1 text-[10px] font-semibold text-navy shadow-md backdrop-blur sm:right-4 sm:px-2.5 sm:text-[11px]">
-                <span className="mr-1 inline-block h-1.5 w-1.5 rounded-full bg-green align-middle" />
-                Tutor
-              </span>
-              <span className="absolute left-1 top-[42%] rounded-full bg-white/95 px-2 py-1 text-[10px] font-semibold text-navy shadow-md backdrop-blur sm:left-3 sm:px-2.5 sm:text-[11px]">
-                <span className="mr-1 inline-block h-1.5 w-1.5 rounded-full bg-green align-middle" />
-                Cleaner
-              </span>
-              <span className="absolute right-1 top-[44%] rounded-full bg-white/95 px-2 py-1 text-[10px] font-semibold text-navy shadow-md backdrop-blur sm:right-3 sm:px-2.5 sm:text-[11px]">
-                <span className="mr-1 inline-block h-1.5 w-1.5 rounded-full bg-green align-middle" />
-                Tailor
-              </span>
-              <span className="absolute left-4 bottom-[14%] rounded-full bg-white/95 px-2 py-1 text-[10px] font-semibold text-navy shadow-md backdrop-blur sm:left-8 sm:px-2.5 sm:text-[11px]">
-                <span className="mr-1 inline-block h-1.5 w-1.5 rounded-full bg-orange align-middle" />
-                House Help
-              </span>
-              <span className="absolute right-4 bottom-[14%] rounded-full bg-white/95 px-2 py-1 text-[10px] font-semibold text-navy shadow-md backdrop-blur sm:right-8 sm:px-2.5 sm:text-[11px]">
-                <span className="mr-1 inline-block h-1.5 w-1.5 rounded-full bg-orange align-middle" />
-                Web Designer
-              </span>
-            </div>
-          </div>
+          {/* Hero carousel */}
+          <HeroCarousel />
         </div>
+
 
         {/* Trust strip overlapping hero */}
         <div className="relative mx-auto -mt-20 max-w-5xl px-4 sm:-mt-24 sm:px-6">
