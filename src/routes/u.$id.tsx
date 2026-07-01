@@ -4,6 +4,7 @@ import { MapPin, Phone, BadgeCheck, Star, Share2, Camera, Users, ThumbsUp, Clipb
 import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { useAuthGate } from "@/components/RequireAuthDialog";
 import { Avatar } from "@/components/social/Avatar";
 import { CoverImage } from "@/components/media/CoverImage";
 import { FollowButton } from "@/components/social/FollowButton";
