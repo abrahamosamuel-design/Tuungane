@@ -168,6 +168,16 @@ function UserProfile() {
     } else {
       setSp(s as typeof sp);
     }
+
+    // Load service packages for the Services tab.
+    const { data: svcRows } = await supabase
+      .from("profile_services")
+      .select("id,title,description,active,is_primary,price_type,price_fixed_ugx,price_min_ugx,price_max_ugx,price_currency,price_note,price_guidance_ugx,provider_user_id,sort_order")
+      .eq("provider_user_id", id)
+      .eq("active", true)
+      .order("is_primary", { ascending: false })
+      .order("sort_order", { ascending: true });
+    setServices((svcRows ?? []) as unknown as ProfileServiceRow[]);
     const { data: ps } = await supabase.from("timeline_posts").select("*").eq("provider_user_id", id).eq("hidden", false).order("created_at", { ascending: false });
     setPosts((ps ?? []).map((r) => ({ ...r, author: p ?? undefined })) as PostRow[]);
 
