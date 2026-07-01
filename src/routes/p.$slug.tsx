@@ -133,14 +133,17 @@ function PublicProfilePage() {
   const location = [profile.area, profile.town, profile.district].filter(Boolean).join(", ");
 
   const requestService = (serviceId?: string) => {
-    if (!user) {
-      nav({ to: "/login", search: { tab: "signup", redirect: `/p/${profile.slug}` } as never });
-      return;
-    }
-    nav({
-      to: "/requests/new",
-      search: { profileId: profile.id, serviceId: serviceId ?? "" } as never,
-    });
+    requireAuth(
+      () => nav({
+        to: "/requests/new",
+        search: { profileId: profile.id, serviceId: serviceId ?? "" } as never,
+      }),
+      {
+        title: "Sign in to request this service",
+        message: "Create a free Tuungane account to send a request to this provider.",
+        redirect: `/p/${profile.slug}`,
+      },
+    );
   };
 
   return (
