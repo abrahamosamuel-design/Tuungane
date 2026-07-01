@@ -145,16 +145,68 @@ export function CommunityUpdatesSection() {
       if (bv !== av) return bv - av;
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     });
-    return ranked.slice(0, 5);
+    return ranked.slice(0, 10);
   }, [posts, userLoc]);
 
-  if (posts === null) return null; // don't render skeleton to keep homepage compact
-  if (top.length === 0) return null; // hide entirely when nothing qualifies
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  const [activeIdx, setActiveIdx] = useState(0);
+  const pausedUntilRef = useRef(0);
+  const RESUME_DELAY = 7000;
 
-  return (
-    <section className="mx-auto max-w-6xl px-4 pt-6 sm:px-6 sm:pt-10">
-      <div className="flex items-end justify-between gap-3">
-        <div className="min-w-0">
+  const pauseInteraction = () => {
+    pausedUntilRef.current = Date.now() + RESUME_DELAY;
+  };
+
+  // Track active card via scroll position (for dots)
+  useEffect(() => {
+    const el = scrollerRef.current;
+    if (!el || top.length === 0) return;
+    const onScroll = () => {
+      const cards = Array.from(el.querySelectorAll<HTMLElement>("[data-cu-card]"));
+      if (!cards.length) return;
+      const center = el.scrollLeft + el.clientWidth / 2;
+      let best = 0;
+      let bestDist = Infinity;
+      cards.forEach((c, i) => {
+        const cCenter = c.offsetLeft + c.offsetWidth / 2;
+        const d = Math.abs(cCenter - center);
+        if (d < bestDist) { bestDist = d; best = i; }
+      });
+      setActiveIdx(best);
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => el.removeEventListener("scroll", onScroll);
+  }, [top.length]);
+
+  // Auto-scroll every 4s, pause on interaction, respect reduced-motion
+  useEffect(() => {
+    if (top.length < 2) return;
+    if (typeof window === "undefined") return;
+    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    if (reduce) return;
+    const el = scrollerRef.current;
+    if (!el) return;
+
+    const id = window.setInterval(() => {
+      if (Date.now() < pausedUntilRef.current) return;
+      const cards = Array.from(el.querySelectorAll<HTMLElement>("[data-cu-card]"));
+      if (!cards.length) return;
+      // If near end, loop back to start.
+      const nearEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 8;
+      if (nearEnd) {
+        el.scrollTo({ left: 0, behavior: "smooth" });
+        return;
+      }
+      const next = Math.min(activeIdx + 1, cards.length - 1);
+      const target = cards[next];
+      if (target) {
+        el.scrollTo({ left: target.offsetLeft - 16, behavior: "smooth" });
+      }
+    }, 4000);
+    return () => window.clearInterval(id);
+  }, [top.length, activeIdx]);
+
           <h2 className="font-display text-lg font-bold text-navy sm:text-xl">
             Community updates
             <span className="mt-1 block h-1 w-10 rounded-full bg-green/80" />
