@@ -271,10 +271,10 @@ function UserProfile() {
   const isOwn = user?.id === id;
   const isProvider = !!profile?.is_provider;
   const visibleTabs = TABS.filter((t) => !t.providerOnly || isProvider);
+  // About is the default tab for everyone. Also normalize legacy "portfolio"
+  // links so old bookmarks land on Timeline where past work now lives.
   useEffect(() => {
-    if (isProvider) setTab("services");
-    else setTab("about");
-    // eslint-disable-next-line
+    setTab((prev) => (prev === ("portfolio" as Tab) ? "timeline" : prev));
   }, [isProvider]);
 
   if (!profile) return <Layout><div className="mx-auto max-w-2xl px-4 py-16 text-center text-muted-foreground">Loading…</div></Layout>;
