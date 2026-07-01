@@ -139,6 +139,8 @@ function UserProfile() {
   const [reviews, setReviews] = useState<Array<{ id: string; rating: number; text: string; created_at: string; user_id: string; profile?: { full_name: string; avatar_url: string | null } }>>([]);
   const [tab, setTab] = useState<Tab>("about");
   const [services, setServices] = useState<ProfileServiceRow[]>([]);
+  const [ownerPublicProfileId, setOwnerPublicProfileId] = useState<string | null>(null);
+  const [svcDialog, setSvcDialog] = useState<{ open: boolean; mode: "create" | "edit"; initial?: Partial<ServiceForm> }>({ open: false, mode: "create" });
   const [recOpen, setRecOpen] = useState(false);
   const [revOpen, setRevOpen] = useState(false);
   
