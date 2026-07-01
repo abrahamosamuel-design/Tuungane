@@ -178,15 +178,17 @@ function UserProfile() {
       .select("id")
       .eq("owner_id", id);
     const pubIds = (pubProfiles ?? []).map((p) => p.id);
+    setOwnerPublicProfileId(pubIds[0] ?? null);
     if (pubIds.length) {
       const { data: svcRows } = await supabase
         .from("profile_services")
         .select("id,title,description,active,is_primary,price_type,price_fixed_ugx,price_min_ugx,price_max_ugx,price_currency,price_note,price_guidance_ugx")
         .in("profile_id", pubIds)
-        .eq("active", true)
         .order("is_primary", { ascending: false })
         .order("sort_order", { ascending: true });
-      setServices((svcRows ?? []) as unknown as ProfileServiceRow[]);
+      // Show inactive rows to owner, only active to visitors
+      const rows = (svcRows ?? []) as unknown as ProfileServiceRow[];
+      setServices(user?.id === id ? rows : rows.filter((r) => r.active));
     } else {
       setServices([]);
     }
