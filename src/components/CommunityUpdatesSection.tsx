@@ -310,21 +310,34 @@ function CommunityCard({ p, userLoc }: { p: CUPost; userLoc: ReturnType<typeof u
 
       {p.text ? (
         <Link to="/u/$id" params={{ id: p.provider_user_id }} className="block px-4 pt-2">
-          <p className="line-clamp-3 text-sm text-navy/90">{p.text}</p>
+          <p className="line-clamp-2 text-sm text-navy/90">{p.text}</p>
         </Link>
       ) : null}
 
-      {firstImg && (
-        <Link to="/u/$id" params={{ id: p.provider_user_id }} className="mt-3 block">
+      <Link
+        to="/u/$id"
+        params={{ id: p.provider_user_id }}
+        className="mt-3 block aspect-[16/9] w-full overflow-hidden bg-navy/5"
+      >
+        {firstImg ? (
           <img
             src={firstImg}
             alt=""
             loading="lazy"
-            className="h-40 w-full object-cover"
-            onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+            className="h-full w-full object-cover object-center"
+            onError={(e) => {
+              const img = e.currentTarget as HTMLImageElement;
+              img.style.display = "none";
+              const parent = img.parentElement;
+              if (parent) parent.classList.add("cu-fallback");
+            }}
           />
-        </Link>
-      )}
+        ) : (
+          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-navy/90 via-navy to-green/70 text-white">
+            <span className="font-display text-base font-bold tracking-wide">Tuungane</span>
+          </div>
+        )}
+      </Link>
 
       {((p.likes ?? 0) > 0 || (p.comments ?? 0) > 0) && (
         <div className="flex items-center gap-3 px-4 pt-2 text-[11px] text-muted-foreground">
@@ -336,6 +349,7 @@ function CommunityCard({ p, userLoc }: { p: CUPost; userLoc: ReturnType<typeof u
           )}
         </div>
       )}
+
 
       <div className="mt-auto flex items-center gap-2 border-t border-border bg-surface px-3 py-2.5">
         <Link
