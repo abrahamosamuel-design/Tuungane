@@ -33,12 +33,21 @@ function PostDetail() {
         setLoading(false);
         return;
       }
-      const { data: prof } = await supabase
-        .from("profiles")
-        .select("full_name, avatar_url, is_provider, district, town, area, latitude, longitude")
-        .eq("id", (data as any).provider_user_id)
-        .maybeSingle();
-      setPost({ ...(data as any), author: prof ?? undefined } as PostRow);
+      const [{ data: prof }, { data: sp }] = await Promise.all([
+        supabase
+          .from("profiles")
+          .select("full_name, avatar_url, is_provider, district, town, area, latitude, longitude")
+          .eq("id", (data as any).provider_user_id)
+          .maybeSingle(),
+        supabase
+          .from("service_profiles")
+          .select("business_name")
+          .eq("user_id", (data as any).provider_user_id)
+          .maybeSingle(),
+      ]);
+      const bn = (sp as any)?.business_name?.trim?.();
+      const author = prof ? { ...(prof as any), full_name: bn || (prof as any).full_name } : undefined;
+      setPost({ ...(data as any), author } as PostRow);
       setLoading(false);
     })();
     return () => {
