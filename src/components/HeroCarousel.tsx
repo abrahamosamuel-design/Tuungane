@@ -4,8 +4,10 @@ import heroNetwork from "@/assets/hero-network.jpg";
 import heroProviders from "@/assets/hero-providers-real.jpg";
 import heroRequest from "@/assets/hero-request-real.jpg";
 import heroTrust from "@/assets/hero-trust-real.jpg";
+import heroCreative from "@/assets/hero-creative-real.jpg";
+import heroProperty from "@/assets/hero-property-real.jpg";
 
-type SlideKey = "network" | "providers" | "request" | "trust";
+type SlideKey = "network" | "providers" | "request" | "trust" | "creative" | "property";
 
 type Slide = {
   key: SlideKey;
@@ -24,13 +26,6 @@ export const heroSlides: Slide[] = [
     altText: "A Ugandan customer connected to multiple trusted skilled providers on Tuungane",
   },
   {
-    key: "providers",
-    image: heroProviders,
-    caption: "List your service",
-    supportingText: "Create a profile and grow your customer base.",
-    altText: "Local Ugandan service providers — cleaner, electrician, tailor, plumber and tutor standing together",
-  },
-  {
     key: "request",
     image: heroRequest,
     caption: "Post a request",
@@ -43,6 +38,27 @@ export const heroSlides: Slide[] = [
     caption: "Find trusted providers",
     supportingText: "Compare options and connect with trusted people near you.",
     altText: "A customer greeting a trusted local service provider at her doorstep",
+  },
+  {
+    key: "providers",
+    image: heroProviders,
+    caption: "List your service",
+    supportingText: "Create a profile and grow your customer base.",
+    altText: "Local Ugandan service providers — cleaner, electrician, tailor, plumber and tutor standing together",
+  },
+  {
+    key: "creative",
+    image: heroCreative,
+    caption: "Creative and business services",
+    supportingText: "Find photographers, marketers, designers, and other business support services.",
+    altText: "Ugandan photographer, marketing professional, designer and branding provider standing together in a modern studio",
+  },
+  {
+    key: "property",
+    image: heroProperty,
+    caption: "Property and professional services",
+    supportingText: "Discover real estate, financial, and other trusted professional services near you.",
+    altText: "Ugandan real estate agent holding house keys with a financial consultant and professional advisor in front of a modern property",
   },
 ];
 
@@ -235,6 +251,34 @@ function SlideChips({ slideKey }: { slideKey: SlideKey }) {
           <MessageCircle className="h-3 w-3 text-navy" /> 3 responses
         </Chip>
         <Chip className="absolute left-3 top-[36%]">
+          <MapPin className="h-3 w-3 text-orange" /> Near you
+        </Chip>
+      </>
+    );
+  }
+  if (slideKey === "creative") {
+    return (
+      <>
+        <Chip dot="green" className="absolute left-3 top-[8%]">Photographer</Chip>
+        <Chip className="absolute right-3 top-[10%]">
+          <BadgeCheck className="h-3 w-3 text-green" /> Verified
+        </Chip>
+        <Chip dot="orange" className="absolute left-3 top-[36%]">Marketing</Chip>
+        <Chip className="absolute right-3 top-[38%]">
+          <Star className="h-3 w-3 fill-orange text-orange" /> 4.9
+        </Chip>
+      </>
+    );
+  }
+  if (slideKey === "property") {
+    return (
+      <>
+        <Chip dot="green" className="absolute left-3 top-[8%]">Real Estate</Chip>
+        <Chip className="absolute right-3 top-[10%]">
+          <BadgeCheck className="h-3 w-3 text-green" /> Verified
+        </Chip>
+        <Chip dot="orange" className="absolute left-3 top-[36%]">Financial services</Chip>
+        <Chip className="absolute right-3 top-[38%]">
           <MapPin className="h-3 w-3 text-orange" /> Near you
         </Chip>
       </>
