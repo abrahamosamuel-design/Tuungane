@@ -496,7 +496,18 @@ function UserProfile() {
           {tab === "about" && (
             <>
               <div className="rounded-2xl border border-border bg-card p-5">
-                <h3 className="font-display text-lg font-bold text-navy">About</h3>
+                <div className="flex items-start justify-between gap-2">
+                  <h3 className="font-display text-lg font-bold text-navy">About</h3>
+                  {isOwn && (
+                    <button
+                      onClick={() => setEditOpen(true)}
+                      aria-label="Edit About"
+                      className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-orange/10 hover:text-orange"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
                 {sp && (
                   <p className="mt-1 text-sm font-medium text-orange">
                     {formatSubcategory(sp.subcategory)}
