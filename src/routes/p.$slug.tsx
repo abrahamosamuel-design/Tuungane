@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
+import { useAuthGate } from "@/components/RequireAuthDialog";
 import { Building2, User as UserIcon, Landmark, Star, MapPin, MessageSquare, Phone, ShieldCheck } from "lucide-react";
 import { ReviewDialog } from "@/components/social/ReviewDialog";
 import { ProfileTrustBadge } from "@/components/trust/ProfileTrustBadge";
