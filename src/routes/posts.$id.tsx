@@ -34,9 +34,9 @@ function PostDetail() {
         return;
       }
       const { data: prof } = await supabase
-        .from("public_profiles")
+        .from("profiles")
         .select("full_name, avatar_url, is_provider, district, town, area, latitude, longitude")
-        .eq("user_id", (data as any).provider_user_id)
+        .eq("id", (data as any).provider_user_id)
         .maybeSingle();
       setPost({ ...(data as any), author: prof ?? undefined } as PostRow);
       setLoading(false);
