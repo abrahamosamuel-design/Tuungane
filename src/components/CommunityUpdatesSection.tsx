@@ -138,15 +138,16 @@ export function CommunityUpdatesSection() {
       },
     }));
     const sorted = sortByProximity(withLoc, userLoc, (p) => p._loc);
-    // Quality ranking: verified > has media > has text, then recency preserved as sub-order.
+    // Newest first, tiebreak by id for stability.
     const ranked = [...sorted].sort((a, b) => {
-      const av = (a.is_verified ? 2 : 0) + ((a.media_urls?.length ?? 0) > 0 ? 1 : 0);
-      const bv = (b.is_verified ? 2 : 0) + ((b.media_urls?.length ?? 0) > 0 ? 1 : 0);
-      if (bv !== av) return bv - av;
-      return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      const ta = new Date(a.created_at).getTime();
+      const tb = new Date(b.created_at).getTime();
+      if (tb !== ta) return tb - ta;
+      return a.id < b.id ? 1 : -1;
     });
     return ranked.slice(0, 10);
   }, [posts, userLoc]);
+
 
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [activeIdx, setActiveIdx] = useState(0);
