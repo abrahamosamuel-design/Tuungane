@@ -31,8 +31,10 @@ export function trackPwa(event: PwaEvent, meta: Record<string, unknown> = {}) {
       try {
         const { data } = await supabase.auth.getSession();
         const uid = data.session?.user?.id ?? null;
-        // @ts-expect-error optional table — silently no-op if missing.
-        await supabase.from("pwa_events").insert({ event, meta, user_id: uid });
+        const client = supabase as unknown as {
+          from: (t: string) => { insert: (row: Record<string, unknown>) => Promise<unknown> };
+        };
+        await client.from("pwa_events").insert({ event, meta, user_id: uid });
       } catch {}
     })();
   } catch {}
