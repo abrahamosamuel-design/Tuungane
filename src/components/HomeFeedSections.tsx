@@ -117,6 +117,7 @@ const SCROLLER =
 
 export function HomeFeedSections() {
   const { user } = useAuth();
+  const { requireAuth } = useAuthGate();
   const { location: userLoc } = useUserLocation();
   const { locations: featured } = useFeaturedLocations();
 
