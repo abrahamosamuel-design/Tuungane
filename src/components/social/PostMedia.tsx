@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { X, ChevronLeft, ChevronRight } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, Play } from "lucide-react";
+
+const isVideo = (u: string) => /\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(u);
 
 /**
- * Displays post media (1+ images) while preserving the original aspect ratio.
- * - Single image: rendered at natural aspect ratio inside a clean letterboxed surface
- *   (no forced 16:9 cropping; portrait/square stays portrait/square).
- * - Multiple images: responsive grid; each image still preserves its own ratio via object-contain.
+ * Displays post media (1+ images or videos) while preserving the original aspect ratio.
+ * - Single item: rendered inside a clean letterboxed surface.
+ * - Multiple items: responsive grid; videos show a poster + play icon.
  * - Tap opens a full-screen lightbox with prev/next navigation.
  */
 export function PostMedia({ urls, alt }: { urls: string[]; alt: string }) {
@@ -16,33 +17,48 @@ export function PostMedia({ urls, alt }: { urls: string[]; alt: string }) {
   const open = (i: number) => setOpenIndex(i);
   const close = () => setOpenIndex(null);
 
+  const renderThumb = (u: string, className: string) =>
+    isVideo(u) ? (
+      <>
+        <video
+          src={u}
+          preload="metadata"
+          muted
+          playsInline
+          className={className}
+        />
+        <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
+          <span className="flex h-11 w-11 items-center justify-center rounded-full bg-black/55 text-white">
+            <Play className="h-5 w-5 fill-white" />
+          </span>
+        </span>
+      </>
+    ) : (
+      <img src={u} alt={alt} loading="lazy" className={className} />
+    );
+
   return (
     <>
       {urls.length === 1 ? (
         <button
           type="button"
           onClick={() => open(0)}
-          className="block w-full overflow-hidden bg-muted/40 sm:rounded-xl"
-          aria-label="Open image"
+          className="relative block w-full overflow-hidden bg-muted/40 sm:rounded-xl"
+          aria-label={isVideo(urls[0]) ? "Play video" : "Open image"}
         >
-          <img
-            src={urls[0]}
-            alt={alt}
-            loading="lazy"
-            className="mx-auto block max-h-[640px] w-full object-contain"
-          />
+          {renderThumb(urls[0], "mx-auto block max-h-[640px] w-full object-contain")}
         </button>
       ) : (
-        <div className={`grid gap-1 overflow-hidden sm:rounded-xl ${urls.length === 2 ? "grid-cols-2" : "grid-cols-2"}`}>
+        <div className="grid grid-cols-2 gap-1 overflow-hidden sm:rounded-xl">
           {urls.slice(0, 4).map((u, i) => (
             <button
               key={i}
               type="button"
               onClick={() => open(i)}
               className="relative block aspect-square overflow-hidden bg-muted/40"
-              aria-label={`Open image ${i + 1}`}
+              aria-label={`Open item ${i + 1}`}
             >
-              <img src={u} alt={alt} loading="lazy" className="h-full w-full object-cover" />
+              {renderThumb(u, "h-full w-full object-cover")}
               {i === 3 && urls.length > 4 && (
                 <span className="absolute inset-0 flex items-center justify-center bg-black/55 text-lg font-semibold text-white">
                   +{urls.length - 4}
@@ -87,6 +103,8 @@ function Lightbox({
     };
   }, [index, urls.length, onClose, onChange]);
 
+  const current = urls[index];
+
   return (
     <div
       className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 p-4"
@@ -122,12 +140,23 @@ function Lightbox({
           </button>
         </>
       )}
-      <img
-        src={urls[index]}
-        alt={alt}
-        className="max-h-[92vh] max-w-[96vw] object-contain"
-        onClick={(e) => e.stopPropagation()}
-      />
+      {isVideo(current) ? (
+        <video
+          src={current}
+          controls
+          autoPlay
+          playsInline
+          className="max-h-[92vh] max-w-[96vw] object-contain"
+          onClick={(e) => e.stopPropagation()}
+        />
+      ) : (
+        <img
+          src={current}
+          alt={alt}
+          className="max-h-[92vh] max-w-[96vw] object-contain"
+          onClick={(e) => e.stopPropagation()}
+        />
+      )}
       {urls.length > 1 && (
         <span className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-white/10 px-3 py-1 text-xs text-white">
           {index + 1} / {urls.length}
