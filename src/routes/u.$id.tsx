@@ -488,58 +488,95 @@ function UserProfile() {
         </div>
 
         <div className="mt-5 space-y-4 pb-10">
-          {tab === "timeline" && (
+          {tab === "about" && (
             <>
-              {isOwn && isProvider && <PostComposer defaultCategory={sp?.category_slug} onPosted={load} />}
-              {posts.length === 0 && <p className="rounded-2xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground">No posts yet.</p>}
-              {posts.map((p) => <PostCard key={p.id} post={p} onChanged={load} />)}
-            </>
-          )}
+              <div className="rounded-2xl border border-border bg-card p-5">
+                <h3 className="font-display text-lg font-bold text-navy">About</h3>
+                {sp && (
+                  <p className="mt-1 text-sm font-medium text-orange">
+                    {formatSubcategory(sp.subcategory)}
+                    {cat?.name && <span className="text-muted-foreground"> · {cat.name}</span>}
+                  </p>
+                )}
+                <p className="mt-3 whitespace-pre-wrap text-sm text-foreground/85">
+                  {sp?.bio || profile.bio || (isProvider ? "No description yet." : "This member hasn't added a bio yet.")}
+                </p>
+                <dl className="mt-5 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
+                  <Row label="Location" value={`${sp?.town || profile.town || "—"}${(sp?.district || profile.district) ? `, ${sp?.district || profile.district}` : ""}`} />
+                  {sp && <Row label="Areas served" value={sp.areas_served.join(", ") || sp.town || "—"} />}
+                  {sp && <Row label="Availability" value={sp.availability.replace(/_/g, " ")} />}
+                  {sp && <Row label="Experience" value={sp.years_experience ? `${sp.years_experience} years` : "—"} />}
+                  {sp && <Row label="Verification" value={sp.verified === "verified" ? "Verified" : sp.verified === "pending" ? "Verification pending" : "Not yet verified"} />}
+                  {sp?.phone && <Row label="Phone" value={sp.phone} />}
+                  {sp?.email && <Row label="Email" value={sp.email} />}
+                </dl>
+                {sp && (sp.price_type || sp.price_note) && (
+                  <div className="mt-4">
+                    <PriceGuideCard
+                      guide={{ ...sp, price_type: sp.price_type as PriceType | null }}
+                      onEdit={isOwn ? () => setEditOpen(true) : undefined}
+                    />
+                  </div>
+                )}
 
-          {tab === "portfolio" && (
-            <>
-              {portfolioPosts.length === 0 ? (
-                <div className="rounded-2xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground"><p>No portfolio added yet.</p><p className="mt-1 text-xs">Message this provider on Tuungane to ask about previous work, availability, and pricing.</p></div>
-              ) : (
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                  {portfolioPosts.flatMap((p) =>
-                    p.media_urls.map((u, i) => (
-                      <div key={`${p.id}-${i}`} className="group relative aspect-square overflow-hidden rounded-xl border border-border bg-surface">
-                        <img src={u} alt={p.text.slice(0, 60)} className="h-full w-full object-cover transition group-hover:scale-105" loading="lazy" />
-                        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent p-2">
-                          <p className="line-clamp-2 text-[10px] text-white">{p.text}</p>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              )}
-            </>
-          )}
+                {!isOwn && isProvider && (
+                  <div className="mt-5 flex flex-wrap gap-2">
+                    <Link
+                      to="/messages"
+                      search={{ to: id } as never}
+                      className="inline-flex items-center gap-1 rounded-full bg-orange px-4 py-2 text-xs font-semibold text-orange-foreground hover:brightness-110"
+                    >
+                      Message on Tuungane
+                    </Link>
+                    {sp?.phone && (
+                      <a href={`tel:${sp.phone}`} className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-navy hover:border-orange">
+                        <Phone className="h-3.5 w-3.5" /> Call
+                      </a>
+                    )}
+                  </div>
+                )}
+              </div>
 
-          {tab === "services" && (
-            <>
-              {!sp ? (
-                <p className="rounded-2xl border border-dashed border-border bg-card p-8 text-center text-sm text-muted-foreground">No service profile yet.</p>
-              ) : (
-                <div className="rounded-2xl border border-border bg-card p-5">
-                  <h3 className="font-display text-lg font-bold text-navy">{formatSubcategory(sp.subcategory)}</h3>
-                  <p className="mt-1 text-xs text-muted-foreground">{cat?.name}</p>
-                  <p className="mt-3 text-sm text-foreground/85">{sp.bio || "No description yet."}</p>
-                  <dl className="mt-4 grid grid-cols-2 gap-3 text-xs">
-                    <div><dt className="text-muted-foreground">Areas served</dt><dd className="mt-0.5 font-medium text-navy">{sp.areas_served.join(", ") || sp.town}</dd></div>
-                    <div><dt className="text-muted-foreground">Availability</dt><dd className="mt-0.5 font-medium capitalize text-navy">{sp.availability.replace(/_/g, " ")}</dd></div>
-                    <div><dt className="text-muted-foreground">Experience</dt><dd className="mt-0.5 font-medium text-navy">{sp.years_experience} years</dd></div>
-                    <div><dt className="text-muted-foreground">Status</dt><dd className="mt-0.5 font-medium capitalize text-navy">{sp.verified}</dd></div>
-                  </dl>
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    {sp.phone && <a href={`tel:${sp.phone}`} className="rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-navy hover:border-orange">Call</a>}
+              {/* Past work preview from Timeline */}
+              {portfolioPosts.length > 0 && (
+                <div className="rounded-2xl border border-border bg-card p-4">
+                  <div className="mb-3 flex items-center justify-between gap-2">
+                    <div>
+                      <h4 className="font-display text-sm font-bold text-navy">Recent work</h4>
+                      <p className="text-[11px] text-muted-foreground">Photos shared on the Timeline</p>
+                    </div>
+                    <button onClick={() => setTab("timeline")} className="text-xs font-semibold text-orange">See all →</button>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2">
+                    {portfolioPosts
+                      .flatMap((p) => p.media_urls.map((u, i) => ({ url: u, alt: p.text.slice(0, 60), key: `${p.id}-${i}` })))
+                      .slice(0, 6)
+                      .map((m) => (
+                        <button key={m.key} onClick={() => setTab("timeline")} className="group relative aspect-square overflow-hidden rounded-lg border border-border bg-surface">
+                          <img src={m.url} alt={m.alt} className="h-full w-full object-cover transition group-hover:scale-105" loading="lazy" />
+                        </button>
+                      ))}
                   </div>
                 </div>
               )}
             </>
           )}
 
+          {tab === "timeline" && (
+            <>
+              {isOwn && isProvider && <PostComposer defaultCategory={sp?.category_slug} onPosted={load} />}
+              {posts.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-border bg-card p-8 text-center text-sm">
+                  <p className="font-semibold text-navy">
+                    {isOwn ? "Share your first update, photo, or recent work to make your profile more attractive." : `${sp?.business_name || profile.full_name} hasn't posted updates yet.`}
+                  </p>
+                  {!isOwn && <p className="mt-1 text-xs text-muted-foreground">When they share work photos, promotions, or recent activity, it will appear here.</p>}
+                </div>
+              ) : (
+                posts.map((p) => <PostCard key={p.id} post={p} onChanged={load} />)
+              )}
+            </>
+          )}
 
           {tab === "reviews" && (
             <>
@@ -564,8 +601,10 @@ function UserProfile() {
 
                 {feedback.length === 0 ? (
                   <div className="rounded-2xl border border-dashed border-border bg-card p-6 text-center text-sm">
-                    <p className="font-semibold text-navy">No verified reviews yet.</p>
-                    <p className="mt-1 text-xs text-muted-foreground">Verified reviews will appear after completed Tuungane services.</p>
+                    <p className="font-semibold text-navy">
+                      {recs.length > 0 ? "This provider has endorsements, but no verified Tuungane reviews yet." : "No verified reviews yet."}
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">Reviews will appear here after completed Tuungane services.</p>
                   </div>
                 ) : (
                   <div className="space-y-3">
@@ -590,7 +629,7 @@ function UserProfile() {
               <section className="space-y-3 pt-2">
                 <div>
                   <h3 className="font-display text-base font-bold text-navy">Endorsements</h3>
-                  <p className="text-xs text-muted-foreground">General support from people who know or trust this provider · not verified service reviews</p>
+                  <p className="text-xs text-muted-foreground">Lighter social proof from people who know or trust this provider</p>
                 </div>
 
                 {!isOwn && user && isProvider && (
@@ -622,25 +661,75 @@ function UserProfile() {
             </>
           )}
 
-
-          {tab === "about" && (
-            <div className="rounded-2xl border border-border bg-card p-5">
-              <h3 className="font-display text-lg font-bold text-navy">About</h3>
-              <p className="mt-2 whitespace-pre-wrap text-sm text-foreground/85">{sp?.bio || profile.bio || "No bio yet."}</p>
-              <dl className="mt-5 space-y-2 text-sm">
-                {sp && <Row label="Service" value={`${formatSubcategory(sp.subcategory)} · ${cat?.name ?? ""}`} />}
-                <Row label="Location" value={`${sp?.town || profile.town || "—"}${(sp?.district || profile.district) ? `, ${sp?.district || profile.district}` : ""}`} />
-                {sp && <Row label="Areas served" value={sp.areas_served.join(", ") || sp.town} />}
-                {sp && <Row label="Experience" value={`${sp.years_experience} years`} />}
-                {sp && <Row label="Availability" value={sp.availability.replace(/_/g, " ")} />}
-                {sp?.phone && <Row label="Phone" value={sp.phone} />}
-                
-                {sp?.email && <Row label="Email" value={sp.email} />}
-                {sp && <Row label="Verification" value={sp.verified} />}
-              </dl>
-            </div>
+          {tab === "services" && (
+            <>
+              {services.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-border bg-card p-6 text-center text-sm">
+                  <p className="font-semibold text-navy">No detailed service packages yet.</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {isOwn
+                      ? "Add service packages so customers can see exactly what you offer, with prices and clear descriptions."
+                      : "You can still message this provider or create a service request."}
+                  </p>
+                  {isOwn && (
+                    <button onClick={() => setEditOpen(true)} className="mt-3 rounded-full bg-orange px-4 py-2 text-xs font-semibold text-orange-foreground">
+                      Add a service package
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <ul className="space-y-3">
+                  {services.map((s) => (
+                    <li key={s.id} className={`rounded-2xl border bg-card p-4 ${s.is_primary ? "border-orange/40 ring-1 ring-orange/15" : "border-border"}`}>
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-1.5">
+                            <p className="font-semibold text-navy">{s.title}</p>
+                            {s.is_primary && (
+                              <span className="inline-flex items-center gap-0.5 rounded-full bg-orange/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-orange">
+                                <Star className="h-3 w-3 fill-orange" /> Main
+                              </span>
+                            )}
+                          </div>
+                          {s.description && <p className="mt-1 whitespace-pre-wrap text-sm text-foreground/85">{s.description}</p>}
+                          <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                            {s.price_type ? (
+                              <PriceGuideChip guide={s as unknown as PriceGuide} />
+                            ) : s.price_guidance_ugx ? (
+                              <span className="inline-flex items-center rounded-full bg-orange/10 px-2 py-0.5 text-[11px] font-semibold text-orange">
+                                From UGX {s.price_guidance_ugx.toLocaleString()}
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">
+                                Negotiable
+                              </span>
+                            )}
+                          </div>
+                          {s.price_note && <p className="mt-1 text-[11px] text-muted-foreground">{s.price_note}</p>}
+                        </div>
+                        {!isOwn && isProvider && (
+                          <button
+                            onClick={() => {
+                              requireAuth(() => setRequestOpen(true), {
+                                title: "Sign in to request this service",
+                                message: "Create a free Tuungane account to send a request to this provider.",
+                                redirect: `/u/${id}`,
+                              });
+                            }}
+                            className="shrink-0 rounded-xl bg-orange px-3 py-2 text-xs font-semibold text-orange-foreground"
+                          >
+                            Request
+                          </button>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </>
           )}
         </div>
+
 
         <RecommendDialog open={recOpen} onClose={() => setRecOpen(false)} providerUserId={id} />
         <ReviewDialog open={revOpen} onClose={() => setRevOpen(false)} providerUserId={id} onPosted={load} />
