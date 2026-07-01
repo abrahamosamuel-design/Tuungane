@@ -4,8 +4,10 @@ import heroNetwork from "@/assets/hero-network.jpg";
 import heroProviders from "@/assets/hero-providers-real.jpg";
 import heroRequest from "@/assets/hero-request-real.jpg";
 import heroTrust from "@/assets/hero-trust-real.jpg";
+import heroCreative from "@/assets/hero-creative-real.jpg";
+import heroProperty from "@/assets/hero-property-real.jpg";
 
-type SlideKey = "network" | "providers" | "request" | "trust";
+type SlideKey = "network" | "providers" | "request" | "trust" | "creative" | "property";
 
 type Slide = {
   key: SlideKey;
