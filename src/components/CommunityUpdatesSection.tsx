@@ -73,12 +73,14 @@ export function CommunityUpdatesSection() {
       if (!raw.length) { if (!cancelled) setPosts([]); return; }
 
       const ids = Array.from(new Set(raw.map((p) => p.provider_user_id)));
-      const [{ data: profs }, { data: sps }] = await Promise.all([
+      const [{ data: profs }, { data: sps }, { data: pps }] = await Promise.all([
         supabase.from("profiles").select("id,full_name,avatar_url,is_provider").in("id", ids),
-        supabase.from("service_profiles").select("user_id,verified,suspended").in("user_id", ids),
+        supabase.from("service_profiles").select("user_id,business_name,verified,suspended,cover_url").in("user_id", ids),
+        supabase.from("public_profiles").select("owner_id,name,avatar_url,cover_url,verified").in("owner_id", ids),
       ]);
       const profMap = new Map((profs ?? []).map((p: any) => [p.id, p]));
       const spMap = new Map((sps ?? []).map((s: any) => [s.user_id, s]));
+      const ppMap = new Map((pps ?? []).filter((p: any) => p.owner_id).map((p: any) => [p.owner_id, p]));
 
       // Fetch like/comment counts in parallel per post (cheap for ~40).
       const counts = await Promise.all(
@@ -96,13 +98,22 @@ export function CommunityUpdatesSection() {
         .map((p) => {
           const prof = profMap.get(p.provider_user_id) as any;
           const sp = spMap.get(p.provider_user_id) as any;
+          const pp = ppMap.get(p.provider_user_id) as any;
           if (sp?.suspended) return null;
           const c = countMap.get(p.id);
+          const fullName =
+            sp?.business_name ||
+            pp?.name ||
+            prof?.full_name ||
+            "Service Provider";
+          const avatar = prof?.avatar_url || pp?.avatar_url || pp?.cover_url || sp?.cover_url || null;
+          const isProvider = !!prof?.is_provider || !!sp || !!pp;
+          const isVerified = sp?.verified === "verified" || pp?.verified === "verified";
           return {
             ...p,
-            author: prof ? { full_name: prof.full_name, avatar_url: prof.avatar_url } : null,
-            is_provider: !!prof?.is_provider,
-            is_verified: sp?.verified === "verified",
+            author: { full_name: fullName, avatar_url: avatar },
+            is_provider: isProvider,
+            is_verified: isVerified,
             likes: c?.likes ?? 0,
             comments: c?.comments ?? 0,
           } as CUPost;
