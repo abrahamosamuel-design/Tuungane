@@ -127,7 +127,16 @@ function Services() {
     (async () => {
       setLoadingReal(true);
       const isRecent = filter === "recent";
-      let qy = supabase.from("service_profiles").select("user_id,business_name,subcategory,bio,town,district,area,latitude,longitude,areas_served,service_radius_km,category_slug,verified,seeded_by_official,seeded_status,updated_at,created_at,availability,cover_url,media_urls,years_experience,price_type,price_fixed_ugx,price_min_ugx,price_max_ugx,price_currency,price_note").eq("suspended", false);
+      // Guests can only SELECT the safe subset (no lat/long/area).
+      const isGuest = !authUser;
+      const spCols = isGuest
+        ? "user_id,business_name,subcategory,bio,town,district,areas_served,service_radius_km,category_slug,verified,updated_at,created_at,availability,cover_url,media_urls,years_experience,price_type,price_fixed_ugx,price_min_ugx,price_max_ugx,price_currency,price_note"
+        : "user_id,business_name,subcategory,bio,town,district,area,latitude,longitude,areas_served,service_radius_km,category_slug,verified,seeded_by_official,seeded_status,updated_at,created_at,availability,cover_url,media_urls,years_experience,price_type,price_fixed_ugx,price_min_ugx,price_max_ugx,price_currency,price_note";
+      const ppCols = isGuest
+        ? "owner_id,name,avatar_url,subcategory,bio,town,district,areas_served,service_radius_km,category_slug,verified,claim_status,updated_at,created_at,availability,cover_url"
+        : "owner_id,name,avatar_url,subcategory,bio,town,district,area,latitude,longitude,areas_served,service_radius_km,category_slug,verified,seeded_by_official,claim_status,updated_at,created_at,availability,cover_url";
+
+      let qy = supabase.from("service_profiles").select(spCols).eq("suspended", false);
       qy = isRecent
         ? qy.order("created_at", { ascending: false }).order("user_id", { ascending: false })
         : qy.order("updated_at", { ascending: false });
@@ -138,7 +147,7 @@ function Services() {
 
       // Also pull public/business pages (claimed legacy listings) so their owners
       // appear as provider cards even when they don't have a service_profile row.
-      let pqy = supabase.from("public_profiles").select("owner_id,name,avatar_url,subcategory,bio,town,district,area,latitude,longitude,areas_served,service_radius_km,category_slug,verified,seeded_by_official,claim_status,updated_at,created_at,availability,cover_url").eq("suspended", false).not("owner_id", "is", null);
+      let pqy = supabase.from("public_profiles").select(ppCols).eq("suspended", false).not("owner_id", "is", null);
       pqy = isRecent
         ? pqy.order("created_at", { ascending: false }).order("owner_id", { ascending: false })
         : pqy.order("updated_at", { ascending: false });
@@ -162,8 +171,8 @@ function Services() {
           town: pp.town ?? "",
           district: pp.district ?? "",
           area: pp.area ?? null,
-          latitude: pp.latitude,
-          longitude: pp.longitude,
+          latitude: pp.latitude ?? null,
+          longitude: pp.longitude ?? null,
           areas_served: pp.areas_served ?? null,
           service_radius_km: pp.service_radius_km ?? null,
           category_slug: pp.category_slug ?? "other",
@@ -190,8 +199,12 @@ function Services() {
       const profMap = new Map<string, { full_name: string; avatar_url: string | null }>();
       const trustMap = new Map<string, { trust_score: number; average_rating: number; completed_jobs: number; verified_reviews: number; response_rate: number }>();
       if (ids.length) {
+        // `profiles` is auth-only; only fetch the fallback name/avatar map for signed-in visitors.
+        const profsPromise = isGuest
+          ? Promise.resolve({ data: [] as Array<{ id: string; full_name: string; avatar_url: string | null }> })
+          : supabase.from("profiles").select("id,full_name,avatar_url").in("id", ids);
         const [profsRes, trustRes] = await Promise.all([
-          supabase.from("profiles").select("id,full_name,avatar_url").in("id", ids),
+          profsPromise,
           supabase.from("provider_trust_stats").select("provider_id,trust_score,average_rating,completed_service_requests,total_verified_reviews,response_rate").in("provider_id", ids),
         ]);
         (profsRes.data ?? []).forEach((p) => profMap.set(p.id, p));
@@ -214,7 +227,7 @@ function Services() {
       })) as RealProvider[]);
       setLoadingReal(false);
     })();
-  }, [filter]);
+  }, [filter, authUser]);
 
   const { has: isBoostedProvider } = useBoostedSet("provider", ["boost_profile", "feature_business_page"]);
 
