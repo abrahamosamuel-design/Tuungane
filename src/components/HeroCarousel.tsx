@@ -168,9 +168,10 @@ export function HeroCarousel() {
               >
                 {current.supportingText}
               </p>
+            </div>
           </div>
 
-          {/* Prev / Next arrows — overlaid, vertically centered on side edges */}
+          {/* Prev / Next arrows — desktop only, subtle, centered on full image */}
           <button
             type="button"
             aria-label="Previous hero image"
@@ -178,9 +179,9 @@ export function HeroCarousel() {
               go(index - 1);
               pauseThenResume();
             }}
-            className="group absolute left-2 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/70 text-navy shadow-md backdrop-blur transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange sm:left-3 sm:h-10 sm:w-10"
+            className="absolute left-2 top-1/2 z-10 hidden h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white/50 text-navy shadow-sm backdrop-blur transition hover:bg-white/75 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange sm:left-3 sm:flex"
           >
-            <ChevronLeft className="h-5 w-5" />
+            <ChevronLeft className="h-4 w-4" />
           </button>
           <button
             type="button"
@@ -189,11 +190,10 @@ export function HeroCarousel() {
               go(index + 1);
               pauseThenResume();
             }}
-            className="group absolute right-2 top-1/2 z-10 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full bg-white/70 text-navy shadow-md backdrop-blur transition hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange sm:right-3 sm:h-10 sm:w-10"
+            className="absolute right-2 top-1/2 z-10 hidden h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-white/50 text-navy shadow-sm backdrop-blur transition hover:bg-white/75 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange sm:right-3 sm:flex"
           >
-            <ChevronRight className="h-5 w-5" />
+            <ChevronRight className="h-4 w-4" />
           </button>
-        </div>
         </div>
       </div>
 
