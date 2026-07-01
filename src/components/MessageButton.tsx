@@ -32,11 +32,15 @@ export function MessageButton({
 }: Props) {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { requireAuth } = useAuthGate();
   const [busy, setBusy] = useState(false);
 
   const onClick = async () => {
     if (!user) {
-      navigate({ to: "/login" });
+      requireAuth(undefined, {
+        title: "Sign in to message this provider",
+        message: "Create a free Tuungane account to message providers and track your conversations.",
+      });
       return;
     }
     if (user.id === providerId) {
