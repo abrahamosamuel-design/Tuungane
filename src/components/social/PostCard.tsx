@@ -61,6 +61,7 @@ export function PostCard({ post, onChanged, userLoc }: Props) {
   const [newComment, setNewComment] = useState("");
   const [reportOpen, setReportOpen] = useState(false);
   const [recOpen, setRecOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
   const { boosts, refresh: refreshBoosts, has: hasBoost } = useActiveBoosts("post", post.id);
 
   useEffect(() => {
