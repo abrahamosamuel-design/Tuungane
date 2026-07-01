@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { MapPin, Heart, MessageCircle, BadgeCheck, Briefcase } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -145,11 +145,70 @@ export function CommunityUpdatesSection() {
       if (bv !== av) return bv - av;
       return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
     });
-    return ranked.slice(0, 5);
+    return ranked.slice(0, 10);
   }, [posts, userLoc]);
 
-  if (posts === null) return null; // don't render skeleton to keep homepage compact
-  if (top.length === 0) return null; // hide entirely when nothing qualifies
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  const [activeIdx, setActiveIdx] = useState(0);
+  const pausedUntilRef = useRef(0);
+  const RESUME_DELAY = 7000;
+
+  const pauseInteraction = () => {
+    pausedUntilRef.current = Date.now() + RESUME_DELAY;
+  };
+
+  // Track active card via scroll position (for dots)
+  useEffect(() => {
+    const el = scrollerRef.current;
+    if (!el || top.length === 0) return;
+    const onScroll = () => {
+      const cards = Array.from(el.querySelectorAll<HTMLElement>("[data-cu-card]"));
+      if (!cards.length) return;
+      const center = el.scrollLeft + el.clientWidth / 2;
+      let best = 0;
+      let bestDist = Infinity;
+      cards.forEach((c, i) => {
+        const cCenter = c.offsetLeft + c.offsetWidth / 2;
+        const d = Math.abs(cCenter - center);
+        if (d < bestDist) { bestDist = d; best = i; }
+      });
+      setActiveIdx(best);
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => el.removeEventListener("scroll", onScroll);
+  }, [top.length]);
+
+  // Auto-scroll every 4s, pause on interaction, respect reduced-motion
+  useEffect(() => {
+    if (top.length < 2) return;
+    if (typeof window === "undefined") return;
+    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    if (reduce) return;
+    const el = scrollerRef.current;
+    if (!el) return;
+
+    const id = window.setInterval(() => {
+      if (Date.now() < pausedUntilRef.current) return;
+      const cards = Array.from(el.querySelectorAll<HTMLElement>("[data-cu-card]"));
+      if (!cards.length) return;
+      // If near end, loop back to start.
+      const nearEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 8;
+      if (nearEnd) {
+        el.scrollTo({ left: 0, behavior: "smooth" });
+        return;
+      }
+      const next = Math.min(activeIdx + 1, cards.length - 1);
+      const target = cards[next];
+      if (target) {
+        el.scrollTo({ left: target.offsetLeft - 16, behavior: "smooth" });
+      }
+    }, 4000);
+    return () => window.clearInterval(id);
+  }, [top.length, activeIdx]);
+
+  if (posts === null) return null;
+  if (top.length === 0) return null;
 
   return (
     <section className="mx-auto max-w-6xl px-4 pt-6 sm:px-6 sm:pt-10">
@@ -163,26 +222,44 @@ export function CommunityUpdatesSection() {
             See what people and providers are sharing on Tuungane.
           </p>
         </div>
-        <Link to="/feed" className="hidden shrink-0 text-sm font-semibold text-navy hover:text-orange sm:inline">
+        <Link to="/feed" className="shrink-0 text-sm font-semibold text-navy hover:text-orange">
           View all →
         </Link>
       </div>
 
-      <div className="-mx-4 mt-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-3 scroll-px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-3">
+      <div
+        ref={scrollerRef}
+        onPointerDown={pauseInteraction}
+        onTouchStart={pauseInteraction}
+        onMouseEnter={pauseInteraction}
+        onFocusCapture={pauseInteraction}
+        onWheel={pauseInteraction}
+        className="-mx-4 mt-4 flex snap-x snap-mandatory gap-3 overflow-x-auto overscroll-x-contain px-4 pb-3 scroll-px-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mx-0 sm:px-0"
+      >
         {top.map((p) => (
-          <CommunityCard key={p.id} p={p} userLoc={userLoc} />
+          <div key={p.id} data-cu-card className="w-[85vw] max-w-[340px] shrink-0 snap-start sm:w-[320px]">
+            <CommunityCard p={p} userLoc={userLoc} />
+          </div>
         ))}
-        <div aria-hidden className="shrink-0 w-1 sm:hidden" />
+        <div aria-hidden className="shrink-0 w-1" />
       </div>
 
-      <div className="mt-2 sm:hidden">
-        <Link to="/feed" className="inline-flex text-sm font-semibold text-navy hover:text-orange">
-          View all updates →
-        </Link>
-      </div>
+      {top.length > 1 && (
+        <div className="mt-2 flex items-center justify-center gap-1.5" aria-hidden>
+          {top.map((_, i) => (
+            <span
+              key={i}
+              className={`h-1.5 rounded-full transition-all ${
+                i === activeIdx ? "w-4 bg-orange" : "w-1.5 bg-navy/20"
+              }`}
+            />
+          ))}
+        </div>
+      )}
     </section>
   );
 }
+
 
 function CommunityCard({ p, userLoc }: { p: CUPost; userLoc: ReturnType<typeof useUserLocation>["location"] }) {
   const cat = useCategory(p.category_slug ?? undefined);
@@ -200,7 +277,7 @@ function CommunityCard({ p, userLoc }: { p: CUPost; userLoc: ReturnType<typeof u
   const isServiceLike = p.post_type === "available" || p.post_type === "new_service" || p.post_type === "completed_job";
 
   return (
-    <article className="flex w-[88vw] max-w-[340px] shrink-0 snap-start flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)] transition hover:border-orange sm:w-auto sm:max-w-none">
+    <article className="flex w-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)] transition hover:border-orange">
       <div className="flex items-start gap-3 p-4 pb-2">
         <Link to="/u/$id" params={{ id: p.provider_user_id }} className="shrink-0">
           <FeedAvatar src={p.author?.avatar_url ?? null} name={authorName} size={40} ring={p.is_verified} />
