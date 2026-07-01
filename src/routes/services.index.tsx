@@ -86,6 +86,7 @@ const POPULAR_SERVICES = ["Plumber", "Electrician", "Cleaner", "Mechanic", "Tuto
 
 function Services() {
   const nav = useNavigate();
+  const { user: authUser } = useAuth();
   const { location: userLoc } = useUserLocation();
   const { locations: featuredLocs } = useFeaturedLocations();
   const search = Route.useSearch();
