@@ -57,12 +57,17 @@ function BrowseRequests() {
 
   const load = async () => {
     setLoading(true);
-    let query = supabase
+    // Guests can only SELECT the safe subset (no requester id, phone, coords, etc.).
+    const isGuest = !user;
+    const cols = isGuest
+      ? "id,provider_id,category_slug,subcategory,service_needed,title,visibility,district,town,description,preferred_date,preferred_time,urgency,budget_range,media_urls,status,urgent_flag,created_at,updated_at,service_profile_id"
+      : "id,customer_id,provider_id,category_slug,subcategory,service_needed,title,visibility,location,district,town,area,latitude,longitude,description,preferred_date,preferred_time,urgency,budget_range,preferred_contact_method,attachment_url,media_urls,status,urgent_flag,created_at,updated_at,completed_at,cancelled_at,disputed_at,service_profile_id,selected_provider_id,provider_confirmed_completion,customer_confirmed_completion";
+    let query: any = supabase
       .from("service_requests")
-      .select("id,customer_id,provider_id,category_slug,subcategory,service_needed,title,visibility,location,district,town,area,latitude,longitude,description,preferred_date,preferred_time,urgency,budget_range,preferred_contact_method,attachment_url,media_urls,status,urgent_flag,created_at,updated_at,completed_at,cancelled_at,disputed_at,service_profile_id,selected_provider_id,provider_confirmed_completion,customer_confirmed_completion")
+      .select(cols as string)
       .eq("visibility", "public")
       .eq("status", "requested")
-      
+
       .order("created_at", { ascending: false })
       .limit(80);
 
@@ -71,34 +76,39 @@ function BrowseRequests() {
     if (chip === "today") query = query.eq("urgency", "emergency");
     if (chip === "week") query = query.eq("urgency", "urgent");
     if (budgetShown) query = query.not("budget_range", "is", null);
-    if (loc) query = query.or(`town.ilike.%${loc}%,district.ilike.%${loc}%,location.ilike.%${loc}%`);
+    if (loc) query = query.or(isGuest
+      ? `town.ilike.%${loc}%,district.ilike.%${loc}%`
+      : `town.ilike.%${loc}%,district.ilike.%${loc}%,location.ilike.%${loc}%`);
     if (q) query = query.or(`title.ilike.%${q}%,service_needed.ilike.%${q}%,description.ilike.%${q}%`);
     if ((chip === "nearby" || nearMe) && myDistrict) query = query.eq("district", myDistrict);
 
     const { data } = await query;
     let list = (data ?? []) as unknown as RequestRowLite[];
 
-    // attach customer names + response counts in parallel
-    const customerIds = Array.from(new Set(list.map((r) => r.customer_id)));
-    const requestIds = list.map((r) => r.id);
-    const [{ data: profs }, { data: resps }] = await Promise.all([
-      customerIds.length
-        ? supabase.from("profiles").select("id,full_name,avatar_url").in("id", customerIds)
-        : Promise.resolve({ data: [] as Array<{ id: string; full_name: string; avatar_url: string | null }> }),
-      requestIds.length
-        ? supabase.from("provider_responses").select("request_id").in("request_id", requestIds)
-        : Promise.resolve({ data: [] as Array<{ request_id: string }> }),
-    ]);
-    const nameMap = new Map((profs ?? []).map((p) => [p.id, p.full_name] as const));
-    const avatarMap = new Map((profs ?? []).map((p) => [p.id, p.avatar_url] as const));
-    const countMap = new Map<string, number>();
-    (resps ?? []).forEach((r) => countMap.set(r.request_id, (countMap.get(r.request_id) ?? 0) + 1));
-    list = list.map((r) => ({
-      ...r,
-      customer_name: nameMap.get(r.customer_id) ?? null,
-      customer_avatar_url: avatarMap.get(r.customer_id) ?? null,
-      response_count: countMap.get(r.id) ?? 0,
-    }));
+    // Only signed-in users can look up requester names and response counts
+    // (both queries hit auth-only tables). Guests see anonymised cards.
+    if (!isGuest) {
+      const customerIds = Array.from(new Set(list.map((r) => r.customer_id).filter(Boolean)));
+      const requestIds = list.map((r) => r.id);
+      const [{ data: profs }, { data: resps }] = await Promise.all([
+        customerIds.length
+          ? supabase.from("profiles").select("id,full_name,avatar_url").in("id", customerIds)
+          : Promise.resolve({ data: [] as Array<{ id: string; full_name: string; avatar_url: string | null }> }),
+        requestIds.length
+          ? supabase.from("provider_responses").select("request_id").in("request_id", requestIds)
+          : Promise.resolve({ data: [] as Array<{ request_id: string }> }),
+      ]);
+      const nameMap = new Map((profs ?? []).map((p) => [p.id, p.full_name] as const));
+      const avatarMap = new Map((profs ?? []).map((p) => [p.id, p.avatar_url] as const));
+      const countMap = new Map<string, number>();
+      (resps ?? []).forEach((r) => countMap.set(r.request_id, (countMap.get(r.request_id) ?? 0) + 1));
+      list = list.map((r) => ({
+        ...r,
+        customer_name: nameMap.get(r.customer_id) ?? null,
+        customer_avatar_url: avatarMap.get(r.customer_id) ?? null,
+        response_count: countMap.get(r.id) ?? 0,
+      }));
+    }
 
     setItems(list);
     setLoading(false);
@@ -107,7 +117,7 @@ function BrowseRequests() {
   useEffect(() => {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cat, chip, urgentOnly, budgetShown, nearMe, myDistrict]);
+  }, [cat, chip, urgentOnly, budgetShown, nearMe, myDistrict, user?.id]);
 
   const category = useMemo(() => categories.find((c) => c.slug === cat), [cat]);
   const rankedItems = useMemo(() => {
