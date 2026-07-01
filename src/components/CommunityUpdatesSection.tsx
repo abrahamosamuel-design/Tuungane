@@ -65,7 +65,7 @@ export function CommunityUpdatesSection() {
         .from("timeline_posts")
         .select("id,provider_user_id,text,category_slug,location,media_urls,featured,created_at,post_type,district,town,area,latitude,longitude")
         .eq("hidden", false)
-        .in("post_type", ALLOWED_TYPES as unknown as string[])
+        .in("post_type", ALLOWED_TYPES as unknown as never)
         .order("created_at", { ascending: false })
         .limit(40);
 

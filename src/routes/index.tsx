@@ -14,6 +14,7 @@ import { listSkillHref } from "@/lib/cta";
 import { HeroCarousel } from "@/components/HeroCarousel";
 import { HomeFeedSections } from "@/components/HomeFeedSections";
 import { PopularCategoriesSection } from "@/components/PopularCategoriesSection";
+import { CommunityUpdatesSection } from "@/components/CommunityUpdatesSection";
 import { SetLocationNudge } from "@/components/SetLocationNudge";
 
 
