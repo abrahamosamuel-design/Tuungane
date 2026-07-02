@@ -185,24 +185,36 @@ export function RequestCard({
       </div>
 
       {/* Action row */}
-      <div className="mt-3 flex items-center gap-2 border-t border-border bg-surface px-3 py-2.5 sm:px-4">
+      <div className="mt-3 grid grid-cols-[1fr_auto_auto] items-stretch gap-2 border-t border-border bg-surface px-3 py-2.5 sm:px-4">
         {isOwner ? (
           <>
             <Link
               to="/requests/$id"
               params={{ id: r.id }}
-              className="flex-1 rounded-full bg-navy px-4 py-2 text-center text-sm font-semibold text-navy-foreground hover:brightness-110"
+              className="inline-flex h-10 items-center justify-center rounded-full bg-navy px-4 text-sm font-semibold text-navy-foreground hover:brightness-110"
             >
               Manage request
             </Link>
+            {onEdit ? (
+              <button
+                type="button"
+                onClick={onEdit}
+                className="inline-flex h-10 items-center justify-center rounded-full border border-border px-3 text-xs font-semibold text-navy hover:border-navy"
+              >
+                Edit
+              </button>
+            ) : (
+              <span />
+            )}
             <Link
               to="/requests/$id"
               params={{ id: r.id }}
-              className="rounded-full border border-border px-3 py-2 text-center text-xs font-semibold text-navy hover:border-navy"
+              className="inline-flex h-10 items-center justify-center rounded-full border border-border px-3 text-xs font-semibold text-navy hover:border-navy"
             >
               Responses
             </Link>
           </>
+
         ) : (
           <>
             {onRespond ? (
