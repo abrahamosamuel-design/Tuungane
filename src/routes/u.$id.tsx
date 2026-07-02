@@ -237,18 +237,8 @@ function UserProfile() {
 
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [id]);
 
-  const uploadCover = async (file: File | null) => {
-    if (!file || !user) return;
-    setUploadingCover(true);
-    try {
-      const url = await uploadMedia(user.id, file, "avatars");
-      await supabase.from("service_profiles").update({ header_url: url }).eq("user_id", user.id);
-      load();
-      toast.success("Header banner updated");
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Upload failed");
-    } finally { setUploadingCover(false); }
-  };
+
+
 
   const uploadAvatar = async (file: File | null) => {
     if (!file || !user) return;
