@@ -66,13 +66,20 @@ export function RequestCard({
   const title = tidy(r.title) || tidy(r.service_needed) || cat?.name || "Request";
   const description = tidy(r.description);
   const isOwner = !!currentUserId && currentUserId === r.customer_id;
-  const requesterName = r.customer_name?.trim() || "A neighbour";
+  const isBusinessPost = r.posted_as_type === "business" && !!r.posted_as_name;
+  const requesterName = isBusinessPost
+    ? (r.posted_as_name as string)
+    : (r.customer_name?.trim() || "A neighbour");
+  const requesterAvatar = isBusinessPost
+    ? (r.posted_as_avatar_url ?? null)
+    : (r.customer_avatar_url ?? null);
   const loc = r.area || r.town || r.district || r.location || "Uganda";
   const media = Array.isArray(r.media_urls) && r.media_urls.length > 0
     ? r.media_urls
     : r.attachment_url
       ? [r.attachment_url]
       : [];
+
 
   return (
     <article className="overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)] transition hover:border-orange/60">
