@@ -298,7 +298,7 @@ export function HomeFeedSections() {
       setLoading(false);
     })();
     return () => { cancelled = true; };
-  }, [userLoc?.latitude, userLoc?.longitude, user?.id]);
+  }, [userLoc?.latitude, userLoc?.longitude, user?.id, reloadTick]);
 
   const topRequests = useMemo(() => {
     const sorted = sortByProximity(requests, userLoc, (r) => r);
