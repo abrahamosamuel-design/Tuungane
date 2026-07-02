@@ -28,17 +28,16 @@ export const Route = createFileRoute("/_authenticated/admin")({
 
 type Tab =
   | "overview"
-  | "users" | "providers" | "businesses"
+  | "users" | "providers"
   | "requests" | "posts" | "recs"
   | "reports" | "disputes" | "trust"
   | "credits" | "official" | "contact" | "activity" | "locations" | "categories";
 
 const TAB_GROUPS: { label: string; tabs: { id: Tab; label: string; adminOnly?: boolean }[] }[] = [
   { label: "Home", tabs: [{ id: "overview", label: "Overview" }] },
-  { label: "People & Pages", tabs: [
+  { label: "People & Profiles", tabs: [
     { id: "users", label: "Users" },
     { id: "providers", label: "Providers" },
-    { id: "businesses", label: "Businesses" },
   ]},
   { label: "Content", tabs: [
     { id: "requests", label: "Manage Requests" },
