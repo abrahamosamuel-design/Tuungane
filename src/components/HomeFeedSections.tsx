@@ -540,7 +540,14 @@ function RequestCard({
   const urg = urgencyMeta(r);
   const media = (r.media_urls ?? []).filter(Boolean) as string[];
   const isOwner = !!currentUserId && !!r.customer_id && currentUserId === r.customer_id;
-  const requesterName = r.customer_name?.trim() || (currentUserId ? "A member" : "Open request");
+  const isBusinessPost = r.posted_as_type === "business" && !!r.posted_as_name;
+  const requesterName = isBusinessPost
+    ? (r.posted_as_name as string)
+    : (r.customer_name?.trim() || (currentUserId ? "A member" : "Open request"));
+  const requesterAvatar = isBusinessPost
+    ? (r.posted_as_avatar_url ?? null)
+    : (r.customer_avatar_url ?? null);
+
 
   return (
     <article
