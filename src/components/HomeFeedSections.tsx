@@ -154,7 +154,7 @@ export function HomeFeedSections() {
       if (!reqs || reqs.length === 0) {
         const { data } = await supabase
           .from("service_requests")
-          .select(user ? SR_COLS_AUTH : SR_COLS_GUEST)
+          .select((user ? SR_COLS_AUTH : SR_COLS_GUEST) as string)
           .eq("visibility", "public")
           .eq("status", "requested")
           .is("provider_id", null)
