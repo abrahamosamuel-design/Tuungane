@@ -5,7 +5,6 @@ import { supabase } from "@/integrations/supabase/client";
 type Stats = {
   users: number;
   providers: number;
-  businesses: number;
   opportunities: number;
   requests: number;
   openReports: number;
@@ -16,7 +15,7 @@ type Stats = {
 };
 
 const empty: Stats = {
-  users: 0, providers: 0, businesses: 0, opportunities: 0, requests: 0,
+  users: 0, providers: 0, opportunities: 0, requests: 0,
   openReports: 0, openDisputes: 0, pendingClaims: 0, pendingPurchases: 0, pendingOpps: 0,
 };
 
