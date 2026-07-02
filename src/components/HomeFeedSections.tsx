@@ -660,12 +660,13 @@ function ProviderCard({ p, userLoc }: { p: NearbyProvider; userLoc: ReturnType<t
           <FeedAvatar src={avatar} name={name} size={44} ring={verified} />
         </Link>
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-x-1.5">
-            <Link to="/u/$id" params={{ id: p.user_id }} className="truncate text-[14px] font-semibold text-navy hover:underline">
+          <div className="flex items-start gap-x-1.5">
+            <Link to="/u/$id" params={{ id: p.user_id }} className="font-display text-[15px] font-semibold leading-snug text-navy line-clamp-2 break-words hover:underline">
               {name}
             </Link>
-            {verified ? <BadgeCheck className="h-4 w-4 shrink-0 text-green" aria-label="Verified" /> : null}
+            {verified ? <BadgeCheck className="mt-1 h-4 w-4 shrink-0 text-green" aria-label="Verified" /> : null}
           </div>
+
           <p className="truncate text-[12px] text-muted-foreground">
             {formatSubcategory(p.subcategory)}{cat ? ` · ${cat.name}` : ""}
           </p>
