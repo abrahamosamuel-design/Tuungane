@@ -254,6 +254,7 @@ export function HomeFeedSections() {
       const ids = Array.from(new Set([
         ...(provs ?? []).map((p) => p.user_id),
         ...listings.map((l) => l.user_id),
+        ...((reqs ?? []).map((r) => r.customer_id).filter((x): x is string => !!x)),
       ]));
       const profMap = new Map<string, { full_name: string; avatar_url: string | null }>();
       if (user && ids.length) {
