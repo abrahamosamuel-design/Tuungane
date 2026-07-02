@@ -415,6 +415,14 @@ function NewRequest() {
             </Field>
           </div>
 
+          <PostAsSelector
+            userId={user.id}
+            value={postedAsKey}
+            onChange={(k) => setPostedAsKey(k)}
+          />
+
+
+
           <Field label="Describe the request *">
             <textarea
               required
