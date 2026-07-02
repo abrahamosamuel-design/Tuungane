@@ -9,7 +9,7 @@ import { OfficialPostForm } from "@/components/admin/OfficialPostForm";
 import { RequestsAdminTab } from "@/components/admin/RequestsAdminTab";
 import { CreditsAdminTab } from "@/components/admin/CreditsAdminTab";
 import { OverviewTab } from "@/components/admin/OverviewTab";
-import { BusinessesAdminTab } from "@/components/admin/BusinessesAdminTab";
+
 import { DisputesAdminTab } from "@/components/admin/DisputesAdminTab";
 
 import { ContactAnalyticsTab } from "@/components/admin/ContactAnalyticsTab";
