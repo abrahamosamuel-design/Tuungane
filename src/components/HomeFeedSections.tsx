@@ -376,7 +376,7 @@ export function HomeFeedSections() {
           />
           <div className={`${SCROLLER} lg:grid-cols-3`}>
             {topListings.map((l) => (
-              <ServiceListingCard key={l.user_id} l={l} userLoc={userLoc} />
+              <ServiceListingCard key={l.id} l={l} userLoc={userLoc} />
             ))}
             <div aria-hidden className="shrink-0 w-1 sm:hidden" />
           </div>
