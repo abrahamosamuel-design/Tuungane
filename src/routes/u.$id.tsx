@@ -17,7 +17,7 @@ import { ReviewDialog } from "@/components/social/ReviewDialog";
 import { SaveButton } from "@/components/social/SaveButton";
 
 import { ClaimProfileDialog } from "@/components/ClaimProfileDialog";
-import { TrustStats } from "@/components/TrustStats";
+
 import { TrustBadge } from "@/components/trust/TrustBadge";
 import { useTrustBadge } from "@/hooks/use-trust-badges";
 import { ReportProfileButton } from "@/components/trust/ReportProfileButton";
