@@ -33,9 +33,9 @@ export function TwoSidedHeroCards() {
             <UserIcon className="h-5 w-5" />
           </div>
           <div className="min-w-0 flex-1">
-            <h3 className="font-display text-lg font-bold text-navy">Have a skill?</h3>
+            <h3 className="font-display text-lg font-bold text-navy">Offer a service on Tuungane</h3>
             <p className="mt-1 text-sm text-foreground/80">
-              List your service, show your work, and get discovered by people looking for services.
+              List what you offer as an individual, business, school, organization, or group so people nearby can find and contact you.
             </p>
             <Link
               to={listSkillHref(user) as never}
