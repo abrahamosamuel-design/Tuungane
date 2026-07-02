@@ -429,15 +429,15 @@ function UserProfile() {
               <div className="flex items-start gap-3">
                 <div className="rounded-full bg-orange/15 p-2 text-orange"><BadgeCheck className="h-5 w-5" /></div>
                 <div>
-                  <p className="font-semibold text-navy">Have a skill? Offer it on Tuungane</p>
-                  <p className="mt-0.5 text-sm text-muted-foreground">You're a Tuungane member — you can also offer services and earn from your skills. Set up your service profile in a few steps.</p>
+                  <p className="font-semibold text-navy">Offer a service on Tuungane</p>
+                  <p className="mt-0.5 text-sm text-muted-foreground">List what you offer as an individual, business, school, organization, or group so people nearby can find and contact you.</p>
                 </div>
               </div>
               <Link
                 to="/list-skill"
                 className="shrink-0 rounded-full bg-orange px-5 py-2.5 text-center text-sm font-semibold text-orange-foreground shadow-sm hover:brightness-110"
               >
-                Offer a service
+                List a Service
               </Link>
             </div>
           </div>
