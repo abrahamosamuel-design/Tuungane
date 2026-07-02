@@ -36,17 +36,15 @@ function NewProfile() {
   const [bio, setBio] = useState("");
   const [phone, setPhone] = useState("");
   const [busy, setBusy] = useState(false);
+  const [duplicateWarning, setDuplicateWarning] = useState<
+    | { id: string; name: string }
+    | null
+  >(null);
 
   const cat = categories.find((c) => c.slug === categorySlug) ?? staticCategories[0];
 
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const doInsert = async () => {
     if (!user) return;
-    if (!name.trim()) {
-      toast.error("Service name is required");
-      return;
-    }
-
     setBusy(true);
     const base = slugify(name) || "profile";
     const slug = `${base}-${Math.random().toString(36).slice(2, 8)}`;
@@ -74,6 +72,31 @@ function NewProfile() {
     toast.success("Service created — now add photos and details");
     nav({ to: "/profiles/$id", params: { id: data.id } });
   };
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+    if (!name.trim()) {
+      toast.error("Service name is required");
+      return;
+    }
+
+    // Light duplicate check: same owner + same normalized name + same category
+    const normalized = name.trim().toLowerCase();
+    const { data: existing } = await supabase
+      .from("public_profiles")
+      .select("id,name")
+      .eq("owner_id", user.id)
+      .eq("category_slug", categorySlug)
+      .ilike("name", normalized);
+    if (existing && existing.length > 0 && !duplicateWarning) {
+      setDuplicateWarning({ id: existing[0].id, name: existing[0].name });
+      return;
+    }
+
+    await doInsert();
+  };
+
 
   return (
     <Layout>
