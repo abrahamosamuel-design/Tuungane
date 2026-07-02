@@ -55,6 +55,24 @@ function sortProfiles(a: ProfileCardData, b: ProfileCardData) {
 export function MyProfilesPanel() {
   const { user } = useAuth();
   const [items, setItems] = useState<ProfileCardData[] | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<ProfileCardData | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    if (!confirmDelete) return;
+    setDeleting(true);
+    // Best-effort cleanup of dependent rows; ignore errors from tables that may not exist / RLS
+    await supabase.from("profile_services").delete().eq("profile_id", confirmDelete.id);
+    const { error } = await supabase.from("public_profiles").delete().eq("id", confirmDelete.id);
+    setDeleting(false);
+    if (error) {
+      toast.error(error.message || "Could not delete this service.");
+      return;
+    }
+    toast.success("Service deleted");
+    setItems((prev) => (prev ? prev.filter((x) => x.id !== confirmDelete.id) : prev));
+    setConfirmDelete(null);
+  };
 
   const load = async () => {
     if (!user) return;
