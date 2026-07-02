@@ -31,6 +31,7 @@ function ListSkillPage() {
   const [editMode, setEditMode] = useState(false);
 
   // form
+  const [providerType, setProviderType] = useState<"individual" | "business" | "organization">("individual");
   const [businessName, setBusinessName] = useState("");
   const [categorySlug, setCategorySlug] = useState(staticCategories[0].slug);
   const [subcategory, setSubcategory] = useState(staticCategories[0].subcategories[0]);
