@@ -2,8 +2,19 @@ import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import { Plus, Building2, User as UserIcon, Landmark, Star, ChevronRight } from "lucide-react";
+import { Plus, Building2, User as UserIcon, Landmark, Star, ChevronRight, Trash2, Loader2 } from "lucide-react";
 import { formatSubcategory } from "@/lib/format-category";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 
 type Profile = {
