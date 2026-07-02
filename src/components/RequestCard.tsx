@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { MapPin, Clock, Wallet, BadgeCheck, MessageSquare, Send, Sparkles, MoreHorizontal } from "lucide-react";
+import { MapPin, Clock, Wallet, BadgeCheck, MessageSquare, Send, Sparkles, MoreHorizontal, Pencil } from "lucide-react";
 import { timeAgo } from "@/lib/format";
 import { useCategory } from "@/hooks/use-categories";
 import { requestStatusMap, type ServiceRequestRow } from "@/data/serviceRequestTypes";
