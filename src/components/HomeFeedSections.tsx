@@ -741,7 +741,10 @@ function ServiceListingCard({
   const loc = l.area || l.town || l.district || "Uganda";
 
   return (
-    <article className={`flex ${CARD_W} shrink-0 snap-start flex-col rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)] transition hover:border-orange sm:w-auto sm:max-w-none`}>
+    <article className={`relative flex ${CARD_W} shrink-0 snap-start flex-col rounded-2xl border border-border bg-card p-4 shadow-[var(--shadow-card)] transition hover:border-orange sm:w-auto sm:max-w-none`}>
+      <div className="pointer-events-none absolute right-3 top-3 z-10">
+        <ProfileTrustBadge kind="service_profile" id={l.user_id} size="sm" />
+      </div>
       <div className="flex items-start gap-3">
         {avatar ? (
           <img src={avatar} alt={providerName} loading="lazy" className="h-11 w-11 shrink-0 rounded-full object-cover" />
