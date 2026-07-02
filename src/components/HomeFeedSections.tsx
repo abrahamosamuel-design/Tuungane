@@ -229,12 +229,11 @@ export function HomeFeedSections() {
 
       let provider = false;
       if (user) {
-        const { data: sp } = await supabase
-          .from("service_profiles")
-          .select("user_id")
-          .eq("user_id", user.id)
-          .maybeSingle();
-        provider = !!sp;
+        const { count } = await supabase
+          .from("public_profiles")
+          .select("id", { count: "exact", head: true })
+          .eq("owner_id", user.id);
+        provider = (count ?? 0) > 0;
       }
 
       if (cancelled) return;
