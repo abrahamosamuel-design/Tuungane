@@ -100,16 +100,7 @@ export function RequestCard({
             <NearYouBadge user={userLoc} target={r} />
           </p>
         </div>
-        {isOwner && onEdit ? (
-          <button
-            type="button"
-            onClick={onEdit}
-            aria-label="Edit request"
-            className="shrink-0 rounded-full border border-border p-1.5 text-navy hover:border-orange hover:text-orange"
-          >
-            <Pencil className="h-4 w-4" />
-          </button>
-        ) : (
+        {!isOwner && (
           <button
             type="button"
             aria-label="More options"
