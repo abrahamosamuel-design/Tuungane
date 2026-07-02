@@ -1,72 +1,71 @@
-# Guest Browsing Mode
 
-## Root cause of current "empty for guests"
+## Goal
 
-Live check confirmed the problem: guest requests to `service_requests`, `service_profiles`, and `public_profiles` are returning **401 Unauthorized**. Past security work revoked anon SELECT on contact + coordinate columns, but no anon SELECT was ever granted on the safe subset — so guests can't read anything. Skeletons stay forever.
+One Tuungane member account can own many **service profiles**. Remove "business page" language from the MVP. Public service cards lead with the service name the owner picked — never auto-prefix "By {owner}".
 
-The fix is not to relax security; it's to add narrow, column-scoped anon read paths and update the client queries to only request safe columns when signed out.
+## What already works (keep)
 
-## Plan
+- `public_profiles` table already supports many rows per `owner_id`.
+- `MyProfilesPanel` already lists all a user's profiles and links to `/profiles/new` and `/profiles/$id`.
+- `profile_services`, reviews (`public_profile_id`), requests (`public_profile_id`), and messaging already reference the specific profile.
 
-### 1. Database — safe anon reads (migration)
+So the backend model does not need a new table. The work is: **schema tightening + terminology + card display + creation flow**.
 
-Add `TO anon` SELECT policies + column-level GRANTs on the guest-safe subset only:
+## Scope
 
-- `service_profiles`, `public_profiles` (anon): `user_id/owner_id, business_name/name, category_slug, subcategory, bio, town, district, verified, availability, cover_url, avatar_url, years_experience, service_radius_km, created_at, updated_at`. **Excluded from anon:** phone, email, whatsapp, latitude, longitude, area, exact address, contact_preference.
-- `service_requests` (anon, only where `visibility='public' AND status='requested'`): `id, title, service_needed, description, budget_range, urgent_flag, urgency, created_at, district, town, category_slug, subcategory, preferred_date`. **Excluded:** customer_id (or exposed only as opaque), phone/contact fields, latitude, longitude, area, attachment_url, media_urls (unless already public-safe).
-- Keep existing authenticated policies untouched.
+### 1. Database (single migration)
 
-### 2. Client — split queries by auth state
+- Rename `public_profiles.profile_type` usage so all new profiles default to `service` (keep enum values for back-compat; treat `business`/`organization` as legacy and hide their special UI).
+- Ensure RLS lets an owner create N rows in `public_profiles` (already true — verify).
+- Reviews/requests remain keyed to `public_profile_id` (already true).
+- No destructive changes to `business_pages` — just stop routing users into it.
 
-For every guest-visible feed (`HomeFeedSections`, `services.index`, `requests.browse`, `providers.$id`, category pages):
+### 2. Creation flow
 
-- When `!user`, project only the safe columns above.
-- Never call `useUserLocation`-based proximity queries; sort by `verified` + `updated_at`.
-- Never render phone, email, exact area/coordinates, or media requiring signed-in view.
+- `/profiles/new` (rename in copy to **"List a new service"**): drop the profile-type picker; every new profile is a service profile.
+- Add helper text under **Service name**: *"This is what customers see on your service card. Use a service name, your own name, or a trading name."*
+- Keep category, subcategory, location, short description, phone/messaging pref, photos.
+- CTAs across the app: **"Add a service"**, **"List another service"**, **"Manage your services"**. Remove "Create business page", "Claim business", "Business profile".
 
-### 3. Sign-in gate — `RequireAuthDialog`
+### 3. Public service cards (the visible fix)
 
-New `src/components/RequireAuthDialog.tsx` and hook `useAuthGate()`:
+Files: `HomeFeedSections.tsx`, `services.index.tsx`, `services.$slug.tsx`, `PopularCategoriesSection.tsx`, `NearYouHomeSection.tsx`, `CommunityUpdatesSection.tsx`, `MatchingRequestsSection.tsx`, `ProviderCard.tsx`.
 
-- Title: "Create a free Tuungane account"
-- Body: "Sign up to contact providers, respond to requests, post your own request, and grow your opportunities on Tuungane."
-- Buttons: **Create account** → `/login?tab=signup&redirect=...`, **Sign in** → `/login?redirect=...`, **Continue browsing** → close.
+- Card title = `public_profiles.name` (the service name).
+- Remove any "By {full_name}", "Owner:", "Posted by", "Provider:", "Member:" prefixes on card surfaces.
+- Owner's real name still appears on the **detail page**, in messaging headers, admin, disputes, and trust surfaces.
+- Verified pill stays top-right (already done in previous turn).
 
-Wire the gate into every protected action for guests (no navigation for signed-in users):
+### 4. Member profile — "Services" tab
 
-- `MessageButton`, `ProviderQuickContact` (Call + Message), `SaveButton`, `ProviderResponseDialog` trigger, "Request service", "Post request" FAB, "List your service", follow, review, recommend, report.
+- `/u/$id` and `/me`: show a **Services** section listing every `public_profile` the member owns as its own card, with owner-only actions (edit / deactivate / add another).
+- `MyProfilesPanel` already does this — flatten grouping, drop the "Personal / Business / Organization" headers, show one list titled **Your services** with an **Add another service** button.
 
-Guest provider cards should still render **View profile**, **Message**, **Call** buttons (the last two open the gate on click) so the UI never looks half-empty.
+### 5. Discovery / matching / reviews / messaging
 
-### 4. Public content safety
+- Services listings already union across profile types — keep as-is, just ensure card renderer uses the new title rule.
+- Request matching, review targets, and message threads already reference the specific `public_profile_id` — verify and label the message thread header with the service name (`Contacting: Genesis Car Wash`).
 
-- `maskProfileLocation` already handles owner masking; extend so guest viewer forces `district`-level precision regardless of stored visibility.
-- Provider profile route (`/u/$id`, `/providers/$id`) loads only guest-safe columns for anon; hide contact strip; show "Sign in to see contact options".
-- Suspended / flagged / incomplete profiles: existing `suspended=eq.false` filter kept; also require `verified != 'flagged'` for guests.
+### 6. Removed / hidden surfaces
 
-### 5. Empty & loading states
+- `businesses.index`, `businesses.new` already redirect — keep.
+- Hide any remaining "Create business page" entry points in headers, CTAs, and dashboards.
+- Keep `business_pages` table for legacy rows (admin can still view), but no new-user CTA links to it.
 
-Replace endless skeleton with:
-- After successful fetch with 0 rows: friendly empty state ("No providers found yet in this category. Be among the first to list your service.") with CTA button that opens the auth gate.
-- Loading skeleton shown only during first fetch, capped to <8 items.
+## Out of scope (call out)
 
-### 6. Routing
+- No WhatsApp contact re-addition.
+- No changes to trust badges, boosts, or credits pricing.
+- Legacy `business_pages` rows remain viewable in admin but are not surfaced in the public app.
 
-- No changes to `_authenticated/` gate — keep dashboard, messages, notifications, credits, settings, requests.new, list-skill, profiles.new protected.
-- Remove any incidental redirects from public marketplace pages (spot check `services.index`, `requests.browse`, `providers.$id`, `p.$slug`, `services.$slug`, `u.$id`).
+## Deliverable order
 
-### 7. Verification
+1. Migration (default `profile_type='service'`, minor policy check).
+2. Copy sweep: replace "business page/profile" language with "service"/"service profile" across UI.
+3. `/profiles/new` simplified to a single service-profile form + helper text.
+4. Card renderer changes across all listing surfaces (title = service name, no owner prefix).
+5. `MyProfilesPanel` → **Your services** with **Add another service**.
+6. Message thread header shows service name.
+7. Verify request-matching and review flows already scope to `public_profile_id`; patch any that don't.
 
-Playwright pass as anonymous user:
-- `/`, `/services`, `/requests/browse`, one category page, one provider profile → content renders, no 401s.
-- Click Message, Call, Save, Respond, Request service, Post request → auth dialog appears; browsing not blocked.
-- Confirm no phone/email/lat/lng in the network responses for anon.
-
-## Technical notes
-
-- Migration adds policies **and** column-level `GRANT SELECT (col1, col2, ...) ON public.<table> TO anon`.
-- Existing `authenticated` grants stay `GRANT SELECT` (all columns) so signed-in flows are unchanged.
-- Public-safe media (`cover_url`, `avatar_url`) are already storage-public; `media_urls` remains authenticated-only for now to avoid leaking unreviewed content.
-- No changes to messaging, contact_logs, contact_reveals, or `get_provider_contact` RPC — those stay authenticated.
-
-Scope is bounded to guest-read surface + a single reusable auth-gate dialog; existing signed-in behavior is untouched.
+Approve and I'll start with the migration + copy/CTA sweep, then card renderers, then the creation form.
