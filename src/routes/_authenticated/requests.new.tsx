@@ -61,6 +61,8 @@ function NewRequest() {
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [districtBounds, setDistrictBounds] = useState<Bounds | null>(null);
   const [showMore, setShowMore] = useState(false);
+  const [postedAsKey, setPostedAsKey] = useState<string>("individual");
+  const { options: postedAsOptions } = usePostAsOptions(user?.id ?? null);
   const [f, setF] = useState({
     title: search.title || "",
     category_slug: search.category || staticCategories[0].slug,
@@ -80,6 +82,7 @@ function NewRequest() {
     customer_phone: "",
     customer_whatsapp: "",
   });
+
 
   // Targeted profile context (from /p/$slug "Request" button)
   const [targetProfile, setTargetProfile] = useState<{ id: string; owner_id: string; name: string; profile_type: string; category_slug: string | null; subcategory: string | null } | null>(null);
