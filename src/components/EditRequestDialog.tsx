@@ -97,7 +97,7 @@ export function EditRequestDialog({
       district: f.district?.trim() || null,
       area: f.area?.trim() || null,
     };
-    const { error } = await supabase.from("service_requests").update(payload).eq("id", requestId);
+    const { error } = await supabase.from("service_requests").update(payload as never).eq("id", requestId);
     setSaving(false);
     if (error) return toastError(error, "Couldn't update request");
     toast.success("Request updated");
