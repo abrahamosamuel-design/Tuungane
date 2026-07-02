@@ -178,6 +178,7 @@ function ListSkillPage() {
 
     const { error } = await supabase.from("service_profiles").upsert({
       user_id: user.id,
+      provider_type: providerType,
       business_name: businessName || null,
       category_slug: categorySlug,
       subcategory,
