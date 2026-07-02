@@ -82,12 +82,38 @@ function CategoryPage() {
 
   useEffect(() => {
     (async () => {
-      const { data: sps } = await supabase
-        .from("service_profiles")
-        .select("user_id,business_name,subcategory,bio,town,district,area,latitude,longitude,verified,category_slug,cover_url")
-        .eq("suspended", false)
-        .limit(200);
-      const all = (sps ?? []) as (Row & { category_slug: string })[];
+      const [{ data: sps }, { data: pps }] = await Promise.all([
+        supabase
+          .from("service_profiles")
+          .select("user_id,business_name,subcategory,bio,town,district,area,latitude,longitude,verified,category_slug,cover_url")
+          .eq("suspended", false)
+          .limit(200),
+        supabase
+          .from("public_profiles")
+          .select("owner_id,name,avatar_url,subcategory,bio,town,district,area,latitude,longitude,verified,category_slug,cover_url")
+          .eq("suspended", false)
+          .not("owner_id", "is", null)
+          .limit(200),
+      ]);
+      const spRows = ((sps ?? []) as any[]).map((r) => ({ ...r })) as (Row & { category_slug: string })[];
+      const spOwners = new Set(spRows.map((r) => r.user_id));
+      const ppRows = ((pps ?? []) as any[])
+        .filter((pp) => pp.owner_id && !spOwners.has(pp.owner_id))
+        .map((pp) => ({
+          user_id: pp.owner_id,
+          business_name: pp.name,
+          subcategory: pp.subcategory ?? "",
+          bio: pp.bio ?? "",
+          town: pp.town ?? "",
+          district: pp.district ?? "",
+          area: pp.area ?? null,
+          latitude: pp.latitude ?? null,
+          longitude: pp.longitude ?? null,
+          verified: pp.verified ?? "none",
+          category_slug: pp.category_slug ?? "other",
+          cover_url: pp.cover_url ?? pp.avatar_url ?? null,
+        })) as (Row & { category_slug: string })[];
+      const all = [...spRows, ...ppRows];
       const inCat = all.filter((r) => r.category_slug === category.slug);
       const outCat = all.filter((r) => r.category_slug !== category.slug);
       const ids = all.map((r) => r.user_id);
@@ -105,7 +131,7 @@ function CategoryPage() {
       const enrich = (r: Row) => ({
         ...r,
         full_name: pmap.get(r.user_id)?.full_name,
-        avatar_url: pmap.get(r.user_id)?.avatar_url ?? null,
+        avatar_url: pmap.get(r.user_id)?.avatar_url ?? (r as any).cover_url ?? null,
         rating: Number(smap.get(r.user_id) ?? 0),
       });
       setList(inCat.map(enrich));
@@ -122,6 +148,7 @@ function CategoryPage() {
       );
     })();
   }, [category.slug]);
+
 
 
   const filtered = useMemo(() => {
