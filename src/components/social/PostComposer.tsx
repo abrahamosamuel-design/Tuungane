@@ -57,12 +57,14 @@ export function PostComposer({ defaultCategory, defaultPostType, businessPageId,
     const { error } = await supabase.from("timeline_posts").insert({
       provider_user_id: user.id,
       business_page_id: businessPageId ?? null,
+      public_profile_id: publicProfileId ?? null,
       text: text.trim(),
       category_slug: category || null,
       location: location.trim() || null,
       media_urls: media,
       post_type: postType,
     });
+
     setBusy(false);
     if (error) toast.error(error.message);
     else {
