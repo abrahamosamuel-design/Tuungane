@@ -86,7 +86,7 @@ export function RequestCard({
       {/* Header row — avatar / name / meta */}
       <div className="flex items-start gap-3 p-4 pb-2">
         <Link to="/requests/$id" params={{ id: r.id }} className="shrink-0">
-          <FeedAvatar src={r.customer_avatar_url ?? null} name={requesterName} size={44} ring={!!r.customer_verified} />
+          <FeedAvatar src={requesterAvatar} name={requesterName} size={44} ring={!!r.customer_verified && !isBusinessPost} />
         </Link>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
