@@ -23,6 +23,7 @@ import { ProfileTrustBadge } from "@/components/trust/ProfileTrustBadge";
 import { useCategory } from "@/hooks/use-categories";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ProviderResponseDialog } from "@/components/ProviderResponseDialog";
+import { EditRequestDialog } from "@/components/EditRequestDialog";
 import { FeedAvatar } from "@/components/feed/FeedAvatar";
 import { ExpandableText } from "@/components/feed/ExpandableText";
 import { MediaGrid } from "@/components/feed/MediaGrid";
