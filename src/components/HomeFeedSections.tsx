@@ -174,7 +174,7 @@ export function HomeFeedSections() {
         reqs = (data ?? []) as unknown as NearbyRequest[];
       }
 
-      if (!provs || provs.length === 0) {
+      {
         const { data } = await supabase
           .from("public_profiles")
           .select(user ? PP_COLS_AUTH : PP_COLS_GUEST)
