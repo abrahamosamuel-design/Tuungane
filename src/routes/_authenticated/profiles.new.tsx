@@ -143,8 +143,9 @@ function NewProfile() {
               Cancel
             </button>
             <button disabled={busy} className="rounded-xl bg-orange px-4 py-2.5 text-sm font-semibold text-orange-foreground disabled:opacity-50">
-              {busy ? "Creating…" : "Create profile"}
+              {busy ? "Creating…" : "Create service"}
             </button>
+
           </div>
         </form>
       </section>
