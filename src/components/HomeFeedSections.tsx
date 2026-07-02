@@ -47,9 +47,9 @@ const SP_LISTING_COLS_AUTH =
 const SP_LISTING_COLS_GUEST =
   "user_id,business_name,category_slug,subcategory,bio,town,district,verified,availability,cover_url,created_at";
 const PP_LISTING_COLS_AUTH =
-  "owner_id,name,category_slug,subcategory,bio,town,district,area,latitude,longitude,verified,availability,cover_url,avatar_url,created_at";
+  "id,slug,owner_id,name,category_slug,subcategory,bio,town,district,area,latitude,longitude,verified,availability,cover_url,avatar_url,created_at";
 const PP_LISTING_COLS_GUEST =
-  "owner_id,name,category_slug,subcategory,bio,town,district,verified,availability,cover_url,avatar_url,created_at";
+  "id,slug,owner_id,name,category_slug,subcategory,bio,town,district,verified,availability,cover_url,avatar_url,created_at";
 
 
 type NearbyRequest = {
