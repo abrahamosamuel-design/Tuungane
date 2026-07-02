@@ -41,7 +41,7 @@ export function TwoSidedHeroCards() {
               to={listSkillHref(user) as never}
               className="mt-4 inline-flex items-center gap-2 rounded-full bg-green px-4 py-2 text-sm font-semibold text-white hover:brightness-110"
             >
-              {CTA.listSkill.label} <ArrowRight className="h-4 w-4" />
+              List a Service <ArrowRight className="h-4 w-4" />
             </Link>
           </div>
         </div>
