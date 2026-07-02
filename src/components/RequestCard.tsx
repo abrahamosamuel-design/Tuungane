@@ -46,11 +46,13 @@ export function RequestCard({
   userLoc,
   currentUserId,
   onRespond,
+  onEdit,
 }: {
   r: RequestRowLite;
   userLoc?: UserLocation | null;
   currentUserId?: string | null;
   onRespond?: () => void;
+  onEdit?: () => void;
 }) {
   const cat = useCategory(r.category_slug ?? undefined);
   const status = requestStatusMap[r.status];
