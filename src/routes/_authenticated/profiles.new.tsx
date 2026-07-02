@@ -8,11 +8,12 @@ import { categories as staticCategories } from "@/data/categories";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/profiles/new")({
-  head: () => ({ meta: [{ title: "Create Profile — Tuungane" }] }),
+  head: () => ({ meta: [{ title: "List a new service — Tuungane" }] }),
   component: NewProfile,
 });
 
 type ProfileType = "individual" | "business" | "organization";
+
 
 function slugify(s: string) {
   return s
