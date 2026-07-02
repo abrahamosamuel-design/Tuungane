@@ -87,13 +87,24 @@ export function RequestCard({
             <NearYouBadge user={userLoc} target={r} />
           </p>
         </div>
-        <button
-          type="button"
-          aria-label="More options"
-          className="hidden shrink-0 rounded-full p-1.5 text-muted-foreground hover:bg-muted hover:text-navy sm:inline-flex"
-        >
-          <MoreHorizontal className="h-4 w-4" />
-        </button>
+        {isOwner && onEdit ? (
+          <button
+            type="button"
+            onClick={onEdit}
+            aria-label="Edit request"
+            className="shrink-0 rounded-full border border-border p-1.5 text-navy hover:border-orange hover:text-orange"
+          >
+            <Pencil className="h-4 w-4" />
+          </button>
+        ) : (
+          <button
+            type="button"
+            aria-label="More options"
+            className="hidden shrink-0 rounded-full p-1.5 text-muted-foreground hover:bg-muted hover:text-navy sm:inline-flex"
+          >
+            <MoreHorizontal className="h-4 w-4" />
+          </button>
+        )}
       </div>
 
       {/* Status / urgency chips */}
