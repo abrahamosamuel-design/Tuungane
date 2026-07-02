@@ -149,7 +149,7 @@ export function HomeFeedSections() {
 
       const hasCoords = userLoc?.latitude != null && userLoc?.longitude != null;
       let reqs: NearbyRequest[] | null = null;
-      let provs: NearbyProvider[] | null = null;
+      let provs: NearbyProvider[] = [];
       let nearbyFlag = false;
 
       if (hasCoords) {
