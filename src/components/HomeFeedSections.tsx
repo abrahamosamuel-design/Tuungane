@@ -199,33 +199,8 @@ export function HomeFeedSections() {
         .order("created_at", { ascending: false })
         .limit(12);
       const spListings = (listingRows ?? []) as unknown as RecentListing[];
-      const { data: ppListingRows } = await supabase
-        .from("public_profiles")
-        .select(user ? PP_LISTING_COLS_AUTH : PP_LISTING_COLS_GUEST)
-        .eq("suspended", false)
-        .not("owner_id", "is", null)
-        .order("created_at", { ascending: false })
-        .limit(12);
-      const spListingOwners = new Set(spListings.map((l) => l.user_id));
-      const ppListings = ((ppListingRows ?? []) as any[])
-        .filter((pp) => pp.owner_id && !spListingOwners.has(pp.owner_id))
-        .map((pp) => ({
-          user_id: pp.owner_id,
-          business_name: pp.name,
-          category_slug: pp.category_slug ?? "other",
-          subcategory: pp.subcategory ?? "",
-          bio: pp.bio ?? "",
-          town: pp.town ?? "",
-          district: pp.district ?? "",
-          area: pp.area ?? null,
-          latitude: pp.latitude ?? null,
-          longitude: pp.longitude ?? null,
-          verified: pp.verified ?? "none",
-          availability: pp.availability ?? null,
-          cover_url: pp.cover_url ?? pp.avatar_url ?? null,
-          created_at: pp.created_at,
-        })) as RecentListing[];
-      const listings = [...spListings, ...ppListings]
+      const listings = spListings
+        .slice()
         .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
         .slice(0, 12);
 
