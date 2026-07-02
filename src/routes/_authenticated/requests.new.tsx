@@ -239,6 +239,7 @@ function NewRequest() {
       (targetProfile && targetProfile.profile_type === "individual" ? targetProfile.owner_id : null);
     const isTargeted = !!(targetedProvider || targetProfile);
 
+    const postedAs = findOption(postedAsOptions, postedAsKey);
     const { data: inserted, error } = await supabase.from("service_requests").insert({
       customer_id: user.id,
       provider_id: targetedProvider,
@@ -265,7 +266,13 @@ function NewRequest() {
       attachment_url,
       media_urls: allMedia,
       status: "requested",
+      posted_as_type: postedAs?.posted_as_type ?? "individual",
+      posted_as_name: postedAs && postedAs.posted_as_type === "business" ? postedAs.name : null,
+      posted_as_avatar_url: postedAs && postedAs.posted_as_type === "business" ? postedAs.avatar_url : null,
+      posted_as_ref_type: postedAs?.posted_as_ref_type ?? null,
+      posted_as_ref_id: postedAs?.posted_as_ref_id ?? null,
     }).select("id").single();
+
     setBusy(false);
     if (error) {
       toastError(error, "Couldn't post your service request");
