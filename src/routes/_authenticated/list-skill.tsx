@@ -63,6 +63,7 @@ function ListSkillPage() {
         .maybeSingle();
       if (sp) {
         setEditMode(true);
+        setProviderType(((sp as any).provider_type as "individual" | "business" | "organization") ?? "individual");
         setBusinessName(sp.business_name ?? "");
         setCategorySlug(sp.category_slug ?? staticCategories[0].slug);
         setSubcategory(sp.subcategory ?? staticCategories[0].subcategories[0]);
