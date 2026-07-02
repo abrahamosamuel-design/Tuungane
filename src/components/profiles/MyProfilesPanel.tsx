@@ -40,11 +40,6 @@ function sortProfiles(a: ProfileCardData, b: ProfileCardData) {
   return score(a) - score(b);
 }
 
-const GROUP_LABELS: Record<Profile["profile_type"], string> = {
-  individual: "Personal service profiles",
-  business: "Business profiles",
-  organization: "Organization profiles",
-};
 
 export function MyProfilesPanel() {
   const { user } = useAuth();
