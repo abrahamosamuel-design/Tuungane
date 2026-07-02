@@ -7,7 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useAuthGate } from "@/components/RequireAuthDialog";
 import { Avatar } from "@/components/social/Avatar";
-import { CoverImage } from "@/components/media/CoverImage";
+
 import { FollowButton } from "@/components/social/FollowButton";
 import { PostComposer } from "@/components/social/PostComposer";
 import { PostCard, type PostRow } from "@/components/social/PostCard";
@@ -17,7 +17,7 @@ import { ReviewDialog } from "@/components/social/ReviewDialog";
 import { SaveButton } from "@/components/social/SaveButton";
 
 import { ClaimProfileDialog } from "@/components/ClaimProfileDialog";
-import { TrustStats } from "@/components/TrustStats";
+
 import { TrustBadge } from "@/components/trust/TrustBadge";
 import { useTrustBadge } from "@/hooks/use-trust-badges";
 import { ReportProfileButton } from "@/components/trust/ReportProfileButton";
@@ -144,7 +144,7 @@ function UserProfile() {
   const [recOpen, setRecOpen] = useState(false);
   const [revOpen, setRevOpen] = useState(false);
   
-  const [uploadingCover, setUploadingCover] = useState(false);
+  
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [claimOpen, setClaimOpen] = useState(false);
   const [requestOpen, setRequestOpen] = useState(false);
@@ -237,18 +237,8 @@ function UserProfile() {
 
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [id]);
 
-  const uploadCover = async (file: File | null) => {
-    if (!file || !user) return;
-    setUploadingCover(true);
-    try {
-      const url = await uploadMedia(user.id, file, "avatars");
-      await supabase.from("service_profiles").update({ header_url: url }).eq("user_id", user.id);
-      load();
-      toast.success("Header banner updated");
-    } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Upload failed");
-    } finally { setUploadingCover(false); }
-  };
+
+
 
   const uploadAvatar = async (file: File | null) => {
     if (!file || !user) return;
@@ -290,29 +280,9 @@ function UserProfile() {
 
   return (
     <Layout>
-      {/* Cover */}
-      <div className="relative h-40 w-full sm:h-56">
-        <CoverImage
-          variant="wide"
-          imageUrl={sp?.header_url ?? sp?.cover_url}
-          categorySlug={sp?.category_slug}
-          name={sp?.business_name || profile?.full_name}
-          label="No profile banner yet"
-          onUpload={isOwn ? uploadCover : undefined}
-          uploading={uploadingCover}
-          className="h-40 w-full rounded-none sm:h-56"
-        />
-        {isOwn && isProvider && (sp?.header_url ?? sp?.cover_url) && (
-          <label className="absolute right-4 top-4 inline-flex cursor-pointer items-center gap-1 rounded-full bg-black/50 px-3 py-1.5 text-xs font-medium text-white backdrop-blur hover:bg-black/70">
-            <Camera className="h-3.5 w-3.5" /> {uploadingCover ? "Uploading…" : "Edit banner"}
-            <input type="file" accept="image/*" className="hidden" onChange={(e) => uploadCover(e.target.files?.[0] ?? null)} disabled={uploadingCover} />
-          </label>
-        )}
-      </div>
-
-      <section className="mx-auto max-w-3xl px-4">
+      <section className="mx-auto max-w-3xl px-4 pt-6">
         {sp?.seeded_by_official && sp.seeded_status !== "claimed" && (
-          <div className="-mt-6 mb-3 flex flex-col gap-3 rounded-2xl border border-orange/40 bg-orange/5 p-4 text-sm sm:flex-row sm:items-center sm:justify-between">
+          <div className="mb-3 flex flex-col gap-3 rounded-2xl border border-orange/40 bg-orange/5 p-4 text-sm sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-3">
               <BadgeCheck className="mt-0.5 h-5 w-5 shrink-0 text-orange" />
               <div>
@@ -326,69 +296,77 @@ function UserProfile() {
             {user && user.id !== id && sp.seeded_status === "unclaimed" && (
               <button onClick={() => setClaimOpen(true)} className="shrink-0 rounded-full bg-orange px-4 py-2 text-xs font-semibold text-orange-foreground hover:brightness-110">
                 Claim this profile
+
               </button>
             )}
           </div>
         )}
-        {/* Header card */}
-        <div className="relative z-10 -mt-12 rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-elevated)] sm:-mt-16 sm:p-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div className="flex flex-col items-center gap-3 text-center sm:flex-row sm:items-start sm:gap-4 sm:text-left">
-              <div className="-mt-16 shrink-0 rounded-full border-4 border-card bg-card sm:-mt-20">
-                {isOwn ? (
-                  <label className="group relative block cursor-pointer rounded-full" aria-label="Change profile photo">
-                    <Avatar name={profile.full_name} url={profile.avatar_url} size={96} />
-                    <span className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-full bg-black/45 text-white opacity-0 transition-opacity group-hover:opacity-100">
-                      <Camera className="h-5 w-5" />
+        {/* Header card — centered, no banner */}
+        <div className="rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-elevated)] sm:p-6">
+          <div className="flex flex-col items-center gap-3 text-center">
+            <div className="shrink-0 rounded-full border-4 border-card bg-card">
+              {isOwn ? (
+                <label className="group relative block cursor-pointer rounded-full" aria-label="Change profile photo">
+                  <Avatar name={profile.full_name} url={profile.avatar_url} size={112} />
+                  <span className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-full bg-black/45 text-white opacity-0 transition-opacity group-hover:opacity-100">
+                    <Camera className="h-5 w-5" />
+                  </span>
+                  {uploadingAvatar && (
+                    <span className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-full bg-black/55 text-[10px] font-semibold text-white">
+                      Uploading…
                     </span>
-                    {uploadingAvatar && (
-                      <span className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-full bg-black/55 text-[10px] font-semibold text-white">
-                        Uploading…
-                      </span>
-                    )}
-                    <span className="pointer-events-none absolute -bottom-1 right-0 flex items-center gap-1 rounded-full bg-black/70 px-2 py-0.5 text-[10px] font-semibold text-white shadow backdrop-blur-sm">
-                      <Camera className="h-3 w-3" />
-                      {profile.avatar_url ? "Edit" : "Upload"}
-                    </span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      disabled={uploadingAvatar}
-                      onChange={(e) => uploadAvatar(e.target.files?.[0] ?? null)}
-                    />
-                  </label>
-                ) : (
-                  <Avatar name={profile.full_name} url={profile.avatar_url} size={96} />
-                )}
+                  )}
+                  <span className="pointer-events-none absolute -bottom-1 right-0 flex items-center gap-1 rounded-full bg-black/70 px-2 py-0.5 text-[10px] font-semibold text-white shadow backdrop-blur-sm">
+                    <Camera className="h-3 w-3" />
+                    {profile.avatar_url ? "Edit" : "Upload"}
+                  </span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    disabled={uploadingAvatar}
+                    onChange={(e) => uploadAvatar(e.target.files?.[0] ?? null)}
+                  />
+                </label>
+              ) : (
+                <Avatar name={profile.full_name} url={profile.avatar_url} size={112} />
+              )}
+            </div>
+            <div className="w-full min-w-0">
+              <h1 className="font-display text-2xl font-bold text-navy">
+                {sp?.business_name || profile.full_name}
+              </h1>
+              <div className="mt-1 flex flex-wrap items-center justify-center gap-x-1.5">
+                <ProfileBoostBadges providerId={id} />
               </div>
-              <div className="flex-1 min-w-0">
-                <h1 className="flex flex-wrap items-center gap-2 font-display text-2xl font-bold text-navy">
-                  {sp?.business_name || profile.full_name}
-                  <TrustBadgeInline userId={id} />
-                  <ProfileBoostBadges providerId={id} />
-                </h1>
-                {sp && <p className="text-sm font-medium text-orange">{formatSubcategory(sp.subcategory)} {cat && <span className="text-muted-foreground">· {cat.name}</span>}</p>}
-                {!sp && <p className="text-sm text-muted-foreground">{isProvider ? "Service provider" : "Member"}</p>}
+              {sp && (
+                <p className="mt-1 text-sm font-medium text-orange">
+                  {formatSubcategory(sp.subcategory)} {cat && <span className="text-muted-foreground">· {cat.name}</span>}
+                </p>
+              )}
+              {!sp && <p className="mt-1 text-sm text-muted-foreground">{isProvider ? "Service provider" : "Member"}</p>}
+              <div className="mt-1.5 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
                 {(sp?.town || profile.town) && (
-                  <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
+                  <span className="inline-flex items-center gap-1">
                     <MapPin className="h-3 w-3" /> {sp?.town || profile.town}{(sp?.district || profile.district) && `, ${sp?.district || profile.district}`}
-                  </p>
+                  </span>
                 )}
-                <div className="mt-2 flex flex-wrap gap-3 text-xs text-muted-foreground">
-                  <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" /> <strong className="text-navy">{followers}</strong> followers</span>
-                  <span className="inline-flex items-center gap-1"><ThumbsUp className="h-3 w-3" /> <strong className="text-navy">{recs.length}</strong> endorsements</span>
-                  {avgRating > 0 ? (
-                    <span className="inline-flex items-center gap-1"><Star className="h-3 w-3 fill-orange text-orange" /> <strong className="text-navy">{avgRating.toFixed(1)}</strong> ({feedback.length} verified)</span>
-                  ) : isProvider ? (
-                    <span className="inline-flex items-center gap-1 text-muted-foreground">No rating yet</span>
-                  ) : null}
-                </div>
+                <TrustBadgeInline userId={id} />
+              </div>
+              <div className="mt-2 flex flex-wrap justify-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" /> <strong className="text-navy">{followers}</strong> followers</span>
+                <span className="inline-flex items-center gap-1"><ThumbsUp className="h-3 w-3" /> <strong className="text-navy">{recs.length}</strong> endorsements</span>
+                {avgRating > 0 ? (
+                  <span className="inline-flex items-center gap-1"><Star className="h-3 w-3 fill-orange text-orange" /> <strong className="text-navy">{avgRating.toFixed(1)}</strong> ({feedback.length} verified)</span>
+                ) : isProvider ? (
+                  <span className="inline-flex items-center gap-1 text-muted-foreground">No rating yet</span>
+                ) : null}
               </div>
             </div>
           </div>
 
-          <div className="mt-4 flex flex-wrap items-center gap-2">
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+
             {!isOwn && isProvider && (
               <button
                 onClick={() => {
@@ -410,12 +388,13 @@ function UserProfile() {
               <BoostButton boostType="boost_profile" entityType="provider_profile" entityId={id} label="Boost profile" dialogTitle="Boost your provider profile" dialogDescription="Increase your visibility across Tuungane for a set period." />
             )}
             {isOwn && (
-              <button onClick={() => setEditOpen(true)} className="ml-auto rounded-full bg-orange px-4 py-2 text-xs font-semibold text-orange-foreground hover:brightness-110">
+              <button onClick={() => setEditOpen(true)} className="rounded-full bg-orange px-4 py-2 text-xs font-semibold text-orange-foreground hover:brightness-110">
                 Edit profile
               </button>
             )}
             {isOwn && <Link to="/dashboard" className="rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-navy hover:border-orange">My Dashboard</Link>}
-            {!isOwn && user && <ReportProfileButton kind="service_profile" id={id} className="ml-auto" />}
+            {!isOwn && user && <ReportProfileButton kind="service_profile" id={id} />}
+
           </div>
         </div>
 
@@ -475,7 +454,7 @@ function UserProfile() {
         )}
 
 
-        {isProvider && <div className="mt-4"><TrustStats providerId={id} /></div>}
+        
 
         {/* Tabs */}
         <div className="sticky top-16 z-10 -mx-4 mt-4 overflow-x-auto border-b border-border bg-background/95 px-4 backdrop-blur">
