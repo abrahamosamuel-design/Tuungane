@@ -37,7 +37,7 @@ function isEngaged(pathname: string, isAuthed: boolean): boolean {
     "/welcome",
     "/settings",
     "/requests",
-    "/list-skill",
+    "/profiles/new",
     "/profiles",
     "/messages",
   ];

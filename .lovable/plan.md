@@ -1,71 +1,80 @@
-
 ## Goal
 
-One Tuungane member account can own many **service profiles**. Remove "business page" language from the MVP. Public service cards lead with the service name the owner picked — never auto-prefix "By {owner}".
+Refocus the service system on **multiple lightweight service profiles per user** with a simple public page (About / Timeline / Services), fix the "List service" prefill bug, remove the banner requirement, and move owner tools off the public view.
 
-## What already works (keep)
+## 1. Fix the "List service opens ZeroSmoke" bug (highest priority)
 
-- `public_profiles` table already supports many rows per `owner_id`.
-- `MyProfilesPanel` already lists all a user's profiles and links to `/profiles/new` and `/profiles/$id`.
-- `profile_services`, reviews (`public_profile_id`), requests (`public_profile_id`), and messaging already reference the specific profile.
+Root cause: every "List service" CTA in the app points to `/list-skill`, which auto-loads the user's existing `service_profile` via `get_my_service_profile` RPC and upserts on a single row keyed by `user_id`. So a second click always reopens the first service.
 
-So the backend model does not need a new table. The work is: **schema tightening + terminology + card display + creation flow**.
+Fix: point every create-service CTA to the already-correct `/profiles/new` flow (which inserts a fresh `public_profiles` row each time). Files to update: `src/lib/cta.ts`, `src/components/InstallPrompt.tsx`, `src/routes/index.tsx`, `src/routes/_authenticated/welcome.tsx`, `src/routes/_authenticated/dashboard.tsx`, `src/routes/services.index.tsx`, `src/routes/profiles.index.tsx`, `src/routes/u.$id.tsx`, `src/components/HomeFeedSections.tsx`, `src/components/profiles/MyProfilesPanel.tsx`, `src/components/CreateChoiceSheet.tsx` (as applicable).
 
-## Scope
+Retire `/list-skill` as a create/edit entry point: redirect `/_authenticated/list-skill` → `/profiles/new` for backward compatibility. Edit is handled per-service at `/profiles/$id`.
 
-### 1. Database (single migration)
+## 2. Remove the banner from service profiles
 
-- Rename `public_profiles.profile_type` usage so all new profiles default to `service` (keep enum values for back-compat; treat `business`/`organization` as legacy and hide their special UI).
-- Ensure RLS lets an owner create N rows in `public_profiles` (already true — verify).
-- Reviews/requests remain keyed to `public_profile_id` (already true).
-- No destructive changes to `business_pages` — just stop routing users into it.
+- `profiles.new.tsx` and `profiles.$id.tsx`: no banner UI, only a single square "service photo/logo" upload.
+- `p.$slug.tsx`: remove the wide `CoverImage` header entirely. Show the square logo as the page's primary visual (larger, centered under a plain background strip).
+- Keep the `cover_url` column in the DB (populated by the avatar upload) so existing card thumbnails still work.
 
-### 2. Creation flow
+## 3. Public service page (`/p/$slug`) — three tabs only
 
-- `/profiles/new` (rename in copy to **"List a new service"**): drop the profile-type picker; every new profile is a service profile.
-- Add helper text under **Service name**: *"This is what customers see on your service card. Use a service name, your own name, or a trading name."*
-- Keep category, subcategory, location, short description, phone/messaging pref, photos.
-- CTAs across the app: **"Add a service"**, **"List another service"**, **"Manage your services"**. Remove "Create business page", "Claim business", "Business profile".
+Rework layout to mirror the personal profile style but lighter:
 
-### 3. Public service cards (the visible fix)
+```text
+[ Square logo ]  Service name  [verified?]
+                 Category · Subcategory · Location
+                 [Request service]  [Message]  [Share]
 
-Files: `HomeFeedSections.tsx`, `services.index.tsx`, `services.$slug.tsx`, `PopularCategoriesSection.tsx`, `NearYouHomeSection.tsx`, `CommunityUpdatesSection.tsx`, `MatchingRequestsSection.tsx`, `ProviderCard.tsx`.
+Tabs:  About | Timeline | Services
+```
 
-- Card title = `public_profiles.name` (the service name).
-- Remove any "By {full_name}", "Owner:", "Posted by", "Provider:", "Member:" prefixes on card surfaces.
-- Owner's real name still appears on the **detail page**, in messaging headers, admin, disputes, and trust surfaces.
-- Verified pill stays top-right (already done in previous turn).
+- **About**: description, category/subcategory, location, areas served, availability, price guide, experience, verification, phone (only if owner allows public phone), contact preference. Owner sees a small pencil next to each editable block that deep-links to the matching field in `/profiles/$id`.
+- **Timeline**: posts scoped to this service profile (see §5).
+- **Services**: current `profile_services` list. Empty state: *"No services added yet. Add the specific things customers can request under this service."* Owner sees "Add service"; visitor sees "Request this service" per row.
+- **Remove**: Reviews tab. Replace the current "★ — (0)" trust line with a small chip: `Verified service` / `Recently listed` / `X completed request(s)` depending on state.
+- **Hide** the profile-strength checklist from the public view entirely. Visitors never see edit / add / manage / draft controls.
 
-### 4. Member profile — "Services" tab
+## 4. Owner vs visitor rendering on `/p/$slug`
 
-- `/u/$id` and `/me`: show a **Services** section listing every `public_profile` the member owns as its own card, with owner-only actions (edit / deactivate / add another).
-- `MyProfilesPanel` already does this — flatten grouping, drop the "Personal / Business / Organization" headers, show one list titled **Your services** with an **Add another service** button.
+Compute `isOwner = user?.id === profile.owner_id`. Owner gets an additional slim owner bar at the top with: *Edit service*, *Add timeline post*, *Add service*, *View dashboard*, and a compact profile-strength progress line (e.g. `Complete your service profile — 76% · Next: Set availability`). Visitors see none of these.
 
-### 5. Discovery / matching / reviews / messaging
+## 5. Timeline posts scoped per service profile
 
-- Services listings already union across profile types — keep as-is, just ensure card renderer uses the new title rule.
-- Request matching, review targets, and message threads already reference the specific `public_profile_id` — verify and label the message thread header with the service name (`Contacting: Genesis Car Wash`).
+Add `public_profile_id uuid REFERENCES public.public_profiles(id) ON DELETE CASCADE` to `timeline_posts` (nullable so existing personal-profile posts keep working). Update:
+- `PostComposer`: when composing from a service page, set `public_profile_id`; else leave null (personal post).
+- Service-page Timeline tab: query `timeline_posts` filtered by `public_profile_id = profile.id`.
+- Personal `/u/$id` timeline: keep current behaviour (all `provider_user_id = id`, all profiles combined) — no cross-mixing on service pages unless the owner cross-posts.
 
-### 6. Removed / hidden surfaces
+## 6. Dashboard service cards
 
-- `businesses.index`, `businesses.new` already redirect — keep.
-- Hide any remaining "Create business page" entry points in headers, CTAs, and dashboards.
-- Keep `business_pages` table for legacy rows (admin can still view), but no new-user CTA links to it.
+Update `MyProfilesPanel` cards:
+- Show square logo, service name (never owner name unless the user chose it), category · subcategory · location.
+- Status pill: `Published` / `Draft` / `Incomplete` / `Verified`.
+- Draft state: "Not visible to the public yet" with actions *Continue editing*, *Publish*, *Delete draft*.
+- Published: *View public page*, *Edit service*, *Manage service*.
+- Move profile-strength checklist here (already lives at `/profiles/$id` — keep it there and stop rendering it publicly).
 
-## Out of scope (call out)
+## 7. Service card click behaviour
 
-- No WhatsApp contact re-addition.
-- No changes to trust badges, boosts, or credits pricing.
-- Legacy `business_pages` rows remain viewable in admin but are not surfaced in the public app.
+Cards in `HomeFeedSections` and `/services` already link to `/p/$slug`. Audit and confirm no card wrapper accidentally opens the setup form; ensure `Request Service` and `Message` are separate `stopPropagation` buttons.
 
-## Deliverable order
+## 8. Create vs edit form isolation
 
-1. Migration (default `profile_type='service'`, minor policy check).
-2. Copy sweep: replace "business page/profile" language with "service"/"service profile" across UI.
-3. `/profiles/new` simplified to a single service-profile form + helper text.
-4. Card renderer changes across all listing surfaces (title = service name, no owner prefix).
-5. `MyProfilesPanel` → **Your services** with **Add another service**.
-6. Message thread header shows service name.
-7. Verify request-matching and review flows already scope to `public_profile_id`; patch any that don't.
+`/profiles/new` already starts blank and inserts new rows — keep it. Add a light duplicate-name check on submit: if the user already owns a `public_profiles` row with the same normalized name + category + town, show a non-blocking warning *"You may already have a similar service profile"* with links to *View existing* / *Edit existing* / *Continue creating*. `/profiles/$id` remains the edit surface (loads only that id).
 
-Approve and I'll start with the migration + copy/CTA sweep, then card renderers, then the creation form.
+## 9. Copy sweep
+
+Remove remaining "business page / business profile" strings in user-facing surfaces; replace with "service profile" / "service page". Admin/legacy internal wording can stay.
+
+## Out of scope for this pass
+
+- Rebuilding a reviews UI (backend reviews stay, just no tab).
+- Payment flows, boost redesign, notification-matching internals.
+- Renaming DB tables (`public_profiles`, `profile_services` stay as-is).
+
+## Technical notes
+
+- One migration: `ALTER TABLE public.timeline_posts ADD COLUMN public_profile_id uuid REFERENCES public.public_profiles(id) ON DELETE CASCADE; CREATE INDEX ...`. No new RLS needed — existing owner/hidden policies cover it via `provider_user_id`.
+- No changes to `service_profiles` table (legacy single-row provider record). All new work uses `public_profiles`.
+- Redirect old `/list-skill` route to `/profiles/new` to preserve external links.
+- `p.$slug.tsx` becomes the single source of truth for the public page; tab state via `Tabs` from `@/components/ui/tabs`.

@@ -4,6 +4,6 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 // unified Service Profile flow instead.
 export const Route = createFileRoute("/businesses/create")({
   beforeLoad: () => {
-    throw redirect({ to: "/list-skill" });
+    throw redirect({ to: "/profiles/new" });
   },
 });

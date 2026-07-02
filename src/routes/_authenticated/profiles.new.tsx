@@ -36,17 +36,15 @@ function NewProfile() {
   const [bio, setBio] = useState("");
   const [phone, setPhone] = useState("");
   const [busy, setBusy] = useState(false);
+  const [duplicateWarning, setDuplicateWarning] = useState<
+    | { id: string; name: string }
+    | null
+  >(null);
 
   const cat = categories.find((c) => c.slug === categorySlug) ?? staticCategories[0];
 
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const doInsert = async () => {
     if (!user) return;
-    if (!name.trim()) {
-      toast.error("Service name is required");
-      return;
-    }
-
     setBusy(true);
     const base = slugify(name) || "profile";
     const slug = `${base}-${Math.random().toString(36).slice(2, 8)}`;
@@ -75,6 +73,31 @@ function NewProfile() {
     nav({ to: "/profiles/$id", params: { id: data.id } });
   };
 
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+    if (!name.trim()) {
+      toast.error("Service name is required");
+      return;
+    }
+
+    // Light duplicate check: same owner + same normalized name + same category
+    const normalized = name.trim().toLowerCase();
+    const { data: existing } = await supabase
+      .from("public_profiles")
+      .select("id,name")
+      .eq("owner_id", user.id)
+      .eq("category_slug", categorySlug)
+      .ilike("name", normalized);
+    if (existing && existing.length > 0 && !duplicateWarning) {
+      setDuplicateWarning({ id: existing[0].id, name: existing[0].name });
+      return;
+    }
+
+    await doInsert();
+  };
+
+
   return (
     <Layout>
       <section className="mx-auto max-w-2xl px-4 py-6">
@@ -83,7 +106,41 @@ function NewProfile() {
           Each service appears separately to customers. You can list as many services as you offer under one Tuungane account.
         </p>
 
+        {duplicateWarning && (
+          <div className="mt-5 rounded-2xl border border-orange/40 bg-orange/5 p-4 text-sm">
+            <p className="font-semibold text-navy">You may already have a similar service profile.</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              We found an existing service called <span className="font-semibold text-navy">{duplicateWarning.name}</span> in the same category.
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => nav({ to: "/profiles/$id", params: { id: duplicateWarning.id } })}
+                className="rounded-xl border border-navy/20 bg-card px-3 py-1.5 text-xs font-semibold text-navy"
+              >
+                Edit existing
+              </button>
+              <button
+                type="button"
+                onClick={doInsert}
+                disabled={busy}
+                className="rounded-xl bg-orange px-3 py-1.5 text-xs font-semibold text-orange-foreground disabled:opacity-50"
+              >
+                {busy ? "Creating…" : "Continue creating new"}
+              </button>
+              <button
+                type="button"
+                onClick={() => setDuplicateWarning(null)}
+                className="rounded-xl px-3 py-1.5 text-xs font-medium text-navy/70"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
+
         <form onSubmit={submit} className="mt-5 space-y-4 rounded-2xl border border-border bg-card p-5">
+
           <div>
             <Field label="Service name" value={name} onChange={setName} placeholder="e.g. Genesis Car Wash" />
             <p className="mt-1 text-[11px] text-muted-foreground">

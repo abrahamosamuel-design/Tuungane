@@ -93,7 +93,7 @@ function Welcome() {
 
           <button
             type="button"
-            onClick={() => { markSeen(); nav({ to: "/list-skill" }); }}
+            onClick={() => { markSeen(); nav({ to: "/profiles/new" }); }}
             className="group rounded-2xl border-2 border-green/30 bg-green/5 p-5 text-left transition hover:border-green hover:bg-green/10"
           >
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-green text-green-foreground">

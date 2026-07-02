@@ -4,16 +4,28 @@ import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useAuthGate } from "@/components/RequireAuthDialog";
-import { Building2, User as UserIcon, Landmark, Star, MapPin, MessageSquare, Phone, ShieldCheck } from "lucide-react";
-import { ReviewDialog } from "@/components/social/ReviewDialog";
+import {
+  MapPin,
+  MessageSquare,
+  Phone,
+  ShieldCheck,
+  Share2,
+  Pencil,
+  Plus,
+  LayoutDashboard,
+  Clock,
+  Sparkles,
+} from "lucide-react";
 import { ProfileTrustBadge } from "@/components/trust/ProfileTrustBadge";
 import { formatSubcategory } from "@/lib/format-category";
 import { Avatar } from "@/components/social/Avatar";
-import { CoverImage } from "@/components/media/CoverImage";
 import { ExpandableText } from "@/components/feed/ExpandableText";
 import { PriceGuideChip } from "@/components/PriceGuide";
 import type { PriceType, PriceGuide } from "@/lib/price-guide";
-
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { PostComposer } from "@/components/social/PostComposer";
+import { PostCard, type PostRow } from "@/components/social/PostCard";
+import { toast } from "sonner";
 
 type ProfileType = "individual" | "business" | "organization";
 
@@ -31,10 +43,12 @@ type PublicProfile = {
   district: string | null;
   town: string | null;
   area: string | null;
+  areas_served: string[] | null;
+  availability: string | null;
+  opening_hours: string | null;
   phone: string | null;
+  whatsapp: string | null;
   verified: string;
-  legacy_source: string | null;
-  legacy_ref: string | null;
 };
 
 type Service = {
@@ -52,25 +66,11 @@ type Service = {
   price_note: string | null;
 };
 
-type Review = {
-  id: string;
-  rating: number;
-  text: string | null;
-  created_at: string;
-  user_id: string;
-};
-
-const TYPE_META: Record<ProfileType, { label: string; icon: React.ComponentType<{ className?: string }> }> = {
-  individual: { label: "Individual provider", icon: UserIcon },
-  business: { label: "Business", icon: Building2 },
-  organization: { label: "Organization", icon: Landmark },
-};
-
 export const Route = createFileRoute("/p/$slug")({
   head: ({ params }) => ({
     meta: [
       { title: `${params.slug} — Tuungane` },
-      { name: "description", content: "Public profile on Tuungane." },
+      { name: "description", content: "Service profile on Tuungane." },
     ],
   }),
   component: PublicProfilePage,
@@ -83,10 +83,9 @@ function PublicProfilePage() {
   const { requireAuth } = useAuthGate();
   const [profile, setProfile] = useState<PublicProfile | null>(null);
   const [services, setServices] = useState<Service[]>([]);
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [stats, setStats] = useState({ completed: 0, pending: 0 });
+  const [posts, setPosts] = useState<PostRow[]>([]);
+  const [completed, setCompleted] = useState(0);
   const [loading, setLoading] = useState(true);
-  const [reviewOpen, setReviewOpen] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -95,49 +94,82 @@ function PublicProfilePage() {
       .select("*")
       .eq("slug", slug)
       .maybeSingle();
-    if (!p) { setProfile(null); setLoading(false); return; }
+    if (!p) {
+      setProfile(null);
+      setLoading(false);
+      return;
+    }
     const prof = p as PublicProfile;
     setProfile(prof);
 
-    const [{ data: s }, { data: r }, { count: completed }] = await Promise.all([
-      supabase.from("profile_services").select("id,title,description,price_guidance_ugx,active,is_primary,price_type,price_fixed_ugx,price_min_ugx,price_max_ugx,price_currency,price_note").eq("profile_id", prof.id).eq("active", true).order("is_primary", { ascending: false }).order("sort_order"),
-      supabase.from("reviews").select("id,rating,text,created_at,user_id").eq("public_profile_id", prof.id).eq("hidden", false).order("created_at", { ascending: false }).limit(20),
-      supabase.from("service_requests").select("*", { count: "exact", head: true }).eq("public_profile_id", prof.id).eq("status", "completed"),
+    const [{ data: s }, { data: t }, { count: c }] = await Promise.all([
+      supabase
+        .from("profile_services")
+        .select(
+          "id,title,description,price_guidance_ugx,active,is_primary,price_type,price_fixed_ugx,price_min_ugx,price_max_ugx,price_currency,price_note",
+        )
+        .eq("profile_id", prof.id)
+        .eq("active", true)
+        .order("is_primary", { ascending: false })
+        .order("sort_order"),
+      supabase
+        .from("timeline_posts")
+        .select("*")
+        .eq("public_profile_id", prof.id)
+        .eq("hidden", false)
+        .order("created_at", { ascending: false })
+        .limit(30),
+      supabase
+        .from("service_requests")
+        .select("*", { count: "exact", head: true })
+        .eq("public_profile_id", prof.id)
+        .eq("status", "completed"),
     ]);
     setServices((s ?? []) as Service[]);
-    setReviews((r ?? []) as Review[]);
-    setStats({ completed: completed ?? 0, pending: 0 });
+    setPosts((t ?? []) as PostRow[]);
+    setCompleted(c ?? 0);
     setLoading(false);
   };
 
-  useEffect(() => { load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [slug]);
+  useEffect(() => {
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slug]);
 
   if (loading) {
-    return <Layout><div className="mx-auto max-w-2xl px-4 py-8 text-sm text-muted-foreground">Loading…</div></Layout>;
+    return (
+      <Layout>
+        <div className="mx-auto max-w-2xl px-4 py-8 text-sm text-muted-foreground">Loading…</div>
+      </Layout>
+    );
   }
 
   if (!profile) {
     return (
       <Layout>
         <div className="mx-auto max-w-2xl px-4 py-8">
-          <p className="text-sm text-muted-foreground">This profile doesn’t exist or was removed.</p>
-          <Link to="/services" className="mt-3 inline-block text-sm font-semibold text-orange">← Browse services</Link>
+          <p className="text-sm text-muted-foreground">
+            This service doesn’t exist or was removed.
+          </p>
+          <Link to="/services" className="mt-3 inline-block text-sm font-semibold text-orange">
+            ← Browse services
+          </Link>
         </div>
       </Layout>
     );
   }
 
   const isOwner = user?.id === profile.owner_id;
-  void TYPE_META;
-  const avgRating = reviews.length ? reviews.reduce((a, r) => a + r.rating, 0) / reviews.length : null;
   const location = [profile.area, profile.town, profile.district].filter(Boolean).join(", ");
+  const isVerified = profile.verified === "verified";
 
   const requestService = (serviceId?: string) => {
     requireAuth(
-      () => nav({
-        to: "/requests/new",
-        search: { profileId: profile.id, serviceId: serviceId ?? "" } as never,
-      }),
+      () =>
+        nav({
+          to: "/requests/new",
+          search: { profileId: profile.id, serviceId: serviceId ?? "" } as never,
+        }),
       {
         title: "Sign in to request this service",
         message: "Create a free Tuungane account to send a request to this provider.",
@@ -146,200 +178,303 @@ function PublicProfilePage() {
     );
   };
 
+  const shareService = async () => {
+    const url = typeof window !== "undefined" ? window.location.href : "";
+    if (typeof navigator !== "undefined" && "share" in navigator) {
+      try {
+        await (navigator as Navigator).share({ title: profile.name, url });
+        return;
+      } catch {
+        /* user cancelled */
+      }
+    }
+    try {
+      await navigator.clipboard?.writeText(url);
+      toast.success("Link copied");
+    } catch {
+      toast.error("Couldn’t copy link");
+    }
+  };
+
   return (
     <Layout>
-      {/* Cover */}
-      <div className="relative h-32 w-full sm:h-44">
-        <CoverImage
-          variant="wide"
-          imageUrl={profile.cover_url}
-          categorySlug={profile.category_slug}
-          name={profile.name}
-          label="No profile banner yet"
-          className="h-32 w-full rounded-none sm:h-44"
-        />
-      </div>
+      {/* Plain background strip — banner removed for MVP */}
+      <div className="h-16 w-full bg-gradient-to-b from-muted/60 to-transparent" />
 
       <section className="mx-auto -mt-10 max-w-2xl px-4 pb-24">
-        <div className="flex items-end gap-3">
-          <div className="h-20 w-20 shrink-0 overflow-hidden rounded-2xl border-4 border-background bg-muted shadow">
+        {/* Logo + identity */}
+        <div className="flex flex-col items-center text-center sm:flex-row sm:items-end sm:text-left">
+          <div className="h-24 w-24 shrink-0 overflow-hidden rounded-2xl border-4 border-background bg-muted shadow-md">
             <Avatar
               name={profile.name}
               url={profile.avatar_url ?? profile.cover_url}
               categorySlug={profile.category_slug}
-              verifiedRing={profile.verified === "verified"}
-              size={72}
+              verifiedRing={isVerified}
+              size={88}
             />
           </div>
-        </div>
-
-        <div className="mt-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <h1 className="font-display text-2xl font-bold text-navy">{profile.name}</h1>
-            {profile.profile_type === "individual" ? (
-              <ProfileTrustBadge kind="service_profile" id={profile.owner_id} />
-            ) : profile.verified === "verified" ? (
-              <span className="inline-flex items-center gap-1 rounded-full bg-green/10 px-2 py-0.5 text-[11px] font-semibold text-green">
-                <ShieldCheck className="h-3 w-3" /> Verified
-              </span>
-            ) : null}
-          </div>
-          <p className="mt-0.5 text-xs uppercase tracking-wide text-navy/60">
-            {TYPE_META[profile.profile_type].label}
-            {profile.subcategory ? ` · ${formatSubcategory(profile.subcategory)}` : profile.category_slug ? ` · ${profile.category_slug}` : ""}
-          </p>
-          {location && (
-            <p className="mt-1 inline-flex items-center gap-1 text-xs text-muted-foreground">
-              <MapPin className="h-3 w-3" /> {location}
+          <div className="mt-3 min-w-0 sm:ml-4 sm:mt-0">
+            <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
+              <h1 className="font-display text-2xl font-bold text-navy">{profile.name}</h1>
+              {profile.profile_type === "individual" ? (
+                <ProfileTrustBadge kind="service_profile" id={profile.owner_id} />
+              ) : isVerified ? (
+                <span className="inline-flex items-center gap-1 rounded-full bg-green/10 px-2 py-0.5 text-[11px] font-semibold text-green">
+                  <ShieldCheck className="h-3 w-3" /> Verified
+                </span>
+              ) : null}
+            </div>
+            <p className="mt-0.5 text-xs uppercase tracking-wide text-navy/60">
+              {profile.subcategory
+                ? formatSubcategory(profile.subcategory)
+                : profile.category_slug ?? "Service"}
             </p>
-          )}
+            {location && (
+              <p className="mt-1 inline-flex items-center gap-1 text-xs text-muted-foreground">
+                <MapPin className="h-3 w-3" /> {location}
+              </p>
+            )}
+            {/* Soft trust chip — no broken 0-review formats */}
+            <div className="mt-2 flex flex-wrap justify-center gap-1.5 sm:justify-start">
+              {isVerified && (
+                <span className="rounded-full bg-green/10 px-2 py-0.5 text-[11px] font-semibold text-green">
+                  Verified service
+                </span>
+              )}
+              {completed > 0 ? (
+                <span className="rounded-full bg-navy/5 px-2 py-0.5 text-[11px] font-semibold text-navy/80">
+                  {completed} completed request{completed === 1 ? "" : "s"}
+                </span>
+              ) : !isVerified ? (
+                <span className="inline-flex items-center gap-1 rounded-full bg-orange/10 px-2 py-0.5 text-[11px] font-semibold text-orange">
+                  <Sparkles className="h-3 w-3" /> Recently listed
+                </span>
+              ) : null}
+            </div>
+          </div>
         </div>
 
-        {/* Trust strip */}
-        <div className="mt-4 grid grid-cols-3 gap-2 rounded-2xl border border-border bg-card p-3 text-center">
-          <Stat label="Services" value={services.length} />
-          <Stat label="Completed" value={stats.completed} />
-          <Stat
-            label="Rating"
-            value={avgRating ? avgRating.toFixed(1) : "—"}
-            sub={`${reviews.length} review${reviews.length === 1 ? "" : "s"}`}
-          />
-        </div>
-
-        {/* Bio */}
-        {profile.bio && (
-          <p className="mt-4 whitespace-pre-line rounded-2xl border border-border bg-card p-4 text-sm text-foreground/90">
-            {profile.bio}
-          </p>
-        )}
-
-        {/* Primary actions */}
+        {/* Primary actions — visitors only */}
         {!isOwner && (
-          <div className="mt-4 grid grid-cols-2 gap-2">
+          <div className="mt-5 grid grid-cols-3 gap-2">
             <button
               onClick={() => requestService()}
-              className="inline-flex items-center justify-center gap-1 rounded-xl bg-orange px-4 py-2.5 text-sm font-semibold text-orange-foreground"
+              className="col-span-2 inline-flex items-center justify-center gap-1 rounded-xl bg-orange px-4 py-2.5 text-sm font-semibold text-orange-foreground"
             >
               Request service
             </button>
             <Link
               to="/messages"
               search={{ to: profile.owner_id } as never}
-              className="inline-flex items-center justify-center gap-1 rounded-xl border border-navy/20 bg-card px-4 py-2.5 text-sm font-semibold text-navy"
+              className="inline-flex items-center justify-center gap-1 rounded-xl border border-navy/20 bg-card px-3 py-2.5 text-sm font-semibold text-navy"
             >
               <MessageSquare className="h-4 w-4" /> Message
             </Link>
+            <button
+              onClick={shareService}
+              className="col-span-3 inline-flex items-center justify-center gap-1 rounded-xl border border-border bg-card px-3 py-2 text-xs font-semibold text-navy/80"
+            >
+              <Share2 className="h-3.5 w-3.5" /> Share this service
+            </button>
           </div>
         )}
 
-        {/* Services */}
-        <div className="mt-6">
-          <h2 className="font-display text-lg font-bold text-navy">Services</h2>
-          {services.length === 0 ? (
-            <p className="mt-2 rounded-2xl border border-dashed border-border bg-card p-4 text-sm text-muted-foreground">
-              No services listed yet.
-            </p>
-          ) : (
-            <ul className="mt-2 space-y-2">
-              {services.map((s) => (
-                <li key={s.id} className={`rounded-2xl border bg-card p-3 ${s.is_primary ? "border-orange/40 ring-1 ring-orange/15" : "border-border"}`}>
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-1.5">
+        {/* Owner-only slim bar (never for visitors) */}
+        {isOwner && (
+          <div className="mt-5 flex flex-wrap items-center gap-2 rounded-2xl border border-orange/30 bg-orange/5 p-3">
+            <span className="text-xs font-semibold text-orange/90">Owner tools</span>
+            <Link
+              to="/profiles/$id"
+              params={{ id: profile.id }}
+              className="inline-flex items-center gap-1 rounded-full bg-orange px-3 py-1.5 text-xs font-semibold text-orange-foreground"
+            >
+              <Pencil className="h-3.5 w-3.5" /> Edit service
+            </Link>
+            <Link
+              to="/dashboard"
+              className="inline-flex items-center gap-1 rounded-full border border-navy/20 bg-card px-3 py-1.5 text-xs font-semibold text-navy"
+            >
+              <LayoutDashboard className="h-3.5 w-3.5" /> Dashboard
+            </Link>
+            <button
+              onClick={shareService}
+              className="ml-auto inline-flex items-center gap-1 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-navy/70"
+            >
+              <Share2 className="h-3.5 w-3.5" /> Share
+            </button>
+          </div>
+        )}
+
+        {/* Tabs */}
+        <Tabs defaultValue="about" className="mt-6">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="about">About</TabsTrigger>
+            <TabsTrigger value="timeline">Timeline</TabsTrigger>
+            <TabsTrigger value="services">Services</TabsTrigger>
+          </TabsList>
+
+          {/* ABOUT */}
+          <TabsContent value="about" className="mt-3 space-y-3">
+            <AboutBlock label="Description" empty="No description yet.">
+              {profile.bio ? (
+                <p className="whitespace-pre-line text-sm text-foreground/90">{profile.bio}</p>
+              ) : null}
+            </AboutBlock>
+
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <AboutBlock label="Category">
+                <p className="text-sm text-foreground/90">
+                  {profile.subcategory
+                    ? formatSubcategory(profile.subcategory)
+                    : profile.category_slug ?? "—"}
+                </p>
+              </AboutBlock>
+              <AboutBlock label="Location">
+                <p className="text-sm text-foreground/90">{location || "—"}</p>
+              </AboutBlock>
+              <AboutBlock label="Areas served" empty="Not set yet.">
+                {profile.areas_served && profile.areas_served.length > 0 ? (
+                  <p className="text-sm text-foreground/90">
+                    {profile.areas_served.join(", ")}
+                  </p>
+                ) : null}
+              </AboutBlock>
+              <AboutBlock label="Availability" empty="Not set yet.">
+                {profile.availability || profile.opening_hours ? (
+                  <p className="inline-flex items-center gap-1 text-sm text-foreground/90">
+                    <Clock className="h-3.5 w-3.5 text-navy/60" />
+                    {profile.availability || profile.opening_hours}
+                  </p>
+                ) : null}
+              </AboutBlock>
+            </div>
+
+            {profile.phone && (
+              <AboutBlock label="Phone">
+                <p className="inline-flex items-center gap-1 text-sm text-foreground/90">
+                  <Phone className="h-3.5 w-3.5 text-navy/60" /> {profile.phone}
+                </p>
+              </AboutBlock>
+            )}
+
+            {isOwner && (
+              <Link
+                to="/profiles/$id"
+                params={{ id: profile.id }}
+                className="inline-flex items-center gap-1 text-xs font-semibold text-orange"
+              >
+                <Pencil className="h-3.5 w-3.5" /> Edit About
+              </Link>
+            )}
+          </TabsContent>
+
+          {/* TIMELINE */}
+          <TabsContent value="timeline" className="mt-3 space-y-3">
+            {isOwner && (
+              <PostComposer
+                defaultCategory={profile.category_slug}
+                publicProfileId={profile.id}
+                onPosted={load}
+              />
+            )}
+            {posts.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-border bg-card p-6 text-center text-sm text-muted-foreground">
+                {isOwner
+                  ? "Share a photo, video, or update to show your work under this service."
+                  : "No updates yet."}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {posts.map((post) => (
+                  <PostCard key={post.id} post={post} onChanged={load} />
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          {/* SERVICES */}
+          <TabsContent value="services" className="mt-3 space-y-2">
+            {services.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-border bg-card p-5 text-center text-sm text-muted-foreground">
+                No services added yet. Add the specific things customers can request under this service.
+              </div>
+            ) : (
+              <ul className="space-y-2">
+                {services.map((s) => (
+                  <li
+                    key={s.id}
+                    className={`rounded-2xl border bg-card p-3 ${
+                      s.is_primary ? "border-orange/40 ring-1 ring-orange/15" : "border-border"
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
                         <p className="font-semibold text-navy">{s.title}</p>
-                        {s.is_primary && (
-                          <span className="inline-flex items-center gap-0.5 rounded-full bg-orange/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-orange">
-                            <Star className="h-3 w-3 fill-orange" /> Main
-                          </span>
+                        {s.description && (
+                          <ExpandableText
+                            text={s.description}
+                            clampLines={3}
+                            maxLines={8}
+                            className="mt-0.5"
+                          />
+                        )}
+                        <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                          <PriceGuideChip guide={s as PriceGuide} />
+                          {!s.price_type && s.price_guidance_ugx && (
+                            <span className="inline-flex items-center rounded-full bg-orange/10 px-2 py-0.5 text-[11px] font-semibold text-orange">
+                              From UGX {s.price_guidance_ugx.toLocaleString()}
+                            </span>
+                          )}
+                        </div>
+                        {s.price_note && (
+                          <p className="mt-1 text-[11px] text-muted-foreground">{s.price_note}</p>
                         )}
                       </div>
-                      {s.description && <ExpandableText text={s.description} clampLines={3} maxLines={8} className="mt-0.5" />}
-                      <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                        <PriceGuideChip guide={s as PriceGuide} />
-                        {!s.price_type && s.price_guidance_ugx && (
-                          <span className="inline-flex items-center rounded-full bg-orange/10 px-2 py-0.5 text-[11px] font-semibold text-orange">
-                            From UGX {s.price_guidance_ugx.toLocaleString()}
-                          </span>
-                        )}
-                      </div>
-                      {s.price_note && (
-                        <p className="mt-1 text-[11px] text-muted-foreground">{s.price_note}</p>
+                      {!isOwner && (
+                        <button
+                          onClick={() => requestService(s.id)}
+                          className="shrink-0 rounded-xl bg-orange px-3 py-2 text-xs font-semibold text-orange-foreground"
+                        >
+                          Request this service
+                        </button>
                       )}
                     </div>
-                    {!isOwner && (
-                      <button
-                        onClick={() => requestService(s.id)}
-                        className="shrink-0 rounded-xl bg-orange px-3 py-2 text-xs font-semibold text-orange-foreground"
-                      >
-                        Request
-                      </button>
-                    )}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-
-        {/* Reviews */}
-        <div className="mt-6">
-          <div className="flex items-center justify-between">
-            <h2 className="font-display text-lg font-bold text-navy">Reviews</h2>
-            {!isOwner && user && (
-              <button onClick={() => setReviewOpen(true)} className="text-xs font-semibold text-orange">
-                Leave a review
-              </button>
+                  </li>
+                ))}
+              </ul>
             )}
-          </div>
-          {reviews.length === 0 ? (
-            <p className="mt-2 rounded-2xl border border-dashed border-border bg-card p-4 text-sm text-muted-foreground">
-              No reviews yet — be the first to leave one after a completed service.
-            </p>
-          ) : (
-            <ul className="mt-2 space-y-2">
-              {reviews.map((r) => (
-                <li key={r.id} className="rounded-2xl border border-border bg-card p-3">
-                  <div className="flex items-center gap-1 text-orange">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star key={i} className={`h-3.5 w-3.5 ${i < r.rating ? "fill-orange" : "text-muted-foreground"}`} />
-                    ))}
-                    <span className="ml-1 text-[11px] text-muted-foreground">{new Date(r.created_at).toLocaleDateString()}</span>
-                  </div>
-                  {r.text && <p className="mt-1 text-sm text-foreground/90">{r.text}</p>}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-
-        {isOwner && (
-          <Link
-            to="/profiles/$id"
-            params={{ id: profile.id }}
-            className="mt-6 inline-block rounded-xl border border-border bg-card px-4 py-2 text-xs font-semibold text-navy"
-          >
-            Manage this profile →
-          </Link>
-        )}
+            {isOwner && (
+              <Link
+                to="/profiles/$id"
+                params={{ id: profile.id }}
+                className="mt-2 inline-flex items-center gap-1 rounded-xl border border-dashed border-orange/40 bg-orange/5 px-3 py-2.5 text-sm font-semibold text-orange"
+              >
+                <Plus className="h-4 w-4" /> Add service
+              </Link>
+            )}
+          </TabsContent>
+        </Tabs>
       </section>
-
-      <ReviewDialog
-        open={reviewOpen}
-        onClose={() => setReviewOpen(false)}
-        providerUserId={profile.owner_id}
-        publicProfileId={profile.id}
-        onPosted={load}
-      />
     </Layout>
   );
 }
 
-function Stat({ label, value, sub }: { label: string; value: number | string; sub?: string }) {
+function AboutBlock({
+  label,
+  children,
+  empty,
+}: {
+  label: string;
+  children?: React.ReactNode;
+  empty?: string;
+}) {
+  const hasContent = Boolean(children);
   return (
-    <div>
-      <p className="font-display text-xl font-bold text-navy">{value}</p>
-      <p className="text-[11px] text-muted-foreground">{label}</p>
-      {sub && <p className="text-[10px] text-muted-foreground">{sub}</p>}
+    <div className="rounded-2xl border border-border bg-card p-3">
+      <p className="text-[10px] font-semibold uppercase tracking-wide text-navy/60">{label}</p>
+      <div className="mt-1">
+        {hasContent ? children : <p className="text-sm text-muted-foreground italic">{empty ?? "—"}</p>}
+      </div>
     </div>
   );
 }
