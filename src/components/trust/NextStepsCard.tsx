@@ -10,7 +10,7 @@ type Row = { key: string; label: string; done: boolean; unlocks: string };
 
 const EDIT_LINK: Record<Kind, string> = {
   service_profile: "/me",
-  business_page: "/businesses/new",
+  business_page: "/me",
 };
 
 export function NextStepsCard({ kind, id }: { kind: Kind; id: string }) {
