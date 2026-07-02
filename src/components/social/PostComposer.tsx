@@ -7,7 +7,7 @@ import { useCategories } from "@/hooks/use-categories";
 import { postTypes, type PostTypeValue } from "@/data/postTypes";
 import { toast } from "sonner";
 
-export function PostComposer({ defaultCategory, defaultPostType, businessPageId, onPosted }: { defaultCategory?: string | null; defaultPostType?: PostTypeValue; businessPageId?: string | null; onPosted?: () => void }) {
+export function PostComposer({ defaultCategory, defaultPostType, businessPageId, publicProfileId, onPosted }: { defaultCategory?: string | null; defaultPostType?: PostTypeValue; businessPageId?: string | null; publicProfileId?: string | null; onPosted?: () => void }) {
   const { user } = useAuth();
   const { categories } = useCategories();
   const [text, setText] = useState("");
