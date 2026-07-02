@@ -651,8 +651,11 @@ function ProviderCard({ p, userLoc }: { p: NearbyProvider; userLoc: ReturnType<t
   const media = (p.media_urls ?? []).filter(Boolean) as string[];
 
   return (
-    <article className={`flex ${CARD_W} shrink-0 snap-start flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)] transition hover:border-orange sm:w-auto sm:max-w-none`}>
-      <div className="flex items-start gap-3 p-4 pb-2">
+    <article className={`relative flex ${CARD_W} shrink-0 snap-start flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)] transition hover:border-orange sm:w-auto sm:max-w-none`}>
+      <div className="pointer-events-none absolute right-3 top-3 z-10">
+        <ProfileTrustBadge kind="service_profile" id={p.user_id} size="sm" />
+      </div>
+      <div className="flex items-start gap-3 p-4 pb-2 pr-24">
         <Link to="/u/$id" params={{ id: p.user_id }} className="shrink-0">
           <FeedAvatar src={avatar} name={name} size={44} ring={verified} />
         </Link>
@@ -673,18 +676,15 @@ function ProviderCard({ p, userLoc }: { p: NearbyProvider; userLoc: ReturnType<t
             ) : null}
           </p>
         </div>
-        <button type="button" aria-label="More" className="hidden shrink-0 rounded-full p-1.5 text-muted-foreground hover:bg-muted hover:text-navy sm:inline-flex">
-          <MoreHorizontal className="h-4 w-4" />
-        </button>
       </div>
 
       <div className="flex flex-wrap items-center gap-1.5 px-4">
         <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${avail.cls}`}>{avail.label}</span>
-        <ProfileTrustBadge kind="service_profile" id={p.user_id} size="sm" className="shrink-0" />
         {years > 0 ? (
           <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold text-navy">{years} yrs experience</span>
         ) : null}
       </div>
+
 
       {p.bio ? <ExpandableText text={p.bio} clampLines={3} maxLines={8} className="px-4 pt-2" /> : null}
 
