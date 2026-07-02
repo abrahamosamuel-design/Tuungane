@@ -26,6 +26,7 @@ export const Route = createFileRoute("/sitemap.xml")({
           { path: "/official", changefreq: "weekly", priority: "0.6" },
           { path: "/feed", changefreq: "daily", priority: "0.5" },
           { path: "/terms", changefreq: "yearly", priority: "0.3" },
+          { path: "/trust", changefreq: "monthly", priority: "0.6" },
           { path: "/guides/property-maintenance-kampala", changefreq: "monthly", priority: "0.7" },
         ];
 
