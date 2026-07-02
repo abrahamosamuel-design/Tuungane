@@ -45,6 +45,7 @@ function BrowseRequests() {
   const [radiusKm, setRadiusKm] = useState<number | null>(null);
   const [myDistrict, setMyDistrict] = useState<string | null>(null);
   const [items, setItems] = useState<RequestRowLite[]>([]);
+  const [editingRequest, setEditingRequest] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [showMoreFilters, setShowMoreFilters] = useState(false);
 
