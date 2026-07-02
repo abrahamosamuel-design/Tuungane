@@ -84,7 +84,7 @@ export function EditRequestDialog({
   const save = async () => {
     if (!requestId) return;
     setSaving(true);
-    const payload: Record<string, unknown> = {
+    const payload = {
       title: f.title?.trim() || null,
       service_needed: f.service_needed?.trim() || null,
       description: f.description?.trim() || null,
@@ -99,7 +99,7 @@ export function EditRequestDialog({
     };
     const { error } = await supabase.from("service_requests").update(payload).eq("id", requestId);
     setSaving(false);
-    if (error) return toast.error(toUserError(error));
+    if (error) return toastError(error, "Couldn't update request");
     toast.success("Request updated");
     onSaved?.();
     onClose();
