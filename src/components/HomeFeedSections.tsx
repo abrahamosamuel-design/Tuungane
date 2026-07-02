@@ -513,23 +513,13 @@ function RequestCard({
               <span className="rounded-full bg-navy/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-navy">You</span>
             )}
           </div>
-          <p className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+          <p className="inline-flex flex-wrap items-center gap-x-1 gap-y-0.5 text-[11px] text-muted-foreground">
             <MapPin className="h-3 w-3" /> {loc}
             {near ? (
-              <span className="ml-1 rounded-full bg-green/10 px-1.5 py-0.5 text-[10px] font-semibold text-green">{near}</span>
+              <span className="rounded-full bg-green/10 px-1.5 py-[1px] text-[9px] font-semibold leading-tight text-green">{near}</span>
             ) : null}
           </p>
         </div>
-        {isOwner && onEdit ? (
-          <button
-            type="button"
-            onClick={onEdit}
-            aria-label="Edit request"
-            className="shrink-0 rounded-full border border-border p-1.5 text-navy hover:border-orange hover:text-orange"
-          >
-            <Pencil className="h-3.5 w-3.5" />
-          </button>
-        ) : null}
         <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${urg.cls}`}>{urg.label}</span>
       </div>
 
