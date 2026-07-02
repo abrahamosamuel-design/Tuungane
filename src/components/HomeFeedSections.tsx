@@ -277,7 +277,12 @@ export function HomeFeedSections() {
 
       if (cancelled) return;
 
-      setRequests(reqs ?? []);
+      setRequests(
+        (reqs ?? []).map((r) => {
+          const p = r.customer_id ? profMap.get(r.customer_id) : null;
+          return { ...r, customer_name: p?.full_name ?? null, customer_avatar_url: p?.avatar_url ?? null };
+        }),
+      );
       setHasNearbyReqs(nearbyFlag);
       setProviders(
         (provs ?? []).map((p) => ({ ...p, profile: profMap.get(p.user_id) ?? null })),
