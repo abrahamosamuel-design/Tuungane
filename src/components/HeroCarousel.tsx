@@ -229,6 +229,7 @@ function Chip({
 }) {
   return (
     <span
+      data-hero-chip
       className={`inline-flex items-center gap-1 rounded-full bg-white/95 px-2 py-1 text-[10px] font-semibold text-navy shadow-md backdrop-blur sm:px-2.5 sm:text-[11px] ${className}`}
     >
       {dot && (
