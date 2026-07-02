@@ -743,7 +743,7 @@ function ServiceListingCard({
   const near = proximityLabel(userLoc, l);
   const avail = availabilityMeta(l.availability);
   const verified = l.verified === "verified";
-  const avatar = l.profile?.avatar_url;
+  const avatar = l.cover_url || l.avatar_url || null;
   const loc = l.area || l.town || l.district || "Uganda";
 
   return (
