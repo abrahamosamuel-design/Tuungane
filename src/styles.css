@@ -197,7 +197,10 @@
   /* Stronger contrast on muted text for outdoor / mobile use. */
   main .text-muted-foreground {
     color: #4b4f56;
+  }
 }
+
+
 
 /*
  * Compact status/indicator pills — normalize small rounded-full <span> badges
