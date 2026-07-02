@@ -398,12 +398,13 @@ function UserProfile() {
               <BoostButton boostType="boost_profile" entityType="provider_profile" entityId={id} label="Boost profile" dialogTitle="Boost your provider profile" dialogDescription="Increase your visibility across Tuungane for a set period." />
             )}
             {isOwn && (
-              <button onClick={() => setEditOpen(true)} className="ml-auto rounded-full bg-orange px-4 py-2 text-xs font-semibold text-orange-foreground hover:brightness-110">
+              <button onClick={() => setEditOpen(true)} className="rounded-full bg-orange px-4 py-2 text-xs font-semibold text-orange-foreground hover:brightness-110">
                 Edit profile
               </button>
             )}
             {isOwn && <Link to="/dashboard" className="rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-navy hover:border-orange">My Dashboard</Link>}
-            {!isOwn && user && <ReportProfileButton kind="service_profile" id={id} className="ml-auto" />}
+            {!isOwn && user && <ReportProfileButton kind="service_profile" id={id} />}
+
           </div>
         </div>
 
