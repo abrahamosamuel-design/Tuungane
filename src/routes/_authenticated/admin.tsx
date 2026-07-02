@@ -108,7 +108,6 @@ function Admin() {
           {tab === "overview" && <OverviewTab onJump={(t, sub) => { setTab(t as Tab); if (t === "official" && sub) setOfficialSub(sub as "account" | "create" | "manage" | "seeded" | "claims"); }} />}
           {tab === "users" && <UsersTab />}
           {tab === "providers" && <ProvidersTab />}
-          {tab === "businesses" && <BusinessesAdminTab />}
           {tab === "requests" && <RequestsAdminTab />}
           {tab === "posts" && <PostsTab />}
           {tab === "recs" && <RecsTab />}
