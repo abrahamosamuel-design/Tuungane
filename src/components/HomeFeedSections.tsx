@@ -295,7 +295,7 @@ export function HomeFeedSections() {
         const tb = new Date(b.created_at).getTime();
         const ta = new Date(a.created_at).getTime();
         if (tb !== ta) return tb - ta;
-        return b.user_id.localeCompare(a.user_id);
+        return b.id.localeCompare(a.id);
       })
       .slice(0, 6);
   }, [recentListings]);
