@@ -98,7 +98,7 @@ export function OverviewTab({ onJump }: { onJump: (tab: string, subTab?: string)
       <div>
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">Quick links</h2>
         <div className="flex flex-wrap gap-2 text-xs">
-          <Link to="/businesses" className="rounded-full border border-border px-3 py-1.5 hover:border-navy">Business directory</Link>
+          
           <Link to="/official" className="rounded-full border border-border px-3 py-1.5 hover:border-navy">Official page</Link>
           <Link to="/requests/browse" className="rounded-full border border-border px-3 py-1.5 hover:border-navy">Requests</Link>
           <Link to="/services" className="rounded-full border border-border px-3 py-1.5 hover:border-navy">Services</Link>
