@@ -31,6 +31,7 @@ function ListSkillPage() {
   const [editMode, setEditMode] = useState(false);
 
   // form
+  const [providerType, setProviderType] = useState<"individual" | "business" | "organization">("individual");
   const [businessName, setBusinessName] = useState("");
   const [categorySlug, setCategorySlug] = useState(staticCategories[0].slug);
   const [subcategory, setSubcategory] = useState(staticCategories[0].subcategories[0]);
@@ -62,6 +63,7 @@ function ListSkillPage() {
         .maybeSingle();
       if (sp) {
         setEditMode(true);
+        setProviderType(((sp as any).provider_type as "individual" | "business" | "organization") ?? "individual");
         setBusinessName(sp.business_name ?? "");
         setCategorySlug(sp.category_slug ?? staticCategories[0].slug);
         setSubcategory(sp.subcategory ?? staticCategories[0].subcategories[0]);
@@ -176,6 +178,7 @@ function ListSkillPage() {
 
     const { error } = await supabase.from("service_profiles").upsert({
       user_id: user.id,
+      provider_type: providerType,
       business_name: businessName || null,
       category_slug: categorySlug,
       subcategory,
@@ -336,10 +339,43 @@ function ListSkillPage() {
                 }}
               />
 
+              <Field label="Who is offering this service?">
+                <div className="mt-1 grid grid-cols-3 gap-2">
+                  {([
+                    { v: "individual", label: "Individual", hint: "A person" },
+                    { v: "business", label: "Business", hint: "Shop, company, salon" },
+                    { v: "organization", label: "Organization", hint: "School, church, NGO, group" },
+                  ] as const).map((opt) => (
+                    <button
+                      key={opt.v}
+                      type="button"
+                      onClick={() => setProviderType(opt.v)}
+                      className={`rounded-xl border px-2 py-2 text-left ${
+                        providerType === opt.v
+                          ? "border-green bg-green/10"
+                          : "border-border bg-background hover:border-green/40"
+                      }`}
+                    >
+                      <div className={`text-xs font-semibold ${providerType === opt.v ? "text-green" : "text-navy"}`}>{opt.label}</div>
+                      <div className="mt-0.5 text-[10px] leading-tight text-muted-foreground">{opt.hint}</div>
+                    </button>
+                  ))}
+                </div>
+              </Field>
 
-
-              <Field label="Business name (optional)">
-                <input value={businessName} onChange={(e) => setBusinessName(e.target.value)} placeholder="e.g. Bright Sparks Electrical" className="input" />
+              <Field label={providerType === "individual" ? "Display name (optional)" : `${providerType === "business" ? "Business" : "Organization"} name`}>
+                <input
+                  value={businessName}
+                  onChange={(e) => setBusinessName(e.target.value)}
+                  placeholder={
+                    providerType === "individual"
+                      ? "e.g. John the Electrician"
+                      : providerType === "business"
+                      ? "e.g. Bright Sparks Electrical"
+                      : "e.g. Rabboni Christian Learning Center"
+                  }
+                  className="input"
+                />
               </Field>
               <div className="grid grid-cols-2 gap-2">
                 <Field label="Category">
