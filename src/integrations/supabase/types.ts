@@ -2307,6 +2307,11 @@ export type Database = {
           location: string
           longitude: number | null
           media_urls: string[]
+          posted_as_avatar_url: string | null
+          posted_as_name: string | null
+          posted_as_ref_id: string | null
+          posted_as_ref_type: string | null
+          posted_as_type: string
           preferred_contact_method: Database["public"]["Enums"]["contact_method"]
           preferred_date: string | null
           preferred_time: string | null
@@ -2349,6 +2354,11 @@ export type Database = {
           location?: string
           longitude?: number | null
           media_urls?: string[]
+          posted_as_avatar_url?: string | null
+          posted_as_name?: string | null
+          posted_as_ref_id?: string | null
+          posted_as_ref_type?: string | null
+          posted_as_type?: string
           preferred_contact_method?: Database["public"]["Enums"]["contact_method"]
           preferred_date?: string | null
           preferred_time?: string | null
@@ -2391,6 +2401,11 @@ export type Database = {
           location?: string
           longitude?: number | null
           media_urls?: string[]
+          posted_as_avatar_url?: string | null
+          posted_as_name?: string | null
+          posted_as_ref_id?: string | null
+          posted_as_ref_type?: string | null
+          posted_as_type?: string
           preferred_contact_method?: Database["public"]["Enums"]["contact_method"]
           preferred_date?: string | null
           preferred_time?: string | null
@@ -3113,6 +3128,11 @@ export type Database = {
           location: string
           longitude: number | null
           media_urls: string[]
+          posted_as_avatar_url: string | null
+          posted_as_name: string | null
+          posted_as_ref_id: string | null
+          posted_as_ref_type: string | null
+          posted_as_type: string
           preferred_contact_method: Database["public"]["Enums"]["contact_method"]
           preferred_date: string | null
           preferred_time: string | null
