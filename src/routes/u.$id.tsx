@@ -144,7 +144,7 @@ function UserProfile() {
   const [recOpen, setRecOpen] = useState(false);
   const [revOpen, setRevOpen] = useState(false);
   
-  const [uploadingCover, setUploadingCover] = useState(false);
+  
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [claimOpen, setClaimOpen] = useState(false);
   const [requestOpen, setRequestOpen] = useState(false);
