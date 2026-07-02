@@ -559,7 +559,7 @@ function RequestCard({
         ) : null}
       </div>
 
-      <div className="mt-auto grid grid-cols-[1fr_auto_auto] items-stretch gap-2 border-t border-border bg-surface px-3 py-2.5">
+      <div className={`mt-auto grid ${isOwner ? "grid-cols-[1fr_auto]" : "grid-cols-[1fr_auto_auto]"} items-stretch gap-2 border-t border-border bg-surface px-3 py-2.5`}>
         {isOwner ? (
           <>
             <Link
@@ -577,16 +577,7 @@ function RequestCard({
               >
                 Edit
               </button>
-            ) : (
-              <span />
-            )}
-            <Link
-              to="/requests/$id"
-              params={{ id: r.id }}
-              className="inline-flex h-9 items-center justify-center rounded-full border border-border px-3 text-xs font-semibold text-navy hover:border-navy"
-            >
-              Responses
-            </Link>
+            ) : null}
           </>
         ) : (
           <>
