@@ -20,8 +20,22 @@ import { NearYouBadge } from "@/components/NearYouBadge";
 import { ProfileTrustBadge } from "@/components/trust/ProfileTrustBadge";
 import { ExpandableText } from "@/components/feed/ExpandableText";
 
+const FEED_TITLE = "Activity Feed — Tuungane";
+const FEED_DESC = "See the latest updates from providers, businesses and neighbours near you on Tuungane — posts, completed jobs, and community news.";
+const FEED_URL = "https://tuungane.com/feed";
+
 export const Route = createFileRoute("/feed")({
-  head: () => ({ meta: [{ title: "Activity Feed — Tuungane" }] }),
+  head: () => ({
+    meta: [
+      { title: FEED_TITLE },
+      { name: "description", content: FEED_DESC },
+      { property: "og:title", content: FEED_TITLE },
+      { property: "og:description", content: FEED_DESC },
+      { property: "og:url", content: FEED_URL },
+      { property: "og:type", content: "website" },
+    ],
+    links: [{ rel: "canonical", href: FEED_URL }],
+  }),
   component: Feed,
 });
 

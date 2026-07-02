@@ -7,7 +7,22 @@ import { PostCard, type PostRow } from "@/components/social/PostCard";
 import { useUserLocation } from "@/hooks/use-user-location";
 
 export const Route = createFileRoute("/posts/$id")({
-  head: () => ({ meta: [{ title: "Post — Tuungane" }] }),
+  head: ({ params }) => {
+    const url = `https://tuungane.com/posts/${params.id}`;
+    const title = "Post — Tuungane";
+    const desc = "Read this update from a provider on Tuungane and see photos, reactions and comments from the community.";
+    return {
+      meta: [
+        { title },
+        { name: "description", content: desc },
+        { property: "og:title", content: title },
+        { property: "og:description", content: desc },
+        { property: "og:url", content: url },
+        { property: "og:type", content: "article" },
+      ],
+      links: [{ rel: "canonical", href: url }],
+    };
+  },
   component: PostDetail,
 });
 

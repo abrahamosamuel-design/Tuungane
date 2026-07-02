@@ -7,7 +7,18 @@ import { PasswordField } from "./login";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/reset-password")({
-  head: () => ({ meta: [{ title: "Set a new password — Tuungane" }] }),
+  head: () => ({
+    meta: [
+      { title: "Set a new password — Tuungane" },
+      { name: "description", content: "Choose a new password for your Tuungane account and sign back in to continue posting requests and connecting with providers." },
+      { property: "og:title", content: "Set a new password — Tuungane" },
+      { property: "og:description", content: "Choose a new password for your Tuungane account." },
+      { property: "og:url", content: "https://tuungane.com/reset-password" },
+      { property: "og:type", content: "website" },
+      { name: "robots", content: "noindex,follow" },
+    ],
+    links: [{ rel: "canonical", href: "https://tuungane.com/reset-password" }],
+  }),
   component: ResetPassword,
 });
 

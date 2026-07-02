@@ -13,7 +13,22 @@ import { SafetyNote, SAFETY_TIPS } from "@/components/SafetyNote";
 import { RouteErrorCard, RouteNotFoundCard } from "@/lib/route-boundaries";
 
 export const Route = createFileRoute("/official-posts/$id")({
-  head: () => ({ meta: [{ title: "Official post — Tuungane" }] }),
+  head: ({ params }) => {
+    const url = `https://tuungane.com/official-posts/${params.id}`;
+    const title = "Official post — Tuungane";
+    const desc = "An official announcement from a verified organization on Tuungane — read the update and join the discussion.";
+    return {
+      meta: [
+        { title },
+        { name: "description", content: desc },
+        { property: "og:title", content: title },
+        { property: "og:description", content: desc },
+        { property: "og:url", content: url },
+        { property: "og:type", content: "article" },
+      ],
+      links: [{ rel: "canonical", href: url }],
+    };
+  },
   component: OfficialPostDetail,
   errorComponent: ({ error, reset }) => <RouteErrorCard error={error} reset={reset} title="Couldn't load this post" />,
   notFoundComponent: () => <RouteNotFoundCard title="Post not found" message="This official post may have been removed." homeHref="/official" homeLabel="Back to Official" />,
