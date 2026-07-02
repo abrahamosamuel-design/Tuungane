@@ -218,10 +218,10 @@ span.rounded-full.text-xs {
 }
 
 /* Icons inside compact pills shrink to match. */
-span.rounded-full.text-\[10px\] > svg,
-span.rounded-full.text-\[11px\] > svg,
-span.rounded-full.text-\[12px\] > svg,
-span.rounded-full.text-xs > svg {
+span.rounded-full.text-\[10px\] svg,
+span.rounded-full.text-\[11px\] svg,
+span.rounded-full.text-\[12px\] svg,
+span.rounded-full.text-xs svg {
   width: 10px !important;
   height: 10px !important;
 }
