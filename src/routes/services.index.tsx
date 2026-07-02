@@ -136,14 +136,14 @@ function Services() {
       const isRecent = filter === "recent";
       // Guests can only SELECT the safe subset (no lat/long/area).
       const isGuest = !authUser;
-      const spCols = isGuest
-        ? "user_id,business_name,subcategory,bio,town,district,areas_served,service_radius_km,category_slug,verified,updated_at,created_at,availability,cover_url,media_urls,years_experience,price_type,price_fixed_ugx,price_min_ugx,price_max_ugx,price_currency,price_note"
-        : "user_id,business_name,subcategory,bio,town,district,area,latitude,longitude,areas_served,service_radius_km,category_slug,verified,seeded_by_official,seeded_status,updated_at,created_at,availability,cover_url,media_urls,years_experience,price_type,price_fixed_ugx,price_min_ugx,price_max_ugx,price_currency,price_note";
-      // MVP: business/public pages are hidden. Only Service Profiles surface here.
+      const ppCols = isGuest
+        ? "owner_id,name,subcategory,bio,town,district,areas_served,service_radius_km,category_slug,verified,updated_at,created_at,availability,cover_url,avatar_url"
+        : "owner_id,name,subcategory,bio,town,district,area,latitude,longitude,areas_served,service_radius_km,category_slug,verified,updated_at,created_at,availability,cover_url,avatar_url";
+      // MVP: read from public_profiles (multi-service per user).
 
-      let qy: any = supabase.from("service_profiles").select(spCols as string).eq("suspended", false);
+      let qy: any = supabase.from("public_profiles").select(ppCols as string);
       qy = isRecent
-        ? qy.order("created_at", { ascending: false }).order("user_id", { ascending: false })
+        ? qy.order("created_at", { ascending: false }).order("owner_id", { ascending: false })
         : qy.order("updated_at", { ascending: false });
       qy = qy.limit(60);
       if (filter === "featured") qy = qy.eq("verified", "featured");
@@ -152,7 +152,13 @@ function Services() {
 
       const { data } = await qy;
 
-      const spRows = (data ?? []) as any[];
+      const spRows = ((data ?? []) as any[]).map((r) => ({
+        ...r,
+        user_id: r.owner_id,
+        business_name: r.name,
+        seeded_by_official: false,
+        seeded_status: null,
+      }));
       const merged = spRows;
       const ids = merged.map((p) => p.user_id);
       const profMap = new Map<string, { full_name: string; avatar_url: string | null }>();

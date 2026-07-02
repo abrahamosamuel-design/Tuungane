@@ -149,18 +149,15 @@ export function HomeFeedSections() {
 
       const hasCoords = userLoc?.latitude != null && userLoc?.longitude != null;
       let reqs: NearbyRequest[] | null = null;
-      let provs: NearbyProvider[] | null = null;
+      let provs: NearbyProvider[] = [];
       let nearbyFlag = false;
 
       if (hasCoords) {
         const lat = userLoc!.latitude as number;
         const lng = userLoc!.longitude as number;
-        const [{ data: rpcReqs }, { data: rpcProvs }] = await Promise.all([
-          supabase.rpc("nearby_service_requests", { in_lat: lat, in_lng: lng, in_radius_km: 50, in_limit: 24 }),
-          supabase.rpc("nearby_service_profiles", { in_lat: lat, in_lng: lng, in_radius_km: 50, in_limit: 24 }),
-        ]);
+        const { data: rpcReqs } = await supabase.rpc("nearby_service_requests", { in_lat: lat, in_lng: lng, in_radius_km: 50, in_limit: 24 });
         reqs = (rpcReqs ?? null) as NearbyRequest[] | null;
-        provs = (rpcProvs ?? null) as NearbyProvider[] | null;
+        // Providers are always loaded from public_profiles below (no RPC — it targets the legacy table).
         nearbyFlag = (reqs?.length ?? 0) > 0;
       }
 
@@ -177,27 +174,33 @@ export function HomeFeedSections() {
         reqs = (data ?? []) as unknown as NearbyRequest[];
       }
 
-      if (!provs || provs.length === 0) {
+      {
         const { data } = await supabase
-          .from("service_profiles")
-          .select(user ? SP_COLS_AUTH : SP_COLS_GUEST)
-          .eq("suspended", false)
+          .from("public_profiles")
+          .select(user ? PP_COLS_AUTH : PP_COLS_GUEST)
           .order("verified", { ascending: false })
           .order("updated_at", { ascending: false })
           .limit(24);
-        provs = (data ?? []) as unknown as NearbyProvider[];
+        provs = ((data ?? []) as any[]).map((r) => ({
+          ...r,
+          user_id: r.owner_id,
+          business_name: r.name,
+        })) as unknown as NearbyProvider[];
       }
 
-      // MVP: only surface completed Service Profiles. Legacy public/business
-      // pages are hidden — owners must list a Service Profile to be discoverable.
+      // MVP: surface user-created Service Profiles from public_profiles
+      // (the multi-per-user table backing "Your services").
 
       const { data: listingRows } = await supabase
-        .from("service_profiles")
-        .select(user ? SP_LISTING_COLS_AUTH : SP_LISTING_COLS_GUEST)
-        .eq("suspended", false)
+        .from("public_profiles")
+        .select(user ? PP_LISTING_COLS_AUTH : PP_LISTING_COLS_GUEST)
         .order("created_at", { ascending: false })
         .limit(12);
-      const spListings = (listingRows ?? []) as unknown as RecentListing[];
+      const spListings = ((listingRows ?? []) as any[]).map((r) => ({
+        ...r,
+        user_id: r.owner_id,
+        business_name: r.name,
+      })) as unknown as RecentListing[];
       const listings = spListings
         .slice()
         .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
@@ -223,12 +226,11 @@ export function HomeFeedSections() {
 
       let provider = false;
       if (user) {
-        const { data: sp } = await supabase
-          .from("service_profiles")
-          .select("user_id")
-          .eq("user_id", user.id)
-          .maybeSingle();
-        provider = !!sp;
+        const { count } = await supabase
+          .from("public_profiles")
+          .select("id", { count: "exact", head: true })
+          .eq("owner_id", user.id);
+        provider = (count ?? 0) > 0;
       }
 
       if (cancelled) return;

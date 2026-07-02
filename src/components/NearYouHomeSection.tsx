@@ -59,50 +59,41 @@ export function NearYouHomeSection() {
       if (hasCoords) {
         const lat = userLoc!.latitude as number;
         const lng = userLoc!.longitude as number;
-        const [{ data: rpcReqs }, { data: rpcProvs }] = await Promise.all([
-          supabase.rpc("nearby_service_requests", {
-            in_lat: lat,
-            in_lng: lng,
-            in_radius_km: 50,
-            in_limit: 20,
-          }),
-          supabase.rpc("nearby_service_profiles", {
-            in_lat: lat,
-            in_lng: lng,
-            in_radius_km: 50,
-            in_limit: 20,
-          }),
-        ]);
+        const { data: rpcReqs } = await supabase.rpc("nearby_service_requests", {
+          in_lat: lat,
+          in_lng: lng,
+          in_radius_km: 50,
+          in_limit: 20,
+        });
         reqs = (rpcReqs ?? null) as NearbyRequest[] | null;
-        provs = (rpcProvs ?? null) as NearbyProvider[] | null;
+        // Providers load from public_profiles below (RPC targets legacy table).
       }
 
 
       // Fallback (no coords, or RPC returned nothing): recent activity, text-hierarchy ranking client-side.
-      if (!reqs || !provs) {
-        const [{ data: rRows }, { data: pRows }] = await Promise.all([
-          reqs
-            ? Promise.resolve({ data: reqs })
-            : supabase
-                .from("service_requests")
-                .select("id,title,service_needed,description,budget_range,urgent_flag,created_at,district,town,area,location,latitude,longitude")
-                .eq("visibility", "public")
-                .eq("status", "requested")
-                .is("provider_id", null)
-                .order("created_at", { ascending: false })
-                .limit(40),
-          provs
-            ? Promise.resolve({ data: provs })
-            : supabase
-                .from("service_profiles")
-                .select("user_id,business_name,subcategory,town,district,area,latitude,longitude,service_radius_km,areas_served,verified")
-                .eq("suspended", false)
-                .order("updated_at", { ascending: false })
-                .limit(40),
-        ]);
-        reqs = (rRows ?? []) as NearbyRequest[];
-        provs = (pRows ?? []) as NearbyProvider[];
-      }
+      const [{ data: rRows }, { data: pRows }] = await Promise.all([
+        reqs
+          ? Promise.resolve({ data: reqs })
+          : supabase
+              .from("service_requests")
+              .select("id,title,service_needed,description,budget_range,urgent_flag,created_at,district,town,area,location,latitude,longitude")
+              .eq("visibility", "public")
+              .eq("status", "requested")
+              .is("provider_id", null)
+              .order("created_at", { ascending: false })
+              .limit(40),
+        supabase
+          .from("public_profiles")
+          .select("owner_id,name,subcategory,town,district,area,latitude,longitude,service_radius_km,areas_served,verified")
+          .order("updated_at", { ascending: false })
+          .limit(40),
+      ]);
+      reqs = (rRows ?? []) as NearbyRequest[];
+      provs = ((pRows ?? []) as any[]).map((r) => ({
+        ...r,
+        user_id: r.owner_id,
+        business_name: r.name,
+      })) as NearbyProvider[];
 
       if (cancelled) return;
       const provIds = (provs ?? []).map((p) => p.user_id);
