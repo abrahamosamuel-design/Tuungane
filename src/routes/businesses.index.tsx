@@ -13,10 +13,17 @@ import { ProfileTrustBadge } from "@/components/trust/ProfileTrustBadge";
 import { ExpandableText } from "@/components/feed/ExpandableText";
 
 export const Route = createFileRoute("/businesses/")({
-  head: () => ({ meta: [
-    { title: "Business Pages — Tuungane" },
-    { name: "description", content: "Discover schools, shops, salons, NGOs and other organizations on Tuungane. Follow them and see their services, posts and requests." },
-  ]}),
+  head: () => ({
+    meta: [
+      { title: "Business Pages — Tuungane" },
+      { name: "description", content: "Discover schools, shops, salons, NGOs and other organizations on Tuungane. Follow them and see their services, posts and requests." },
+      { property: "og:title", content: "Business Pages — Tuungane" },
+      { property: "og:description", content: "Discover verified schools, shops, salons and NGOs across Uganda on Tuungane." },
+      { property: "og:url", content: "https://tuungane.com/businesses" },
+      { property: "og:type", content: "website" },
+    ],
+    links: [{ rel: "canonical", href: "https://tuungane.com/businesses" }],
+  }),
   component: BusinessesPage,
 });
 
