@@ -137,7 +137,7 @@ function Dashboard() {
             ) : (
               <QuickAction to="/services" icon={<Wrench className="h-5 w-5" />} label="Browse services" hint="Find skilled providers" />
             )}
-            <QuickAction to="/profiles/new" icon={<Wrench className="h-5 w-5" />} label={sp ? "Edit service profile" : "Add service"} hint={sp ? "Update your service photo or details" : "List a service you provide"} />
+            <QuickAction to="/profiles/new" icon={<Wrench className="h-5 w-5" />} label="Add a service" hint="Each service gets its own public page" />
             <QuickAction to="/u/$id" params={{ id: user.id }} icon={<UserCircle2 className="h-5 w-5" />} label="View public profile" hint="See how customers see you" />
           </div>
         </div>
