@@ -102,8 +102,11 @@ type NearbyProvider = {
 };
 
 type RecentListing = {
+  id: string;
+  slug: string | null;
   user_id: string;
   business_name: string | null;
+  avatar_url?: string | null;
   category_slug: string | null;
   subcategory: string;
   bio: string | null;
