@@ -267,7 +267,7 @@ function BrowseRequests() {
           <div className="grid gap-3 sm:grid-cols-2">
             {rankedItems.map((r, idx) => (
               <Fragment key={r.id}>
-                <RequestCard r={r} userLoc={userLoc} currentUserId={user?.id ?? null} />
+                <RequestCard r={r} userLoc={userLoc} currentUserId={user?.id ?? null} onEdit={() => setEditingRequest(r.id)} />
                 {idx === 1 && (
                   <div className="sm:col-span-2">
                     <ProviderTrackCTA
