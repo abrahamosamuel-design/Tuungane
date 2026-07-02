@@ -283,6 +283,12 @@ function BrowseRequests() {
           </div>
         </div>
       </section>
+      <EditRequestDialog
+        open={!!editingRequest}
+        requestId={editingRequest}
+        onClose={() => setEditingRequest(null)}
+        onSaved={load}
+      />
     </Layout>
   );
 }
