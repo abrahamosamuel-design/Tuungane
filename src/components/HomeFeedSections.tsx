@@ -505,13 +505,17 @@ function RequestCard({
   userLoc,
   featured,
   isProvider,
+  currentUserId,
   onRespond,
+  onEdit,
 }: {
   r: NearbyRequest;
   userLoc: ReturnType<typeof useUserLocation>["location"];
   featured: boolean;
   isProvider: boolean;
+  currentUserId?: string | null;
   onRespond: () => void;
+  onEdit?: () => void;
 }) {
   const cat = useCategory(r.category_slug ?? undefined);
   const near = proximityLabel(userLoc, r);
@@ -519,6 +523,8 @@ function RequestCard({
   const loc = r.area || r.town || r.district || r.location || "Uganda";
   const urg = urgencyMeta(r);
   const media = (r.media_urls ?? []).filter(Boolean) as string[];
+  const isOwner = !!currentUserId && !!r.customer_id && currentUserId === r.customer_id;
+  const requesterName = r.customer_name?.trim() || (currentUserId ? "A member" : "Open request");
 
   return (
     <article
@@ -526,14 +532,17 @@ function RequestCard({
         r.urgent_flag ? "border-orange/40" : "border-border"
       }`}
     >
-      {/* Header — anonymous neighbour avatar + meta */}
+      {/* Header — requester name + meta (or anonymous for guests) */}
       <div className="flex items-start gap-3 p-4 pb-2">
-        <FeedAvatar src={null} name="Neighbour" size={40} />
+        <FeedAvatar src={r.customer_avatar_url ?? null} name={requesterName} size={40} />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-x-1.5 text-[13px] font-semibold text-navy">
-            <span>Open request</span>
+            <span className="truncate">{requesterName}</span>
             <span className="text-muted-foreground">·</span>
             <span className="text-[12px] font-medium text-muted-foreground">{timeAgo(r.created_at)}</span>
+            {isOwner && (
+              <span className="rounded-full bg-navy/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-navy">You</span>
+            )}
           </div>
           <p className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
             <MapPin className="h-3 w-3" /> {loc}
@@ -542,8 +551,19 @@ function RequestCard({
             ) : null}
           </p>
         </div>
+        {isOwner && onEdit ? (
+          <button
+            type="button"
+            onClick={onEdit}
+            aria-label="Edit request"
+            className="shrink-0 rounded-full border border-border p-1.5 text-navy hover:border-orange hover:text-orange"
+          >
+            <Pencil className="h-3.5 w-3.5" />
+          </button>
+        ) : null}
         <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${urg.cls}`}>{urg.label}</span>
       </div>
+
 
       <div className="flex flex-wrap items-center gap-1.5 px-4">
         {featured && (
