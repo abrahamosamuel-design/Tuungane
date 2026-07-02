@@ -52,6 +52,7 @@ const PP_LISTING_COLS_GUEST =
 
 type NearbyRequest = {
   id: string;
+  customer_id?: string | null;
   title: string | null;
   service_needed: string | null;
   description: string | null;
@@ -67,6 +68,8 @@ type NearbyRequest = {
   category_slug?: string | null;
   subcategory?: string | null;
   media_urls?: string[] | null;
+  customer_name?: string | null;
+  customer_avatar_url?: string | null;
 };
 
 type NearbyProvider = {
