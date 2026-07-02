@@ -139,9 +139,7 @@ function Services() {
       const spCols = isGuest
         ? "user_id,business_name,subcategory,bio,town,district,areas_served,service_radius_km,category_slug,verified,updated_at,created_at,availability,cover_url,media_urls,years_experience,price_type,price_fixed_ugx,price_min_ugx,price_max_ugx,price_currency,price_note"
         : "user_id,business_name,subcategory,bio,town,district,area,latitude,longitude,areas_served,service_radius_km,category_slug,verified,seeded_by_official,seeded_status,updated_at,created_at,availability,cover_url,media_urls,years_experience,price_type,price_fixed_ugx,price_min_ugx,price_max_ugx,price_currency,price_note";
-      const ppCols = isGuest
-        ? "owner_id,name,avatar_url,subcategory,bio,town,district,areas_served,service_radius_km,category_slug,verified,claim_status,updated_at,created_at,availability,cover_url"
-        : "owner_id,name,avatar_url,subcategory,bio,town,district,area,latitude,longitude,areas_served,service_radius_km,category_slug,verified,seeded_by_official,claim_status,updated_at,created_at,availability,cover_url";
+      // MVP: business/public pages are hidden. Only Service Profiles surface here.
 
       let qy: any = supabase.from("service_profiles").select(spCols as string).eq("suspended", false);
       qy = isRecent
