@@ -790,13 +790,23 @@ function ServiceListingCard({
       {l.bio ? <ExpandableText text={l.bio} clampLines={3} maxLines={8} className="mt-2" /> : null}
 
       <div className="mt-auto flex items-center gap-2 pt-3">
-        <Link
-          to="/u/$id"
-          params={{ id: l.user_id }}
-          className="flex-1 truncate rounded-full bg-orange px-3 py-2 text-center text-xs font-semibold text-orange-foreground hover:brightness-110"
-        >
-          View service
-        </Link>
+        {l.slug ? (
+          <Link
+            to="/p/$slug"
+            params={{ slug: l.slug }}
+            className="flex-1 truncate rounded-full bg-orange px-3 py-2 text-center text-xs font-semibold text-orange-foreground hover:brightness-110"
+          >
+            View service
+          </Link>
+        ) : (
+          <Link
+            to="/u/$id"
+            params={{ id: l.user_id }}
+            className="flex-1 truncate rounded-full bg-orange px-3 py-2 text-center text-xs font-semibold text-orange-foreground hover:brightness-110"
+          >
+            View service
+          </Link>
+        )}
         <Link
           to="/requests/new"
           className="inline-flex shrink-0 items-center justify-center gap-1 rounded-full border border-border px-3 py-2 text-xs font-semibold text-navy hover:border-navy"
