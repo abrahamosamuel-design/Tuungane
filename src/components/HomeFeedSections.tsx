@@ -29,7 +29,7 @@ import { useAuthGate } from "@/components/RequireAuthDialog";
 
 // Column lists — guests can only SELECT a safe subset (no lat/long/area/location).
 const SR_COLS_AUTH =
-  "id,title,service_needed,description,budget_range,urgent_flag,created_at,district,town,area,location,latitude,longitude,category_slug,subcategory,media_urls";
+  "id,customer_id,title,service_needed,description,budget_range,urgent_flag,created_at,district,town,area,location,latitude,longitude,category_slug,subcategory,media_urls";
 const SR_COLS_GUEST =
   "id,title,service_needed,description,budget_range,urgent_flag,created_at,district,town,category_slug,subcategory,media_urls";
 const SP_COLS_AUTH =
