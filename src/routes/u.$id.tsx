@@ -407,10 +407,7 @@ function UserProfile() {
             {!isOwn && isProvider && <SaveButton providerUserId={id} variant="full" />}
             <button onClick={share} aria-label="Share" className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-3 py-2 text-xs font-semibold text-navy hover:border-orange"><Share2 className="h-3.5 w-3.5" /> Share</button>
             {isOwn && isProvider && (
-              <>
-                <BoostButton boostType="boost_profile" entityType="provider_profile" entityId={id} label="Boost profile" dialogTitle="Boost your provider profile" dialogDescription="Increase your visibility across Tuungane for a set period." />
-                <BoostButton boostType="feature_business_page" entityType="provider_profile" entityId={id} label="Feature business" dialogTitle="Feature your business page" dialogDescription="Highlight your business page in featured rails." />
-              </>
+              <BoostButton boostType="boost_profile" entityType="provider_profile" entityId={id} label="Boost profile" dialogTitle="Boost your provider profile" dialogDescription="Increase your visibility across Tuungane for a set period." />
             )}
             {isOwn && (
               <button onClick={() => setEditOpen(true)} className="ml-auto rounded-full bg-orange px-4 py-2 text-xs font-semibold text-orange-foreground hover:brightness-110">
@@ -429,8 +426,8 @@ function UserProfile() {
               <div className="flex items-start gap-3">
                 <div className="rounded-full bg-orange/15 p-2 text-orange"><BadgeCheck className="h-5 w-5" /></div>
                 <div>
-                  <p className="font-semibold text-navy">Offer a service on Tuungane</p>
-                  <p className="mt-0.5 text-sm text-muted-foreground">List what you offer as an individual, business, school, organization, or group so people nearby can find and contact you.</p>
+                  <p className="font-semibold text-navy">Want people to find you on Tuungane?</p>
+                  <p className="mt-0.5 text-sm text-muted-foreground">Your account is currently a Member Profile. To appear under Services, search, categories, and homepage provider cards, list a service.</p>
                 </div>
               </div>
               <Link

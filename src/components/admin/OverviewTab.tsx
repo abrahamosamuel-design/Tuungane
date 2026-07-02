@@ -5,7 +5,6 @@ import { supabase } from "@/integrations/supabase/client";
 type Stats = {
   users: number;
   providers: number;
-  businesses: number;
   opportunities: number;
   requests: number;
   openReports: number;
@@ -16,7 +15,7 @@ type Stats = {
 };
 
 const empty: Stats = {
-  users: 0, providers: 0, businesses: 0, opportunities: 0, requests: 0,
+  users: 0, providers: 0, opportunities: 0, requests: 0,
   openReports: 0, openDisputes: 0, pendingClaims: 0, pendingPurchases: 0, pendingOpps: 0,
 };
 
@@ -27,10 +26,9 @@ export function OverviewTab({ onJump }: { onJump: (tab: string, subTab?: string)
   useEffect(() => {
     (async () => {
       const head = { count: "exact" as const, head: true };
-      const [u, p, b, o, r, rep, dis, cl, cp, po] = await Promise.all([
+      const [u, p, o, r, rep, dis, cl, cp, po] = await Promise.all([
         supabase.from("profiles").select("*", head),
         supabase.from("service_profiles").select("*", head),
-        supabase.from("business_pages").select("*", head),
         supabase.from("opportunities").select("*", head).eq("archived", false),
         supabase.from("service_requests").select("*", head),
         supabase.from("reports").select("*", head).eq("status", "open"),
@@ -42,7 +40,6 @@ export function OverviewTab({ onJump }: { onJump: (tab: string, subTab?: string)
       setS({
         users: u.count ?? 0,
         providers: p.count ?? 0,
-        businesses: b.count ?? 0,
         opportunities: o.count ?? 0,
         requests: r.count ?? 0,
         openReports: rep.count ?? 0,
@@ -58,7 +55,6 @@ export function OverviewTab({ onJump }: { onJump: (tab: string, subTab?: string)
   const cards: Array<{ label: string; value: number; tab?: string; tone?: string }> = [
     { label: "Users", value: s.users, tab: "users" },
     { label: "Providers", value: s.providers, tab: "providers" },
-    { label: "Business Pages", value: s.businesses, tab: "businesses" },
     { label: "Requests", value: s.requests, tab: "requests" },
   ];
   const alerts: Array<{ label: string; value: number; tab: string; subTab?: string; tone: string }> = [
@@ -102,7 +98,7 @@ export function OverviewTab({ onJump }: { onJump: (tab: string, subTab?: string)
       <div>
         <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">Quick links</h2>
         <div className="flex flex-wrap gap-2 text-xs">
-          <Link to="/businesses" className="rounded-full border border-border px-3 py-1.5 hover:border-navy">Business directory</Link>
+          
           <Link to="/official" className="rounded-full border border-border px-3 py-1.5 hover:border-navy">Official page</Link>
           <Link to="/requests/browse" className="rounded-full border border-border px-3 py-1.5 hover:border-navy">Requests</Link>
           <Link to="/services" className="rounded-full border border-border px-3 py-1.5 hover:border-navy">Services</Link>

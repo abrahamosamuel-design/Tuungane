@@ -139,9 +139,7 @@ function Services() {
       const spCols = isGuest
         ? "user_id,business_name,subcategory,bio,town,district,areas_served,service_radius_km,category_slug,verified,updated_at,created_at,availability,cover_url,media_urls,years_experience,price_type,price_fixed_ugx,price_min_ugx,price_max_ugx,price_currency,price_note"
         : "user_id,business_name,subcategory,bio,town,district,area,latitude,longitude,areas_served,service_radius_km,category_slug,verified,seeded_by_official,seeded_status,updated_at,created_at,availability,cover_url,media_urls,years_experience,price_type,price_fixed_ugx,price_min_ugx,price_max_ugx,price_currency,price_note";
-      const ppCols = isGuest
-        ? "owner_id,name,avatar_url,subcategory,bio,town,district,areas_served,service_radius_km,category_slug,verified,claim_status,updated_at,created_at,availability,cover_url"
-        : "owner_id,name,avatar_url,subcategory,bio,town,district,area,latitude,longitude,areas_served,service_radius_km,category_slug,verified,seeded_by_official,claim_status,updated_at,created_at,availability,cover_url";
+      // MVP: business/public pages are hidden. Only Service Profiles surface here.
 
       let qy: any = supabase.from("service_profiles").select(spCols as string).eq("suspended", false);
       qy = isRecent
@@ -152,56 +150,10 @@ function Services() {
       if (filter === "verified") qy = qy.in("verified", ["verified", "featured"]);
       if (filter === "available") qy = qy.eq("availability", "available");
 
-      // Also pull public/business pages (claimed legacy listings) so their owners
-      // appear as provider cards even when they don't have a service_profile row.
-      let pqy: any = supabase.from("public_profiles").select(ppCols as string).eq("suspended", false).not("owner_id", "is", null);
-      pqy = isRecent
-        ? pqy.order("created_at", { ascending: false }).order("owner_id", { ascending: false })
-        : pqy.order("updated_at", { ascending: false });
-      pqy = pqy.limit(60);
-      if (filter === "featured") pqy = pqy.eq("verified", "featured");
-      if (filter === "verified") pqy = pqy.in("verified", ["verified", "featured"]);
-      if (filter === "available") pqy = pqy.eq("availability", "available");
-
-
-      const [{ data }, { data: ppData }] = await Promise.all([qy, pqy]);
+      const { data } = await qy;
 
       const spRows = (data ?? []) as any[];
-      const spOwners = new Set(spRows.map((p) => p.user_id));
-      const ppRows = ((ppData ?? []) as any[])
-        .filter((pp) => pp.owner_id && !spOwners.has(pp.owner_id))
-        .map((pp) => ({
-          user_id: pp.owner_id,
-          business_name: pp.name,
-          subcategory: pp.subcategory ?? "",
-          bio: pp.bio ?? "",
-          town: pp.town ?? "",
-          district: pp.district ?? "",
-          area: pp.area ?? null,
-          latitude: pp.latitude ?? null,
-          longitude: pp.longitude ?? null,
-          areas_served: pp.areas_served ?? null,
-          service_radius_km: pp.service_radius_km ?? null,
-          category_slug: pp.category_slug ?? "other",
-          verified: pp.verified ?? "none",
-          seeded_by_official: !!pp.seeded_by_official,
-          seeded_status: pp.claim_status ?? null,
-          updated_at: pp.updated_at,
-          created_at: pp.created_at,
-
-          availability: pp.availability ?? null,
-          cover_url: pp.cover_url ?? pp.avatar_url ?? null,
-          media_urls: null,
-          years_experience: null,
-          price_type: null,
-          price_fixed_ugx: null,
-          price_min_ugx: null,
-          price_max_ugx: null,
-          price_currency: null,
-          price_note: null,
-        }));
-
-      const merged = [...spRows, ...ppRows];
+      const merged = spRows;
       const ids = merged.map((p) => p.user_id);
       const profMap = new Map<string, { full_name: string; avatar_url: string | null }>();
       const trustMap = new Map<string, { trust_score: number; average_rating: number; completed_jobs: number; verified_reviews: number; response_rate: number }>();

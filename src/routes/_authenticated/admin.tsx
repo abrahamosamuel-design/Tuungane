@@ -9,7 +9,7 @@ import { OfficialPostForm } from "@/components/admin/OfficialPostForm";
 import { RequestsAdminTab } from "@/components/admin/RequestsAdminTab";
 import { CreditsAdminTab } from "@/components/admin/CreditsAdminTab";
 import { OverviewTab } from "@/components/admin/OverviewTab";
-import { BusinessesAdminTab } from "@/components/admin/BusinessesAdminTab";
+
 import { DisputesAdminTab } from "@/components/admin/DisputesAdminTab";
 
 import { ContactAnalyticsTab } from "@/components/admin/ContactAnalyticsTab";
@@ -28,17 +28,16 @@ export const Route = createFileRoute("/_authenticated/admin")({
 
 type Tab =
   | "overview"
-  | "users" | "providers" | "businesses"
+  | "users" | "providers"
   | "requests" | "posts" | "recs"
   | "reports" | "disputes" | "trust"
   | "credits" | "official" | "contact" | "activity" | "locations" | "categories";
 
 const TAB_GROUPS: { label: string; tabs: { id: Tab; label: string; adminOnly?: boolean }[] }[] = [
   { label: "Home", tabs: [{ id: "overview", label: "Overview" }] },
-  { label: "People & Pages", tabs: [
+  { label: "People & Profiles", tabs: [
     { id: "users", label: "Users" },
     { id: "providers", label: "Providers" },
-    { id: "businesses", label: "Businesses" },
   ]},
   { label: "Content", tabs: [
     { id: "requests", label: "Manage Requests" },
@@ -109,7 +108,6 @@ function Admin() {
           {tab === "overview" && <OverviewTab onJump={(t, sub) => { setTab(t as Tab); if (t === "official" && sub) setOfficialSub(sub as "account" | "create" | "manage" | "seeded" | "claims"); }} />}
           {tab === "users" && <UsersTab />}
           {tab === "providers" && <ProvidersTab />}
-          {tab === "businesses" && <BusinessesAdminTab />}
           {tab === "requests" && <RequestsAdminTab />}
           {tab === "posts" && <PostsTab />}
           {tab === "recs" && <RecsTab />}

@@ -1,17 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
-import { Layout } from "@/components/Layout";
-import { BusinessPageCreateForm } from "@/components/business/BusinessPageManager";
-
+// Business Pages are hidden in the Tuungane MVP. Route people to the
+// unified Service Profile flow instead.
 export const Route = createFileRoute("/businesses/create")({
-  head: () => ({ meta: [{ title: "Create a business page — Tuungane" }] }),
-  component: CreateBusinessPageRoute,
+  beforeLoad: () => {
+    throw redirect({ to: "/list-skill" });
+  },
 });
-
-function CreateBusinessPageRoute() {
-  return (
-    <Layout>
-      <BusinessPageCreateForm />
-    </Layout>
-  );
-}

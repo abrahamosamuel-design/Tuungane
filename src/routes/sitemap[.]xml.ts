@@ -20,7 +20,6 @@ export const Route = createFileRoute("/sitemap.xml")({
           { path: "/about", changefreq: "monthly", priority: "0.7" },
           { path: "/contact", changefreq: "monthly", priority: "0.6" },
           { path: "/services", changefreq: "weekly", priority: "0.9" },
-          { path: "/businesses", changefreq: "weekly", priority: "0.8" },
           { path: "/requests/browse", changefreq: "daily", priority: "0.8" },
           { path: "/opportunities", changefreq: "daily", priority: "0.8" },
           { path: "/official", changefreq: "weekly", priority: "0.6" },
@@ -33,24 +32,17 @@ export const Route = createFileRoute("/sitemap.xml")({
         const dynamicEntries: SitemapEntry[] = [];
 
         try {
-          const [{ data: cats }, { data: businesses }] = await Promise.all([
-            supabase.from("service_categories").select("slug,updated_at").eq("active", true).limit(500),
-            supabase.from("business_pages").select("slug,updated_at").eq("suspended", false).limit(2000),
-          ]);
+          const { data: cats } = await supabase
+            .from("service_categories")
+            .select("slug,updated_at")
+            .eq("active", true)
+            .limit(500);
           for (const c of cats ?? []) {
             dynamicEntries.push({
               path: `/services/${c.slug}`,
               lastmod: c.updated_at ? new Date(c.updated_at).toISOString() : undefined,
               changefreq: "weekly",
               priority: "0.7",
-            });
-          }
-          for (const b of businesses ?? []) {
-            dynamicEntries.push({
-              path: `/businesses/${b.slug}`,
-              lastmod: b.updated_at ? new Date(b.updated_at).toISOString() : undefined,
-              changefreq: "weekly",
-              priority: "0.6",
             });
           }
         } catch {

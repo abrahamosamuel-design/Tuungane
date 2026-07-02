@@ -7,9 +7,8 @@ import { CreateChoiceSheet } from "./CreateChoiceSheet";
 const SHOW_ON = new Set<string>([
   "/",
   "/services",
-  
+
   "/feed",
-  "/businesses",
   "/official",
   "/requests",
   "/requests/browse",

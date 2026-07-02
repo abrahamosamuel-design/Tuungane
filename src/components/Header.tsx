@@ -14,7 +14,6 @@ const primaryNav = [
   { to: "/", label: "Home", exact: true },
   { to: "/services", label: "Services" },
   { to: "/requests/browse", label: "Service Requests" },
-  { to: "/profiles", label: "Businesses" },
 ];
 
 const moreNav = [
