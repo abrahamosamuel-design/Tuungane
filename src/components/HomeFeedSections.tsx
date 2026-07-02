@@ -73,7 +73,13 @@ type NearbyRequest = {
   media_urls?: string[] | null;
   customer_name?: string | null;
   customer_avatar_url?: string | null;
+  posted_as_type?: string | null;
+  posted_as_name?: string | null;
+  posted_as_avatar_url?: string | null;
+  posted_as_ref_type?: string | null;
+  posted_as_ref_id?: string | null;
 };
+
 
 type NearbyProvider = {
   user_id: string;
