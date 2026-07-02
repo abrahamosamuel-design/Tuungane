@@ -10,7 +10,6 @@ import {
   Wallet,
   Clock,
   MoreHorizontal,
-  Pencil,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
@@ -513,23 +512,13 @@ function RequestCard({
               <span className="rounded-full bg-navy/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-navy">You</span>
             )}
           </div>
-          <p className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
+          <p className="inline-flex flex-wrap items-center gap-x-1 gap-y-0.5 text-[11px] text-muted-foreground">
             <MapPin className="h-3 w-3" /> {loc}
             {near ? (
-              <span className="ml-1 rounded-full bg-green/10 px-1.5 py-0.5 text-[10px] font-semibold text-green">{near}</span>
+              <span className="rounded-full bg-green/10 px-1.5 py-[1px] text-[9px] font-semibold leading-tight text-green">{near}</span>
             ) : null}
           </p>
         </div>
-        {isOwner && onEdit ? (
-          <button
-            type="button"
-            onClick={onEdit}
-            aria-label="Edit request"
-            className="shrink-0 rounded-full border border-border p-1.5 text-navy hover:border-orange hover:text-orange"
-          >
-            <Pencil className="h-3.5 w-3.5" />
-          </button>
-        ) : null}
         <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${urg.cls}`}>{urg.label}</span>
       </div>
 
@@ -569,7 +558,7 @@ function RequestCard({
         ) : null}
       </div>
 
-      <div className="mt-auto grid grid-cols-[1fr_auto_auto] items-stretch gap-2 border-t border-border bg-surface px-3 py-2.5">
+      <div className={`mt-auto grid ${isOwner ? "grid-cols-[1fr_auto]" : "grid-cols-[1fr_auto_auto]"} items-stretch gap-2 border-t border-border bg-surface px-3 py-2.5`}>
         {isOwner ? (
           <>
             <Link
@@ -587,16 +576,7 @@ function RequestCard({
               >
                 Edit
               </button>
-            ) : (
-              <span />
-            )}
-            <Link
-              to="/requests/$id"
-              params={{ id: r.id }}
-              className="inline-flex h-9 items-center justify-center rounded-full border border-border px-3 text-xs font-semibold text-navy hover:border-navy"
-            >
-              Responses
-            </Link>
+            ) : null}
           </>
         ) : (
           <>
