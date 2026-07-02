@@ -176,34 +176,30 @@ export function RequestCard({
       </div>
 
       {/* Action row */}
-      <div className="mt-3 grid grid-cols-[1fr_auto_auto] items-stretch gap-2 border-t border-border bg-surface px-3 py-2.5 sm:px-4">
+      <div className={`mt-3 grid ${isOwner ? "grid-cols-[1fr_auto]" : "grid-cols-[1fr_auto_auto]"} items-stretch gap-2 border-t border-border bg-surface px-3 py-2.5 sm:px-4`}>
         {isOwner ? (
           <>
             <Link
               to="/requests/$id"
               params={{ id: r.id }}
-              className="inline-flex h-10 items-center justify-center rounded-full bg-navy px-4 text-sm font-semibold text-navy-foreground hover:brightness-110"
+              className="inline-flex h-10 items-center justify-center gap-1.5 rounded-full bg-navy px-4 text-sm font-semibold text-navy-foreground hover:brightness-110"
             >
-              Manage request
+              <span>Manage request</span>
+              {typeof r.response_count === "number" && r.response_count > 0 && (
+                <span className="rounded-full bg-orange px-2 py-0.5 text-[10px] font-bold text-orange-foreground">
+                  {r.response_count}
+                </span>
+              )}
             </Link>
-            {onEdit ? (
+            {onEdit && (
               <button
                 type="button"
                 onClick={onEdit}
-                className="inline-flex h-10 items-center justify-center rounded-full border border-border px-3 text-xs font-semibold text-navy hover:border-navy"
+                className="inline-flex h-10 items-center justify-center rounded-full border border-border px-4 text-xs font-semibold text-navy hover:border-navy"
               >
                 Edit
               </button>
-            ) : (
-              <span />
             )}
-            <Link
-              to="/requests/$id"
-              params={{ id: r.id }}
-              className="inline-flex h-10 items-center justify-center rounded-full border border-border px-3 text-xs font-semibold text-navy hover:border-navy"
-            >
-              Responses
-            </Link>
           </>
 
         ) : (
