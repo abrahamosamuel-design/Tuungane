@@ -24,6 +24,10 @@ import { AreaAutocomplete } from "@/components/AreaAutocomplete";
 import { MapPicker } from "@/components/MapPicker";
 import { findDistrictBounds, type Bounds } from "@/lib/geocoding";
 import { suggestCategory } from "@/lib/api/suggest-category.functions";
+import { PostAsSelector } from "@/components/PostAsSelector";
+import { usePostAsOptions, findOption } from "@/hooks/use-post-as-options";
+
+
 
 const s = (v: unknown) => (typeof v === "string" ? v : "");
 
