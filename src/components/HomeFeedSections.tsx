@@ -535,7 +535,7 @@ function RequestCard({
       </div>
 
       <Link to="/requests/$id" params={{ id: r.id }} className="block px-4 pt-2">
-        <h3 className="font-display text-[15px] font-bold leading-snug text-navy">{title}</h3>
+        <h3 className="font-display text-[15px] font-bold leading-snug text-navy line-clamp-2 break-words">{title}</h3>
         {cat ? (
           <p className="mt-0.5 text-[11px] text-muted-foreground">
             {cat.name}{r.subcategory ? ` · ${formatSubcategory(r.subcategory)}` : ""}
@@ -660,12 +660,13 @@ function ProviderCard({ p, userLoc }: { p: NearbyProvider; userLoc: ReturnType<t
           <FeedAvatar src={avatar} name={name} size={44} ring={verified} />
         </Link>
         <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-x-1.5">
-            <Link to="/u/$id" params={{ id: p.user_id }} className="truncate text-[14px] font-semibold text-navy hover:underline">
+          <div className="flex items-start gap-x-1.5">
+            <Link to="/u/$id" params={{ id: p.user_id }} className="font-display text-[15px] font-semibold leading-snug text-navy line-clamp-2 break-words hover:underline">
               {name}
             </Link>
-            {verified ? <BadgeCheck className="h-4 w-4 shrink-0 text-green" aria-label="Verified" /> : null}
+            {verified ? <BadgeCheck className="mt-1 h-4 w-4 shrink-0 text-green" aria-label="Verified" /> : null}
           </div>
+
           <p className="truncate text-[12px] text-muted-foreground">
             {formatSubcategory(p.subcategory)}{cat ? ` · ${cat.name}` : ""}
           </p>
@@ -745,7 +746,7 @@ function ServiceListingCard({
       <div className="pointer-events-none absolute right-3 top-3 z-10">
         <ProfileTrustBadge kind="service_profile" id={l.user_id} size="sm" />
       </div>
-      <div className="flex items-start gap-3">
+      <div className="flex items-start gap-3 pr-24">
         {avatar ? (
           <img src={avatar} alt={providerName} loading="lazy" className="h-11 w-11 shrink-0 rounded-full object-cover" />
         ) : (
@@ -754,13 +755,14 @@ function ServiceListingCard({
           </div>
         )}
         <div className="min-w-0 flex-1">
-          <h3 className="line-clamp-1 font-display text-sm font-bold text-navy">{title}</h3>
+          <h3 className="font-display text-sm font-bold leading-snug text-navy line-clamp-2 break-words">{title}</h3>
           <p className="mt-0.5 flex items-center gap-1 truncate text-[11px] text-muted-foreground">
             <span className="truncate">{providerName}</span>
             {verified ? <BadgeCheck className="h-3.5 w-3.5 shrink-0 text-green" /> : null}
           </p>
         </div>
       </div>
+
 
       <div className="mt-2 flex flex-wrap items-center gap-1.5">
         <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${avail.cls}`}>{avail.label}</span>

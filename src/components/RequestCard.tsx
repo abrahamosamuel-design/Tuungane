@@ -135,7 +135,7 @@ export function RequestCard({
 
       {/* Title + body */}
       <Link to="/requests/$id" params={{ id: r.id }} className="block px-4 pt-2">
-        <h3 className="font-display text-base font-bold leading-snug text-navy">{title}</h3>
+        <h3 className="font-display text-base font-bold leading-snug text-navy line-clamp-2 break-words">{title}</h3>
         {cat && (
           <p className="mt-0.5 text-xs text-muted-foreground">
             {cat.name}{r.subcategory ? ` · ${formatSubcategory(tidy(r.subcategory))}` : ""}
