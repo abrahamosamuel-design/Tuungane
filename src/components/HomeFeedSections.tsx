@@ -363,7 +363,16 @@ export function HomeFeedSections() {
         ) : (
           <div className={`${SCROLLER} lg:grid-cols-3`}>
             {topRequests.map((r) => (
-              <RequestCard key={r.id} r={r} userLoc={userLoc} featured={Boolean(isFeaturedTarget(r, featured))} isProvider={isProvider} onRespond={() => requireAuth(() => setRespondTo(r.id), { title: "Sign in to respond", message: "Create a free Tuungane account to send quotes and respond to service requests." })} />
+              <RequestCard
+                key={r.id}
+                r={r}
+                userLoc={userLoc}
+                featured={Boolean(isFeaturedTarget(r, featured))}
+                isProvider={isProvider}
+                currentUserId={user?.id ?? null}
+                onEdit={() => setEditingRequest(r.id)}
+                onRespond={() => requireAuth(() => setRespondTo(r.id), { title: "Sign in to respond", message: "Create a free Tuungane account to send quotes and respond to service requests." })}
+              />
             ))}
             <div aria-hidden className="shrink-0 w-1 sm:hidden" />
           </div>
