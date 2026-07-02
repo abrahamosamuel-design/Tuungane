@@ -6,7 +6,7 @@ import type { User } from "@supabase/supabase-js";
 
 export const CTA = {
   createRequest: { label: "Post a Service Request", href: "/requests/new" },
-  listSkill: { label: "List Your Service" },
+  listSkill: { label: "List a Service" },
   browseRequests: { label: "Browse Service Requests", href: "/requests/browse" },
   postYourWork: { label: "Post Your Work", href: "/dashboard" },
   becomeProvider: { label: "Become a Service Provider" },
