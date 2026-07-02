@@ -311,65 +311,72 @@ function UserProfile() {
             )}
           </div>
         )}
-        {/* Header card */}
-        <div className="relative z-10 -mt-12 rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-elevated)] sm:-mt-16 sm:p-6">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div className="flex flex-col items-center gap-3 text-center sm:flex-row sm:items-start sm:gap-4 sm:text-left">
-              <div className="-mt-16 shrink-0 rounded-full border-4 border-card bg-card sm:-mt-20">
-                {isOwn ? (
-                  <label className="group relative block cursor-pointer rounded-full" aria-label="Change profile photo">
-                    <Avatar name={profile.full_name} url={profile.avatar_url} size={96} />
-                    <span className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-full bg-black/45 text-white opacity-0 transition-opacity group-hover:opacity-100">
-                      <Camera className="h-5 w-5" />
+        {/* Header card — centered, no banner */}
+        <div className="rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-elevated)] sm:p-6">
+          <div className="flex flex-col items-center gap-3 text-center">
+            <div className="shrink-0 rounded-full border-4 border-card bg-card">
+              {isOwn ? (
+                <label className="group relative block cursor-pointer rounded-full" aria-label="Change profile photo">
+                  <Avatar name={profile.full_name} url={profile.avatar_url} size={112} />
+                  <span className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-full bg-black/45 text-white opacity-0 transition-opacity group-hover:opacity-100">
+                    <Camera className="h-5 w-5" />
+                  </span>
+                  {uploadingAvatar && (
+                    <span className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-full bg-black/55 text-[10px] font-semibold text-white">
+                      Uploading…
                     </span>
-                    {uploadingAvatar && (
-                      <span className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-full bg-black/55 text-[10px] font-semibold text-white">
-                        Uploading…
-                      </span>
-                    )}
-                    <span className="pointer-events-none absolute -bottom-1 right-0 flex items-center gap-1 rounded-full bg-black/70 px-2 py-0.5 text-[10px] font-semibold text-white shadow backdrop-blur-sm">
-                      <Camera className="h-3 w-3" />
-                      {profile.avatar_url ? "Edit" : "Upload"}
-                    </span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      disabled={uploadingAvatar}
-                      onChange={(e) => uploadAvatar(e.target.files?.[0] ?? null)}
-                    />
-                  </label>
-                ) : (
-                  <Avatar name={profile.full_name} url={profile.avatar_url} size={96} />
-                )}
+                  )}
+                  <span className="pointer-events-none absolute -bottom-1 right-0 flex items-center gap-1 rounded-full bg-black/70 px-2 py-0.5 text-[10px] font-semibold text-white shadow backdrop-blur-sm">
+                    <Camera className="h-3 w-3" />
+                    {profile.avatar_url ? "Edit" : "Upload"}
+                  </span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    disabled={uploadingAvatar}
+                    onChange={(e) => uploadAvatar(e.target.files?.[0] ?? null)}
+                  />
+                </label>
+              ) : (
+                <Avatar name={profile.full_name} url={profile.avatar_url} size={112} />
+              )}
+            </div>
+            <div className="w-full min-w-0">
+              <h1 className="font-display text-2xl font-bold text-navy">
+                {sp?.business_name || profile.full_name}
+              </h1>
+              <div className="mt-1 flex flex-wrap items-center justify-center gap-x-1.5">
+                <ProfileBoostBadges providerId={id} />
               </div>
-              <div className="flex-1 min-w-0">
-                <h1 className="flex flex-wrap items-center gap-2 font-display text-2xl font-bold text-navy">
-                  {sp?.business_name || profile.full_name}
-                  <TrustBadgeInline userId={id} />
-                  <ProfileBoostBadges providerId={id} />
-                </h1>
-                {sp && <p className="text-sm font-medium text-orange">{formatSubcategory(sp.subcategory)} {cat && <span className="text-muted-foreground">· {cat.name}</span>}</p>}
-                {!sp && <p className="text-sm text-muted-foreground">{isProvider ? "Service provider" : "Member"}</p>}
+              {sp && (
+                <p className="mt-1 text-sm font-medium text-orange">
+                  {formatSubcategory(sp.subcategory)} {cat && <span className="text-muted-foreground">· {cat.name}</span>}
+                </p>
+              )}
+              {!sp && <p className="mt-1 text-sm text-muted-foreground">{isProvider ? "Service provider" : "Member"}</p>}
+              <div className="mt-1.5 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
                 {(sp?.town || profile.town) && (
-                  <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
+                  <span className="inline-flex items-center gap-1">
                     <MapPin className="h-3 w-3" /> {sp?.town || profile.town}{(sp?.district || profile.district) && `, ${sp?.district || profile.district}`}
-                  </p>
+                  </span>
                 )}
-                <div className="mt-2 flex flex-wrap gap-3 text-xs text-muted-foreground">
-                  <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" /> <strong className="text-navy">{followers}</strong> followers</span>
-                  <span className="inline-flex items-center gap-1"><ThumbsUp className="h-3 w-3" /> <strong className="text-navy">{recs.length}</strong> endorsements</span>
-                  {avgRating > 0 ? (
-                    <span className="inline-flex items-center gap-1"><Star className="h-3 w-3 fill-orange text-orange" /> <strong className="text-navy">{avgRating.toFixed(1)}</strong> ({feedback.length} verified)</span>
-                  ) : isProvider ? (
-                    <span className="inline-flex items-center gap-1 text-muted-foreground">No rating yet</span>
-                  ) : null}
-                </div>
+                <TrustBadgeInline userId={id} />
+              </div>
+              <div className="mt-2 flex flex-wrap justify-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" /> <strong className="text-navy">{followers}</strong> followers</span>
+                <span className="inline-flex items-center gap-1"><ThumbsUp className="h-3 w-3" /> <strong className="text-navy">{recs.length}</strong> endorsements</span>
+                {avgRating > 0 ? (
+                  <span className="inline-flex items-center gap-1"><Star className="h-3 w-3 fill-orange text-orange" /> <strong className="text-navy">{avgRating.toFixed(1)}</strong> ({feedback.length} verified)</span>
+                ) : isProvider ? (
+                  <span className="inline-flex items-center gap-1 text-muted-foreground">No rating yet</span>
+                ) : null}
               </div>
             </div>
           </div>
 
-          <div className="mt-4 flex flex-wrap items-center gap-2">
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+
             {!isOwn && isProvider && (
               <button
                 onClick={() => {
