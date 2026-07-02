@@ -33,7 +33,9 @@ type Msg = {
 };
 
 type Profile = { id: string; full_name: string; avatar_url: string | null };
-type Req = { id: string; service_needed: string; title: string | null; status: string; location: string | null; budget_range: string | null; selected_provider_id: string | null; urgent_flag: boolean | null; urgency: string | null };
+type Req = { id: string; service_needed: string; title: string | null; status: string; location: string | null; budget_range: string | null; selected_provider_id: string | null; urgent_flag: boolean | null; urgency: string | null; public_profile_id: string | null };
+type ServiceProfile = { id: string; name: string };
+
 
 function ConversationPage() {
   const { id } = Route.useParams();
