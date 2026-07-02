@@ -623,40 +623,73 @@ function RequestCard({
         ) : null}
       </div>
 
-      <div className="mt-auto flex items-center gap-2 border-t border-border bg-surface px-3 py-2.5">
-        {isProvider ? (
-          <button
-            type="button"
-            onClick={onRespond}
-            className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-orange px-3 py-2 text-xs font-semibold text-orange-foreground hover:brightness-110"
-          >
-            <Send className="h-3.5 w-3.5" /> Send quote
-          </button>
+      <div className="mt-auto grid grid-cols-[1fr_auto_auto] items-stretch gap-2 border-t border-border bg-surface px-3 py-2.5">
+        {isOwner ? (
+          <>
+            <Link
+              to="/requests/$id"
+              params={{ id: r.id }}
+              className="inline-flex h-9 items-center justify-center rounded-full bg-navy px-4 text-xs font-semibold text-navy-foreground hover:brightness-110"
+            >
+              Manage request
+            </Link>
+            {onEdit ? (
+              <button
+                type="button"
+                onClick={onEdit}
+                className="inline-flex h-9 items-center justify-center rounded-full border border-border px-3 text-xs font-semibold text-navy hover:border-navy"
+              >
+                Edit
+              </button>
+            ) : (
+              <span />
+            )}
+            <Link
+              to="/requests/$id"
+              params={{ id: r.id }}
+              className="inline-flex h-9 items-center justify-center rounded-full border border-border px-3 text-xs font-semibold text-navy hover:border-navy"
+            >
+              Responses
+            </Link>
+          </>
         ) : (
-          <Link
-            to="/requests/$id"
-            params={{ id: r.id }}
-            className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-orange px-3 py-2 text-xs font-semibold text-orange-foreground hover:brightness-110"
-          >
-            <Send className="h-3.5 w-3.5" /> Respond
-          </Link>
+          <>
+            {isProvider ? (
+              <button
+                type="button"
+                onClick={onRespond}
+                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-full bg-orange px-4 text-xs font-semibold text-orange-foreground hover:brightness-110"
+              >
+                <Send className="h-3.5 w-3.5" /> Send quote
+              </button>
+            ) : (
+              <Link
+                to="/requests/$id"
+                params={{ id: r.id }}
+                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-full bg-orange px-4 text-xs font-semibold text-orange-foreground hover:brightness-110"
+              >
+                <Send className="h-3.5 w-3.5" /> Respond
+              </Link>
+            )}
+            <Link
+              to="/requests/$id"
+              params={{ id: r.id }}
+              className="inline-flex h-9 items-center justify-center rounded-full border border-border px-3 text-navy hover:border-navy"
+              aria-label="Message"
+            >
+              <MessageSquare className="h-3.5 w-3.5" />
+            </Link>
+            <Link
+              to="/requests/$id"
+              params={{ id: r.id }}
+              className="inline-flex h-9 items-center justify-center rounded-full border border-border px-3 text-xs font-semibold text-navy hover:border-navy"
+            >
+              View
+            </Link>
+          </>
         )}
-        <Link
-          to="/requests/$id"
-          params={{ id: r.id }}
-          className="inline-flex items-center justify-center gap-1 rounded-full border border-border px-3 py-2 text-xs font-semibold text-navy hover:border-navy"
-          aria-label="Message"
-        >
-          <MessageSquare className="h-3.5 w-3.5" />
-        </Link>
-        <Link
-          to="/requests/$id"
-          params={{ id: r.id }}
-          className="rounded-full border border-border px-3 py-2 text-xs font-semibold text-navy hover:border-navy"
-        >
-          View
-        </Link>
       </div>
+
     </article>
   );
 }
