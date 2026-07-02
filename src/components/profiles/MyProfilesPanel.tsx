@@ -2,8 +2,19 @@ import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
-import { Plus, Building2, User as UserIcon, Landmark, Star, ChevronRight } from "lucide-react";
+import { Plus, Building2, User as UserIcon, Landmark, Star, ChevronRight, Trash2, Loader2 } from "lucide-react";
 import { formatSubcategory } from "@/lib/format-category";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 
 type Profile = {
@@ -44,6 +55,24 @@ function sortProfiles(a: ProfileCardData, b: ProfileCardData) {
 export function MyProfilesPanel() {
   const { user } = useAuth();
   const [items, setItems] = useState<ProfileCardData[] | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<ProfileCardData | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    if (!confirmDelete) return;
+    setDeleting(true);
+    // Best-effort cleanup of dependent rows; ignore errors from tables that may not exist / RLS
+    await supabase.from("profile_services").delete().eq("profile_id", confirmDelete.id);
+    const { error } = await supabase.from("public_profiles").delete().eq("id", confirmDelete.id);
+    setDeleting(false);
+    if (error) {
+      toast.error(error.message || "Could not delete this service.");
+      return;
+    }
+    toast.success("Service deleted");
+    setItems((prev) => (prev ? prev.filter((x) => x.id !== confirmDelete.id) : prev));
+    setConfirmDelete(null);
+  };
 
   const load = async () => {
     if (!user) return;
@@ -116,11 +145,11 @@ export function MyProfilesPanel() {
             const Icon = TYPE_META[p.profile_type].icon;
             const draft = isDraft(p);
             return (
-              <li key={p.id}>
+              <li key={p.id} className="relative">
                 <Link
                   to="/profiles/$id"
                   params={{ id: p.id }}
-                  className="flex items-start gap-3 rounded-2xl border border-border bg-card p-4 transition hover:border-orange/60"
+                  className="flex items-start gap-3 rounded-2xl border border-border bg-card p-4 pr-12 transition hover:border-orange/60"
                 >
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-muted">
                     {p.avatar_url ? (
@@ -163,11 +192,41 @@ export function MyProfilesPanel() {
                   </div>
                   <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground" />
                 </Link>
+                <button
+                  type="button"
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); setConfirmDelete(p); }}
+                  aria-label={`Delete ${p.name}`}
+                  className="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
               </li>
             );
           })}
         </ul>
       )}
+
+      <AlertDialog open={!!confirmDelete} onOpenChange={(o) => !o && !deleting && setConfirmDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this service?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {confirmDelete ? `“${confirmDelete.name}” and all of its sub-services will be permanently removed. This cannot be undone.` : ""}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => { e.preventDefault(); handleDelete(); }}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting && <Loader2 className="mr-1 h-4 w-4 animate-spin" />}
+              {deleting ? "Deleting…" : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </section>
   );
 }
