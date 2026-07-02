@@ -27,9 +27,8 @@ export function PopularCategoriesSection() {
       const entries = await Promise.all(
         POPULAR.map(async (c) => {
           const { count } = await supabase
-            .from("service_profiles")
-            .select("user_id", { count: "exact", head: true })
-            .eq("suspended", false)
+            .from("public_profiles")
+            .select("id", { count: "exact", head: true })
             .ilike("subcategory", `%${c.query.replace(/s$/, "")}%`);
           return [c.label, count ?? 0] as const;
         }),
