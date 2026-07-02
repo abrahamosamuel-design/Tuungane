@@ -179,25 +179,31 @@ export function HomeFeedSections() {
 
       if (!provs || provs.length === 0) {
         const { data } = await supabase
-          .from("service_profiles")
-          .select(user ? SP_COLS_AUTH : SP_COLS_GUEST)
-          .eq("suspended", false)
+          .from("public_profiles")
+          .select(user ? PP_COLS_AUTH : PP_COLS_GUEST)
           .order("verified", { ascending: false })
           .order("updated_at", { ascending: false })
           .limit(24);
-        provs = (data ?? []) as unknown as NearbyProvider[];
+        provs = ((data ?? []) as any[]).map((r) => ({
+          ...r,
+          user_id: r.owner_id,
+          business_name: r.name,
+        })) as unknown as NearbyProvider[];
       }
 
-      // MVP: only surface completed Service Profiles. Legacy public/business
-      // pages are hidden — owners must list a Service Profile to be discoverable.
+      // MVP: surface user-created Service Profiles from public_profiles
+      // (the multi-per-user table backing "Your services").
 
       const { data: listingRows } = await supabase
-        .from("service_profiles")
-        .select(user ? SP_LISTING_COLS_AUTH : SP_LISTING_COLS_GUEST)
-        .eq("suspended", false)
+        .from("public_profiles")
+        .select(user ? PP_LISTING_COLS_AUTH : PP_LISTING_COLS_GUEST)
         .order("created_at", { ascending: false })
         .limit(12);
-      const spListings = (listingRows ?? []) as unknown as RecentListing[];
+      const spListings = ((listingRows ?? []) as any[]).map((r) => ({
+        ...r,
+        user_id: r.owner_id,
+        business_name: r.name,
+      })) as unknown as RecentListing[];
       const listings = spListings
         .slice()
         .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
