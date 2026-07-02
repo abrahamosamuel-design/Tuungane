@@ -118,7 +118,7 @@ function Dashboard() {
                 </div>
               </div>
               <Link
-                to="/list-skill"
+                to="/profiles/new"
                 className="shrink-0 rounded-full bg-green px-5 py-2.5 text-center text-sm font-semibold text-white shadow-sm hover:brightness-110"
               >
                 List Your Service
@@ -137,7 +137,7 @@ function Dashboard() {
             ) : (
               <QuickAction to="/services" icon={<Wrench className="h-5 w-5" />} label="Browse services" hint="Find skilled providers" />
             )}
-            <QuickAction to="/list-skill" icon={<Wrench className="h-5 w-5" />} label={sp ? "Edit service profile" : "Add service"} hint={sp ? "Update your service photo or details" : "List a service you provide"} />
+            <QuickAction to="/profiles/new" icon={<Wrench className="h-5 w-5" />} label={sp ? "Edit service profile" : "Add service"} hint={sp ? "Update your service photo or details" : "List a service you provide"} />
             <QuickAction to="/u/$id" params={{ id: user.id }} icon={<UserCircle2 className="h-5 w-5" />} label="View public profile" hint="See how customers see you" />
           </div>
         </div>
@@ -286,7 +286,7 @@ function Dashboard() {
 
         {!profile?.is_provider && (
           <Link
-            to="/list-skill"
+            to="/profiles/new"
             className="mt-6 inline-block rounded-xl bg-green px-4 py-3 text-sm font-semibold text-white hover:brightness-110"
           >List Your Service</Link>
         )}

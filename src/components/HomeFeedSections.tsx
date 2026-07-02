@@ -348,7 +348,7 @@ export function HomeFeedSections() {
           <CompactEmptyState
             message="No providers listed near you yet."
             hint="Be among the first to list your service."
-            cta={{ label: "List Your Service", to: "/list-skill" }}
+            cta={{ label: "List Your Service", to: "/profiles/new" }}
           />
         ) : (
           <div className={`${SCROLLER} lg:grid-cols-3`}>

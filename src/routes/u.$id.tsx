@@ -431,7 +431,7 @@ function UserProfile() {
                 </div>
               </div>
               <Link
-                to="/list-skill"
+                to="/profiles/new"
                 className="shrink-0 rounded-full bg-orange px-5 py-2.5 text-center text-sm font-semibold text-orange-foreground shadow-sm hover:brightness-110"
               >
                 List a Service
@@ -695,7 +695,7 @@ function UserProfile() {
                 <div className="rounded-2xl border border-dashed border-border bg-card p-4 text-center text-sm">
                   <p className="font-semibold text-navy">Create your provider profile first</p>
                   <p className="mt-1 text-xs text-muted-foreground">You need a provider profile before you can add service packages.</p>
-                  <Link to="/list-skill" className="mt-2 inline-block rounded-full bg-orange px-4 py-2 text-xs font-semibold text-orange-foreground">List your service</Link>
+                  <Link to="/profiles/new" className="mt-2 inline-block rounded-full bg-orange px-4 py-2 text-xs font-semibold text-orange-foreground">List your service</Link>
                 </div>
               )}
               {services.length === 0 ? (
