@@ -197,8 +197,46 @@
   /* Stronger contrast on muted text for outdoor / mobile use. */
   main .text-muted-foreground {
     color: #4b4f56;
+}
+
+/*
+ * Compact status/indicator pills — normalize small rounded-full <span> badges
+ * (Near you, Same district, Flexible, Urgent, Featured, Work update, You, etc.)
+ * to a single tight size across the whole app. Only targets <span> so real
+ * pill-shaped buttons/links keep their tap size.
+ */
+span.rounded-full.text-\[10px\],
+span.rounded-full.text-\[11px\],
+span.rounded-full.text-\[12px\],
+span.rounded-full.text-xs {
+  font-size: 9px !important;
+  line-height: 1rem !important;
+  padding-top: 1px !important;
+  padding-bottom: 1px !important;
+  padding-left: 6px !important;
+  padding-right: 6px !important;
+}
+
+/* Icons inside compact pills shrink to match. */
+span.rounded-full.text-\[10px\] > svg,
+span.rounded-full.text-\[11px\] > svg,
+span.rounded-full.text-\[12px\] > svg,
+span.rounded-full.text-xs > svg {
+  width: 10px !important;
+  height: 10px !important;
+}
+
+/* Override the mobile readability lift for these pills specifically. */
+@media (max-width: 639px) {
+  main span.rounded-full.text-\[10px\],
+  main span.rounded-full.text-\[11px\],
+  main span.rounded-full.text-\[12px\],
+  main span.rounded-full.text-xs {
+    font-size: 9px !important;
+    line-height: 1rem !important;
   }
 }
+
 
 
 
