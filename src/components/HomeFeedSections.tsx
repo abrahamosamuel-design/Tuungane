@@ -47,9 +47,9 @@ const SP_LISTING_COLS_AUTH =
 const SP_LISTING_COLS_GUEST =
   "user_id,business_name,category_slug,subcategory,bio,town,district,verified,availability,cover_url,created_at";
 const PP_LISTING_COLS_AUTH =
-  "owner_id,name,category_slug,subcategory,bio,town,district,area,latitude,longitude,verified,availability,cover_url,avatar_url,created_at";
+  "id,slug,owner_id,name,category_slug,subcategory,bio,town,district,area,latitude,longitude,verified,availability,cover_url,avatar_url,created_at";
 const PP_LISTING_COLS_GUEST =
-  "owner_id,name,category_slug,subcategory,bio,town,district,verified,availability,cover_url,avatar_url,created_at";
+  "id,slug,owner_id,name,category_slug,subcategory,bio,town,district,verified,availability,cover_url,avatar_url,created_at";
 
 
 type NearbyRequest = {
@@ -102,8 +102,11 @@ type NearbyProvider = {
 };
 
 type RecentListing = {
+  id: string;
+  slug: string | null;
   user_id: string;
   business_name: string | null;
+  avatar_url?: string | null;
   category_slug: string | null;
   subcategory: string;
   bio: string | null;
@@ -292,7 +295,7 @@ export function HomeFeedSections() {
         const tb = new Date(b.created_at).getTime();
         const ta = new Date(a.created_at).getTime();
         if (tb !== ta) return tb - ta;
-        return b.user_id.localeCompare(a.user_id);
+        return b.id.localeCompare(a.id);
       })
       .slice(0, 6);
   }, [recentListings]);
@@ -373,7 +376,7 @@ export function HomeFeedSections() {
           />
           <div className={`${SCROLLER} lg:grid-cols-3`}>
             {topListings.map((l) => (
-              <ServiceListingCard key={l.user_id} l={l} userLoc={userLoc} />
+              <ServiceListingCard key={l.id} l={l} userLoc={userLoc} />
             ))}
             <div aria-hidden className="shrink-0 w-1 sm:hidden" />
           </div>
@@ -740,7 +743,7 @@ function ServiceListingCard({
   const near = proximityLabel(userLoc, l);
   const avail = availabilityMeta(l.availability);
   const verified = l.verified === "verified";
-  const avatar = l.profile?.avatar_url;
+  const avatar = l.cover_url || l.avatar_url || null;
   const loc = l.area || l.town || l.district || "Uganda";
 
   return (
@@ -787,13 +790,23 @@ function ServiceListingCard({
       {l.bio ? <ExpandableText text={l.bio} clampLines={3} maxLines={8} className="mt-2" /> : null}
 
       <div className="mt-auto flex items-center gap-2 pt-3">
-        <Link
-          to="/u/$id"
-          params={{ id: l.user_id }}
-          className="flex-1 truncate rounded-full bg-orange px-3 py-2 text-center text-xs font-semibold text-orange-foreground hover:brightness-110"
-        >
-          View service
-        </Link>
+        {l.slug ? (
+          <Link
+            to="/p/$slug"
+            params={{ slug: l.slug }}
+            className="flex-1 truncate rounded-full bg-orange px-3 py-2 text-center text-xs font-semibold text-orange-foreground hover:brightness-110"
+          >
+            View service
+          </Link>
+        ) : (
+          <Link
+            to="/u/$id"
+            params={{ id: l.user_id }}
+            className="flex-1 truncate rounded-full bg-orange px-3 py-2 text-center text-xs font-semibold text-orange-foreground hover:brightness-110"
+          >
+            View service
+          </Link>
+        )}
         <Link
           to="/requests/new"
           className="inline-flex shrink-0 items-center justify-center gap-1 rounded-full border border-border px-3 py-2 text-xs font-semibold text-navy hover:border-navy"
