@@ -290,29 +290,9 @@ function UserProfile() {
 
   return (
     <Layout>
-      {/* Cover */}
-      <div className="relative h-40 w-full sm:h-56">
-        <CoverImage
-          variant="wide"
-          imageUrl={sp?.header_url ?? sp?.cover_url}
-          categorySlug={sp?.category_slug}
-          name={sp?.business_name || profile?.full_name}
-          label="No profile banner yet"
-          onUpload={isOwn ? uploadCover : undefined}
-          uploading={uploadingCover}
-          className="h-40 w-full rounded-none sm:h-56"
-        />
-        {isOwn && isProvider && (sp?.header_url ?? sp?.cover_url) && (
-          <label className="absolute right-4 top-4 inline-flex cursor-pointer items-center gap-1 rounded-full bg-black/50 px-3 py-1.5 text-xs font-medium text-white backdrop-blur hover:bg-black/70">
-            <Camera className="h-3.5 w-3.5" /> {uploadingCover ? "Uploading…" : "Edit banner"}
-            <input type="file" accept="image/*" className="hidden" onChange={(e) => uploadCover(e.target.files?.[0] ?? null)} disabled={uploadingCover} />
-          </label>
-        )}
-      </div>
-
-      <section className="mx-auto max-w-3xl px-4">
+      <section className="mx-auto max-w-3xl px-4 pt-6">
         {sp?.seeded_by_official && sp.seeded_status !== "claimed" && (
-          <div className="-mt-6 mb-3 flex flex-col gap-3 rounded-2xl border border-orange/40 bg-orange/5 p-4 text-sm sm:flex-row sm:items-center sm:justify-between">
+          <div className="mb-3 flex flex-col gap-3 rounded-2xl border border-orange/40 bg-orange/5 p-4 text-sm sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-3">
               <BadgeCheck className="mt-0.5 h-5 w-5 shrink-0 text-orange" />
               <div>
@@ -326,6 +306,7 @@ function UserProfile() {
             {user && user.id !== id && sp.seeded_status === "unclaimed" && (
               <button onClick={() => setClaimOpen(true)} className="shrink-0 rounded-full bg-orange px-4 py-2 text-xs font-semibold text-orange-foreground hover:brightness-110">
                 Claim this profile
+
               </button>
             )}
           </div>
