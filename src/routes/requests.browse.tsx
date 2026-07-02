@@ -15,6 +15,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useUserLocation } from "@/hooks/use-user-location";
 import { filterByRadius, sortByProximity } from "@/lib/location";
 import { RadiusFilter } from "@/components/RadiusFilter";
+import { EditRequestDialog } from "@/components/EditRequestDialog";
 
 export const Route = createFileRoute("/requests/browse")({
   head: () => ({
