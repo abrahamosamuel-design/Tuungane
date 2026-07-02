@@ -49,7 +49,7 @@ export function usePostAsOptions(userId: string | null | undefined) {
           key: `business:service_profile:${sp.user_id}`,
           label: sp.business_name,
           name: sp.business_name,
-          avatar_url: sp.cover_url ?? null,
+          avatar_url: sp.cover_url ?? me?.avatar_url ?? null,
           posted_as_type: "business",
           posted_as_ref_type: "service_profile",
           posted_as_ref_id: sp.user_id,

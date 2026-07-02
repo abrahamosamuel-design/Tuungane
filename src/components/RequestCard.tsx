@@ -71,7 +71,7 @@ export function RequestCard({
     ? (r.posted_as_name as string)
     : (r.customer_name?.trim() || "A neighbour");
   const requesterAvatar = isBusinessPost
-    ? (r.posted_as_avatar_url ?? null)
+    ? (r.posted_as_avatar_url ?? r.customer_avatar_url ?? null)
     : (r.customer_avatar_url ?? null);
   const loc = r.area || r.town || r.district || r.location || "Uganda";
   const media = Array.isArray(r.media_urls) && r.media_urls.length > 0

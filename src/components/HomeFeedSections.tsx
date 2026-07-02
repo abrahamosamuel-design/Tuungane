@@ -490,7 +490,7 @@ function RequestCard({
     ? (r.posted_as_name as string)
     : (r.customer_name?.trim() || (currentUserId ? "A member" : "Open request"));
   const requesterAvatar = isBusinessPost
-    ? (r.posted_as_avatar_url ?? null)
+    ? (r.posted_as_avatar_url ?? r.customer_avatar_url ?? null)
     : (r.customer_avatar_url ?? null);
 
 
