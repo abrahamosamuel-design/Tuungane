@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { MapPin, Clock, Wallet, BadgeCheck, MessageSquare, Send, Sparkles, MoreHorizontal, Pencil } from "lucide-react";
+import { MapPin, Clock, Wallet, BadgeCheck, MessageSquare, Send, Sparkles, MoreHorizontal } from "lucide-react";
 import { timeAgo } from "@/lib/format";
 import { useCategory } from "@/hooks/use-categories";
 import { requestStatusMap, type ServiceRequestRow } from "@/data/serviceRequestTypes";
@@ -100,16 +100,7 @@ export function RequestCard({
             <NearYouBadge user={userLoc} target={r} />
           </p>
         </div>
-        {isOwner && onEdit ? (
-          <button
-            type="button"
-            onClick={onEdit}
-            aria-label="Edit request"
-            className="shrink-0 rounded-full border border-border p-1.5 text-navy hover:border-orange hover:text-orange"
-          >
-            <Pencil className="h-4 w-4" />
-          </button>
-        ) : (
+        {!isOwner && (
           <button
             type="button"
             aria-label="More options"
@@ -185,34 +176,30 @@ export function RequestCard({
       </div>
 
       {/* Action row */}
-      <div className="mt-3 grid grid-cols-[1fr_auto_auto] items-stretch gap-2 border-t border-border bg-surface px-3 py-2.5 sm:px-4">
+      <div className={`mt-3 grid ${isOwner ? "grid-cols-[1fr_auto]" : "grid-cols-[1fr_auto_auto]"} items-stretch gap-2 border-t border-border bg-surface px-3 py-2.5 sm:px-4`}>
         {isOwner ? (
           <>
             <Link
               to="/requests/$id"
               params={{ id: r.id }}
-              className="inline-flex h-10 items-center justify-center rounded-full bg-navy px-4 text-sm font-semibold text-navy-foreground hover:brightness-110"
+              className="inline-flex h-10 items-center justify-center gap-1.5 rounded-full bg-navy px-4 text-sm font-semibold text-navy-foreground hover:brightness-110"
             >
-              Manage request
+              <span>Manage request</span>
+              {typeof r.response_count === "number" && r.response_count > 0 && (
+                <span className="rounded-full bg-orange px-2 py-0.5 text-[10px] font-bold text-orange-foreground">
+                  {r.response_count}
+                </span>
+              )}
             </Link>
-            {onEdit ? (
+            {onEdit && (
               <button
                 type="button"
                 onClick={onEdit}
-                className="inline-flex h-10 items-center justify-center rounded-full border border-border px-3 text-xs font-semibold text-navy hover:border-navy"
+                className="inline-flex h-10 items-center justify-center rounded-full border border-border px-4 text-xs font-semibold text-navy hover:border-navy"
               >
                 Edit
               </button>
-            ) : (
-              <span />
             )}
-            <Link
-              to="/requests/$id"
-              params={{ id: r.id }}
-              className="inline-flex h-10 items-center justify-center rounded-full border border-border px-3 text-xs font-semibold text-navy hover:border-navy"
-            >
-              Responses
-            </Link>
           </>
 
         ) : (

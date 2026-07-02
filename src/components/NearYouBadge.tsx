@@ -14,9 +14,9 @@ export function NearYouBadge({
   if (!label) return null;
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full bg-green/10 px-2 py-0.5 text-[10px] font-semibold text-green ${className}`}
+      className={`inline-flex shrink-0 items-center gap-0.5 whitespace-nowrap rounded-full bg-green/10 px-1.5 py-0 text-[10px] font-medium leading-4 text-green ${className}`}
     >
-      <MapPin className="h-3 w-3" /> {label}
+      <MapPin className="h-2.5 w-2.5" /> {label}
     </span>
   );
 }
