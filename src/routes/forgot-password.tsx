@@ -7,7 +7,18 @@ import { supabase } from "@/integrations/supabase/client";
 type Search = { email?: string };
 
 export const Route = createFileRoute("/forgot-password")({
-  head: () => ({ meta: [{ title: "Reset your password — Tuungane" }] }),
+  head: () => ({
+    meta: [
+      { title: "Reset your password — Tuungane" },
+      { name: "description", content: "Forgot your Tuungane password? Enter your email and we'll send you a secure link to reset it and get back to your account." },
+      { property: "og:title", content: "Reset your password — Tuungane" },
+      { property: "og:description", content: "Request a password reset link for your Tuungane account." },
+      { property: "og:url", content: "https://tuungane.com/forgot-password" },
+      { property: "og:type", content: "website" },
+      { name: "robots", content: "noindex,follow" },
+    ],
+    links: [{ rel: "canonical", href: "https://tuungane.com/forgot-password" }],
+  }),
   validateSearch: (s: Record<string, unknown>): Search => ({
     email: typeof s.email === "string" ? s.email : undefined,
   }),
