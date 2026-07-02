@@ -10,6 +10,7 @@ import {
   Wallet,
   Clock,
   MoreHorizontal,
+  Pencil,
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
@@ -22,6 +23,7 @@ import { ProfileTrustBadge } from "@/components/trust/ProfileTrustBadge";
 import { useCategory } from "@/hooks/use-categories";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ProviderResponseDialog } from "@/components/ProviderResponseDialog";
+import { EditRequestDialog } from "@/components/EditRequestDialog";
 import { FeedAvatar } from "@/components/feed/FeedAvatar";
 import { ExpandableText } from "@/components/feed/ExpandableText";
 import { MediaGrid } from "@/components/feed/MediaGrid";
@@ -29,7 +31,7 @@ import { useAuthGate } from "@/components/RequireAuthDialog";
 
 // Column lists — guests can only SELECT a safe subset (no lat/long/area/location).
 const SR_COLS_AUTH =
-  "id,title,service_needed,description,budget_range,urgent_flag,created_at,district,town,area,location,latitude,longitude,category_slug,subcategory,media_urls";
+  "id,customer_id,title,service_needed,description,budget_range,urgent_flag,created_at,district,town,area,location,latitude,longitude,category_slug,subcategory,media_urls";
 const SR_COLS_GUEST =
   "id,title,service_needed,description,budget_range,urgent_flag,created_at,district,town,category_slug,subcategory,media_urls";
 const SP_COLS_AUTH =
@@ -52,6 +54,7 @@ const PP_LISTING_COLS_GUEST =
 
 type NearbyRequest = {
   id: string;
+  customer_id?: string | null;
   title: string | null;
   service_needed: string | null;
   description: string | null;
@@ -67,6 +70,8 @@ type NearbyRequest = {
   category_slug?: string | null;
   subcategory?: string | null;
   media_urls?: string[] | null;
+  customer_name?: string | null;
+  customer_avatar_url?: string | null;
 };
 
 type NearbyProvider = {
@@ -128,6 +133,8 @@ export function HomeFeedSections() {
   const [loading, setLoading] = useState(true);
   const [isProvider, setIsProvider] = useState(false);
   const [respondTo, setRespondTo] = useState<string | null>(null);
+  const [editingRequest, setEditingRequest] = useState<string | null>(null);
+  const [reloadTick, setReloadTick] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -154,7 +161,7 @@ export function HomeFeedSections() {
       if (!reqs || reqs.length === 0) {
         const { data } = await supabase
           .from("service_requests")
-          .select(user ? SR_COLS_AUTH : SR_COLS_GUEST)
+          .select((user ? SR_COLS_AUTH : SR_COLS_GUEST) as string)
           .eq("visibility", "public")
           .eq("status", "requested")
           .is("provider_id", null)
@@ -251,6 +258,7 @@ export function HomeFeedSections() {
       const ids = Array.from(new Set([
         ...(provs ?? []).map((p) => p.user_id),
         ...listings.map((l) => l.user_id),
+        ...((reqs ?? []).map((r) => r.customer_id).filter((x): x is string => !!x)),
       ]));
       const profMap = new Map<string, { full_name: string; avatar_url: string | null }>();
       if (user && ids.length) {
@@ -273,7 +281,12 @@ export function HomeFeedSections() {
 
       if (cancelled) return;
 
-      setRequests(reqs ?? []);
+      setRequests(
+        (reqs ?? []).map((r) => {
+          const p = r.customer_id ? profMap.get(r.customer_id) : null;
+          return { ...r, customer_name: p?.full_name ?? null, customer_avatar_url: p?.avatar_url ?? null };
+        }),
+      );
       setHasNearbyReqs(nearbyFlag);
       setProviders(
         (provs ?? []).map((p) => ({ ...p, profile: profMap.get(p.user_id) ?? null })),
@@ -285,7 +298,7 @@ export function HomeFeedSections() {
       setLoading(false);
     })();
     return () => { cancelled = true; };
-  }, [userLoc?.latitude, userLoc?.longitude, user?.id]);
+  }, [userLoc?.latitude, userLoc?.longitude, user?.id, reloadTick]);
 
   const topRequests = useMemo(() => {
     const sorted = sortByProximity(requests, userLoc, (r) => r);
@@ -353,7 +366,16 @@ export function HomeFeedSections() {
         ) : (
           <div className={`${SCROLLER} lg:grid-cols-3`}>
             {topRequests.map((r) => (
-              <RequestCard key={r.id} r={r} userLoc={userLoc} featured={Boolean(isFeaturedTarget(r, featured))} isProvider={isProvider} onRespond={() => requireAuth(() => setRespondTo(r.id), { title: "Sign in to respond", message: "Create a free Tuungane account to send quotes and respond to service requests." })} />
+              <RequestCard
+                key={r.id}
+                r={r}
+                userLoc={userLoc}
+                featured={Boolean(isFeaturedTarget(r, featured))}
+                isProvider={isProvider}
+                currentUserId={user?.id ?? null}
+                onEdit={() => setEditingRequest(r.id)}
+                onRespond={() => requireAuth(() => setRespondTo(r.id), { title: "Sign in to respond", message: "Create a free Tuungane account to send quotes and respond to service requests." })}
+              />
             ))}
             <div aria-hidden className="shrink-0 w-1 sm:hidden" />
           </div>
@@ -413,6 +435,12 @@ export function HomeFeedSections() {
           requestId={respondTo}
         />
       )}
+      <EditRequestDialog
+        open={!!editingRequest}
+        requestId={editingRequest}
+        onClose={() => setEditingRequest(null)}
+        onSaved={() => setReloadTick((n) => n + 1)}
+      />
     </div>
   );
 }
@@ -486,13 +514,17 @@ function RequestCard({
   userLoc,
   featured,
   isProvider,
+  currentUserId,
   onRespond,
+  onEdit,
 }: {
   r: NearbyRequest;
   userLoc: ReturnType<typeof useUserLocation>["location"];
   featured: boolean;
   isProvider: boolean;
+  currentUserId?: string | null;
   onRespond: () => void;
+  onEdit?: () => void;
 }) {
   const cat = useCategory(r.category_slug ?? undefined);
   const near = proximityLabel(userLoc, r);
@@ -500,6 +532,8 @@ function RequestCard({
   const loc = r.area || r.town || r.district || r.location || "Uganda";
   const urg = urgencyMeta(r);
   const media = (r.media_urls ?? []).filter(Boolean) as string[];
+  const isOwner = !!currentUserId && !!r.customer_id && currentUserId === r.customer_id;
+  const requesterName = r.customer_name?.trim() || (currentUserId ? "A member" : "Open request");
 
   return (
     <article
@@ -507,14 +541,17 @@ function RequestCard({
         r.urgent_flag ? "border-orange/40" : "border-border"
       }`}
     >
-      {/* Header — anonymous neighbour avatar + meta */}
+      {/* Header — requester name + meta (or anonymous for guests) */}
       <div className="flex items-start gap-3 p-4 pb-2">
-        <FeedAvatar src={null} name="Neighbour" size={40} />
+        <FeedAvatar src={r.customer_avatar_url ?? null} name={requesterName} size={40} />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-x-1.5 text-[13px] font-semibold text-navy">
-            <span>Open request</span>
+            <span className="truncate">{requesterName}</span>
             <span className="text-muted-foreground">·</span>
             <span className="text-[12px] font-medium text-muted-foreground">{timeAgo(r.created_at)}</span>
+            {isOwner && (
+              <span className="rounded-full bg-navy/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-navy">You</span>
+            )}
           </div>
           <p className="inline-flex items-center gap-1 text-[11px] text-muted-foreground">
             <MapPin className="h-3 w-3" /> {loc}
@@ -523,8 +560,19 @@ function RequestCard({
             ) : null}
           </p>
         </div>
+        {isOwner && onEdit ? (
+          <button
+            type="button"
+            onClick={onEdit}
+            aria-label="Edit request"
+            className="shrink-0 rounded-full border border-border p-1.5 text-navy hover:border-orange hover:text-orange"
+          >
+            <Pencil className="h-3.5 w-3.5" />
+          </button>
+        ) : null}
         <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${urg.cls}`}>{urg.label}</span>
       </div>
+
 
       <div className="flex flex-wrap items-center gap-1.5 px-4">
         {featured && (

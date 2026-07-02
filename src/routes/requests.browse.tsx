@@ -15,6 +15,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useUserLocation } from "@/hooks/use-user-location";
 import { filterByRadius, sortByProximity } from "@/lib/location";
 import { RadiusFilter } from "@/components/RadiusFilter";
+import { EditRequestDialog } from "@/components/EditRequestDialog";
 
 export const Route = createFileRoute("/requests/browse")({
   head: () => ({
@@ -44,6 +45,7 @@ function BrowseRequests() {
   const [radiusKm, setRadiusKm] = useState<number | null>(null);
   const [myDistrict, setMyDistrict] = useState<string | null>(null);
   const [items, setItems] = useState<RequestRowLite[]>([]);
+  const [editingRequest, setEditingRequest] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [showMoreFilters, setShowMoreFilters] = useState(false);
 
@@ -267,7 +269,7 @@ function BrowseRequests() {
           <div className="grid gap-3 sm:grid-cols-2">
             {rankedItems.map((r, idx) => (
               <Fragment key={r.id}>
-                <RequestCard r={r} userLoc={userLoc} currentUserId={user?.id ?? null} />
+                <RequestCard r={r} userLoc={userLoc} currentUserId={user?.id ?? null} onEdit={() => setEditingRequest(r.id)} />
                 {idx === 1 && (
                   <div className="sm:col-span-2">
                     <ProviderTrackCTA
@@ -281,6 +283,12 @@ function BrowseRequests() {
           </div>
         </div>
       </section>
+      <EditRequestDialog
+        open={!!editingRequest}
+        requestId={editingRequest}
+        onClose={() => setEditingRequest(null)}
+        onSaved={load}
+      />
     </Layout>
   );
 }
