@@ -2145,6 +2145,7 @@ export type Database = {
           price_note: string | null
           price_type: string | null
           price_updated_at: string | null
+          provider_type: Database["public"]["Enums"]["service_provider_type"]
           region: string | null
           seeded_by_official: boolean
           seeded_status:
@@ -2184,6 +2185,7 @@ export type Database = {
           price_note?: string | null
           price_type?: string | null
           price_updated_at?: string | null
+          provider_type?: Database["public"]["Enums"]["service_provider_type"]
           region?: string | null
           seeded_by_official?: boolean
           seeded_status?:
@@ -2223,6 +2225,7 @@ export type Database = {
           price_note?: string | null
           price_type?: string | null
           price_updated_at?: string | null
+          provider_type?: Database["public"]["Enums"]["service_provider_type"]
           region?: string | null
           seeded_by_official?: boolean
           seeded_status?:
@@ -2996,6 +2999,7 @@ export type Database = {
           price_note: string | null
           price_type: string | null
           price_updated_at: string | null
+          provider_type: Database["public"]["Enums"]["service_provider_type"]
           region: string | null
           seeded_by_official: boolean
           seeded_status:
@@ -3316,6 +3320,7 @@ export type Database = {
       public_profile_type: "individual" | "business" | "organization"
       report_status: "open" | "reviewing" | "resolved" | "dismissed"
       seeded_profile_status: "unclaimed" | "claim_pending" | "claimed"
+      service_provider_type: "individual" | "business" | "organization"
       service_request_status:
         | "requested"
         | "accepted"
@@ -3529,6 +3534,7 @@ export const Constants = {
       public_profile_type: ["individual", "business", "organization"],
       report_status: ["open", "reviewing", "resolved", "dismissed"],
       seeded_profile_status: ["unclaimed", "claim_pending", "claimed"],
+      service_provider_type: ["individual", "business", "organization"],
       service_request_status: [
         "requested",
         "accepted",
