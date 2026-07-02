@@ -464,7 +464,7 @@ function UserProfile() {
         )}
 
 
-        {isProvider && <div className="mt-4"><TrustStats providerId={id} /></div>}
+        
 
         {/* Tabs */}
         <div className="sticky top-16 z-10 -mx-4 mt-4 overflow-x-auto border-b border-border bg-background/95 px-4 backdrop-blur">
