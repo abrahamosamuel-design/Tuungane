@@ -439,11 +439,7 @@ export function HomeFeedSections() {
         open={!!editingRequest}
         requestId={editingRequest}
         onClose={() => setEditingRequest(null)}
-        onSaved={() => {
-          // trigger reload by bumping user location dependency workaround: simplest is a full window refetch.
-          // The hook re-runs on user id/location; call a light refresh:
-          window.dispatchEvent(new Event("tuungane:refresh-feed"));
-        }}
+        onSaved={() => setReloadTick((n) => n + 1)}
       />
     </div>
   );
