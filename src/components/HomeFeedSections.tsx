@@ -31,9 +31,10 @@ import { useAuthGate } from "@/components/RequireAuthDialog";
 
 // Column lists — guests can only SELECT a safe subset (no lat/long/area/location).
 const SR_COLS_AUTH =
-  "id,customer_id,title,service_needed,description,budget_range,urgent_flag,created_at,district,town,area,location,latitude,longitude,category_slug,subcategory,media_urls";
+  "id,customer_id,title,service_needed,description,budget_range,urgent_flag,created_at,district,town,area,location,latitude,longitude,category_slug,subcategory,media_urls,posted_as_type,posted_as_name,posted_as_avatar_url,posted_as_ref_type,posted_as_ref_id";
 const SR_COLS_GUEST =
-  "id,title,service_needed,description,budget_range,urgent_flag,created_at,district,town,category_slug,subcategory,media_urls";
+  "id,title,service_needed,description,budget_range,urgent_flag,created_at,district,town,category_slug,subcategory,media_urls,posted_as_type,posted_as_name,posted_as_avatar_url,posted_as_ref_type,posted_as_ref_id";
+
 const SP_COLS_AUTH =
   "user_id,business_name,category_slug,subcategory,bio,town,district,area,latitude,longitude,service_radius_km,areas_served,verified,availability,years_experience,cover_url,media_urls";
 const SP_COLS_GUEST =
@@ -72,7 +73,13 @@ type NearbyRequest = {
   media_urls?: string[] | null;
   customer_name?: string | null;
   customer_avatar_url?: string | null;
+  posted_as_type?: string | null;
+  posted_as_name?: string | null;
+  posted_as_avatar_url?: string | null;
+  posted_as_ref_type?: string | null;
+  posted_as_ref_id?: string | null;
 };
+
 
 type NearbyProvider = {
   user_id: string;
@@ -533,7 +540,14 @@ function RequestCard({
   const urg = urgencyMeta(r);
   const media = (r.media_urls ?? []).filter(Boolean) as string[];
   const isOwner = !!currentUserId && !!r.customer_id && currentUserId === r.customer_id;
-  const requesterName = r.customer_name?.trim() || (currentUserId ? "A member" : "Open request");
+  const isBusinessPost = r.posted_as_type === "business" && !!r.posted_as_name;
+  const requesterName = isBusinessPost
+    ? (r.posted_as_name as string)
+    : (r.customer_name?.trim() || (currentUserId ? "A member" : "Open request"));
+  const requesterAvatar = isBusinessPost
+    ? (r.posted_as_avatar_url ?? null)
+    : (r.customer_avatar_url ?? null);
+
 
   return (
     <article
@@ -543,7 +557,7 @@ function RequestCard({
     >
       {/* Header — requester name + meta (or anonymous for guests) */}
       <div className="flex items-start gap-3 p-4 pb-2">
-        <FeedAvatar src={r.customer_avatar_url ?? null} name={requesterName} size={40} />
+        <FeedAvatar src={requesterAvatar} name={requesterName} size={40} />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-x-1.5 text-[13px] font-semibold text-navy">
             <span className="truncate">{requesterName}</span>
@@ -609,40 +623,73 @@ function RequestCard({
         ) : null}
       </div>
 
-      <div className="mt-auto flex items-center gap-2 border-t border-border bg-surface px-3 py-2.5">
-        {isProvider ? (
-          <button
-            type="button"
-            onClick={onRespond}
-            className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-orange px-3 py-2 text-xs font-semibold text-orange-foreground hover:brightness-110"
-          >
-            <Send className="h-3.5 w-3.5" /> Send quote
-          </button>
+      <div className="mt-auto grid grid-cols-[1fr_auto_auto] items-stretch gap-2 border-t border-border bg-surface px-3 py-2.5">
+        {isOwner ? (
+          <>
+            <Link
+              to="/requests/$id"
+              params={{ id: r.id }}
+              className="inline-flex h-9 items-center justify-center rounded-full bg-navy px-4 text-xs font-semibold text-navy-foreground hover:brightness-110"
+            >
+              Manage request
+            </Link>
+            {onEdit ? (
+              <button
+                type="button"
+                onClick={onEdit}
+                className="inline-flex h-9 items-center justify-center rounded-full border border-border px-3 text-xs font-semibold text-navy hover:border-navy"
+              >
+                Edit
+              </button>
+            ) : (
+              <span />
+            )}
+            <Link
+              to="/requests/$id"
+              params={{ id: r.id }}
+              className="inline-flex h-9 items-center justify-center rounded-full border border-border px-3 text-xs font-semibold text-navy hover:border-navy"
+            >
+              Responses
+            </Link>
+          </>
         ) : (
-          <Link
-            to="/requests/$id"
-            params={{ id: r.id }}
-            className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-orange px-3 py-2 text-xs font-semibold text-orange-foreground hover:brightness-110"
-          >
-            <Send className="h-3.5 w-3.5" /> Respond
-          </Link>
+          <>
+            {isProvider ? (
+              <button
+                type="button"
+                onClick={onRespond}
+                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-full bg-orange px-4 text-xs font-semibold text-orange-foreground hover:brightness-110"
+              >
+                <Send className="h-3.5 w-3.5" /> Send quote
+              </button>
+            ) : (
+              <Link
+                to="/requests/$id"
+                params={{ id: r.id }}
+                className="inline-flex h-9 items-center justify-center gap-1.5 rounded-full bg-orange px-4 text-xs font-semibold text-orange-foreground hover:brightness-110"
+              >
+                <Send className="h-3.5 w-3.5" /> Respond
+              </Link>
+            )}
+            <Link
+              to="/requests/$id"
+              params={{ id: r.id }}
+              className="inline-flex h-9 items-center justify-center rounded-full border border-border px-3 text-navy hover:border-navy"
+              aria-label="Message"
+            >
+              <MessageSquare className="h-3.5 w-3.5" />
+            </Link>
+            <Link
+              to="/requests/$id"
+              params={{ id: r.id }}
+              className="inline-flex h-9 items-center justify-center rounded-full border border-border px-3 text-xs font-semibold text-navy hover:border-navy"
+            >
+              View
+            </Link>
+          </>
         )}
-        <Link
-          to="/requests/$id"
-          params={{ id: r.id }}
-          className="inline-flex items-center justify-center gap-1 rounded-full border border-border px-3 py-2 text-xs font-semibold text-navy hover:border-navy"
-          aria-label="Message"
-        >
-          <MessageSquare className="h-3.5 w-3.5" />
-        </Link>
-        <Link
-          to="/requests/$id"
-          params={{ id: r.id }}
-          className="rounded-full border border-border px-3 py-2 text-xs font-semibold text-navy hover:border-navy"
-        >
-          View
-        </Link>
       </div>
+
     </article>
   );
 }

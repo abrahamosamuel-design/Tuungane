@@ -62,8 +62,9 @@ function BrowseRequests() {
     // Guests can only SELECT the safe subset (no requester id, phone, coords, etc.).
     const isGuest = !user;
     const cols = isGuest
-      ? "id,provider_id,category_slug,subcategory,service_needed,title,visibility,district,town,description,preferred_date,preferred_time,urgency,budget_range,media_urls,status,urgent_flag,created_at,updated_at,service_profile_id"
-      : "id,customer_id,provider_id,category_slug,subcategory,service_needed,title,visibility,location,district,town,area,latitude,longitude,description,preferred_date,preferred_time,urgency,budget_range,preferred_contact_method,attachment_url,media_urls,status,urgent_flag,created_at,updated_at,completed_at,cancelled_at,disputed_at,service_profile_id,selected_provider_id,provider_confirmed_completion,customer_confirmed_completion";
+      ? "id,provider_id,category_slug,subcategory,service_needed,title,visibility,district,town,description,preferred_date,preferred_time,urgency,budget_range,media_urls,status,urgent_flag,created_at,updated_at,service_profile_id,posted_as_type,posted_as_name,posted_as_avatar_url,posted_as_ref_type,posted_as_ref_id"
+      : "id,customer_id,provider_id,category_slug,subcategory,service_needed,title,visibility,location,district,town,area,latitude,longitude,description,preferred_date,preferred_time,urgency,budget_range,preferred_contact_method,attachment_url,media_urls,status,urgent_flag,created_at,updated_at,completed_at,cancelled_at,disputed_at,service_profile_id,selected_provider_id,provider_confirmed_completion,customer_confirmed_completion,posted_as_type,posted_as_name,posted_as_avatar_url,posted_as_ref_type,posted_as_ref_id";
+
     let query: any = supabase
       .from("service_requests")
       .select(cols as string)

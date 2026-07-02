@@ -24,6 +24,10 @@ import { AreaAutocomplete } from "@/components/AreaAutocomplete";
 import { MapPicker } from "@/components/MapPicker";
 import { findDistrictBounds, type Bounds } from "@/lib/geocoding";
 import { suggestCategory } from "@/lib/api/suggest-category.functions";
+import { PostAsSelector } from "@/components/PostAsSelector";
+import { usePostAsOptions, findOption } from "@/hooks/use-post-as-options";
+
+
 
 const s = (v: unknown) => (typeof v === "string" ? v : "");
 
@@ -57,6 +61,8 @@ function NewRequest() {
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [districtBounds, setDistrictBounds] = useState<Bounds | null>(null);
   const [showMore, setShowMore] = useState(false);
+  const [postedAsKey, setPostedAsKey] = useState<string>("individual");
+  const { options: postedAsOptions } = usePostAsOptions(user?.id ?? null);
   const [f, setF] = useState({
     title: search.title || "",
     category_slug: search.category || staticCategories[0].slug,
@@ -76,6 +82,7 @@ function NewRequest() {
     customer_phone: "",
     customer_whatsapp: "",
   });
+
 
   // Targeted profile context (from /p/$slug "Request" button)
   const [targetProfile, setTargetProfile] = useState<{ id: string; owner_id: string; name: string; profile_type: string; category_slug: string | null; subcategory: string | null } | null>(null);
@@ -232,6 +239,7 @@ function NewRequest() {
       (targetProfile && targetProfile.profile_type === "individual" ? targetProfile.owner_id : null);
     const isTargeted = !!(targetedProvider || targetProfile);
 
+    const postedAs = findOption(postedAsOptions, postedAsKey);
     const { data: inserted, error } = await supabase.from("service_requests").insert({
       customer_id: user.id,
       provider_id: targetedProvider,
@@ -258,7 +266,13 @@ function NewRequest() {
       attachment_url,
       media_urls: allMedia,
       status: "requested",
+      posted_as_type: postedAs?.posted_as_type ?? "individual",
+      posted_as_name: postedAs && postedAs.posted_as_type === "business" ? postedAs.name : null,
+      posted_as_avatar_url: postedAs && postedAs.posted_as_type === "business" ? postedAs.avatar_url : null,
+      posted_as_ref_type: postedAs?.posted_as_ref_type ?? null,
+      posted_as_ref_id: postedAs?.posted_as_ref_id ?? null,
     }).select("id").single();
+
     setBusy(false);
     if (error) {
       toastError(error, "Couldn't post your service request");
@@ -400,6 +414,14 @@ function NewRequest() {
               </select>
             </Field>
           </div>
+
+          <PostAsSelector
+            userId={user.id}
+            value={postedAsKey}
+            onChange={(k) => setPostedAsKey(k)}
+          />
+
+
 
           <Field label="Describe the request *">
             <textarea

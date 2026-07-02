@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,6 +8,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { toastError } from "@/lib/user-errors";
+import { useAuth } from "@/hooks/use-auth";
+import { useCategories } from "@/hooks/use-categories";
+import { budgetBuckets } from "@/data/serviceRequestTypes";
+import { PostAsSelector } from "@/components/PostAsSelector";
+import { usePostAsOptions, findOption, keyFromRow } from "@/hooks/use-post-as-options";
 
 type EditableFields = {
   title: string | null;
@@ -21,6 +26,8 @@ type EditableFields = {
   town: string | null;
   district: string | null;
   area: string | null;
+  category_slug: string | null;
+  subcategory: string | null;
 };
 
 export function EditRequestDialog({
@@ -34,8 +41,12 @@ export function EditRequestDialog({
   requestId: string | null;
   onSaved?: () => void;
 }) {
+  const { user } = useAuth();
+  const { categories } = useCategories();
+  const { options: postedAsOptions } = usePostAsOptions(user?.id ?? null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [postedAsKey, setPostedAsKey] = useState<string>("individual");
   const [f, setF] = useState<EditableFields>({
     title: "",
     service_needed: "",
@@ -48,6 +59,8 @@ export function EditRequestDialog({
     town: "",
     district: "",
     area: "",
+    category_slug: "",
+    subcategory: "",
   });
 
   useEffect(() => {
@@ -56,7 +69,7 @@ export function EditRequestDialog({
       setLoading(true);
       const { data, error } = await supabase
         .from("service_requests")
-        .select("title,service_needed,description,budget_range,urgency,urgent_flag,preferred_date,preferred_time,town,district,area")
+        .select("title,service_needed,description,budget_range,urgency,urgent_flag,preferred_date,preferred_time,town,district,area,category_slug,subcategory,posted_as_type,posted_as_ref_type,posted_as_ref_id")
         .eq("id", requestId)
         .maybeSingle();
       setLoading(false);
@@ -65,25 +78,35 @@ export function EditRequestDialog({
         onClose();
         return;
       }
+      const d = data as any;
       setF({
-        title: data.title ?? "",
-        service_needed: data.service_needed ?? "",
-        description: data.description ?? "",
-        budget_range: data.budget_range ?? "",
-        urgency: data.urgency ?? "normal",
-        urgent_flag: !!data.urgent_flag,
-        preferred_date: data.preferred_date ?? "",
-        preferred_time: data.preferred_time ?? "",
-        town: data.town ?? "",
-        district: data.district ?? "",
-        area: data.area ?? "",
+        title: d.title ?? "",
+        service_needed: d.service_needed ?? "",
+        description: d.description ?? "",
+        budget_range: d.budget_range ?? "",
+        urgency: d.urgency ?? "normal",
+        urgent_flag: !!d.urgent_flag,
+        preferred_date: d.preferred_date ?? "",
+        preferred_time: d.preferred_time ?? "",
+        town: d.town ?? "",
+        district: d.district ?? "",
+        area: d.area ?? "",
+        category_slug: d.category_slug ?? "",
+        subcategory: d.subcategory ?? "",
       });
+      setPostedAsKey(keyFromRow(d));
     })();
   }, [open, requestId, onClose]);
+
+  const activeCat = useMemo(
+    () => categories.find((c) => c.slug === (f.category_slug || "")),
+    [categories, f.category_slug],
+  );
 
   const save = async () => {
     if (!requestId) return;
     setSaving(true);
+    const postedAs = findOption(postedAsOptions, postedAsKey);
     const payload = {
       title: f.title?.trim() || null,
       service_needed: f.service_needed?.trim() || null,
@@ -96,6 +119,13 @@ export function EditRequestDialog({
       town: f.town?.trim() || null,
       district: f.district?.trim() || null,
       area: f.area?.trim() || null,
+      category_slug: f.category_slug || null,
+      subcategory: f.subcategory || null,
+      posted_as_type: postedAs?.posted_as_type ?? "individual",
+      posted_as_name: postedAs && postedAs.posted_as_type === "business" ? postedAs.name : null,
+      posted_as_avatar_url: postedAs && postedAs.posted_as_type === "business" ? postedAs.avatar_url : null,
+      posted_as_ref_type: postedAs?.posted_as_ref_type ?? null,
+      posted_as_ref_id: postedAs?.posted_as_ref_id ?? null,
     };
     const { error } = await supabase.from("service_requests").update(payload as never).eq("id", requestId);
     setSaving(false);
@@ -121,6 +151,53 @@ export function EditRequestDialog({
               <Label htmlFor="er-title">Title</Label>
               <Input id="er-title" value={f.title ?? ""} onChange={(e) => setF({ ...f, title: e.target.value })} placeholder="e.g. Need a plumber to fix leaking sink" />
             </div>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div>
+                <Label htmlFor="er-cat">Category</Label>
+                <select
+                  id="er-cat"
+                  value={f.category_slug ?? ""}
+                  onChange={(e) => {
+                    const nextSlug = e.target.value;
+                    const nextCat = categories.find((c) => c.slug === nextSlug);
+                    setF({
+                      ...f,
+                      category_slug: nextSlug,
+                      subcategory: nextCat?.subcategories[0] ?? "",
+                    });
+                  }}
+                  className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                >
+                  <option value="">Select…</option>
+                  {categories.map((c) => (
+                    <option key={c.slug} value={c.slug}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <Label htmlFor="er-sub">Subcategory</Label>
+                <select
+                  id="er-sub"
+                  value={f.subcategory ?? ""}
+                  onChange={(e) => setF({ ...f, subcategory: e.target.value })}
+                  className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  disabled={!activeCat}
+                >
+                  <option value="">Select…</option>
+                  {(activeCat?.subcategories ?? []).map((s) => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <PostAsSelector
+              userId={user?.id ?? null}
+              value={postedAsKey}
+              onChange={(k) => setPostedAsKey(k)}
+            />
+
             <div>
               <Label htmlFor="er-service">Service needed</Label>
               <Input id="er-service" value={f.service_needed ?? ""} onChange={(e) => setF({ ...f, service_needed: e.target.value })} />
@@ -132,7 +209,17 @@ export function EditRequestDialog({
             <div className="grid gap-3 sm:grid-cols-2">
               <div>
                 <Label htmlFor="er-budget">Budget</Label>
-                <Input id="er-budget" value={f.budget_range ?? ""} onChange={(e) => setF({ ...f, budget_range: e.target.value })} placeholder="e.g. UGX 100,000 - 200,000" />
+                <select
+                  id="er-budget"
+                  value={f.budget_range ?? ""}
+                  onChange={(e) => setF({ ...f, budget_range: e.target.value })}
+                  className="mt-1 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                >
+                  <option value="">Not set</option>
+                  {budgetBuckets.map((b) => (
+                    <option key={b} value={b}>{b}</option>
+                  ))}
+                </select>
               </div>
               <div>
                 <Label htmlFor="er-urgency">Urgency</Label>

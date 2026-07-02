@@ -15,7 +15,13 @@ export interface RequestRowLite extends ServiceRequestRow {
   customer_name?: string | null;
   customer_avatar_url?: string | null;
   customer_verified?: boolean;
+  posted_as_type?: string | null;
+  posted_as_name?: string | null;
+  posted_as_avatar_url?: string | null;
+  posted_as_ref_type?: string | null;
+  posted_as_ref_id?: string | null;
 }
+
 
 const urgencyLabel: Record<string, { label: string; tone: string }> = {
   emergency: { label: "Today", tone: "bg-orange/15 text-orange" },
@@ -60,7 +66,13 @@ export function RequestCard({
   const title = tidy(r.title) || tidy(r.service_needed) || cat?.name || "Request";
   const description = tidy(r.description);
   const isOwner = !!currentUserId && currentUserId === r.customer_id;
-  const requesterName = r.customer_name?.trim() || "A neighbour";
+  const isBusinessPost = r.posted_as_type === "business" && !!r.posted_as_name;
+  const requesterName = isBusinessPost
+    ? (r.posted_as_name as string)
+    : (r.customer_name?.trim() || "A neighbour");
+  const requesterAvatar = isBusinessPost
+    ? (r.posted_as_avatar_url ?? null)
+    : (r.customer_avatar_url ?? null);
   const loc = r.area || r.town || r.district || r.location || "Uganda";
   const media = Array.isArray(r.media_urls) && r.media_urls.length > 0
     ? r.media_urls
@@ -68,12 +80,13 @@ export function RequestCard({
       ? [r.attachment_url]
       : [];
 
+
   return (
     <article className="overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)] transition hover:border-orange/60">
       {/* Header row — avatar / name / meta */}
       <div className="flex items-start gap-3 p-4 pb-2">
         <Link to="/requests/$id" params={{ id: r.id }} className="shrink-0">
-          <FeedAvatar src={r.customer_avatar_url ?? null} name={requesterName} size={44} ring={!!r.customer_verified} />
+          <FeedAvatar src={requesterAvatar} name={requesterName} size={44} ring={!!r.customer_verified && !isBusinessPost} />
         </Link>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-x-1.5 gap-y-0.5">
@@ -172,31 +185,43 @@ export function RequestCard({
       </div>
 
       {/* Action row */}
-      <div className="mt-3 flex items-center gap-2 border-t border-border bg-surface px-3 py-2.5 sm:px-4">
+      <div className="mt-3 grid grid-cols-[1fr_auto_auto] items-stretch gap-2 border-t border-border bg-surface px-3 py-2.5 sm:px-4">
         {isOwner ? (
           <>
             <Link
               to="/requests/$id"
               params={{ id: r.id }}
-              className="flex-1 rounded-full bg-navy px-4 py-2 text-center text-sm font-semibold text-navy-foreground hover:brightness-110"
+              className="inline-flex h-10 items-center justify-center rounded-full bg-navy px-4 text-sm font-semibold text-navy-foreground hover:brightness-110"
             >
               Manage request
             </Link>
+            {onEdit ? (
+              <button
+                type="button"
+                onClick={onEdit}
+                className="inline-flex h-10 items-center justify-center rounded-full border border-border px-3 text-xs font-semibold text-navy hover:border-navy"
+              >
+                Edit
+              </button>
+            ) : (
+              <span />
+            )}
             <Link
               to="/requests/$id"
               params={{ id: r.id }}
-              className="rounded-full border border-border px-3 py-2 text-center text-xs font-semibold text-navy hover:border-navy"
+              className="inline-flex h-10 items-center justify-center rounded-full border border-border px-3 text-xs font-semibold text-navy hover:border-navy"
             >
               Responses
             </Link>
           </>
+
         ) : (
           <>
             {onRespond ? (
               <button
                 type="button"
                 onClick={onRespond}
-                className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-orange px-4 py-2 text-sm font-semibold text-orange-foreground hover:brightness-110"
+                className="inline-flex h-10 items-center justify-center gap-1.5 rounded-full bg-orange px-4 text-sm font-semibold text-orange-foreground hover:brightness-110"
               >
                 <Send className="h-4 w-4" /> Send quote
               </button>
@@ -204,7 +229,7 @@ export function RequestCard({
               <Link
                 to="/requests/$id"
                 params={{ id: r.id }}
-                className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-orange px-4 py-2 text-sm font-semibold text-orange-foreground hover:brightness-110"
+                className="inline-flex h-10 items-center justify-center gap-1.5 rounded-full bg-orange px-4 text-sm font-semibold text-orange-foreground hover:brightness-110"
               >
                 <Send className="h-4 w-4" /> Send quote
               </Link>
@@ -212,7 +237,7 @@ export function RequestCard({
             <Link
               to="/requests/$id"
               params={{ id: r.id }}
-              className="inline-flex items-center justify-center gap-1 rounded-full border border-border px-3 py-2 text-xs font-semibold text-navy hover:border-navy"
+              className="inline-flex h-10 items-center justify-center gap-1 rounded-full border border-border px-3 text-xs font-semibold text-navy hover:border-navy"
               aria-label="Message requester"
             >
               <MessageSquare className="h-4 w-4" />
@@ -221,12 +246,13 @@ export function RequestCard({
             <Link
               to="/requests/$id"
               params={{ id: r.id }}
-              className="rounded-full border border-border px-3 py-2 text-xs font-semibold text-navy hover:border-navy"
+              className="inline-flex h-10 items-center justify-center rounded-full border border-border px-3 text-xs font-semibold text-navy hover:border-navy"
             >
               View
             </Link>
           </>
         )}
+
       </div>
     </article>
   );
