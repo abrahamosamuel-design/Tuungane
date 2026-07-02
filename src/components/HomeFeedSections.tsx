@@ -189,37 +189,8 @@ export function HomeFeedSections() {
         provs = (data ?? []) as unknown as NearbyProvider[];
       }
 
-      // Merge in claimed public/business pages so their owners appear too.
-      const { data: ppProvRows } = await supabase
-        .from("public_profiles")
-        .select(user ? PP_COLS_AUTH : PP_COLS_GUEST)
-        .eq("suspended", false)
-        .not("owner_id", "is", null)
-        .order("updated_at", { ascending: false })
-        .limit(24);
-      const existingProvIds = new Set((provs ?? []).map((p) => p.user_id));
-      const ppProvs = ((ppProvRows ?? []) as any[])
-        .filter((pp) => pp.owner_id && !existingProvIds.has(pp.owner_id))
-        .map((pp) => ({
-          user_id: pp.owner_id,
-          business_name: pp.name,
-          category_slug: pp.category_slug ?? "other",
-          subcategory: pp.subcategory ?? "",
-          bio: pp.bio ?? "",
-          town: pp.town ?? "",
-          district: pp.district ?? "",
-          area: pp.area ?? null,
-          latitude: pp.latitude ?? null,
-          longitude: pp.longitude ?? null,
-          service_radius_km: pp.service_radius_km ?? null,
-          areas_served: pp.areas_served ?? null,
-          verified: pp.verified ?? "none",
-          availability: pp.availability ?? null,
-          years_experience: null,
-          cover_url: pp.cover_url ?? pp.avatar_url ?? null,
-          media_urls: null,
-        })) as NearbyProvider[];
-      provs = [...(provs ?? []), ...ppProvs];
+      // MVP: only surface completed Service Profiles. Legacy public/business
+      // pages are hidden — owners must list a Service Profile to be discoverable.
 
       const { data: listingRows } = await supabase
         .from("service_profiles")
