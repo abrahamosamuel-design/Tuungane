@@ -145,11 +145,11 @@ export function MyProfilesPanel() {
             const Icon = TYPE_META[p.profile_type].icon;
             const draft = isDraft(p);
             return (
-              <li key={p.id}>
+              <li key={p.id} className="relative">
                 <Link
                   to="/profiles/$id"
                   params={{ id: p.id }}
-                  className="flex items-start gap-3 rounded-2xl border border-border bg-card p-4 transition hover:border-orange/60"
+                  className="flex items-start gap-3 rounded-2xl border border-border bg-card p-4 pr-12 transition hover:border-orange/60"
                 >
                   <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-muted">
                     {p.avatar_url ? (
@@ -192,11 +192,41 @@ export function MyProfilesPanel() {
                   </div>
                   <ChevronRight className="h-5 w-5 shrink-0 text-muted-foreground" />
                 </Link>
+                <button
+                  type="button"
+                  onClick={(e) => { e.preventDefault(); e.stopPropagation(); setConfirmDelete(p); }}
+                  aria-label={`Delete ${p.name}`}
+                  className="absolute right-3 top-3 inline-flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground transition hover:bg-destructive/10 hover:text-destructive"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
               </li>
             );
           })}
         </ul>
       )}
+
+      <AlertDialog open={!!confirmDelete} onOpenChange={(o) => !o && !deleting && setConfirmDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this service?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {confirmDelete ? `“${confirmDelete.name}” and all of its sub-services will be permanently removed. This cannot be undone.` : ""}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => { e.preventDefault(); handleDelete(); }}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting && <Loader2 className="mr-1 h-4 w-4 animate-spin" />}
+              {deleting ? "Deleting…" : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </section>
   );
 }
