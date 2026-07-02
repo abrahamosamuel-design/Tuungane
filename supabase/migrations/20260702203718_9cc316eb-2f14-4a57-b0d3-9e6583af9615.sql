@@ -1,0 +1,2 @@
+ALTER TABLE public.timeline_posts ADD COLUMN IF NOT EXISTS public_profile_id uuid REFERENCES public.public_profiles(id) ON DELETE CASCADE;
+CREATE INDEX IF NOT EXISTS idx_timeline_posts_public_profile ON public.timeline_posts(public_profile_id);

@@ -2501,6 +2501,7 @@ export type Database = {
           media_urls: string[]
           post_type: Database["public"]["Enums"]["post_type"]
           provider_user_id: string
+          public_profile_id: string | null
           text: string
           town: string | null
         }
@@ -2520,6 +2521,7 @@ export type Database = {
           media_urls?: string[]
           post_type?: Database["public"]["Enums"]["post_type"]
           provider_user_id: string
+          public_profile_id?: string | null
           text: string
           town?: string | null
         }
@@ -2539,10 +2541,19 @@ export type Database = {
           media_urls?: string[]
           post_type?: Database["public"]["Enums"]["post_type"]
           provider_user_id?: string
+          public_profile_id?: string | null
           text?: string
           town?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "timeline_posts_public_profile_id_fkey"
+            columns: ["public_profile_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       trust_audit_log: {
         Row: {
