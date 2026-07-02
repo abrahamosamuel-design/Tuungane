@@ -426,8 +426,8 @@ function UserProfile() {
               <div className="flex items-start gap-3">
                 <div className="rounded-full bg-orange/15 p-2 text-orange"><BadgeCheck className="h-5 w-5" /></div>
                 <div>
-                  <p className="font-semibold text-navy">Offer a service on Tuungane</p>
-                  <p className="mt-0.5 text-sm text-muted-foreground">List what you offer as an individual, business, school, organization, or group so people nearby can find and contact you.</p>
+                  <p className="font-semibold text-navy">Want people to find you on Tuungane?</p>
+                  <p className="mt-0.5 text-sm text-muted-foreground">Your account is currently a Member Profile. To appear under Services, search, categories, and homepage provider cards, list a service.</p>
                 </div>
               </div>
               <Link
