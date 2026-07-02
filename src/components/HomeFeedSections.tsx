@@ -557,7 +557,7 @@ function RequestCard({
     >
       {/* Header — requester name + meta (or anonymous for guests) */}
       <div className="flex items-start gap-3 p-4 pb-2">
-        <FeedAvatar src={r.customer_avatar_url ?? null} name={requesterName} size={40} />
+        <FeedAvatar src={requesterAvatar} name={requesterName} size={40} />
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-x-1.5 text-[13px] font-semibold text-navy">
             <span className="truncate">{requesterName}</span>
