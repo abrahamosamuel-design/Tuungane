@@ -155,12 +155,9 @@ export function HomeFeedSections() {
       if (hasCoords) {
         const lat = userLoc!.latitude as number;
         const lng = userLoc!.longitude as number;
-        const [{ data: rpcReqs }, { data: rpcProvs }] = await Promise.all([
-          supabase.rpc("nearby_service_requests", { in_lat: lat, in_lng: lng, in_radius_km: 50, in_limit: 24 }),
-          supabase.rpc("nearby_service_profiles", { in_lat: lat, in_lng: lng, in_radius_km: 50, in_limit: 24 }),
-        ]);
+        const { data: rpcReqs } = await supabase.rpc("nearby_service_requests", { in_lat: lat, in_lng: lng, in_radius_km: 50, in_limit: 24 });
         reqs = (rpcReqs ?? null) as NearbyRequest[] | null;
-        provs = (rpcProvs ?? null) as NearbyProvider[] | null;
+        // Providers are always loaded from public_profiles below (no RPC — it targets the legacy table).
         nearbyFlag = (reqs?.length ?? 0) > 0;
       }
 
