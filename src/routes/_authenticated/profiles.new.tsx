@@ -71,38 +71,26 @@ function NewProfile() {
       toast.error(error?.message ?? "Could not create profile");
       return;
     }
-    toast.success("Profile created — now add your services");
+    toast.success("Service created — now add photos and details");
     nav({ to: "/profiles/$id", params: { id: data.id } });
   };
 
   return (
     <Layout>
       <section className="mx-auto max-w-2xl px-4 py-6">
-        <h1 className="font-display text-2xl font-bold text-navy">Create a new profile</h1>
+        <h1 className="font-display text-2xl font-bold text-navy">List a new service</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Each profile appears separately to customers. Use one per business, skill or organization.
+          Each service appears separately to customers. You can list as many services as you offer under one Tuungane account.
         </p>
 
         <form onSubmit={submit} className="mt-5 space-y-4 rounded-2xl border border-border bg-card p-5">
           <div>
-            <label className="text-xs font-medium text-navy">Profile type</label>
-            <div className="mt-1 grid grid-cols-3 gap-2">
-              {(["individual", "business", "organization"] as ProfileType[]).map((t) => (
-                <button
-                  type="button"
-                  key={t}
-                  onClick={() => setProfileType(t)}
-                  className={`rounded-xl border px-3 py-2 text-xs font-semibold capitalize ${
-                    profileType === t ? "border-orange bg-orange/10 text-orange" : "border-border text-navy/70"
-                  }`}
-                >
-                  {t}
-                </button>
-              ))}
-            </div>
+            <Field label="Service name" value={name} onChange={setName} placeholder="e.g. Genesis Car Wash" />
+            <p className="mt-1 text-[11px] text-muted-foreground">
+              This is the name customers will see on your service card. You can use your personal name, a service name, or a trading name.
+            </p>
           </div>
 
-          <Field label="Profile name" value={name} onChange={setName} placeholder="e.g. Genesis Car Wash" />
 
           <div className="grid grid-cols-2 gap-2">
             <div>
