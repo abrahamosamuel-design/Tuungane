@@ -134,6 +134,7 @@ export function HomeFeedSections() {
   const [isProvider, setIsProvider] = useState(false);
   const [respondTo, setRespondTo] = useState<string | null>(null);
   const [editingRequest, setEditingRequest] = useState<string | null>(null);
+  const [reloadTick, setReloadTick] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
