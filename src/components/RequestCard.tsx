@@ -15,7 +15,13 @@ export interface RequestRowLite extends ServiceRequestRow {
   customer_name?: string | null;
   customer_avatar_url?: string | null;
   customer_verified?: boolean;
+  posted_as_type?: string | null;
+  posted_as_name?: string | null;
+  posted_as_avatar_url?: string | null;
+  posted_as_ref_type?: string | null;
+  posted_as_ref_id?: string | null;
 }
+
 
 const urgencyLabel: Record<string, { label: string; tone: string }> = {
   emergency: { label: "Today", tone: "bg-orange/15 text-orange" },
