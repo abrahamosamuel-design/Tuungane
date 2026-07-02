@@ -172,10 +172,19 @@ function ConversationPage() {
           <Link to="/u/$id" params={{ id: other?.id ?? "" }} className="flex min-w-0 flex-1 items-center gap-2">
             <Avatar name={other?.full_name ?? "User"} url={other?.avatar_url ?? null} size={36} />
             <div className="min-w-0">
-              <p className="truncate font-semibold text-navy">{other?.full_name ?? "User"}</p>
-              {req && <p className="truncate text-[11px] text-muted-foreground">Re: {req.title ?? req.service_needed}</p>}
+              <p className="truncate font-semibold text-navy">
+                {serviceProfile?.name ?? other?.full_name ?? "User"}
+              </p>
+              {serviceProfile ? (
+                <p className="truncate text-[11px] text-muted-foreground">
+                  Contacting: {serviceProfile.name}{other?.full_name ? ` · ${other.full_name}` : ""}
+                </p>
+              ) : req ? (
+                <p className="truncate text-[11px] text-muted-foreground">Re: {req.title ?? req.service_needed}</p>
+              ) : null}
             </div>
           </Link>
+
           <Link to="/requests/$id" params={{ id: conv.service_request_id }} className="hidden rounded-full border border-border px-3 py-1 text-xs font-semibold text-navy hover:border-orange sm:inline-flex">Open request</Link>
           <button onClick={reportConversation} aria-label="Report" className="rounded-full p-2 text-muted-foreground hover:text-destructive"><Flag className="h-4 w-4" /></button>
           <button onClick={blockOther} aria-label="Block" className="rounded-full p-2 text-muted-foreground hover:text-destructive"><Ban className="h-4 w-4" /></button>
