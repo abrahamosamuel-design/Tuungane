@@ -26,7 +26,8 @@ function NewProfile() {
   const { user } = useAuth();
   const nav = useNavigate();
   const { categories } = useCategories();
-  const [profileType, setProfileType] = useState<ProfileType>("individual");
+  // Every new profile is a service profile in the MVP.
+  const profileType: ProfileType = "individual";
   const [name, setName] = useState("");
   const [categorySlug, setCategorySlug] = useState(staticCategories[0].slug);
   const [subcategory, setSubcategory] = useState(staticCategories[0].subcategories[0]);
@@ -42,9 +43,10 @@ function NewProfile() {
     e.preventDefault();
     if (!user) return;
     if (!name.trim()) {
-      toast.error("Profile name is required");
+      toast.error("Service name is required");
       return;
     }
+
     setBusy(true);
     const base = slugify(name) || "profile";
     const slug = `${base}-${Math.random().toString(36).slice(2, 8)}`;
