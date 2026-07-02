@@ -33,7 +33,9 @@ type Msg = {
 };
 
 type Profile = { id: string; full_name: string; avatar_url: string | null };
-type Req = { id: string; service_needed: string; title: string | null; status: string; location: string | null; budget_range: string | null; selected_provider_id: string | null; urgent_flag: boolean | null; urgency: string | null };
+type Req = { id: string; service_needed: string; title: string | null; status: string; location: string | null; budget_range: string | null; selected_provider_id: string | null; urgent_flag: boolean | null; urgency: string | null; public_profile_id: string | null };
+type ServiceProfile = { id: string; name: string };
+
 
 function ConversationPage() {
   const { id } = Route.useParams();
@@ -43,6 +45,7 @@ function ConversationPage() {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [other, setOther] = useState<Profile | null>(null);
   const [req, setReq] = useState<Req | null>(null);
+  const [serviceProfile, setServiceProfile] = useState<ServiceProfile | null>(null);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const [busy, setBusy] = useState(true);
@@ -61,7 +64,7 @@ function ConversationPage() {
       const [{ data: prof }, { data: r }, { data: msgs }] = await Promise.all([
         supabase.from("profiles").select("id,full_name,avatar_url").eq("id", otherId).maybeSingle(),
         c.service_request_id
-          ? supabase.from("service_requests").select("id,service_needed,title,status,location,budget_range,selected_provider_id,urgent_flag,urgency").eq("id", c.service_request_id).maybeSingle()
+          ? supabase.from("service_requests").select("id,service_needed,title,status,location,budget_range,selected_provider_id,urgent_flag,urgency,public_profile_id").eq("id", c.service_request_id).maybeSingle()
           : Promise.resolve({ data: null }),
         supabase.from("messages").select("id,conversation_id,sender_id,receiver_id,body,created_at,is_read").eq("conversation_id", id).order("created_at", { ascending: true }),
       ]);
@@ -70,9 +73,18 @@ function ConversationPage() {
       setOther((prof ?? null) as Profile | null);
       setReq((r ?? null) as Req | null);
       setMessages((msgs ?? []) as Msg[]);
+      // If the request is scoped to a specific service profile, resolve its name for the header.
+      const spId = (r as { public_profile_id?: string | null } | null)?.public_profile_id ?? null;
+      if (spId) {
+        const { data: sp } = await supabase.from("public_profiles").select("id,name").eq("id", spId).maybeSingle();
+        if (active) setServiceProfile((sp ?? null) as ServiceProfile | null);
+      } else {
+        setServiceProfile(null);
+      }
       setBusy(false);
       void markConversationRead(id);
     };
+
 
     load();
 
@@ -160,10 +172,19 @@ function ConversationPage() {
           <Link to="/u/$id" params={{ id: other?.id ?? "" }} className="flex min-w-0 flex-1 items-center gap-2">
             <Avatar name={other?.full_name ?? "User"} url={other?.avatar_url ?? null} size={36} />
             <div className="min-w-0">
-              <p className="truncate font-semibold text-navy">{other?.full_name ?? "User"}</p>
-              {req && <p className="truncate text-[11px] text-muted-foreground">Re: {req.title ?? req.service_needed}</p>}
+              <p className="truncate font-semibold text-navy">
+                {serviceProfile?.name ?? other?.full_name ?? "User"}
+              </p>
+              {serviceProfile ? (
+                <p className="truncate text-[11px] text-muted-foreground">
+                  Contacting: {serviceProfile.name}{other?.full_name ? ` · ${other.full_name}` : ""}
+                </p>
+              ) : req ? (
+                <p className="truncate text-[11px] text-muted-foreground">Re: {req.title ?? req.service_needed}</p>
+              ) : null}
             </div>
           </Link>
+
           <Link to="/requests/$id" params={{ id: conv.service_request_id }} className="hidden rounded-full border border-border px-3 py-1 text-xs font-semibold text-navy hover:border-orange sm:inline-flex">Open request</Link>
           <button onClick={reportConversation} aria-label="Report" className="rounded-full p-2 text-muted-foreground hover:text-destructive"><Flag className="h-4 w-4" /></button>
           <button onClick={blockOther} aria-label="Block" className="rounded-full p-2 text-muted-foreground hover:text-destructive"><Ban className="h-4 w-4" /></button>
