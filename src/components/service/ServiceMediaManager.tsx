@@ -145,7 +145,7 @@ export function ServiceMediaManager({ ownerId, profileId }: { ownerId: string; p
       await supabase
         .from("service_media")
         .update({ is_cover: false } as never)
-        .eq("service_user_id", ownerId)
+        .eq("public_profile_id" as never, profileId)
         .eq("is_cover", true);
       await supabase.from("service_media").update({ is_cover: true } as never).eq("id", id);
       // Mirror photo covers into service_profiles.cover_url so existing service cards pick them up
