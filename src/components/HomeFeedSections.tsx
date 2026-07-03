@@ -717,7 +717,6 @@ function ProviderCard({ p, userLoc }: { p: NearbyProvider; userLoc: ReturnType<t
         >
           <MessageSquare className="h-3.5 w-3.5" />
         </Link>
-        <Link
         {p.slug ? (
           <Link
             to="/p/$slug"
