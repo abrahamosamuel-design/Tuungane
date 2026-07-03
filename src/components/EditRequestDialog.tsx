@@ -105,8 +105,16 @@ export function EditRequestDialog({
 
   const save = async () => {
     if (!requestId) return;
-    setSaving(true);
+    if (loadingPostedAsOptions) {
+      toast.error("Still loading your posting options — please try again in a moment");
+      return;
+    }
     const postedAs = findOption(postedAsOptions, postedAsKey);
+    if (postedAsKey !== "individual" && !postedAs) {
+      toast.error("Couldn't find the selected posting identity");
+      return;
+    }
+    setSaving(true);
     const payload = {
       title: f.title?.trim() || null,
       service_needed: f.service_needed?.trim() || null,
