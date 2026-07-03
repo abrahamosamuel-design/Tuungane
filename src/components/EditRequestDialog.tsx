@@ -43,7 +43,7 @@ export function EditRequestDialog({
 }) {
   const { user } = useAuth();
   const { categories } = useCategories();
-  const { options: postedAsOptions } = usePostAsOptions(user?.id ?? null);
+  const { options: postedAsOptions, loading: loadingPostedAsOptions } = usePostAsOptions(user?.id ?? null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [postedAsKey, setPostedAsKey] = useState<string>("individual");
