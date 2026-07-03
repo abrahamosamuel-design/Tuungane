@@ -67,7 +67,7 @@ function ManageProfile() {
   const [profile, setProfile] = useState<PublicProfile | null>(null);
   const [services, setServices] = useState<Service[]>([]);
   const [requests, setRequests] = useState<Request[]>([]);
-  const [tab, setTab] = useState<"details" | "services" | "requests">("services");
+  const [tab, setTab] = useState<"details" | "media" | "services" | "requests">("media");
   const [saving, setSaving] = useState(false);
 
   const load = async () => {
