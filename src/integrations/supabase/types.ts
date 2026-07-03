@@ -2127,6 +2127,7 @@ export type Database = {
           id: string
           is_cover: boolean
           kind: string
+          public_profile_id: string
           service_user_id: string
           sort_order: number
           thumbnail_url: string | null
@@ -2139,6 +2140,7 @@ export type Database = {
           id?: string
           is_cover?: boolean
           kind: string
+          public_profile_id: string
           service_user_id: string
           sort_order?: number
           thumbnail_url?: string | null
@@ -2151,13 +2153,22 @@ export type Database = {
           id?: string
           is_cover?: boolean
           kind?: string
+          public_profile_id?: string
           service_user_id?: string
           sort_order?: number
           thumbnail_url?: string | null
           updated_at?: string
           url?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "service_media_public_profile_id_fkey"
+            columns: ["public_profile_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       service_profiles: {
         Row: {
