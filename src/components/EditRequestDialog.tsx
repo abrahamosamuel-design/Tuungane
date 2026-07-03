@@ -43,7 +43,7 @@ export function EditRequestDialog({
 }) {
   const { user } = useAuth();
   const { categories } = useCategories();
-  const { options: postedAsOptions } = usePostAsOptions(user?.id ?? null);
+  const { options: postedAsOptions, loading: loadingPostedAsOptions } = usePostAsOptions(user?.id ?? null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [postedAsKey, setPostedAsKey] = useState<string>("individual");
@@ -105,8 +105,16 @@ export function EditRequestDialog({
 
   const save = async () => {
     if (!requestId) return;
-    setSaving(true);
+    if (loadingPostedAsOptions) {
+      toast.error("Still loading your posting options — please try again in a moment");
+      return;
+    }
     const postedAs = findOption(postedAsOptions, postedAsKey);
+    if (postedAsKey !== "individual" && !postedAs) {
+      toast.error("Couldn't find the selected posting identity");
+      return;
+    }
+    setSaving(true);
     const payload = {
       title: f.title?.trim() || null,
       service_needed: f.service_needed?.trim() || null,
@@ -267,7 +275,7 @@ export function EditRequestDialog({
         )}
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={saving}>Cancel</Button>
-          <Button onClick={save} disabled={saving || loading} className="bg-orange text-orange-foreground hover:brightness-110">
+          <Button onClick={save} disabled={saving || loading || loadingPostedAsOptions} className="bg-orange text-orange-foreground hover:brightness-110">
             {saving ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Saving…</> : "Save changes"}
           </Button>
         </DialogFooter>
