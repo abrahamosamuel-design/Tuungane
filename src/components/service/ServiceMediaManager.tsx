@@ -170,7 +170,7 @@ export function ServiceMediaManager({ ownerId }: { ownerId: string }) {
         <div>
           <h3 className="text-sm font-semibold text-navy">Service photos &amp; videos</h3>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            Add photos or short videos of your work so customers can trust your service. Max 25&nbsp;MB, videos up to 60s.
+            Add photos or short videos of your work so customers can trust your service. Max 50&nbsp;MB, videos up to 2&nbsp;minutes.
           </p>
         </div>
         <button
