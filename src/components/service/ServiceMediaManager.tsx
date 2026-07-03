@@ -91,6 +91,7 @@ export function ServiceMediaManager({ ownerId, profileId }: { ownerId: string; p
         const url = await uploadMedia(ownerId, file, "service-media");
         const { error } = await supabase.from("service_media").insert({
           service_user_id: ownerId,
+          public_profile_id: profileId,
           kind: isVideo ? "video" : "photo",
           url,
           thumbnail_url: thumbUrl,
