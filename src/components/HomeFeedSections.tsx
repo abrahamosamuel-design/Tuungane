@@ -39,9 +39,9 @@ const SP_COLS_AUTH =
 const SP_COLS_GUEST =
   "user_id,business_name,category_slug,subcategory,bio,town,district,service_radius_km,areas_served,verified,availability,years_experience,cover_url,media_urls";
 const PP_COLS_AUTH =
-  "owner_id,name,category_slug,subcategory,bio,town,district,area,latitude,longitude,service_radius_km,areas_served,verified,availability,cover_url,avatar_url,updated_at";
+  "owner_id,slug,name,category_slug,subcategory,bio,town,district,area,latitude,longitude,service_radius_km,areas_served,verified,availability,cover_url,avatar_url,updated_at";
 const PP_COLS_GUEST =
-  "owner_id,name,category_slug,subcategory,bio,town,district,service_radius_km,areas_served,verified,availability,cover_url,avatar_url,updated_at";
+  "owner_id,slug,name,category_slug,subcategory,bio,town,district,service_radius_km,areas_served,verified,availability,cover_url,avatar_url,updated_at";
 const SP_LISTING_COLS_AUTH =
   "user_id,business_name,category_slug,subcategory,bio,town,district,area,latitude,longitude,verified,availability,cover_url,created_at";
 const SP_LISTING_COLS_GUEST =
@@ -82,6 +82,7 @@ type NearbyRequest = {
 
 type NearbyProvider = {
   user_id: string;
+  slug?: string | null;
   business_name: string | null;
   category_slug?: string | null;
   subcategory: string;
@@ -716,13 +717,23 @@ function ProviderCard({ p, userLoc }: { p: NearbyProvider; userLoc: ReturnType<t
         >
           <MessageSquare className="h-3.5 w-3.5" />
         </Link>
-        <Link
-          to="/u/$id"
-          params={{ id: p.user_id }}
-          className="rounded-full border border-border px-3 py-2 text-xs font-semibold text-navy hover:border-navy"
-        >
-          View
-        </Link>
+        {p.slug ? (
+          <Link
+            to="/p/$slug"
+            params={{ slug: p.slug }}
+            className="rounded-full border border-border px-3 py-2 text-xs font-semibold text-navy hover:border-navy"
+          >
+            View
+          </Link>
+        ) : (
+          <Link
+            to="/u/$id"
+            params={{ id: p.user_id }}
+            className="rounded-full border border-border px-3 py-2 text-xs font-semibold text-navy hover:border-navy"
+          >
+            View
+          </Link>
+        )}
       </div>
     </article>
   );
