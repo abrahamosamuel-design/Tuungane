@@ -22,7 +22,7 @@ export type MediaRow = {
  * Owner-only media manager for a service_profile.
  * Uses the existing public `tuungane-media` bucket (service-media/{userId}/...).
  */
-export function ServiceMediaManager({ ownerId }: { ownerId: string }) {
+export function ServiceMediaManager({ ownerId, profileId }: { ownerId: string; profileId: string }) {
   const [items, setItems] = useState<MediaRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -33,7 +33,7 @@ export function ServiceMediaManager({ ownerId }: { ownerId: string }) {
     const { data, error } = await supabase
       .from("service_media")
       .select("id,service_user_id,kind,url,thumbnail_url,sort_order,is_cover,duration_seconds")
-      .eq("service_user_id", ownerId)
+      .eq("public_profile_id" as never, profileId)
       .order("is_cover", { ascending: false })
       .order("sort_order");
     if (error) toast.error("Couldn't load media");
@@ -44,7 +44,7 @@ export function ServiceMediaManager({ ownerId }: { ownerId: string }) {
   useEffect(() => {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ownerId]);
+  }, [ownerId, profileId]);
 
   const nextSortOrder = () =>
     (items.reduce((max, i) => Math.max(max, i.sort_order), -1) + 1) | 0;
