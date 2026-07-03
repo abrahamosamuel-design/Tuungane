@@ -718,12 +718,23 @@ function ProviderCard({ p, userLoc }: { p: NearbyProvider; userLoc: ReturnType<t
           <MessageSquare className="h-3.5 w-3.5" />
         </Link>
         <Link
-          to="/u/$id"
-          params={{ id: p.user_id }}
-          className="rounded-full border border-border px-3 py-2 text-xs font-semibold text-navy hover:border-navy"
-        >
-          View
-        </Link>
+        {p.slug ? (
+          <Link
+            to="/p/$slug"
+            params={{ slug: p.slug }}
+            className="rounded-full border border-border px-3 py-2 text-xs font-semibold text-navy hover:border-navy"
+          >
+            View
+          </Link>
+        ) : (
+          <Link
+            to="/u/$id"
+            params={{ id: p.user_id }}
+            className="rounded-full border border-border px-3 py-2 text-xs font-semibold text-navy hover:border-navy"
+          >
+            View
+          </Link>
+        )}
       </div>
     </article>
   );
