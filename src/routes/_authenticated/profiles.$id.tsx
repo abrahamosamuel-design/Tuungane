@@ -198,7 +198,7 @@ function ManageProfile() {
 
         {tab === "media" && (
           <div className="mt-4">
-            <ServiceMediaManager ownerId={profile.owner_id} />
+            <ServiceMediaManager ownerId={profile.owner_id} profileId={profile.id} />
           </div>
         )}
 

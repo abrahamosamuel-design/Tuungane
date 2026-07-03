@@ -141,7 +141,7 @@ function PublicProfilePage() {
       supabase
         .from("service_media")
         .select("id,kind,url,thumbnail_url,is_cover,sort_order")
-        .eq("service_user_id", prof.owner_id)
+        .eq("public_profile_id" as never, prof.id)
         .order("is_cover", { ascending: false })
         .order("sort_order"),
       supabase

@@ -22,7 +22,7 @@ export type MediaRow = {
  * Owner-only media manager for a service_profile.
  * Uses the existing public `tuungane-media` bucket (service-media/{userId}/...).
  */
-export function ServiceMediaManager({ ownerId }: { ownerId: string }) {
+export function ServiceMediaManager({ ownerId, profileId }: { ownerId: string; profileId: string }) {
   const [items, setItems] = useState<MediaRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -33,7 +33,7 @@ export function ServiceMediaManager({ ownerId }: { ownerId: string }) {
     const { data, error } = await supabase
       .from("service_media")
       .select("id,service_user_id,kind,url,thumbnail_url,sort_order,is_cover,duration_seconds")
-      .eq("service_user_id", ownerId)
+      .eq("public_profile_id" as never, profileId)
       .order("is_cover", { ascending: false })
       .order("sort_order");
     if (error) toast.error("Couldn't load media");
@@ -44,7 +44,7 @@ export function ServiceMediaManager({ ownerId }: { ownerId: string }) {
   useEffect(() => {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ownerId]);
+  }, [ownerId, profileId]);
 
   const nextSortOrder = () =>
     (items.reduce((max, i) => Math.max(max, i.sort_order), -1) + 1) | 0;
@@ -91,6 +91,7 @@ export function ServiceMediaManager({ ownerId }: { ownerId: string }) {
         const url = await uploadMedia(ownerId, file, "service-media");
         const { error } = await supabase.from("service_media").insert({
           service_user_id: ownerId,
+          public_profile_id: profileId,
           kind: isVideo ? "video" : "photo",
           url,
           thumbnail_url: thumbUrl,
@@ -144,7 +145,7 @@ export function ServiceMediaManager({ ownerId }: { ownerId: string }) {
       await supabase
         .from("service_media")
         .update({ is_cover: false } as never)
-        .eq("service_user_id", ownerId)
+        .eq("public_profile_id" as never, profileId)
         .eq("is_cover", true);
       await supabase.from("service_media").update({ is_cover: true } as never).eq("id", id);
       // Mirror photo covers into service_profiles.cover_url so existing service cards pick them up
