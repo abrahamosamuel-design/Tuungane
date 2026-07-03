@@ -82,6 +82,7 @@ type NearbyRequest = {
 
 type NearbyProvider = {
   user_id: string;
+  slug?: string | null;
   business_name: string | null;
   category_slug?: string | null;
   subcategory: string;
