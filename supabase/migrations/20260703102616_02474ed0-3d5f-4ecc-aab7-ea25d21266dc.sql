@@ -1,0 +1,2 @@
+ALTER TABLE public.service_media DROP CONSTRAINT IF EXISTS service_media_service_user_id_fkey;
+ALTER TABLE public.service_media ADD CONSTRAINT service_media_service_user_id_fkey FOREIGN KEY (service_user_id) REFERENCES auth.users(id) ON DELETE CASCADE;
