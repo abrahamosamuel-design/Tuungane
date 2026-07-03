@@ -4,8 +4,8 @@ import { uploadMedia } from "@/lib/upload";
 import { toast } from "sonner";
 import { Loader2, Upload, Trash2, ArrowUp, ArrowDown, Star, StarOff, Video as VideoIcon, ImageIcon } from "lucide-react";
 
-const MAX_BYTES = 25 * 1024 * 1024; // 25MB
-const MAX_VIDEO_SECONDS = 60;
+const MAX_BYTES = 50 * 1024 * 1024; // 50MB
+const MAX_VIDEO_SECONDS = 120;
 
 export type MediaRow = {
   id: string;
