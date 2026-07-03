@@ -13,6 +13,7 @@ import { ArrowLeft, Plus, Trash2, Save, Camera, Pencil, Star } from "lucide-reac
 import { ExpandableText } from "@/components/feed/ExpandableText";
 import { PriceGuideChip } from "@/components/PriceGuide";
 import { PRICE_TYPE_OPTIONS, validatePriceGuide, type PriceType, type PriceGuide } from "@/lib/price-guide";
+import { ServiceMediaManager } from "@/components/service/ServiceMediaManager";
 
 export const Route = createFileRoute("/_authenticated/profiles/$id")({
   head: () => ({ meta: [{ title: "Manage Profile — Tuungane" }] }),
@@ -66,7 +67,7 @@ function ManageProfile() {
   const [profile, setProfile] = useState<PublicProfile | null>(null);
   const [services, setServices] = useState<Service[]>([]);
   const [requests, setRequests] = useState<Request[]>([]);
-  const [tab, setTab] = useState<"details" | "services" | "requests">("services");
+  const [tab, setTab] = useState<"details" | "media" | "services" | "requests">("media");
   const [saving, setSaving] = useState(false);
 
   const load = async () => {
@@ -184,7 +185,7 @@ function ManageProfile() {
 
 
         <nav className="mt-4 flex gap-1 rounded-xl bg-muted p-1 text-xs font-semibold">
-          {(["services", "requests", "details"] as const).map((t) => (
+          {(["media", "services", "requests", "details"] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -194,6 +195,12 @@ function ManageProfile() {
             </button>
           ))}
         </nav>
+
+        {tab === "media" && (
+          <div className="mt-4">
+            <ServiceMediaManager ownerId={profile.owner_id} />
+          </div>
+        )}
 
         {tab === "services" && (
           <ServicesTab profileId={profile.id} services={services} onChanged={load} />

@@ -15,6 +15,7 @@ import {
   LayoutDashboard,
   Clock,
   Sparkles,
+  ChevronRight,
 } from "lucide-react";
 import { ProfileTrustBadge } from "@/components/trust/ProfileTrustBadge";
 import { formatSubcategory } from "@/lib/format-category";
@@ -26,6 +27,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { PostComposer } from "@/components/social/PostComposer";
 import { PostCard, type PostRow } from "@/components/social/PostCard";
 import { toast } from "sonner";
+import { ServiceMediaGallery, type ServiceMediaItem } from "@/components/service/ServiceMediaGallery";
 
 type ProfileType = "individual" | "business" | "organization";
 
@@ -51,6 +53,19 @@ type PublicProfile = {
   verified: string;
 };
 
+type ServiceProfileExtras = {
+  price_display: string | null;
+  price_min: number | null;
+  price_max: number | null;
+  created_at: string;
+};
+
+type OwnerProfile = {
+  id: string;
+  full_name: string | null;
+  avatar_url: string | null;
+};
+
 type Service = {
   id: string;
   title: string;
@@ -70,11 +85,18 @@ export const Route = createFileRoute("/p/$slug")({
   head: ({ params }) => ({
     meta: [
       { title: `${params.slug} — Tuungane` },
-      { name: "description", content: "Service profile on Tuungane." },
+      { name: "description", content: "Service listing on Tuungane." },
     ],
   }),
   component: PublicProfilePage,
 });
+
+const QUICK_MESSAGES = [
+  "Is this available?",
+  "What is your price?",
+  "Can you come today?",
+  "I need this service",
+];
 
 function PublicProfilePage() {
   const { slug } = Route.useParams();
@@ -82,6 +104,9 @@ function PublicProfilePage() {
   const nav = useNavigate();
   const { requireAuth } = useAuthGate();
   const [profile, setProfile] = useState<PublicProfile | null>(null);
+  const [extras, setExtras] = useState<ServiceProfileExtras | null>(null);
+  const [owner, setOwner] = useState<OwnerProfile | null>(null);
+  const [media, setMedia] = useState<ServiceMediaItem[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [posts, setPosts] = useState<PostRow[]>([]);
   const [completed, setCompleted] = useState(0);
@@ -102,7 +127,23 @@ function PublicProfilePage() {
     const prof = p as PublicProfile;
     setProfile(prof);
 
-    const [{ data: s }, { data: t }, { count: c }] = await Promise.all([
+    const [{ data: sp }, { data: ownerRow }, { data: mediaRows }, { data: s }, { data: t }, { count: c }] = await Promise.all([
+      supabase
+        .from("service_profiles")
+        .select("price_display,price_min,price_max,created_at")
+        .eq("user_id", prof.owner_id)
+        .maybeSingle(),
+      supabase
+        .from("profiles")
+        .select("id,full_name,avatar_url")
+        .eq("id", prof.owner_id)
+        .maybeSingle(),
+      supabase
+        .from("service_media")
+        .select("id,kind,url,thumbnail_url,is_cover,sort_order")
+        .eq("service_user_id", prof.owner_id)
+        .order("is_cover", { ascending: false })
+        .order("sort_order"),
       supabase
         .from("profile_services")
         .select(
@@ -125,6 +166,9 @@ function PublicProfilePage() {
         .eq("public_profile_id", prof.id)
         .eq("status", "completed"),
     ]);
+    setExtras((sp as ServiceProfileExtras | null) ?? null);
+    setOwner((ownerRow as OwnerProfile | null) ?? null);
+    setMedia((mediaRows ?? []) as ServiceMediaItem[]);
     setServices((s ?? []) as Service[]);
     setPosts((t ?? []) as PostRow[]);
     setCompleted(c ?? 0);
@@ -162,6 +206,10 @@ function PublicProfilePage() {
   const isOwner = user?.id === profile.owner_id;
   const location = [profile.area, profile.town, profile.district].filter(Boolean).join(", ");
   const isVerified = profile.verified === "verified";
+  const priceLabel = formatPrice(extras);
+  const recentlyListed =
+    extras?.created_at &&
+    Date.now() - new Date(extras.created_at).getTime() < 7 * 24 * 60 * 60 * 1000;
 
   const requestService = (serviceId?: string) => {
     requireAuth(
@@ -173,6 +221,21 @@ function PublicProfilePage() {
       {
         title: "Sign in to request this service",
         message: "Create a free Tuungane account to send a request to this provider.",
+        redirect: `/p/${profile.slug}`,
+      },
+    );
+  };
+
+  const sendQuickMessage = (msg: string) => {
+    requireAuth(
+      () =>
+        nav({
+          to: "/messages",
+          search: { to: profile.owner_id, draft: msg } as never,
+        }),
+      {
+        title: "Sign in to message",
+        message: "Create a free Tuungane account to start a conversation.",
         redirect: `/p/${profile.slug}`,
       },
     );
@@ -198,24 +261,35 @@ function PublicProfilePage() {
 
   return (
     <Layout>
-      {/* Plain background strip — banner removed for MVP */}
-      <div className="h-16 w-full bg-gradient-to-b from-muted/60 to-transparent" />
+      {/* Media gallery hero — no banner */}
+      <ServiceMediaGallery
+        items={media}
+        fallbackName={profile.name}
+        fallbackAvatarUrl={profile.avatar_url ?? profile.cover_url}
+        fallbackCategorySlug={profile.category_slug}
+      />
 
-      <section className="mx-auto -mt-10 max-w-2xl px-4 pb-24">
-        {/* Logo + identity */}
-        <div className="flex flex-col items-center text-center sm:flex-row sm:items-end sm:text-left">
-          <div className="h-24 w-24 shrink-0 overflow-hidden rounded-2xl border-4 border-background bg-muted shadow-md">
-            <Avatar
-              name={profile.name}
-              url={profile.avatar_url ?? profile.cover_url}
-              categorySlug={profile.category_slug}
-              verifiedRing={isVerified}
-              size={88}
-            />
-          </div>
-          <div className="mt-3 min-w-0 sm:ml-4 sm:mt-0">
-            <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
-              <h1 className="font-display text-2xl font-bold text-navy">{profile.name}</h1>
+      <section className="mx-auto -mt-6 max-w-2xl px-4 pb-28">
+        {/* Service summary card — slight overlap for marketplace feel */}
+        <div className="relative rounded-2xl border border-border bg-card p-4 shadow-sm">
+          <h1 className="text-center font-display text-xl font-bold leading-tight text-navy sm:text-2xl">
+            {profile.name}
+          </h1>
+
+          <p className="mt-1 text-center text-[11px] font-semibold uppercase tracking-wide text-navy/60">
+            {profile.subcategory
+              ? formatSubcategory(profile.subcategory)
+              : profile.category_slug ?? "Service"}
+          </p>
+
+          {(location || isVerified) && (
+            <div className="mt-2 flex flex-wrap items-center justify-center gap-2 text-xs text-muted-foreground">
+              {location && (
+                <span className="inline-flex items-center gap-1">
+                  <MapPin className="h-3.5 w-3.5 text-navy/60" />
+                  {location}
+                </span>
+              )}
               {profile.profile_type === "individual" ? (
                 <ProfileTrustBadge kind="service_profile" id={profile.owner_id} />
               ) : isVerified ? (
@@ -224,83 +298,122 @@ function PublicProfilePage() {
                 </span>
               ) : null}
             </div>
-            <p className="mt-0.5 text-xs uppercase tracking-wide text-navy/60">
-              {profile.subcategory
-                ? formatSubcategory(profile.subcategory)
-                : profile.category_slug ?? "Service"}
-            </p>
-            {location && (
-              <p className="mt-1 inline-flex items-center gap-1 text-xs text-muted-foreground">
-                <MapPin className="h-3 w-3" /> {location}
-              </p>
+          )}
+
+          <div className="mt-3 flex flex-wrap items-center justify-center gap-1.5">
+            {priceLabel && (
+              <span className="inline-flex items-center rounded-full bg-navy/5 px-3 py-1 text-xs font-bold text-navy">
+                {priceLabel}
+              </span>
             )}
-            {/* Soft trust chip — no broken 0-review formats */}
-            <div className="mt-2 flex flex-wrap justify-center gap-1.5 sm:justify-start">
-              {isVerified && (
-                <span className="rounded-full bg-green/10 px-2 py-0.5 text-[11px] font-semibold text-green">
-                  Verified service
-                </span>
-              )}
-              {completed > 0 ? (
-                <span className="rounded-full bg-navy/5 px-2 py-0.5 text-[11px] font-semibold text-navy/80">
-                  {completed} completed request{completed === 1 ? "" : "s"}
-                </span>
-              ) : !isVerified ? (
-                <span className="inline-flex items-center gap-1 rounded-full bg-orange/10 px-2 py-0.5 text-[11px] font-semibold text-orange">
-                  <Sparkles className="h-3 w-3" /> Recently listed
-                </span>
-              ) : null}
-            </div>
+            {recentlyListed && !isVerified && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-orange/10 px-2 py-0.5 text-[11px] font-semibold text-orange">
+                <Sparkles className="h-3 w-3" /> Recently listed
+              </span>
+            )}
+            {completed > 0 && (
+              <span className="inline-flex items-center rounded-full bg-green/10 px-2 py-0.5 text-[11px] font-semibold text-green">
+                {completed} completed
+              </span>
+            )}
           </div>
         </div>
 
-        {/* Primary actions — visitors only */}
+        {/* Provider identity strip */}
+        {owner && (
+          <Link
+            to="/u/$id"
+            params={{ id: profile.owner_id }}
+            className="mt-3 flex items-center gap-3 rounded-xl border border-border bg-card p-3 transition hover:border-navy/30"
+          >
+            <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-muted">
+              <Avatar name={owner.full_name || profile.name} url={owner.avatar_url} size={40} />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-[11px] font-medium uppercase tracking-wide text-navy/50">
+                Offered by
+              </p>
+              <p className="truncate text-sm font-semibold text-navy">
+                {owner.full_name || "View provider"}
+              </p>
+            </div>
+            <ChevronRight className="h-4 w-4 shrink-0 text-navy/40" />
+          </Link>
+        )}
+
+        {/* Contact actions — visitors only */}
         {!isOwner && (
-          <div className="mt-5 grid grid-cols-3 gap-2">
-            <button
-              onClick={() => requestService()}
-              className="col-span-2 inline-flex items-center justify-center gap-1 rounded-xl bg-orange px-4 py-2.5 text-sm font-semibold text-orange-foreground"
-            >
-              Request service
-            </button>
-            <Link
-              to="/messages"
-              search={{ to: profile.owner_id } as never}
-              className="inline-flex items-center justify-center gap-1 rounded-xl border border-navy/20 bg-card px-3 py-2.5 text-sm font-semibold text-navy"
-            >
-              <MessageSquare className="h-4 w-4" /> Message
-            </Link>
+          <>
+            <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-[1fr_auto]">
+              <Link
+                to="/messages"
+                search={{ to: profile.owner_id } as never}
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-orange px-4 py-3 text-sm font-bold text-orange-foreground shadow-sm"
+              >
+                <MessageSquare className="h-4 w-4" /> Message on Tuungane
+              </Link>
+              {profile.phone && (
+                <a
+                  href={`tel:${profile.phone}`}
+                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-navy/25 bg-card px-4 py-3 text-sm font-semibold text-navy"
+                >
+                  <Phone className="h-4 w-4" /> Call
+                </a>
+              )}
+            </div>
+
+            {/* Quick-message chips */}
+            <div className="mt-3">
+              <p className="text-[11px] font-semibold uppercase tracking-wide text-navy/50">
+                Quick message
+              </p>
+              <div className="mt-1.5 flex flex-wrap gap-1.5">
+                {QUICK_MESSAGES.map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => sendQuickMessage(m)}
+                    className="rounded-full border border-navy/20 bg-card px-3 py-1.5 text-xs font-medium text-navy transition hover:border-orange hover:text-orange"
+                  >
+                    {m}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <button
               onClick={shareService}
-              className="col-span-3 inline-flex items-center justify-center gap-1 rounded-xl border border-border bg-card px-3 py-2 text-xs font-semibold text-navy/80"
+              className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-navy/70 hover:text-navy"
             >
               <Share2 className="h-3.5 w-3.5" /> Share this service
             </button>
-          </div>
+          </>
         )}
 
-        {/* Owner-only slim bar (never for visitors) */}
+        {/* Compact owner tools row */}
         {isOwner && (
-          <div className="mt-5 flex flex-wrap items-center gap-2 rounded-2xl border border-orange/30 bg-orange/5 p-3">
-            <span className="text-xs font-semibold text-orange/90">Owner tools</span>
+          <div className="mt-3 flex flex-wrap items-center gap-1.5 rounded-xl border border-border bg-muted/40 px-2 py-1.5">
+            <span className="pl-1 text-[10px] font-semibold uppercase tracking-wide text-navy/60">
+              Owner
+            </span>
             <Link
               to="/profiles/$id"
               params={{ id: profile.id }}
-              className="inline-flex items-center gap-1 rounded-full bg-orange px-3 py-1.5 text-xs font-semibold text-orange-foreground"
+              className="inline-flex items-center gap-1 rounded-full bg-orange px-2.5 py-1 text-[11px] font-semibold text-orange-foreground"
             >
-              <Pencil className="h-3.5 w-3.5" /> Edit service
+              <Pencil className="h-3 w-3" /> Edit
             </Link>
             <Link
               to="/dashboard"
-              className="inline-flex items-center gap-1 rounded-full border border-navy/20 bg-card px-3 py-1.5 text-xs font-semibold text-navy"
+              className="inline-flex items-center gap-1 rounded-full border border-navy/20 bg-card px-2.5 py-1 text-[11px] font-semibold text-navy"
             >
-              <LayoutDashboard className="h-3.5 w-3.5" /> Dashboard
+              <LayoutDashboard className="h-3 w-3" /> Dashboard
             </Link>
             <button
               onClick={shareService}
-              className="ml-auto inline-flex items-center gap-1 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-navy/70"
+              className="ml-auto inline-flex items-center gap-1 rounded-full border border-border bg-card px-2.5 py-1 text-[11px] font-medium text-navy/70"
             >
-              <Share2 className="h-3.5 w-3.5" /> Share
+              <Share2 className="h-3 w-3" /> Share
             </button>
           </div>
         )}
@@ -347,15 +460,19 @@ function PublicProfilePage() {
                   </p>
                 ) : null}
               </AboutBlock>
+              {priceLabel && (
+                <AboutBlock label="Price guide">
+                  <p className="text-sm font-semibold text-navy">{priceLabel}</p>
+                </AboutBlock>
+              )}
+              {profile.phone && (
+                <AboutBlock label="Contact">
+                  <p className="inline-flex items-center gap-1 text-sm text-foreground/90">
+                    <Phone className="h-3.5 w-3.5 text-navy/60" /> {profile.phone}
+                  </p>
+                </AboutBlock>
+              )}
             </div>
-
-            {profile.phone && (
-              <AboutBlock label="Phone">
-                <p className="inline-flex items-center gap-1 text-sm text-foreground/90">
-                  <Phone className="h-3.5 w-3.5 text-navy/60" /> {profile.phone}
-                </p>
-              </AboutBlock>
-            )}
 
             {isOwner && (
               <Link
@@ -396,7 +513,7 @@ function PublicProfilePage() {
           <TabsContent value="services" className="mt-3 space-y-2">
             {services.length === 0 ? (
               <div className="rounded-2xl border border-dashed border-border bg-card p-5 text-center text-sm text-muted-foreground">
-                No services added yet. Add the specific things customers can request under this service.
+                No sub-services listed yet. Customers can still request this service directly.
               </div>
             ) : (
               <ul className="space-y-2">
@@ -435,7 +552,7 @@ function PublicProfilePage() {
                           onClick={() => requestService(s.id)}
                           className="shrink-0 rounded-xl bg-orange px-3 py-2 text-xs font-semibold text-orange-foreground"
                         >
-                          Request this service
+                          Request
                         </button>
                       )}
                     </div>
@@ -449,7 +566,7 @@ function PublicProfilePage() {
                 params={{ id: profile.id }}
                 className="mt-2 inline-flex items-center gap-1 rounded-xl border border-dashed border-orange/40 bg-orange/5 px-3 py-2.5 text-sm font-semibold text-orange"
               >
-                <Plus className="h-4 w-4" /> Add service
+                <Plus className="h-4 w-4" /> Add sub-service
               </Link>
             )}
           </TabsContent>
@@ -477,4 +594,15 @@ function AboutBlock({
       </div>
     </div>
   );
+}
+
+function formatPrice(sp: ServiceProfileExtras | null): string | null {
+  if (!sp) return null;
+  if (sp.price_display && sp.price_display.trim()) return sp.price_display.trim();
+  const min = sp.price_min ?? null;
+  const max = sp.price_max ?? null;
+  if (min && max && max !== min) return `USh ${min.toLocaleString()} – ${max.toLocaleString()}`;
+  if (min) return `From USh ${min.toLocaleString()}`;
+  if (max) return `USh ${max.toLocaleString()}`;
+  return null;
 }
