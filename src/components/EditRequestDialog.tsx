@@ -275,7 +275,7 @@ export function EditRequestDialog({
         )}
         <DialogFooter>
           <Button variant="outline" onClick={onClose} disabled={saving}>Cancel</Button>
-          <Button onClick={save} disabled={saving || loading} className="bg-orange text-orange-foreground hover:brightness-110">
+          <Button onClick={save} disabled={saving || loading || loadingPostedAsOptions} className="bg-orange text-orange-foreground hover:brightness-110">
             {saving ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Saving…</> : "Save changes"}
           </Button>
         </DialogFooter>
