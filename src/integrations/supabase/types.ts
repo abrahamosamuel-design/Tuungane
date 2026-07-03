@@ -2157,15 +2157,7 @@ export type Database = {
           updated_at?: string
           url?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "service_media_service_user_id_fkey"
-            columns: ["service_user_id"]
-            isOneToOne: false
-            referencedRelation: "service_profiles"
-            referencedColumns: ["user_id"]
-          },
-        ]
+        Relationships: []
       }
       service_profiles: {
         Row: {
