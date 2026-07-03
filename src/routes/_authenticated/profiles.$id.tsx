@@ -185,7 +185,7 @@ function ManageProfile() {
 
 
         <nav className="mt-4 flex gap-1 rounded-xl bg-muted p-1 text-xs font-semibold">
-          {(["services", "requests", "details"] as const).map((t) => (
+          {(["media", "services", "requests", "details"] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -195,6 +195,12 @@ function ManageProfile() {
             </button>
           ))}
         </nav>
+
+        {tab === "media" && (
+          <div className="mt-4">
+            <ServiceMediaManager ownerId={profile.owner_id} />
+          </div>
+        )}
 
         {tab === "services" && (
           <ServicesTab profileId={profile.id} services={services} onChanged={load} />
