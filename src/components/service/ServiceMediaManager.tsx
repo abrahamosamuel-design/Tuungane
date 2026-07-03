@@ -4,8 +4,8 @@ import { uploadMedia } from "@/lib/upload";
 import { toast } from "sonner";
 import { Loader2, Upload, Trash2, ArrowUp, ArrowDown, Star, StarOff, Video as VideoIcon, ImageIcon } from "lucide-react";
 
-const MAX_BYTES = 25 * 1024 * 1024; // 25MB
-const MAX_VIDEO_SECONDS = 60;
+const MAX_BYTES = 50 * 1024 * 1024; // 50MB
+const MAX_VIDEO_SECONDS = 120;
 
 export type MediaRow = {
   id: string;
@@ -170,7 +170,7 @@ export function ServiceMediaManager({ ownerId }: { ownerId: string }) {
         <div>
           <h3 className="text-sm font-semibold text-navy">Service photos &amp; videos</h3>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            Add photos or short videos of your work so customers can trust your service. Max 25&nbsp;MB, videos up to 60s.
+            Add photos or short videos of your work so customers can trust your service. Max 50&nbsp;MB, videos up to 2&nbsp;minutes.
           </p>
         </div>
         <button
