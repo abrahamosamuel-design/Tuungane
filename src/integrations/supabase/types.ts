@@ -2120,6 +2120,53 @@ export type Database = {
           },
         ]
       }
+      service_media: {
+        Row: {
+          created_at: string
+          duration_seconds: number | null
+          id: string
+          is_cover: boolean
+          kind: string
+          service_user_id: string
+          sort_order: number
+          thumbnail_url: string | null
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          is_cover?: boolean
+          kind: string
+          service_user_id: string
+          sort_order?: number
+          thumbnail_url?: string | null
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          created_at?: string
+          duration_seconds?: number | null
+          id?: string
+          is_cover?: boolean
+          kind?: string
+          service_user_id?: string
+          sort_order?: number
+          thumbnail_url?: string | null
+          updated_at?: string
+          url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_media_service_user_id_fkey"
+            columns: ["service_user_id"]
+            isOneToOne: false
+            referencedRelation: "service_profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       service_profiles: {
         Row: {
           area: string | null
@@ -2139,8 +2186,11 @@ export type Database = {
           media_urls: string[]
           phone: string | null
           price_currency: string
+          price_display: string | null
           price_fixed_ugx: number | null
+          price_max: number | null
           price_max_ugx: number | null
+          price_min: number | null
           price_min_ugx: number | null
           price_note: string | null
           price_type: string | null
@@ -2179,8 +2229,11 @@ export type Database = {
           media_urls?: string[]
           phone?: string | null
           price_currency?: string
+          price_display?: string | null
           price_fixed_ugx?: number | null
+          price_max?: number | null
           price_max_ugx?: number | null
+          price_min?: number | null
           price_min_ugx?: number | null
           price_note?: string | null
           price_type?: string | null
@@ -2219,8 +2272,11 @@ export type Database = {
           media_urls?: string[]
           phone?: string | null
           price_currency?: string
+          price_display?: string | null
           price_fixed_ugx?: number | null
+          price_max?: number | null
           price_max_ugx?: number | null
+          price_min?: number | null
           price_min_ugx?: number | null
           price_note?: string | null
           price_type?: string | null
@@ -3004,8 +3060,11 @@ export type Database = {
           media_urls: string[]
           phone: string | null
           price_currency: string
+          price_display: string | null
           price_fixed_ugx: number | null
+          price_max: number | null
           price_max_ugx: number | null
+          price_min: number | null
           price_min_ugx: number | null
           price_note: string | null
           price_type: string | null
