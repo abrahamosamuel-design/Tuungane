@@ -13,6 +13,7 @@ import { ArrowLeft, Plus, Trash2, Save, Camera, Pencil, Star } from "lucide-reac
 import { ExpandableText } from "@/components/feed/ExpandableText";
 import { PriceGuideChip } from "@/components/PriceGuide";
 import { PRICE_TYPE_OPTIONS, validatePriceGuide, type PriceType, type PriceGuide } from "@/lib/price-guide";
+import { ServiceMediaManager } from "@/components/service/ServiceMediaManager";
 
 export const Route = createFileRoute("/_authenticated/profiles/$id")({
   head: () => ({ meta: [{ title: "Manage Profile — Tuungane" }] }),
