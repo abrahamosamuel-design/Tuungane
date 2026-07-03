@@ -147,6 +147,19 @@ export function ServiceMediaManager({ ownerId }: { ownerId: string }) {
         .eq("service_user_id", ownerId)
         .eq("is_cover", true);
       await supabase.from("service_media").update({ is_cover: true } as never).eq("id", id);
+      // Mirror photo covers into service_profiles.cover_url so existing service cards pick them up
+      const target = items.find((m) => m.id === id);
+      if (target && target.kind === "photo") {
+        await supabase
+          .from("service_profiles")
+          .update({ cover_url: target.url } as never)
+          .eq("user_id", ownerId);
+      } else if (target && target.kind === "video" && target.thumbnail_url) {
+        await supabase
+          .from("service_profiles")
+          .update({ cover_url: target.thumbnail_url } as never)
+          .eq("user_id", ownerId);
+      }
     }
     load();
   };
