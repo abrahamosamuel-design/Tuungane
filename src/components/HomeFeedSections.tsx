@@ -39,9 +39,9 @@ const SP_COLS_AUTH =
 const SP_COLS_GUEST =
   "user_id,business_name,category_slug,subcategory,bio,town,district,service_radius_km,areas_served,verified,availability,years_experience,cover_url,media_urls";
 const PP_COLS_AUTH =
-  "owner_id,name,category_slug,subcategory,bio,town,district,area,latitude,longitude,service_radius_km,areas_served,verified,availability,cover_url,avatar_url,updated_at";
+  "owner_id,slug,name,category_slug,subcategory,bio,town,district,area,latitude,longitude,service_radius_km,areas_served,verified,availability,cover_url,avatar_url,updated_at";
 const PP_COLS_GUEST =
-  "owner_id,name,category_slug,subcategory,bio,town,district,service_radius_km,areas_served,verified,availability,cover_url,avatar_url,updated_at";
+  "owner_id,slug,name,category_slug,subcategory,bio,town,district,service_radius_km,areas_served,verified,availability,cover_url,avatar_url,updated_at";
 const SP_LISTING_COLS_AUTH =
   "user_id,business_name,category_slug,subcategory,bio,town,district,area,latitude,longitude,verified,availability,cover_url,created_at";
 const SP_LISTING_COLS_GUEST =
