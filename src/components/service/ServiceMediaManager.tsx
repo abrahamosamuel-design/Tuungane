@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadMedia } from "@/lib/upload";
 import { toast } from "sonner";
-import { Loader2, Upload, Trash2, ArrowUp, ArrowDown, Star, StarOff, Video as VideoIcon, ImageIcon } from "lucide-react";
+import { Loader2, Upload, Trash2, ArrowUp, ArrowDown, Star, StarOff, Video as VideoIcon, ImageIcon, RefreshCw } from "lucide-react";
 
 const MAX_BYTES = 50 * 1024 * 1024; // 50MB
 const MAX_VIDEO_SECONDS = 120;
@@ -27,6 +27,8 @@ export function ServiceMediaManager({ ownerId, profileId }: { ownerId: string; p
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const fileRef = useRef<HTMLInputElement | null>(null);
+  const replaceRef = useRef<HTMLInputElement | null>(null);
+  const [replaceTarget, setReplaceTarget] = useState<MediaRow | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -165,6 +167,77 @@ export function ServiceMediaManager({ ownerId, profileId }: { ownerId: string; p
     load();
   };
 
+  const beginReplace = (item: MediaRow) => {
+    setReplaceTarget(item);
+    replaceRef.current?.click();
+  };
+
+  const handleReplaceFile = async (fs: FileList | null) => {
+    const file = fs?.[0];
+    const target = replaceTarget;
+    if (replaceRef.current) replaceRef.current.value = "";
+    setReplaceTarget(null);
+    if (!file || !target) return;
+    const isVideo = file.type.startsWith("video/");
+    const isImage = file.type.startsWith("image/");
+    if (!isVideo && !isImage) return toast.error("Please pick a photo or video");
+    if (file.size > MAX_BYTES) return toast.error("File is over 50 MB");
+    setBusy(true);
+    try {
+      let duration: number | null = null;
+      let thumbUrl: string | null = target.thumbnail_url;
+      if (isVideo) {
+        const meta = await probeVideo(file);
+        if (meta.duration > MAX_VIDEO_SECONDS) {
+          toast.error(`Video is longer than ${MAX_VIDEO_SECONDS}s — please trim it`);
+          setBusy(false);
+          return;
+        }
+        duration = Math.round(meta.duration);
+        if (meta.thumbnailBlob) {
+          const thumbFile = new File(
+            [meta.thumbnailBlob],
+            `${crypto.randomUUID()}.jpg`,
+            { type: "image/jpeg" },
+          );
+          try {
+            thumbUrl = await uploadMedia(ownerId, thumbFile, "service-media/thumbs");
+          } catch {
+            /* non-fatal */
+          }
+        }
+      } else {
+        thumbUrl = null;
+      }
+      const url = await uploadMedia(ownerId, file, "service-media");
+      const { error } = await supabase
+        .from("service_media")
+        .update({
+          kind: isVideo ? "video" : "photo",
+          url,
+          thumbnail_url: thumbUrl,
+          duration_seconds: duration,
+        } as never)
+        .eq("id", target.id);
+      if (error) throw new Error(error.message);
+      if (target.is_cover) {
+        const coverUrl = isVideo ? thumbUrl : url;
+        if (coverUrl) {
+          await supabase
+            .from("service_profiles")
+            .update({ cover_url: coverUrl } as never)
+            .eq("user_id", ownerId);
+        }
+      }
+      toast.success("Media updated");
+      load();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Replace failed");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <div className="rounded-2xl border border-border bg-card p-4">
       <div className="flex items-start justify-between gap-3">
@@ -191,6 +264,13 @@ export function ServiceMediaManager({ ownerId, profileId }: { ownerId: string; p
           accept="image/*,video/mp4,video/webm,video/quicktime,video/x-m4v"
           onChange={(e) => handleFiles(e.target.files)}
         />
+        <input
+          ref={replaceRef}
+          type="file"
+          hidden
+          accept="image/*,video/mp4,video/webm,video/quicktime,video/x-m4v"
+          onChange={(e) => handleReplaceFile(e.target.files)}
+        />
       </div>
 
       {loading ? (
@@ -199,7 +279,7 @@ export function ServiceMediaManager({ ownerId, profileId }: { ownerId: string; p
         </div>
       ) : items.length === 0 ? (
         <div className="mt-4 rounded-xl border border-dashed border-border bg-muted/30 p-6 text-center text-sm text-muted-foreground">
-          No media yet. The first item you add will be the cover shown on your service card.
+          No photos or videos yet. Tap <span className="font-semibold text-navy">Add media</span> to upload — the first item becomes your cover.
         </div>
       ) : (
         <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -258,6 +338,14 @@ export function ServiceMediaManager({ ownerId, profileId }: { ownerId: string; p
                     aria-label={m.is_cover ? "Unset cover" : "Set as cover"}
                   >
                     {m.is_cover ? <StarOff className="h-3.5 w-3.5" /> : <Star className="h-3.5 w-3.5" />}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => beginReplace(m)}
+                    className="rounded-md border border-border p-1 text-navy/70"
+                    aria-label="Replace with a new photo or video"
+                  >
+                    <RefreshCw className="h-3.5 w-3.5" />
                   </button>
                   <button
                     type="button"

@@ -281,7 +281,7 @@ function PublicProfilePage() {
             aria-label="Edit photos and videos"
           >
             <ImagePlus className="h-3.5 w-3.5" />
-            {media.length === 0 ? "Add photos" : "Edit photos"}
+            {media.length === 0 ? "Add photos or videos" : "Edit photos & videos"}
           </button>
         )}
       </div>
