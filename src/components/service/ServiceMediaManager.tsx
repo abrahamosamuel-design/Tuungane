@@ -2,7 +2,28 @@ import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadMedia } from "@/lib/upload";
 import { toast } from "sonner";
-import { Loader2, Upload, Trash2, ArrowUp, ArrowDown, Star, StarOff, Video as VideoIcon, ImageIcon, RefreshCw } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  Loader2,
+  Upload,
+  Trash2,
+  ArrowUp,
+  ArrowDown,
+  Star,
+  StarOff,
+  Video as VideoIcon,
+  ImageIcon,
+  RefreshCw,
+} from "lucide-react";
 
 const MAX_BYTES = 50 * 1024 * 1024; // 50MB
 const MAX_VIDEO_SECONDS = 120;
@@ -56,6 +77,8 @@ export function ServiceMediaManager({ ownerId, profileId }: { ownerId: string; p
   const [items, setItems] = useState<MediaRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<MediaRow | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
   const replaceRef = useRef<HTMLInputElement | null>(null);
   const [replaceTarget, setReplaceTarget] = useState<MediaRow | null>(null);
@@ -149,14 +172,28 @@ export function ServiceMediaManager({ ownerId, profileId }: { ownerId: string; p
     }
   };
 
+  const askRemove = (item: MediaRow) => {
+    setDeleteTarget(item);
+  };
+
+  const cancelRemove = () => {
+    setDeleteTarget(null);
+    setDeletingId(null);
+  };
+
   const removeItem = async (id: string) => {
-    if (!confirm("Remove this media item?")) return;
     const target = items.find((m) => m.id === id);
+    if (!target) return;
+    setDeletingId(id);
     const { error } = await supabase.from("service_media").delete().eq("id", id);
-    if (error) return toast.error(error.message);
-    if (target) {
-      await removeStorageObjects([target.url, target.thumbnail_url]);
+    if (error) {
+      setDeletingId(null);
+      setDeleteTarget(null);
+      return toast.error(error.message);
     }
+    await removeStorageObjects([target.url, target.thumbnail_url]);
+    setDeletingId(null);
+    setDeleteTarget(null);
     load();
   };
 
@@ -388,11 +425,16 @@ export function ServiceMediaManager({ ownerId, profileId }: { ownerId: string; p
                   </button>
                   <button
                     type="button"
-                    onClick={() => removeItem(m.id)}
-                    className="rounded-md border border-border p-1 text-destructive"
+                    onClick={() => askRemove(m)}
+                    disabled={deletingId === m.id}
+                    className="rounded-md border border-border p-1 text-destructive disabled:opacity-50"
                     aria-label="Remove"
                   >
-                    <Trash2 className="h-3.5 w-3.5" />
+                    {deletingId === m.id ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-3.5 w-3.5" />
+                    )}
                   </button>
                 </div>
               </div>
@@ -400,6 +442,33 @@ export function ServiceMediaManager({ ownerId, profileId }: { ownerId: string; p
           ))}
         </ul>
       )}
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && cancelRemove()}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete {deleteTarget?.kind === "video" ? "video" : "photo"}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently remove the {deleteTarget?.kind === "video" ? "video" : "photo"} from your gallery and storage. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={cancelRemove} disabled={!!deletingId}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deleteTarget && removeItem(deleteTarget.id)}
+              disabled={!!deletingId}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deletingId ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Deleting…
+                </>
+              ) : (
+                "Delete"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
