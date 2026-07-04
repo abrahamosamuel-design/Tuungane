@@ -199,12 +199,15 @@ function UserProfile() {
     const { data: ps } = await supabase.from("timeline_posts").select("*").eq("provider_user_id", id).eq("hidden", false).order("created_at", { ascending: false });
     setPosts((ps ?? []).map((r) => ({ ...r, author: p ?? undefined })) as PostRow[]);
 
-    const [{ count: fc }, rRes, vRes] = await Promise.all([
-      supabase.from("follows").select("*", { count: "exact", head: true }).eq("provider_user_id", id),
+    const [{ data: fc }, rRes, vRes] = await Promise.all([
+      // Follower count via RPC — follows RLS only exposes rows the caller
+      // is part of, so a direct count would return 0 for non-owners.
+      supabase.rpc("get_provider_follower_count", { _provider: id }),
       supabase.from("provider_recommendations").select("id,service,message,rating,created_at,user_id").eq("provider_user_id", id).eq("hidden", false).order("created_at", { ascending: false }),
       supabase.from("reviews").select("id,rating,text,created_at,user_id").eq("provider_user_id", id).eq("hidden", false).order("created_at", { ascending: false }),
     ]);
-    setFollowers(fc ?? 0);
+    setFollowers((typeof fc === "number" ? fc : 0));
+
 
     const ids = Array.from(new Set([...(rRes.data ?? []).map((r) => r.user_id), ...(vRes.data ?? []).map((r) => r.user_id)]));
     let pm = new Map<string, { full_name: string; avatar_url: string | null }>();
