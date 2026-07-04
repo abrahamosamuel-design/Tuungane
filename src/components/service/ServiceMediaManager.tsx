@@ -355,7 +355,7 @@ export function ServiceMediaManager({ ownerId, profileId }: { ownerId: string; p
         </div>
       ) : items.length === 0 ? (
         <div className="mt-4 rounded-xl border border-dashed border-border bg-muted/30 p-6 text-center text-sm text-muted-foreground">
-          No photos or videos yet. Tap <span className="font-semibold text-navy">Add media</span> to upload — the first item becomes your cover.
+          No photos or videos yet. Tap <span className="font-semibold text-navy">Upload</span> to share your work — the first item becomes your cover and helps customers trust your service.
         </div>
       ) : (
         <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
