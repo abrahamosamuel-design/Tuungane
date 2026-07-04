@@ -341,6 +341,14 @@ export function ServiceMediaManager({ ownerId, profileId }: { ownerId: string; p
                   </button>
                   <button
                     type="button"
+                    onClick={() => beginReplace(m)}
+                    className="rounded-md border border-border p-1 text-navy/70"
+                    aria-label="Replace with a new photo or video"
+                  >
+                    <RefreshCw className="h-3.5 w-3.5" />
+                  </button>
+                  <button
+                    type="button"
                     onClick={() => removeItem(m.id)}
                     className="rounded-md border border-border p-1 text-destructive"
                     aria-label="Remove"
