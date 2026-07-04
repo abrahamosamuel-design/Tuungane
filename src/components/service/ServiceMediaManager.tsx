@@ -224,6 +224,11 @@ export function ServiceMediaManager({ ownerId, profileId }: { ownerId: string; p
         } as never)
         .eq("id", target.id);
       if (error) throw new Error(error.message);
+      // Old file(s) are now orphaned — clean them up. Skip an old thumbnail we're reusing.
+      await removeStorageObjects([
+        target.url,
+        target.thumbnail_url && target.thumbnail_url !== thumbUrl ? target.thumbnail_url : null,
+      ]);
       if (target.is_cover) {
         const coverUrl = isVideo ? thumbUrl : url;
         if (coverUrl) {
