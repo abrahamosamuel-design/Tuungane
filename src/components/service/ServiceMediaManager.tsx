@@ -425,11 +425,16 @@ export function ServiceMediaManager({ ownerId, profileId }: { ownerId: string; p
                   </button>
                   <button
                     type="button"
-                    onClick={() => removeItem(m.id)}
-                    className="rounded-md border border-border p-1 text-destructive"
+                    onClick={() => askRemove(m)}
+                    disabled={deletingId === m.id}
+                    className="rounded-md border border-border p-1 text-destructive disabled:opacity-50"
                     aria-label="Remove"
                   >
-                    <Trash2 className="h-3.5 w-3.5" />
+                    {deletingId === m.id ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-3.5 w-3.5" />
+                    )}
                   </button>
                 </div>
               </div>
