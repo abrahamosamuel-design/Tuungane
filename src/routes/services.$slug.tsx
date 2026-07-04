@@ -105,8 +105,8 @@ function CategoryPage() {
       ]);
       const spCoordMap = new Map(((spCoords ?? []) as Array<{ user_id: string; latitude: number | null; longitude: number | null }>).map((c) => [c.user_id, c]));
       const ppCoordMap = new Map(((ppCoords ?? []) as Array<{ id: string; latitude: number | null; longitude: number | null }>).map((c) => [c.id, c]));
-      (sps ?? []).forEach((r) => { const c = spCoordMap.get(r.user_id as string); (r as { latitude: number | null; longitude: number | null }).latitude = c?.latitude ?? null; (r as { latitude: number | null; longitude: number | null }).longitude = c?.longitude ?? null; });
-      (pps ?? []).forEach((r) => { const c = ppCoordMap.get((r as { id: string }).id); (r as { latitude: number | null; longitude: number | null }).latitude = c?.latitude ?? null; (r as { latitude: number | null; longitude: number | null }).longitude = c?.longitude ?? null; });
+      (sps ?? []).forEach((r) => { const c = spCoordMap.get(r.user_id as string); (r as unknown as { latitude: number | null; longitude: number | null }).latitude = c?.latitude ?? null; (r as unknown as { latitude: number | null; longitude: number | null }).longitude = c?.longitude ?? null; });
+      (pps ?? []).forEach((r) => { const c = ppCoordMap.get((r as { id: string }).id); (r as unknown as { latitude: number | null; longitude: number | null }).latitude = c?.latitude ?? null; (r as unknown as { latitude: number | null; longitude: number | null }).longitude = c?.longitude ?? null; });
       const spRows = ((sps ?? []) as any[]).map((r) => ({ ...r })) as (Row & { category_slug: string })[];
       const spOwners = new Set(spRows.map((r) => r.user_id));
       const ppRows = ((pps ?? []) as any[])
