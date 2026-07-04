@@ -179,33 +179,61 @@ export function HomeFeedSections() {
       }
 
       {
-        const { data } = await supabase
-          .from("public_profiles")
-          .select(user ? PP_COLS_AUTH : PP_COLS_GUEST)
-          .order("verified", { ascending: false })
-          .order("updated_at", { ascending: false })
-          .limit(24);
-        provs = ((data ?? []) as any[]).map((r) => ({
+        const [{ data: ppData }, { data: spData }] = await Promise.all([
+          supabase
+            .from("public_profiles")
+            .select(user ? PP_COLS_AUTH : PP_COLS_GUEST)
+            .eq("suspended", false)
+            .not("owner_id", "is", null)
+            .order("verified", { ascending: false })
+            .order("updated_at", { ascending: false })
+            .limit(24),
+          supabase
+            .from("service_profiles")
+            .select(user ? SP_COLS_AUTH : SP_COLS_GUEST)
+            .eq("suspended", false)
+            .order("verified", { ascending: false })
+            .order("updated_at", { ascending: false })
+            .limit(24),
+        ]);
+        const ppRows = ((ppData ?? []) as any[]).map((r) => ({
           ...r,
           user_id: r.owner_id,
           business_name: r.name,
-        })) as unknown as NearbyProvider[];
+        }));
+        const ppOwners = new Set(ppRows.map((r) => r.user_id));
+        const spRows = ((spData ?? []) as any[]).filter((r) => !ppOwners.has(r.user_id));
+        provs = [...ppRows, ...spRows] as unknown as NearbyProvider[];
       }
 
-      // MVP: surface user-created Service Profiles from public_profiles
-      // (the multi-per-user table backing "Your services").
+      // MVP: surface user-created Service Profiles from both public_profiles
+      // (multi-per-user) and legacy service_profiles (one-per-user).
 
-      const { data: listingRows } = await supabase
-        .from("public_profiles")
-        .select(user ? PP_LISTING_COLS_AUTH : PP_LISTING_COLS_GUEST)
-        .order("created_at", { ascending: false })
-        .limit(12);
-      const spListings = ((listingRows ?? []) as any[]).map((r) => ({
+      const [{ data: listingRows }, { data: spListingRows }] = await Promise.all([
+        supabase
+          .from("public_profiles")
+          .select(user ? PP_LISTING_COLS_AUTH : PP_LISTING_COLS_GUEST)
+          .eq("suspended", false)
+          .not("owner_id", "is", null)
+          .order("created_at", { ascending: false })
+          .limit(12),
+        supabase
+          .from("service_profiles")
+          .select(user ? SP_LISTING_COLS_AUTH : SP_LISTING_COLS_GUEST)
+          .eq("suspended", false)
+          .order("created_at", { ascending: false })
+          .limit(12),
+      ]);
+      const ppListings = ((listingRows ?? []) as any[]).map((r) => ({
         ...r,
         user_id: r.owner_id,
         business_name: r.name,
       })) as unknown as RecentListing[];
-      const listings = spListings
+      const ppOwnerSet = new Set(ppListings.map((l) => l.user_id));
+      const spListings = ((spListingRows ?? []) as any[])
+        .filter((r) => !ppOwnerSet.has(r.user_id))
+        .map((r) => ({ ...r, id: r.user_id, slug: null })) as unknown as RecentListing[];
+      const listings = [...ppListings, ...spListings]
         .slice()
         .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
         .slice(0, 12);
