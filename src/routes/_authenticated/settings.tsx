@@ -145,7 +145,11 @@ function SettingsPage() {
           </button>
         </Section>
 
+        <ProfileIdentitySection />
+
         <LocationSection />
+
+
 
 
         <Section title="Notifications">
