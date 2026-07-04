@@ -24,14 +24,14 @@ function AuthenticatedLayout() {
       if (cancelled || !sess.user) return;
       const { data } = await supabase
         .from("profiles")
-        .select("profile_identity")
+        .select("has_completed_onboarding")
         .eq("id", sess.user.id)
         .maybeSingle();
-      // Only redirect brand-new users — anyone with an existing identity
-      // (which includes every pre-existing user via backfill) is skipped
-      // and future runs are short-circuited by the localStorage flag.
       if (cancelled) return;
-      if (!data) {
+      // Redirect brand-new users who haven't completed the welcome flow.
+      // The flag is set to true on existing users via backfill, and set
+      // to true when the user finishes or skips onboarding.
+      if (!data || data.has_completed_onboarding === false) {
         nav({ to: "/onboarding" });
       } else {
         localStorage.setItem(ONBOARDED_KEY, "1");
