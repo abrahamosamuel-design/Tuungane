@@ -76,7 +76,7 @@ export function NearYouHomeSection() {
           ? Promise.resolve({ data: reqs })
           : supabase
               .from("service_requests")
-              .select("id,title,service_needed,description,budget_range,urgent_flag,created_at,district,town,area,location,latitude,longitude")
+              .select("id,title,service_needed,description,budget_range,urgent_flag,created_at,district,town,area,location")
               .eq("visibility", "public")
               .eq("status", "requested")
               .is("provider_id", null)
@@ -84,16 +84,30 @@ export function NearYouHomeSection() {
               .limit(40),
         supabase
           .from("public_profiles")
-          .select("owner_id,name,subcategory,town,district,area,latitude,longitude,service_radius_km,areas_served,verified")
+          .select("id,owner_id,name,subcategory,town,district,area,service_radius_km,areas_served,verified")
           .order("updated_at", { ascending: false })
           .limit(40),
       ]);
-      reqs = (rRows ?? []) as NearbyRequest[];
-      provs = ((pRows ?? []) as any[]).map((r) => ({
+      const rRaw = (rRows ?? []) as Array<NearbyRequest & { id: string }>;
+      const pRaw = (pRows ?? []) as Array<{ id: string; owner_id: string; name: string; [k: string]: unknown }>;
+
+      // Coordinates are gated at DB level — fetch via security-definer RPCs.
+      const [{ data: reqCoords }, { data: provCoords }] = await Promise.all([
+        rRaw.length ? supabase.rpc("get_service_request_coords", { _ids: rRaw.map((r) => r.id) }) : Promise.resolve({ data: [] as Array<{ id: string; latitude: number | null; longitude: number | null }> }),
+        pRaw.length ? supabase.rpc("get_public_profile_coords", { _ids: pRaw.map((r) => r.id) }) : Promise.resolve({ data: [] as Array<{ id: string; latitude: number | null; longitude: number | null }> }),
+      ]);
+      const reqCoordMap = new Map(((reqCoords ?? []) as Array<{ id: string; latitude: number | null; longitude: number | null }>).map((c) => [c.id, c]));
+      const provCoordMap = new Map(((provCoords ?? []) as Array<{ id: string; latitude: number | null; longitude: number | null }>).map((c) => [c.id, c]));
+
+      reqs = rRaw.map((r) => ({ ...r, latitude: reqCoordMap.get(r.id)?.latitude ?? null, longitude: reqCoordMap.get(r.id)?.longitude ?? null }));
+      provs = pRaw.map((r) => ({
         ...r,
         user_id: r.owner_id,
         business_name: r.name,
+        latitude: provCoordMap.get(r.id)?.latitude ?? null,
+        longitude: provCoordMap.get(r.id)?.longitude ?? null,
       })) as NearbyProvider[];
+
 
       if (cancelled) return;
       const provIds = (provs ?? []).map((p) => p.user_id);
