@@ -121,8 +121,12 @@ export function ServiceMediaManager({ ownerId, profileId }: { ownerId: string; p
 
   const removeItem = async (id: string) => {
     if (!confirm("Remove this media item?")) return;
+    const target = items.find((m) => m.id === id);
     const { error } = await supabase.from("service_media").delete().eq("id", id);
     if (error) return toast.error(error.message);
+    if (target) {
+      await removeStorageObjects([target.url, target.thumbnail_url]);
+    }
     load();
   };
 
