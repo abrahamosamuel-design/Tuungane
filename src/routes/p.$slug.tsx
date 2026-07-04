@@ -208,9 +208,13 @@ function PublicProfilePage() {
   }
 
   const isOwner = user?.id === profile.owner_id;
-  const location = [profile.area, profile.town, profile.district].filter(Boolean).join(", ");
+  const location = [profile.area, profile.town, profile.district]
+    .map((v) => v?.trim())
+    .filter(Boolean)
+    .join(", ");
   const isVerified = profile.verified === "verified";
   const priceLabel = formatPrice(extras);
+  const availabilityLabel = formatAvailability(profile.availability, profile.opening_hours);
   const recentlyListed =
     extras?.created_at &&
     Date.now() - new Date(extras.created_at).getTime() < 7 * 24 * 60 * 60 * 1000;
