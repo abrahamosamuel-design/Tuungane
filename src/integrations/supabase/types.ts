@@ -1538,6 +1538,7 @@ export type Database = {
           description: string | null
           district: string | null
           full_name: string
+          has_completed_onboarding: boolean
           id: string
           is_provider: boolean
           latitude: number | null
@@ -1566,6 +1567,7 @@ export type Database = {
           description?: string | null
           district?: string | null
           full_name?: string
+          has_completed_onboarding?: boolean
           id: string
           is_provider?: boolean
           latitude?: number | null
@@ -1594,6 +1596,7 @@ export type Database = {
           description?: string | null
           district?: string | null
           full_name?: string
+          has_completed_onboarding?: boolean
           id?: string
           is_provider?: boolean
           latitude?: number | null
@@ -3125,6 +3128,7 @@ export type Database = {
           description: string | null
           district: string | null
           full_name: string
+          has_completed_onboarding: boolean
           id: string
           is_provider: boolean
           latitude: number | null
