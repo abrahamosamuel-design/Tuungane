@@ -595,9 +595,19 @@ function PublicProfilePage() {
           {/* SERVICES */}
           <TabsContent value="services" className="mt-3 space-y-2">
             {services.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-border bg-card p-5 text-center text-sm text-muted-foreground">
-                No sub-services listed yet. Customers can still request this service directly.
-              </div>
+              isOwner ? (
+                <Link
+                  to="/profiles/$id"
+                  params={{ id: profile.id }}
+                  className="flex items-center justify-center gap-1 rounded-2xl border border-dashed border-orange/40 bg-orange/5 p-5 text-sm font-semibold text-orange"
+                >
+                  <Plus className="h-4 w-4" /> Add your first service or package
+                </Link>
+              ) : (
+                <div className="rounded-2xl border border-dashed border-border bg-card p-5 text-center text-sm text-muted-foreground">
+                  No specific services listed yet. You can still request this service directly.
+                </div>
+              )
             ) : (
               <ul className="space-y-2">
                 {services.map((s) => (
