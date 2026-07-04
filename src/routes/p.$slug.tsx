@@ -28,6 +28,9 @@ import { PostComposer } from "@/components/social/PostComposer";
 import { PostCard, type PostRow } from "@/components/social/PostCard";
 import { toast } from "sonner";
 import { ServiceMediaGallery, type ServiceMediaItem } from "@/components/service/ServiceMediaGallery";
+import { ServiceMediaManager } from "@/components/service/ServiceMediaManager";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ImagePlus } from "lucide-react";
 
 type ProfileType = "individual" | "business" | "organization";
 
@@ -111,6 +114,7 @@ function PublicProfilePage() {
   const [posts, setPosts] = useState<PostRow[]>([]);
   const [completed, setCompleted] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [mediaManagerOpen, setMediaManagerOpen] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -262,15 +266,28 @@ function PublicProfilePage() {
   return (
     <Layout>
       {/* Media gallery hero — no banner */}
-      <ServiceMediaGallery
-        items={media}
-        fallbackName={profile.name}
-        fallbackAvatarUrl={profile.avatar_url ?? profile.cover_url}
-        fallbackCategorySlug={profile.category_slug}
-      />
+      <div className="relative">
+        <ServiceMediaGallery
+          items={media}
+          fallbackName={profile.name}
+          fallbackAvatarUrl={profile.avatar_url ?? profile.cover_url}
+          fallbackCategorySlug={profile.category_slug}
+        />
+        {isOwner && (
+          <button
+            type="button"
+            onClick={() => setMediaManagerOpen(true)}
+            className="absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-black/60 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur transition hover:bg-black/75"
+            aria-label="Edit photos and videos"
+          >
+            <ImagePlus className="h-3.5 w-3.5" />
+            {media.length === 0 ? "Add photos" : "Edit photos"}
+          </button>
+        )}
+      </div>
 
-      <section className="mx-auto -mt-6 max-w-2xl px-4 pb-28">
-        {/* Service summary card — slight overlap for marketplace feel */}
+      <section className="mx-auto mt-4 max-w-2xl px-4 pb-28">
+        {/* Service summary card */}
         <div className="relative rounded-2xl border border-border bg-card p-4 shadow-sm">
           <h1 className="text-center font-display text-xl font-bold leading-tight text-navy sm:text-2xl">
             {profile.name}
@@ -572,6 +589,23 @@ function PublicProfilePage() {
           </TabsContent>
         </Tabs>
       </section>
+
+      {isOwner && (
+        <Dialog
+          open={mediaManagerOpen}
+          onOpenChange={(open) => {
+            setMediaManagerOpen(open);
+            if (!open) load();
+          }}
+        >
+          <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Photos &amp; videos</DialogTitle>
+            </DialogHeader>
+            <ServiceMediaManager ownerId={profile.owner_id} profileId={profile.id} />
+          </DialogContent>
+        </Dialog>
+      )}
     </Layout>
   );
 }
