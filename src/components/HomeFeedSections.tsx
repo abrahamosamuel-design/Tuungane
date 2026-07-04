@@ -258,11 +258,11 @@ export function HomeFeedSections() {
 
       let provider = false;
       if (user) {
-        const { count } = await supabase
-          .from("public_profiles")
-          .select("id", { count: "exact", head: true })
-          .eq("owner_id", user.id);
-        provider = (count ?? 0) > 0;
+        const [{ count: ppCount }, { count: spCount }] = await Promise.all([
+          supabase.from("public_profiles").select("id", { count: "exact", head: true }).eq("owner_id", user.id),
+          supabase.from("service_profiles").select("user_id", { count: "exact", head: true }).eq("user_id", user.id),
+        ]);
+        provider = ((ppCount ?? 0) + (spCount ?? 0)) > 0;
       }
 
       if (cancelled) return;
