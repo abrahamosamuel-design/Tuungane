@@ -442,6 +442,33 @@ export function ServiceMediaManager({ ownerId, profileId }: { ownerId: string; p
           ))}
         </ul>
       )}
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && cancelRemove()}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete {deleteTarget?.kind === "video" ? "video" : "photo"}?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently remove the {deleteTarget?.kind === "video" ? "video" : "photo"} from your gallery and storage. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={cancelRemove} disabled={!!deletingId}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => deleteTarget && removeItem(deleteTarget.id)}
+              disabled={!!deletingId}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deletingId ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Deleting…
+                </>
+              ) : (
+                "Delete"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
