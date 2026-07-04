@@ -367,22 +367,29 @@ function PublicProfilePage() {
         {/* Contact actions — visitors only */}
         {!isOwner && (
           <>
-            <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-[1fr_auto]">
+            <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
               <Link
                 to="/messages"
                 search={{ to: profile.owner_id } as never}
                 className="inline-flex items-center justify-center gap-2 rounded-xl bg-orange px-4 py-3 text-sm font-bold text-orange-foreground shadow-sm"
               >
-                <MessageSquare className="h-4 w-4" /> Message on Tuungane
+                <MessageSquare className="h-4 w-4" /> Message
               </Link>
-              {profile.phone && (
+              {profile.phone ? (
                 <a
                   href={`tel:${profile.phone}`}
                   className="inline-flex items-center justify-center gap-2 rounded-xl border border-navy/25 bg-card px-4 py-3 text-sm font-semibold text-navy"
                 >
-                  <Phone className="h-4 w-4" /> Call
+                  <Phone className="h-4 w-4" /> Call {profile.name.split(" ")[0]}
                 </a>
-              )}
+              ) : null}
+              <button
+                type="button"
+                onClick={() => requestService()}
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-orange/40 bg-orange/10 px-4 py-3 text-sm font-semibold text-orange"
+              >
+                Request service
+              </button>
             </div>
 
             {/* Quick-message chips */}
@@ -426,6 +433,13 @@ function PublicProfilePage() {
             >
               <Pencil className="h-3 w-3" /> Edit
             </Link>
+            <button
+              type="button"
+              onClick={() => setMediaManagerOpen(true)}
+              className="inline-flex items-center gap-1 rounded-full border border-navy/20 bg-card px-2.5 py-1 text-[11px] font-semibold text-navy"
+            >
+              <ImagePlus className="h-3 w-3" /> Photos
+            </button>
             <Link
               to="/dashboard"
               className="inline-flex items-center gap-1 rounded-full border border-navy/20 bg-card px-2.5 py-1 text-[11px] font-semibold text-navy"
@@ -440,6 +454,7 @@ function PublicProfilePage() {
             </button>
           </div>
         )}
+
 
         {/* Tabs */}
         <Tabs defaultValue="about" className="mt-6">
