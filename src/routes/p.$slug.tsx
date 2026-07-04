@@ -761,9 +761,9 @@ function DetailRow({
   );
 }
 
-function formatAvailability(availability: string | null, openingHours: string | null): string | null {
+function formatAvailability(availability: string | null, openingHours: unknown): string | null {
   const raw = (availability ?? "").trim().toLowerCase();
-  const hours = (openingHours ?? "").trim();
+  const hours = formatOpeningHours(openingHours);
   const map: Record<string, string> = {
     available: "Available now",
     available_now: "Available now",
@@ -777,5 +777,35 @@ function formatAvailability(availability: string | null, openingHours: string | 
   const label = raw ? map[raw] ?? raw.charAt(0).toUpperCase() + raw.slice(1) : "";
   if (label && hours) return `${label} · ${hours}`;
   return label || hours || null;
+}
+
+function formatOpeningHours(oh: unknown): string {
+  if (!oh) return "";
+  if (typeof oh === "string") return oh.trim();
+  if (typeof oh !== "object") return "";
+  const days = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"] as const;
+  const dayLabels: Record<string, string> = { mon: "Mon", tue: "Tue", wed: "Wed", thu: "Thu", fri: "Fri", sat: "Sat", sun: "Sun" };
+  const now = new Date();
+  const todayKey = days[(now.getDay() + 6) % 7];
+  const rec = oh as Record<string, unknown>;
+  const todayVal = rec[todayKey];
+  const fmt = (v: unknown): string => {
+    if (!v) return "";
+    if (typeof v === "string") return v;
+    if (typeof v === "object" && v !== null) {
+      const o = v as { open?: string; close?: string; closed?: boolean };
+      if (o.closed) return "Closed";
+      if (o.open && o.close) return `${o.open} – ${o.close}`;
+    }
+    return "";
+  };
+  const todayStr = fmt(todayVal);
+  if (todayStr) return `Today: ${todayStr}`;
+  // Fallback: first day with hours
+  for (const d of days) {
+    const s = fmt(rec[d]);
+    if (s) return `${dayLabels[d]}: ${s}`;
+  }
+  return "";
 }
 
