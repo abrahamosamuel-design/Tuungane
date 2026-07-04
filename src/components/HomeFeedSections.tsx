@@ -30,24 +30,24 @@ import { useAuthGate } from "@/components/RequireAuthDialog";
 
 // Column lists — guests can only SELECT a safe subset (no lat/long/area/location).
 const SR_COLS_AUTH =
-  "id,customer_id,title,service_needed,description,budget_range,urgent_flag,created_at,district,town,area,location,latitude,longitude,category_slug,subcategory,media_urls,posted_as_type,posted_as_name,posted_as_avatar_url,posted_as_ref_type,posted_as_ref_id";
+  "id,customer_id,title,service_needed,description,budget_range,urgent_flag,created_at,district,town,area,location,category_slug,subcategory,media_urls,posted_as_type,posted_as_name,posted_as_avatar_url,posted_as_ref_type,posted_as_ref_id";
 const SR_COLS_GUEST =
   "id,title,service_needed,description,budget_range,urgent_flag,created_at,district,town,category_slug,subcategory,media_urls,posted_as_type,posted_as_name,posted_as_avatar_url,posted_as_ref_type,posted_as_ref_id";
 
 const SP_COLS_AUTH =
-  "user_id,business_name,category_slug,subcategory,bio,town,district,area,latitude,longitude,service_radius_km,areas_served,verified,availability,years_experience,cover_url,media_urls";
+  "user_id,business_name,category_slug,subcategory,bio,town,district,area,service_radius_km,areas_served,verified,availability,years_experience,cover_url,media_urls";
 const SP_COLS_GUEST =
   "user_id,business_name,category_slug,subcategory,bio,town,district,service_radius_km,areas_served,verified,availability,years_experience,cover_url,media_urls";
 const PP_COLS_AUTH =
-  "owner_id,slug,name,category_slug,subcategory,bio,town,district,area,latitude,longitude,service_radius_km,areas_served,verified,availability,cover_url,avatar_url,updated_at";
+  "owner_id,slug,name,category_slug,subcategory,bio,town,district,area,service_radius_km,areas_served,verified,availability,cover_url,avatar_url,updated_at";
 const PP_COLS_GUEST =
   "owner_id,slug,name,category_slug,subcategory,bio,town,district,service_radius_km,areas_served,verified,availability,cover_url,avatar_url,updated_at";
 const SP_LISTING_COLS_AUTH =
-  "user_id,business_name,category_slug,subcategory,bio,town,district,area,latitude,longitude,verified,availability,cover_url,created_at";
+  "user_id,business_name,category_slug,subcategory,bio,town,district,area,verified,availability,cover_url,created_at";
 const SP_LISTING_COLS_GUEST =
   "user_id,business_name,category_slug,subcategory,bio,town,district,verified,availability,cover_url,created_at";
 const PP_LISTING_COLS_AUTH =
-  "id,slug,owner_id,name,category_slug,subcategory,bio,town,district,area,latitude,longitude,verified,availability,cover_url,avatar_url,created_at";
+  "id,slug,owner_id,name,category_slug,subcategory,bio,town,district,area,verified,availability,cover_url,avatar_url,created_at";
 const PP_LISTING_COLS_GUEST =
   "id,slug,owner_id,name,category_slug,subcategory,bio,town,district,verified,availability,cover_url,avatar_url,created_at";
 
