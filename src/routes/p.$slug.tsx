@@ -208,9 +208,13 @@ function PublicProfilePage() {
   }
 
   const isOwner = user?.id === profile.owner_id;
-  const location = [profile.area, profile.town, profile.district].filter(Boolean).join(", ");
+  const location = [profile.area, profile.town, profile.district]
+    .map((v) => v?.trim())
+    .filter(Boolean)
+    .join(", ");
   const isVerified = profile.verified === "verified";
   const priceLabel = formatPrice(extras);
+  const availabilityLabel = formatAvailability(profile.availability, profile.opening_hours);
   const recentlyListed =
     extras?.created_at &&
     Date.now() - new Date(extras.created_at).getTime() < 7 * 24 * 60 * 60 * 1000;
@@ -288,7 +292,7 @@ function PublicProfilePage() {
         )}
       </div>
 
-      <section className="mx-auto mt-4 max-w-2xl px-4 pb-28">
+      <section className="mx-auto mt-4 max-w-2xl px-4 pb-32">
         {/* Service summary card */}
         <div className="relative rounded-2xl border border-border bg-card p-4 shadow-sm">
           <h1 className="text-center font-display text-xl font-bold leading-tight text-navy sm:text-2xl">
@@ -363,22 +367,29 @@ function PublicProfilePage() {
         {/* Contact actions — visitors only */}
         {!isOwner && (
           <>
-            <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-[1fr_auto]">
+            <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
               <Link
                 to="/messages"
                 search={{ to: profile.owner_id } as never}
                 className="inline-flex items-center justify-center gap-2 rounded-xl bg-orange px-4 py-3 text-sm font-bold text-orange-foreground shadow-sm"
               >
-                <MessageSquare className="h-4 w-4" /> Message on Tuungane
+                <MessageSquare className="h-4 w-4" /> Message
               </Link>
-              {profile.phone && (
+              {profile.phone ? (
                 <a
                   href={`tel:${profile.phone}`}
                   className="inline-flex items-center justify-center gap-2 rounded-xl border border-navy/25 bg-card px-4 py-3 text-sm font-semibold text-navy"
                 >
-                  <Phone className="h-4 w-4" /> Call
+                  <Phone className="h-4 w-4" /> Call {profile.name.split(" ")[0]}
                 </a>
-              )}
+              ) : null}
+              <button
+                type="button"
+                onClick={() => requestService()}
+                className="inline-flex items-center justify-center gap-2 rounded-xl border border-orange/40 bg-orange/10 px-4 py-3 text-sm font-semibold text-orange"
+              >
+                Request service
+              </button>
             </div>
 
             {/* Quick-message chips */}
@@ -422,6 +433,13 @@ function PublicProfilePage() {
             >
               <Pencil className="h-3 w-3" /> Edit
             </Link>
+            <button
+              type="button"
+              onClick={() => setMediaManagerOpen(true)}
+              className="inline-flex items-center gap-1 rounded-full border border-navy/20 bg-card px-2.5 py-1 text-[11px] font-semibold text-navy"
+            >
+              <ImagePlus className="h-3 w-3" /> Photos
+            </button>
             <Link
               to="/dashboard"
               className="inline-flex items-center gap-1 rounded-full border border-navy/20 bg-card px-2.5 py-1 text-[11px] font-semibold text-navy"
@@ -437,72 +455,118 @@ function PublicProfilePage() {
           </div>
         )}
 
+
         {/* Tabs */}
         <Tabs defaultValue="about" className="mt-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="about">About</TabsTrigger>
-            <TabsTrigger value="timeline">Timeline</TabsTrigger>
-            <TabsTrigger value="services">Services</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3 rounded-xl bg-muted/60 p-1">
+            <TabsTrigger
+              value="about"
+              className="rounded-lg text-sm font-semibold text-navy/60 data-[state=active]:bg-card data-[state=active]:text-orange data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-orange/30"
+            >
+              About
+            </TabsTrigger>
+            <TabsTrigger
+              value="timeline"
+              className="rounded-lg text-sm font-semibold text-navy/60 data-[state=active]:bg-card data-[state=active]:text-orange data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-orange/30"
+            >
+              Timeline
+            </TabsTrigger>
+            <TabsTrigger
+              value="services"
+              className="rounded-lg text-sm font-semibold text-navy/60 data-[state=active]:bg-card data-[state=active]:text-orange data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-orange/30"
+            >
+              Services
+            </TabsTrigger>
           </TabsList>
 
           {/* ABOUT */}
-          <TabsContent value="about" className="mt-3 space-y-3">
-            <AboutBlock label="Description" empty="No description yet.">
+          <TabsContent value="about" className="mt-3">
+            <div className="rounded-2xl border border-border bg-card p-4">
+              <h2 className="font-display text-base font-bold text-navy">About {profile.name}</h2>
               {profile.bio ? (
-                <p className="whitespace-pre-line text-sm text-foreground/90">{profile.bio}</p>
-              ) : null}
-            </AboutBlock>
-
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <AboutBlock label="Category">
-                <p className="text-sm text-foreground/90">
-                  {profile.subcategory
-                    ? formatSubcategory(profile.subcategory)
-                    : profile.category_slug ?? "—"}
-                </p>
-              </AboutBlock>
-              <AboutBlock label="Location">
-                <p className="text-sm text-foreground/90">{location || "—"}</p>
-              </AboutBlock>
-              <AboutBlock label="Areas served" empty="Not set yet.">
-                {profile.areas_served && profile.areas_served.length > 0 ? (
-                  <p className="text-sm text-foreground/90">
-                    {profile.areas_served.join(", ")}
-                  </p>
-                ) : null}
-              </AboutBlock>
-              <AboutBlock label="Availability" empty="Not set yet.">
-                {profile.availability || profile.opening_hours ? (
-                  <p className="inline-flex items-center gap-1 text-sm text-foreground/90">
-                    <Clock className="h-3.5 w-3.5 text-navy/60" />
-                    {profile.availability || profile.opening_hours}
-                  </p>
-                ) : null}
-              </AboutBlock>
-              {priceLabel && (
-                <AboutBlock label="Price guide">
-                  <p className="text-sm font-semibold text-navy">{priceLabel}</p>
-                </AboutBlock>
+                <p className="mt-2 whitespace-pre-line text-sm text-foreground/90">{profile.bio}</p>
+              ) : isOwner ? (
+                <Link
+                  to="/profiles/$id"
+                  params={{ id: profile.id }}
+                  className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-orange"
+                >
+                  <Plus className="h-3.5 w-3.5" /> Add a description
+                </Link>
+              ) : (
+                <p className="mt-2 text-sm text-muted-foreground">No description yet.</p>
               )}
-              {profile.phone && (
-                <AboutBlock label="Contact">
-                  <p className="inline-flex items-center gap-1 text-sm text-foreground/90">
-                    <Phone className="h-3.5 w-3.5 text-navy/60" /> {profile.phone}
-                  </p>
-                </AboutBlock>
+
+              <dl className="mt-4 divide-y divide-border/60">
+                <DetailRow
+                  label="Category"
+                  value={
+                    profile.subcategory
+                      ? formatSubcategory(profile.subcategory)
+                      : profile.category_slug ?? null
+                  }
+                  isOwner={isOwner}
+                />
+                <DetailRow label="Location" value={location || null} isOwner={isOwner} />
+                <DetailRow
+                  label="Areas served"
+                  value={
+                    profile.areas_served && profile.areas_served.length > 0
+                      ? profile.areas_served.join(", ")
+                      : null
+                  }
+                  isOwner={isOwner}
+                  emptyOwnerPrompt="Add areas served"
+                  profileEditId={profile.id}
+                />
+                <DetailRow
+                  label="Availability"
+                  value={availabilityLabel}
+                  icon={<Clock className="h-3.5 w-3.5 text-navy/60" />}
+                  isOwner={isOwner}
+                  emptyOwnerPrompt="Set availability"
+                  profileEditId={profile.id}
+                />
+                {priceLabel && (
+                  <DetailRow label="Price guide" value={priceLabel} isOwner={isOwner} valueClass="font-semibold text-navy" />
+                )}
+                {isOwner ? (
+                  <DetailRow
+                    label="Contact"
+                    value={profile.phone}
+                    icon={<Phone className="h-3.5 w-3.5 text-navy/60" />}
+                    isOwner
+                    emptyOwnerPrompt="Add phone number"
+                    profileEditId={profile.id}
+                  />
+                ) : profile.phone ? (
+                  <div className="flex items-center justify-between gap-3 py-2.5">
+                    <dt className="text-[11px] font-semibold uppercase tracking-wide text-navy/50">
+                      Contact
+                    </dt>
+                    <a
+                      href={`tel:${profile.phone}`}
+                      className="inline-flex items-center gap-1.5 rounded-full bg-orange px-3 py-1.5 text-xs font-semibold text-orange-foreground"
+                    >
+                      <Phone className="h-3.5 w-3.5" /> Call {profile.name.split(" ")[0]}
+                    </a>
+                  </div>
+                ) : null}
+              </dl>
+
+              {isOwner && (
+                <Link
+                  to="/profiles/$id"
+                  params={{ id: profile.id }}
+                  className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-orange"
+                >
+                  <Pencil className="h-3.5 w-3.5" /> Edit About
+                </Link>
               )}
             </div>
-
-            {isOwner && (
-              <Link
-                to="/profiles/$id"
-                params={{ id: profile.id }}
-                className="inline-flex items-center gap-1 text-xs font-semibold text-orange"
-              >
-                <Pencil className="h-3.5 w-3.5" /> Edit About
-              </Link>
-            )}
           </TabsContent>
+
+
 
           {/* TIMELINE */}
           <TabsContent value="timeline" className="mt-3 space-y-3">
@@ -531,9 +595,19 @@ function PublicProfilePage() {
           {/* SERVICES */}
           <TabsContent value="services" className="mt-3 space-y-2">
             {services.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-border bg-card p-5 text-center text-sm text-muted-foreground">
-                No sub-services listed yet. Customers can still request this service directly.
-              </div>
+              isOwner ? (
+                <Link
+                  to="/profiles/$id"
+                  params={{ id: profile.id }}
+                  className="flex items-center justify-center gap-1 rounded-2xl border border-dashed border-orange/40 bg-orange/5 p-5 text-sm font-semibold text-orange"
+                >
+                  <Plus className="h-4 w-4" /> Add your first service or package
+                </Link>
+              ) : (
+                <div className="rounded-2xl border border-dashed border-border bg-card p-5 text-center text-sm text-muted-foreground">
+                  No specific services listed yet. You can still request this service directly.
+                </div>
+              )
             ) : (
               <ul className="space-y-2">
                 {services.map((s) => (
@@ -642,3 +716,66 @@ function formatPrice(sp: ServiceProfileExtras | null): string | null {
   if (max) return `USh ${max.toLocaleString()}`;
   return null;
 }
+
+function DetailRow({
+  label,
+  value,
+  icon,
+  isOwner,
+  emptyOwnerPrompt,
+  profileEditId,
+  valueClass,
+}: {
+  label: string;
+  value?: string | null;
+  icon?: React.ReactNode;
+  isOwner: boolean;
+  emptyOwnerPrompt?: string;
+  profileEditId?: string;
+  valueClass?: string;
+}) {
+  const has = Boolean(value && String(value).trim());
+  if (!has && !isOwner) return null;
+  return (
+    <div className="flex items-center justify-between gap-3 py-2.5">
+      <dt className="text-[11px] font-semibold uppercase tracking-wide text-navy/50">{label}</dt>
+      <dd className={`min-w-0 text-right text-sm text-foreground/90 ${valueClass ?? ""}`}>
+        {has ? (
+          <span className="inline-flex items-center gap-1">
+            {icon}
+            <span className="truncate">{value}</span>
+          </span>
+        ) : isOwner && emptyOwnerPrompt && profileEditId ? (
+          <Link
+            to="/profiles/$id"
+            params={{ id: profileEditId }}
+            className="inline-flex items-center gap-1 text-xs font-semibold text-orange"
+          >
+            <Plus className="h-3 w-3" /> {emptyOwnerPrompt}
+          </Link>
+        ) : (
+          <span className="text-muted-foreground italic">Not set</span>
+        )}
+      </dd>
+    </div>
+  );
+}
+
+function formatAvailability(availability: string | null, openingHours: string | null): string | null {
+  const raw = (availability ?? "").trim().toLowerCase();
+  const hours = (openingHours ?? "").trim();
+  const map: Record<string, string> = {
+    available: "Available now",
+    available_now: "Available now",
+    open: "Open now",
+    open_now: "Open now",
+    open_today: "Open today",
+    appointment: "Available by appointment",
+    by_appointment: "Available by appointment",
+    closed: "Closed now",
+  };
+  const label = raw ? map[raw] ?? raw.charAt(0).toUpperCase() + raw.slice(1) : "";
+  if (label && hours) return `${label} · ${hours}`;
+  return label || hours || null;
+}
+
