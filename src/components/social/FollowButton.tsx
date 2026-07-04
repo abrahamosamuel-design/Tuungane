@@ -13,8 +13,8 @@ export function FollowButton({ providerUserId, onChange }: { providerUserId: str
 
   useEffect(() => {
     (async () => {
-      const { count: c } = await supabase.from("follows").select("*", { count: "exact", head: true }).eq("provider_user_id", providerUserId);
-      setCount(c ?? 0);
+      const { data: c } = await supabase.rpc("get_provider_follower_count", { _provider: providerUserId });
+      setCount(typeof c === "number" ? c : 0);
       if (user) {
         const { data } = await supabase.from("follows").select("follower_id").eq("provider_user_id", providerUserId).eq("follower_id", user.id).maybeSingle();
         setFollowing(!!data);
