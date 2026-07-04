@@ -292,7 +292,7 @@ function PublicProfilePage() {
         )}
       </div>
 
-      <section className="mx-auto mt-4 max-w-2xl px-4 pb-28">
+      <section className="mx-auto mt-4 max-w-2xl px-4 pb-32">
         {/* Service summary card */}
         <div className="relative rounded-2xl border border-border bg-card p-4 shadow-sm">
           <h1 className="text-center font-display text-xl font-bold leading-tight text-navy sm:text-2xl">
