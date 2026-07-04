@@ -2925,6 +2925,62 @@ export type Database = {
         }
         Returns: undefined
       }
+      admin_list_service_requests: {
+        Args: { _limit?: number }
+        Returns: {
+          area: string | null
+          attachment_url: string | null
+          budget_range: string | null
+          cancelled_at: string | null
+          category_slug: string | null
+          completed_at: string | null
+          completion_code: string | null
+          country: string | null
+          created_at: string
+          customer_confirmed_completion: boolean
+          customer_id: string
+          customer_phone: string | null
+          customer_whatsapp: string | null
+          description: string
+          disputed_at: string | null
+          district: string | null
+          id: string
+          latitude: number | null
+          location: string
+          longitude: number | null
+          media_urls: string[]
+          posted_as_avatar_url: string | null
+          posted_as_name: string | null
+          posted_as_ref_id: string | null
+          posted_as_ref_type: string | null
+          posted_as_type: string
+          preferred_contact_method: Database["public"]["Enums"]["contact_method"]
+          preferred_date: string | null
+          preferred_time: string | null
+          profile_service_id: string | null
+          provider_confirmed_completion: boolean
+          provider_id: string | null
+          public_profile_id: string | null
+          region: string | null
+          selected_provider_id: string | null
+          service_needed: string
+          service_profile_id: string | null
+          status: Database["public"]["Enums"]["service_request_status"]
+          subcategory: string | null
+          title: string | null
+          town: string | null
+          updated_at: string
+          urgency: Database["public"]["Enums"]["service_urgency"]
+          urgent_flag: boolean
+          visibility: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "service_requests"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       admin_list_user_contacts: {
         Args: { _ids: string[] }
         Returns: {
@@ -3037,7 +3093,24 @@ export type Database = {
         Returns: undefined
       }
       get_application_phone: { Args: { _app_id: string }; Returns: string }
+      get_business_follower_count: { Args: { _page: string }; Returns: number }
+      get_business_page_coords: {
+        Args: { _ids: string[] }
+        Returns: {
+          id: string
+          latitude: number
+          longitude: number
+        }[]
+      }
       get_completion_code: { Args: { _request_id: string }; Returns: string }
+      get_featured_location_coords: {
+        Args: { _ids: string[] }
+        Returns: {
+          id: string
+          latitude: number
+          longitude: number
+        }[]
+      }
       get_my_profile: {
         Args: never
         Returns: {
@@ -3127,6 +3200,18 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      get_official_post_like_count: {
+        Args: { _post_id: string }
+        Returns: number
+      }
+      get_post_like_count: { Args: { _post_id: string }; Returns: number }
+      get_post_like_counts: {
+        Args: { _post_ids: string[] }
+        Returns: {
+          cnt: number
+          post_id: string
+        }[]
+      }
       get_profile_card: {
         Args: { _id: string }
         Returns: {
@@ -3164,6 +3249,14 @@ export type Database = {
           whatsapp_number: string
         }[]
       }
+      get_profile_coords: {
+        Args: { _ids: string[] }
+        Returns: {
+          id: string
+          latitude: number
+          longitude: number
+        }[]
+      }
       get_profile_trust_badge: {
         Args: {
           _id: string
@@ -3190,6 +3283,90 @@ export type Database = {
           phone: string
           whatsapp: string
         }[]
+      }
+      get_provider_follower_count: {
+        Args: { _provider: string }
+        Returns: number
+      }
+      get_public_profile_coords: {
+        Args: { _ids: string[] }
+        Returns: {
+          id: string
+          latitude: number
+          longitude: number
+        }[]
+      }
+      get_service_profile_coords: {
+        Args: { _ids: string[] }
+        Returns: {
+          latitude: number
+          longitude: number
+          user_id: string
+        }[]
+      }
+      get_service_request_coords: {
+        Args: { _ids: string[] }
+        Returns: {
+          id: string
+          latitude: number
+          longitude: number
+        }[]
+      }
+      get_service_request_detail: {
+        Args: { _id: string }
+        Returns: {
+          area: string | null
+          attachment_url: string | null
+          budget_range: string | null
+          cancelled_at: string | null
+          category_slug: string | null
+          completed_at: string | null
+          completion_code: string | null
+          country: string | null
+          created_at: string
+          customer_confirmed_completion: boolean
+          customer_id: string
+          customer_phone: string | null
+          customer_whatsapp: string | null
+          description: string
+          disputed_at: string | null
+          district: string | null
+          id: string
+          latitude: number | null
+          location: string
+          longitude: number | null
+          media_urls: string[]
+          posted_as_avatar_url: string | null
+          posted_as_name: string | null
+          posted_as_ref_id: string | null
+          posted_as_ref_type: string | null
+          posted_as_type: string
+          preferred_contact_method: Database["public"]["Enums"]["contact_method"]
+          preferred_date: string | null
+          preferred_time: string | null
+          profile_service_id: string | null
+          provider_confirmed_completion: boolean
+          provider_id: string | null
+          public_profile_id: string | null
+          region: string | null
+          selected_provider_id: string | null
+          service_needed: string
+          service_profile_id: string | null
+          status: Database["public"]["Enums"]["service_request_status"]
+          subcategory: string | null
+          title: string | null
+          town: string | null
+          updated_at: string
+          urgency: Database["public"]["Enums"]["service_urgency"]
+          urgent_flag: boolean
+          visibility: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "service_requests"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       get_unread_message_count: { Args: never; Returns: number }
       has_role: {
