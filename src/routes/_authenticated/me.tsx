@@ -97,6 +97,10 @@ function Me() {
             </div>
           </div>
 
+          <IdentityBadges status={identity} className="mt-3" />
+
+
+
           <div className="mt-4 grid grid-cols-2 gap-3">
             <Field label="District" value={profile.district ?? ""} onSave={(v) => save({ district: v })} />
             <Field label="Town" value={profile.town ?? ""} onSave={(v) => save({ town: v })} />
