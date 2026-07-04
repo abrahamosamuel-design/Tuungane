@@ -8,6 +8,8 @@ import { Avatar } from "@/components/social/Avatar";
 import { RemovePhotoConfirm } from "@/components/RemovePhotoConfirm";
 import { MyRequestsSummary } from "@/components/MyRequestsSummary";
 import { MyTrustStatusCard } from "@/components/trust/MyTrustStatusCard";
+import { IdentityBadges } from "@/components/profile/IdentityBadges";
+import { fetchIdentityStatus, type IdentityStatus } from "@/lib/profile-badges";
 import { toast } from "sonner";
 
 
@@ -25,6 +27,7 @@ function Me() {
   const [reviewsCount, setReviewsCount] = useState(0);
   const [recsCount, setRecsCount] = useState(0);
   const [busy, setBusy] = useState(false);
+  const [identity, setIdentity] = useState<IdentityStatus | null>(null);
 
   useEffect(() => { if (!loading && !user) nav({ to: "/login", search: { tab: "login", redirect: "/me" } as never }); }, [loading, user, nav]);
 
@@ -32,6 +35,7 @@ function Me() {
     if (!user) return;
     const { data: p } = await supabase.rpc("get_my_profile").maybeSingle();
     setProfile(p ? { full_name: p.full_name ?? "", avatar_url: p.avatar_url ?? null, bio: p.bio ?? null, town: p.town ?? null, district: p.district ?? null } as never : null);
+    fetchIdentityStatus(user.id).then(setIdentity).catch(() => setIdentity(null));
     const { data: f } = await supabase.from("follows").select("provider_user_id").eq("follower_id", user.id);
     const ids = (f ?? []).map((x) => x.provider_user_id);
     if (ids.length) {
@@ -92,6 +96,10 @@ function Me() {
               </p>
             </div>
           </div>
+
+          <IdentityBadges status={identity} className="mt-3" />
+
+
 
           <div className="mt-4 grid grid-cols-2 gap-3">
             <Field label="District" value={profile.district ?? ""} onSave={(v) => save({ district: v })} />

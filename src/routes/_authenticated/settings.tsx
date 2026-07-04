@@ -5,10 +5,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useUserLocation } from "@/hooks/use-user-location";
 import { toast } from "sonner";
-import { MapPin, Loader2 } from "lucide-react";
+import { MapPin, Loader2, User, Building2 } from "lucide-react";
 import { AreaAutocomplete } from "@/components/AreaAutocomplete";
 import { MapPicker } from "@/components/MapPicker";
 import { findDistrictBounds, type Bounds } from "@/lib/geocoding";
+import { organisationTypes } from "@/data/organisationTypes";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({ meta: [{ title: "Settings — Tuungane" }] }),
@@ -144,7 +145,11 @@ function SettingsPage() {
           </button>
         </Section>
 
+        <ProfileIdentitySection />
+
         <LocationSection />
+
+
 
 
         <Section title="Notifications">
@@ -487,4 +492,178 @@ function ProviderContactPolicySection() {
     </>
   );
 }
+
+function ProfileIdentitySection() {
+  const { user } = useAuth();
+  const [loaded, setLoaded] = useState(false);
+  const [identity, setIdentity] = useState<"individual" | "institution">("individual");
+  const [orgName, setOrgName] = useState("");
+  const [orgType, setOrgType] = useState<string>("");
+  const [contactPerson, setContactPerson] = useState("");
+  const [orgPhone, setOrgPhone] = useState("");
+  const [orgEmail, setOrgEmail] = useState("");
+  const [description, setDescription] = useState("");
+  const [registration, setRegistration] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("profile_identity,organisation_name,organisation_type,contact_person,org_phone,org_email,description,registration_status")
+        .eq("id", user.id)
+        .maybeSingle();
+      if (data) {
+        setIdentity((data.profile_identity as "individual" | "institution") ?? "individual");
+        setOrgName(data.organisation_name ?? "");
+        setOrgType(data.organisation_type ?? "");
+        setContactPerson(data.contact_person ?? "");
+        setOrgPhone(data.org_phone ?? "");
+        setOrgEmail(data.org_email ?? "");
+        setDescription(data.description ?? "");
+        setRegistration(data.registration_status ?? "");
+      }
+      setLoaded(true);
+    })();
+  }, [user]);
+
+  const save = async () => {
+    if (!user) return;
+    setBusy(true);
+    const patch = {
+      profile_identity: identity,
+      organisation_name: identity === "institution" ? orgName.trim() || null : null,
+      organisation_type: identity === "institution" ? orgType || null : null,
+      contact_person: identity === "institution" ? contactPerson.trim() || null : null,
+      org_phone: identity === "institution" ? orgPhone.trim() || null : null,
+      org_email: identity === "institution" ? orgEmail.trim() || null : null,
+      description: identity === "institution" ? description.trim() || null : null,
+      registration_status: identity === "institution" ? registration.trim() || null : null,
+    };
+    const { error } = await supabase.from("profiles").update(patch).eq("id", user.id);
+    setBusy(false);
+    if (error) toast.error(error.message);
+    else toast.success("Profile identity updated");
+  };
+
+  if (!user || !loaded) return null;
+
+  return (
+    <div className="mt-6 rounded-2xl border border-border bg-card p-5">
+      <h2 className="font-display text-base font-bold text-navy">Profile Identity</h2>
+      <p className="mt-1 text-xs text-muted-foreground">
+        Choose how you appear on Tuungane. Changing this never deletes your posts, listings, requests, followers, or messages.
+      </p>
+
+      <div className="mt-4 grid gap-2 sm:grid-cols-2">
+        <IdentityOption
+          selected={identity === "individual"}
+          onClick={() => setIdentity("individual")}
+          icon={<User className="h-4 w-4" />}
+          title="Individual Profile"
+          body="For people who connect, request, offer services and share updates."
+        />
+        <IdentityOption
+          selected={identity === "institution"}
+          onClick={() => setIdentity("institution")}
+          icon={<Building2 className="h-4 w-4" />}
+          title="Institution / Organisation"
+          body="For schools, NGOs, churches, companies, SACCOs, training centres and more."
+        />
+      </div>
+
+      {identity === "institution" && (
+        <div className="mt-4 space-y-3 rounded-xl border border-green/20 bg-green/5 p-3">
+          <div className="grid gap-3 sm:grid-cols-2">
+            <FieldControl label="Organisation name" value={orgName} onChange={setOrgName} />
+            <div>
+              <label className="text-xs font-medium text-navy">Organisation type</label>
+              <select
+                value={orgType}
+                onChange={(e) => setOrgType(e.target.value)}
+                className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm"
+              >
+                <option value="">Select a type…</option>
+                {organisationTypes.map((t) => (
+                  <option key={t.value} value={t.value}>{t.label}</option>
+                ))}
+              </select>
+            </div>
+            <FieldControl label="Contact person" value={contactPerson} onChange={setContactPerson} />
+            <FieldControl label="Phone number" value={orgPhone} onChange={setOrgPhone} />
+            <FieldControl label="Email address (optional)" value={orgEmail} onChange={setOrgEmail} />
+            <FieldControl label="Registration status (optional)" value={registration} onChange={setRegistration} />
+          </div>
+          <div>
+            <label className="text-xs font-medium text-navy">Description / About</label>
+            <textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              rows={3}
+              className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-green"
+            />
+          </div>
+        </div>
+      )}
+
+      <div className="mt-4 flex justify-end">
+        <button
+          onClick={save}
+          disabled={busy}
+          className="inline-flex items-center gap-2 rounded-full bg-orange px-4 py-2 text-sm font-semibold text-orange-foreground shadow hover:brightness-110 disabled:opacity-50"
+        >
+          {busy && <Loader2 className="h-4 w-4 animate-spin" />}
+          Save identity
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function IdentityOption({
+  selected, onClick, icon, title, body,
+}: {
+  selected: boolean;
+  onClick: () => void;
+  icon: React.ReactNode;
+  title: string;
+  body: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`rounded-xl border-2 p-3 text-left transition ${
+        selected ? "border-orange bg-orange/5" : "border-border bg-background hover:border-navy/40"
+      }`}
+    >
+      <div className="flex items-center gap-2 text-navy">
+        {icon}
+        <span className="text-sm font-semibold">{title}</span>
+      </div>
+      <p className="mt-1 text-xs text-muted-foreground">{body}</p>
+    </button>
+  );
+}
+
+function FieldControl({
+  label, value, onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div>
+      <label className="text-xs font-medium text-navy">{label}</label>
+      <input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-orange"
+      />
+    </div>
+  );
+}
+
 

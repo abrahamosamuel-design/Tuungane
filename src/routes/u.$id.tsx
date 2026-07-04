@@ -41,6 +41,8 @@ import type { PriceType, PriceGuide } from "@/lib/price-guide";
 import { ContactOptionsUnlocked } from "@/components/ContactOptionsUnlocked";
 import { ProviderQuickContact } from "@/components/ProviderQuickContact";
 import { useContactGate } from "@/hooks/use-contact-gate";
+import { IdentityBadges } from "@/components/profile/IdentityBadges";
+import { fetchIdentityStatus, type IdentityStatus } from "@/lib/profile-badges";
 
 
 
@@ -152,6 +154,8 @@ function UserProfile() {
   const [editOpen, setEditOpen] = useState(false);
   const [feedback, setFeedback] = useState<Array<{ id: string; rating: number; review_text: string; service_provided: string; created_at: string; customer_id: string; would_recommend: boolean; profile?: { full_name: string; avatar_url: string | null } }>>([]);
   const [canReview, setCanReview] = useState(false);
+  const [identity, setIdentity] = useState<IdentityStatus | null>(null);
+
 
   const load = async () => {
     // Use the masked RPC so anon visitors and non-owners can never see
@@ -236,6 +240,7 @@ function UserProfile() {
   };
 
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [id]);
+  useEffect(() => { fetchIdentityStatus(id).then(setIdentity).catch(() => setIdentity(null)); }, [id]);
 
 
 
@@ -339,6 +344,8 @@ function UserProfile() {
               <div className="mt-1 flex flex-wrap items-center justify-center gap-x-1.5">
                 <ProfileBoostBadges providerId={id} />
               </div>
+              <IdentityBadges status={identity} className="mt-2 justify-center" />
+
               {sp && (
                 <p className="mt-1 text-sm font-medium text-orange">
                   {formatSubcategory(sp.subcategory)} {cat && <span className="text-muted-foreground">· {cat.name}</span>}
