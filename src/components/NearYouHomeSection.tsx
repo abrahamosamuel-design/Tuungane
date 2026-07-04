@@ -106,7 +106,7 @@ export function NearYouHomeSection() {
         business_name: r.name,
         latitude: provCoordMap.get(r.id)?.latitude ?? null,
         longitude: provCoordMap.get(r.id)?.longitude ?? null,
-      })) as NearbyProvider[];
+      })) as unknown as NearbyProvider[];
 
 
       if (cancelled) return;
