@@ -114,6 +114,7 @@ function PublicProfilePage() {
   const [posts, setPosts] = useState<PostRow[]>([]);
   const [completed, setCompleted] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [mediaManagerOpen, setMediaManagerOpen] = useState(false);
 
   const load = async () => {
     setLoading(true);
