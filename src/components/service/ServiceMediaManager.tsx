@@ -264,6 +264,13 @@ export function ServiceMediaManager({ ownerId, profileId }: { ownerId: string; p
           accept="image/*,video/mp4,video/webm,video/quicktime,video/x-m4v"
           onChange={(e) => handleFiles(e.target.files)}
         />
+        <input
+          ref={replaceRef}
+          type="file"
+          hidden
+          accept="image/*,video/mp4,video/webm,video/quicktime,video/x-m4v"
+          onChange={(e) => handleReplaceFile(e.target.files)}
+        />
       </div>
 
       {loading ? (
