@@ -50,7 +50,7 @@ type PublicProfile = {
   area: string | null;
   areas_served: string[] | null;
   availability: string | null;
-  opening_hours: string | null;
+  opening_hours: unknown | null;
   phone: string | null;
   whatsapp: string | null;
   verified: string;
