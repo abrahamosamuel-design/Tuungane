@@ -589,6 +589,23 @@ function PublicProfilePage() {
           </TabsContent>
         </Tabs>
       </section>
+
+      {isOwner && (
+        <Dialog
+          open={mediaManagerOpen}
+          onOpenChange={(open) => {
+            setMediaManagerOpen(open);
+            if (!open) load();
+          }}
+        >
+          <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
+            <DialogHeader>
+              <DialogTitle>Photos &amp; videos</DialogTitle>
+            </DialogHeader>
+            <ServiceMediaManager ownerId={profile.owner_id} profileId={profile.id} />
+          </DialogContent>
+        </Dialog>
+      )}
     </Layout>
   );
 }
