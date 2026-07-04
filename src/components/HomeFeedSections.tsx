@@ -776,16 +776,31 @@ function ServiceListingCard({
         <ProfileTrustBadge kind="service_profile" id={l.user_id} size="sm" />
       </div>
       <div className="flex items-start gap-3 pr-24">
-        {avatar ? (
-          <img src={avatar} alt={serviceName} loading="lazy" className="h-11 w-11 shrink-0 rounded-full object-cover" />
-        ) : (
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-navy/10 text-sm font-bold text-navy">
-            {initialsOf(serviceName)}
-          </div>
-        )}
+        {(() => {
+          const AvatarEl = avatar ? (
+            <img src={avatar} alt={serviceName} loading="lazy" className="h-11 w-11 shrink-0 rounded-full object-cover" />
+          ) : (
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-navy/10 text-sm font-bold text-navy">
+              {initialsOf(serviceName)}
+            </div>
+          );
+          return l.slug ? (
+            <Link to="/p/$slug" params={{ slug: l.slug }} className="shrink-0">{AvatarEl}</Link>
+          ) : (
+            <Link to="/u/$id" params={{ id: l.user_id }} className="shrink-0">{AvatarEl}</Link>
+          );
+        })()}
         <div className="min-w-0 flex-1">
           <div className="flex items-start gap-x-1.5">
-            <h3 className="font-display text-sm font-bold leading-snug text-navy line-clamp-2 break-words">{serviceName}</h3>
+            {l.slug ? (
+              <Link to="/p/$slug" params={{ slug: l.slug }} className="font-display text-sm font-bold leading-snug text-navy line-clamp-2 break-words hover:underline">
+                {serviceName}
+              </Link>
+            ) : (
+              <Link to="/u/$id" params={{ id: l.user_id }} className="font-display text-sm font-bold leading-snug text-navy line-clamp-2 break-words hover:underline">
+                {serviceName}
+              </Link>
+            )}
             {verified ? <BadgeCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-green" /> : null}
           </div>
           {categoryLabel ? (
@@ -793,6 +808,7 @@ function ServiceListingCard({
           ) : null}
         </div>
       </div>
+
 
 
 
