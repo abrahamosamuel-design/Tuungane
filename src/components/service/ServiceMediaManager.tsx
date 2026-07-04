@@ -6,6 +6,36 @@ import { Loader2, Upload, Trash2, ArrowUp, ArrowDown, Star, StarOff, Video as Vi
 
 const MAX_BYTES = 50 * 1024 * 1024; // 50MB
 const MAX_VIDEO_SECONDS = 120;
+const STORAGE_BUCKET = "tuungane-media";
+
+// Turn a stored public URL back into the object path inside the bucket so we can
+// delete it. Handles both `/object/public/<bucket>/...` and `/object/<bucket>/...`
+// (signed) URL shapes. Returns null when the URL doesn't belong to the bucket.
+function pathFromPublicUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  try {
+    const u = new URL(url);
+    const marker = `/${STORAGE_BUCKET}/`;
+    const idx = u.pathname.indexOf(marker);
+    if (idx === -1) return null;
+    const path = u.pathname.slice(idx + marker.length);
+    return path ? decodeURIComponent(path) : null;
+  } catch {
+    return null;
+  }
+}
+
+async function removeStorageObjects(urls: (string | null | undefined)[]) {
+  const paths = Array.from(
+    new Set(urls.map(pathFromPublicUrl).filter((p): p is string => Boolean(p))),
+  );
+  if (paths.length === 0) return;
+  // Best-effort — surface a soft warning but don't fail the surrounding action.
+  const { error } = await supabase.storage.from(STORAGE_BUCKET).remove(paths);
+  if (error) {
+    console.warn("Failed to remove storage objects", paths, error);
+  }
+}
 
 export type MediaRow = {
   id: string;
