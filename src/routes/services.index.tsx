@@ -139,27 +139,39 @@ function Services() {
       const ppCols = isGuest
         ? "owner_id,name,subcategory,bio,town,district,areas_served,service_radius_km,category_slug,verified,updated_at,created_at,availability,cover_url,avatar_url"
         : "owner_id,name,subcategory,bio,town,district,area,latitude,longitude,areas_served,service_radius_km,category_slug,verified,updated_at,created_at,availability,cover_url,avatar_url";
-      // MVP: read from public_profiles (multi-service per user).
+      const spCols = isGuest
+        ? "user_id,business_name,subcategory,bio,town,district,areas_served,service_radius_km,category_slug,verified,updated_at,created_at,availability,cover_url,seeded_by_official,seeded_status,years_experience,price_type,price_fixed_ugx,price_min_ugx,price_max_ugx,price_currency,price_note,media_urls"
+        : "user_id,business_name,subcategory,bio,town,district,area,latitude,longitude,areas_served,service_radius_km,category_slug,verified,updated_at,created_at,availability,cover_url,seeded_by_official,seeded_status,years_experience,price_type,price_fixed_ugx,price_min_ugx,price_max_ugx,price_currency,price_note,media_urls";
+      // MVP: read from public_profiles (multi-service per user) + legacy service_profiles (one-per-user).
 
-      let qy: any = supabase.from("public_profiles").select(ppCols as string);
-      qy = isRecent
-        ? qy.order("created_at", { ascending: false }).order("owner_id", { ascending: false })
-        : qy.order("updated_at", { ascending: false });
-      qy = qy.limit(60);
-      if (filter === "featured") qy = qy.eq("verified", "featured");
-      if (filter === "verified") qy = qy.in("verified", ["verified", "featured"]);
-      if (filter === "available") qy = qy.eq("availability", "available");
+      const build = (from: "public_profiles" | "service_profiles", cols: string) => {
+        let q: any = supabase.from(from).select(cols).eq("suspended", false);
+        if (from === "public_profiles") q = q.not("owner_id", "is", null);
+        q = isRecent
+          ? q.order("created_at", { ascending: false })
+          : q.order("updated_at", { ascending: false });
+        q = q.limit(60);
+        if (filter === "featured") q = q.eq("verified", "featured");
+        if (filter === "verified") q = q.in("verified", ["verified", "featured"]);
+        if (filter === "available") q = q.eq("availability", "available");
+        return q;
+      };
 
-      const { data } = await qy;
+      const [{ data: ppData }, { data: spData }] = await Promise.all([
+        build("public_profiles", ppCols),
+        build("service_profiles", spCols),
+      ]);
 
-      const spRows = ((data ?? []) as any[]).map((r) => ({
+      const ppRows = ((ppData ?? []) as any[]).map((r) => ({
         ...r,
         user_id: r.owner_id,
         business_name: r.name,
         seeded_by_official: false,
         seeded_status: null,
       }));
-      const merged = spRows;
+      const ppOwners = new Set(ppRows.map((r) => r.user_id));
+      const spRows = ((spData ?? []) as any[]).filter((r) => !ppOwners.has(r.user_id));
+      const merged = [...ppRows, ...spRows];
       const ids = merged.map((p) => p.user_id);
       const profMap = new Map<string, { full_name: string; avatar_url: string | null }>();
       const trustMap = new Map<string, { trust_score: number; average_rating: number; completed_jobs: number; verified_reviews: number; response_rate: number }>();
