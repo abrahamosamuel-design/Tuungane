@@ -71,7 +71,7 @@ export function NearYouHomeSection() {
 
 
       // Fallback (no coords, or RPC returned nothing): recent activity, text-hierarchy ranking client-side.
-      const [{ data: rRows }, { data: pRows }] = await Promise.all([
+      const [{ data: rRows }, { data: pRows }, { data: spRowsRaw }] = await Promise.all([
         reqs
           ? Promise.resolve({ data: reqs })
           : supabase
@@ -85,28 +85,47 @@ export function NearYouHomeSection() {
         supabase
           .from("public_profiles")
           .select("id,owner_id,name,subcategory,town,district,area,service_radius_km,areas_served,verified")
+          .eq("suspended", false)
+          .not("owner_id", "is", null)
+          .order("updated_at", { ascending: false })
+          .limit(40),
+        supabase
+          .from("service_profiles")
+          .select("user_id,business_name,subcategory,town,district,area,service_radius_km,areas_served,verified")
+          .eq("suspended", false)
           .order("updated_at", { ascending: false })
           .limit(40),
       ]);
       const rRaw = (rRows ?? []) as Array<NearbyRequest & { id: string }>;
       const pRaw = (pRows ?? []) as Array<{ id: string; owner_id: string; name: string; [k: string]: unknown }>;
+      const spRaw = (spRowsRaw ?? []) as Array<{ user_id: string; business_name: string | null; [k: string]: unknown }>;
+      const ppOwners = new Set(pRaw.map((r) => r.owner_id));
+      const spNew = spRaw.filter((r) => !ppOwners.has(r.user_id));
 
       // Coordinates are gated at DB level — fetch via security-definer RPCs.
-      const [{ data: reqCoords }, { data: provCoords }] = await Promise.all([
+      const [{ data: reqCoords }, { data: provCoords }, { data: spCoords }] = await Promise.all([
         rRaw.length ? supabase.rpc("get_service_request_coords", { _ids: rRaw.map((r) => r.id) }) : Promise.resolve({ data: [] as Array<{ id: string; latitude: number | null; longitude: number | null }> }),
         pRaw.length ? supabase.rpc("get_public_profile_coords", { _ids: pRaw.map((r) => r.id) }) : Promise.resolve({ data: [] as Array<{ id: string; latitude: number | null; longitude: number | null }> }),
+        spNew.length ? supabase.rpc("get_service_profile_coords", { _ids: spNew.map((r) => r.user_id) }) : Promise.resolve({ data: [] as Array<{ user_id: string; latitude: number | null; longitude: number | null }> }),
       ]);
       const reqCoordMap = new Map(((reqCoords ?? []) as Array<{ id: string; latitude: number | null; longitude: number | null }>).map((c) => [c.id, c]));
       const provCoordMap = new Map(((provCoords ?? []) as Array<{ id: string; latitude: number | null; longitude: number | null }>).map((c) => [c.id, c]));
+      const spCoordMap = new Map(((spCoords ?? []) as Array<{ user_id: string; latitude: number | null; longitude: number | null }>).map((c) => [c.user_id, c]));
 
       reqs = rRaw.map((r) => ({ ...r, latitude: reqCoordMap.get(r.id)?.latitude ?? null, longitude: reqCoordMap.get(r.id)?.longitude ?? null }));
-      provs = pRaw.map((r) => ({
+      const ppProvs = pRaw.map((r) => ({
         ...r,
         user_id: r.owner_id,
         business_name: r.name,
         latitude: provCoordMap.get(r.id)?.latitude ?? null,
         longitude: provCoordMap.get(r.id)?.longitude ?? null,
-      })) as unknown as NearbyProvider[];
+      }));
+      const spProvs = spNew.map((r) => ({
+        ...r,
+        latitude: spCoordMap.get(r.user_id)?.latitude ?? null,
+        longitude: spCoordMap.get(r.user_id)?.longitude ?? null,
+      }));
+      provs = [...ppProvs, ...spProvs] as unknown as NearbyProvider[];
 
 
       if (cancelled) return;
