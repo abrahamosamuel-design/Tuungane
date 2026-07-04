@@ -154,6 +154,8 @@ function UserProfile() {
   const [editOpen, setEditOpen] = useState(false);
   const [feedback, setFeedback] = useState<Array<{ id: string; rating: number; review_text: string; service_provided: string; created_at: string; customer_id: string; would_recommend: boolean; profile?: { full_name: string; avatar_url: string | null } }>>([]);
   const [canReview, setCanReview] = useState(false);
+  const [identity, setIdentity] = useState<IdentityStatus | null>(null);
+
 
   const load = async () => {
     // Use the masked RPC so anon visitors and non-owners can never see
