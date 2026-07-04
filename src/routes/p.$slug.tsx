@@ -278,10 +278,12 @@ function PublicProfilePage() {
             type="button"
             onClick={() => setMediaManagerOpen(true)}
             className="absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-black/60 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur transition hover:bg-black/75"
-            aria-label="Edit photos and videos"
+            aria-label="Upload photos and videos"
           >
             <ImagePlus className="h-3.5 w-3.5" />
-            {media.length === 0 ? "Add photos or videos" : "Edit photos & videos"}
+            {media.length === 0
+              ? "Upload photos & videos — build trust"
+              : "Upload more photos & videos"}
           </button>
         )}
       </div>
