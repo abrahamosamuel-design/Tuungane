@@ -1,70 +1,142 @@
-# Service Profile Redesign — Visual-First Listing
+## Goal
 
-Transform the service profile from a personal-profile-styled page into a Jiji-inspired but Tuungane-branded service listing led by a swipeable photo/video gallery.
+Introduce a unified **Profile Identity** system (Individual vs Institution/Organisation) and derive **roles/badges** (Offers Services, Requester, etc.) from activity — replacing any "customer vs provider" split. Keep existing data, posts, listings, followers intact.
 
-## 1. Backend — media support
+---
 
-New migration:
-- `service_media` table: `id`, `service_user_id` (FK service_profiles), `kind` ('photo' | 'video'), `url`, `thumbnail_url` (nullable), `sort_order`, `is_cover` (bool), `duration_seconds` (nullable), `created_at`.
-- Grants + RLS: public SELECT (`TO anon, authenticated`); owner-only INSERT/UPDATE/DELETE via `auth.uid() = service_user_id`.
-- Add `price_display` (text, e.g. "From USh 50,000" | "Negotiable") and `price_min`/`price_max` (nullable numeric) to `service_profiles`.
-- Storage bucket `service-media` (public read; owner-scoped write) with 25MB per file cap. Videos limited to 60s (enforced client-side).
+## 1. Database changes (single migration)
 
-## 2. New/updated components
+Add to `public.profiles`:
+- `profile_identity` text, check in (`'individual'`, `'institution'`), default `'individual'`, not null
+- `organisation_name` text
+- `organisation_type` text (enum-like, free text with app-level validation)
+- `contact_person` text
+- `registration_status` text
+- `description` text
+- `org_phone` text, `org_email` text (org contact, separate from user auth email)
 
-- `ServiceMediaGallery` (new): large 16:9 hero, horizontal snap-swipe on mobile, dot pager + `1/N` chip, camera/video icon count. Video items render `<video muted playsInline preload="metadata" controls>` on tap, poster from `thumbnail_url`. Fallback = service logo / neutral placeholder — no banners.
-- `ServiceMediaUploader` (new, used in create + edit): drag/drop or file picker, accepts images + `video/mp4|webm|quicktime`, previews with remove/reorder (dnd via simple up/down buttons for MVP), pick-cover toggle. Auto-generates video poster via a hidden `<video>` + canvas seek to 0.5s.
-- `ServiceSummaryCard` (new): centered service name (2-line wrap), category · subcategory, location with verified badge inline, "Recently listed" chip if <7d, price display.
-- `ProviderIdentityStrip` (new): small circular avatar + "Provided by <name>" → links to `/u/$id`.
-- `ContactActions` (new): Orange "Message on Tuungane" (primary), outline "Call" (secondary). Green reserved for verified/availability. Quick-message chips ("Is this available?", "What is your price?", "Can you come today?", "I need this service") that prefill a new message thread.
-- `OwnerToolsCompact` (new): single small row with Edit / Dashboard / Share — owner-only, no big orange panel.
+Backfill: all existing rows → `individual`.
 
-## 3. Service profile page (`src/routes/p.$slug.tsx` and `src/routes/u.$id.tsx` for service view)
+Create SQL helper views / RPCs (optional, cheap):
+- `profile_offers_services(profile_user_id uuid) returns boolean` — true if any active row exists in `public_profiles` or `service_profiles` owned by that user (reuse existing tables — no new `services` table; the request's suggested schema overlaps with what already exists).
+- `profile_is_requester(profile_user_id uuid) returns boolean` — true if any `service_requests` row exists.
 
-Order on mobile:
-1. `ServiceMediaGallery`
-2. `ServiceSummaryCard` (slightly overlapping gallery, -mt-6 rounded card)
-3. `ProviderIdentityStrip`
-4. `ContactActions` + quick-message chips
-5. `OwnerToolsCompact` (owner only)
-6. Tabs: About | Timeline | Services (Reviews removed)
+Keep RLS as-is; new columns inherit existing policies. Add explicit `GRANT` re-check not needed (columns added, table grants already exist).
 
-Remove: `TrustStats`, existing large avatar hero, "Trust on Tuungane" section, banner remnants, big orange Owner tools panel.
+**Note:** The user's suggested `services` table already exists as `service_profiles` / `public_profiles`. Reuse those. The `institution_details` fields are folded into `profiles` for MVP simplicity (matches the "no separate business pages" instruction).
 
-About tab: description, category/subcategory, location, availability, price guide, contact preference.
-Timeline tab: existing posts feed, extended to render video posts with play icon.
-Services tab: current service details only — no multi-profile management UI.
+---
 
-## 4. Create/Edit service forms
+## 2. Onboarding flow (post-signup)
 
-- `src/routes/_authenticated/list-skill.tsx` and `ManageServiceDialog.tsx`: add `ServiceMediaUploader` section with helper text "Add photos or short videos of your work so customers can trust your service."
-- Add price fields: dropdown for mode (From / Range / Negotiable / On request) + amount inputs; save to `price_display` + `price_min/max`.
-- Cover selection: star icon on any media item → sets `is_cover`.
+New route: `src/routes/_authenticated/onboarding.tsx` — two-step wizard shown once, right after signup, before `/welcome`:
 
-## 5. Service cards (Home, Services, Category, Search)
+**Step 1 — "How are you joining Tuungane?"**
+- Individual Profile
+- Institution / Organisation Profile
 
-Update `HomeFeedSections.tsx`, `services.index.tsx`, `PopularCategoriesSection.tsx`, `NearYouHomeSection.tsx`:
-- Fetch cover media (join to `service_media` where `is_cover` = true, fallback to first by `sort_order`, fallback to `cover_url`/avatar).
-- If cover is a video: render poster + play-icon overlay; never autoplay on cards.
-- Media count chip when >1.
-- Verified badge fixed top-right, service name wraps to 2 lines with `line-clamp-2`.
+If Institution selected → lightweight inline fields (org name, org type dropdown, location). Everything else editable later.
 
-## 6. Branding rules enforced
+**Step 2 — "What would you like to do first?"**
+- Find a service → `/services`
+- Post a service request → `/requests/new`
+- List my service → `/profiles/new`
+- Explore Tuungane → `/`
 
-Navy for headings/trust text, orange only for primary CTAs, green only for verified/availability chips, white/`--muted` backgrounds. All via existing semantic tokens in `src/styles.css`.
+Writes `profile_identity` (+ org fields if institution) to `profiles`, then routes based on Step 2. Skippable.
 
-## Technical notes
+Redirect logic: in `_authenticated/route.tsx` (or a small effect in `__root.tsx` auth hook), if `profile_identity` is null/unset AND user just signed up, push to `/onboarding`. Otherwise leave `/welcome` behavior alone.
 
-- Videos: HTML5 `<video>` only for MVP — no HLS/transcoding. Client validates size (≤25MB) and duration (≤60s) before upload.
-- Thumbnails generated client-side at upload time, uploaded alongside the video as `<uuid>.jpg`.
-- Storage path: `service-media/{user_id}/{uuid}.{ext}`.
-- Backfill: existing `cover_url` values migrated into `service_media` as a single photo row with `is_cover = true`.
+---
 
-## Out of scope
+## 3. Profile Settings — "Profile Identity" section
 
-- Server-side transcoding / adaptive streaming.
-- Multi-service management UI.
-- Reviews tab (explicitly removed for now).
-- Drag-and-drop reorder library (using up/down buttons instead).
+In `src/routes/_authenticated/settings.tsx`, add a new card:
+- Radio: Individual / Institution
+- When Institution selected: show org fields (name, type, contact person, phone, email, description, registration status)
+- Save button → updates `profiles`
+- Copy note: "Changing identity does not delete your posts, listings, requests, followers, or messages."
 
-Approve and I'll implement in this order: migration → uploader + gallery components → profile page rewrite → create/edit forms → service card updates.
+Org type options (constant in `src/data/organisationTypes.ts`):
+School, Vocational Institute, NGO, Church, Community Group, Association, SACCO, Company, Training Center, Health Facility, Government, Other.
+
+---
+
+## 4. Badges — derived, not stored
+
+New helper `src/lib/profile-badges.ts`:
+- `getProfileBadges(profile, counts) → { identity, offersServices, requester, verified, ... }`
+- `identity` from `profile_identity`; `offersServices` from `public_profiles`/`service_profiles` count > 0; `requester` from `service_requests` count > 0.
+
+New component `src/components/profile/IdentityBadges.tsx` renders chips: `Individual Profile` / `Institution Profile`, `· Offers Services`, `· Requester`, verified check.
+
+Wire into:
+- `src/routes/u.$id.tsx` (public individual profile view)
+- `src/routes/_authenticated/me.tsx` (my profile header)
+- `src/components/ProviderCard.tsx` (service/provider cards)
+- `src/routes/p.$slug.tsx` (public service profile view)
+
+For institutions, header shows organisation name + org type + contact person instead of personal name.
+
+---
+
+## 5. Language sweep
+
+Replace user-facing "Customer" with neutral copy. Grep-and-edit pass across:
+- `CreateChoiceSheet.tsx`, `welcome.tsx`, hero cards, empty states, dialogs.
+- Use "Member" / "Tuungane member", "Requester" (only when they've posted), "Offers Services" (only when they've listed).
+
+Do **not** touch DB column names that use "customer" internally (if any) — UI only.
+
+---
+
+## 6. Service listing eligibility
+
+- Keep `List Your Service` available to every signed-in user regardless of identity (already the case).
+- After a user creates their first `public_profile` / `service_profile`, the derived `offersServices` badge appears automatically — no code change needed beyond the badge helper.
+- Institution profiles list services under the same account; no separate business page flow added.
+
+Explicitly leave existing `business_pages` code untouched (per "no separate business pages for MVP" — existing routes stay but new onboarding does not push users there).
+
+---
+
+## 7. Out of scope for this change
+
+- Not renaming DB columns.
+- Not modifying `business_pages` table or routes.
+- Not touching messaging, credits, boosts, trust system.
+- Not adding a new `services` table (existing `public_profiles` / `service_profiles` cover it).
+
+---
+
+## Files touched (approx)
+
+**Migration**
+- `supabase/migrations/<new>.sql`
+
+**New**
+- `src/routes/_authenticated/onboarding.tsx`
+- `src/data/organisationTypes.ts`
+- `src/lib/profile-badges.ts`
+- `src/components/profile/IdentityBadges.tsx`
+
+**Edited**
+- `src/routes/_authenticated/settings.tsx` — Profile Identity section
+- `src/routes/_authenticated/route.tsx` or `use-auth.tsx` — first-run redirect to onboarding
+- `src/routes/_authenticated/welcome.tsx` — softened wording, still available
+- `src/routes/_authenticated/me.tsx` — identity badges
+- `src/routes/u.$id.tsx`, `src/routes/p.$slug.tsx` — identity display
+- `src/components/ProviderCard.tsx`, `src/components/CreateChoiceSheet.tsx` — neutral wording, identity chip
+- `src/integrations/supabase/types.ts` — regenerated after migration approved
+
+---
+
+## Rollout order
+
+1. Ship migration (adds columns, defaults everyone to `individual`).
+2. Add badge helper + Identity component (safe no-ops until wired).
+3. Add onboarding route + settings section.
+4. Wire badges into profile pages and cards.
+5. Copy sweep for "customer" → "member".
+
+Nothing here is destructive; existing users become Individual by default and can switch any time.

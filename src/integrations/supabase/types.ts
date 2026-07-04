@@ -1532,8 +1532,10 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           city: string | null
+          contact_person: string | null
           country: string | null
           created_at: string
+          description: string | null
           district: string | null
           full_name: string
           id: string
@@ -1542,7 +1544,13 @@ export type Database = {
           location_updated_at: string | null
           location_visibility: string
           longitude: number | null
+          org_email: string | null
+          org_phone: string | null
+          organisation_name: string | null
+          organisation_type: string | null
+          profile_identity: string
           region: string | null
+          registration_status: string | null
           town: string | null
           updated_at: string
         }
@@ -1552,8 +1560,10 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           city?: string | null
+          contact_person?: string | null
           country?: string | null
           created_at?: string
+          description?: string | null
           district?: string | null
           full_name?: string
           id: string
@@ -1562,7 +1572,13 @@ export type Database = {
           location_updated_at?: string | null
           location_visibility?: string
           longitude?: number | null
+          org_email?: string | null
+          org_phone?: string | null
+          organisation_name?: string | null
+          organisation_type?: string | null
+          profile_identity?: string
           region?: string | null
+          registration_status?: string | null
           town?: string | null
           updated_at?: string
         }
@@ -1572,8 +1588,10 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           city?: string | null
+          contact_person?: string | null
           country?: string | null
           created_at?: string
+          description?: string | null
           district?: string | null
           full_name?: string
           id?: string
@@ -1582,7 +1600,13 @@ export type Database = {
           location_updated_at?: string | null
           location_visibility?: string
           longitude?: number | null
+          org_email?: string | null
+          org_phone?: string | null
+          organisation_name?: string | null
+          organisation_type?: string | null
+          profile_identity?: string
           region?: string | null
+          registration_status?: string | null
           town?: string | null
           updated_at?: string
         }
@@ -3022,8 +3046,10 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           city: string | null
+          contact_person: string | null
           country: string | null
           created_at: string
+          description: string | null
           district: string | null
           full_name: string
           id: string
@@ -3032,7 +3058,13 @@ export type Database = {
           location_updated_at: string | null
           location_visibility: string
           longitude: number | null
+          org_email: string | null
+          org_phone: string | null
+          organisation_name: string | null
+          organisation_type: string | null
+          profile_identity: string
           region: string | null
+          registration_status: string | null
           town: string | null
           updated_at: string
         }[]
