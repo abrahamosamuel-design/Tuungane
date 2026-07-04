@@ -2,7 +2,28 @@ import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadMedia } from "@/lib/upload";
 import { toast } from "sonner";
-import { Loader2, Upload, Trash2, ArrowUp, ArrowDown, Star, StarOff, Video as VideoIcon, ImageIcon, RefreshCw } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  Loader2,
+  Upload,
+  Trash2,
+  ArrowUp,
+  ArrowDown,
+  Star,
+  StarOff,
+  Video as VideoIcon,
+  ImageIcon,
+  RefreshCw,
+} from "lucide-react";
 
 const MAX_BYTES = 50 * 1024 * 1024; // 50MB
 const MAX_VIDEO_SECONDS = 120;
