@@ -509,11 +509,10 @@ function ProfileIdentitySection() {
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("profile_identity,organisation_name,organisation_type,contact_person,org_phone,org_email,description,registration_status")
-        .eq("id", user.id)
-        .maybeSingle();
+      // Read via the security-definer RPC so column-level revokes on
+      // org_phone / org_email (protected against cross-user reads) still
+      // resolve for the owner.
+      const { data } = await supabase.rpc("get_my_profile").maybeSingle();
       if (data) {
         setIdentity((data.profile_identity as "individual" | "institution") ?? "individual");
         setOrgName(data.organisation_name ?? "");
@@ -526,6 +525,7 @@ function ProfileIdentitySection() {
       }
       setLoaded(true);
     })();
+
   }, [user]);
 
   const save = async () => {
