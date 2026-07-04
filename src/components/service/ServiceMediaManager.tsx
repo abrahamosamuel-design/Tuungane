@@ -318,9 +318,9 @@ export function ServiceMediaManager({ ownerId, profileId }: { ownerId: string; p
     <div className="rounded-2xl border border-border bg-card p-4">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h3 className="text-sm font-semibold text-navy">Service photos &amp; videos</h3>
+          <h3 className="text-sm font-semibold text-navy">Upload photos &amp; videos</h3>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            Add photos or short videos of your work so customers can trust your service. Max 50&nbsp;MB, videos up to 2&nbsp;minutes.
+            Services with real photos and short videos get far more contacts. Show your work, your team, and your space — customers trust what they can see. Max 50&nbsp;MB, videos up to 2&nbsp;minutes.
           </p>
         </div>
         <button
@@ -330,7 +330,7 @@ export function ServiceMediaManager({ ownerId, profileId }: { ownerId: string; p
           className="inline-flex shrink-0 items-center gap-1 rounded-xl bg-orange px-3 py-2 text-xs font-semibold text-orange-foreground disabled:opacity-50"
         >
           {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
-          {busy ? "Uploading…" : "Add media"}
+          {busy ? "Uploading…" : "Upload"}
         </button>
         <input
           ref={fileRef}
@@ -355,7 +355,7 @@ export function ServiceMediaManager({ ownerId, profileId }: { ownerId: string; p
         </div>
       ) : items.length === 0 ? (
         <div className="mt-4 rounded-xl border border-dashed border-border bg-muted/30 p-6 text-center text-sm text-muted-foreground">
-          No photos or videos yet. Tap <span className="font-semibold text-navy">Add media</span> to upload — the first item becomes your cover.
+          No photos or videos yet. Tap <span className="font-semibold text-navy">Upload</span> to share your work — the first item becomes your cover and helps customers trust your service.
         </div>
       ) : (
         <ul className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
