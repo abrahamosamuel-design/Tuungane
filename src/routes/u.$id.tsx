@@ -41,6 +41,8 @@ import type { PriceType, PriceGuide } from "@/lib/price-guide";
 import { ContactOptionsUnlocked } from "@/components/ContactOptionsUnlocked";
 import { ProviderQuickContact } from "@/components/ProviderQuickContact";
 import { useContactGate } from "@/hooks/use-contact-gate";
+import { IdentityBadges } from "@/components/profile/IdentityBadges";
+import { fetchIdentityStatus, type IdentityStatus } from "@/lib/profile-badges";
 
 
 
