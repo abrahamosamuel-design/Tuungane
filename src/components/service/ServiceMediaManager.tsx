@@ -77,6 +77,8 @@ export function ServiceMediaManager({ ownerId, profileId }: { ownerId: string; p
   const [items, setItems] = useState<MediaRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<MediaRow | null>(null);
   const fileRef = useRef<HTMLInputElement | null>(null);
   const replaceRef = useRef<HTMLInputElement | null>(null);
   const [replaceTarget, setReplaceTarget] = useState<MediaRow | null>(null);
