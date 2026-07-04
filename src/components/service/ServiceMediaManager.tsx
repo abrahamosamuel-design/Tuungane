@@ -172,14 +172,28 @@ export function ServiceMediaManager({ ownerId, profileId }: { ownerId: string; p
     }
   };
 
+  const askRemove = (item: MediaRow) => {
+    setDeleteTarget(item);
+  };
+
+  const cancelRemove = () => {
+    setDeleteTarget(null);
+    setDeletingId(null);
+  };
+
   const removeItem = async (id: string) => {
-    if (!confirm("Remove this media item?")) return;
     const target = items.find((m) => m.id === id);
+    if (!target) return;
+    setDeletingId(id);
     const { error } = await supabase.from("service_media").delete().eq("id", id);
-    if (error) return toast.error(error.message);
-    if (target) {
-      await removeStorageObjects([target.url, target.thumbnail_url]);
+    if (error) {
+      setDeletingId(null);
+      setDeleteTarget(null);
+      return toast.error(error.message);
     }
+    await removeStorageObjects([target.url, target.thumbnail_url]);
+    setDeletingId(null);
+    setDeleteTarget(null);
     load();
   };
 
