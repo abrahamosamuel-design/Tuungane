@@ -1,15 +1,45 @@
-import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import { createFileRoute, Outlet, redirect, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { autoEnablePushIfNeeded } from "@/lib/push";
 
+const ONBOARDED_KEY = "tuungane_onboarded";
+
 function AuthenticatedLayout() {
+  const nav = useNavigate();
   useEffect(() => {
-    // Push is enabled by default for all signed-in users. This requests
-    // permission the first time and re-subscribes silently afterward.
-    // Users who explicitly disable on the preferences page won't be re-prompted.
     autoEnablePushIfNeeded().catch(() => {});
   }, []);
+
+  useEffect(() => {
+    // First-run onboarding redirect: only when the user has never set an
+    // identity AND we haven't already routed them through onboarding.
+    // Cheap: single-column select on the primary key.
+    if (typeof window === "undefined") return;
+    if (window.location.pathname.startsWith("/onboarding")) return;
+    if (localStorage.getItem(ONBOARDED_KEY) === "1") return;
+    let cancelled = false;
+    (async () => {
+      const { data: sess } = await supabase.auth.getUser();
+      if (cancelled || !sess.user) return;
+      const { data } = await supabase
+        .from("profiles")
+        .select("profile_identity")
+        .eq("id", sess.user.id)
+        .maybeSingle();
+      // Only redirect brand-new users — anyone with an existing identity
+      // (which includes every pre-existing user via backfill) is skipped
+      // and future runs are short-circuited by the localStorage flag.
+      if (cancelled) return;
+      if (!data) {
+        nav({ to: "/onboarding" });
+      } else {
+        localStorage.setItem(ONBOARDED_KEY, "1");
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [nav]);
+
   return <Outlet />;
 }
 
