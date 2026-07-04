@@ -122,7 +122,7 @@ function Feed() {
   };
 
   const loadProviders = async () => {
-    let q = supabase.from("service_profiles").select("user_id,business_name,subcategory,bio,town,district,area,latitude,longitude,service_radius_km,category_slug,verified,years_experience,areas_served,availability,cover_url,seeded_by_official,seeded_status,suspended,updated_at").eq("suspended", false).order("updated_at", { ascending: false }).limit(50);
+    let q = supabase.from("service_profiles").select("user_id,business_name,subcategory,bio,town,district,area,service_radius_km,category_slug,verified,years_experience,areas_served,availability,cover_url,seeded_by_official,seeded_status,suspended,updated_at").eq("suspended", false).order("updated_at", { ascending: false }).limit(50);
     if (category) q = q.eq("category_slug", category);
     const { data } = await q;
     const ids = (data ?? []).map((p) => p.user_id);
