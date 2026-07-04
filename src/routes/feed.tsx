@@ -109,16 +109,20 @@ function Feed() {
     }
     let mapped = (rows ?? []).map((r) => ({ ...r, author: profMap.get(r.provider_user_id) })) as PostRow[];
     if (filter === "popular") {
-      const { data: likes } = await supabase.from("post_likes").select("post_id");
+      const ids = mapped.map((r) => r.id);
+      const { data: likes } = ids.length
+        ? await supabase.rpc("get_post_like_counts", { _post_ids: ids })
+        : { data: [] as Array<{ post_id: string; cnt: number }> };
       const tally = new Map<string, number>();
-      (likes ?? []).forEach((l) => tally.set(l.post_id, (tally.get(l.post_id) ?? 0) + 1));
+      (likes ?? []).forEach((l: { post_id: string; cnt: number }) => tally.set(l.post_id, l.cnt));
       mapped = mapped.sort((a, b) => (tally.get(b.id) ?? 0) - (tally.get(a.id) ?? 0));
     }
+
     setPosts(mapped);
   };
 
   const loadProviders = async () => {
-    let q = supabase.from("service_profiles").select("user_id,business_name,subcategory,bio,town,district,area,latitude,longitude,service_radius_km,category_slug,verified,years_experience,areas_served,availability,cover_url,seeded_by_official,seeded_status,suspended,updated_at").eq("suspended", false).order("updated_at", { ascending: false }).limit(50);
+    let q = supabase.from("service_profiles").select("user_id,business_name,subcategory,bio,town,district,area,service_radius_km,category_slug,verified,years_experience,areas_served,availability,cover_url,seeded_by_official,seeded_status,suspended,updated_at").eq("suspended", false).order("updated_at", { ascending: false }).limit(50);
     if (category) q = q.eq("category_slug", category);
     const { data } = await q;
     const ids = (data ?? []).map((p) => p.user_id);

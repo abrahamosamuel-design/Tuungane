@@ -51,7 +51,7 @@ function PostDetail() {
       const [{ data: prof }, { data: sp }] = await Promise.all([
         supabase
           .from("profiles")
-          .select("full_name, avatar_url, is_provider, district, town, area, latitude, longitude")
+          .select("full_name, avatar_url, is_provider, district, town, area")
           .eq("id", (data as any).provider_user_id)
           .maybeSingle(),
         supabase

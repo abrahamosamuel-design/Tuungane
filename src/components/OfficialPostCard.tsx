@@ -24,11 +24,11 @@ export function OfficialPostCard({ post, account, onChanged }: { post: OfficialP
 
   useEffect(() => {
     (async () => {
-      const [{ count: lc }, { count: cc }] = await Promise.all([
-        supabase.from("official_post_likes").select("*", { count: "exact", head: true }).eq("post_id", post.id),
+      const [{ data: lc }, { count: cc }] = await Promise.all([
+        supabase.rpc("get_official_post_like_count", { _post_id: post.id }),
         supabase.from("official_post_comments").select("*", { count: "exact", head: true }).eq("post_id", post.id),
       ]);
-      setLikes(lc ?? 0);
+      setLikes(typeof lc === "number" ? lc : 0);
       setComments(cc ?? 0);
       if (user) {
         const { data } = await supabase.from("official_post_likes").select("post_id").eq("post_id", post.id).eq("user_id", user.id).maybeSingle();

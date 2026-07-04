@@ -85,16 +85,28 @@ function CategoryPage() {
       const [{ data: sps }, { data: pps }] = await Promise.all([
         supabase
           .from("service_profiles")
-          .select("user_id,business_name,subcategory,bio,town,district,area,latitude,longitude,verified,category_slug,cover_url")
+          .select("user_id,business_name,subcategory,bio,town,district,area,verified,category_slug,cover_url")
           .eq("suspended", false)
           .limit(200),
         supabase
           .from("public_profiles")
-          .select("owner_id,name,avatar_url,subcategory,bio,town,district,area,latitude,longitude,verified,category_slug,cover_url")
+          .select("id,owner_id,name,avatar_url,subcategory,bio,town,district,area,verified,category_slug,cover_url")
           .eq("suspended", false)
           .not("owner_id", "is", null)
           .limit(200),
       ]);
+      // Coordinates are gated at DB level; fetch via security-definer RPCs
+      // and merge in so distance/radius filters keep working.
+      const spIds = (sps ?? []).map((r) => r.user_id as string);
+      const ppIds = (pps ?? []).map((r) => (r as { id: string }).id);
+      const [{ data: spCoords }, { data: ppCoords }] = await Promise.all([
+        spIds.length ? supabase.rpc("get_service_profile_coords", { _ids: spIds }) : Promise.resolve({ data: [] as Array<{ user_id: string; latitude: number | null; longitude: number | null }> }),
+        ppIds.length ? supabase.rpc("get_public_profile_coords", { _ids: ppIds }) : Promise.resolve({ data: [] as Array<{ id: string; latitude: number | null; longitude: number | null }> }),
+      ]);
+      const spCoordMap = new Map(((spCoords ?? []) as Array<{ user_id: string; latitude: number | null; longitude: number | null }>).map((c) => [c.user_id, c]));
+      const ppCoordMap = new Map(((ppCoords ?? []) as Array<{ id: string; latitude: number | null; longitude: number | null }>).map((c) => [c.id, c]));
+      (sps ?? []).forEach((r) => { const c = spCoordMap.get(r.user_id as string); (r as unknown as { latitude: number | null; longitude: number | null }).latitude = c?.latitude ?? null; (r as unknown as { latitude: number | null; longitude: number | null }).longitude = c?.longitude ?? null; });
+      (pps ?? []).forEach((r) => { const c = ppCoordMap.get((r as { id: string }).id); (r as unknown as { latitude: number | null; longitude: number | null }).latitude = c?.latitude ?? null; (r as unknown as { latitude: number | null; longitude: number | null }).longitude = c?.longitude ?? null; });
       const spRows = ((sps ?? []) as any[]).map((r) => ({ ...r })) as (Row & { category_slug: string })[];
       const spOwners = new Set(spRows.map((r) => r.user_id));
       const ppRows = ((pps ?? []) as any[])

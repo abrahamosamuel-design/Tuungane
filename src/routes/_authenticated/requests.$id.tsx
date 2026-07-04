@@ -58,12 +58,17 @@ function RequestDetailsPage() {
 
   const load = useCallback(async () => {
     if (!user) return;
-    const { data: r, error } = await supabase.from("service_requests").select("id,customer_id,provider_id,category_slug,subcategory,service_needed,title,visibility,location,district,town,area,latitude,longitude,country,region,description,preferred_date,preferred_time,urgency,budget_range,preferred_contact_method,customer_phone,customer_whatsapp,attachment_url,status,urgent_flag,created_at,updated_at,completed_at,cancelled_at,disputed_at,service_profile_id,selected_provider_id,provider_confirmed_completion,customer_confirmed_completion").eq("id", id).maybeSingle();
+    // get_service_request_detail is SECURITY DEFINER and only returns
+    // the row to the customer, provider, or staff — bypasses the column
+    // revokes on customer_phone/customer_whatsapp/latitude/longitude for
+    // authorised parties.
+    const { data: r, error } = await supabase.rpc("get_service_request_detail", { _id: id }).maybeSingle();
     if (error || !r) {
       toast.error("Request not found or you don't have access");
       return;
     }
-    const sr = { ...r, completion_code: null } as ServiceRequestRow;
+    const sr = { ...(r as Record<string, unknown>), completion_code: null } as ServiceRequestRow;
+
     // Fetch completion code via secure RPC (only the customer / admin can retrieve plaintext)
     if (user.id === sr.customer_id) {
       const { data: code } = await supabase.rpc("get_completion_code", { _request_id: id });
