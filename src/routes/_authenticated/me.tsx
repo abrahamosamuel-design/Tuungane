@@ -8,6 +8,8 @@ import { Avatar } from "@/components/social/Avatar";
 import { RemovePhotoConfirm } from "@/components/RemovePhotoConfirm";
 import { MyRequestsSummary } from "@/components/MyRequestsSummary";
 import { MyTrustStatusCard } from "@/components/trust/MyTrustStatusCard";
+import { IdentityBadges } from "@/components/profile/IdentityBadges";
+import { fetchIdentityStatus, type IdentityStatus } from "@/lib/profile-badges";
 import { toast } from "sonner";
 
 
