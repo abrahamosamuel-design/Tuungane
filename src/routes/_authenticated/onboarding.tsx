@@ -31,7 +31,11 @@ function Onboarding() {
   const saveIdentity = async () => {
     if (!user || !identity) return;
     setBusy(true);
-    const patch: Record<string, unknown> = { profile_identity: identity };
+    const patch: {
+      profile_identity: Identity;
+      organisation_name?: string;
+      organisation_type?: string;
+    } = { profile_identity: identity };
     if (identity === "institution") {
       if (orgName.trim()) patch.organisation_name = orgName.trim();
       if (orgType) patch.organisation_type = orgType;
