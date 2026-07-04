@@ -27,6 +27,8 @@ export function ServiceMediaManager({ ownerId, profileId }: { ownerId: string; p
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const fileRef = useRef<HTMLInputElement | null>(null);
+  const replaceRef = useRef<HTMLInputElement | null>(null);
+  const [replaceTarget, setReplaceTarget] = useState<MediaRow | null>(null);
 
   const load = async () => {
     setLoading(true);
