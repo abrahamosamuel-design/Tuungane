@@ -109,11 +109,15 @@ function Feed() {
     }
     let mapped = (rows ?? []).map((r) => ({ ...r, author: profMap.get(r.provider_user_id) })) as PostRow[];
     if (filter === "popular") {
-      const { data: likes } = await supabase.from("post_likes").select("post_id");
+      const ids = mapped.map((r) => r.id);
+      const { data: likes } = ids.length
+        ? await supabase.rpc("get_post_like_counts", { _post_ids: ids })
+        : { data: [] as Array<{ post_id: string; cnt: number }> };
       const tally = new Map<string, number>();
-      (likes ?? []).forEach((l) => tally.set(l.post_id, (tally.get(l.post_id) ?? 0) + 1));
+      (likes ?? []).forEach((l: { post_id: string; cnt: number }) => tally.set(l.post_id, l.cnt));
       mapped = mapped.sort((a, b) => (tally.get(b.id) ?? 0) - (tally.get(a.id) ?? 0));
     }
+
     setPosts(mapped);
   };
 
