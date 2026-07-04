@@ -716,3 +716,66 @@ function formatPrice(sp: ServiceProfileExtras | null): string | null {
   if (max) return `USh ${max.toLocaleString()}`;
   return null;
 }
+
+function DetailRow({
+  label,
+  value,
+  icon,
+  isOwner,
+  emptyOwnerPrompt,
+  profileEditId,
+  valueClass,
+}: {
+  label: string;
+  value?: string | null;
+  icon?: React.ReactNode;
+  isOwner: boolean;
+  emptyOwnerPrompt?: string;
+  profileEditId?: string;
+  valueClass?: string;
+}) {
+  const has = Boolean(value && String(value).trim());
+  if (!has && !isOwner) return null;
+  return (
+    <div className="flex items-center justify-between gap-3 py-2.5">
+      <dt className="text-[11px] font-semibold uppercase tracking-wide text-navy/50">{label}</dt>
+      <dd className={`min-w-0 text-right text-sm text-foreground/90 ${valueClass ?? ""}`}>
+        {has ? (
+          <span className="inline-flex items-center gap-1">
+            {icon}
+            <span className="truncate">{value}</span>
+          </span>
+        ) : isOwner && emptyOwnerPrompt && profileEditId ? (
+          <Link
+            to="/profiles/$id"
+            params={{ id: profileEditId }}
+            className="inline-flex items-center gap-1 text-xs font-semibold text-orange"
+          >
+            <Plus className="h-3 w-3" /> {emptyOwnerPrompt}
+          </Link>
+        ) : (
+          <span className="text-muted-foreground italic">Not set</span>
+        )}
+      </dd>
+    </div>
+  );
+}
+
+function formatAvailability(availability: string | null, openingHours: string | null): string | null {
+  const raw = (availability ?? "").trim().toLowerCase();
+  const hours = (openingHours ?? "").trim();
+  const map: Record<string, string> = {
+    available: "Available now",
+    available_now: "Available now",
+    open: "Open now",
+    open_now: "Open now",
+    open_today: "Open today",
+    appointment: "Available by appointment",
+    by_appointment: "Available by appointment",
+    closed: "Closed now",
+  };
+  const label = raw ? map[raw] ?? raw.charAt(0).toUpperCase() + raw.slice(1) : "";
+  if (label && hours) return `${label} · ${hours}`;
+  return label || hours || null;
+}
+
