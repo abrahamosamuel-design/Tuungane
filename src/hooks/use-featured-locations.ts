@@ -37,13 +37,23 @@ export async function fetchFeaturedLocations(force = false): Promise<FeaturedLoc
   if (!force && _cache && Date.now() - _cacheAt < TTL) return _cache;
   const { data } = await supabase
     .from("featured_locations")
-    .select("id,country,region,district,town,area,latitude,longitude,category_slug,priority,note,active")
+    .select("id,country,region,district,town,area,category_slug,priority,note,active")
     .eq("active", true)
     .order("priority", { ascending: false });
-  _cache = (data ?? []) as FeaturedLocation[];
+  const base = (data ?? []) as Omit<FeaturedLocation, "latitude" | "longitude">[];
+  // Coordinates are gated at the DB level — fetch through the security-definer
+  // RPC and merge them back in for map/distance features.
+  const ids = base.map((r) => r.id);
+  let coordMap = new Map<string, { latitude: number | null; longitude: number | null }>();
+  if (ids.length) {
+    const { data: coords } = await supabase.rpc("get_featured_location_coords", { _ids: ids });
+    coordMap = new Map((coords ?? []).map((c: { id: string; latitude: number | null; longitude: number | null }) => [c.id, { latitude: c.latitude, longitude: c.longitude }]));
+  }
+  _cache = base.map((r) => ({ ...r, latitude: coordMap.get(r.id)?.latitude ?? null, longitude: coordMap.get(r.id)?.longitude ?? null })) as FeaturedLocation[];
   _cacheAt = Date.now();
   return _cache;
 }
+
 
 export function invalidateFeaturedLocationsCache() {
   _cache = null;
