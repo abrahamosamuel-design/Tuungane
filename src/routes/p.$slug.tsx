@@ -28,6 +28,9 @@ import { PostComposer } from "@/components/social/PostComposer";
 import { PostCard, type PostRow } from "@/components/social/PostCard";
 import { toast } from "sonner";
 import { ServiceMediaGallery, type ServiceMediaItem } from "@/components/service/ServiceMediaGallery";
+import { ServiceMediaManager } from "@/components/service/ServiceMediaManager";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ImagePlus } from "lucide-react";
 
 type ProfileType = "individual" | "business" | "organization";
 
