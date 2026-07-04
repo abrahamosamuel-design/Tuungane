@@ -167,6 +167,77 @@ export function ServiceMediaManager({ ownerId, profileId }: { ownerId: string; p
     load();
   };
 
+  const beginReplace = (item: MediaRow) => {
+    setReplaceTarget(item);
+    replaceRef.current?.click();
+  };
+
+  const handleReplaceFile = async (fs: FileList | null) => {
+    const file = fs?.[0];
+    const target = replaceTarget;
+    if (replaceRef.current) replaceRef.current.value = "";
+    setReplaceTarget(null);
+    if (!file || !target) return;
+    const isVideo = file.type.startsWith("video/");
+    const isImage = file.type.startsWith("image/");
+    if (!isVideo && !isImage) return toast.error("Please pick a photo or video");
+    if (file.size > MAX_BYTES) return toast.error("File is over 50 MB");
+    setBusy(true);
+    try {
+      let duration: number | null = null;
+      let thumbUrl: string | null = target.thumbnail_url;
+      if (isVideo) {
+        const meta = await probeVideo(file);
+        if (meta.duration > MAX_VIDEO_SECONDS) {
+          toast.error(`Video is longer than ${MAX_VIDEO_SECONDS}s — please trim it`);
+          setBusy(false);
+          return;
+        }
+        duration = Math.round(meta.duration);
+        if (meta.thumbnailBlob) {
+          const thumbFile = new File(
+            [meta.thumbnailBlob],
+            `${crypto.randomUUID()}.jpg`,
+            { type: "image/jpeg" },
+          );
+          try {
+            thumbUrl = await uploadMedia(ownerId, thumbFile, "service-media/thumbs");
+          } catch {
+            /* non-fatal */
+          }
+        }
+      } else {
+        thumbUrl = null;
+      }
+      const url = await uploadMedia(ownerId, file, "service-media");
+      const { error } = await supabase
+        .from("service_media")
+        .update({
+          kind: isVideo ? "video" : "photo",
+          url,
+          thumbnail_url: thumbUrl,
+          duration_seconds: duration,
+        } as never)
+        .eq("id", target.id);
+      if (error) throw new Error(error.message);
+      if (target.is_cover) {
+        const coverUrl = isVideo ? thumbUrl : url;
+        if (coverUrl) {
+          await supabase
+            .from("service_profiles")
+            .update({ cover_url: coverUrl } as never)
+            .eq("user_id", ownerId);
+        }
+      }
+      toast.success("Media updated");
+      load();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Replace failed");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <div className="rounded-2xl border border-border bg-card p-4">
       <div className="flex items-start justify-between gap-3">
