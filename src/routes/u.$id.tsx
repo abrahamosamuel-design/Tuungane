@@ -339,6 +339,8 @@ function UserProfile() {
               <div className="mt-1 flex flex-wrap items-center justify-center gap-x-1.5">
                 <ProfileBoostBadges providerId={id} />
               </div>
+              <IdentityBadges status={identity} className="mt-2 justify-center" />
+
               {sp && (
                 <p className="mt-1 text-sm font-medium text-orange">
                   {formatSubcategory(sp.subcategory)} {cat && <span className="text-muted-foreground">· {cat.name}</span>}
