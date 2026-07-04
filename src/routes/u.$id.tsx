@@ -240,6 +240,7 @@ function UserProfile() {
   };
 
   useEffect(() => { load(); /* eslint-disable-next-line */ }, [id]);
+  useEffect(() => { fetchIdentityStatus(id).then(setIdentity).catch(() => setIdentity(null)); }, [id]);
 
 
 
