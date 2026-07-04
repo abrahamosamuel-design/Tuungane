@@ -85,11 +85,11 @@ export function CommunityUpdatesSection() {
       // Fetch like/comment counts in parallel per post (cheap for ~40).
       const counts = await Promise.all(
         raw.map(async (p) => {
-          const [{ count: lc }, { count: cc }] = await Promise.all([
-            supabase.from("post_likes").select("*", { count: "exact", head: true }).eq("post_id", p.id),
+          const [{ data: lc }, { count: cc }] = await Promise.all([
+            supabase.rpc("get_post_like_count", { _post_id: p.id }),
             supabase.from("post_comments").select("*", { count: "exact", head: true }).eq("post_id", p.id).eq("hidden", false),
           ]);
-          return { id: p.id, likes: lc ?? 0, comments: cc ?? 0 };
+          return { id: p.id, likes: typeof lc === "number" ? lc : 0, comments: cc ?? 0 };
         })
       );
       const countMap = new Map(counts.map((c) => [c.id, c]));
