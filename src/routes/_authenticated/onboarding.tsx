@@ -49,8 +49,13 @@ function Onboarding() {
     setStep(2);
   };
 
-  const finish = (next: NextAction) => {
+  const finish = async (next: NextAction) => {
     try { localStorage.setItem("tuungane_welcome_seen", "1"); } catch { /* ignore */ }
+    try { localStorage.setItem("tuungane_onboarded", "1"); } catch { /* ignore */ }
+    if (user) {
+      // Fire-and-forget: don't block navigation on the flag write.
+      supabase.from("profiles").update({ has_completed_onboarding: true }).eq("id", user.id).then(() => {});
+    }
     const map: Record<NextAction, string> = {
       find: "/services",
       request: "/requests/new",
