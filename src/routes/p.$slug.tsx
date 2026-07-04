@@ -458,70 +458,115 @@ function PublicProfilePage() {
 
         {/* Tabs */}
         <Tabs defaultValue="about" className="mt-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="about">About</TabsTrigger>
-            <TabsTrigger value="timeline">Timeline</TabsTrigger>
-            <TabsTrigger value="services">Services</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3 rounded-xl bg-muted/60 p-1">
+            <TabsTrigger
+              value="about"
+              className="rounded-lg text-sm font-semibold text-navy/60 data-[state=active]:bg-card data-[state=active]:text-orange data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-orange/30"
+            >
+              About
+            </TabsTrigger>
+            <TabsTrigger
+              value="timeline"
+              className="rounded-lg text-sm font-semibold text-navy/60 data-[state=active]:bg-card data-[state=active]:text-orange data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-orange/30"
+            >
+              Timeline
+            </TabsTrigger>
+            <TabsTrigger
+              value="services"
+              className="rounded-lg text-sm font-semibold text-navy/60 data-[state=active]:bg-card data-[state=active]:text-orange data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-orange/30"
+            >
+              Services
+            </TabsTrigger>
           </TabsList>
 
           {/* ABOUT */}
-          <TabsContent value="about" className="mt-3 space-y-3">
-            <AboutBlock label="Description" empty="No description yet.">
+          <TabsContent value="about" className="mt-3">
+            <div className="rounded-2xl border border-border bg-card p-4">
+              <h2 className="font-display text-base font-bold text-navy">About {profile.name}</h2>
               {profile.bio ? (
-                <p className="whitespace-pre-line text-sm text-foreground/90">{profile.bio}</p>
-              ) : null}
-            </AboutBlock>
-
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <AboutBlock label="Category">
-                <p className="text-sm text-foreground/90">
-                  {profile.subcategory
-                    ? formatSubcategory(profile.subcategory)
-                    : profile.category_slug ?? "—"}
-                </p>
-              </AboutBlock>
-              <AboutBlock label="Location">
-                <p className="text-sm text-foreground/90">{location || "—"}</p>
-              </AboutBlock>
-              <AboutBlock label="Areas served" empty="Not set yet.">
-                {profile.areas_served && profile.areas_served.length > 0 ? (
-                  <p className="text-sm text-foreground/90">
-                    {profile.areas_served.join(", ")}
-                  </p>
-                ) : null}
-              </AboutBlock>
-              <AboutBlock label="Availability" empty="Not set yet.">
-                {profile.availability || profile.opening_hours ? (
-                  <p className="inline-flex items-center gap-1 text-sm text-foreground/90">
-                    <Clock className="h-3.5 w-3.5 text-navy/60" />
-                    {profile.availability || profile.opening_hours}
-                  </p>
-                ) : null}
-              </AboutBlock>
-              {priceLabel && (
-                <AboutBlock label="Price guide">
-                  <p className="text-sm font-semibold text-navy">{priceLabel}</p>
-                </AboutBlock>
+                <p className="mt-2 whitespace-pre-line text-sm text-foreground/90">{profile.bio}</p>
+              ) : isOwner ? (
+                <Link
+                  to="/profiles/$id"
+                  params={{ id: profile.id }}
+                  className="mt-2 inline-flex items-center gap-1 text-sm font-semibold text-orange"
+                >
+                  <Plus className="h-3.5 w-3.5" /> Add a description
+                </Link>
+              ) : (
+                <p className="mt-2 text-sm text-muted-foreground">No description yet.</p>
               )}
-              {profile.phone && (
-                <AboutBlock label="Contact">
-                  <p className="inline-flex items-center gap-1 text-sm text-foreground/90">
-                    <Phone className="h-3.5 w-3.5 text-navy/60" /> {profile.phone}
-                  </p>
-                </AboutBlock>
+
+              <dl className="mt-4 divide-y divide-border/60">
+                <DetailRow
+                  label="Category"
+                  value={
+                    profile.subcategory
+                      ? formatSubcategory(profile.subcategory)
+                      : profile.category_slug ?? null
+                  }
+                  isOwner={isOwner}
+                />
+                <DetailRow label="Location" value={location || null} isOwner={isOwner} />
+                <DetailRow
+                  label="Areas served"
+                  value={
+                    profile.areas_served && profile.areas_served.length > 0
+                      ? profile.areas_served.join(", ")
+                      : null
+                  }
+                  isOwner={isOwner}
+                  emptyOwnerPrompt="Add areas served"
+                  profileEditId={profile.id}
+                />
+                <DetailRow
+                  label="Availability"
+                  value={availabilityLabel}
+                  icon={<Clock className="h-3.5 w-3.5 text-navy/60" />}
+                  isOwner={isOwner}
+                  emptyOwnerPrompt="Set availability"
+                  profileEditId={profile.id}
+                />
+                {priceLabel && (
+                  <DetailRow label="Price guide" value={priceLabel} isOwner={isOwner} valueClass="font-semibold text-navy" />
+                )}
+                {isOwner ? (
+                  <DetailRow
+                    label="Contact"
+                    value={profile.phone}
+                    icon={<Phone className="h-3.5 w-3.5 text-navy/60" />}
+                    isOwner
+                    emptyOwnerPrompt="Add phone number"
+                    profileEditId={profile.id}
+                  />
+                ) : profile.phone ? (
+                  <div className="flex items-center justify-between gap-3 py-2.5">
+                    <dt className="text-[11px] font-semibold uppercase tracking-wide text-navy/50">
+                      Contact
+                    </dt>
+                    <a
+                      href={`tel:${profile.phone}`}
+                      className="inline-flex items-center gap-1.5 rounded-full bg-orange px-3 py-1.5 text-xs font-semibold text-orange-foreground"
+                    >
+                      <Phone className="h-3.5 w-3.5" /> Call {profile.name.split(" ")[0]}
+                    </a>
+                  </div>
+                ) : null}
+              </dl>
+
+              {isOwner && (
+                <Link
+                  to="/profiles/$id"
+                  params={{ id: profile.id }}
+                  className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-orange"
+                >
+                  <Pencil className="h-3.5 w-3.5" /> Edit About
+                </Link>
               )}
             </div>
-
-            {isOwner && (
-              <Link
-                to="/profiles/$id"
-                params={{ id: profile.id }}
-                className="inline-flex items-center gap-1 text-xs font-semibold text-orange"
-              >
-                <Pencil className="h-3.5 w-3.5" /> Edit About
-              </Link>
-            )}
           </TabsContent>
+
+
 
           {/* TIMELINE */}
           <TabsContent value="timeline" className="mt-3 space-y-3">
