@@ -511,7 +511,33 @@ function ProviderRow({ p, isBoosted, userLoc, onRequest }: { p: RealProvider; is
     <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)] transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-elevated)]">
       {isVerified && <div className="h-1 w-full bg-gradient-to-r from-green via-green/70 to-orange/60" />}
 
+      {p.slug ? (
+        <Link to="/p/$slug" params={{ slug: p.slug }} className="flex items-start gap-3 p-4 pb-3">
+          <CoverImage
+            variant="square"
+            imageUrl={p.cover_url ?? p.profile?.avatar_url}
+            categorySlug={p.category_slug}
+            name={name}
+            verifiedRing={isVerified}
+            className="h-14 w-14 shrink-0"
+          />
+          <div className="min-w-0 flex-1">
+            <div className="flex items-start gap-2">
+              <h3 className="min-w-0 flex-1 font-display text-[15px] font-bold leading-tight text-navy line-clamp-2">
+                {name}
+              </h3>
+              {isBoosted && <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-orange" />}
+              <ProfileTrustBadge kind="service_profile" id={p.user_id} size="sm" descriptive className="shrink-0" />
+            </div>
+            <p className="mt-0.5 text-[13px] font-medium text-foreground/80">{formatSubcategory(p.subcategory)}</p>
+            <p className="mt-0.5 inline-flex items-center gap-1 text-xs text-muted-foreground">
+              <MapPin className="h-3 w-3" />{p.town || p.district || "Location not provided"}
+            </p>
+          </div>
+        </Link>
+      ) : (
       <Link to="/u/$id" params={{ id: p.user_id }} className="flex items-start gap-3 p-4 pb-3">
+
         <CoverImage
           variant="square"
           imageUrl={p.cover_url ?? p.profile?.avatar_url}
