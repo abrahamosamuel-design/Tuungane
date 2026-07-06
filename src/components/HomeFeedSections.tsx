@@ -746,15 +746,16 @@ function ProviderCard({ p, userLoc }: { p: NearbyProvider; userLoc: ReturnType<t
       </div>
 
 
-      {p.bio ? <ExpandableText text={p.bio} clampLines={3} maxLines={8} className="px-4 pt-2" /> : null}
+      {p.bio ? <ExpandableText text={p.bio} clampLines={3} maxLines={8} className="relative z-10 px-4 pt-2" /> : null}
 
       {media.length > 0 && (
-        <div className="px-4 pt-1">
+        <div className="relative z-10 px-4 pt-1">
           <MediaGrid urls={media} alt={name} />
         </div>
       )}
 
-      <div className="mt-auto flex items-center gap-2 border-t border-border bg-surface px-3 py-2.5">
+      <div className="relative z-10 mt-auto flex items-center gap-2 border-t border-border bg-surface px-3 py-2.5">
+
         <Link
           to="/requests/new"
           search={{ providerId: p.user_id } as never}
