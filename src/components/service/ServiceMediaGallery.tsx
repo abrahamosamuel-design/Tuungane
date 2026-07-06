@@ -108,7 +108,6 @@ export function ServiceMediaGallery({
       video.preload = "auto";
       video.muted = true;
       video.playsInline = true;
-      // @ts-expect-error - non-standard but widely supported
       video.setAttribute("webkit-playsinline", "true");
       video.src = item.url;
 
