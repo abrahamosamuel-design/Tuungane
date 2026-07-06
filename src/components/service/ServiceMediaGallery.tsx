@@ -17,12 +17,19 @@ type Props = {
 };
 
 const AUTO_MS = 2000;
+// Timestamps (seconds) to try when capturing a poster frame. We skip 0 because
+// many videos start on a black/blank frame.
+const POSTER_SAMPLE_TIMES = [1.2, 2.0, 3.0, 0.5];
+// A frame is considered "black" (unusable) if its average luminance is below
+// this threshold on a 0-255 scale.
+const BLACK_LUMA_THRESHOLD = 12;
 
 /**
  * Visual-first hero for a service profile.
  * - Auto-advances every 2s, loops. Pauses while a video is playing.
  * - Manual swipe / tap does not disable auto-scroll (only resets timing).
- * - Videos: generates a first-frame poster when no thumbnail; play starts with sound.
+ * - Videos: generates a poster from ~1-2s in (skipping black frames); falls
+ *   back to service imagery + play overlay if capture fails.
  */
 export function ServiceMediaGallery({
   items,
@@ -54,14 +61,6 @@ export function ServiceMediaGallery({
     return () => el.removeEventListener("scroll", onScroll);
   }, [items.length]);
 
-  const goTo = useCallback((i: number) => {
-    const el = scrollerRef.current;
-    if (!el) return;
-    const width = el.clientWidth || 1;
-    const target = ((i % items.length) + items.length) % items.length;
-    el.scrollTo({ left: target * width, behavior: "smooth" });
-  }, [items.length]);
-
   // Auto-advance loop.
   useEffect(() => {
     if (items.length <= 1) return;
@@ -79,7 +78,6 @@ export function ServiceMediaGallery({
     return () => clearInterval(t);
   }, [items.length, playingId]);
 
-  // Briefly delay auto-advance after user interaction so it doesn't fight them.
   const nudge = useCallback(() => {
     suspendUntil.current = Date.now() + AUTO_MS * 2;
   }, []);
@@ -91,49 +89,115 @@ export function ServiceMediaGallery({
     if (idx !== -1 && idx !== active) setPlayingId(null);
   }, [active, playingId, items]);
 
-  // Generate first-frame posters for videos missing a thumbnail.
+  // Generate posters for videos missing a thumbnail.
   const videoIds = useMemo(
-    () => items.filter((m) => m.kind === "video" && !m.thumbnail_url).map((m) => `${m.id}|${m.url}`).join(","),
+    () =>
+      items
+        .filter((m) => m.kind === "video" && !m.thumbnail_url)
+        .map((m) => `${m.id}|${m.url}`)
+        .join(","),
     [items],
   );
   useEffect(() => {
     if (!videoIds) return;
     let cancelled = false;
-    for (const m of items) {
-      if (m.kind !== "video" || m.thumbnail_url || posters[m.id]) continue;
+
+    const capture = (item: ServiceMediaItem) => {
       const video = document.createElement("video");
       video.crossOrigin = "anonymous";
-      video.preload = "metadata";
+      video.preload = "auto";
       video.muted = true;
       video.playsInline = true;
-      video.src = m.url;
-      const onLoaded = () => {
+      video.setAttribute("webkit-playsinline", "true");
+      video.src = item.url;
+
+      let attempt = 0;
+      let settled = false;
+
+      const cleanup = () => {
+        video.removeAttribute("src");
         try {
-          video.currentTime = Math.min(0.1, (video.duration || 1) / 2);
+          video.load();
         } catch {
           /* noop */
         }
       };
-      const onSeeked = () => {
+
+      const tryNext = () => {
+        if (settled || cancelled) return;
+        if (attempt >= POSTER_SAMPLE_TIMES.length) {
+          settled = true;
+          cleanup();
+          return;
+        }
+        const duration = Number.isFinite(video.duration) ? video.duration : 0;
+        const t = POSTER_SAMPLE_TIMES[attempt++];
+        const target = duration > 0 ? Math.min(t, Math.max(0, duration - 0.05)) : t;
         try {
-          const canvas = document.createElement("canvas");
-          canvas.width = video.videoWidth || 640;
-          canvas.height = video.videoHeight || 360;
-          const ctx = canvas.getContext("2d");
-          if (!ctx) return;
-          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-          const data = canvas.toDataURL("image/jpeg", 0.7);
-          if (!cancelled) setPosters((p) => ({ ...p, [m.id]: data }));
+          video.currentTime = target;
         } catch {
-          /* cross-origin — skip */
-        } finally {
-          video.removeEventListener("loadedmetadata", onLoaded);
-          video.removeEventListener("seeked", onSeeked);
-          video.src = "";
+          tryNext();
         }
       };
-      video.addEventListener("loadedmetadata", onLoaded);
+
+      const onSeeked = () => {
+        if (settled || cancelled) return;
+        try {
+          const w = video.videoWidth || 640;
+          const h = video.videoHeight || 360;
+          const canvas = document.createElement("canvas");
+          canvas.width = w;
+          canvas.height = h;
+          const ctx = canvas.getContext("2d");
+          if (!ctx) {
+            settled = true;
+            cleanup();
+            return;
+          }
+          ctx.drawImage(video, 0, 0, w, h);
+
+          // Luminance check — skip mostly-black frames.
+          let luma = 0;
+          try {
+            const sampleW = Math.min(64, w);
+            const sampleH = Math.min(64, h);
+            const sample = ctx.getImageData(0, 0, sampleW, sampleH).data;
+            let sum = 0;
+            for (let i = 0; i < sample.length; i += 4) {
+              sum += 0.299 * sample[i] + 0.587 * sample[i + 1] + 0.114 * sample[i + 2];
+            }
+            luma = sum / (sample.length / 4);
+          } catch {
+            // getImageData throws on tainted canvas — accept the frame as-is.
+            luma = 255;
+          }
+
+          if (luma < BLACK_LUMA_THRESHOLD && attempt < POSTER_SAMPLE_TIMES.length) {
+            tryNext();
+            return;
+          }
+
+          const data = canvas.toDataURL("image/jpeg", 0.72);
+          if (!cancelled) setPosters((p) => ({ ...p, [item.id]: data }));
+          settled = true;
+          cleanup();
+        } catch {
+          settled = true;
+          cleanup();
+        }
+      };
+
+      video.addEventListener("loadeddata", tryNext, { once: false });
       video.addEventListener("seeked", onSeeked);
+      video.addEventListener("error", () => {
+        settled = true;
+        cleanup();
+      });
+    };
+
+    for (const m of items) {
+      if (m.kind !== "video" || m.thumbnail_url || posters[m.id]) continue;
+      capture(m);
     }
     return () => {
       cancelled = true;
@@ -164,6 +228,10 @@ export function ServiceMediaGallery({
   const videoCount = items.filter((m) => m.kind === "video").length;
   const IconChip = videoCount > 0 && videoCount === total ? Video : Camera;
 
+  // First photo in the reel — used as a nice fallback poster for videos when
+  // capture fails.
+  const firstPhotoUrl = items.find((m) => m.kind === "photo")?.url ?? null;
+
   return (
     <div className="relative w-full bg-navy/[0.03]">
       <div
@@ -174,8 +242,12 @@ export function ServiceMediaGallery({
         style={{ scrollbarWidth: "none" }}
       >
         {items.map((m) => {
-          const poster = m.thumbnail_url ?? posters[m.id] ?? fallbackAvatarUrl ?? undefined;
+          const capturedPoster = posters[m.id];
+          const posterImage =
+            m.thumbnail_url ?? capturedPoster ?? firstPhotoUrl ?? fallbackAvatarUrl ?? null;
           const isPlaying = playingId === m.id;
+          const hasRealPoster = Boolean(m.thumbnail_url || capturedPoster);
+
           return (
             <div key={m.id} className="relative h-full w-full flex-none snap-center">
               {m.kind === "photo" ? (
@@ -183,14 +255,13 @@ export function ServiceMediaGallery({
               ) : isPlaying ? (
                 <video
                   src={m.url}
-                  poster={poster}
+                  poster={posterImage ?? undefined}
                   controls
                   autoPlay
                   playsInline
                   className="h-full w-full bg-black object-cover"
                   onEnded={() => setPlayingId(null)}
                   onPause={(e) => {
-                    // Return to play overlay when user pauses at start/end.
                     const v = e.currentTarget;
                     if (v.ended || v.currentTime === 0) setPlayingId(null);
                   }}
@@ -202,17 +273,36 @@ export function ServiceMediaGallery({
                     nudge();
                     setPlayingId(m.id);
                   }}
-                  className="group relative block h-full w-full"
+                  className="group relative block h-full w-full bg-navy/10"
                   aria-label="Play video"
                 >
-                  {poster ? (
-                    <img src={poster} alt="" className="h-full w-full object-cover" />
+                  {posterImage ? (
+                    <img
+                      src={posterImage}
+                      alt=""
+                      className="h-full w-full object-cover"
+                      loading="lazy"
+                    />
                   ) : (
-                    <div className="h-full w-full bg-navy/10" />
+                    <div className="flex h-full w-full items-center justify-center bg-navy/10">
+                      <Avatar
+                        name={fallbackName}
+                        url={fallbackAvatarUrl}
+                        categorySlug={fallbackCategorySlug}
+                        size={140}
+                      />
+                    </div>
                   )}
-                  <span className="pointer-events-none absolute inset-0 grid place-items-center bg-black/30 transition group-hover:bg-black/40">
-                    <span className="grid h-16 w-16 place-items-center rounded-full bg-white/95 text-navy shadow-lg">
-                      <Play className="h-7 w-7 translate-x-0.5 fill-navy" />
+                  <span className="pointer-events-none absolute inset-0 grid place-items-center bg-black/35 transition group-hover:bg-black/45">
+                    <span className="flex flex-col items-center gap-2">
+                      <span className="grid h-16 w-16 place-items-center rounded-full bg-white/95 text-navy shadow-lg">
+                        <Play className="h-7 w-7 translate-x-0.5 fill-navy" />
+                      </span>
+                      {!hasRealPoster && (
+                        <span className="rounded-full bg-black/50 px-2.5 py-0.5 text-[11px] font-medium text-white">
+                          Video preview
+                        </span>
+                      )}
                     </span>
                   </span>
                 </button>
