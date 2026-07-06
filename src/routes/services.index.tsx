@@ -139,8 +139,9 @@ function Services() {
       // Guests can only SELECT the safe subset (no lat/long/area).
       const isGuest = !authUser;
       const ppCols = isGuest
-        ? "owner_id,name,subcategory,bio,town,district,areas_served,service_radius_km,category_slug,verified,updated_at,created_at,availability,cover_url,avatar_url"
-        : "owner_id,name,subcategory,bio,town,district,area,latitude,longitude,areas_served,service_radius_km,category_slug,verified,updated_at,created_at,availability,cover_url,avatar_url";
+        ? "owner_id,slug,name,subcategory,bio,town,district,areas_served,service_radius_km,category_slug,verified,updated_at,created_at,availability,cover_url,avatar_url"
+        : "owner_id,slug,name,subcategory,bio,town,district,area,latitude,longitude,areas_served,service_radius_km,category_slug,verified,updated_at,created_at,availability,cover_url,avatar_url";
+
       const spCols = isGuest
         ? "user_id,business_name,subcategory,bio,town,district,areas_served,service_radius_km,category_slug,verified,updated_at,created_at,availability,cover_url,seeded_by_official,seeded_status,years_experience,price_type,price_fixed_ugx,price_min_ugx,price_max_ugx,price_currency,price_note,media_urls"
         : "user_id,business_name,subcategory,bio,town,district,area,latitude,longitude,areas_served,service_radius_km,category_slug,verified,updated_at,created_at,availability,cover_url,seeded_by_official,seeded_status,years_experience,price_type,price_fixed_ugx,price_min_ugx,price_max_ugx,price_currency,price_note,media_urls";
