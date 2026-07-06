@@ -385,7 +385,7 @@ export function ServiceMediaManager({ ownerId, profileId }: { ownerId: string; p
                   {m.kind === "photo" ? <ImageIcon className="h-3 w-3" /> : <VideoIcon className="h-3 w-3" />}
                 </span>
               </div>
-              <div className="flex items-center justify-between gap-1 p-1.5">
+              <div className="flex flex-wrap items-center justify-between gap-1 p-1.5">
                 <div className="flex gap-1">
                   <button
                     type="button"
@@ -406,7 +406,7 @@ export function ServiceMediaManager({ ownerId, profileId }: { ownerId: string; p
                     <ArrowDown className="h-3.5 w-3.5" />
                   </button>
                 </div>
-                <div className="flex gap-1">
+                <div className="flex flex-wrap justify-end gap-1">
                   <button
                     type="button"
                     onClick={() => setCover(m.id, m.is_cover)}
@@ -427,8 +427,9 @@ export function ServiceMediaManager({ ownerId, profileId }: { ownerId: string; p
                     type="button"
                     onClick={() => askRemove(m)}
                     disabled={deletingId === m.id}
-                    className="rounded-md border border-border p-1 text-destructive disabled:opacity-50"
-                    aria-label="Remove"
+                    className="rounded-md border border-destructive/40 bg-destructive/10 p-1 text-destructive disabled:opacity-50"
+                    aria-label="Delete"
+                    title="Delete"
                   >
                     {deletingId === m.id ? (
                       <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -438,6 +439,7 @@ export function ServiceMediaManager({ ownerId, profileId }: { ownerId: string; p
                   </button>
                 </div>
               </div>
+
             </li>
           ))}
         </ul>
