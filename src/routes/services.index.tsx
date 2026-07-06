@@ -685,6 +685,8 @@ function ProviderCardCompact({ p, userLoc, onRequest }: { p: RealProvider; userL
           </p>
         </div>
       </Link>
+      )}
+
 
       <div className="flex flex-wrap items-center gap-1.5 px-3">
         {p.price_type && (
