@@ -648,7 +648,27 @@ function ProviderCardCompact({ p, userLoc, onRequest }: { p: RealProvider; userL
   return (
     <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)]">
       {isVerified && <div className="h-1 w-full bg-gradient-to-r from-green via-green/70 to-orange/60" />}
+      {p.slug ? (
+        <Link to="/p/$slug" params={{ slug: p.slug }} className="flex items-start gap-2.5 p-3">
+          <CoverImage
+            variant="square"
+            imageUrl={p.cover_url ?? p.profile?.avatar_url}
+            categorySlug={p.category_slug}
+            name={name}
+            verifiedRing={isVerified}
+            className="h-12 w-12 shrink-0"
+          />
+          <div className="min-w-0 flex-1">
+            <h3 className="truncate font-display text-[14px] font-bold leading-tight text-navy">{name}</h3>
+            <p className="mt-0.5 truncate text-[12px] font-medium text-foreground/80">{formatSubcategory(p.subcategory)}</p>
+            <p className="mt-0.5 inline-flex items-center gap-1 truncate text-[11px] text-muted-foreground">
+              <MapPin className="h-3 w-3 shrink-0" />{p.town || p.district || "Location"}
+            </p>
+          </div>
+        </Link>
+      ) : (
       <Link to="/u/$id" params={{ id: p.user_id }} className="flex items-start gap-2.5 p-3">
+
         <CoverImage
           variant="square"
           imageUrl={p.cover_url ?? p.profile?.avatar_url}
