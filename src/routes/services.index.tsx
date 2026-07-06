@@ -61,6 +61,8 @@ type RealProvider = {
   seeded_status: string | null;
   updated_at: string;
   created_at?: string;
+  slug?: string | null;
+
 
   availability?: string | null;
   area?: string | null;
@@ -137,8 +139,9 @@ function Services() {
       // Guests can only SELECT the safe subset (no lat/long/area).
       const isGuest = !authUser;
       const ppCols = isGuest
-        ? "owner_id,name,subcategory,bio,town,district,areas_served,service_radius_km,category_slug,verified,updated_at,created_at,availability,cover_url,avatar_url"
-        : "owner_id,name,subcategory,bio,town,district,area,latitude,longitude,areas_served,service_radius_km,category_slug,verified,updated_at,created_at,availability,cover_url,avatar_url";
+        ? "owner_id,slug,name,subcategory,bio,town,district,areas_served,service_radius_km,category_slug,verified,updated_at,created_at,availability,cover_url,avatar_url"
+        : "owner_id,slug,name,subcategory,bio,town,district,area,latitude,longitude,areas_served,service_radius_km,category_slug,verified,updated_at,created_at,availability,cover_url,avatar_url";
+
       const spCols = isGuest
         ? "user_id,business_name,subcategory,bio,town,district,areas_served,service_radius_km,category_slug,verified,updated_at,created_at,availability,cover_url,seeded_by_official,seeded_status,years_experience,price_type,price_fixed_ugx,price_min_ugx,price_max_ugx,price_currency,price_note,media_urls"
         : "user_id,business_name,subcategory,bio,town,district,area,latitude,longitude,areas_served,service_radius_km,category_slug,verified,updated_at,created_at,availability,cover_url,seeded_by_official,seeded_status,years_experience,price_type,price_fixed_ugx,price_min_ugx,price_max_ugx,price_currency,price_note,media_urls";
@@ -508,7 +511,33 @@ function ProviderRow({ p, isBoosted, userLoc, onRequest }: { p: RealProvider; is
     <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)] transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-elevated)]">
       {isVerified && <div className="h-1 w-full bg-gradient-to-r from-green via-green/70 to-orange/60" />}
 
+      {p.slug ? (
+        <Link to="/p/$slug" params={{ slug: p.slug }} className="flex items-start gap-3 p-4 pb-3">
+          <CoverImage
+            variant="square"
+            imageUrl={p.cover_url ?? p.profile?.avatar_url}
+            categorySlug={p.category_slug}
+            name={name}
+            verifiedRing={isVerified}
+            className="h-14 w-14 shrink-0"
+          />
+          <div className="min-w-0 flex-1">
+            <div className="flex items-start gap-2">
+              <h3 className="min-w-0 flex-1 font-display text-[15px] font-bold leading-tight text-navy line-clamp-2">
+                {name}
+              </h3>
+              {isBoosted && <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-orange" />}
+              <ProfileTrustBadge kind="service_profile" id={p.user_id} size="sm" descriptive className="shrink-0" />
+            </div>
+            <p className="mt-0.5 text-[13px] font-medium text-foreground/80">{formatSubcategory(p.subcategory)}</p>
+            <p className="mt-0.5 inline-flex items-center gap-1 text-xs text-muted-foreground">
+              <MapPin className="h-3 w-3" />{p.town || p.district || "Location not provided"}
+            </p>
+          </div>
+        </Link>
+      ) : (
       <Link to="/u/$id" params={{ id: p.user_id }} className="flex items-start gap-3 p-4 pb-3">
+
         <CoverImage
           variant="square"
           imageUrl={p.cover_url ?? p.profile?.avatar_url}
@@ -531,6 +560,8 @@ function ProviderRow({ p, isBoosted, userLoc, onRequest }: { p: RealProvider; is
           </p>
         </div>
       </Link>
+      )}
+
 
       {/* Trust summary — positive signals only */}
       {(hasRating || p.completed_jobs > 0 || years > 0) && (
@@ -617,7 +648,27 @@ function ProviderCardCompact({ p, userLoc, onRequest }: { p: RealProvider; userL
   return (
     <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)]">
       {isVerified && <div className="h-1 w-full bg-gradient-to-r from-green via-green/70 to-orange/60" />}
+      {p.slug ? (
+        <Link to="/p/$slug" params={{ slug: p.slug }} className="flex items-start gap-2.5 p-3">
+          <CoverImage
+            variant="square"
+            imageUrl={p.cover_url ?? p.profile?.avatar_url}
+            categorySlug={p.category_slug}
+            name={name}
+            verifiedRing={isVerified}
+            className="h-12 w-12 shrink-0"
+          />
+          <div className="min-w-0 flex-1">
+            <h3 className="truncate font-display text-[14px] font-bold leading-tight text-navy">{name}</h3>
+            <p className="mt-0.5 truncate text-[12px] font-medium text-foreground/80">{formatSubcategory(p.subcategory)}</p>
+            <p className="mt-0.5 inline-flex items-center gap-1 truncate text-[11px] text-muted-foreground">
+              <MapPin className="h-3 w-3 shrink-0" />{p.town || p.district || "Location"}
+            </p>
+          </div>
+        </Link>
+      ) : (
       <Link to="/u/$id" params={{ id: p.user_id }} className="flex items-start gap-2.5 p-3">
+
         <CoverImage
           variant="square"
           imageUrl={p.cover_url ?? p.profile?.avatar_url}
@@ -634,6 +685,8 @@ function ProviderCardCompact({ p, userLoc, onRequest }: { p: RealProvider; userL
           </p>
         </div>
       </Link>
+      )}
+
 
       <div className="flex flex-wrap items-center gap-1.5 px-3">
         {p.price_type && (
