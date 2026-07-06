@@ -700,7 +700,7 @@ function ProviderCard({ p, userLoc }: { p: NearbyProvider; userLoc: ReturnType<t
         <ProfileTrustBadge kind="service_profile" id={p.user_id} size="sm" />
       </div>
 
-      <div className="flex items-start gap-3 p-4 pb-2 pr-24">
+      <div className="relative z-10 flex items-start gap-3 p-4 pb-2 pr-24">
         {p.slug ? (
           <Link to="/p/$slug" params={{ slug: p.slug }} className="shrink-0">
             <FeedAvatar src={avatar} name={name} size={44} ring={verified} />
