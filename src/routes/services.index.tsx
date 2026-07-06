@@ -61,6 +61,8 @@ type RealProvider = {
   seeded_status: string | null;
   updated_at: string;
   created_at?: string;
+  slug?: string | null;
+
 
   availability?: string | null;
   area?: string | null;
