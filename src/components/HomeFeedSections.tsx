@@ -684,12 +684,23 @@ function ProviderCard({ p, userLoc }: { p: NearbyProvider; userLoc: ReturnType<t
   const years = typeof p.years_experience === "number" ? p.years_experience : 0;
   const media = (p.media_urls ?? []).filter(Boolean) as string[];
 
+  const profileLinkProps = p.slug
+    ? ({ to: "/p/$slug", params: { slug: p.slug } } as const)
+    : ({ to: "/u/$id", params: { id: p.user_id } } as const);
+
   return (
-    <article className={`relative flex ${CARD_W} shrink-0 snap-start flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)] transition hover:border-orange sm:w-auto sm:max-w-none`}>
-      <div className="pointer-events-none absolute right-3 top-3 z-10">
+    <article className={`group relative flex ${CARD_W} shrink-0 snap-start flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)] transition hover:border-orange sm:w-auto sm:max-w-none`}>
+      {/* Full-card click target — sits below interactive controls so buttons/links still work */}
+      <Link
+        {...profileLinkProps}
+        aria-label={`View ${name} profile`}
+        className="absolute inset-0 z-0"
+      />
+      <div className="pointer-events-none absolute right-3 top-3 z-20">
         <ProfileTrustBadge kind="service_profile" id={p.user_id} size="sm" />
       </div>
-      <div className="flex items-start gap-3 p-4 pb-2 pr-24">
+
+      <div className="relative z-10 flex items-start gap-3 p-4 pb-2 pr-24">
         {p.slug ? (
           <Link to="/p/$slug" params={{ slug: p.slug }} className="shrink-0">
             <FeedAvatar src={avatar} name={name} size={44} ring={verified} />
@@ -726,7 +737,8 @@ function ProviderCard({ p, userLoc }: { p: NearbyProvider; userLoc: ReturnType<t
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-1.5 px-4">
+      <div className="relative z-10 flex flex-wrap items-center gap-1.5 px-4">
+
         <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${avail.cls}`}>{avail.label}</span>
         {years > 0 ? (
           <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold text-navy">{years} yrs experience</span>
@@ -734,15 +746,16 @@ function ProviderCard({ p, userLoc }: { p: NearbyProvider; userLoc: ReturnType<t
       </div>
 
 
-      {p.bio ? <ExpandableText text={p.bio} clampLines={3} maxLines={8} className="px-4 pt-2" /> : null}
+      {p.bio ? <ExpandableText text={p.bio} clampLines={3} maxLines={8} className="relative z-10 px-4 pt-2" /> : null}
 
       {media.length > 0 && (
-        <div className="px-4 pt-1">
+        <div className="relative z-10 px-4 pt-1">
           <MediaGrid urls={media} alt={name} />
         </div>
       )}
 
-      <div className="mt-auto flex items-center gap-2 border-t border-border bg-surface px-3 py-2.5">
+      <div className="relative z-10 mt-auto flex items-center gap-2 border-t border-border bg-surface px-3 py-2.5">
+
         <Link
           to="/requests/new"
           search={{ providerId: p.user_id } as never}
