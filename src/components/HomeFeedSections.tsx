@@ -737,7 +737,8 @@ function ProviderCard({ p, userLoc }: { p: NearbyProvider; userLoc: ReturnType<t
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-1.5 px-4">
+      <div className="relative z-10 flex flex-wrap items-center gap-1.5 px-4">
+
         <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${avail.cls}`}>{avail.label}</span>
         {years > 0 ? (
           <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-semibold text-navy">{years} yrs experience</span>
