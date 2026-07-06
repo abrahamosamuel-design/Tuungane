@@ -560,6 +560,8 @@ function ProviderRow({ p, isBoosted, userLoc, onRequest }: { p: RealProvider; is
           </p>
         </div>
       </Link>
+      )}
+
 
       {/* Trust summary — positive signals only */}
       {(hasRating || p.completed_jobs > 0 || years > 0) && (
