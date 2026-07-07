@@ -119,6 +119,22 @@ function PublicProfilePage() {
   const [completed, setCompleted] = useState(0);
   const [loading, setLoading] = useState(true);
   const [mediaManagerOpen, setMediaManagerOpen] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("welcome") === "1") setShowWelcome(true);
+  }, []);
+
+  const dismissWelcome = () => {
+    setShowWelcome(false);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("welcome");
+      window.history.replaceState({}, "", url.toString());
+    }
+  };
 
   const load = async () => {
     setLoading(true);
