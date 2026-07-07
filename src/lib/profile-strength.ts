@@ -57,7 +57,7 @@ export function computeProfileStrength(p: StrengthInput): StrengthResult {
   const providerItems: StrengthItem[] = isProvider
     ? [
         { key: "category", label: "Main skill or category", done: !!p.category, weight: 10 },
-        { key: "services", label: "Services offered", done: (p.servicesCount ?? 0) > 0, weight: 10 },
+        { key: "services", label: "Service listed", done: !!p.hasServiceProfile || (p.servicesCount ?? 0) > 0, weight: 10 },
         { key: "availability", label: "Availability set", done: !!p.hasAvailability, weight: 6 },
         { key: "portfolio", label: "Portfolio / work photos", done: (p.portfolioCount ?? 0) > 0, weight: 6 },
         { key: "reviews", label: "Reviews from customers", done: (p.reviewsCount ?? 0) > 0, weight: 6 },
