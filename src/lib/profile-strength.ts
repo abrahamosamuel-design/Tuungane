@@ -12,6 +12,7 @@ export type StrengthInput = {
   phone?: string | null;
   category?: string | null;
   servicesCount?: number;
+  hasServiceProfile?: boolean;
   hasAvailability?: boolean;
   portfolioCount?: number;
   reviewsCount?: number;
