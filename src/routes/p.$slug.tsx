@@ -718,7 +718,7 @@ function PublicProfilePage() {
                 params={{ id: profile.id }}
                 className="mt-2 inline-flex items-center gap-1 rounded-xl border border-dashed border-orange/40 bg-orange/5 px-3 py-2.5 text-sm font-semibold text-orange"
               >
-                <Plus className="h-4 w-4" /> Add sub-service
+                <Plus className="h-4 w-4" /> {services.length === 0 ? "Add a package or price option" : "Add another package"}
               </Link>
             )}
           </TabsContent>
