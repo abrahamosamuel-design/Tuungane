@@ -62,15 +62,15 @@ function NewProfile() {
         bio: bio || "",
         phone: phone || null,
       })
-      .select("id")
+      .select("id,slug")
       .single();
     setBusy(false);
     if (error || !data) {
       toast.error(error?.message ?? "Could not create profile");
       return;
     }
-    toast.success("Service created — now add photos and details");
-    nav({ to: "/profiles/$id", params: { id: data.id } });
+    toast.success("Your service profile is live");
+    nav({ to: "/p/$slug", params: { slug: data.slug }, search: { welcome: "1" } as never });
   };
 
   const submit = async (e: React.FormEvent) => {
