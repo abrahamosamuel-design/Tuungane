@@ -651,22 +651,22 @@ function PublicProfilePage() {
             )}
           </TabsContent>
 
-          {/* SERVICES */}
+          {/* PACKAGES / PRICE GUIDE */}
           <TabsContent value="services" className="mt-3 space-y-2">
+            <div className="rounded-2xl border border-border bg-muted/40 p-3 text-xs text-navy/70">
+              <p className="font-semibold text-navy">Packages &amp; Price Guide</p>
+              <p className="mt-0.5">
+                Your main service <span className="font-semibold text-navy">{profile.name}</span> is already live.
+                Add optional packages below (for example: basic, full, monthly) so customers can pick what fits them best.
+              </p>
+            </div>
             {services.length === 0 ? (
-              isOwner ? (
-                <Link
-                  to="/profiles/$id"
-                  params={{ id: profile.id }}
-                  className="flex items-center justify-center gap-1 rounded-2xl border border-dashed border-orange/40 bg-orange/5 p-5 text-sm font-semibold text-orange"
-                >
-                  <Plus className="h-4 w-4" /> Add your first service or package
-                </Link>
-              ) : (
+              isOwner ? null : (
                 <div className="rounded-2xl border border-dashed border-border bg-card p-5 text-center text-sm text-muted-foreground">
-                  No specific services listed yet. You can still request this service directly.
+                  No specific packages listed yet. You can still request this service directly.
                 </div>
               )
+
             ) : (
               <ul className="space-y-2">
                 {services.map((s) => (
