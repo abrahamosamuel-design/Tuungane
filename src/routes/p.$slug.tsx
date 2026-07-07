@@ -475,8 +475,46 @@ function PublicProfilePage() {
           </div>
         )}
 
+        {/* Owner welcome banner (after creation) */}
+        {isOwner && showWelcome && (
+          <div className="relative mt-3 overflow-hidden rounded-2xl border border-green/40 bg-green/5 p-4">
+            <button
+              type="button"
+              onClick={dismissWelcome}
+              aria-label="Dismiss"
+              className="absolute right-2 top-2 rounded-full p-1 text-navy/50 hover:bg-navy/10"
+            >
+              <X className="h-4 w-4" />
+            </button>
+            <div className="flex items-start gap-3 pr-6">
+              <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-green text-white">
+                <PartyPopper className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <p className="font-display text-base font-bold text-navy">
+                  Your service profile is live
+                </p>
+                <p className="mt-0.5 text-sm text-foreground/80">
+                  Add photos, videos, packages, and updates to attract more customers.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Owner completion prompts */}
+        {isOwner && (
+          <OwnerCompletionCard
+            profile={profile}
+            mediaCount={media.length}
+            servicesCount={services.length}
+            postsCount={posts.length}
+            onUploadMedia={() => setMediaManagerOpen(true)}
+          />
+        )}
 
         {/* Tabs */}
+
         <Tabs defaultValue="about" className="mt-6">
           <TabsList className="grid w-full grid-cols-3 rounded-xl bg-muted/60 p-1">
             <TabsTrigger
