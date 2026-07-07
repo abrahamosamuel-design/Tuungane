@@ -173,6 +173,7 @@ function ManageProfile() {
               phone: profile.phone,
               category: profile.category_slug,
               servicesCount: services.length,
+              hasServiceProfile: true,
               reviewsCount: 0,
               verified: profile.verified === "verified",
             })}

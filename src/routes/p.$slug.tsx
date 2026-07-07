@@ -16,6 +16,10 @@ import {
   Clock,
   Sparkles,
   ChevronRight,
+  CheckCircle2,
+  Circle,
+  PartyPopper,
+  X,
 } from "lucide-react";
 import { ProfileTrustBadge } from "@/components/trust/ProfileTrustBadge";
 import { formatSubcategory } from "@/lib/format-category";
@@ -115,6 +119,22 @@ function PublicProfilePage() {
   const [completed, setCompleted] = useState(0);
   const [loading, setLoading] = useState(true);
   const [mediaManagerOpen, setMediaManagerOpen] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("welcome") === "1") setShowWelcome(true);
+  }, []);
+
+  const dismissWelcome = () => {
+    setShowWelcome(false);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("welcome");
+      window.history.replaceState({}, "", url.toString());
+    }
+  };
 
   const load = async () => {
     setLoading(true);
@@ -455,8 +475,46 @@ function PublicProfilePage() {
           </div>
         )}
 
+        {/* Owner welcome banner (after creation) */}
+        {isOwner && showWelcome && (
+          <div className="relative mt-3 overflow-hidden rounded-2xl border border-green/40 bg-green/5 p-4">
+            <button
+              type="button"
+              onClick={dismissWelcome}
+              aria-label="Dismiss"
+              className="absolute right-2 top-2 rounded-full p-1 text-navy/50 hover:bg-navy/10"
+            >
+              <X className="h-4 w-4" />
+            </button>
+            <div className="flex items-start gap-3 pr-6">
+              <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-green text-white">
+                <PartyPopper className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <p className="font-display text-base font-bold text-navy">
+                  Your service profile is live
+                </p>
+                <p className="mt-0.5 text-sm text-foreground/80">
+                  Add photos, videos, packages, and updates to attract more customers.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Owner completion prompts */}
+        {isOwner && (
+          <OwnerCompletionCard
+            profile={profile}
+            mediaCount={media.length}
+            servicesCount={services.length}
+            postsCount={posts.length}
+            onUploadMedia={() => setMediaManagerOpen(true)}
+          />
+        )}
 
         {/* Tabs */}
+
         <Tabs defaultValue="about" className="mt-6">
           <TabsList className="grid w-full grid-cols-3 rounded-xl bg-muted/60 p-1">
             <TabsTrigger
@@ -475,7 +533,8 @@ function PublicProfilePage() {
               value="services"
               className="rounded-lg text-sm font-semibold text-navy/60 data-[state=active]:bg-card data-[state=active]:text-orange data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-orange/30"
             >
-              Services
+              Packages
+
             </TabsTrigger>
           </TabsList>
 
@@ -592,22 +651,22 @@ function PublicProfilePage() {
             )}
           </TabsContent>
 
-          {/* SERVICES */}
+          {/* PACKAGES / PRICE GUIDE */}
           <TabsContent value="services" className="mt-3 space-y-2">
+            <div className="rounded-2xl border border-border bg-muted/40 p-3 text-xs text-navy/70">
+              <p className="font-semibold text-navy">Packages &amp; Price Guide</p>
+              <p className="mt-0.5">
+                Your main service <span className="font-semibold text-navy">{profile.name}</span> is already live.
+                Add optional packages below (for example: basic, full, monthly) so customers can pick what fits them best.
+              </p>
+            </div>
             {services.length === 0 ? (
-              isOwner ? (
-                <Link
-                  to="/profiles/$id"
-                  params={{ id: profile.id }}
-                  className="flex items-center justify-center gap-1 rounded-2xl border border-dashed border-orange/40 bg-orange/5 p-5 text-sm font-semibold text-orange"
-                >
-                  <Plus className="h-4 w-4" /> Add your first service or package
-                </Link>
-              ) : (
+              isOwner ? null : (
                 <div className="rounded-2xl border border-dashed border-border bg-card p-5 text-center text-sm text-muted-foreground">
-                  No specific services listed yet. You can still request this service directly.
+                  No specific packages listed yet. You can still request this service directly.
                 </div>
               )
+
             ) : (
               <ul className="space-y-2">
                 {services.map((s) => (
@@ -659,7 +718,7 @@ function PublicProfilePage() {
                 params={{ id: profile.id }}
                 className="mt-2 inline-flex items-center gap-1 rounded-xl border border-dashed border-orange/40 bg-orange/5 px-3 py-2.5 text-sm font-semibold text-orange"
               >
-                <Plus className="h-4 w-4" /> Add sub-service
+                <Plus className="h-4 w-4" /> {services.length === 0 ? "Add a package or price option" : "Add another package"}
               </Link>
             )}
           </TabsContent>
@@ -808,4 +867,141 @@ function formatOpeningHours(oh: unknown): string {
   }
   return "";
 }
+
+function OwnerCompletionCard({
+  profile,
+  mediaCount,
+  servicesCount,
+  postsCount,
+  onUploadMedia,
+}: {
+  profile: PublicProfile;
+  mediaCount: number;
+  servicesCount: number;
+  postsCount: number;
+  onUploadMedia: () => void;
+}) {
+  const isVerified = profile.verified === "verified";
+  const hasAreas = !!(profile.areas_served && profile.areas_served.length > 0);
+  const hasAvailability = !!(profile.availability || profile.opening_hours);
+
+  type Step = {
+    key: string;
+    label: string;
+    done: boolean;
+    action: React.ReactNode;
+  };
+
+  const steps: Step[] = [
+    {
+      key: "media",
+      label: "Upload photos and videos",
+      done: mediaCount > 0,
+      action: (
+        <button
+          type="button"
+          onClick={onUploadMedia}
+          className="text-xs font-semibold text-orange hover:underline"
+        >
+          Upload
+        </button>
+      ),
+    },
+    {
+      key: "areas",
+      label: "Add areas you serve",
+      done: hasAreas,
+      action: (
+        <Link
+          to="/profiles/$id"
+          params={{ id: profile.id }}
+          className="text-xs font-semibold text-orange hover:underline"
+        >
+          Add
+        </Link>
+      ),
+    },
+    {
+      key: "availability",
+      label: "Set your availability",
+      done: hasAvailability,
+      action: (
+        <Link
+          to="/profiles/$id"
+          params={{ id: profile.id }}
+          className="text-xs font-semibold text-orange hover:underline"
+        >
+          Set
+        </Link>
+      ),
+    },
+    {
+      key: "timeline",
+      label: "Post a work update on the Timeline",
+      done: postsCount > 0,
+      action: <span className="text-xs text-navy/50">Use Timeline tab</span>,
+    },
+    {
+      key: "packages",
+      label: "Add packages or a price guide",
+      done: servicesCount > 0,
+      action: <span className="text-xs text-navy/50">Use Packages tab</span>,
+    },
+    {
+      key: "verify",
+      label: "Add verification (optional, later)",
+      done: isVerified,
+      action: (
+        <Link
+          to="/trust"
+          className="text-xs font-semibold text-orange hover:underline"
+        >
+          Learn more
+        </Link>
+      ),
+    },
+  ];
+
+  const doneCount = steps.filter((s) => s.done).length;
+  if (doneCount === steps.length) return null;
+
+  return (
+    <div className="mt-3 rounded-2xl border border-orange/30 bg-orange/5 p-4">
+      <div className="flex items-baseline justify-between gap-2">
+        <p className="font-display text-sm font-bold text-navy">
+          Complete your service profile
+        </p>
+        <span className="text-[11px] font-semibold text-navy/60">
+          {doneCount}/{steps.length}
+        </span>
+      </div>
+      <p className="mt-0.5 text-xs text-foreground/75">
+        A more complete profile attracts more customers.
+      </p>
+      <ul className="mt-3 space-y-1.5">
+        {steps.map((s) => (
+          <li
+            key={s.key}
+            className="flex items-center justify-between gap-3 rounded-lg bg-card/60 px-2.5 py-1.5"
+          >
+            <span className="flex min-w-0 items-center gap-2 text-sm">
+              {s.done ? (
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-green" />
+              ) : (
+                <Circle className="h-4 w-4 shrink-0 text-navy/30" />
+              )}
+              <span
+                className={`truncate ${s.done ? "text-navy/60 line-through" : "text-navy"}`}
+              >
+                {s.label}
+              </span>
+            </span>
+            {!s.done && <span className="shrink-0">{s.action}</span>}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 
