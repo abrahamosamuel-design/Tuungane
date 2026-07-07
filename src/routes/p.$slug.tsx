@@ -868,3 +868,140 @@ function formatOpeningHours(oh: unknown): string {
   return "";
 }
 
+function OwnerCompletionCard({
+  profile,
+  mediaCount,
+  servicesCount,
+  postsCount,
+  onUploadMedia,
+}: {
+  profile: PublicProfile;
+  mediaCount: number;
+  servicesCount: number;
+  postsCount: number;
+  onUploadMedia: () => void;
+}) {
+  const isVerified = profile.verified === "verified";
+  const hasAreas = !!(profile.areas_served && profile.areas_served.length > 0);
+  const hasAvailability = !!(profile.availability || profile.opening_hours);
+
+  type Step = {
+    key: string;
+    label: string;
+    done: boolean;
+    action: React.ReactNode;
+  };
+
+  const steps: Step[] = [
+    {
+      key: "media",
+      label: "Upload photos and videos",
+      done: mediaCount > 0,
+      action: (
+        <button
+          type="button"
+          onClick={onUploadMedia}
+          className="text-xs font-semibold text-orange hover:underline"
+        >
+          Upload
+        </button>
+      ),
+    },
+    {
+      key: "areas",
+      label: "Add areas you serve",
+      done: hasAreas,
+      action: (
+        <Link
+          to="/profiles/$id"
+          params={{ id: profile.id }}
+          className="text-xs font-semibold text-orange hover:underline"
+        >
+          Add
+        </Link>
+      ),
+    },
+    {
+      key: "availability",
+      label: "Set your availability",
+      done: hasAvailability,
+      action: (
+        <Link
+          to="/profiles/$id"
+          params={{ id: profile.id }}
+          className="text-xs font-semibold text-orange hover:underline"
+        >
+          Set
+        </Link>
+      ),
+    },
+    {
+      key: "timeline",
+      label: "Post a work update on the Timeline",
+      done: postsCount > 0,
+      action: <span className="text-xs text-navy/50">Use Timeline tab</span>,
+    },
+    {
+      key: "packages",
+      label: "Add packages or a price guide",
+      done: servicesCount > 0,
+      action: <span className="text-xs text-navy/50">Use Packages tab</span>,
+    },
+    {
+      key: "verify",
+      label: "Add verification (optional, later)",
+      done: isVerified,
+      action: (
+        <Link
+          to="/trust"
+          className="text-xs font-semibold text-orange hover:underline"
+        >
+          Learn more
+        </Link>
+      ),
+    },
+  ];
+
+  const doneCount = steps.filter((s) => s.done).length;
+  if (doneCount === steps.length) return null;
+
+  return (
+    <div className="mt-3 rounded-2xl border border-orange/30 bg-orange/5 p-4">
+      <div className="flex items-baseline justify-between gap-2">
+        <p className="font-display text-sm font-bold text-navy">
+          Complete your service profile
+        </p>
+        <span className="text-[11px] font-semibold text-navy/60">
+          {doneCount}/{steps.length}
+        </span>
+      </div>
+      <p className="mt-0.5 text-xs text-foreground/75">
+        A more complete profile attracts more customers.
+      </p>
+      <ul className="mt-3 space-y-1.5">
+        {steps.map((s) => (
+          <li
+            key={s.key}
+            className="flex items-center justify-between gap-3 rounded-lg bg-card/60 px-2.5 py-1.5"
+          >
+            <span className="flex min-w-0 items-center gap-2 text-sm">
+              {s.done ? (
+                <CheckCircle2 className="h-4 w-4 shrink-0 text-green" />
+              ) : (
+                <Circle className="h-4 w-4 shrink-0 text-navy/30" />
+              )}
+              <span
+                className={`truncate ${s.done ? "text-navy/60 line-through" : "text-navy"}`}
+              >
+                {s.label}
+              </span>
+            </span>
+            {!s.done && <span className="shrink-0">{s.action}</span>}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+
