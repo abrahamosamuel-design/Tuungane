@@ -495,7 +495,8 @@ function PublicProfilePage() {
               value="services"
               className="rounded-lg text-sm font-semibold text-navy/60 data-[state=active]:bg-card data-[state=active]:text-orange data-[state=active]:shadow-sm data-[state=active]:ring-1 data-[state=active]:ring-orange/30"
             >
-              Services
+              Packages
+
             </TabsTrigger>
           </TabsList>
 
