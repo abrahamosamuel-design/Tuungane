@@ -16,6 +16,10 @@ import {
   Clock,
   Sparkles,
   ChevronRight,
+  CheckCircle2,
+  Circle,
+  PartyPopper,
+  X,
 } from "lucide-react";
 import { ProfileTrustBadge } from "@/components/trust/ProfileTrustBadge";
 import { formatSubcategory } from "@/lib/format-category";
