@@ -75,7 +75,7 @@ export function DashboardView() {
   return (
     <div className="flex min-h-screen flex-col bg-background pb-20 md:pb-0">
 
-      <main className="flex-1 space-y-6 pt-16">
+      <main className="mx-auto w-full max-w-2xl flex-1 space-y-6 pt-16 md:pt-24 lg:pt-28">
         
         {/* 2. Profile Stories Carousel */}
         <section>

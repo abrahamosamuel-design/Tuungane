@@ -30,7 +30,7 @@ export function Header() {
 
       {/* Main Header Pill */}
       <div className="border-b border-border bg-background/95 backdrop-blur-md">
-        <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:h-16 sm:px-6 lg:px-8">
+        <div className="mx-auto flex h-14 md:h-[4.5rem] lg:h-[5rem] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           
           {/* Mobile Header Layout */}
           <div className="flex w-full items-center justify-between md:hidden relative">
@@ -62,20 +62,31 @@ export function Header() {
           </Link>
           
           <nav className="hidden md:flex flex-1 items-center justify-center gap-8">
-            {primaryNav.filter((n) => !n.requiresAuth || user).map((n) => {
-              const toRoute = user && n.to === "/" ? "/dashboard" : n.to;
-              return (
+            {(() => {
+              const navItems = user ? [
+                { to: "/dashboard", label: "Home", exact: true },
+                { to: "/services", label: "Services", exact: false },
+                { to: "/requests/browse", label: "Requests", exact: false },
+                { to: "/u/$id", params: { id: user.id }, label: "Profile", exact: false },
+              ] : [
+                { to: "/", label: "Home", exact: true },
+                { to: "/services", label: "Services", exact: false },
+                { to: "/about", label: "About Us", exact: false },
+              ];
+
+              return navItems.map((n) => (
                 <Link
                   key={n.to}
-                  to={toRoute}
+                  to={n.to}
+                  params={n.params as never}
                   className="text-sm font-medium text-navy/80 transition-colors hover:text-orange"
                   activeProps={{ className: "text-orange font-bold" }}
                   activeOptions={{ exact: n.exact }}
                 >
                   {n.label}
                 </Link>
-              );
-            })}
+              ));
+            })()}
           </nav>
 
           <div className="hidden items-center gap-3 md:flex">
@@ -125,12 +136,30 @@ export function Header() {
         <div className="border-t border-border bg-background md:hidden max-h-[calc(100vh-4rem)] overflow-y-auto overscroll-contain">
           <div className="space-y-1 px-4 py-3 pb-24">
             <p className="px-3 pt-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Main</p>
-            {primaryNav.filter((n) => !n.requiresAuth || user).map((n) => {
-              const toRoute = user && n.to === "/" ? "/dashboard" : n.to;
-              return (
-                <Link key={n.to} to={toRoute} onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-navy hover:bg-muted">{n.label}</Link>
-              );
-            })}
+            {(() => {
+              const navItems = user ? [
+                { to: "/dashboard", label: "Home", exact: true },
+                { to: "/services", label: "Services", exact: false },
+                { to: "/requests/browse", label: "Requests", exact: false },
+                { to: "/u/$id", params: { id: user.id }, label: "Profile", exact: false },
+              ] : [
+                { to: "/", label: "Home", exact: true },
+                { to: "/services", label: "Services", exact: false },
+                { to: "/about", label: "About Us", exact: false },
+              ];
+
+              return navItems.map((n) => (
+                <Link 
+                  key={n.to} 
+                  to={n.to} 
+                  params={n.params as never} 
+                  onClick={() => setOpen(false)} 
+                  className="block rounded-md px-3 py-2 text-sm font-medium text-navy hover:bg-muted"
+                >
+                  {n.label}
+                </Link>
+              ));
+            })()}
             {user ? (
               <>
                 <div className="my-2 border-t border-border" />
