@@ -13,7 +13,7 @@ import { listSkillHref } from "@/lib/cta";
 
 const primaryNav = [
   { to: "/", label: "Home", exact: true },
-  { to: "/services", label: "Services" },
+  { to: "/services", label: "Services", requiresAuth: true },
   { to: "/about", label: "About Us" },
 ];
 
@@ -61,19 +61,21 @@ export function Header() {
             <Logo className="h-14 w-auto" />
           </Link>
           
-          {/* Centered Navigation */}
           <nav className="hidden md:flex flex-1 items-center justify-center gap-8">
-            {primaryNav.map((n) => (
-              <Link
-                key={n.to}
-                to={n.to}
-                className="text-sm font-medium text-navy/80 transition-colors hover:text-orange"
-                activeProps={{ className: "text-orange font-bold" }}
-                activeOptions={{ exact: n.exact }}
-              >
-                {n.label}
-              </Link>
-            ))}
+            {primaryNav.filter((n) => !n.requiresAuth || user).map((n) => {
+              const toRoute = user && n.to === "/" ? "/dashboard" : n.to;
+              return (
+                <Link
+                  key={n.to}
+                  to={toRoute}
+                  className="text-sm font-medium text-navy/80 transition-colors hover:text-orange"
+                  activeProps={{ className: "text-orange font-bold" }}
+                  activeOptions={{ exact: n.exact }}
+                >
+                  {n.label}
+                </Link>
+              );
+            })}
           </nav>
 
           <div className="hidden items-center gap-3 md:flex">
@@ -123,10 +125,12 @@ export function Header() {
         <div className="border-t border-border bg-background md:hidden max-h-[calc(100vh-4rem)] overflow-y-auto overscroll-contain">
           <div className="space-y-1 px-4 py-3 pb-24">
             <p className="px-3 pt-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Main</p>
-            {primaryNav.map((n) => (
-              <Link key={n.to} to={n.to} onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-navy hover:bg-muted">{n.label}</Link>
-            ))}
-            <Link to="/login" search={{ tab: "signup" } as never} onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-navy hover:bg-muted">Get Started</Link>
+            {primaryNav.filter((n) => !n.requiresAuth || user).map((n) => {
+              const toRoute = user && n.to === "/" ? "/dashboard" : n.to;
+              return (
+                <Link key={n.to} to={toRoute} onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-navy hover:bg-muted">{n.label}</Link>
+              );
+            })}
             {user ? (
               <>
                 <div className="my-2 border-t border-border" />
@@ -158,11 +162,8 @@ export function Header() {
             ) : (
               <>
                 <div className="my-2 border-t border-border" />
-                <Link to="/requests/new" onClick={() => setOpen(false)} className="mt-2 block rounded-full bg-orange px-4 py-2 text-center text-sm font-semibold text-orange-foreground">
-                  Post a Service Request
-                </Link>
-                <Link to={listSkillHref(null) as never} onClick={() => setOpen(false)} className="mt-2 block rounded-full border border-green/40 bg-green/5 px-4 py-2 text-center text-sm font-semibold text-green">
-                  List Your Service
+                <Link to="/login" search={{ tab: "signup" } as never} onClick={() => setOpen(false)} className="mt-4 block rounded-full bg-orange px-4 py-2.5 text-center text-sm font-semibold text-orange-foreground shadow-sm transition-all hover:brightness-110">
+                  Get Started
                 </Link>
               </>
             )}

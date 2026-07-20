@@ -5,35 +5,62 @@ import useEmblaCarousel from "embla-carousel-react";
 import { useAuth } from "@/hooks/use-auth";
 import { apiClient } from "@/lib/api";
 import { FeedAvatar } from "@/components/feed/FeedAvatar";
+import { useUserLocation } from "@/hooks/use-user-location";
 
 import { useQuery } from "@tanstack/react-query";
 
 export function DashboardView() {
   const { user } = useAuth();
+  const { location: userLoc } = useUserLocation();
   const [emblaRef] = useEmblaCarousel({ dragFree: true });
   const [jobsRef] = useEmblaCarousel({ dragFree: true });
 
   const { data, isLoading } = useQuery({
-    queryKey: ["dashboard-data"],
+    queryKey: ["dashboard-data", userLoc?.latitude, userLoc?.longitude],
     queryFn: async () => {
-      const res = await apiClient.get("/dashboard/feed");
-      const { profiles, topJobs, posts } = res.data;
+      const hasCoords = userLoc?.latitude != null && userLoc?.longitude != null;
+      const params: any = {};
+      if (hasCoords) {
+        params.lat = userLoc!.latitude;
+        params.lng = userLoc!.longitude;
+      }
 
-      const formattedPosts = (posts || []).map((r: any) => ({
+      // Fetch providers and recent listings for stories and top jobs
+      const homeRes = await apiClient.get("/feed/home", { params }).catch(() => ({ data: {} }));
+      const homeData = homeRes.data || {};
+      
+      // The original "Community Feed" on the dashboard was designed to show "requests" 
+      // (it used r.title and r.description in its mapping)
+      const requestsData = homeData.requests || [];
+
+      const formattedPosts = requestsData.map((r: any) => ({
         id: r.id,
-        author: r.posted_as_name || "A member",
-        avatar: r.posted_as_avatar_url || null,
+        author: r.posted_as_name || r.customer_name || "A member",
+        avatar: r.posted_as_avatar_url || r.customer_avatar_url || null,
         time: new Date(r.created_at).toLocaleDateString(),
-        location: r.area || r.town || "Uganda",
-        content: r.title + (r.description ? ` - ${r.description}` : ""),
+        location: r.area || r.town || r.district || "Uganda",
+        content: (r.title || r.service_needed) + (r.description ? ` - ${r.description}` : ""),
         images: r.media_urls || [],
         likes: Math.floor(Math.random() * 50) + 1,
         comments: Math.floor(Math.random() * 20),
       }));
 
+      const profiles = (homeData.providers || []).map((p: any) => ({
+        owner_id: p.user_id,
+        slug: p.slug,
+        name: p.business_name || p.profile?.full_name || "Provider",
+        avatar_url: p.cover_url || p.profile?.avatar_url || null,
+      }));
+
+      const topJobs = (homeData.recentListings || []).map((l: any) => ({
+        owner_id: l.user_id,
+        name: l.business_name || l.profile?.full_name || l.subcategory || "Service",
+        cover_url: l.cover_url || l.avatar_url || l.profile?.avatar_url || null,
+      }));
+
       return {
-        profiles: profiles || [],
-        topJobs: topJobs || [],
+        profiles,
+        topJobs,
         posts: formattedPosts
       };
     },
@@ -48,7 +75,7 @@ export function DashboardView() {
   return (
     <div className="flex min-h-screen flex-col bg-background pb-20 md:pb-0">
 
-      <main className="flex-1 space-y-6 pt-4">
+      <main className="flex-1 space-y-6 pt-16">
         
         {/* 2. Profile Stories Carousel */}
         <section>
@@ -78,7 +105,7 @@ export function DashboardView() {
               ))}
               
               {/* Mock fallback profiles if none loaded */}
-              {profiles.length === 0 && [1,2,3].map(i => (
+              {!isLoading && profiles.length === 0 && [1,2,3].map(i => (
                 <div key={i} className="flex flex-col items-center gap-1 shrink-0 w-16">
                   <div className="rounded-full border-2 border-orange p-0.5">
                      <FeedAvatar src={`https://i.pravatar.cc/150?u=${i}`} name={`User ${i}`} size={56} />
@@ -104,10 +131,10 @@ export function DashboardView() {
                   </div>
                 </div>
               ))}
-              {loadingJobs && (
+              {isLoading && (
                 <div className="text-xs text-muted-foreground p-4">Loading top jobs...</div>
               )}
-              {!loadingJobs && realTopJobs.length === 0 && [1,2,3].map(i => (
+              {!isLoading && realTopJobs.length === 0 && [1,2,3].map(i => (
                 <div key={`mock-${i}`} className="relative h-48 w-40 shrink-0 overflow-hidden rounded-2xl shadow-sm">
                   <img src={`https://picsum.photos/seed/${i}/300/400`} alt={`Example Job ${i}`} className="h-full w-full object-cover transition-transform duration-500 hover:scale-110" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
@@ -125,7 +152,8 @@ export function DashboardView() {
           <h2 className="mb-4 text-sm font-semibold text-navy">Community Feed</h2>
           
           <div className="space-y-6">
-            {realPosts.length === 0 && <div className="text-sm text-muted-foreground text-center py-8">Loading posts...</div>}
+            {isLoading && <div className="text-sm text-muted-foreground text-center py-8">Loading posts...</div>}
+            {!isLoading && realPosts.length === 0 && <div className="text-sm text-muted-foreground text-center py-8">No community posts yet.</div>}
             {realPosts.map((post) => (
               <div key={post.id} className="rounded-3xl border border-border bg-card p-4 shadow-sm">
                 

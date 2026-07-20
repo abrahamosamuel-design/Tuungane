@@ -34,7 +34,7 @@ export function LoginPage({
 
   useEffect(() => {
     if (!loading && user) {
-      void nav({ to: (redirectUrl as never) ?? "/welcome" });
+      void nav({ to: (redirectUrl as never) ?? "/dashboard" });
     }
   }, [loading, user, redirectUrl, nav]);
 
@@ -69,7 +69,7 @@ export function LoginPage({
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/welcome`
+          redirectTo: `${window.location.origin}/dashboard`
         }
       });
       if (error) throw error;
@@ -92,16 +92,16 @@ export function LoginPage({
         const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: `${window.location.origin}/` },
+          options: { emailRedirectTo: `${window.location.origin}/dashboard` },
         });
         if (error) throw error;
         try { localStorage.removeItem("tuungane_welcome_seen"); } catch { /* ignore */ }
-        nav({ to: (redirectUrl as never) ?? "/welcome" });
+        nav({ to: (redirectUrl as never) ?? "/dashboard" });
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast.success("Welcome back!");
-        nav({ to: (redirectUrl as never) ?? "/services" });
+        nav({ to: (redirectUrl as never) ?? "/dashboard" });
       }
     } catch (err) {
       await showErr(err, tab === "signup" ? "Couldn't create your account" : "Couldn't sign you in");

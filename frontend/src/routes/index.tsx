@@ -79,15 +79,13 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
+import { Navigate } from "@tanstack/react-router";
+
 function Index() {
   const { user } = useAuth();
 
   if (user) {
-    return (
-      <>
-        <DashboardView />
-      </>
-    );
+    return <Navigate to="/dashboard" replace />;
   }
 
   return (

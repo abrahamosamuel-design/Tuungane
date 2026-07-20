@@ -14,6 +14,9 @@ export const Route = createFileRoute("/about")({
     ],
     links: [{ rel: "canonical", href: "https://tuungane.com/about" }],
   }),
+  staticData: {
+    hideBottomNavOnMobile: true,
+  },
   component: About,
 });
 
@@ -22,7 +25,7 @@ function About() {
     <>
       <section className="bg-surface py-16">
         <div className="mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
-          <Logo className="mx-auto h-12" />
+          <Logo className="mx-auto h-12 hidden md:flex" />
           <h1 className="mt-6 font-display text-4xl font-extrabold text-navy">Connect. Grow. Prosper Together.</h1>
           <p className="mt-4 text-lg text-muted-foreground">
             Tuungane is a services-first platform built around requests. Customers post what they need; skilled providers respond. It's the simplest way to find trusted help near you — and to be found.

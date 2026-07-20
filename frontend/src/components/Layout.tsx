@@ -4,7 +4,6 @@ import { Footer } from "./Footer";
 import { MobileBottomNav } from "./MobileBottomNav";
 import { RequestFab } from "./RequestFab";
 import { OfflineBanner } from "./OfflineBanner";
-import { InstallPrompt } from "./InstallPrompt";
 import { AuthGateProvider } from "./RequireAuthDialog";
 import { useAuth } from "@/hooks/use-auth";
 import { Link, useMatches } from "@tanstack/react-router";
@@ -14,6 +13,7 @@ export function Layout({ children }: { children: ReactNode }) {
   
   const hideFooter = matches.some((m) => m.staticData?.hideFooter);
   const hideBottomNavOnMobileUnauth = matches.some((m) => m.staticData?.hideBottomNavOnMobileUnauth);
+  const hideBottomNavOnMobile = matches.some((m) => m.staticData?.hideBottomNavOnMobile);
   const hideHeaderOnMobile = matches.some((m) => m.staticData?.hideHeaderOnMobile);
 
   const { user } = useAuth();
@@ -33,14 +33,17 @@ export function Layout({ children }: { children: ReactNode }) {
         {!shouldHideFooter && <Footer />}
         <RequestFab />
         
-        {hideBottomNavOnMobileUnauth && !user ? (
+        {hideBottomNavOnMobile ? (
+          <div className="hidden md:block">
+            <MobileBottomNav />
+          </div>
+        ) : hideBottomNavOnMobileUnauth && !user ? (
           <div className="hidden md:block">
             <MobileBottomNav />
           </div>
         ) : (
           <MobileBottomNav />
         )}
-        <InstallPrompt />
       </div>
     </AuthGateProvider>
   );

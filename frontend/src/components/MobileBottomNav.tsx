@@ -9,7 +9,7 @@ export function MobileBottomNav() {
     <>
       <nav className="fixed bottom-6 left-4 right-4 z-40 rounded-[2rem] border border-border/50 bg-background/60 shadow-[0_8px_32px_rgba(0,0,0,0.08)] backdrop-blur-xl md:hidden">
         <div className="mx-auto grid h-16 w-full max-w-md grid-cols-4 items-center justify-items-center px-2">
-          <Tab to="/" icon={<Home className="h-6 w-6" />} exact />
+          <Tab to={user ? "/dashboard" : "/"} icon={<Home className="h-6 w-6" />} exact />
           <Tab to="/services" icon={<Wrench className="h-6 w-6" />} />
           <Tab to="/requests/browse" icon={<ClipboardList className="h-6 w-6" />} />
           {user ? (
