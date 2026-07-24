@@ -76,7 +76,7 @@ function Me() {
 
   return (
     <>
-      <section className="mx-auto max-w-2xl px-4 py-8">
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         <div className="rounded-2xl border border-border bg-card p-6">
           <div className="flex items-center gap-4">
             <Avatar name={profile.full_name} url={profile.avatar_url} size={80} verifiedRing={!!profile.avatar_url} />

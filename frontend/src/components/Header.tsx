@@ -66,7 +66,7 @@ export function Header() {
               const navItems = user ? [
                 { to: "/dashboard", label: "Home", exact: true },
                 { to: "/services", label: "Services", exact: false },
-                { to: "/requests/browse", label: "Requests", exact: false },
+                { to: "/messages", label: "Messages", exact: false },
                 { to: "/u/$id", params: { id: user.id }, label: "Profile", exact: false },
               ] : [
                 { to: "/", label: "Home", exact: true },
@@ -140,7 +140,7 @@ export function Header() {
               const navItems = user ? [
                 { to: "/dashboard", label: "Home", exact: true },
                 { to: "/services", label: "Services", exact: false },
-                { to: "/requests/browse", label: "Requests", exact: false },
+                { to: "/messages", label: "Messages", exact: false },
                 { to: "/u/$id", params: { id: user.id }, label: "Profile", exact: false },
               ] : [
                 { to: "/", label: "Home", exact: true },

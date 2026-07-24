@@ -244,7 +244,7 @@ function UserProfile() {
 
   return (
     <>
-      <section className="mx-auto max-w-3xl px-4 pt-6">
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-6">
         {sp?.seeded_by_official && sp.seeded_status !== "claimed" && (
           <div className="mb-3 flex flex-col gap-3 rounded-2xl border border-orange/40 bg-orange/5 p-4 text-sm sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-start gap-3">

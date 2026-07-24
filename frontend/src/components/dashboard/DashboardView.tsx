@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Menu, Search, Bell, Heart, MessageCircle, MoreHorizontal } from "lucide-react";
+import { Menu, Search, Bell, Heart, MessageCircle, MoreHorizontal, Star, ChevronRight } from "lucide-react";
 import useEmblaCarousel from "embla-carousel-react";
 import { useAuth } from "@/hooks/use-auth";
 import { apiClient } from "@/lib/api";
@@ -75,11 +75,12 @@ export function DashboardView() {
   return (
     <div className="flex min-h-screen flex-col bg-background pb-20 md:pb-0">
 
-      <main className="mx-auto w-full max-w-2xl flex-1 space-y-6 pt-16 md:pt-24 lg:pt-28">
-        
-        {/* 2. Profile Stories Carousel */}
+      <div className="mx-auto flex w-full max-w-7xl px-4 sm:px-6 lg:px-8 gap-8 pt-16 md:pt-24 lg:pt-28">
+        <main className="mx-auto w-full max-w-2xl flex-1 space-y-6">
+          
+          {/* 2. Profile Stories Carousel */}
         <section>
-          <div className="overflow-hidden px-4" ref={emblaRef}>
+          <div className="overflow-hidden" ref={emblaRef}>
             <div className="flex gap-4">
               <div className="flex flex-col items-center gap-1 shrink-0">
                 <Link to="/me" className="relative flex h-16 w-16 items-center justify-center rounded-full border-2 border-dashed border-orange p-1 hover:bg-orange/5">
@@ -118,7 +119,7 @@ export function DashboardView() {
         </section>
 
         {/* 3. Top Jobs Done Slider (Dating App style stacked/slider cards) */}
-        <section className="px-4">
+        <section>
           <h2 className="mb-3 text-sm font-semibold text-navy">Top jobs done</h2>
           <div className="overflow-hidden rounded-2xl" ref={jobsRef}>
             <div className="flex gap-4">
@@ -148,7 +149,7 @@ export function DashboardView() {
         </section>
 
         {/* 4. Community Feed */}
-        <section className="px-4 pb-6">
+        <section className="pb-6">
           <h2 className="mb-4 text-sm font-semibold text-navy">Community Feed</h2>
           
           <div className="space-y-6">
@@ -203,7 +204,90 @@ export function DashboardView() {
           </div>
         </section>
 
-      </main>
+        </main>
+
+        {/* Right Panel (Desktop Only) */}
+        <aside className="hidden lg:block w-[320px] shrink-0 space-y-6 pb-20">
+          
+          {/* Service Categories */}
+          <div className="rounded-3xl border border-border bg-card p-5 shadow-sm">
+            <h2 className="mb-4 text-sm font-semibold text-navy">Categories</h2>
+            <div className="space-y-3">
+               {[
+                 { name: "Plumbing", providers: 12 },
+                 { name: "Cleaning", providers: 8 },
+                 { name: "Mechanics", providers: 5 },
+                 { name: "Beauty & Hair", providers: 15 },
+                 { name: "Tutoring", providers: 9 },
+               ].map((cat) => (
+                 <Link key={cat.name} to="/services" search={{ q: cat.name } as never} className="group flex items-center justify-between rounded-xl p-2 hover:bg-muted/50 transition-colors">
+                   <div>
+                     <span className="block text-sm font-medium text-navy group-hover:text-orange transition-colors">{cat.name}</span>
+                     <span className="text-[10px] text-muted-foreground">{cat.providers} providers</span>
+                   </div>
+                   <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-orange transition-colors" />
+                 </Link>
+               ))}
+               <Link to="/services" className="mt-2 block w-full text-center text-xs font-semibold text-orange hover:underline">
+                 View all categories
+               </Link>
+            </div>
+          </div>
+          
+          {/* Recent Reviews */}
+          <div className="rounded-3xl border border-border bg-card p-5 shadow-sm">
+            <h2 className="mb-4 text-sm font-semibold text-navy">Recent Reviews</h2>
+            <div className="space-y-5">
+               {/* Dummy Review 1 */}
+               <div className="space-y-2">
+                 <div className="flex items-center justify-between">
+                   <div className="flex gap-1 text-orange">
+                     <Star className="h-3 w-3 fill-current" />
+                     <Star className="h-3 w-3 fill-current" />
+                     <Star className="h-3 w-3 fill-current" />
+                     <Star className="h-3 w-3 fill-current" />
+                     <Star className="h-3 w-3 fill-current" />
+                   </div>
+                   <span className="text-[10px] text-muted-foreground">Just now</span>
+                 </div>
+                 <p className="text-xs font-medium text-navy leading-snug">
+                   "Fixed my sink in under 20 minutes. Very professional and clean!"
+                 </p>
+                 <div className="flex items-center gap-2">
+                   <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-muted text-[8px] font-bold">JD</div>
+                   <p className="text-[10px] text-muted-foreground line-clamp-1">
+                     John D. reviewed <span className="font-semibold text-navy">Kato Plumbers</span>
+                   </p>
+                 </div>
+               </div>
+               
+               {/* Dummy Review 2 */}
+               <div className="space-y-2">
+                 <div className="flex items-center justify-between">
+                   <div className="flex gap-1 text-orange">
+                     <Star className="h-3 w-3 fill-current" />
+                     <Star className="h-3 w-3 fill-current" />
+                     <Star className="h-3 w-3 fill-current" />
+                     <Star className="h-3 w-3 fill-current" />
+                     <Star className="h-3 w-3 fill-current" />
+                   </div>
+                   <span className="text-[10px] text-muted-foreground">2h ago</span>
+                 </div>
+                 <p className="text-xs font-medium text-navy leading-snug">
+                   "The best deep cleaning service I've ever used. Highly recommend."
+                 </p>
+                 <div className="flex items-center gap-2">
+                   <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-muted text-[8px] font-bold">SM</div>
+                   <p className="text-[10px] text-muted-foreground line-clamp-1">
+                     Sarah M. reviewed <span className="font-semibold text-navy">Sparkle Cleaners</span>
+                   </p>
+                 </div>
+               </div>
+            </div>
+          </div>
+          
+        </aside>
+      </div>
     </div>
   );
 }

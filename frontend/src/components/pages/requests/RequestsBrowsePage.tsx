@@ -86,7 +86,7 @@ export function RequestsBrowsePage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      <section className="relative overflow-hidden bg-background pt-4 pb-4 sm:pt-10 sm:pb-8 border-b border-border shadow-sm md:shadow-none">
+      <section className="relative overflow-hidden bg-background pt-20 pb-4 md:pt-28 sm:pb-8 border-b border-border shadow-sm md:shadow-none">
         {/* Decorative background blur */}
         <div className="absolute inset-x-0 -top-40 -z-10 mx-auto h-[400px] w-full max-w-4xl rounded-[100%] bg-orange/5 blur-[100px]" />
         
@@ -100,12 +100,10 @@ export function RequestsBrowsePage() {
                 Find jobs near you and send quotes.
               </p>
             </div>
-            <Link
-              to="/requests/new"
-              className="inline-flex min-h-[44px] shrink-0 items-center justify-center gap-1.5 rounded-xl bg-orange/10 px-5 py-2 text-sm font-bold text-orange transition-colors hover:bg-orange/20 active:scale-[0.98] md:rounded-full"
-            >
-              <Plus className="h-4 w-4" /> Post Request
-            </Link>
+            <div className="inline-flex rounded-full bg-muted p-1 shrink-0 self-start md:self-auto">
+              <Link to="/services" className="rounded-full px-6 py-2 text-sm font-medium text-muted-foreground hover:text-navy transition-colors">Services</Link>
+              <Link to="/requests/browse" className="rounded-full bg-background px-6 py-2 text-sm font-semibold text-navy shadow-sm">Requests</Link>
+            </div>
           </div>
 
           <form

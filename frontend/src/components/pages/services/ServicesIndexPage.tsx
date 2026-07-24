@@ -181,10 +181,18 @@ export function ServicesIndexPage({ initialSort }: { initialSort?: "recent" }) {
   return (
     <div className="flex flex-col min-h-screen bg-background">
       {/* SECTION 1: SEARCH & FILTER BAR */}
-      <section className="sticky top-0 z-30 border-b border-border bg-surface/95 backdrop-blur-md px-4 pb-4 pt-20 md:pt-28 md:relative md:top-auto md:z-auto sm:px-6 sm:pb-6 lg:px-8 shadow-sm md:shadow-none">
-        <div className="mx-auto max-w-7xl">
-          <h1 className="font-display text-2xl font-bold leading-tight text-navy sm:text-4xl hidden md:block">Find services near you</h1>
-          <p className="mt-1 text-sm text-muted-foreground sm:text-lg hidden md:block">Search by service, skill, or location.</p>
+      <section className="sticky top-0 z-30 border-b border-border bg-surface/95 backdrop-blur-md pb-4 pt-20 md:pt-28 md:relative md:top-auto md:z-auto sm:pb-6 shadow-sm md:shadow-none">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row md:items-start lg:items-center justify-between gap-4 mb-4 md:mb-0">
+            <div>
+              <h1 className="font-display text-2xl font-bold leading-tight text-navy sm:text-4xl hidden md:block">Find services near you</h1>
+              <p className="mt-1 text-sm text-muted-foreground sm:text-lg hidden md:block">Search by service, skill, or location.</p>
+            </div>
+            <div className="inline-flex rounded-full bg-muted p-1 shrink-0 self-start md:self-auto">
+              <Link to="/services" className="rounded-full bg-background px-6 py-2 text-sm font-semibold text-navy shadow-sm">Services</Link>
+              <Link to="/requests/browse" className="rounded-full px-6 py-2 text-sm font-medium text-muted-foreground hover:text-navy transition-colors">Requests</Link>
+            </div>
+          </div>
 
           <div className="mt-0 md:mt-4 rounded-2xl border border-border bg-card p-2 md:p-3 shadow-sm md:shadow-md">
             <div className="flex flex-col md:flex-row md:items-center gap-2">
@@ -234,8 +242,8 @@ export function ServicesIndexPage({ initialSort }: { initialSort?: "recent" }) {
       </section>
 
       {/* SECTION 2: SERVICE PROVIDERS GRID */}
-      <section id="providers-section" className="px-4 pb-32 pt-6 sm:px-6 sm:pb-24 sm:pt-8 lg:px-8">
-        <div className="mx-auto max-w-7xl">
+      <section id="providers-section" className="pb-32 pt-6 sm:pb-24 sm:pt-8">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
             <h2 className="font-display text-xl font-bold text-navy sm:text-3xl">Service providers on Tuungane</h2>
             <span className="text-sm font-medium text-muted-foreground">{realFiltered.length} {realFiltered.length === 1 ? "provider" : "providers"}</span>

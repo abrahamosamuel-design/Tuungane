@@ -76,7 +76,7 @@ function MessagesIndex() {
 
   return (
     <>
-      <section className="mx-auto max-w-3xl px-4 pt-6 pb-24">
+      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-6 pb-24">
         <div className="flex items-center gap-2">
           <div className="rounded-xl bg-orange/10 p-2 text-orange"><MessageSquare className="h-5 w-5" /></div>
           <h1 className="font-display text-2xl font-bold text-navy">Messages</h1>
