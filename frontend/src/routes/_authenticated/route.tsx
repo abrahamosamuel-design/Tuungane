@@ -44,6 +44,23 @@ function AuthenticatedLayout() {
 export const Route = createFileRoute("/_authenticated")({
   ssr: false,
   beforeLoad: async ({ location }) => {
+    // After Google OAuth redirect, the URL contains hash fragments like #access_token=...
+    // We need to let Supabase process these before checking auth status
+    if (typeof window !== "undefined" && window.location.hash.includes("access_token")) {
+      // Supabase auto-detects hash fragments on onAuthStateChange, 
+      // but getUser() may fire before that. Wait briefly for it to process.
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        return { user: session.user };
+      }
+      // If getSession didn't find it yet, wait a moment for the hash to be processed
+      await new Promise((r) => setTimeout(r, 500));
+      const { data: retry } = await supabase.auth.getSession();
+      if (retry.session?.user) {
+        return { user: retry.session.user };
+      }
+    }
+
     const { data, error } = await supabase.auth.getUser();
     if (error || !data.user) {
       throw redirect({
