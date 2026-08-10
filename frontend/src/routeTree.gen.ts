@@ -41,6 +41,7 @@ import { Route as GuidesPropertyMaintenanceKampalaRouteImport } from './routes/g
 import { Route as BusinessesNewRouteImport } from './routes/businesses.new'
 import { Route as BusinessesCreateRouteImport } from './routes/businesses.create'
 import { Route as BusinessesSlugRouteImport } from './routes/businesses.$slug'
+import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as AuthenticatedWelcomeRouteImport } from './routes/_authenticated/welcome'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
@@ -221,6 +222,11 @@ const BusinessesSlugRoute = BusinessesSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => BusinessesRoute,
 } as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/auth/callback',
+  path: '/auth/callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedWelcomeRoute = AuthenticatedWelcomeRouteImport.update({
   id: '/welcome',
   path: '/welcome',
@@ -347,6 +353,7 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/welcome': typeof AuthenticatedWelcomeRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/businesses/$slug': typeof BusinessesSlugRoute
   '/businesses/create': typeof BusinessesCreateRoute
   '/businesses/new': typeof BusinessesNewRoute
@@ -398,6 +405,7 @@ export interface FileRoutesByTo {
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/welcome': typeof AuthenticatedWelcomeRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/businesses/$slug': typeof BusinessesSlugRoute
   '/businesses/create': typeof BusinessesCreateRoute
   '/businesses/new': typeof BusinessesNewRoute
@@ -452,6 +460,7 @@ export interface FileRoutesById {
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/welcome': typeof AuthenticatedWelcomeRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/businesses/$slug': typeof BusinessesSlugRoute
   '/businesses/create': typeof BusinessesCreateRoute
   '/businesses/new': typeof BusinessesNewRoute
@@ -506,6 +515,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/settings'
     | '/welcome'
+    | '/auth/callback'
     | '/businesses/$slug'
     | '/businesses/create'
     | '/businesses/new'
@@ -557,6 +567,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/settings'
     | '/welcome'
+    | '/auth/callback'
     | '/businesses/$slug'
     | '/businesses/create'
     | '/businesses/new'
@@ -610,6 +621,7 @@ export interface FileRouteTypes {
     | '/_authenticated/onboarding'
     | '/_authenticated/settings'
     | '/_authenticated/welcome'
+    | '/auth/callback'
     | '/businesses/$slug'
     | '/businesses/create'
     | '/businesses/new'
@@ -656,6 +668,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
   TrustRoute: typeof TrustRoute
+  AuthCallbackRoute: typeof AuthCallbackRoute
   GuidesPropertyMaintenanceKampalaRoute: typeof GuidesPropertyMaintenanceKampalaRoute
   OfficialPostsIdRoute: typeof OfficialPostsIdRoute
   PSlugRoute: typeof PSlugRoute
@@ -896,6 +909,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BusinessesSlugRouteImport
       parentRoute: typeof BusinessesRoute
     }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/auth/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/welcome': {
       id: '/_authenticated/welcome'
       path: '/welcome'
@@ -1126,6 +1146,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
   TrustRoute: TrustRoute,
+  AuthCallbackRoute: AuthCallbackRoute,
   GuidesPropertyMaintenanceKampalaRoute: GuidesPropertyMaintenanceKampalaRoute,
   OfficialPostsIdRoute: OfficialPostsIdRoute,
   PSlugRoute: PSlugRoute,
