@@ -23,4 +23,15 @@ export default defineConfig({
     port: 8000,
     host: true,
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor': ['react', 'react-dom'],
+          'router': ['@tanstack/react-router'],
+          'ui': ['lucide-react', 'sonner'],
+        }
+      }
+    }
+  }
 });

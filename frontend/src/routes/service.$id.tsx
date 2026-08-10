@@ -3,8 +3,6 @@ import { useEffect, useState } from "react";
 import { ArrowLeft, Star, MessageSquare, Clock, ImageIcon } from "lucide-react";
 import { apiClient } from "@/lib/api";
 import { useAuthGate } from "@/components/RequireAuthDialog";
-import { formatPrice } from "@/lib/price-guide";
-import { FeedAvatar } from "@/components/social/FeedAvatar";
 
 export const Route = createFileRoute("/service/$id")({
   staticData: { hideHeaderOnMobile: true, hideBottomNavOnMobile: true, hideHeader: true, hideBottomNav: true },
@@ -51,7 +49,7 @@ function ServiceDetailPage() {
 
   // Use cover_url from service, or fallback to profile avatar/cover, or a default placeholder
   const imageUrl = service.media?.[0]?.url || service.profile?.cover_url || service.profile?.avatar_url || "https://picsum.photos/800/800";
-  const displayPrice = formatPrice({ price_display: service.price_note, price_min: service.price_min_ugx, price_max: service.price_max_ugx });
+  const displayPrice = service.price_note || (service.price_min_ugx ? "From UGX " + service.price_min_ugx.toLocaleString() : null);
   
   const handleOrder = () => {
     requireAuth(
@@ -100,7 +98,13 @@ function ServiceDetailPage() {
         <div className="mt-8 rounded-2xl border border-border bg-card p-4">
           <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Offered by</h2>
           <div className="flex items-center gap-3">
-            <FeedAvatar src={service.profile?.avatar_url} name={service.profile?.name} size={48} />
+            <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-orange/10 flex items-center justify-center text-orange font-bold">
+              {service.profile?.avatar_url ? (
+                <img src={service.profile.avatar_url} alt={service.profile?.name} className="h-full w-full object-cover" />
+              ) : (
+                service.profile?.name?.charAt(0) || "?"
+              )}
+            </div>
             <div className="flex-1 overflow-hidden">
               <h3 className="truncate font-semibold text-navy">{service.profile?.name}</h3>
               <p className="truncate text-xs text-muted-foreground">
