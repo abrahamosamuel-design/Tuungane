@@ -5,11 +5,14 @@ import { apiClient } from "@/lib/api";
 import { useAuth } from "@/hooks/use-auth";
 import { Avatar } from "@/components/social/Avatar";
 import { timeAgo } from "@/lib/format";
-import { Heart, MessageCircle, ThumbsUp, Star, UserPlus, ClipboardList, CheckCircle2, PlayCircle, Send, ShieldCheck, AlertTriangle, XCircle, Settings } from "lucide-react";
+import { Heart, MessageCircle, ThumbsUp, Star, UserPlus, ClipboardList, CheckCircle2, PlayCircle, Send, ShieldCheck, AlertTriangle, XCircle, Settings, ArrowLeft } from "lucide-react";
 import { isTypeEnabled, loadNotifPrefs, type NotifPrefs, DEFAULT_PREFS } from "@/lib/notification-prefs";
 
 export const Route = createFileRoute("/_authenticated/notifications/")({
   head: () => ({ meta: [{ title: "Notifications — Tuungane" }] }),
+  staticData: {
+    hideBottomNavOnMobile: true,
+  },
   component: NotificationsPage,
 });
 
@@ -92,19 +95,12 @@ function NotificationsPage() {
   if (!user) return null;
   return (
     <>
-      <section className="mx-auto max-w-2xl px-4 py-8">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h1 className="font-display text-3xl font-bold text-navy">Notifications</h1>
-            <p className="mt-1 text-sm text-muted-foreground">Activity on your posts, profile, follows, and service jobs.</p>
-          </div>
-          <Link
-            to="/notifications/preferences"
-            className="inline-flex shrink-0 items-center gap-1 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-semibold text-navy hover:border-orange"
-            aria-label="Notification preferences"
-          >
-            <Settings className="h-3.5 w-3.5" /> Preferences
-          </Link>
+      <section className="mx-auto w-full max-w-2xl px-4 py-8">
+        <div className="flex items-center gap-3">
+          <button onClick={() => history.back()} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-card text-navy transition-colors hover:border-orange hover:text-orange" aria-label="Go back">
+            <ArrowLeft className="h-5 w-5" />
+          </button>
+          <h1 className="font-display text-3xl font-bold text-navy">Notifications</h1>
         </div>
 
         <div className="mt-4 inline-flex rounded-full border border-border bg-card p-1">

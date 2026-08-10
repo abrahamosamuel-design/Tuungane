@@ -17,10 +17,12 @@ const REASONS = [
 export function ReportProfileButton({
   kind,
   id,
+  variant = "full",
   className = "",
 }: {
   kind: ProfileKind;
   id: string;
+  variant?: "icon" | "full";
   className?: string;
 }) {
   const { user } = useAuth();
@@ -59,13 +61,25 @@ export function ReportProfileButton({
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className={`inline-flex items-center gap-1 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-semibold text-muted-foreground transition hover:border-destructive/40 hover:text-destructive ${className}`}
-      >
-        <Flag className="h-3.5 w-3.5" /> Report profile
-      </button>
+      {variant === "full" ? (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className={`inline-flex items-center gap-1 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-semibold text-muted-foreground transition hover:border-destructive/40 hover:text-destructive ${className}`}
+        >
+          <Flag className="h-3.5 w-3.5" /> Report profile
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          title="Report profile"
+          data-icon-only={true}
+          className={`inline-flex aspect-square h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border bg-card p-0 text-muted-foreground transition hover:border-destructive/40 hover:text-destructive ${className}`}
+        >
+          <Flag className="h-4 w-4" />
+        </button>
+      )}
 
       {open && (
         <div

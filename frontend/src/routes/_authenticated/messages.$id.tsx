@@ -10,7 +10,8 @@ import { markConversationRead } from "@/lib/messaging";
 
 export const Route = createFileRoute("/_authenticated/messages/$id")({
     staticData: {
-      hideFooter: true
+      hideFooter: true,
+      hideBottomNavOnMobile: true
     },
   head: () => ({ meta: [{ title: "Conversation — Tuungane" }] }),
   component: ConversationPage,
@@ -59,6 +60,20 @@ function ConversationPage() {
     let active = true;
 
     const load = async () => {
+      if (id === "mockup") {
+        setConv({ id: "mockup", service_request_id: "req1", customer_id: user?.id ?? "c1", provider_id: "p1", status: "open", provider_response_id: null });
+        setOther({ id: "p1", full_name: "Jane Doe", avatar_url: null });
+        setReq({ id: "req1", service_needed: "Fix leaking pipe", title: "Emergency Kitchen Leak", status: "requested", location: "Nairobi", budget_range: "KES 2000 - 5000", selected_provider_id: null, urgent_flag: true, urgency: "urgent", public_profile_id: null });
+        setServiceProfile({ id: "sp1", name: "Jane's Plumbing Services" });
+        setMessages([
+          { id: "m1", conversation_id: "mockup", sender_id: user?.id ?? "c1", receiver_id: "p1", body: "Hi Jane, I have an emergency leak in my kitchen. Can you help?", created_at: new Date(Date.now() - 3600000).toISOString(), is_read: true },
+          { id: "m2", conversation_id: "mockup", sender_id: "p1", receiver_id: user?.id ?? "c1", body: "Hello! Yes, I can come over in about 30 minutes. Please turn off the main water valve.", created_at: new Date(Date.now() - 3500000).toISOString(), is_read: true },
+          { id: "m3", conversation_id: "mockup", sender_id: user?.id ?? "c1", receiver_id: "p1", body: "Just turned it off. See you soon!", created_at: new Date(Date.now() - 3400000).toISOString(), is_read: true },
+        ]);
+        setBusy(false);
+        return;
+      }
+      
       try {
         const { data } = await apiClient<{ data: { conv: Conv, other: Profile | null, req: Req | null, messages: Msg[], serviceProfile: ServiceProfile | null } }>(`/messages/${id}`);
         if (!active) return;
@@ -138,7 +153,7 @@ function ConversationPage() {
 
   return (
     <>
-      <section className="mx-auto flex h-[calc(100dvh-8rem)] max-w-3xl flex-col md:h-[calc(100dvh-4rem)]">
+      <section className="mx-auto w-full flex flex-1 overflow-hidden max-w-3xl flex-col">
 
 
         {/* Sticky header */}

@@ -1,16 +1,18 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import { apiClient } from "@/lib/api";
 import { useAuth } from "@/hooks/use-auth";
 import { useCreditWallet } from "@/hooks/use-credits";
-import { Coins, Info, Check, Clock, X as XIcon, Bug, RefreshCw } from "lucide-react";
+import { Coins, Info, Check, Clock, X as XIcon, Bug, RefreshCw, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { timeAgo } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/credits")({
     staticData: {
-      hideFooter: true
+      hideFooter: true,
+      hideBottomNavOnMobile: true,
+      hideHeaderOnMobile: true
     },
   head: () => ({ meta: [
     { title: "Tuungane Credits" },
@@ -28,6 +30,7 @@ const loginSearch = { tab: "login", redirect: "/credits" } as never;
 
 function CreditsPage() {
   const { user } = useAuth();
+  const router = useRouter();
   const { balance } = useCreditWallet();
   const [pkgs, setPkgs] = useState<Pkg[]>([]);
   const [txs, setTxs] = useState<Tx[]>([]);
@@ -169,6 +172,13 @@ function CreditsPage() {
 
   return (
     <>
+      <div className="md:hidden sticky top-0 z-50 flex h-14 items-center gap-3 border-b border-border bg-background/95 px-4 backdrop-blur-md">
+        <button onClick={() => router.history.back()} className="flex h-9 w-9 items-center justify-center rounded-full bg-muted text-navy transition-colors hover:bg-orange/20 hover:text-orange">
+          <ArrowLeft className="h-5 w-5" />
+        </button>
+        <span className="font-display text-lg font-bold text-navy">My Credits</span>
+      </div>
+
       <section
         className="mx-auto max-w-5xl px-4 py-6 space-y-6 sm:py-8 sm:space-y-8"
         style={{ paddingBottom: "calc(6rem + env(safe-area-inset-bottom) + 2rem)" }}

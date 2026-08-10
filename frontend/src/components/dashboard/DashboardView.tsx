@@ -1,7 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Link } from "@tanstack/react-router";
-import { Menu, Search, Bell, Heart, MessageCircle, MoreHorizontal, Star, ChevronRight } from "lucide-react";
-import useEmblaCarousel from "embla-carousel-react";
+import { Menu, Search, Bell, Heart, MessageCircle, MoreHorizontal, Star, ChevronRight, Wrench, Zap, Sparkles, Calendar, GraduationCap } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { apiClient } from "@/lib/api";
 import { FeedAvatar } from "@/components/feed/FeedAvatar";
@@ -9,11 +8,12 @@ import { useUserLocation } from "@/hooks/use-user-location";
 
 import { useQuery } from "@tanstack/react-query";
 
+import { MobileSearchBar } from "@/components/MobileSearchBar";
+import { CategoryScroll } from "@/components/CategoryScroll";
+import { ServiceVerticalList } from "@/components/ServiceVerticalList";
 export function DashboardView() {
   const { user } = useAuth();
   const { location: userLoc } = useUserLocation();
-  const [emblaRef] = useEmblaCarousel({ dragFree: true });
-  const [jobsRef] = useEmblaCarousel({ dragFree: true });
 
   const { data, isLoading } = useQuery({
     queryKey: ["dashboard-data", userLoc?.latitude, userLoc?.longitude],
@@ -33,23 +33,26 @@ export function DashboardView() {
       // (it used r.title and r.description in its mapping)
       const requestsData = homeData.requests || [];
 
-      const formattedPosts = requestsData.map((r: any) => ({
+      const formattedRequests = requestsData.map((r: any) => ({
         id: r.id,
         author: r.posted_as_name || r.customer_name || "A member",
         avatar: r.posted_as_avatar_url || r.customer_avatar_url || null,
         time: new Date(r.created_at).toLocaleDateString(),
         location: r.area || r.town || r.district || "Uganda",
+        title: r.title || r.service_needed,
+        budget: r.budget_range || (r.price ? `UGX ${r.price}` : "Negotiable"),
         content: (r.title || r.service_needed) + (r.description ? ` - ${r.description}` : ""),
-        images: r.media_urls || [],
-        likes: Math.floor(Math.random() * 50) + 1,
-        comments: Math.floor(Math.random() * 20),
       }));
 
-      const profiles = (homeData.providers || []).map((p: any) => ({
+      const formattedProfiles = (homeData.providers || []).map((p: any) => ({
+        id: p.user_id,
         owner_id: p.user_id,
         slug: p.slug,
         name: p.business_name || p.profile?.full_name || "Provider",
         avatar_url: p.cover_url || p.profile?.avatar_url || null,
+        category: p.subcategory || p.category || "Service Provider",
+        rating: p.rating || (4 + Math.random()).toFixed(1),
+        jobs: p.jobs_completed || Math.floor(Math.random() * 50) + 1,
       }));
 
       const topJobs = (homeData.recentListings || []).map((l: any) => ({
@@ -59,94 +62,99 @@ export function DashboardView() {
       }));
 
       return {
-        profiles,
+        profiles: formattedProfiles,
         topJobs,
-        posts: formattedPosts
+        requests: formattedRequests
       };
     },
     staleTime: 1000 * 60 * 5,
   });
 
-  const profiles = data?.profiles || [];
+  const realProfiles = data?.profiles || [];
   const realTopJobs = data?.topJobs || [];
-  const realPosts = data?.posts || [];
+  const realRequests = data?.requests || [];
   const loadingJobs = isLoading;
+
+  const mixedFeed = useMemo(() => {
+    const feed: any[] = [];
+    
+    // Dummy posts to pad out the feed
+    const dummyPosts = [
+      { id: 'dp1', author: 'Tuungane Admin', avatar: null, time: '1 day ago', location: 'Uganda', content: 'Welcome to Tuungane! Find the best service providers around you. Join the community and connect with skilled professionals.', likes: 124, comments: 23 },
+      { id: 'dp2', author: 'Genesis Car Wash', avatar: null, time: '2 days ago', location: 'Entebbe', content: 'Get 20% off all full car washes this weekend! Come by and give your ride the shine it deserves. Located opposite the main market.', likes: 45, comments: 8 },
+      { id: 'dp3', author: 'Sarah Painter', avatar: null, time: '3 days ago', location: 'Kampala', content: 'Just finished a beautiful living room painting project. Check out the before and after photos on my profile!', likes: 89, comments: 14 },
+      { id: 'dp4', author: 'Kato Electricals', avatar: null, time: '5 days ago', location: 'Wakiso', content: 'Reminder: Always ensure your wiring is checked annually by a certified professional to prevent fire hazards.', likes: 210, comments: 45 },
+      { id: 'dp5', author: 'Tuungane Tips', avatar: null, time: '1 week ago', location: 'Uganda', content: 'Did you know you can leave verified reviews for providers you have hired? Help others by sharing your experiences.', likes: 56, comments: 5 },
+      { id: 'dp6', author: 'John Plumbing', avatar: null, time: '2 weeks ago', location: 'Jinja', content: 'Available for emergency plumbing repairs 24/7. Call us anytime!', likes: 12, comments: 1 },
+      { id: 'dp7', author: 'Clean Sweep', avatar: null, time: '3 weeks ago', location: 'Kampala', content: 'We offer deep cleaning services for offices and residential homes. Get a free quote today.', likes: 34, comments: 4 },
+    ];
+
+    let profIdx = 0;
+    let reqIdx = 0;
+    
+    // Duplicate dummy posts to ensure the feed is long enough
+    const allPosts = [...dummyPosts, ...dummyPosts, ...dummyPosts];
+
+    let postsSinceInjection = 0;
+    let injectionCount = 0;
+    const injectionGaps = [3, 1, 4, 2, 4, 1, 3, 2];
+    
+    for (let i = 0; i < allPosts.length; i++) {
+       const p = allPosts[i];
+       feed.push({ type: 'post', id: `post-${i}`, data: p });
+       postsSinceInjection++;
+       
+       const targetGap = injectionGaps[injectionCount % injectionGaps.length];
+       if (postsSinceInjection >= targetGap) {
+          const canInjectService = profIdx + 1 < realProfiles.length;
+          const canInjectRequest = reqIdx < realRequests.length;
+          
+          if (!canInjectService && !canInjectRequest) continue;
+          
+          let injectService = false;
+          if (canInjectService && canInjectRequest) {
+             injectService = injectionCount % 2 === 0;
+          } else if (canInjectService) {
+             injectService = true;
+          }
+          
+          if (injectService) {
+             const p1 = realProfiles[profIdx++];
+             const p2 = realProfiles[profIdx++];
+             feed.push({ type: 'provider_pair', id: `pair-${injectionCount}`, providers: [p1, p2] });
+             postsSinceInjection = 0;
+             injectionCount++;
+          } else {
+             const r = realRequests[reqIdx++];
+             feed.push({ type: 'request', id: `req-${injectionCount}`, data: r });
+             postsSinceInjection = 0;
+             injectionCount++;
+          }
+       }
+    }
+    
+    return feed;
+  }, [realProfiles, realRequests]);
 
   return (
     <div className="flex min-h-screen flex-col bg-background pb-20 md:pb-0">
+      
+      {/* NEW MOBILE UI */}
+      <div className="md:hidden bg-white">
+        <MobileSearchBar placeholder="Search friend services" />
+        <CategoryScroll 
+          title="Services"
+          categories={[
+            { id: "1", name: "Plumbing", icon: <Wrench className="h-6 w-6" />, colorClass: "bg-navy" },
+            { id: "2", name: "Electric", icon: <Zap className="h-6 w-6" />, colorClass: "bg-orange" },
+            { id: "3", name: "Cleaning", icon: <Sparkles className="h-6 w-6" />, colorClass: "bg-green" },
+            { id: "4", name: "More", icon: <MoreHorizontal className="h-6 w-6" />, colorClass: "bg-slate-800", isMore: true },
+          ]} 
+        />
+      </div>
 
-      <div className="mx-auto flex w-full max-w-7xl px-4 sm:px-6 lg:px-8 gap-8 pt-16 md:pt-24 lg:pt-28">
+      <div className="mx-auto flex w-full max-w-7xl px-4 sm:px-6 lg:px-8 gap-8 pt-2 md:pt-8">
         <main className="mx-auto w-full max-w-2xl flex-1 space-y-6">
-          
-          {/* 2. Profile Stories Carousel */}
-        <section>
-          <div className="overflow-hidden" ref={emblaRef}>
-            <div className="flex gap-4">
-              <div className="flex flex-col items-center gap-1 shrink-0">
-                <Link to="/me" className="relative flex h-16 w-16 items-center justify-center rounded-full border-2 border-dashed border-orange p-1 hover:bg-orange/5">
-                  <FeedAvatar src={null} name={user?.email || "Me"} size={56} />
-                  <div className="absolute -bottom-1 right-0 flex h-5 w-5 items-center justify-center rounded-full border-2 border-background bg-orange text-white">
-                    <span className="text-xs font-bold leading-none">+</span>
-                  </div>
-                </Link>
-                <span className="text-[10px] font-medium text-muted-foreground">Your Story</span>
-              </div>
-
-              {profiles.map((p) => (
-                <div key={p.owner_id} className="flex flex-col items-center gap-1 shrink-0 w-16">
-                  <Link 
-                    to={p.slug ? "/p/$slug" : "/u/$id"} 
-                    params={p.slug ? { slug: p.slug } : { id: p.owner_id }}
-                    className="rounded-full border-2 border-orange p-0.5 hover:opacity-80 transition-opacity"
-                  >
-                    <FeedAvatar src={p.avatar_url} name={p.name} size={56} />
-                  </Link>
-                  <span className="w-full truncate text-center text-[10px] font-medium text-navy">{p.name}</span>
-                </div>
-              ))}
-              
-              {/* Mock fallback profiles if none loaded */}
-              {!isLoading && profiles.length === 0 && [1,2,3].map(i => (
-                <div key={i} className="flex flex-col items-center gap-1 shrink-0 w-16">
-                  <div className="rounded-full border-2 border-orange p-0.5">
-                     <FeedAvatar src={`https://i.pravatar.cc/150?u=${i}`} name={`User ${i}`} size={56} />
-                  </div>
-                  <span className="w-full truncate text-center text-[10px] font-medium text-navy">User {i}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* 3. Top Jobs Done Slider (Dating App style stacked/slider cards) */}
-        <section>
-          <h2 className="mb-3 text-sm font-semibold text-navy">Top jobs done</h2>
-          <div className="overflow-hidden rounded-2xl" ref={jobsRef}>
-            <div className="flex gap-4">
-              {realTopJobs.map((job) => (
-                <div key={job.owner_id} className="relative h-48 w-40 shrink-0 overflow-hidden rounded-2xl shadow-sm">
-                  <img src={job.cover_url || undefined} alt={job.name} className="h-full w-full object-cover transition-transform duration-500 hover:scale-110" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
-                  <div className="absolute bottom-3 left-3 right-3 text-white">
-                    <p className="text-xs font-medium">{job.name}</p>
-                  </div>
-                </div>
-              ))}
-              {isLoading && (
-                <div className="text-xs text-muted-foreground p-4">Loading top jobs...</div>
-              )}
-              {!isLoading && realTopJobs.length === 0 && [1,2,3].map(i => (
-                <div key={`mock-${i}`} className="relative h-48 w-40 shrink-0 overflow-hidden rounded-2xl shadow-sm">
-                  <img src={`https://picsum.photos/seed/${i}/300/400`} alt={`Example Job ${i}`} className="h-full w-full object-cover transition-transform duration-500 hover:scale-110" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"></div>
-                  <div className="absolute bottom-3 left-3 right-3 text-white">
-                    <p className="text-xs font-medium">Job Example {i}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
 
         {/* 4. Community Feed */}
         <section className="pb-6">
@@ -154,8 +162,58 @@ export function DashboardView() {
           
           <div className="space-y-6">
             {isLoading && <div className="text-sm text-muted-foreground text-center py-8">Loading posts...</div>}
-            {!isLoading && realPosts.length === 0 && <div className="text-sm text-muted-foreground text-center py-8">No community posts yet.</div>}
-            {realPosts.map((post) => (
+            {!isLoading && mixedFeed.length === 0 && <div className="text-sm text-muted-foreground text-center py-8">No community posts yet.</div>}
+            {mixedFeed.map((item) => {
+              if (item.type === 'provider_pair') {
+                return (
+                  <div key={item.id} className="grid grid-cols-2 gap-4">
+                    {item.providers.map((p: any) => (
+                      <div key={p.id} className="rounded-3xl border border-border bg-card p-4 shadow-sm text-center">
+                         <img src={p.avatar} className="mx-auto h-12 w-12 rounded-full object-cover mb-2" />
+                         <h4 className="font-semibold text-sm text-navy truncate">{p.name}</h4>
+                         <p className="text-[10px] text-muted-foreground">{p.category}</p>
+                         <div className="mt-2 flex items-center justify-center gap-1 text-[10px] font-medium text-orange">
+                           <Star className="h-3 w-3 fill-current" /> {p.rating} ({p.jobs} jobs)
+                         </div>
+                         <Link 
+                           to={p.slug ? "/p/$slug" : "/u/$id"}
+                           params={p.slug ? { slug: p.slug } : { id: p.owner_id }}
+                           className="mt-3 block w-full rounded-full bg-orange/10 py-1.5 text-center text-xs font-semibold text-orange hover:bg-orange/20 transition-colors"
+                         >
+                           View Profile
+                         </Link>
+                      </div>
+                    ))}
+                  </div>
+                );
+              }
+
+              if (item.type === 'request') {
+                return (
+                  <div key={item.id} className="rounded-3xl border border-orange/30 bg-orange/5 p-4 shadow-sm">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-orange/20 text-orange">
+                           <Search className="h-4 w-4" />
+                        </div>
+                        <div>
+                           <span className="text-xs font-semibold text-navy">Service Request</span>
+                           <p className="text-[10px] text-muted-foreground">{item.data.author} • {item.data.location}</p>
+                        </div>
+                      </div>
+                      <span className="text-[10px] text-muted-foreground">{item.data.time}</span>
+                    </div>
+                    <h3 className="text-sm font-semibold text-navy mb-1">{item.data.title}</h3>
+                    <p className="text-xs text-muted-foreground mb-4 font-medium">Budget: {item.data.budget}</p>
+                    <button className="w-full rounded-full bg-orange py-2 text-xs font-semibold text-white hover:bg-orange/90 transition-colors">
+                      Send Quote
+                    </button>
+                  </div>
+                );
+              }
+
+              const post = item.data;
+              return (
               <div key={post.id} className="rounded-3xl border border-border bg-card p-4 shadow-sm">
                 
                 {/* Author Info */}
@@ -200,7 +258,8 @@ export function DashboardView() {
                 </div>
 
               </div>
-            ))}
+              );
+            })}
           </div>
         </section>
 

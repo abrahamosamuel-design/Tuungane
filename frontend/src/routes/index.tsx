@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Wrench, Zap, Sparkles, Calendar, GraduationCap, MoreHorizontal } from "lucide-react";
 
 import { ListYourSkillButton } from "@/components/cta/ListYourSkillButton";
 import { useAuth } from "@/hooks/use-auth";
@@ -12,6 +12,10 @@ import { PopularCategoriesSection } from "@/components/PopularCategoriesSection"
 import { CommunityUpdatesSection } from "@/components/CommunityUpdatesSection";
 import { SetLocationNudge } from "@/components/SetLocationNudge";
 import { DashboardView } from "@/components/dashboard/DashboardView";
+
+import { MobileSearchBar } from "@/components/MobileSearchBar";
+import { CategoryScroll } from "@/components/CategoryScroll";
+import { ServiceVerticalList } from "@/components/ServiceVerticalList";
 
 export const Route = createFileRoute("/")({
     staticData: {
@@ -91,15 +95,42 @@ function Index() {
   return (
     <>
       <SetLocationNudge />
-      
-      {/* NEW LANDING DESIGN */}
-      <LandingHero />
-      <LandingSearchBox />
-      <LandingTrustStrip />
-      <LandingJourney />
 
-      {/* DYNAMIC FEED: Open requests + Skilled people + Recent work */}
-      <HomeFeedSections />
+      {/* NEW MOBILE UI */}
+      <div className="md:hidden pt-4 bg-white">
+        <div className="relative mb-6 h-[400px] w-full overflow-hidden">
+           <img src="https://images.unsplash.com/photo-1542037104857-ffbb0b91552d?auto=format&fit=crop&q=80" alt="Provider" className="h-full w-full object-cover" />
+           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+           <div className="absolute bottom-6 left-4 right-4 text-center">
+             <Link to="/login" search={{ tab: "signup" } as never} className="block w-full rounded-full bg-orange py-3.5 text-sm font-bold text-white shadow-lg transition-transform hover:scale-[1.02] active:scale-95">
+               Create Your Provider Profile
+             </Link>
+             <p className="mt-4 text-xs font-medium text-white/80">www.tuungane.com</p>
+           </div>
+        </div>
+        
+        <MobileSearchBar placeholder="Search for it services" />
+        <CategoryScroll 
+          title="Services"
+          categories={[
+            { id: "1", name: "Plumbing", icon: <Wrench className="h-6 w-6" />, colorClass: "bg-navy" },
+            { id: "2", name: "Electric", icon: <Zap className="h-6 w-6" />, colorClass: "bg-orange" },
+            { id: "3", name: "Cleaning", icon: <Sparkles className="h-6 w-6" />, colorClass: "bg-green" },
+            { id: "4", name: "More", icon: <MoreHorizontal className="h-6 w-6" />, colorClass: "bg-slate-800", isMore: true },
+          ]} 
+        />
+      </div>
+
+      <div className="hidden md:block">
+        {/* NEW LANDING DESIGN */}
+        <LandingHero />
+        <LandingSearchBox />
+        <LandingTrustStrip />
+        <LandingJourney />
+
+        {/* DYNAMIC FEED: Open requests + Skilled people + Recent work */}
+        <HomeFeedSections />
+      </div>
 
       {/* Popular categories — discovery after dynamic marketplace content */}
       <PopularCategoriesSection />

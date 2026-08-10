@@ -1,58 +1,90 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
-
+import { useState, useRef } from "react";
+import { ArrowLeft, ImagePlus, X, CheckCircle2, Zap } from "lucide-react";
 import { apiClient } from "@/lib/api";
 import { useAuth } from "@/hooks/use-auth";
-import { useCategories } from "@/hooks/use-categories";
-import { categories as staticCategories } from "@/data/categories";
 import { toast } from "sonner";
+import { uploadMedia } from "@/lib/upload";
+import { SERVICE_CATEGORIES } from "@/data/service-categories";
+import { useCreditWallet } from "@/hooks/use-credits";
+import { LocationAutocomplete } from "@/components/LocationAutocomplete";
+import { filterDistricts, filterTowns } from "@/data/uganda-locations";
 
 export const Route = createFileRoute("/_authenticated/profiles/new")({
-  head: () => ({ meta: [{ title: "List a new service — Tuungane" }] }),
+  staticData: { hideHeaderOnMobile: true, hideBottomNavOnMobile: true },
+  head: () => ({ meta: [{ title: "List a service â€” Tuungane" }] }),
   component: NewProfile,
 });
 
-type ProfileType = "individual" | "business" | "organization";
-
+const PROMO_PLANS = [
+  { id: "free", label: "No promo", sub: "List for free", creditsPerDay: 0, highlight: false },
+  { id: "basic", label: "Basic Boost", sub: "More visibility", creditsPerDay: 2, highlight: false },
+  { id: "standard", label: "Standard", sub: "Top of search results", creditsPerDay: 5, highlight: true },
+  { id: "premium", label: "Premium", sub: "Featured + badge", creditsPerDay: 10, highlight: false },
+];
 
 function slugify(s: string) {
-  return s
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
+  return s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
 
 function NewProfile() {
   const { user } = useAuth();
   const nav = useNavigate();
-  const { categories } = useCategories();
-  // Every new profile is a service profile in the MVP.
-  const profileType: ProfileType = "individual";
+  const { balance } = useCreditWallet();
+
+  // Form state
   const [name, setName] = useState("");
-  const [categorySlug, setCategorySlug] = useState(staticCategories[0].slug);
-  const [subcategory, setSubcategory] = useState(staticCategories[0].subcategories[0]);
+  const [categorySlug, setCategorySlug] = useState(SERVICE_CATEGORIES[0].slug);
+  const [subcategory, setSubcategory] = useState(SERVICE_CATEGORIES[0].services[0].service);
+  const [contactForPrice, setContactForPrice] = useState(false);
+  const [price, setPrice] = useState("");
   const [district, setDistrict] = useState("");
   const [town, setTown] = useState("");
   const [bio, setBio] = useState("");
-  const [phone, setPhone] = useState("");
+  const [promoId, setPromoId] = useState("free");
+  const [images, setImages] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
-  const [duplicateWarning, setDuplicateWarning] = useState<
-    | { id: string; name: string }
-    | null
-  >(null);
+  const [uploadingImg, setUploadingImg] = useState(false);
+  const [useCustomUnit, setUseCustomUnit] = useState(false);
+  const [customUnit, setCustomUnit] = useState("");
+  const fileRef = useRef<HTMLInputElement>(null);
 
-  const cat = categories.find((c) => c.slug === categorySlug) ?? staticCategories[0];
+  const cat = SERVICE_CATEGORIES.find(c => c.slug === categorySlug) ?? SERVICE_CATEGORIES[0];
+  const serviceEntry = cat.services.find(s => s.service === subcategory) ?? cat.services[0];
+  const activeUnit = useCustomUnit && customUnit.trim() ? customUnit.trim() : serviceEntry.unit;
 
-  const doInsert = async () => {
+  const handleCatChange = (slug: string) => {
+    setCategorySlug(slug);
+    const newCat = SERVICE_CATEGORIES.find(c => c.slug === slug) ?? SERVICE_CATEGORIES[0];
+    setSubcategory(newCat.services[0].service);
+    setUseCustomUnit(false);
+    setCustomUnit("");
+  };
+
+  const handleImagePick = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    if (!files.length || !user) return;
+    if (images.length + files.length > 5) { toast.error("Max 5 images"); return; }
+    setUploadingImg(true);
+    try {
+      const urls = await Promise.all(files.map(f => uploadMedia(user.id, f, "service-images")));
+      setImages(prev => [...prev, ...urls]);
+    } catch { toast.error("Image upload failed"); }
+    finally { setUploadingImg(false); if (fileRef.current) fileRef.current.value = ""; }
+  };
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!user) return;
+    if (!name.trim()) { toast.error("Service name is required"); return; }
+    if (images.length < 1) { toast.error("Add at least 1 photo"); return; }
     setBusy(true);
-    const base = slugify(name) || "profile";
-    const slug = `${base}-${Math.random().toString(36).slice(2, 8)}`;
+    const slug = `${slugify(name) || "profile"}-${Math.random().toString(36).slice(2, 8)}`;
     try {
       const { data } = await apiClient<{ data: { id: string; slug: string } }>(`/profiles/public`, {
-        method: 'POST',
+        method: "POST",
         body: JSON.stringify({
-          profile_type: profileType,
+          profile_type: "individual",
           slug,
           name: name.trim(),
           category_slug: categorySlug,
@@ -60,169 +92,219 @@ function NewProfile() {
           district: district || null,
           town: town || null,
           bio: bio || "",
-          phone: phone || null,
-        })
+          price: contactForPrice ? null : (price ? Number(price) : null),
+          price_unit: contactForPrice ? "contact" : activeUnit,
+          images,
+          promo_plan: promoId === "free" ? null : promoId,
+        }),
       });
-      setBusy(false);
-      toast.success("Your service profile is live");
+      toast.success("Your service is live!");
       nav({ to: "/p/$slug", params: { slug: data.slug }, search: { welcome: "1" } as never });
     } catch (err) {
-      setBusy(false);
-      toast.error(err instanceof Error ? err.message : "Could not create profile");
-    }
+      toast.error(err instanceof Error ? err.message : "Could not create service");
+    } finally { setBusy(false); }
   };
-
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user) return;
-    if (!name.trim()) {
-      toast.error("Service name is required");
-      return;
-    }
-
-    // Light duplicate check: fetch all my profiles and filter
-    const normalized = name.trim().toLowerCase();
-    try {
-      const { data: myProfiles } = await apiClient<{ data: any[] }>(`/profiles/public/me`);
-      const existing = myProfiles?.filter(p => 
-        p.category_slug === categorySlug && 
-        p.name.toLowerCase().includes(normalized)
-      );
-
-      if (existing && existing.length > 0 && !duplicateWarning) {
-        setDuplicateWarning({ id: existing[0].id, name: existing[0].name });
-        return;
-      }
-    } catch (e) {
-      console.warn("Failed duplicate check", e);
-    }
-
-    await doInsert();
-  };
-
 
   return (
-    <>
-      <section className="mx-auto max-w-2xl px-4 py-6">
-        <h1 className="font-display text-2xl font-bold text-navy">List a new service</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Each service appears separately to customers. You can list as many services as you offer under one Tuungane account.
-        </p>
+    <div className="min-h-screen bg-gray-50">
+      {/* Fixed top bar */}
+      <div className="sticky top-0 z-30 flex items-center justify-between bg-white px-4 py-3 shadow-sm">
+        <button onClick={() => window.history.back()} className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-gray-100">
+          <ArrowLeft className="h-5 w-5 text-gray-700" />
+        </button>
+        <h1 className="text-base font-bold text-gray-900">List a service</h1>
+        <div className="w-9" />
+      </div>
 
-        {duplicateWarning && (
-          <div className="mt-5 rounded-2xl border border-orange/40 bg-orange/5 p-4 text-sm">
-            <p className="font-semibold text-navy">You may already have a similar service profile.</p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              We found an existing service called <span className="font-semibold text-navy">{duplicateWarning.name}</span> in the same category.
-            </p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => nav({ to: "/profiles/$id", params: { id: duplicateWarning.id } })}
-                className="rounded-xl border border-navy/20 bg-card px-3 py-1.5 text-xs font-semibold text-navy"
-              >
-                Edit existing
+      <form onSubmit={submit} className="mx-auto max-w-lg space-y-0 pb-10">
+
+        {/* SERVICE NAME */}
+        <Section>
+          <label className="block text-sm font-semibold text-gray-700">Service name *</label>
+          <input
+            value={name}
+            onChange={e => setName(e.target.value)}
+            placeholder="e.g. Genesis Car Wash"
+            maxLength={70}
+            className="mt-2 w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100"
+          />
+          <div className="mt-1 flex justify-end text-xs text-gray-400">{name.length}/70</div>
+        </Section>
+
+        {/* IMAGES */}
+        <Section>
+          <label className="block text-sm font-semibold text-gray-700">Photos <span className="font-normal text-gray-400">(add at least 2)</span></label>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {images.map((url, i) => (
+              <div key={i} className="relative h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-gray-200">
+                <img src={url} alt="" className="h-full w-full object-cover" />
+                <button type="button" onClick={() => setImages(imgs => imgs.filter((_, j) => j !== i))}
+                  className="absolute right-0.5 top-0.5 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-white">
+                  <X className="h-3 w-3" />
+                </button>
+              </div>
+            ))}
+            {images.length < 5 && (
+              <button type="button" onClick={() => fileRef.current?.click()}
+                className="flex h-20 w-20 shrink-0 flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-gray-300 bg-white text-gray-400 hover:border-orange-400 hover:text-orange-400 transition">
+                {uploadingImg ? <span className="text-xs">Uploadingâ€¦</span> : <><ImagePlus className="h-6 w-6" /><span className="text-[10px]">Add photo</span></>}
               </button>
-              <button
-                type="button"
-                onClick={doInsert}
-                disabled={busy}
-                className="rounded-xl bg-orange px-3 py-1.5 text-xs font-semibold text-orange-foreground disabled:opacity-50"
-              >
-                {busy ? "Creating…" : "Continue creating new"}
-              </button>
-              <button
-                type="button"
-                onClick={() => setDuplicateWarning(null)}
-                className="rounded-xl px-3 py-1.5 text-xs font-medium text-navy/70"
-              >
-                Cancel
-              </button>
+            )}
+            <input ref={fileRef} type="file" accept="image/*" multiple className="hidden" onChange={handleImagePick} />
+          </div>
+          <p className="mt-1.5 text-[11px] text-gray-400">First photo is the cover. JPG, PNG, WEBP Â· max 5MB each.</p>
+        </Section>
+
+        {/* CATEGORY + SUBCATEGORY */}
+        <Section>
+          <label className="block text-sm font-semibold text-gray-700">Category *</label>
+          <select value={categorySlug} onChange={e => handleCatChange(e.target.value)}
+            className="mt-2 w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:border-orange-400">
+            {SERVICE_CATEGORIES.map(c => <option key={c.slug} value={c.slug}>{c.icon} {c.name}</option>)}
+          </select>
+
+          <label className="mt-3 block text-sm font-semibold text-gray-700">Sub-category *</label>
+          <select value={subcategory} onChange={e => setSubcategory(e.target.value)}
+            className="mt-2 w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:border-orange-400">
+            {cat.services.map(s => <option key={s.service} value={s.service}>{s.service}</option>)}
+          </select>
+
+          {serviceEntry && (
+            <div className="mt-2 space-y-2">
+              <div className="flex items-center justify-between">
+                <p className="flex items-center gap-1 text-[11px] text-gray-400">
+                  <span className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-orange-100 text-orange-600 text-[9px] font-bold">U</span>
+                  Measurement: <span className="font-medium text-gray-600">{useCustomUnit ? (customUnit || "…") : serviceEntry.unit}</span>
+                </p>
+                <button
+                  type="button"
+                  onClick={() => { setUseCustomUnit(v => !v); setCustomUnit(""); }}
+                  className={`text-[11px] font-semibold transition ${useCustomUnit ? "text-orange-500" : "text-gray-400 hover:text-orange-500"}`}
+                >
+                  {useCustomUnit ? "← Use default" : "+ Custom unit"}
+                </button>
+              </div>
+              {useCustomUnit && (
+                <input
+                  type="text"
+                  value={customUnit}
+                  onChange={e => setCustomUnit(e.target.value)}
+                  placeholder={`e.g. ${serviceEntry.unit}`}
+                  maxLength={40}
+                  autoFocus
+                  className="w-full rounded-xl border border-orange-300 bg-orange-50 px-3 py-2 text-sm outline-none focus:border-orange-400 focus:ring-2 focus:ring-orange-100 placeholder:text-gray-400"
+                />
+              )}
             </div>
+          )}
+        </Section>
+
+        {/* PRICE */}
+        <Section>
+          <label className="block text-sm font-semibold text-gray-700">Pricing</label>
+          <div className="mt-2 flex gap-3">
+            <button type="button" onClick={() => setContactForPrice(false)}
+              className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition ${!contactForPrice ? "border-orange-400 bg-orange-50 text-orange-600" : "border-gray-200 text-gray-500"}`}>
+              <span className={`h-4 w-4 rounded-full border-2 ${!contactForPrice ? "border-orange-500 bg-orange-500" : "border-gray-400"}`} />
+              Specify price
+            </button>
+            <button type="button" onClick={() => setContactForPrice(true)}
+              className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition ${contactForPrice ? "border-orange-400 bg-orange-50 text-orange-600" : "border-gray-200 text-gray-500"}`}>
+              <span className={`h-4 w-4 rounded-full border-2 ${contactForPrice ? "border-orange-500 bg-orange-500" : "border-gray-400"}`} />
+              Contact for price
+            </button>
           </div>
-        )}
 
-        <form onSubmit={submit} className="mt-5 space-y-4 rounded-2xl border border-border bg-card p-5">
-
-          <div>
-            <Field label="Service name" value={name} onChange={setName} placeholder="e.g. Genesis Car Wash" />
-            <p className="mt-1 text-[11px] text-muted-foreground">
-              This is the name customers will see on your service card. You can use your personal name, a service name, or a trading name.
-            </p>
-          </div>
-
-
-          <div className="grid grid-cols-2 gap-2">
-            <div>
-              <label className="text-xs font-medium text-navy">Category</label>
-              <select
-                value={categorySlug}
-                onChange={(e) => {
-                  setCategorySlug(e.target.value);
-                  setSubcategory(categories.find((c) => c.slug === e.target.value)?.subcategories[0] ?? "");
-                }}
-                className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm"
-              >
-                {categories.map((c) => (
-                  <option key={c.slug} value={c.slug}>{c.name}</option>
-                ))}
-              </select>
+          {!contactForPrice && (
+            <div className="mt-3 flex items-center gap-2">
+              <div className="relative flex-1">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-semibold text-gray-500">UGX</span>
+                <input type="number" value={price} onChange={e => setPrice(e.target.value)} placeholder="0"
+                  className="w-full rounded-xl border border-gray-200 bg-white py-3 pl-14 pr-4 text-sm outline-none focus:border-orange-400" />
+              </div>
+              <div className="shrink-0 max-w-[130px] truncate rounded-xl border border-gray-200 bg-white px-3 py-3 text-sm text-gray-600">
+                {activeUnit}
+              </div>
             </div>
-            <div>
-              <label className="text-xs font-medium text-navy">Sub-category</label>
-              <select
-                value={subcategory}
-                onChange={(e) => setSubcategory(e.target.value)}
-                className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm"
-              >
-                {cat.subcategories.map((s) => <option key={s}>{s}</option>)}
-              </select>
-            </div>
-          </div>
+          )}
+        </Section>
 
-          <div className="grid grid-cols-2 gap-2">
-            <Field label="District" value={district} onChange={setDistrict} />
-            <Field label="Town" value={town} onChange={setTown} />
-          </div>
-
-          <div>
-            <label className="text-xs font-medium text-navy">Short description</label>
-            <textarea
-              value={bio}
-              onChange={(e) => setBio(e.target.value)}
-              rows={3}
-              className="mt-1 w-full resize-none rounded-xl border border-border px-3 py-2 text-sm outline-none focus:border-orange"
-              placeholder="What does this profile offer?"
+        {/* LOCATION */}
+        <Section>
+          <label className="block text-sm font-semibold text-gray-700">Location</label>
+          <div className="mt-2 grid grid-cols-2 gap-3">
+            <LocationAutocomplete
+              label="District"
+              value={district}
+              onChange={v => { setDistrict(v); setTown(""); }}
+              suggestions={filterDistricts(district)}
+              placeholder="e.g. Kampala"
+            />
+            <LocationAutocomplete
+              label="Town / Area"
+              value={town}
+              onChange={setTown}
+              suggestions={filterTowns(district, town)}
+              placeholder={district ? "Type town…" : "Select district first"}
+              disabled={!district.trim()}
             />
           </div>
+        </Section>
 
-          <Field label="Phone (optional)" value={phone} onChange={setPhone} />
+        {/* DESCRIPTION */}
+        <Section>
+          <label className="block text-sm font-semibold text-gray-700">Description</label>
+          <textarea value={bio} onChange={e => setBio(e.target.value)} rows={4} maxLength={850}
+            placeholder="Describe what you offer, your experience, and what makes you stand outâ€¦"
+            className="mt-2 w-full resize-none rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:border-orange-400" />
+          <div className="mt-1 flex justify-end text-xs text-gray-400">{bio.length}/850</div>
+        </Section>
 
-          <div className="flex justify-end gap-2 pt-1">
-            <button type="button" onClick={() => nav({ to: "/dashboard" })} className="rounded-xl border border-border px-4 py-2 text-sm font-semibold text-navy">
-              Cancel
-            </button>
-            <button disabled={busy} className="rounded-xl bg-orange px-4 py-2.5 text-sm font-semibold text-orange-foreground disabled:opacity-50">
-              {busy ? "Creating…" : "Create service"}
-            </button>
-
+        {/* PROMOTION */}
+        <Section>
+          <div className="flex items-center gap-2">
+            <Zap className="h-4 w-4 text-orange-500" />
+            <span className="text-sm font-semibold text-gray-700">Choose a promotion</span>
           </div>
-        </form>
-      </section>
-    </>
+          <p className="mt-0.5 text-xs text-gray-400">Credits balance: <span className="font-semibold text-gray-700">{balance ?? 0}</span></p>
+          <div className="mt-3 space-y-2">
+            {PROMO_PLANS.map(plan => (
+              <button type="button" key={plan.id} onClick={() => setPromoId(plan.id)}
+                className={`flex w-full items-center justify-between rounded-2xl border px-4 py-3.5 text-left transition ${
+                  promoId === plan.id
+                    ? "border-orange-400 bg-orange-50 ring-1 ring-orange-300"
+                    : "border-gray-200 bg-white hover:border-orange-200"
+                }`}>
+                <div className="flex items-center gap-3">
+                  <span className={`flex h-5 w-5 items-center justify-center rounded-full border-2 transition ${promoId === plan.id ? "border-orange-500 bg-orange-500" : "border-gray-300"}`}>
+                    {promoId === plan.id && <CheckCircle2 className="h-3.5 w-3.5 text-white" />}
+                  </span>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-800">{plan.label}</p>
+                    <p className="text-xs text-gray-400">{plan.sub}</p>
+                  </div>
+                </div>
+                <span className={`rounded-full px-3 py-1 text-xs font-bold ${plan.creditsPerDay === 0 ? "bg-green-100 text-green-700" : "bg-orange-100 text-orange-700"}`}>
+                  {plan.creditsPerDay === 0 ? "Free" : `${plan.creditsPerDay} credits/day`}
+                </span>
+              </button>
+            ))}
+          </div>
+        </Section>
+
+        {/* SUBMIT */}
+        <div className="px-4 pt-2">
+          <button disabled={busy || uploadingImg}
+            className="w-full rounded-2xl bg-orange-500 py-4 text-base font-bold text-white shadow-lg shadow-orange-200 transition hover:brightness-105 disabled:opacity-50">
+            {busy ? "Creatingâ€¦" : "List my service"}
+          </button>
+        </div>
+
+      </form>
+    </div>
   );
 }
 
-function Field({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string }) {
-  return (
-    <div>
-      <label className="text-xs font-medium text-navy">{label}</label>
-      <input
-        value={value}
-        placeholder={placeholder}
-        onChange={(e) => onChange(e.target.value)}
-        className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-orange"
-      />
-    </div>
-  );
+function Section({ children }: { children: React.ReactNode }) {
+  return <div className="mx-4 mt-4 rounded-2xl bg-white p-4 shadow-sm">{children}</div>;
 }

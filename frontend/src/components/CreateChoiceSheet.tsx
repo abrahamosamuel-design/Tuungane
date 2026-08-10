@@ -32,31 +32,31 @@ export function CreateChoiceSheet({
 
         <div className="mt-4 space-y-3">
           <Link
-            to={CTA.createRequest.href}
+            to={listSkillHref(user) as never}
             onClick={onClose}
             className="flex items-start gap-3 rounded-2xl border border-orange/30 bg-orange/5 p-4 transition hover:border-orange"
           >
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-orange text-white">
-              <ClipboardList className="h-5 w-5" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="font-display text-base font-bold text-navy">Post a Service Request</p>
-              <p className="text-xs text-foreground/75">For people looking for a service.</p>
-            </div>
-            <ArrowRight className="mt-2 h-5 w-5 shrink-0 text-orange" />
-          </Link>
-
-          <Link
-            to={listSkillHref(user) as never}
-            onClick={onClose}
-            className="flex items-start gap-3 rounded-2xl border border-green/30 bg-green/5 p-4 transition hover:border-green"
-          >
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-green text-white">
               <Sparkles className="h-5 w-5" />
             </div>
             <div className="min-w-0 flex-1">
               <p className="font-display text-base font-bold text-navy">List Your Service</p>
               <p className="text-xs text-foreground/75">For people who want to offer a service.</p>
+            </div>
+            <ArrowRight className="mt-2 h-5 w-5 shrink-0 text-orange" />
+          </Link>
+
+          <Link
+            to={CTA.createRequest.href}
+            onClick={onClose}
+            className="flex items-start gap-3 rounded-2xl border border-green/30 bg-green/5 p-4 transition hover:border-green"
+          >
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-green text-white">
+              <ClipboardList className="h-5 w-5" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="font-display text-base font-bold text-navy">Post a Service Request</p>
+              <p className="text-xs text-foreground/75">For people looking for a service.</p>
             </div>
             <ArrowRight className="mt-2 h-5 w-5 shrink-0 text-green" />
           </Link>

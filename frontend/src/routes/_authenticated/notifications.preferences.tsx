@@ -28,6 +28,7 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/notifications/preferences")({
   head: () => ({ meta: [{ title: "Notification preferences — Tuungane" }] }),
+  staticData: { hideBottomNavOnMobile: true },
   component: NotificationPreferencesPage,
 });
 
@@ -152,13 +153,10 @@ function NotificationPreferencesPage() {
   return (
     <>
       <section className="mx-auto max-w-3xl px-4 py-6">
-        <Link to="/notifications" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-navy">
-          <ChevronLeft className="h-4 w-4" /> Back to notifications
+        <Link to="/settings" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-navy">
+          <ChevronLeft className="h-4 w-4" /> Back to settings
         </Link>
         <h1 className="mt-2 font-display text-2xl font-bold text-navy">Notification preferences</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Pick how you want to be alerted for each category. Toggle channels independently — in-app, email, and push.
-        </p>
 
         {/* Push enable/disable for this device */}
         <div className="mt-5 rounded-2xl border border-border bg-card p-4">

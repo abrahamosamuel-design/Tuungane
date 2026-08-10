@@ -1,5 +1,86 @@
 import { supabaseAdmin } from '../lib/supabaseClient.js';
 
+export const getServiceById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { data: service, error: serviceError } = await supabaseAdmin
+      .from('profile_services')
+      .select(`
+        *,
+        profile:public_profiles!profile_services_profile_id_fkey (
+          id, owner_id, name, avatar_url, verified,
+          town, district, area, slug
+        )
+      `)
+      .eq('id', id)
+      .single();
+
+    if (serviceError) throw serviceError;
+    
+    // Fetch associated media
+    const { data: media } = await supabaseAdmin
+      .from('service_media')
+      .select('*')
+      .eq('profile_id', service.profile_id); // Assuming media is linked to profile for now
+
+    res.json({ data: { ...service, media: media || [] } });
+  } catch (err) {
+    console.error('Error fetching service:', err);
+    res.status(500).json({ error: 'Failed to fetch service' });
+  }
+};
+
+export const getMyServices = async (req, res) => {
+  try {
+    const { data: services, error } = await supabaseAdmin
+      .from('profile_services')
+      .select(`
+        *,
+        profile:public_profiles!profile_services_profile_id_fkey (
+          id, name, avatar_url, slug
+        )
+      `)
+      .eq('profile.owner_id', req.user.id)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      // Supabase inner join filter syntax trick might fail if not properly used.
+      // Alternatively, query profiles first.
+      const { data: profiles } = await supabaseAdmin
+        .from('public_profiles')
+        .select('id, name, avatar_url, slug')
+        .eq('owner_id', req.user.id);
+        
+      if (!profiles || profiles.length === 0) {
+        return res.json({ data: [] });
+      }
+      
+      const profileIds = profiles.map(p => p.id);
+      const { data: userServices, error: servError } = await supabaseAdmin
+        .from('profile_services')
+        .select('*')
+        .in('profile_id', profileIds)
+        .order('created_at', { ascending: false });
+        
+      if (servError) throw servError;
+      
+      const enrichedServices = userServices.map(s => ({
+        ...s,
+        profile: profiles.find(p => p.id === s.profile_id)
+      }));
+      
+      return res.json({ data: enrichedServices });
+    }
+
+    // Filter out null profiles if inner join failed
+    const validServices = services.filter(s => s.profile);
+    res.json({ data: validServices });
+  } catch (err) {
+    console.error('Error fetching my services:', err);
+    res.status(500).json({ error: 'Failed to fetch my services' });
+  }
+};
+
 export const getProfileServices = async (req, res) => {
   try {
     const { profileId } = req.params;

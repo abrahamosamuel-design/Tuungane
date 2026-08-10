@@ -177,22 +177,33 @@ export function PostCard({ post, onChanged, userLoc }: Props) {
                 </p>
               </div>
             </Link>
-            <div className="flex flex-wrap items-center gap-1">
-              {userLoc && (
-                <NearYouBadge
-                  user={userLoc}
-                  target={{
-                    district: post.district ?? post.author?.district ?? null,
-                    town: post.town ?? post.author?.town ?? null,
-                    area: post.area ?? post.author?.area ?? null,
-                    latitude: post.latitude ?? post.author?.latitude ?? null,
-                    longitude: post.longitude ?? post.author?.longitude ?? null,
-                  } as TargetLocation}
-                />
+            <div className="flex flex-col items-end gap-1.5 sm:gap-2">
+              <div className="flex flex-wrap items-center justify-end gap-1">
+                {userLoc && (
+                  <NearYouBadge
+                    user={userLoc}
+                    target={{
+                      district: post.district ?? post.author?.district ?? null,
+                      town: post.town ?? post.author?.town ?? null,
+                      area: post.area ?? post.author?.area ?? null,
+                      latitude: post.latitude ?? post.author?.latitude ?? null,
+                      longitude: post.longitude ?? post.author?.longitude ?? null,
+                    } as TargetLocation}
+                  />
+                )}
+                {post.featured && <span className="rounded-full bg-orange/10 px-2 py-0.5 text-xs font-medium text-orange">Featured</span>}
+                {boosts.map((b) => <BoostBadge key={b.id} type={b.boost_type} />)}
+                {post.hidden && <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive">Hidden</span>}
+              </div>
+              {post.author?.is_provider && user?.id !== post.provider_user_id && (
+                <Link
+                  to="/requests/new"
+                  search={{ providerId: post.provider_user_id } as never}
+                  className="rounded-full bg-orange px-3 py-1.5 text-xs font-semibold text-orange-foreground shadow-sm hover:brightness-110"
+                >
+                  Request service
+                </Link>
               )}
-              {post.featured && <span className="rounded-full bg-orange/10 px-2 py-0.5 text-xs font-medium text-orange">Featured</span>}
-              {boosts.map((b) => <BoostBadge key={b.id} type={b.boost_type} />)}
-              {post.hidden && <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive">Hidden</span>}
             </div>
           </div>
         }

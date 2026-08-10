@@ -85,63 +85,81 @@ export function RequestsBrowsePage() {
   const radiusExpanded = radiusKm != null && userLoc && rankedItems.length === 0 && items.length > 0;
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
-      <section className="relative overflow-hidden bg-background pt-20 pb-4 md:pt-28 sm:pb-8 border-b border-border shadow-sm md:shadow-none">
+    <div className="flex flex-col min-h-screen bg-background flex-1 w-full min-w-0">
+      <section className="sticky top-14 z-30 bg-background/95 backdrop-blur-md pt-3 pb-3 md:pt-4 md:relative md:top-auto md:z-auto shadow-sm md:shadow-none">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h1 className="font-display text-2xl font-bold tracking-tight text-navy sm:text-4xl hidden md:block">
+                Service Requests
+              </h1>
+              <p className="mt-1 text-sm text-muted-foreground sm:text-lg hidden md:block">
+                Find jobs near you and send quotes.
+              </p>
+            </div>
+            <div className="flex w-full justify-center md:w-auto md:justify-end">
+              <div className="inline-flex rounded-full bg-muted p-1 shrink-0 shadow-sm">
+                <Link to="/services" className="rounded-full px-6 py-2 text-sm font-medium text-muted-foreground hover:text-navy transition-colors">Services</Link>
+                <Link to="/requests/browse" className="rounded-full max-md:bg-orange max-md:text-white md:bg-background px-6 py-2 text-sm font-semibold md:text-navy shadow-sm">Requests</Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="relative overflow-hidden bg-background pb-4 pt-3 md:pt-4 sm:pb-8 md:shadow-none">
         {/* Decorative background blur */}
         <div className="absolute inset-x-0 -top-40 -z-10 mx-auto h-[400px] w-full max-w-4xl rounded-[100%] bg-orange/5 blur-[100px]" />
         
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="mb-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <h1 className="font-display text-2xl font-bold tracking-tight text-navy sm:text-4xl">
-                Service Requests
-              </h1>
-              <p className="mt-1 text-sm text-muted-foreground sm:text-lg">
-                Find jobs near you and send quotes.
-              </p>
-            </div>
-            <div className="inline-flex rounded-full bg-muted p-1 shrink-0 self-start md:self-auto">
-              <Link to="/services" className="rounded-full px-6 py-2 text-sm font-medium text-muted-foreground hover:text-navy transition-colors">Services</Link>
-              <Link to="/requests/browse" className="rounded-full bg-background px-6 py-2 text-sm font-semibold text-navy shadow-sm">Requests</Link>
-            </div>
-          </div>
-
           <form
             onSubmit={(e) => {
               e.preventDefault();
               load();
             }}
-            className="flex flex-col gap-2 rounded-2xl border border-border bg-card p-3 shadow-md sm:flex-row sm:items-center md:rounded-full sm:p-2 md:shadow-sm"
+            className="flex flex-row items-center gap-2 rounded-full border border-border bg-card p-2 md:p-3 shadow-sm md:shadow-md"
           >
-            <div className="flex flex-1 items-center gap-2 rounded-xl bg-surface px-4 py-1 sm:bg-transparent">
-              <Search className="h-5 w-5 text-muted-foreground" />
+            <div className="flex flex-1 items-center gap-2 rounded-full bg-surface px-3 py-1 sm:bg-transparent min-w-0">
+              <Search className="h-5 w-5 text-muted-foreground shrink-0" />
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="What service do you need?"
-                className="w-full bg-transparent min-h-[44px] text-base outline-none placeholder:text-muted-foreground"
+                className="w-full min-w-0 bg-transparent min-h-[44px] text-base outline-none placeholder:text-muted-foreground"
               />
             </div>
             <div className="hidden h-8 w-px bg-border sm:block" />
-            <div className="flex flex-1 items-center gap-2 rounded-xl bg-surface px-4 py-1 sm:bg-transparent">
-              <MapPin className="h-5 w-5 text-muted-foreground" />
-              <input
+            
+            <div className="relative flex shrink-0 items-center justify-center rounded-full bg-surface focus-within:border-orange h-[52px] w-[52px] sm:h-auto sm:w-auto sm:flex-1 sm:px-4 sm:py-1 sm:bg-transparent">
+              <MapPin className="h-5 w-5 text-muted-foreground shrink-0 sm:mr-2" />
+              <select
                 value={loc}
                 onChange={(e) => setLoc(e.target.value)}
-                placeholder="Location (e.g. Entebbe)"
-                className="w-full bg-transparent min-h-[44px] text-base outline-none placeholder:text-muted-foreground"
-              />
+                className="absolute inset-0 h-full w-full opacity-0 cursor-pointer sm:relative sm:opacity-100 bg-transparent min-h-[44px] text-base outline-none text-foreground appearance-none"
+                title="Location"
+              >
+                <option value="">All Locations</option>
+                <option value="Kampala">Kampala</option>
+                <option value="Entebbe">Entebbe</option>
+                <option value="Wakiso">Wakiso</option>
+                <option value="Jinja">Jinja</option>
+                <option value="Gulu">Gulu</option>
+                <option value="Mbarara">Mbarara</option>
+                <option value="Mbale">Mbale</option>
+              </select>
             </div>
-            <button className="mt-2 w-full min-h-[44px] rounded-xl bg-navy px-6 py-2.5 text-base font-bold text-white transition hover:bg-navy/90 sm:mt-0 sm:w-auto md:rounded-full active:scale-[0.98]">
-              Search
+            
+            <button className="shrink-0 h-[52px] w-[52px] sm:h-auto sm:w-auto rounded-full bg-navy sm:px-6 flex items-center justify-center sm:py-2.5 text-base font-bold text-white transition hover:bg-navy/90 active:scale-[0.98]">
+              <Search className="h-5 w-5 sm:hidden" />
+              <span className="hidden sm:inline">Search</span>
             </button>
           </form>
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-4 sm:px-6 sm:py-6 lg:px-8 w-full flex-1">
+      <section className="mx-auto max-w-7xl px-4 py-4 sm:px-6 sm:py-6 lg:px-8 w-full flex-1 min-w-0">
         {/* Filter chips */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-hide snap-x">
+        <div className="-mx-4 flex items-center gap-2 overflow-x-auto px-4 pb-2 scrollbar-hide sm:mx-0 sm:px-0 after:content-[''] after:w-px after:shrink-0">
           {requestFilterChips
             .filter((c) => ["all", "urgent", "today", "week", "nearby"].includes(c.value))
             .map((c) => (
@@ -151,7 +169,7 @@ export function RequestsBrowsePage() {
             ))}
           <button
             onClick={() => setShowMoreFilters((s) => !s)}
-            className={`shrink-0 snap-start inline-flex min-h-[40px] items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-semibold transition active:scale-[0.98] ${
+            className={`shrink-0 inline-flex min-h-[40px] items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-semibold transition active:scale-[0.98] ${
               showMoreFilters ? "border-navy bg-navy text-navy-foreground shadow-sm" : "border-border bg-background text-muted-foreground hover:border-navy hover:text-navy"
             }`}
           >
@@ -228,7 +246,7 @@ export function RequestsBrowsePage() {
               />
             </div>
           )}
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 min-w-0 w-full">
             {rankedItems.map((r, idx) => (
               <Fragment key={r.id}>
                 <RequestCard r={r} userLoc={userLoc} currentUserId={user?.id ?? null} onEdit={() => setEditingRequest(r.id)} />
@@ -260,7 +278,7 @@ function Pill({ active, onClick, children }: { active: boolean; onClick: () => v
   return (
     <button
       onClick={onClick}
-      className={`shrink-0 snap-start min-h-[40px] rounded-full px-4 py-2 text-sm font-semibold transition active:scale-[0.98] ${
+      className={`shrink-0 min-h-[40px] rounded-full px-4 py-2 text-sm font-semibold transition active:scale-[0.98] ${
         active ? "bg-navy text-navy-foreground border border-navy shadow-sm" : "border border-border bg-background text-muted-foreground hover:border-navy hover:text-navy"
       }`}
     >

@@ -19,6 +19,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as FeedRouteImport } from './routes/feed'
 import { Route as ContactRouteImport } from './routes/contact'
+import { Route as ConfirmEmailRouteImport } from './routes/confirm-email'
 import { Route as BusinessesRouteImport } from './routes/businesses'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
@@ -28,6 +29,7 @@ import { Route as ProfilesIndexRouteImport } from './routes/profiles.index'
 import { Route as BusinessesIndexRouteImport } from './routes/businesses.index'
 import { Route as ServicesRequestsRouteImport } from './routes/services.requests'
 import { Route as ServicesSlugRouteImport } from './routes/services.$slug'
+import { Route as ServiceIdRouteImport } from './routes/service.$id'
 import { Route as RequestsBrowseRouteImport } from './routes/requests.browse'
 import { Route as ProvidersIdRouteImport } from './routes/providers.$id'
 import { Route as PostsIdRouteImport } from './routes/posts.$id'
@@ -109,6 +111,11 @@ const ContactRoute = ContactRouteImport.update({
   path: '/contact',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ConfirmEmailRoute = ConfirmEmailRouteImport.update({
+  id: '/confirm-email',
+  path: '/confirm-email',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BusinessesRoute = BusinessesRouteImport.update({
   id: '/businesses',
   path: '/businesses',
@@ -151,6 +158,11 @@ const ServicesRequestsRoute = ServicesRequestsRouteImport.update({
 const ServicesSlugRoute = ServicesSlugRouteImport.update({
   id: '/services/$slug',
   path: '/services/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ServiceIdRoute = ServiceIdRouteImport.update({
+  id: '/service/$id',
+  path: '/service/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RequestsBrowseRoute = RequestsBrowseRouteImport.update({
@@ -316,6 +328,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
   '/businesses': typeof BusinessesRouteWithChildren
+  '/confirm-email': typeof ConfirmEmailRoute
   '/contact': typeof ContactRoute
   '/feed': typeof FeedRoute
   '/forgot-password': typeof ForgotPasswordRoute
@@ -345,6 +358,7 @@ export interface FileRoutesByFullPath {
   '/posts/$id': typeof PostsIdRoute
   '/providers/$id': typeof ProvidersIdRoute
   '/requests/browse': typeof RequestsBrowseRoute
+  '/service/$id': typeof ServiceIdRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/services/requests': typeof ServicesRequestsRoute
   '/businesses/': typeof BusinessesIndexRoute
@@ -365,6 +379,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/confirm-email': typeof ConfirmEmailRoute
   '/contact': typeof ContactRoute
   '/feed': typeof FeedRoute
   '/forgot-password': typeof ForgotPasswordRoute
@@ -394,6 +409,7 @@ export interface FileRoutesByTo {
   '/posts/$id': typeof PostsIdRoute
   '/providers/$id': typeof ProvidersIdRoute
   '/requests/browse': typeof RequestsBrowseRoute
+  '/service/$id': typeof ServiceIdRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/services/requests': typeof ServicesRequestsRoute
   '/businesses': typeof BusinessesIndexRoute
@@ -417,6 +433,7 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/about': typeof AboutRoute
   '/businesses': typeof BusinessesRouteWithChildren
+  '/confirm-email': typeof ConfirmEmailRoute
   '/contact': typeof ContactRoute
   '/feed': typeof FeedRoute
   '/forgot-password': typeof ForgotPasswordRoute
@@ -446,6 +463,7 @@ export interface FileRoutesById {
   '/posts/$id': typeof PostsIdRoute
   '/providers/$id': typeof ProvidersIdRoute
   '/requests/browse': typeof RequestsBrowseRoute
+  '/service/$id': typeof ServiceIdRoute
   '/services/$slug': typeof ServicesSlugRoute
   '/services/requests': typeof ServicesRequestsRoute
   '/businesses/': typeof BusinessesIndexRoute
@@ -469,6 +487,7 @@ export interface FileRouteTypes {
     | '/'
     | '/about'
     | '/businesses'
+    | '/confirm-email'
     | '/contact'
     | '/feed'
     | '/forgot-password'
@@ -498,6 +517,7 @@ export interface FileRouteTypes {
     | '/posts/$id'
     | '/providers/$id'
     | '/requests/browse'
+    | '/service/$id'
     | '/services/$slug'
     | '/services/requests'
     | '/businesses/'
@@ -518,6 +538,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
+    | '/confirm-email'
     | '/contact'
     | '/feed'
     | '/forgot-password'
@@ -547,6 +568,7 @@ export interface FileRouteTypes {
     | '/posts/$id'
     | '/providers/$id'
     | '/requests/browse'
+    | '/service/$id'
     | '/services/$slug'
     | '/services/requests'
     | '/businesses'
@@ -569,6 +591,7 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/about'
     | '/businesses'
+    | '/confirm-email'
     | '/contact'
     | '/feed'
     | '/forgot-password'
@@ -598,6 +621,7 @@ export interface FileRouteTypes {
     | '/posts/$id'
     | '/providers/$id'
     | '/requests/browse'
+    | '/service/$id'
     | '/services/$slug'
     | '/services/requests'
     | '/businesses/'
@@ -621,6 +645,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AboutRoute: typeof AboutRoute
   BusinessesRoute: typeof BusinessesRouteWithChildren
+  ConfirmEmailRoute: typeof ConfirmEmailRoute
   ContactRoute: typeof ContactRoute
   FeedRoute: typeof FeedRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
@@ -637,6 +662,7 @@ export interface RootRouteChildren {
   PostsIdRoute: typeof PostsIdRoute
   ProvidersIdRoute: typeof ProvidersIdRoute
   RequestsBrowseRoute: typeof RequestsBrowseRoute
+  ServiceIdRoute: typeof ServiceIdRoute
   ServicesSlugRoute: typeof ServicesSlugRoute
   ServicesRequestsRoute: typeof ServicesRequestsRoute
   ProfilesIndexRoute: typeof ProfilesIndexRoute
@@ -716,6 +742,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/confirm-email': {
+      id: '/confirm-email'
+      path: '/confirm-email'
+      fullPath: '/confirm-email'
+      preLoaderRoute: typeof ConfirmEmailRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/businesses': {
       id: '/businesses'
       path: '/businesses'
@@ -777,6 +810,13 @@ declare module '@tanstack/react-router' {
       path: '/services/$slug'
       fullPath: '/services/$slug'
       preLoaderRoute: typeof ServicesSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/service/$id': {
+      id: '/service/$id'
+      path: '/service/$id'
+      fullPath: '/service/$id'
+      preLoaderRoute: typeof ServiceIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/requests/browse': {
@@ -1075,6 +1115,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AboutRoute: AboutRoute,
   BusinessesRoute: BusinessesRouteWithChildren,
+  ConfirmEmailRoute: ConfirmEmailRoute,
   ContactRoute: ContactRoute,
   FeedRoute: FeedRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
@@ -1091,6 +1132,7 @@ const rootRouteChildren: RootRouteChildren = {
   PostsIdRoute: PostsIdRoute,
   ProvidersIdRoute: ProvidersIdRoute,
   RequestsBrowseRoute: RequestsBrowseRoute,
+  ServiceIdRoute: ServiceIdRoute,
   ServicesSlugRoute: ServicesSlugRoute,
   ServicesRequestsRoute: ServicesRequestsRoute,
   ProfilesIndexRoute: ProfilesIndexRoute,

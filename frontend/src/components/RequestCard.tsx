@@ -82,7 +82,7 @@ export function RequestCard({
 
 
   return (
-    <article className="overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)] transition hover:border-orange/60">
+    <article className="min-w-0 overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)] transition hover:border-orange/60">
       {/* Header row — avatar / name / meta */}
       <div className="flex items-start gap-3 p-4 pb-2">
         <Link to="/requests/$id" params={{ id: r.id }} className="shrink-0">
@@ -169,14 +169,14 @@ export function RequestCard({
           </span>
         )}
         {(r.response_count ?? 0) === 0 && !isOwner && (
-          <span className="inline-flex items-center gap-1 rounded-full bg-green/10 px-2 py-0.5 text-[10px] font-semibold text-green">
-            <Sparkles className="h-3 w-3" /> Be among the first to respond
+          <span className="inline-flex items-center gap-1 rounded-full bg-green/10 px-2 py-0.5 text-[10px] font-semibold text-green min-w-0 max-w-full">
+            <Sparkles className="h-3 w-3 shrink-0" /> <span className="truncate">Be among the first to respond</span>
           </span>
         )}
       </div>
 
       {/* Action row */}
-      <div className={`mt-3 grid ${isOwner ? "grid-cols-[1fr_auto]" : "grid-cols-[1fr_auto_auto]"} items-stretch gap-2 border-t border-border bg-surface px-3 py-2.5 sm:px-4`}>
+      <div className={`mt-3 grid ${isOwner ? "grid-cols-[1fr_auto]" : "grid-cols-[1fr_auto_auto]"} items-stretch gap-2 border-t border-border bg-surface px-3 py-2.5 sm:px-4 min-w-0`}>
         {isOwner ? (
           <>
             <Link

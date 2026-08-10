@@ -133,7 +133,9 @@ declare module '@tanstack/react-router' {
   interface StaticDataRouteOption {
     hideFooter?: boolean;
     hideBottomNavOnMobileUnauth?: boolean;
+    hideBottomNavOnMobile?: boolean;
     hideHeaderOnMobile?: boolean;
+    hideHeader?: boolean;
   }
 }
 

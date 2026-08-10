@@ -11,6 +11,7 @@ import { PostCard, type PostRow } from "@/components/social/PostCard";
 import { OfficialPostCard } from "@/components/OfficialPostCard";
 import { useCategories } from "@/hooks/use-categories";
 import { formatSubcategory } from "@/lib/format-category";
+import { RequestCard, type RequestRowLite } from "@/components/RequestCard";
 
 import { postTypes, type PostTypeValue } from "@/data/postTypes";
 import type { OfficialAccountRow, OfficialPostRow } from "@/data/officialPostTypes";
@@ -58,6 +59,7 @@ function Feed() {
   
   const [officialPosts, setOfficialPosts] = useState<OfficialPostRow[]>([]);
   const [officialAccount, setOfficialAccount] = useState<OfficialAccountRow | null>(null);
+  const [requests, setRequests] = useState<RequestRowLite[]>([]);
   const [loading, setLoading] = useState(true);
   const { has: isBoostedPost } = useBoostedSet("post", ["feature_post", "promote_completed_work"]);
   const { has: isBoostedProvider } = useBoostedSet("provider", ["boost_profile", "feature_business_page"]);
@@ -70,8 +72,10 @@ function Feed() {
       if (category) searchParams.set("category", category);
       if (postType) searchParams.set("postType", postType);
       
-      const res = await apiClient<{ data: PostRow[] }>(`/feed/posts?${searchParams.toString()}`);
-      setPosts(res.data || []);
+      const postsData = res.data || [];
+      // Randomize posts array before setting state
+      const randomized = [...postsData].sort(() => Math.random() - 0.5);
+      setPosts(randomized);
     } catch (err) {
       console.error("Failed to load posts", err);
       setPosts([]);
@@ -107,9 +111,22 @@ function Feed() {
     }
   };
 
+  const loadRequests = async () => {
+    try {
+      const searchParams = new URLSearchParams();
+      if (category) searchParams.set("cat", category);
+      
+      const res = await apiClient<{ data: RequestRowLite[] }>(`/requests/browse?${searchParams.toString()}`);
+      setRequests(res.data || []);
+    } catch (err) {
+      console.error("Failed to load requests", err);
+      setRequests([]);
+    }
+  };
+
   const load = async () => {
     setLoading(true);
-    if (tab === "posts") { await Promise.all([loadPosts(), loadOfficial()]); }
+    if (tab === "posts") { await Promise.all([loadPosts(), loadOfficial(), loadProviders(), loadRequests()]); }
     else if (tab === "services") await loadProviders();
     setLoading(false);
   };
@@ -179,7 +196,73 @@ function Feed() {
                 {officialToShow.map((p) => <OfficialPostCard key={`op-${p.id}`} post={p} account={officialAccount} />)}
                 {filter !== "official" && (sortedPosts.length === 0 ? (
                   <Empty title="No posts yet" hint={filter === "following" ? "Follow providers to see their work here." : "Be the first to share work."} />
-                ) : sortedPosts.map((p) => <PostCard key={p.id} post={p} onChanged={load} userLoc={userLoc} />))}
+                ) : (() => {
+                  const mixedFeed = [];
+                  let serviceIndex = 0;
+                  let requestIndex = 0;
+                  let postsSinceInjection = 0;
+                  let injectionCount = 0;
+                  const injectionGaps = [3, 1, 4, 2, 4, 1, 3, 2];
+                  
+                  for (let i = 0; i < sortedPosts.length; i++) {
+                    mixedFeed.push(<PostCard key={sortedPosts[i].id} post={sortedPosts[i]} onChanged={load} userLoc={userLoc} />);
+                    postsSinceInjection++;
+                    
+                    const targetGap = injectionGaps[injectionCount % injectionGaps.length];
+                    if (postsSinceInjection >= targetGap) {
+                      const canInjectService = serviceIndex + 1 < providers.length;
+                      const canInjectRequest = requestIndex < requests.length;
+                      
+                      if (!canInjectService && !canInjectRequest) {
+                        continue; // Nothing left to inject
+                      }
+                      
+                      let shouldInjectService = false;
+                      if (canInjectService && canInjectRequest) {
+                        shouldInjectService = (injectionCount % 2 === 0);
+                      } else if (canInjectService) {
+                        shouldInjectService = true;
+                      } else {
+                        shouldInjectService = false;
+                      }
+                      
+                      if (shouldInjectService) {
+                        const p1 = providers[serviceIndex++];
+                        const p2 = providers[serviceIndex++];
+                        mixedFeed.push(
+                          <div key={`inject-srv-${i}`} className="mx-4 sm:mx-0 p-4 border rounded-2xl bg-orange/5 border-orange/20 my-4">
+                            <p className="mb-3 text-sm font-bold text-navy flex items-center gap-2"><Sparkles className="h-4 w-4 text-orange" /> Recommended Providers</p>
+                            <div className="grid grid-cols-2 gap-3">
+                              <Link to="/u/$id" params={{ id: p1.user_id }} className="block bg-card rounded-xl border border-border p-3 hover:border-orange transition">
+                                <img src={p1.profile?.avatar_url || avatar(p1.business_name || p1.profile?.full_name)} className="h-10 w-10 rounded-full mb-2 object-cover" />
+                                <p className="font-semibold text-xs text-navy line-clamp-1">{p1.business_name || p1.profile?.full_name}</p>
+                                <p className="text-[10px] text-muted-foreground">{p1.town}</p>
+                              </Link>
+                              <Link to="/u/$id" params={{ id: p2.user_id }} className="block bg-card rounded-xl border border-border p-3 hover:border-orange transition">
+                                <img src={p2.profile?.avatar_url || avatar(p2.business_name || p2.profile?.full_name)} className="h-10 w-10 rounded-full mb-2 object-cover" />
+                                <p className="font-semibold text-xs text-navy line-clamp-1">{p2.business_name || p2.profile?.full_name}</p>
+                                <p className="text-[10px] text-muted-foreground">{p2.town}</p>
+                              </Link>
+                            </div>
+                          </div>
+                        );
+                        postsSinceInjection = 0;
+                        injectionCount++;
+                      } else if (canInjectRequest) {
+                        const req = requests[requestIndex++];
+                        mixedFeed.push(
+                          <div key={`inject-req-${i}`} className="mx-4 sm:mx-0 my-4">
+                            <p className="mb-2 text-xs font-bold text-navy uppercase tracking-wider pl-1">Community Request</p>
+                            <RequestCard r={req} />
+                          </div>
+                        );
+                        postsSinceInjection = 0;
+                        injectionCount++;
+                      }
+                    }
+                  }
+                  return mixedFeed;
+                })())}
                 {filter === "official" && officialToShow.length === 0 && (
                   <Empty title="No official posts yet" hint="Tuungane Official will post curated updates here soon." />
                 )}

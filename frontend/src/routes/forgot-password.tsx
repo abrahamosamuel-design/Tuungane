@@ -24,6 +24,7 @@ export const Route = createFileRoute("/forgot-password")({
   }),
   staticData: {
     hideHeaderOnMobile: true,
+    hideHeader: true,
     hideFooter: true,
     hideBottomNavOnMobileUnauth: true,
   },

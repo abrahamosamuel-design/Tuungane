@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 
 import { apiClient } from "@/lib/api";
@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { useUserLocation } from "@/hooks/use-user-location";
 import { toast } from "sonner";
-import { MapPin, Loader2, User, Building2 } from "lucide-react";
+import { MapPin, Loader2, User, Building2, ArrowLeft } from "lucide-react";
 import { AreaAutocomplete } from "@/components/AreaAutocomplete";
 import { MapPicker } from "@/components/MapPicker";
 import { findDistrictBounds, type Bounds } from "@/lib/geocoding";
@@ -14,11 +14,13 @@ import { organisationTypes } from "@/data/organisationTypes";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({ meta: [{ title: "Settings — Tuungane" }] }),
+  staticData: { hideBottomNavOnMobile: true, hideHeaderOnMobile: true },
   component: SettingsPage,
 });
 
 function SettingsPage() {
   const { user, signOut } = useAuth();
+  const router = useRouter();
   const [fullName, setFullName] = useState<string>("");
   const [isProvider, setIsProvider] = useState(false);
   const [loaded, setLoaded] = useState(false);
@@ -125,8 +127,24 @@ function SettingsPage() {
 
   return (
     <>
-      <section className="mx-auto max-w-2xl px-4 py-6">
-        <div className="flex items-center justify-between">
+      <div className="md:hidden sticky top-0 z-50 flex h-14 items-center justify-between border-b border-border bg-background/95 px-4 backdrop-blur-md">
+        <div className="flex items-center gap-3">
+          <button onClick={() => router.history.back()} className="flex h-9 w-9 items-center justify-center rounded-full bg-muted text-navy transition-colors hover:bg-orange/20 hover:text-orange">
+            <ArrowLeft className="h-5 w-5" />
+          </button>
+          <span className="font-display text-lg font-bold text-navy">Settings</span>
+        </div>
+        <button
+          onClick={saveAll}
+          disabled={!dirty || busy}
+          className="inline-flex items-center gap-2 rounded-full bg-orange px-3 py-1.5 text-xs font-semibold text-orange-foreground shadow-sm transition hover:brightness-110 disabled:opacity-50"
+        >
+          {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : "Save"}
+        </button>
+      </div>
+
+      <section className="mx-auto max-w-2xl px-4 py-6 md:py-8">
+        <div className="hidden md:flex items-center justify-between mb-6">
           <div>
             <h1 className="font-display text-2xl font-bold text-navy">Settings</h1>
             <p className="mt-1 text-sm text-muted-foreground">Manage your account and preferences.</p>
@@ -158,10 +176,12 @@ function SettingsPage() {
 
 
         <Section title="Notifications">
-          <Toggle label="Request responses" checked={notif.requests} onChange={(v) => { const next = { ...notif, requests: v }; setNotif(next); checkDirty({ notif: next }); }} />
-          <Toggle label="Messages" checked={notif.messages} onChange={(v) => { const next = { ...notif, messages: v }; setNotif(next); checkDirty({ notif: next }); }} />
-          <Toggle label="Credit updates" checked={notif.credits} onChange={(v) => { const next = { ...notif, credits: v }; setNotif(next); checkDirty({ notif: next }); }} />
-          <Toggle label="Official Tuungane updates" checked={notif.official} onChange={(v) => { const next = { ...notif, official: v }; setNotif(next); checkDirty({ notif: next }); }} />
+          <p className="mb-3 text-sm text-muted-foreground">
+            Manage your email, push, and in-app notification preferences.
+          </p>
+          <Link to="/notifications/preferences" className="inline-flex rounded-full border border-border bg-card px-4 py-2 text-sm font-semibold text-navy transition-colors hover:border-orange">
+            Manage Notification Preferences
+          </Link>
         </Section>
 
         <Section title="Privacy & contact">

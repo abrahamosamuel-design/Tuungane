@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/use-auth";
 export function LandingHero() {
   const { user } = useAuth();
   return (
-    <section className="relative w-full overflow-hidden bg-navy pt-24 pb-48 lg:pt-32 lg:pb-56 xl:pt-40 xl:pb-64">
+    <section className="relative w-full overflow-hidden bg-navy pt-10 pb-48 lg:pt-16 lg:pb-56 xl:pt-24 xl:pb-64">
       {/* Background Image */}
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-gradient-to-r from-navy via-navy/90 to-transparent z-10" />

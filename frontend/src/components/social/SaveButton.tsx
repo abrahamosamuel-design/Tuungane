@@ -61,7 +61,7 @@ export function SaveButton({ providerUserId, variant = "icon" }: { providerUserI
     );
   }
   return (
-    <button onClick={toggle} disabled={busy} title={saved ? "Saved" : "Save provider"} className={`inline-flex items-center justify-center rounded-full border p-2 transition ${saved ? "border-orange bg-orange/10 text-orange" : "border-border text-muted-foreground hover:border-orange hover:text-orange"}`}>
+    <button onClick={toggle} disabled={busy} data-icon-only={true} title={saved ? "Saved" : "Save provider"} className={`inline-flex aspect-square h-9 w-9 shrink-0 items-center justify-center rounded-full border p-0 transition ${saved ? "border-orange bg-orange/10 text-orange" : "border-border text-muted-foreground hover:border-orange hover:text-orange"}`}>
       <Bookmark className={`h-4 w-4 ${saved ? "fill-orange" : ""}`} />
     </button>
   );

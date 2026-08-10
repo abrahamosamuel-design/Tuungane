@@ -93,6 +93,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (typeof window !== "undefined") {
         localStorage.removeItem(REMEMBER_KEY);
         sessionStorage.removeItem(SESSION_ACTIVE_KEY);
+        window.location.href = "/";
       }
     },
   }), [user, session, loading, roles]);

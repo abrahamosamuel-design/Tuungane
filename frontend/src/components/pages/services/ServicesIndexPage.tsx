@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Search, MapPin, BadgeCheck, Wrench, Sparkles, Building2, Scissors, Truck, Car, GraduationCap, Camera, ChefHat, Laptop, HeartPulse, Sprout, MoreHorizontal, ShieldCheck, ChevronRight, Star, ClipboardList } from "lucide-react";
+import { Search, MapPin, BadgeCheck, Wrench, Sparkles, Building2, Scissors, Truck, Car, GraduationCap, Camera, ChefHat, Laptop, HeartPulse, Sprout, MoreHorizontal, ShieldCheck, ChevronRight, Star, ClipboardList, Bell, Heart, Phone, MessageCircle, ArrowLeft } from "lucide-react";
 
 import { categories } from "@/data/categories";
 import { apiClient } from "@/lib/api";
@@ -23,6 +23,8 @@ import { MediaGrid } from "@/components/feed/MediaGrid";
 import { ExpandableText } from "@/components/feed/ExpandableText";
 import { PriceGuideChip } from "@/components/PriceGuide";
 import type { PriceType } from "@/lib/price-guide";
+import { MobileSearchBar } from "@/components/MobileSearchBar";
+import { Logo } from "@/components/Logo";
 
 const iconMap: Record<string, any> = { Wrench, Sparkles, Building2, Scissors, Truck, Car, GraduationCap, Camera, ChefHat, Laptop, HeartPulse, Sprout, MoreHorizontal };
 
@@ -178,40 +180,50 @@ export function ServicesIndexPage({ initialSort }: { initialSort?: "recent" }) {
     el?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
+  const isSearching = q.length > 0 || loc.length > 0 || selectedCategory.length > 0;
+
   return (
-    <div className="flex flex-col min-h-screen bg-background">
-      {/* SECTION 1: SEARCH & FILTER BAR */}
-      <section className="sticky top-0 z-30 border-b border-border bg-surface/95 backdrop-blur-md pb-4 pt-20 md:pt-28 md:relative md:top-auto md:z-auto sm:pb-6 shadow-sm md:shadow-none">
+    <div className="flex flex-col min-h-screen bg-background flex-1 w-full min-w-0">
+      {/* SECTION 1: HEADER & TOGGLE (STICKY) */}
+      <section className="hidden md:block sticky top-14 z-30 bg-surface/95 backdrop-blur-md pb-3 pt-3 md:pt-4 md:relative md:top-auto md:z-auto shadow-sm md:shadow-none">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row md:items-start lg:items-center justify-between gap-4 mb-4 md:mb-0">
+          <div className="flex flex-col md:flex-row md:items-start lg:items-center justify-between gap-4">
             <div>
               <h1 className="font-display text-2xl font-bold leading-tight text-navy sm:text-4xl hidden md:block">Find services near you</h1>
               <p className="mt-1 text-sm text-muted-foreground sm:text-lg hidden md:block">Search by service, skill, or location.</p>
             </div>
-            <div className="inline-flex rounded-full bg-muted p-1 shrink-0 self-start md:self-auto">
-              <Link to="/services" className="rounded-full bg-background px-6 py-2 text-sm font-semibold text-navy shadow-sm">Services</Link>
-              <Link to="/requests/browse" className="rounded-full px-6 py-2 text-sm font-medium text-muted-foreground hover:text-navy transition-colors">Requests</Link>
+            <div className="flex w-full justify-center md:w-auto md:justify-end">
+              <div className="inline-flex rounded-full bg-muted p-1 shrink-0 shadow-sm">
+                <Link to="/services" className="rounded-full max-md:bg-orange max-md:text-white md:bg-background px-6 py-2 text-sm font-semibold md:text-navy shadow-sm">Services</Link>
+                <Link to="/requests/browse" className="rounded-full px-6 py-2 text-sm font-medium text-muted-foreground hover:text-navy transition-colors">Requests</Link>
+              </div>
             </div>
           </div>
+        </div>
+      </section>
 
-          <div className="mt-0 md:mt-4 rounded-2xl border border-border bg-card p-2 md:p-3 shadow-sm md:shadow-md">
-            <div className="flex flex-col md:flex-row md:items-center gap-2">
-              <div className="flex flex-1 items-center gap-2 rounded-xl bg-surface px-4 py-1">
-                <Search className="h-5 w-5 text-muted-foreground" />
+      {/* SECTION 1.5: SEARCH BAR (NOT STICKY) */}
+      <section className="hidden md:block bg-surface/95 pb-4 pt-3 sm:pb-6 md:pt-4 md:shadow-none">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="rounded-full border border-border bg-card p-2 md:p-3 shadow-sm md:shadow-md">
+            <div className="flex flex-row items-center gap-2">
+              <div className="flex flex-1 items-center gap-2 rounded-full bg-surface px-3 py-1 min-w-0">
+                <Search className="h-5 w-5 text-muted-foreground shrink-0" />
                 <input 
                   value={q} 
                   onChange={(e) => setQ(e.target.value)} 
                   placeholder="What service do you need?" 
-                  className="w-full bg-transparent py-2.5 text-base outline-none placeholder:text-muted-foreground min-h-[44px]" 
+                  className="w-full min-w-0 bg-transparent py-2.5 text-base outline-none placeholder:text-muted-foreground min-h-[44px]" 
                 />
               </div>
 
-              <div className="flex items-center gap-2 rounded-xl bg-surface px-4 py-1 flex-1 md:flex-none md:w-48 lg:w-64">
-                <Wrench className="h-5 w-5 shrink-0 text-muted-foreground" />
+              <div className="relative flex shrink-0 items-center justify-center rounded-full bg-surface focus-within:border-orange h-[52px] w-[52px] md:h-auto md:w-auto md:flex-none md:w-48 lg:w-64 md:px-4 md:py-1">
+                <Wrench className="h-5 w-5 shrink-0 text-muted-foreground md:mr-2" />
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="w-full bg-transparent py-2.5 text-base outline-none text-foreground min-h-[44px] appearance-none"
+                  className="absolute inset-0 h-full w-full opacity-0 cursor-pointer md:relative md:opacity-100 bg-transparent py-2.5 text-base outline-none text-foreground min-h-[44px] appearance-none"
+                  title="Category"
                 >
                   <option value="">All Categories</option>
                   {(dbCats ?? categories).map(c => (
@@ -220,46 +232,88 @@ export function ServicesIndexPage({ initialSort }: { initialSort?: "recent" }) {
                 </select>
               </div>
 
-              <div className="flex items-center gap-2 rounded-xl bg-surface px-4 py-1 flex-1 md:flex-none md:w-48 lg:w-64">
-                <MapPin className="h-5 w-5 shrink-0 text-muted-foreground" />
-                <input
+              <div className="relative flex shrink-0 items-center justify-center rounded-full bg-surface focus-within:border-orange h-[52px] w-[52px] md:h-auto md:w-auto md:flex-none md:w-48 lg:w-64 md:px-4 md:py-1">
+                <MapPin className="h-5 w-5 shrink-0 text-muted-foreground md:mr-2" />
+                <select
                   value={loc}
                   onChange={(e) => setLoc(e.target.value)}
-                  placeholder={userLoc?.town ? `Near: ${userLoc.town}` : "Location"}
-                  className="w-full bg-transparent py-2.5 text-base outline-none placeholder:text-muted-foreground min-h-[44px]"
-                />
+                  className="absolute inset-0 h-full w-full opacity-0 cursor-pointer md:relative md:opacity-100 bg-transparent py-2.5 text-base outline-none text-foreground min-h-[44px] appearance-none"
+                  title="Location"
+                >
+                  <option value="">All Locations</option>
+                  <option value="Kampala">Kampala</option>
+                  <option value="Entebbe">Entebbe</option>
+                  <option value="Wakiso">Wakiso</option>
+                  <option value="Jinja">Jinja</option>
+                  <option value="Gulu">Gulu</option>
+                  <option value="Mbarara">Mbarara</option>
+                  <option value="Mbale">Mbale</option>
+                </select>
               </div>
               
               <button
                 onClick={() => document.getElementById("providers-section")?.scrollIntoView({ behavior: "smooth" })}
-                className="w-full md:w-auto shrink-0 rounded-xl bg-orange px-6 py-3 md:py-2.5 text-base md:text-sm font-bold text-orange-foreground transition hover:brightness-110 min-h-[44px] active:scale-[0.98]"
+                className="shrink-0 rounded-full bg-orange md:px-6 h-[52px] w-[52px] md:h-auto md:w-auto flex items-center justify-center py-3 md:py-2.5 text-base md:text-sm font-bold text-white transition hover:brightness-110 active:scale-[0.98]"
               >
-                Search
+                <Search className="h-5 w-5 md:hidden" />
+                <span className="hidden md:inline">Search</span>
               </button>
             </div>
           </div>
         </div>
       </section>
 
-      {/* SECTION 2: SERVICE PROVIDERS GRID */}
-      <section id="providers-section" className="pb-32 pt-6 sm:pb-24 sm:pt-8">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
-            <h2 className="font-display text-xl font-bold text-navy sm:text-3xl">Service providers on Tuungane</h2>
-            <span className="text-sm font-medium text-muted-foreground">{realFiltered.length} {realFiltered.length === 1 ? "provider" : "providers"}</span>
+      {/* SECTION 2: SERVICE PROVIDERS GRID OR MOBILE CATEGORIES */}
+      <section id="providers-section" className={`pb-32 pt-2 sm:pb-24 sm:pt-8 ${!isSearching ? 'max-md:pt-0' : ''}`}>
+        <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
+          
+          {/* MOBILE DEFAULT: CATEGORIES LIST */}
+          <div className={`md:hidden ${isSearching ? 'hidden' : 'block'}`}>
+            <MobileSearchBar placeholder="Search friend services" value={q} onChange={(e) => setQ(e.target.value)} />
+            <h2 className="font-display text-xl font-bold text-navy mb-4 px-6 pt-2">Services</h2>
+            <div className="flex flex-col gap-4 px-6 pb-6">
+              {(dbCats ?? categories).map((c) => {
+                const Icon = iconMap[c.icon] || Sparkles;
+                return (
+                  <button
+                    key={c.slug}
+                    onClick={() => {
+                      setSelectedCategory(c.slug);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    className="flex items-center gap-4 rounded-[24px] border border-border/30 bg-white p-5 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.06)] transition-transform hover:-translate-y-0.5 active:scale-[0.98] text-left"
+                  >
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-slate-100 text-navy">
+                      <Icon className="h-6 w-6" />
+                    </div>
+                    <div className="flex flex-1 flex-col gap-0.5">
+                      <span className="text-[15px] font-bold text-navy">{c.name}</span>
+                    </div>
+                    <ChevronRight className="h-5 w-5 text-navy/40" />
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
-          <div className="-mx-4 mt-4 flex gap-2 overflow-x-auto px-4 pb-2 scrollbar-hide sm:mx-0 sm:px-0">
-            {filterChips.map((f) => (
-              <button
-                key={f.id}
-                onClick={() => setFilter(f.id)}
-                className={`min-h-[40px] shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition active:scale-[0.97] ${filter === f.id ? "bg-navy text-navy-foreground shadow-sm" : "border border-border bg-card text-muted-foreground hover:border-navy hover:text-navy"}`}
-              >
-                {f.label}
-              </button>
-            ))}
+          {/* MOBILE SEARCHING: BAR + CLEAR */}
+          <div className={`md:hidden ${!isSearching ? 'hidden' : 'block'}`}>
+             <MobileSearchBar placeholder="Search friend services" value={q} onChange={(e) => setQ(e.target.value)} />
+             <div className="flex items-center justify-between px-6 pb-2 pt-2">
+                <div className="flex items-center gap-1 -ml-2">
+                  <button onClick={() => { setQ(''); setSelectedCategory(''); setLoc(''); }} className="p-2 text-navy hover:bg-slate-100 rounded-full transition-colors active:scale-95">
+                    <ArrowLeft className="w-5 h-5" />
+                  </button>
+                  <span className="font-display text-lg font-bold text-navy">Verified providers</span>
+                </div>
+                <button onClick={() => { setQ(''); setSelectedCategory(''); setLoc(''); }} className="text-sm text-blue-600 font-bold">See All</button>
+             </div>
           </div>
+
+          <div className={`px-4 sm:px-0 ${!isSearching ? 'hidden md:block' : 'block'}`}>
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
+              <h2 className="font-display text-xl font-bold text-navy sm:text-3xl hidden md:block">Service providers on Tuungane</h2>
+            </div>
 
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
             <RadiusFilter value={radiusKm} onChange={setRadiusKm} disabled={!userLoc} />
@@ -272,10 +326,17 @@ export function ServicesIndexPage({ initialSort }: { initialSort?: "recent" }) {
             </div>
           )}
 
-          <div className="mt-6 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          <div className="mt-4 md:mt-6 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-1.5 md:gap-4 px-1.5 sm:px-0">
             {loadingReal && <p className="text-base text-muted-foreground col-span-full">Loading providers&hellip;</p>}
             {!loadingReal && realFiltered.map((p) => (
-              <ProviderCardCompact key={p.user_id} p={p} userLoc={userLoc} onRequest={() => nav({ to: "/u/$id", params: { id: p.user_id } })} />
+              <div key={p.user_id}>
+                <div className="hidden md:block h-full">
+                  <ProviderCardCompact p={p} userLoc={userLoc} onRequest={() => nav({ to: "/u/$id", params: { id: p.user_id } })} />
+                </div>
+                <div className="md:block h-full">
+                  <ProviderCardListMobile p={p} userLoc={userLoc} onRequest={() => nav({ to: "/u/$id", params: { id: p.user_id } })} />
+                </div>
+              </div>
             ))}
             {!loadingReal && realFiltered.length === 0 && !radiusExpanded && (
               <div className="col-span-full">
@@ -286,6 +347,7 @@ export function ServicesIndexPage({ initialSort }: { initialSort?: "recent" }) {
                 </div>
               </div>
             )}
+          </div>
           </div>
         </div>
       </section>
@@ -451,3 +513,67 @@ function ProviderCardCompact({ p, userLoc, onRequest }: { p: RealProvider; userL
     </div>
   );
 }
+
+function ProviderCardListMobile({ p, userLoc, onRequest }: { p: RealProvider; userLoc?: UserLocation | null; onRequest: () => void }) {
+  const name = p.business_name || p.profile?.full_name || "Provider";
+  const isVerified = p.verified === "verified" || p.verified === "featured";
+  const coverImage = p.cover_url || (p.media_urls && p.media_urls.length > 0 ? p.media_urls[0] : null) || p.profile?.avatar_url;
+
+  return (
+    <div className="group flex flex-col overflow-hidden rounded-[20px] bg-white shadow-[0_4px_20px_rgb(0,0,0,0.06)] border border-border/40 relative h-full">
+      
+      {/* Image Section */}
+      <Link to={p.slug ? "/p/$slug" : "/u/$id"} params={p.slug ? { slug: p.slug } : { id: p.user_id }} className="relative aspect-[4/3] w-full shrink-0 overflow-hidden bg-muted block">
+        {coverImage ? (
+          <img src={coverImage} alt={name} className="absolute inset-0 h-full w-full object-cover" />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center bg-surface absolute inset-0">
+            <span className="font-display text-3xl font-bold uppercase text-muted-foreground/30">{name.substring(0, 2)}</span>
+          </div>
+        )}
+        {isVerified && (
+          <div className="absolute top-2 right-2 flex items-center justify-center rounded-full bg-white/95 p-1.5 shadow-sm backdrop-blur-sm">
+            <BadgeCheck className="h-3.5 w-3.5 text-green" />
+          </div>
+        )}
+      </Link>
+      
+      {/* Content Section */}
+      <div className="p-2 flex flex-col flex-1">
+         <div className="flex items-start justify-between gap-1">
+            <Link to={p.slug ? "/p/$slug" : "/u/$id"} params={p.slug ? { slug: p.slug } : { id: p.user_id }} className="font-display text-[16px] font-bold leading-tight text-[#1A1A1A] line-clamp-1 block tracking-tight">
+               {name}
+            </Link>
+         </div>
+         
+         <p className="text-[12px] font-medium text-[#8F8F8F] line-clamp-1">{formatSubcategory(p.subcategory)}</p>
+         
+         {/* Meta Row */}
+         <div className="mt-1 flex items-center gap-2 text-[11px] font-bold text-[#4A4A4A] truncate">
+           <div className="flex items-center gap-1">
+             <MapPin className="h-3 w-3 text-[#8F8F8F] shrink-0" />
+             <span className="truncate">{[p.town, p.district].filter(Boolean).join(', ') || "Uganda"}</span>
+           </div>
+         </div>
+         
+         {/* Action Row */}
+         <div className="mt-auto pt-2.5 flex items-center gap-1.5">
+            <Link 
+              to={p.slug ? "/p/$slug" : "/u/$id"} params={p.slug ? { slug: p.slug } : { id: p.user_id }}
+              className="flex h-[36px] flex-1 items-center justify-center rounded-[8px] bg-orange text-[12.5px] font-bold text-white hover:brightness-110 transition-all shadow-[0_4px_12px_rgba(249,115,22,0.3)]"
+            >
+               View details
+            </Link>
+            <div 
+              role="button"
+              onClick={(e) => { e.preventDefault(); onRequest(); }}
+              className="flex h-[36px] w-[36px] shrink-0 items-center justify-center rounded-[8px] border border-orange/20 bg-orange/5 text-orange hover:bg-orange/10 transition-colors cursor-pointer"
+            >
+               <MessageCircle className="h-4 w-4 pointer-events-none" />
+            </div>
+         </div>
+      </div>
+    </div>
+  );
+}
+

@@ -6,8 +6,8 @@ import { CreateChoiceSheet } from "./CreateChoiceSheet";
 
 const SHOW_ON = new Set<string>([
   "/",
+  "/dashboard",
   "/services",
-
   "/feed",
   "/official",
   "/requests",
@@ -19,7 +19,7 @@ export function RequestFab() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [open, setOpen] = useState(false);
   if (!user) return null;
-  if (!SHOW_ON.has(pathname)) return null;
+  if (!SHOW_ON.has(pathname) && !pathname.startsWith("/u/")) return null;
 
   return (
     <>

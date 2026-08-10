@@ -15,21 +15,30 @@ export function Layout({ children }: { children: ReactNode }) {
   const hideBottomNavOnMobileUnauth = matches.some((m) => m.staticData?.hideBottomNavOnMobileUnauth);
   const hideBottomNavOnMobile = matches.some((m) => m.staticData?.hideBottomNavOnMobile);
   const hideHeaderOnMobile = matches.some((m) => m.staticData?.hideHeaderOnMobile);
+  const hideHeader = matches.some((m) => m.staticData?.hideHeader);
 
   const { user } = useAuth();
   const shouldHideFooter = hideFooter || !!user;
 
+  const headerPaddingClass = hideHeader 
+    ? "" 
+    : hideHeaderOnMobile 
+      ? "md:pt-[4.5rem] lg:pt-[5rem]" 
+      : "pt-14 md:pt-[4.5rem] lg:pt-[5rem]";
+
   return (
     <AuthGateProvider>
-      <div className="flex min-h-dvh flex-col relative bg-background">
+      <div className="flex min-h-dvh flex-col relative bg-background overflow-x-hidden">
         <OfflineBanner />
         
         {/* Conditionally hide Header on mobile or entirely for specific routes */}
-        <div className={`${hideHeaderOnMobile ? "hidden md:block" : ""} sticky top-0 z-50`}>
-          <Header />
-        </div>
+        {!hideHeader && (
+          <div className={`${hideHeaderOnMobile ? "hidden md:block" : ""} sticky top-0 z-50`}>
+            <Header />
+          </div>
+        )}
 
-        <main className="flex-1">{children}</main>
+        <main className={`flex-1 w-full min-w-0 flex flex-col ${headerPaddingClass}`}>{children}</main>
         {!shouldHideFooter && <Footer />}
         <RequestFab />
         

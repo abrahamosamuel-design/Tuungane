@@ -1,8 +1,11 @@
 import { createFileRoute, useParams, Link, useNavigate, useRouter } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { MapPin, Phone, BadgeCheck, Star, Share2, Camera, Users, ThumbsUp, ClipboardList, Pencil, Plus } from "lucide-react";
+import { MapPin, Phone, BadgeCheck, Star, Share2, Camera, Users, ThumbsUp, ClipboardList, Pencil, Plus, ChevronRight, ArrowLeft, MessageSquare, Loader2, Wrench, Zap, Sparkles, Calendar, GraduationCap, LayoutDashboard, Coins, Settings, Briefcase, CheckCircle2, Clock, ImagePlus, ArrowRight, Info, Check, X as XIcon, LogOut } from "lucide-react";
+import { useCreditWallet } from "@/hooks/use-credits";
+import { RemovePhotoConfirm } from "@/components/RemovePhotoConfirm";
 import { ManageServiceDialog, type ServiceForm } from "@/components/ManageServiceDialog";
+import { ServiceRequestCard, type RequestWithParty } from "@/components/ServiceRequestCard";
 
 import { apiClient } from "@/lib/api";
 import { useAuth } from "@/hooks/use-auth";
@@ -41,22 +44,24 @@ import { PriceGuideCard, PriceGuideEmptyOwner, PriceGuideChip } from "@/componen
 import type { PriceType, PriceGuide } from "@/lib/price-guide";
 import { ContactOptionsUnlocked } from "@/components/ContactOptionsUnlocked";
 import { ProviderQuickContact } from "@/components/ProviderQuickContact";
-import { useContactGate } from "@/hooks/use-contact-gate";
+import { useContactGate, getRevealablePhone, logContactClick } from "@/hooks/use-contact-gate";
 import { IdentityBadges } from "@/components/profile/IdentityBadges";
 import { fetchIdentityStatus, type IdentityStatus } from "@/lib/profile-badges";
 
 
 
 import { RouteErrorCard, RouteNotFoundCard } from "@/lib/route-boundaries";
+import { CategoryScroll } from "@/components/CategoryScroll";
+import { ServiceVerticalList } from "@/components/ServiceVerticalList";
 
 export const Route = createFileRoute("/u/$id/")({
+  staticData: { hideHeaderOnMobile: true },
   loader: async ({ params }) => {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/profiles/full/${params.id}`);
-      if (!res.ok) throw new Error("Failed to load profile");
-      const { data } = await res.json();
+      const { data } = await apiClient.get(`/profiles/full/${params.id}`);
       return { profile: data.profile, sp: data.sp };
-    } catch {
+    } catch (err) {
+      console.error("Profile load error:", err);
       return { profile: null, sp: null };
     }
   },
@@ -64,8 +69,8 @@ export const Route = createFileRoute("/u/$id/")({
     const name = loaderData?.sp?.business_name || loaderData?.profile?.full_name || "Profile";
     const loc = [loaderData?.sp?.town || loaderData?.profile?.town, loaderData?.sp?.district || loaderData?.profile?.district].filter(Boolean).join(", ");
     const subtitle = loaderData?.sp?.subcategory || loaderData?.sp?.category_slug;
-    const title = `${name}${subtitle ? ` — ${subtitle}` : ""} | Tuungane`;
-    const description = (loaderData?.sp?.bio || loaderData?.profile?.bio || `Connect with ${name}${loc ? ` in ${loc}` : ""} on Tuungane — Uganda's trusted services marketplace.`).slice(0, 158);
+    const title = `${name}${subtitle ? ` ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â ${subtitle}` : ""} | Tuungane`;
+    const description = (loaderData?.sp?.bio || loaderData?.profile?.bio || `Connect with ${name}${loc ? ` in ${loc}` : ""} on Tuungane ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Uganda's trusted services marketplace.`).slice(0, 158);
     const url = `https://tuungane.com/u/${params.id}`;
     const isProvider = !!loaderData?.sp || loaderData?.profile?.is_provider;
     const meta: Array<Record<string, string>> = [
@@ -102,13 +107,14 @@ export const Route = createFileRoute("/u/$id/")({
   notFoundComponent: () => <RouteNotFoundCard title="Profile not found" message="This user profile may have been removed." />,
 });
 
-type Tab = "about" | "timeline" | "reviews" | "services";
+type Tab = "timeline" | "reviews" | "services" | "requests" | "admin";
 
-const TABS: { id: Tab; label: string; providerOnly?: boolean }[] = [
-  { id: "about", label: "About" },
+const TABS: { id: Tab; label: string; providerOnly?: boolean; ownerOnly?: boolean; adminOnly?: boolean; href?: string }[] = [
   { id: "timeline", label: "Timeline" },
+  { id: "requests", label: "My Requests", ownerOnly: true },
   { id: "reviews", label: "Reviews", providerOnly: true },
   { id: "services", label: "Services", providerOnly: true },
+  { id: "admin", label: "Admin Console", ownerOnly: true, adminOnly: true, href: "/admin" },
 ];
 
 type ProfileServiceRow = {
@@ -128,7 +134,7 @@ type ProfileServiceRow = {
 
 function UserProfile() {
   const { id } = useParams({ from: "/u/$id/" });
-  const { user } = useAuth();
+  const { user, isModerator, signOut } = useAuth() as any;
   const nav = useNavigate();
   const { requireAuth } = useAuthGate();
   const loaderData = Route.useLoaderData();
@@ -142,7 +148,7 @@ function UserProfile() {
   const [followers, setFollowers] = useState(0);
   const [recs, setRecs] = useState<Array<{ id: string; service: string; message: string; rating: number | null; created_at: string; user_id: string; profile?: { full_name: string; avatar_url: string | null } }>>([]);
   const [reviews, setReviews] = useState<Array<{ id: string; rating: number; text: string; created_at: string; user_id: string; profile?: { full_name: string; avatar_url: string | null } }>>([]);
-  const [tab, setTab] = useState<Tab>("about");
+  const [tab, setTab] = useState<Tab>("timeline");
   const [services, setServices] = useState<ProfileServiceRow[]>([]);
   const [ownerPublicProfileId, setOwnerPublicProfileId] = useState<string | null>(null);
   const [svcDialog, setSvcDialog] = useState<{ open: boolean; mode: "create" | "edit"; initial?: Partial<ServiceForm> }>({ open: false, mode: "create" });
@@ -151,6 +157,7 @@ function UserProfile() {
   
   
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [uploadingCover, setUploadingCover] = useState(false);
   const [claimOpen, setClaimOpen] = useState(false);
   const [requestOpen, setRequestOpen] = useState(false);
   const [contactModalOpen, setContactModalOpen] = useState(false);
@@ -158,6 +165,56 @@ function UserProfile() {
   const [feedback, setFeedback] = useState<Array<{ id: string; rating: number; review_text: string; service_provided: string; created_at: string; customer_id: string; would_recommend: boolean; profile?: { full_name: string; avatar_url: string | null } }>>([]);
   const [canReview, setCanReview] = useState(false);
   const [identity, setIdentity] = useState<IdentityStatus | null>(null);
+  const [calling, setCalling] = useState(false);
+
+  // ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Owner dashboard state ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
+  type OwnerTab = "dashboard" | "credits" | "settings";
+  type Pkg = { id: string; name: string; credits: number; amount_ugx: number; active: boolean; sort_order: number };
+  type Tx  = { id: string; transaction_type: string; amount: number; reason: string; created_at: string };
+  type CreditReq = { id: string; package_id: string | null; package_name: string; credits_requested: number; amount_ugx: number; status: string; admin_note: string | null; created_at: string };
+  const { balance } = useCreditWallet();
+  const [ownerTab, setOwnerTab] = useState<OwnerTab>("dashboard");
+  const [ownerRequests, setOwnerRequests] = useState<any[]>([]);
+  const [ownerCounts, setOwnerCounts] = useState({ services: 0, requests: 0, completed: 0, pending: 0 });
+  const [ownerReqLoaded, setOwnerReqLoaded] = useState(false);
+  const [pkgs, setPkgs] = useState<Pkg[]>([]);
+  const [txs, setTxs] = useState<Tx[]>([]);
+  const [creditReqs, setCreditReqs] = useState<CreditReq[]>([]);
+  const [creditSubmitting, setCreditSubmitting] = useState<string | null>(null);
+  const pkgsLoaded = useRef(false);
+  const creditsLoaded = useRef<string | null>(null);
+  const [ownerFullName, setOwnerFullName] = useState("");
+  const [savingOwner, setSavingOwner] = useState(false);
+  const [ownerBusy, setOwnerBusy] = useState(false);
+
+  const handleCall = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!user) {
+      requireAuth(undefined, {
+        title: "Sign in to call this provider",
+        message: "Create a free Tuungane account to view phone numbers and contact providers directly.",
+      });
+      return;
+    }
+    setCalling(true);
+    try {
+      const p = await getRevealablePhone(id);
+      if (!p) {
+        toast.error("Phone number not available or hidden.");
+        return;
+      }
+      logContactClick({
+        customerId: user.id,
+        providerId: id,
+        serviceId: null,
+        source: "provider_profile",
+        method: "call",
+      }).catch(() => {});
+      window.location.href = `tel:${p}`;
+    } finally {
+      setCalling(false);
+    }
+  };
 
 
   useEffect(() => {
@@ -191,6 +248,65 @@ function UserProfile() {
   }, [auxData, loaderData.sp]);
   useEffect(() => { fetchIdentityStatus(id).then(setIdentity).catch(() => setIdentity(null)); }, [id]);
 
+  // ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Owner data loading ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
+  const loadOwnerRequests = async () => {
+    if (!user || ownerReqLoaded) return;
+    try {
+      const { data } = await apiClient<{ data: { data: any[] } }>("/requests/me?role=all");
+      const list = data.data?.data ?? data.data ?? [];
+      setOwnerRequests(Array.isArray(list) ? list.slice(0, 5) : []);
+      const all: any[] = Array.isArray(list) ? list : [];
+      setOwnerCounts({
+        services: services.length,
+        requests: all.length,
+        completed: all.filter((r: any) => r.status === "completed").length,
+        pending: all.filter((r: any) => ["requested","accepted","in_progress"].includes(r.status)).length,
+      });
+    } catch {}
+    setOwnerReqLoaded(true);
+  };
+
+  const loadOwnerCredits = async () => {
+    if (!user || creditsLoaded.current === user.id) return;
+    creditsLoaded.current = user.id;
+    try {
+      const { data } = await apiClient<{ data: { transactions: Tx[]; requests: CreditReq[] } }>("/credits/personal");
+      setTxs(data.data?.transactions ?? []);
+      setCreditReqs(data.data?.requests ?? []);
+    } catch {}
+  };
+
+  const loadOwnerPackages = async () => {
+    if (pkgsLoaded.current) return;
+    pkgsLoaded.current = true;
+    try {
+      const { data } = await apiClient<{ data: Pkg[] }>("/credits/packages");
+      setPkgs(data.data ?? []);
+    } catch {}
+  };
+
+  const saveOwnerProfile = async (patch: any) => {
+    setOwnerBusy(true);
+    try {
+      await apiClient.put("/profiles/me", patch);
+      toast.success("Saved");
+      setProfile(p => p ? { ...p, ...patch } : p);
+    } catch (err: any) { toast.error(err.response?.data?.error || "Failed to save"); }
+    finally { setOwnerBusy(false); }
+  };
+
+  const requestPurchase = async (pkg: Pkg) => {
+    if (!user || creditSubmitting) return;
+    const dup = creditReqs.find(r => r.status === "pending" && (r.package_id === pkg.id || r.package_name === pkg.name));
+    if (dup) { toast.error("You already have a pending request for this package."); return; }
+    setCreditSubmitting(pkg.id);
+    try {
+      await apiClient.post("/credits/requests", { package_id: pkg.id, package_name: pkg.name, credits: pkg.credits, amount_ugx: pkg.amount_ugx });
+      toast.success("Purchase request submitted."); loadOwnerCredits();
+    } catch (err: any) { toast.error(err.response?.data?.error || "Failed to submit"); }
+    finally { setCreditSubmitting(null); }
+  };
+
 
 
 
@@ -200,12 +316,24 @@ function UserProfile() {
     try {
       const url = await uploadMedia(user.id, file, "avatars");
       await apiClient.patch("/profiles/me", { avatar_url: url });
-      if (error) throw error;
-      router.invalidate();
+      setProfile((p) => (p ? { ...p, avatar_url: url } : p));
       toast.success("Profile photo updated");
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Upload failed");
     } finally { setUploadingAvatar(false); }
+  };
+
+  const uploadCover = async (file: File | null) => {
+    if (!file || !user) return;
+    setUploadingCover(true);
+    try {
+      const url = await uploadMedia(user.id, file, "covers");
+      await apiClient.put("/profiles/me/full", { serviceProfilePatch: { cover_url: url } });
+      setSp((p) => (p ? { ...p, cover_url: url } : p));
+      toast.success("Cover photo updated");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Upload failed");
+    } finally { setUploadingCover(false); }
   };
 
   const share = async () => {
@@ -213,20 +341,340 @@ function UserProfile() {
     if (navigator.share) navigator.share({ title: profile?.full_name ?? "Profile", url }).catch(() => {});
     else { navigator.clipboard.writeText(url); toast.success("Profile link copied"); }
   };
-
   const gate = useContactGate(id);
   const cat = useCategory(sp?.category_slug);
 
   const isOwn = user?.id === id;
   const isProvider = !!profile?.is_provider;
-  const visibleTabs = TABS.filter((t) => !t.providerOnly || isProvider);
-  // About is the default tab for everyone. Also normalize legacy "portfolio"
-  // links so old bookmarks land on Timeline where past work now lives.
-  useEffect(() => {
-    setTab((prev) => (prev === ("portfolio" as Tab) ? "timeline" : prev));
-  }, [isProvider]);
+  const visibleTabs = TABS.filter((t) => (!t.providerOnly || isProvider) && (!t.ownerOnly || isOwn) && (!t.adminOnly || isModerator));
 
   if (!profile) return <RouteNotFoundCard title="Profile not found" message="This user profile may have been removed." />;
+
+  // â”€â”€ OWNER: 3-tab dashboard matching reference design â”€â”€
+  if (isOwn) {
+    type OTab = OwnerTab;
+    const ownerTabs = [
+      { id: "dashboard" as OTab, label: "Dashboard",  icon: <LayoutDashboard className="h-[15px] w-[15px]" /> },
+      { id: "credits"   as OTab, label: "My Credits", icon: <Coins className="h-[15px] w-[15px]" /> },
+      { id: "settings"  as OTab, label: "Settings",   icon: <Settings className="h-[15px] w-[15px]" /> },
+    ];
+    const fmtUgx = (n: number) => `${n.toLocaleString()} UGX`;
+    const pendingPkgIds   = new Set(creditReqs.filter(r => r.status === "pending").map(r => r.package_id).filter(Boolean) as string[]);
+    const pendingPkgNames = new Set(creditReqs.filter(r => r.status === "pending").map(r => r.package_name));
+    const avgRatingOwner  = feedback.length ? feedback.reduce((s, r) => s + r.rating, 0) / feedback.length : 0;
+    if (!ownerReqLoaded) loadOwnerRequests();
+
+    return (
+      <div className="min-h-screen" style={{ background: "linear-gradient(180deg,#f47b16 0%,#f47b16 38%,#ffffff 38%)" }}>
+
+        {/* ORANGE HEADER */}
+        <div className="relative" style={{ paddingBottom: "80px", background: "linear-gradient(135deg,#f47b16 0%,#e06210 100%)" }}>
+          <div className="absolute top-0 right-0 h-44 w-44 rounded-full opacity-20 pointer-events-none" style={{ background: "radial-gradient(circle,#fff 0%,transparent 70%)", transform: "translate(30%,-30%)" }} />
+          <div className="absolute top-10 right-20 h-[72px] w-[72px] rounded-full opacity-10 pointer-events-none" style={{ background: "radial-gradient(circle,#fff 0%,transparent 70%)" }} />
+          {/* Sign out button — top right */}
+          <div className="flex justify-end pr-4 pt-5">
+            <button
+              onClick={() => signOut?.()}
+              title="Sign out"
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-white/25 text-white backdrop-blur-sm hover:bg-white/35 transition"
+            >
+              <LogOut className="h-5 w-5" />
+            </button>
+          </div>
+        </div>
+
+        {/* WHITE BODY â€” rounded top, full width, no floating shadow */}
+        <div className="relative bg-white" style={{ borderRadius: "36px 36px 0 0", marginTop: "-36px" }}>
+
+          {/* Avatar overlapping the orange-white boundary */}
+          <div className="flex justify-center">
+            <div className="relative" style={{ marginTop: "-60px" }}>
+              <div className="rounded-full overflow-hidden bg-white" style={{ width: 120, height: 120, border: "5px solid #fff", boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
+                <Avatar name={profile.full_name} url={profile.avatar_url} size={120} />
+              </div>
+              <label className="absolute bottom-1 right-1 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border-[3px] border-white shadow-lg" style={{ background: "#f47b16" }}>
+                {uploadingAvatar ? <Loader2 className="h-4 w-4 animate-spin text-white" /> : <Camera className="h-4 w-4 text-white" />}
+                <input type="file" accept="image/*" className="hidden" disabled={ownerBusy || uploadingAvatar}
+                  onChange={e => {
+                    const f = e.target.files?.[0];
+                    if (f && user) {
+                      setUploadingAvatar(true);
+                      uploadMedia(user.id, f, "avatars")
+                        .then(url => saveOwnerProfile({ avatar_url: url }))
+                        .catch(err => toast.error(err.message))
+                        .finally(() => setUploadingAvatar(false));
+                    }
+                  }} />
+              </label>
+            </div>
+          </div>
+
+          {/* Name + Location */}
+          <div className="mt-3 text-center px-6">
+            <h1 className="text-[22px] font-extrabold" style={{ color: "#1a2b4b" }}>{profile.full_name}</h1>
+            {(profile.town || profile.district) && (
+              <p className="mt-1 flex items-center justify-center gap-1 text-[13px]" style={{ color: "#9ca3af" }}>
+                <MapPin className="h-3.5 w-3.5" style={{ color: "#f47b16" }} />
+                {[profile.district, profile.town].filter(Boolean).join(" | ")}
+              </p>
+            )}
+          </div>
+
+          {/* Edit + Share */}
+          <div className="mt-5 flex gap-3 px-6">
+            <button onClick={() => setEditOpen(true)}
+              className="flex-1 flex items-center justify-center gap-2 rounded-full py-3 text-[13px] font-bold transition hover:opacity-80"
+              style={{ border: "2.5px solid #1a2b4b", color: "#1a2b4b", background: "#fff" }}>
+              <Pencil className="h-4 w-4" /> Edit
+            </button>
+            <button onClick={share}
+              className="flex-1 flex items-center justify-center gap-2 rounded-full py-3 text-[13px] font-bold text-white transition hover:brightness-110"
+              style={{ background: "#f47b16", boxShadow: "0 4px 14px rgba(244,123,22,0.4)" }}>
+              <Share2 className="h-4 w-4" /> Share
+            </button>
+          </div>
+
+          {/* Stats */}
+          <div className="mt-5 mx-6 flex items-center justify-around border-t pt-4 pb-1" style={{ borderColor: "#f3f4f6" }}>
+            <div className="text-center">
+              <p className="text-[20px] font-extrabold" style={{ color: "#1a2b4b" }}>{services.length}</p>
+              <p className="text-[11px] mt-0.5" style={{ color: "#9ca3af" }}>Services</p>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Star className="h-5 w-5" style={{ fill: "#f47b16", color: "#f47b16" }} />
+              <span className="text-[20px] font-extrabold" style={{ color: "#1a2b4b" }}>{avgRatingOwner > 0 ? avgRatingOwner.toFixed(1) : "\u2014"}</span>
+            </div>
+            <div className="text-center">
+              <p className="text-[20px] font-extrabold" style={{ color: "#1a2b4b" }}>{ownerCounts.completed}</p>
+              <p className="text-[11px] mt-0.5" style={{ color: "#9ca3af" }}>Jobs done</p>
+            </div>
+          </div>
+
+          {/* Tabs */}
+          <div className="mt-4 flex" style={{ borderBottom: "2px solid #f3f4f6" }}>
+            {ownerTabs.map(t => (
+              <button key={t.id}
+                onClick={() => {
+                  setOwnerTab(t.id);
+                  if (t.id === "credits") { loadOwnerPackages(); loadOwnerCredits(); }
+                  if (t.id === "settings") setOwnerFullName(profile.full_name);
+                }}
+                className="relative flex flex-1 items-center justify-center gap-1.5 py-3.5 text-[12px] font-semibold transition-colors"
+                style={{ color: ownerTab === t.id ? "#f47b16" : "#9ca3af" }}
+              >
+                {t.icon}<span>{t.label}</span>
+                {ownerTab === t.id && <span className="absolute bottom-0 left-4 right-4 rounded-full" style={{ height: 2.5, background: "#f47b16" }} />}
+              </button>
+            ))}
+          </div>
+
+          {/* Tab content */}
+          <div className="px-4 pt-4">
+
+            {ownerTab === "dashboard" && (
+              <div className="space-y-4 pb-28">
+                <div className="grid grid-cols-2 gap-3">
+                  {([
+                    { icon: <Briefcase className="h-5 w-5" />,     label: "Services Listed",  value: services.length,       bg: "#eff6ff", ic: "#3b82f6" },
+                    { icon: <ClipboardList className="h-5 w-5" />, label: "Service Requests", value: ownerCounts.requests,  bg: "#fff7ed", ic: "#f47b16" },
+                    { icon: <CheckCircle2 className="h-5 w-5" />,  label: "Jobs Done",        value: ownerCounts.completed, bg: "#f0fdf4", ic: "#22c55e" },
+                    { icon: <Clock className="h-5 w-5" />,         label: "Pending Jobs",     value: ownerCounts.pending,   bg: "#fefce8", ic: "#eab308" },
+                  ] as const).map(c => (
+                    <div key={c.label} className="flex items-center gap-3 rounded-2xl bg-white p-4" style={{ border: "1.5px solid #f3f4f6", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
+                      <div className="flex-shrink-0 rounded-xl p-2.5" style={{ background: c.bg, color: c.ic }}>{c.icon}</div>
+                      <div>
+                        <p className="text-[22px] font-extrabold leading-none" style={{ color: "#1a2b4b" }}>{c.value}</p>
+                        <p className="text-[11px] mt-1" style={{ color: "#9ca3af" }}>{c.label}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="rounded-2xl bg-white p-5" style={{ border: "1.5px solid #f3f4f6", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-[14px] font-extrabold" style={{ color: "#1a2b4b" }}>My Services</h2>
+                    {ownerPublicProfileId && (
+                      <Link to="/profiles/$id" params={{ id: ownerPublicProfileId }} className="flex items-center gap-1 text-xs font-semibold hover:underline" style={{ color: "#f47b16" }}>
+                        Manage <ArrowRight className="h-3 w-3" />
+                      </Link>
+                    )}
+                  </div>
+                  {services.length === 0 ? (
+                    <div className="rounded-xl p-6 text-center" style={{ border: "1.5px dashed #e5e7eb", background: "#f9fafb" }}>
+                      <Briefcase className="mx-auto h-8 w-8 mb-2" style={{ color: "#d1d5db" }} />
+                      <p className="text-sm font-semibold" style={{ color: "#1a2b4b" }}>No services yet</p>
+                      <Link to="/profiles/new" className="mt-3 inline-block rounded-full px-4 py-1.5 text-xs font-bold text-white" style={{ background: "#f47b16" }}>+ Add Service</Link>
+                    </div>
+                  ) : services.map(s => (
+                    <div key={s.id} className="flex items-center gap-3 rounded-xl p-3 mb-2 transition-colors hover:bg-orange-50" style={{ border: "1.5px solid #f3f4f6" }}>
+                      <div className="h-9 w-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "#fff7ed" }}>
+                        <Briefcase className="h-4 w-4" style={{ color: "#f47b16" }} />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="truncate text-sm font-semibold" style={{ color: "#1a2b4b" }}>{s.title}</p>
+                        {s.price_guidance_ugx && <p className="text-xs" style={{ color: "#9ca3af" }}>From UGX {s.price_guidance_ugx.toLocaleString()}</p>}
+                      </div>
+                      {ownerPublicProfileId && (
+                        <Link to="/profiles/$id" params={{ id: ownerPublicProfileId }} className="rounded-lg px-2.5 py-1 text-xs font-semibold flex-shrink-0" style={{ background: "#f1f5f9", color: "#1a2b4b" }}>
+                          <Pencil className="h-3 w-3 inline mr-1" />Edit
+                        </Link>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="rounded-2xl bg-white p-5" style={{ border: "1.5px solid #f3f4f6", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-[14px] font-extrabold" style={{ color: "#1a2b4b" }}>Recent Requests</h2>
+                    <Link to="/requests" className="flex items-center gap-1 text-xs font-semibold hover:underline" style={{ color: "#f47b16" }}>View all <ArrowRight className="h-3 w-3" /></Link>
+                  </div>
+                  {ownerRequests.length === 0 ? (
+                    <div className="rounded-xl p-6 text-center" style={{ border: "1.5px dashed #e5e7eb", background: "#f9fafb" }}>
+                      <ClipboardList className="mx-auto h-8 w-8 mb-2" style={{ color: "#d1d5db" }} />
+                      <p className="text-sm font-semibold" style={{ color: "#1a2b4b" }}>No requests yet</p>
+                    </div>
+                  ) : ownerRequests.map((r: any) => (
+                    <Link key={r.id} to="/requests/$id" params={{ id: r.id }} className="flex items-center justify-between gap-3 rounded-xl p-3 mb-2 transition-colors hover:bg-orange-50" style={{ border: "1.5px solid #f3f4f6" }}>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-semibold" style={{ color: "#1a2b4b" }}>{r.service_needed}</p>
+                        <p className="truncate text-xs" style={{ color: "#9ca3af" }}>{new Date(r.created_at).toLocaleDateString()}</p>
+                      </div>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <span className="rounded-full px-2 py-0.5 text-[10px] font-semibold capitalize" style={{ background: "#fff7ed", color: "#f47b16" }}>{r.status?.replace(/_/g," ")}</span>
+                        <ChevronRight className="h-4 w-4" style={{ color: "#9ca3af" }} />
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {ownerTab === "credits" && (
+              <div className="space-y-4 pb-10">
+                <div className="rounded-2xl p-5" style={{ background: "linear-gradient(135deg,#fff7ed,#fff)", border: "1.5px solid #fed7aa" }}>
+                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide" style={{ color: "#f47b16" }}><Coins className="h-4 w-4" /> Tuungane Credits</div>
+                  <div className="mt-2 flex items-end gap-2">
+                    <span className="text-5xl font-black leading-none" style={{ color: "#1a2b4b" }}>{(balance ?? 0).toLocaleString()}</span>
+                    <span className="text-lg font-semibold mb-1" style={{ color: "#9ca3af" }}>credits</span>
+                  </div>
+                  <p className="mt-2 text-sm" style={{ color: "#9ca3af" }}>Boost visibility, feature posts, and promote your services.</p>
+                  <a href="#credit-packages" className="mt-4 inline-flex items-center rounded-full px-5 py-2.5 text-sm font-bold text-white" style={{ background: "#f47b16" }}>Buy credits</a>
+                </div>
+                <div className="flex gap-3 rounded-xl bg-white p-4 text-sm" style={{ border: "1.5px solid #f3f4f6", color: "#9ca3af" }}>
+                  <Info className="h-5 w-5 flex-shrink-0" style={{ color: "#1a2b4b" }} />
+                  <p><strong style={{ color: "#1a2b4b" }}>Credits are not cash.</strong> Used inside Tuungane for boosts, features and promotions. Cannot be withdrawn.</p>
+                </div>
+                <div id="credit-packages">
+                  <h2 className="mb-3 text-base font-extrabold" style={{ color: "#1a2b4b" }}>Buy credits</h2>
+                  <div className="grid grid-cols-2 gap-3">
+                    {pkgs.map(p => {
+                      const hasPending = pendingPkgIds.has(p.id) || pendingPkgNames.has(p.name);
+                      const isSubmitting = creditSubmitting === p.id;
+                      return (
+                        <div key={p.id} className="flex flex-col rounded-2xl bg-white p-4" style={{ border: "1.5px solid #f3f4f6", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
+                          <div className="text-xs font-medium" style={{ color: "#9ca3af" }}>{p.name}</div>
+                          <div className="mt-1 flex items-baseline gap-1"><span className="text-2xl font-black" style={{ color: "#1a2b4b" }}>{p.credits}</span><span className="text-xs" style={{ color: "#9ca3af" }}>credits</span></div>
+                          <div className="text-sm font-bold" style={{ color: "#f47b16" }}>{fmtUgx(p.amount_ugx)}</div>
+                          <button disabled={isSubmitting || hasPending} onClick={() => requestPurchase(p)} className="mt-3 w-full rounded-full py-2 text-xs font-bold text-white transition disabled:opacity-60" style={{ background: hasPending ? "#fed7aa" : "#1a2b4b" }}>
+                            {hasPending ? "Pending\u2026" : isSubmitting ? "Submitting\u2026" : "Buy"}
+                          </button>
+                        </div>
+                      );
+                    })}
+                    {pkgs.length === 0 && <div className="col-span-2 rounded-xl p-6 text-center text-sm" style={{ border: "1.5px dashed #e5e7eb", color: "#9ca3af" }}>No packages available.</div>}
+                  </div>
+                </div>
+                {creditReqs.length > 0 && (
+                  <div className="rounded-2xl bg-white p-5" style={{ border: "1.5px solid #f3f4f6" }}>
+                    <h2 className="text-sm font-extrabold mb-4" style={{ color: "#1a2b4b" }}>Purchase Requests</h2>
+                    <div className="space-y-2">
+                      {creditReqs.slice(0, 5).map(r => (
+                        <div key={r.id} className="flex items-center justify-between rounded-xl p-3" style={{ border: "1.5px solid #f3f4f6", background: "#f9fafb" }}>
+                          <div><p className="text-sm font-semibold" style={{ color: "#1a2b4b" }}>{r.package_name}</p><p className="text-xs" style={{ color: "#9ca3af" }}>{r.credits_requested} credits &middot; {timeAgo(r.created_at)}</p></div>
+                          <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${r.status==="paid" ? "bg-green-100 text-green-700" : ""}`} style={r.status==="pending" ? { background: "#fff7ed", color: "#f47b16" } : r.status!=="paid" ? { background: "#f3f4f6", color: "#9ca3af" } : {}}>{r.status}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div className="rounded-2xl bg-white p-5" style={{ border: "1.5px solid #f3f4f6" }}>
+                  <h2 className="text-sm font-extrabold mb-4" style={{ color: "#1a2b4b" }}>Transaction History</h2>
+                  {txs.length === 0 ? <p className="text-sm py-2" style={{ color: "#9ca3af" }}>No activity yet.</p> : (
+                    <div className="space-y-2">
+                      {txs.slice(0, 6).map(t => (
+                        <div key={t.id} className="flex items-center justify-between rounded-xl p-3" style={{ border: "1.5px solid #f3f4f6", background: "#f9fafb" }}>
+                          <div className="min-w-0"><p className="truncate text-sm" style={{ color: "#1a2b4b" }}>{t.reason || t.transaction_type.replace(/_/g, " ")}</p><p className="text-xs" style={{ color: "#9ca3af" }}>{timeAgo(t.created_at)}</p></div>
+                          <span className={`text-base font-bold flex-shrink-0 ${t.amount >= 0 ? "text-green-600" : "text-red-500"}`}>{t.amount > 0 ? "+" : ""}{t.amount}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {ownerTab === "settings" && (
+              <div className="space-y-4 pb-10">
+                <div className="rounded-2xl bg-white p-5" style={{ border: "1.5px solid #f3f4f6" }}>
+                  <h2 className="text-[14px] font-extrabold mb-4" style={{ color: "#1a2b4b" }}>Profile Information</h2>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-xs font-semibold" style={{ color: "#1a2b4b" }}>Display Name</label>
+                      <input value={ownerFullName} onChange={e => setOwnerFullName(e.target.value)} className="mt-1 w-full rounded-xl px-3 py-2.5 text-sm outline-none transition-colors" style={{ border: "1.5px solid #e5e7eb", background: "#f9fafb" }} />
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold" style={{ color: "#1a2b4b" }}>Bio</label>
+                      <textarea defaultValue={profile.bio ?? ""} onBlur={e => e.target.value !== (profile.bio ?? "") && saveOwnerProfile({ bio: e.target.value })} rows={3} className="mt-1 w-full resize-none rounded-xl px-3 py-2.5 text-sm outline-none transition-colors" style={{ border: "1.5px solid #e5e7eb", background: "#f9fafb" }} />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-xs font-semibold" style={{ color: "#1a2b4b" }}>District</label>
+                        <input defaultValue={profile.district ?? ""} onBlur={e => e.target.value !== profile.district && saveOwnerProfile({ district: e.target.value })} className="mt-1 w-full rounded-xl px-3 py-2.5 text-sm outline-none" style={{ border: "1.5px solid #e5e7eb", background: "#f9fafb" }} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-semibold" style={{ color: "#1a2b4b" }}>Town</label>
+                        <input defaultValue={profile.town ?? ""} onBlur={e => e.target.value !== profile.town && saveOwnerProfile({ town: e.target.value })} className="mt-1 w-full rounded-xl px-3 py-2.5 text-sm outline-none" style={{ border: "1.5px solid #e5e7eb", background: "#f9fafb" }} />
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 pt-1">
+                      <label className="flex cursor-pointer items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold hover:border-orange-400 transition-colors" style={{ border: "1.5px solid #e5e7eb", background: "#f9fafb", color: "#1a2b4b" }}>
+                        <ImagePlus className="h-4 w-4" />
+                        {profile.avatar_url ? "Change Photo" : "Add Photo"}
+                        <input type="file" accept="image/*" className="hidden" disabled={ownerBusy || uploadingAvatar}
+                          onChange={e => { const f = e.target.files?.[0]; if (f && user) { setUploadingAvatar(true); uploadMedia(user.id, f, "avatars").then(url => saveOwnerProfile({ avatar_url: url })).catch(err => toast.error(err.message)).finally(() => setUploadingAvatar(false)); } }} />
+                      </label>
+                      {profile.avatar_url && <RemovePhotoConfirm onConfirm={() => saveOwnerProfile({ avatar_url: null })} disabled={ownerBusy} />}
+                    </div>
+                    <button onClick={async () => { setSavingOwner(true); await saveOwnerProfile({ full_name: ownerFullName }); setSavingOwner(false); }} disabled={savingOwner} className="w-full rounded-full py-3 text-sm font-bold text-white transition disabled:opacity-60" style={{ background: "#f47b16" }}>
+                      {savingOwner ? "Saving\u2026" : "Save Changes"}
+                    </button>
+                  </div>
+                </div>
+                <div className="rounded-2xl bg-white p-5" style={{ border: "1.5px solid #f3f4f6" }}>
+                  <h2 className="text-[14px] font-extrabold mb-3" style={{ color: "#1a2b4b" }}>Account</h2>
+                  <div>
+                    <div className="flex items-center justify-between px-1 py-3 text-sm" style={{ borderBottom: "1px solid #f3f4f6" }}>
+                      <span style={{ color: "#9ca3af" }}>Email</span>
+                      <span className="font-semibold truncate ml-4" style={{ color: "#1a2b4b" }}>{user?.email}</span>
+                    </div>
+                    <Link to="/settings" className="flex items-center justify-between px-1 py-3 text-sm transition hover:opacity-70" style={{ borderBottom: "1px solid #f3f4f6" }}>
+                      <span className="font-semibold" style={{ color: "#1a2b4b" }}>Advanced Settings</span>
+                      <ChevronRight className="h-4 w-4" style={{ color: "#9ca3af" }} />
+                    </Link>
+                    <Link to="/credits" className="flex items-center justify-between px-1 py-3 text-sm transition hover:opacity-70">
+                      <span className="font-semibold" style={{ color: "#1a2b4b" }}>Full Credits Page</span>
+                      <ChevronRight className="h-4 w-4" style={{ color: "#9ca3af" }} />
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            )}
+
+          </div>
+        </div>
+      </div>
+    );
+  }
   if (!profile) {
     return (
       <>
@@ -265,112 +713,203 @@ function UserProfile() {
             )}
           </div>
         )}
-        {/* Header card — centered, no banner */}
-        <div className="rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-elevated)] sm:p-6">
-          <div className="flex flex-col items-center gap-3 text-center">
-            <div className="shrink-0 rounded-full border-4 border-card bg-card">
-              {isOwn ? (
-                <label className="group relative block cursor-pointer rounded-full" aria-label="Change profile photo">
-                  <Avatar name={profile.full_name} url={profile.avatar_url} size={112} />
-                  <span className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-full bg-black/45 text-white opacity-0 transition-opacity group-hover:opacity-100">
-                    <Camera className="h-5 w-5" />
-                  </span>
-                  {uploadingAvatar && (
-                    <span className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-full bg-black/55 text-[10px] font-semibold text-white">
-                      Uploading…
-                    </span>
-                  )}
-                  <span className="pointer-events-none absolute -bottom-1 right-0 flex items-center gap-1 rounded-full bg-black/70 px-2 py-0.5 text-[10px] font-semibold text-white shadow backdrop-blur-sm">
-                    <Camera className="h-3 w-3" />
-                    {profile.avatar_url ? "Edit" : "Upload"}
-                  </span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    disabled={uploadingAvatar}
-                    onChange={(e) => uploadAvatar(e.target.files?.[0] ?? null)}
-                  />
-                </label>
-              ) : (
-                <Avatar name={profile.full_name} url={profile.avatar_url} size={112} />
-              )}
-            </div>
-            <div className="w-full min-w-0">
-              <h1 className="font-display text-2xl font-bold text-navy">
-                {sp?.business_name || profile.full_name}
-              </h1>
-              <div className="mt-1 flex flex-wrap items-center justify-center gap-x-1.5">
-                <ProfileBoostBadges providerId={id} />
-              </div>
-              <IdentityBadges status={identity} className="mt-2 justify-center" />
+        {/* Header card with banner */}
+        <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-elevated)]">
+          {/* Banner */}
+          <div className="group relative h-32 w-full bg-muted sm:h-48 rounded-t-2xl">
+            {(sp?.cover_url || sp?.header_url) ? (
+              <img src={sp?.cover_url || sp?.header_url || ""} alt="Cover" className="h-full w-full object-cover" />
+            ) : (
+              <div className="h-full w-full bg-gradient-to-r from-orange/20 to-orange/5"></div>
+            )}
+            
+            <button 
+              onClick={() => window.history.back()}
+              data-icon-only={true}
+              className="absolute left-4 top-4 flex aspect-square h-9 w-9 shrink-0 p-0 items-center justify-center rounded-full bg-white/80 text-black shadow-sm backdrop-blur-sm z-10 md:hidden hover:bg-white"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </button>
+            
+            {isOwn && isProvider && (
+              <label className="absolute bottom-2 right-2 flex cursor-pointer items-center gap-1.5 rounded-full bg-black/60 px-3 py-1.5 text-xs font-semibold text-white shadow backdrop-blur-sm transition hover:bg-black/80 opacity-0 group-hover:opacity-100 focus-within:opacity-100 sm:bottom-4 sm:right-4">
+                <Camera className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">Change cover</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  disabled={uploadingCover}
+                  onChange={(e) => uploadCover(e.target.files?.[0] ?? null)}
+                />
+              </label>
+            )}
+            {uploadingCover && (
+               <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+                 <span className="text-sm font-semibold text-white">Uploading...</span>
+               </div>
+            )}
+          </div>
 
+          <div className="p-5 sm:p-6">
+            <div className="relative flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 sm:gap-6">
+              {/* Avatar overlapping the banner */}
+              <div className="-mt-16 sm:-mt-20 shrink-0 relative self-start sm:self-auto">
+                <div className="inline-block rounded-full border-4 border-card bg-card">
+                  {isOwn ? (
+                    <label className="group relative block cursor-pointer rounded-full" aria-label="Change profile photo">
+                      <Avatar name={profile.full_name} url={profile.avatar_url} size={112} className="h-24 w-24 sm:h-28 sm:w-28" />
+                      <span className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-full bg-black/45 text-white opacity-0 transition-opacity group-hover:opacity-100">
+                        <Camera className="h-6 w-6" />
+                      </span>
+                      {uploadingAvatar && (
+                        <span className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-full bg-black/55 text-[10px] font-semibold text-white">
+                          UploadingÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦
+                        </span>
+                      )}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        disabled={uploadingAvatar}
+                        onChange={(e) => uploadAvatar(e.target.files?.[0] ?? null)}
+                      />
+                    </label>
+                  ) : (
+                    <Avatar name={profile.full_name} url={profile.avatar_url} size={112} className="h-24 w-24 sm:h-28 sm:w-28" />
+                  )}
+                </div>
+              </div>
+
+              {/* Mobile top-right icons */}
+              <div className="absolute right-0 top-0 flex gap-2 sm:hidden pt-2">
+                 {!isOwn && isProvider && <SaveButton providerUserId={id} variant="icon" />}
+                 <button onClick={share} aria-label="Share" data-icon-only={true} className="inline-flex aspect-square h-9 w-9 shrink-0 p-0 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition hover:border-orange hover:text-orange"><Share2 className="h-4 w-4" /></button>
+                 {!isOwn && user && <ReportProfileButton kind="service_profile" id={id} variant="icon" className="h-9 w-9" />}
+              </div>
+
+              {/* Action Buttons */}
+              <div className={`flex-wrap items-center gap-2 sm:pb-2 ${!isOwn ? 'hidden sm:flex' : 'flex'}`}>
+                {!isOwn && isProvider && (
+                  <button
+                    onClick={() => {
+                      requireAuth(() => setRequestOpen(true), {
+                        title: "Sign in to request this service",
+                        message: "Create a free Tuungane account to send a request to this provider.",
+                        redirect: `/u/${id}`,
+                      });
+                    }}
+                    className="hidden sm:inline-flex rounded-full bg-orange px-5 py-2.5 text-sm font-semibold text-orange-foreground shadow-sm hover:brightness-110"
+                  >
+                    Request service
+                  </button>
+                )}
+                <div className="hidden sm:block">
+                  {!isOwn && isProvider && <FollowButton providerUserId={id} onChange={setFollowers} />}
+                </div>
+
+                {/* Desktop full buttons */}
+                <div className="hidden sm:flex items-center gap-2">
+                   {!isOwn && isProvider && <SaveButton providerUserId={id} variant="full" />}
+                   <button onClick={share} aria-label="Share" className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-3 py-2 text-xs font-semibold text-navy hover:border-orange"><Share2 className="h-3.5 w-3.5" /> Share</button>
+                   {!isOwn && user && <ReportProfileButton kind="service_profile" id={id} variant="full" />}
+                </div>
+
+                {isOwn && isProvider && (
+                  <BoostButton boostType="boost_profile" entityType="provider_profile" entityId={id} label="Boost profile" dialogTitle="Boost your provider profile" dialogDescription="Increase your visibility across Tuungane for a set period." />
+                )}
+                {isOwn && (
+                  <button onClick={() => setEditOpen(true)} className="rounded-full bg-orange px-4 py-2 text-xs font-semibold text-orange-foreground hover:brightness-110">
+                    Edit profile
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-4 w-full min-w-0 text-left">
+              <h1 className="font-display text-2xl font-bold text-navy flex items-center gap-2 flex-wrap">
+                {sp?.business_name || profile.full_name}
+                <ProfileBoostBadges providerId={id} />
+                <IdentityBadges status={identity} className="mt-0" />
+              </h1>
+              
               {sp && (
                 <p className="mt-1 text-sm font-medium text-orange">
-                  {formatSubcategory(sp.subcategory)} {cat && <span className="text-muted-foreground">· {cat.name}</span>}
+                  {formatSubcategory(sp.subcategory)} {cat && <span className="text-muted-foreground">Ãƒâ€šÃ‚Â· {cat.name}</span>}
                 </p>
               )}
-              {!sp && <p className="mt-1 text-sm text-muted-foreground">{isProvider ? "Service provider" : "Member"}</p>}
-              <div className="mt-1.5 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
-                {(sp?.town || profile.town) && (
-                  <span className="inline-flex items-center gap-1">
-                    <MapPin className="h-3 w-3" /> {sp?.town || profile.town}{(sp?.district || profile.district) && `, ${sp?.district || profile.district}`}
-                  </span>
-                )}
+              
+              <p className="mt-2 whitespace-pre-wrap text-sm text-foreground/85">
+                {sp?.bio || profile.bio || (isProvider ? "No description yet." : "This member hasn't added a bio yet.")}
+              </p>
+              
+              <div className="mt-3">
                 <TrustBadgeInline userId={id} />
               </div>
-              <div className="mt-2 flex flex-wrap justify-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                <span className="inline-flex items-center gap-1"><Users className="h-3 w-3" /> <strong className="text-navy">{followers}</strong> followers</span>
-                <span className="inline-flex items-center gap-1"><ThumbsUp className="h-3 w-3" /> <strong className="text-navy">{recs.length}</strong> endorsements</span>
+              
+              <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
+                <span className="inline-flex items-center gap-1.5"><Users className="h-4 w-4" /> <strong className="text-navy">{followers}</strong> followers</span>
+                <span className="inline-flex items-center gap-1.5"><ThumbsUp className="h-4 w-4" /> <strong className="text-navy">{recs.length}</strong> endorsements</span>
                 {avgRating > 0 ? (
-                  <span className="inline-flex items-center gap-1"><Star className="h-3 w-3 fill-orange text-orange" /> <strong className="text-navy">{avgRating.toFixed(1)}</strong> ({feedback.length} verified)</span>
+                  <span className="inline-flex items-center gap-1.5"><Star className="h-4 w-4 fill-orange text-orange" /> <strong className="text-navy">{avgRating.toFixed(1)}</strong> ({feedback.length} verified)</span>
                 ) : isProvider ? (
-                  <span className="inline-flex items-center gap-1 text-muted-foreground">No rating yet</span>
+                  <span className="inline-flex items-center gap-1.5 text-muted-foreground">No rating yet</span>
                 ) : null}
+
+                {(sp?.town || profile.town) ? (
+                  <span className="inline-flex items-center gap-1.5">
+                    <MapPin className="h-4 w-4 text-muted-foreground" /> 
+                    {sp?.town || profile.town}{(sp?.district || profile.district) && `, ${sp?.district || profile.district}`}
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 text-muted-foreground/50">
+                    <MapPin className="h-4 w-4" /> ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â
+                  </span>
+                )}
               </div>
             </div>
           </div>
 
-          <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+          {/* Provider Details (Only rendered if sp exists) */}
+          {sp && (
+            <div className="border-t border-border/60 bg-muted/10 p-5 sm:p-6">
+              <h3 className="font-display text-base font-bold text-navy">Service Details</h3>
+              <dl className="mt-4 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
+                <Row label="Areas served" value={sp.areas_served?.join(", ") || sp.town || "ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â"} />
+                <Row label="Availability" value={sp.availability?.replace(/_/g, " ") || "ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â"} />
+                <Row label="Experience" value={sp.years_experience ? `${sp.years_experience} years` : "ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â"} />
+                <Row label="Verification" value={sp.verified === "verified" ? "Verified" : sp.verified === "pending" ? "Verification pending" : "Not yet verified"} />
+                {sp.phone && <Row label="Phone" value={sp.phone} />}
+                {sp.email && <Row label="Email" value={sp.email} />}
+              </dl>
 
-            {!isOwn && isProvider && (
-              <button
-                onClick={() => {
-                  requireAuth(() => setRequestOpen(true), {
-                    title: "Sign in to request this service",
-                    message: "Create a free Tuungane account to send a request to this provider.",
-                    redirect: `/u/${id}`,
-                  });
-                }}
-                className="rounded-full bg-orange px-5 py-2.5 text-sm font-semibold text-orange-foreground shadow-sm hover:brightness-110"
-              >
-                Request service
-              </button>
-            )}
-            {!isOwn && isProvider && <FollowButton providerUserId={id} onChange={setFollowers} />}
-            {!isOwn && isProvider && <SaveButton providerUserId={id} variant="full" />}
-            <button onClick={share} aria-label="Share" className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-3 py-2 text-xs font-semibold text-navy hover:border-orange"><Share2 className="h-3.5 w-3.5" /> Share</button>
-            {isOwn && isProvider && (
-              <BoostButton boostType="boost_profile" entityType="provider_profile" entityId={id} label="Boost profile" dialogTitle="Boost your provider profile" dialogDescription="Increase your visibility across Tuungane for a set period." />
-            )}
-            {isOwn && (
-              <button onClick={() => setEditOpen(true)} className="rounded-full bg-orange px-4 py-2 text-xs font-semibold text-orange-foreground hover:brightness-110">
-                Edit profile
-              </button>
-            )}
-            {isOwn && <Link to="/dashboard" className="rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-navy hover:border-orange">My Dashboard</Link>}
-            {!isOwn && user && <ReportProfileButton kind="service_profile" id={id} />}
-
-          </div>
+              {!isOwn && (
+                <div className="mt-5 flex flex-wrap gap-2">
+                  <Link
+                    to="/messages"
+                    search={{ to: id } as never}
+                    className="inline-flex items-center gap-1 rounded-full bg-orange px-4 py-2 text-xs font-semibold text-orange-foreground hover:brightness-110"
+                  >
+                    Message on Tuungane
+                  </Link>
+                  {sp.phone && (
+                    <a href={`tel:${sp.phone}`} className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-navy hover:border-orange">
+                      <Phone className="h-3.5 w-3.5" /> Call
+                    </a>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
 
         {isOwn && !isProvider && (
           <div className="mt-4 rounded-2xl border border-orange/40 bg-gradient-to-br from-orange/10 to-orange/5 p-5">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-start gap-3">
-                <div className="rounded-full bg-orange/15 p-2 text-orange"><BadgeCheck className="h-5 w-5" /></div>
-                <div>
+              <div className="flex items-start gap-3 min-w-0">
+                <div className="shrink-0 rounded-full bg-orange/15 p-2 text-orange"><BadgeCheck className="h-5 w-5" /></div>
+                <div className="min-w-0">
                   <p className="font-semibold text-navy">Want people to find you on Tuungane?</p>
                   <p className="mt-0.5 text-sm text-muted-foreground">Your account is currently a Member Profile. To appear under Services, search, categories, and homepage provider cards, list a service.</p>
                 </div>
@@ -382,6 +921,19 @@ function UserProfile() {
                 List a Service
               </Link>
             </div>
+          </div>
+        )}
+
+        {isOwn && (
+          <div className="mt-4 flex flex-col gap-2">
+            <Link to="/settings" className="flex items-center justify-between rounded-xl bg-card p-4 border border-border shadow-[var(--shadow-elevated)] transition-colors hover:bg-muted/50">
+              <span className="font-semibold text-navy">Settings</span>
+              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+            </Link>
+            <Link to="/credits" className="flex items-center justify-between rounded-xl bg-card p-4 border border-border shadow-[var(--shadow-elevated)] transition-colors hover:bg-muted/50">
+              <span className="font-semibold text-navy">My Credits</span>
+              <ChevronRight className="h-5 w-5 text-muted-foreground" />
+            </Link>
           </div>
         )}
 
@@ -414,116 +966,71 @@ function UserProfile() {
           ) : (
             <div className="mt-4 flex flex-wrap items-center gap-2">
               <ProviderQuickContact providerId={id} source="provider_profile" />
-              <span className="text-xs text-muted-foreground">Tip: request the service through Tuungane to keep your job tracked and reviewable.</span>
+              {!isOwn && isProvider && (
+                <div className="sm:hidden">
+                  <FollowButton providerUserId={id} onChange={setFollowers} />
+                </div>
+              )}
+              <span className="mt-1 w-full text-xs text-muted-foreground">Tip: request the service through Tuungane to keep your job tracked and reviewable.</span>
             </div>
           )
         )}
 
 
-        
+        {/* NEW MOBILE UI */}
+        <div className="md:hidden mt-6 bg-white rounded-[24px] shadow-sm border border-border/40 overflow-hidden">
+          <CategoryScroll 
+            title="Available list uploads"
+            categories={[
+              { id: "c1", name: "Plumbing", icon: <Wrench className="h-6 w-6" />, colorClass: "bg-navy" },
+              { id: "c2", name: "Electric", icon: <Zap className="h-6 w-6" />, colorClass: "bg-orange" },
+              { id: "c3", name: "Cleaning", icon: <Sparkles className="h-6 w-6" />, colorClass: "bg-green" },
+              { id: "c4", name: "Stoutness", icon: <ClipboardList className="h-6 w-6" />, colorClass: "bg-green/80" },
+            ]} 
+          />
+          <ServiceVerticalList 
+            title="Service list"
+            items={services.length > 0 ? services.map(s => ({
+              id: s.id,
+              name: s.title,
+              subtitle: s.price_guidance_ugx ? `From UGX ${s.price_guidance_ugx.toLocaleString()}` : undefined,
+              icon: <Star className="h-6 w-6" />, // Or map icons based on category
+              to: `/u/${id}?tab=services`
+            })) : [
+              { id: "s1", name: "Plectric", icon: <Zap className="h-6 w-6" />, to: "#" },
+              { id: "s2", name: "Electric", icon: <Zap className="h-6 w-6 text-orange" />, to: "#" },
+              { id: "s3", name: "Cleaning", icon: <Sparkles className="h-6 w-6 text-green" />, to: "#" },
+              { id: "s4", name: "Pecatut proess", icon: <ClipboardList className="h-6 w-6 text-orange" />, to: "#" },
+            ]}
+          />
+        </div>
 
         {/* Tabs */}
-        <div className="sticky top-16 z-10 -mx-4 mt-4 overflow-x-auto border-b border-border bg-background/95 px-4 backdrop-blur">
+        <div className="sticky top-16 z-10 -mx-4 mt-4 overflow-x-auto border-b border-border bg-background/95 px-4 backdrop-blur max-w-[100vw] sm:max-w-none">
           <div className="flex gap-1">
-            {visibleTabs.map((t) => (
-              <button key={t.id} onClick={() => setTab(t.id)} className={`relative whitespace-nowrap px-4 py-3 text-sm font-semibold transition ${tab === t.id ? "text-orange" : "text-muted-foreground hover:text-navy"}`}>
-                {t.label}
-                {tab === t.id && <span className="absolute inset-x-2 bottom-0 h-0.5 bg-orange" />}
-              </button>
-            ))}
+            {visibleTabs.map((t) => {
+              const isActive = tab === t.id;
+              const className = `relative whitespace-nowrap px-4 py-3 text-sm font-semibold transition ${isActive ? "text-orange" : "text-muted-foreground hover:text-navy"}`;
+              
+              if (t.href) {
+                return (
+                  <Link key={t.id} to={t.href as any} className={className}>
+                    {t.label}
+                  </Link>
+                );
+              }
+
+              return (
+                <button key={t.id} onClick={() => setTab(t.id)} className={className}>
+                  {t.label}
+                  {isActive && <span className="absolute inset-x-2 bottom-0 h-0.5 bg-orange" />}
+                </button>
+              );
+            })}
           </div>
         </div>
 
         <div className="mt-5 space-y-4 pb-10">
-          {tab === "about" && (
-            <>
-              <div className="rounded-2xl border border-border bg-card p-5">
-                <div className="flex items-start justify-between gap-2">
-                  <h3 className="font-display text-lg font-bold text-navy">About</h3>
-                  {isOwn && (
-                    <button
-                      onClick={() => setEditOpen(true)}
-                      aria-label="Edit About"
-                      className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-orange/10 hover:text-orange"
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </button>
-                  )}
-                </div>
-                {sp && (
-                  <p className="mt-1 text-sm font-medium text-orange">
-                    {formatSubcategory(sp.subcategory)}
-                    {cat?.name && <span className="text-muted-foreground"> · {cat.name}</span>}
-                  </p>
-                )}
-                <p className="mt-3 whitespace-pre-wrap text-sm text-foreground/85">
-                  {sp?.bio || profile.bio || (isProvider ? "No description yet." : "This member hasn't added a bio yet.")}
-                </p>
-                <dl className="mt-5 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
-                  <Row label="Location" value={`${sp?.town || profile.town || "—"}${(sp?.district || profile.district) ? `, ${sp?.district || profile.district}` : ""}`} />
-                  {sp && <Row label="Areas served" value={sp.areas_served.join(", ") || sp.town || "—"} />}
-                  {sp && <Row label="Availability" value={sp.availability.replace(/_/g, " ")} />}
-                  {sp && <Row label="Experience" value={sp.years_experience ? `${sp.years_experience} years` : "—"} />}
-                  {sp && <Row label="Verification" value={sp.verified === "verified" ? "Verified" : sp.verified === "pending" ? "Verification pending" : "Not yet verified"} />}
-                  {sp?.phone && <Row label="Phone" value={sp.phone} />}
-                  {sp?.email && <Row label="Email" value={sp.email} />}
-                </dl>
-                {/* Price guide is shown once above the tabs to avoid duplication */}
-
-                {!isOwn && isProvider && (
-                  <div className="mt-5 flex flex-wrap gap-2">
-                    <Link
-                      to="/messages"
-                      search={{ to: id } as never}
-                      className="inline-flex items-center gap-1 rounded-full bg-orange px-4 py-2 text-xs font-semibold text-orange-foreground hover:brightness-110"
-                    >
-                      Message on Tuungane
-                    </Link>
-                    {sp?.phone && (
-                      <a href={`tel:${sp.phone}`} className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-navy hover:border-orange">
-                        <Phone className="h-3.5 w-3.5" /> Call
-                      </a>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* Past work preview from Timeline */}
-              {portfolioPosts.length > 0 && (
-                <div className="rounded-2xl border border-border bg-card p-4">
-                  <div className="mb-3 flex items-center justify-between gap-2">
-                    <div>
-                      <h4 className="font-display text-sm font-bold text-navy">Recent work</h4>
-                      <p className="text-[11px] text-muted-foreground">Photos shared on the Timeline</p>
-                    </div>
-                    <button onClick={() => setTab("timeline")} className="text-xs font-semibold text-orange">See all →</button>
-                  </div>
-                  <div className="grid grid-cols-3 gap-2">
-                    {portfolioPosts
-                      .flatMap((p) => p.media_urls.map((u, i) => ({ url: u, alt: p.text.slice(0, 60), key: `${p.id}-${i}` })))
-                      .filter((m) => !/\.(mp4|webm|mov|m4v|ogg)(\?|$)/i.test(m.url))
-                      .slice(0, 6)
-                      .map((m) => (
-                        <button key={m.key} onClick={() => setTab("timeline")} className="group relative aspect-square overflow-hidden rounded-lg border border-border bg-surface">
-                          <img
-                            src={m.url}
-                            alt={m.alt}
-                            className="h-full w-full object-cover transition group-hover:scale-105"
-                            loading="lazy"
-                            onError={(e) => {
-                              const btn = (e.currentTarget as HTMLImageElement).closest("button");
-                              if (btn) (btn as HTMLElement).style.display = "none";
-                            }}
-                          />
-                        </button>
-
-                      ))}
-                  </div>
-
-                </div>
-              )}
-            </>
-          )}
 
           {tab === "timeline" && (
             <>
@@ -577,9 +1084,9 @@ function UserProfile() {
                           <Avatar name={f.profile?.full_name ?? "Member"} url={f.profile?.avatar_url ?? null} size={36} />
                           <div>
                             <p className="flex flex-wrap items-center gap-2 text-sm font-semibold text-navy">{f.profile?.full_name ?? "Member"} <VerifiedReviewBadge /></p>
-                            <p className="text-xs text-muted-foreground">{f.service_provided} · {timeAgo(f.created_at)}</p>
+                            <p className="text-xs text-muted-foreground">{f.service_provided} Ãƒâ€šÃ‚Â· {timeAgo(f.created_at)}</p>
                           </div>
-                          <span className="ml-auto text-sm text-orange">{"★".repeat(f.rating)}{"☆".repeat(5 - f.rating)}</span>
+                          <span className="ml-auto text-sm text-orange">{"ÃƒÂ¢Ã‹Å“Ã¢â‚¬Â¦".repeat(f.rating)}{"ÃƒÂ¢Ã‹Å“Ã¢â‚¬Â ".repeat(5 - f.rating)}</span>
                         </div>
                         {f.review_text && <p className="mt-3 text-sm text-foreground/90">{f.review_text}</p>}
                       </div>
@@ -612,7 +1119,7 @@ function UserProfile() {
                           <Avatar name={r.profile?.full_name ?? "User"} url={r.profile?.avatar_url ?? null} size={32} />
                           <div className="min-w-0">
                             <p className="truncate text-sm font-medium text-navy">{r.profile?.full_name ?? "User"}</p>
-                            <p className="text-[11px] text-muted-foreground">Endorses for {r.service} · {timeAgo(r.created_at)}</p>
+                            <p className="text-[11px] text-muted-foreground">Endorses for {r.service} Ãƒâ€šÃ‚Â· {timeAgo(r.created_at)}</p>
                           </div>
                         </div>
                         <p className="mt-2 text-sm text-foreground/85">{r.message}</p>
@@ -760,6 +1267,10 @@ function UserProfile() {
               )}
             </>
           )}
+          
+          {tab === "requests" && isOwn && (
+            <ProfileRequestsTab userId={id} />
+          )}
         </div>
 
 
@@ -812,9 +1323,16 @@ function UserProfile() {
       </section>
 
       {!isOwn && isProvider && (
-        <MobileActionBar>
-          <button onClick={() => requireAuth(() => setRequestOpen(true), { title: "Sign in to request this service", message: "Create a free Tuungane account to send a request to this provider.", redirect: `/u/${id}` })} className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-orange px-4 py-2.5 text-sm font-semibold text-orange-foreground shadow-sm"><ClipboardList className="h-4 w-4" /> Request service</button>
-          {sp?.phone && <a href={`tel:${sp.phone}`} aria-label="Call provider" className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border bg-card text-navy"><Phone className="h-4 w-4" /></a>}
+        <MobileActionBar className="bottom-0">
+          <button 
+            onClick={() => requireAuth(() => setRequestOpen(true), { title: "Sign in to request this service", message: "Create a free Tuungane account to send a request to this provider.", redirect: `/u/${id}` })} 
+            className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-orange px-4 py-3 text-sm font-bold text-orange-foreground shadow-sm hover:brightness-110"
+          >
+            <ClipboardList className="h-5 w-5" /> Request service
+          </button>
+          <button onClick={handleCall} disabled={calling} aria-label="Call provider" className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-border bg-card text-navy shadow-sm hover:border-orange disabled:opacity-50">
+            {calling ? <Loader2 className="h-5 w-5 animate-spin" /> : <Phone className="h-5 w-5" />}
+          </button>
         </MobileActionBar>
       )}
     </>
@@ -833,11 +1351,50 @@ function TrustBadgeInline({ userId }: { userId: string }) {
   return <TrustBadge level={level} />;
 }
 
-function Row({ label, value }: { label: string; value: string }) {
+function Row({ label, value }: { label: ReactNode; value: ReactNode }) {
   return (
     <div className="flex justify-between gap-3 border-b border-border/50 py-2 last:border-0">
-      <dt className="text-muted-foreground">{label}</dt>
+      <dt className="text-muted-foreground flex items-center shrink-0">{label}</dt>
       <dd className="text-right font-medium capitalize text-navy">{value}</dd>
+    </div>
+  );
+}
+
+function ProfileRequestsTab({ userId }: { userId: string }) {
+  const { data: requests, refetch } = useQuery({
+    queryKey: ["profileRequests", userId],
+    queryFn: async () => {
+      const { data } = await apiClient<{ data: RequestWithParty[] }>(`/requests/me?role=customer`);
+      return data || [];
+    },
+  });
+
+  const updateStatus = async (id: string, status: any) => {
+    try {
+      await apiClient(`/requests/${id}`, { method: 'PATCH', body: JSON.stringify({ status }) });
+      import("sonner").then(m => m.toast.success(`Marked ${status.replace("_", " ")}`));
+      refetch();
+    } catch (err) {
+      import("sonner").then(m => m.toast.error(err instanceof Error ? err.message : "Failed"));
+    }
+  };
+
+  if (!requests) return <div className="p-4 text-center text-sm text-muted-foreground animate-pulse">Loading requests...</div>;
+  if (requests.length === 0) return <div className="p-8 text-center text-sm text-muted-foreground bg-card rounded-2xl border border-dashed border-border">You haven't sent any requests yet.</div>;
+
+  return (
+    <div className="space-y-3">
+      {requests.map(r => (
+        <ServiceRequestCard
+          key={r.id}
+          r={r}
+          viewerRole="customer"
+          onStatus={(s) => updateStatus(r.id, s)}
+          onFeedback={() => {}} 
+          onDispute={() => {}}
+          onReport={() => {}}
+        />
+      ))}
     </div>
   );
 }

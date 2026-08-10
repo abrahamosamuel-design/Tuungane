@@ -18,39 +18,53 @@ const primaryNav = [
 ];
 
 export function Header() {
-  const [open, setOpen] = useState(false);
   const [menu, setMenu] = useState(false);
   const [more, setMore] = useState(false);
   const { user, loading, isModerator, signOut } = useAuth();
   const location = useLocation();
   const isLandingPage = location.pathname === "/";
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY > lastScrollY && currentScrollY > 50) {
+        setIsVisible(false);
+      } else if (currentScrollY < lastScrollY) {
+        setIsVisible(true);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [lastScrollY]);
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50">
+    <header className={`fixed inset-x-0 top-0 z-50 transition-transform duration-300 ease-in-out ${isVisible ? "translate-y-0" : "-translate-y-full"}`}>
 
       {/* Main Header Pill */}
-      <div className="border-b border-border bg-background/95 backdrop-blur-md">
+      <div className="bg-background/95 backdrop-blur-md">
         <div className="mx-auto flex h-14 md:h-[4.5rem] lg:h-[5rem] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
           
           {/* Mobile Header Layout */}
           <div className="flex w-full items-center justify-between md:hidden relative">
-            <button aria-label="Toggle menu" className="flex h-9 w-9 items-center justify-center rounded-full bg-muted text-navy transition-colors hover:bg-orange/20 hover:text-orange" onClick={() => setOpen((o) => !o)}>
-              {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-            </button>
-
-            <Link to="/" className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center" aria-label="Tuungane home">
-              <Logo className="h-7 w-auto" />
+            <Link to="/" className="flex items-center" aria-label="Tuungane home">
+              <Logo className="h-9 w-auto" />
             </Link>
 
             <div className="flex items-center gap-3">
               {user ? (
                 <>
-                  <MessagesIconLink />
+                  <CreditBalanceChip />
                   <NotificationsBell />
                 </>
               ) : (
-                <Link to="/services" className="flex h-9 w-9 items-center justify-center rounded-full bg-muted text-navy transition-colors hover:bg-orange/20 hover:text-orange">
-                  <Search className="h-5 w-5" />
+                <Link to="/login" className="inline-flex items-center justify-center rounded-full bg-muted px-4 py-1.5 text-sm font-semibold text-navy transition-colors hover:bg-orange/20 hover:text-orange">
+                  Log In
                 </Link>
               )}
             </div>
@@ -79,6 +93,7 @@ export function Header() {
                   key={n.to}
                   to={n.to}
                   params={n.params as never}
+                  preload="intent"
                   className="text-sm font-medium text-navy/80 transition-colors hover:text-orange"
                   activeProps={{ className: "text-orange font-bold" }}
                   activeOptions={{ exact: n.exact }}
@@ -132,74 +147,6 @@ export function Header() {
           {/* Replaced by the new mobile layout block at the top */}
         </div>
       </div>
-      {open && (
-        <div className="border-t border-border bg-background md:hidden max-h-[calc(100vh-4rem)] overflow-y-auto overscroll-contain">
-          <div className="space-y-1 px-4 py-3 pb-24">
-            <p className="px-3 pt-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Main</p>
-            {(() => {
-              const navItems = user ? [
-                { to: "/dashboard", label: "Home", exact: true },
-                { to: "/services", label: "Services", exact: false },
-                { to: "/messages", label: "Messages", exact: false },
-                { to: "/u/$id", params: { id: user.id }, label: "Profile", exact: false },
-              ] : [
-                { to: "/", label: "Home", exact: true },
-                { to: "/services", label: "Services", exact: false },
-                { to: "/about", label: "About Us", exact: false },
-              ];
-
-              return navItems.map((n) => (
-                <Link 
-                  key={n.to} 
-                  to={n.to} 
-                  params={n.params as never} 
-                  onClick={() => setOpen(false)} 
-                  className="block rounded-md px-3 py-2 text-sm font-medium text-navy hover:bg-muted"
-                >
-                  {n.label}
-                </Link>
-              ));
-            })()}
-            {user ? (
-              <>
-                <div className="my-2 border-t border-border" />
-                <p className="px-3 pt-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">My Account</p>
-                <CountedLink to="/messages" label="Messages" count={<MsgCount />} onClick={() => setOpen(false)} />
-                <CountedLink to="/notifications" label="Notifications" count={<NotifCount />} onClick={() => setOpen(false)} />
-                <CountedLink to="/requests" label="My Service Requests" count={<ActiveRequestsCount />} onClick={() => setOpen(false)} />
-                <Link to="/dashboard" onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-navy hover:bg-muted">My Dashboard</Link>
-                <Link to="/me" onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-navy hover:bg-muted">My Profile</Link>
-                <MyCreditsLink onClick={() => setOpen(false)} />
-                <Link to="/settings" onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-navy hover:bg-muted">Settings</Link>
-                
-                {isModerator && (
-                  <>
-                    <div className="my-2 border-t border-border" />
-                    <p className="px-3 pt-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Admin</p>
-                    <Link to="/admin" onClick={() => setOpen(false)} className="block rounded-md px-3 py-2 text-sm font-medium text-navy hover:bg-muted">Admin</Link>
-                  </>
-                )}
-                <div className="my-2 border-t border-border" />
-                <Link to="/requests/new" onClick={() => setOpen(false)} className="mt-2 block rounded-full bg-orange px-4 py-2 text-center text-sm font-semibold text-orange-foreground">
-                  Post a Service Request
-                </Link>
-                <Link to={listSkillHref(user) as never} onClick={() => setOpen(false)} className="mt-2 block rounded-full border border-green/40 bg-green/5 px-4 py-2 text-center text-sm font-semibold text-green">
-                  List Your Service
-                </Link>
-                <button onClick={() => { setOpen(false); signOut(); }} className="mt-2 block w-full rounded-md px-3 py-2 text-left text-sm font-medium text-destructive hover:bg-muted">Sign out</button>
-              </>
-            ) : (
-              <>
-                <div className="my-2 border-t border-border" />
-                <Link to="/login" search={{ tab: "signup" } as never} onClick={() => setOpen(false)} className="mt-4 block rounded-full bg-orange px-4 py-2.5 text-center text-sm font-semibold text-orange-foreground shadow-sm transition-all hover:brightness-110">
-                  Get Started
-                </Link>
-              </>
-            )}
-          </div>
-        </div>
-      )}
-
       </div>
     </header>
   );
@@ -231,7 +178,7 @@ function CountedLink({ to, label, count, onClick }: { to: string; label: string;
   );
 }
 
-function useMyCounts() {
+export function useMyCounts() {
   const { user } = useAuth();
   const { data } = useQuery({
     queryKey: ["my_counts", user?.id],

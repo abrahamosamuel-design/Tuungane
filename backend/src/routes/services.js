@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { 
   getProfileServices, 
+  getServiceById,
+  getMyServices,
   createProfileService, 
   updateProfileService, 
   deleteProfileService,
@@ -26,10 +28,12 @@ router.get('/featured-locations', optionalAuth, getFeaturedLocations);
 router.get('/home-nearby', optionalAuth, getHomeNearby);
 router.get('/search', optionalAuth, searchServices);
 router.get('/category/:slug', optionalAuth, getCategoryServices);
+router.get('/detail/:id', optionalAuth, getServiceById);
 
 // Authenticated Routes
 router.use(requireAuth);
 
+router.get('/me', getMyServices);
 router.get('/profile/:profileId', getProfileServices);
 router.post('/profile/:profileId', createProfileService);
 router.patch('/:id', updateProfileService);

@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { LoginPage } from "@/components/pages/auth/LoginPage";
 
-type Search = { tab?: "login" | "signup"; redirect?: string; intent?: "customer" | "provider" | "both" };
+type Search = { tab?: "login" | "signup"; redirect?: string; intent?: "customer" | "provider" | "both"; verified?: boolean };
 
 export const Route = createFileRoute("/login")({
   head: () => {
@@ -24,14 +24,16 @@ export const Route = createFileRoute("/login")({
     tab: s.tab === "signup" ? "signup" : "login",
     redirect: typeof s.redirect === "string" ? s.redirect : undefined,
     intent: s.intent === "provider" || s.intent === "both" || s.intent === "customer" ? s.intent : undefined,
+    verified: s.verified === true || s.verified === "true",
   }),
   staticData: {
     hideHeaderOnMobile: true,
+    hideHeader: true,
     hideFooter: true,
     hideBottomNavOnMobileUnauth: true,
   },
   component: () => {
     const search = Route.useSearch();
-    return <LoginPage initialTab={search.tab} redirectUrl={search.redirect} intent={search.intent} />;
+    return <LoginPage initialTab={search.tab} redirectUrl={search.redirect} intent={search.intent} verified={search.verified} />;
   },
 });

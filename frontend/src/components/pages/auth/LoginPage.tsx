@@ -13,35 +13,58 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export function LoginPage({ 
   initialTab, 
   redirectUrl, 
-  intent 
+  intent,
+  verified
 }: { 
   initialTab?: "login" | "signup";
   redirectUrl?: string;
   intent?: "customer" | "provider" | "both";
+  verified?: boolean;
 }) {
   const nav = useNavigate();
   const { user, loading } = useAuth();
   const [tab, setTab] = useState<"login" | "signup">(initialTab ?? (intent ? "signup" : "login"));
 
+  const [isSigningOut, setIsSigningOut] = useState(false);
+
+  useEffect(() => {
+    if (verified && !isSigningOut) {
+      setIsSigningOut(true);
+      toast.success("Email verified! Please log in to continue.");
+      supabase.auth.signOut().then(() => {
+        // Wait an extra tick to ensure useAuth state has cleared before replacing URL
+        setTimeout(() => {
+          nav({ to: "/login", search: { redirect: redirectUrl } as never, replace: true });
+        }, 100);
+      });
+    }
+  }, [verified, nav, redirectUrl, isSigningOut]);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [emailTouched, setEmailTouched] = useState(false);
   const [passwordTouched, setPasswordTouched] = useState(false);
+  const [confirmPasswordTouched, setConfirmPasswordTouched] = useState(false);
 
   const [busy, setBusy] = useState(false);
   const [googleBusy, setGoogleBusy] = useState(false);
   const [error, setError] = useState<{ title: string; description?: string; kind?: UserErrorKind } | null>(null);
 
+  const [signupSuccess, setSignupSuccess] = useState(false);
+
   useEffect(() => {
-    if (!loading && user) {
+    if (!loading && user && !signupSuccess && !verified && !isSigningOut) {
       void nav({ to: (redirectUrl as never) ?? "/dashboard" });
     }
-  }, [loading, user, redirectUrl, nav]);
+  }, [loading, user, redirectUrl, nav, signupSuccess, verified, isSigningOut]);
 
   const emailValid = emailRegex.test(email.trim());
   const passwordValid = password.length >= 6;
+  const passwordsMatch = password === confirmPassword;
   const showEmailError = emailTouched && email.length > 0 && !emailValid;
   const showPasswordError = passwordTouched && password.length > 0 && !passwordValid;
+  const showConfirmPasswordError = confirmPasswordTouched && confirmPassword.length > 0 && !passwordsMatch;
 
   const passwordStrength = useMemo(() => {
     if (!password) return 0;
@@ -53,7 +76,7 @@ export function LoginPage({
     return s;
   }, [password]);
 
-  const canSubmitEmail = emailValid && passwordValid && !busy;
+  const canSubmitEmail = emailValid && passwordValid && (tab === "login" || passwordsMatch) && !busy;
 
   if (!loading && user) return null;
 
@@ -69,7 +92,7 @@ export function LoginPage({
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/dashboard`
+          redirectTo: `${window.location.origin}${redirectUrl ?? '/dashboard'}`
         }
       });
       if (error) throw error;
@@ -85,18 +108,27 @@ export function LoginPage({
     setError(null);
     setEmailTouched(true);
     setPasswordTouched(true);
-    if (!emailValid || !passwordValid) return;
+    if (tab === "signup") setConfirmPasswordTouched(true);
+    if (!emailValid || !passwordValid || (tab === "signup" && !passwordsMatch)) return;
     setBusy(true);
     try {
       if (tab === "signup") {
-        const { error } = await supabase.auth.signUp({
+        setSignupSuccess(true);
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: `${window.location.origin}/dashboard` },
+          options: { emailRedirectTo: `${window.location.origin}/login?verified=true${redirectUrl ? `&redirect=${encodeURIComponent(redirectUrl)}` : ''}` },
         });
         if (error) throw error;
         try { localStorage.removeItem("tuungane_welcome_seen"); } catch { /* ignore */ }
-        nav({ to: (redirectUrl as never) ?? "/dashboard" });
+        
+        // Unconditionally enforce email verification flow for all email signups.
+        // Even if the backend is configured to auto-confirm or return a session,
+        // we destroy it to ensure the user must verify their email or log in manually.
+        if (data.session) {
+          await supabase.auth.signOut();
+        }
+        nav({ to: "/confirm-email", search: { email } as never });
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
@@ -114,7 +146,7 @@ export function LoginPage({
     <main className="min-h-screen bg-background flex flex-col">
       <section className="mx-auto flex w-full max-w-md flex-col items-center px-4 py-8 sm:py-16">
         <Link to="/" className="active:scale-[0.98] transition-transform"><Logo className="h-10 sm:h-12" /></Link>
-        <div className="mt-6 sm:mt-8 w-full rounded-3xl sm:rounded-2xl border border-border bg-card p-6 shadow-sm hover:shadow-md transition-shadow sm:p-8">
+        <div className="mt-4 sm:mt-6 w-full rounded-3xl sm:rounded-2xl border border-border bg-card p-5 shadow-sm hover:shadow-md transition-shadow sm:p-6">
           <div className="flex rounded-full bg-surface p-1">
             {(["login", "signup"] as const).map((t) => (
               <button key={t} type="button" onClick={() => { setTab(t); setError(null); }} className={`flex-1 rounded-full px-4 py-2 text-sm font-bold transition active:scale-[0.98] ${tab === t ? "bg-navy text-navy-foreground shadow-sm" : "text-muted-foreground hover:text-navy hover:bg-navy/5"}`}>
@@ -123,7 +155,7 @@ export function LoginPage({
             ))}
           </div>
 
-          <h1 className="mt-6 font-display text-2xl font-bold text-navy text-center sm:text-left">
+          <h1 className="mt-4 font-display text-2xl font-bold text-navy text-center sm:text-left">
             {tab === "login" ? "Welcome back" : "Join Tuungane"}
           </h1>
           <p className="mt-2 text-sm text-muted-foreground text-center sm:text-left">
@@ -134,19 +166,19 @@ export function LoginPage({
             type="button"
             onClick={onGoogle}
             disabled={googleBusy || busy}
-            className="mt-6 flex min-h-[48px] w-full items-center justify-center gap-3 rounded-xl border border-border bg-background py-3 text-sm font-bold text-navy transition hover:bg-surface active:scale-[0.98] disabled:opacity-50"
+            className="mt-4 flex min-h-[44px] w-full items-center justify-center gap-3 rounded-xl border border-border bg-background py-2 text-sm font-bold text-navy transition hover:bg-surface active:scale-[0.98] disabled:opacity-50"
           >
             {googleBusy ? <Loader2 className="h-5 w-5 animate-spin" /> : <GoogleIcon />}
             {googleBusy ? "Opening Google…" : tab === "login" ? "Continue with Google" : "Sign up with Google"}
           </button>
 
-          <div className="my-6 flex items-center gap-4">
+          <div className="my-4 flex items-center gap-4">
             <div className="h-px flex-1 bg-border" />
             <span className="text-[11px] font-bold uppercase tracking-widest text-muted-foreground">or</span>
             <div className="h-px flex-1 bg-border" />
           </div>
 
-          <form className="space-y-4" onSubmit={onEmailSubmit} noValidate>
+          <form className="space-y-3" onSubmit={onEmailSubmit} noValidate>
             <div>
               <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Email</label>
               <div className="relative mt-1.5">
@@ -160,7 +192,7 @@ export function LoginPage({
                   onChange={(e) => setEmail(e.target.value)}
                   onBlur={() => setEmailTouched(true)}
                   aria-invalid={showEmailError}
-                  className={`w-full min-h-[48px] rounded-xl border bg-background px-4 py-3 pr-10 text-base outline-none focus:ring-2 transition-all ${
+                  className={`w-full min-h-[44px] rounded-xl border bg-background px-4 py-2 pr-10 text-base outline-none focus:ring-2 transition-all ${
                     showEmailError ? "border-destructive focus:ring-destructive/20" : emailValid ? "border-green focus:ring-green/20" : "border-border focus:border-orange focus:ring-orange/20"
                   }`}
                 />
@@ -198,6 +230,21 @@ export function LoginPage({
               {showPasswordError && <p className="mt-1.5 text-xs text-destructive font-medium">Password must be at least 6 characters</p>}
             </div>
 
+            {tab === "signup" && (
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Confirm Password</label>
+                <PasswordInput
+                  value={confirmPassword}
+                  onChange={setConfirmPassword}
+                  onBlur={() => setConfirmPasswordTouched(true)}
+                  autoComplete="new-password"
+                  invalid={showConfirmPasswordError}
+                  valid={confirmPassword.length > 0 && passwordsMatch}
+                />
+                {showConfirmPasswordError && <p className="mt-1.5 text-xs text-destructive font-medium">Passwords do not match</p>}
+              </div>
+            )}
+
             {/* tab === "login" && (
               <div className="flex justify-end pt-1">
                 <Link to="/forgot-password" className="text-sm font-bold text-orange hover:underline p-2 -m-2 active:scale-[0.98] transition-transform">
@@ -206,8 +253,8 @@ export function LoginPage({
               </div>
             ) */}
 
-            <div className="min-h-[4.5rem]">
-              {error && (
+            {error && (
+              <div className="pt-1">
                 <ErrorBlock
                   error={error}
                   onResetPassword={() => nav({ to: "/forgot-password", search: emailValid ? { email } : undefined })}
@@ -225,16 +272,16 @@ export function LoginPage({
                   }}
                   onRetry={() => { setError(null); void onEmailSubmit(new Event("submit") as unknown as React.FormEvent); }}
                 />
-              )}
-            </div>
+              </div>
+            )}
 
-            <button type="submit" disabled={!canSubmitEmail} className="mt-4 flex min-h-[48px] w-full items-center justify-center gap-2 rounded-xl bg-orange py-3 text-base font-bold text-orange-foreground shadow-sm transition hover:brightness-110 active:scale-[0.98] disabled:opacity-50">
+            <button type="submit" disabled={!canSubmitEmail} className="mt-3 flex min-h-[44px] w-full items-center justify-center gap-2 rounded-xl bg-orange py-2 text-base font-bold text-orange-foreground shadow-sm transition hover:brightness-110 active:scale-[0.98] disabled:opacity-50">
               {busy && <Loader2 className="h-5 w-5 animate-spin" />}
               {busy ? "Please wait…" : tab === "login" ? "Log in" : "Create account"}
             </button>
           </form>
 
-          <p className="mt-6 text-center text-sm text-muted-foreground">
+          <p className="mt-4 text-center text-sm text-muted-foreground">
             By continuing you agree to our <Link to="/terms" className="text-orange font-bold hover:underline p-1 -m-1">Terms & Safety</Link>.
           </p>
         </div>
@@ -294,7 +341,7 @@ function PasswordInput({ value, onChange, onBlur, autoComplete, invalid, valid }
         onChange={(e) => onChange(e.target.value)}
         onBlur={onBlur}
         aria-invalid={invalid}
-        className={`w-full min-h-[48px] rounded-xl border bg-background px-4 py-3 pr-12 text-base outline-none focus:ring-2 transition-all ${
+        className={`w-full min-h-[44px] rounded-xl border bg-background px-4 py-2 pr-12 text-base outline-none focus:ring-2 transition-all ${
           invalid ? "border-destructive focus:ring-destructive/20" : valid ? "border-green focus:ring-green/20" : "border-border focus:border-orange focus:ring-orange/20"
         }`}
       />
@@ -323,7 +370,7 @@ export function PasswordField({ label, value, onChange, required, autoComplete }
           required={required}
           autoComplete={autoComplete}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full min-h-[48px] rounded-xl border border-border bg-background px-4 py-3 pr-12 text-base outline-none focus:border-orange focus:ring-2 focus:ring-orange/20 transition-all"
+          className="w-full min-h-[44px] rounded-xl border border-border bg-background px-4 py-2 pr-12 text-base outline-none focus:border-orange focus:ring-2 focus:ring-orange/20 transition-all"
         />
         <button
           type="button"

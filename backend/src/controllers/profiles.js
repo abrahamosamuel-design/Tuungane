@@ -5,9 +5,11 @@ import { supabaseAdmin } from '../lib/supabaseClient.js';
 export const getMyProfile = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { data, error } = await supabaseAdmin.rpc("get_my_profile", {
-      user_id_param: userId
-    }).maybeSingle();
+    const { data, error } = await supabaseAdmin
+      .from("profiles")
+      .select("*")
+      .eq("id", userId)
+      .maybeSingle();
 
     if (error) throw error;
     res.json({ data });
@@ -311,7 +313,7 @@ export const updateMyProfileFull = async (req, res) => {
 export const getMyProfileDetails = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { data: p } = await supabaseAdmin.rpc("get_my_profile", { user_id_param: userId }).maybeSingle();
+    const { data: p } = await supabaseAdmin.from("profiles").select("*").eq("id", userId).maybeSingle();
     
     const [
       { data: f },
@@ -483,7 +485,7 @@ export const getFullProfile = async (req, res) => {
     const { id } = req.params;
     const [profileRes, spRes] = await Promise.all([
       supabaseAdmin.rpc("get_profile_card", { _id: id }).maybeSingle(),
-      supabaseAdmin.from("service_profiles").select("business_name,subcategory,bio,category_slug,district,town,verified").eq("user_id", id).maybeSingle(),
+      supabaseAdmin.from("service_profiles").select("business_name,subcategory,bio,category_slug,district,town,verified,cover_url,header_url").eq("user_id", id).maybeSingle(),
     ]);
 
     res.json({ data: { profile: profileRes.data, sp: spRes.data } });
