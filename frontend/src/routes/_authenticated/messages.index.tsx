@@ -81,51 +81,6 @@ function MessagesIndex() {
 
         let list = data.data || [];
 
-        // --- DUMMY DATA FOR PREVIEW ---
-        if (list.length === 0) {
-          list = [
-            {
-              id: "dummy-1",
-              service_request_id: "req-1",
-              customer_id: user.id,
-              provider_id: "prov-1",
-              status: "active",
-              last_message_at: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
-              last_message_preview: "Yes, I can come over this afternoon to fix the sink.",
-              customer_unread_count: 2,
-              provider_unread_count: 0,
-              otherProfile: { id: "prov-1", full_name: "John's Plumbing", avatar_url: "https://i.pravatar.cc/150?u=johns-plumbing" },
-              request: { id: "req-1", service_needed: "Plumbing", title: "Leaking sink in kitchen" }
-            },
-            {
-              id: "dummy-2",
-              service_request_id: "req-2",
-              customer_id: user.id,
-              provider_id: "prov-2",
-              status: "active",
-              last_message_at: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
-              last_message_preview: "Thank you for the excellent service!",
-              customer_unread_count: 0,
-              provider_unread_count: 0,
-              otherProfile: { id: "prov-2", full_name: "Kato Electricals", avatar_url: "https://i.pravatar.cc/150?u=kato-electricals" },
-              request: { id: "req-2", service_needed: "Electrical", title: "Wiring for new extension" }
-            },
-            {
-              id: "dummy-3",
-              service_request_id: null,
-              customer_id: user.id,
-              provider_id: "prov-3",
-              status: "active",
-              last_message_at: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
-              last_message_preview: "Could you send me a quote for the painting job?",
-              customer_unread_count: 0,
-              provider_unread_count: 0,
-              otherProfile: { id: "prov-3", full_name: "Sarah Painter", avatar_url: "https://i.pravatar.cc/150?img=47" },
-            }
-          ];
-        }
-        // ------------------------------
-
         setRows(list as Row[]);
 
         const pMap = new Map<string, Profile>();
@@ -169,54 +124,6 @@ function MessagesIndex() {
         setJobsLoaded(true);
       } catch (err) {
         console.error("Failed to load booked jobs", err);
-        // Show dummy data if API fails
-        setJobs([
-          {
-            id: "demo-job-1",
-            customer_id: user.id,
-            provider_id: "prov-1",
-            service_needed: "Plumbing",
-            title: "Fix kitchen sink",
-            description: "The kitchen sink is leaking and needs repair",
-            status: "in_progress",
-            district: "Kampala",
-            town: "Kololo",
-            created_at: new Date(Date.now() - 1000 * 60 * 60 * 72).toISOString(),
-            updated_at: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
-            provider: { full_name: "John's Plumbing", avatar_url: "https://i.pravatar.cc/150?u=johns-plumbing" },
-            customer: { full_name: "You", avatar_url: null },
-          },
-          {
-            id: "demo-job-2",
-            customer_id: "cust-2",
-            provider_id: user.id,
-            service_needed: "Electrical",
-            title: "Wiring for new office extension",
-            description: "Need complete wiring for a new office block extension",
-            status: "accepted",
-            district: "Wakiso",
-            town: "Entebbe",
-            created_at: new Date(Date.now() - 1000 * 60 * 60 * 48).toISOString(),
-            updated_at: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
-            customer: { full_name: "Robert Kamya", avatar_url: "https://i.pravatar.cc/150?u=robert-k" },
-            provider: { full_name: "You", avatar_url: null },
-          },
-          {
-            id: "demo-job-3",
-            customer_id: user.id,
-            provider_id: "prov-4",
-            service_needed: "Painting",
-            title: "Interior painting — 2 bedrooms",
-            description: "Full interior painting for 2 bedrooms with quality paint",
-            status: "in_progress",
-            district: "Kampala",
-            town: "Ntinda",
-            created_at: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
-            updated_at: new Date(Date.now() - 1000 * 60 * 15).toISOString(),
-            provider: { full_name: "Sarah Painter", avatar_url: "https://i.pravatar.cc/150?img=47" },
-            customer: { full_name: "You", avatar_url: null },
-          },
-        ]);
         setJobsLoaded(true);
       }
     };
@@ -250,14 +157,9 @@ function MessagesIndex() {
   return (
     <>
       <section className="mx-auto max-w-7xl w-full min-w-0 px-4 sm:px-6 lg:px-8 pt-6 pb-24 md:pt-8 md:pb-8">
-        {/* Header */}
-        <div className="flex items-center gap-2">
-          <div className="rounded-xl bg-orange/10 p-2 text-orange"><MessageSquare className="h-5 w-5" /></div>
-          <h1 className="font-display text-2xl font-bold text-navy">Messages</h1>
-        </div>
-
         {/* Toggle Pill */}
-        <div className="mt-4 flex items-center gap-1 rounded-full bg-muted/60 p-1 w-fit">
+        <div className="flex justify-center">
+        <div className="flex items-center gap-1 rounded-full bg-muted/60 p-1 w-fit">
           <button
             id="tab-messages"
             onClick={() => setTab("messages")}
@@ -282,6 +184,7 @@ function MessagesIndex() {
             <Briefcase className="h-4 w-4" />
             Booked Jobs
           </button>
+        </div>
         </div>
 
         {/* ─── MESSAGES TAB ─── */}

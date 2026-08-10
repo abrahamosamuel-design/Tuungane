@@ -1,6 +1,6 @@
 import { Fragment, useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Search, Plus, ShieldAlert, SlidersHorizontal, ChevronDown, ChevronUp, MapPin } from "lucide-react";
+import { Search, Plus, ShieldAlert, SlidersHorizontal, ChevronDown, ChevronUp, MapPin, ArrowLeft } from "lucide-react";
 
 import { apiClient } from "@/lib/api";
 import { useCategories } from "@/hooks/use-categories";
@@ -16,6 +16,7 @@ import { useUserLocation } from "@/hooks/use-user-location";
 import { filterByRadius, sortByProximity } from "@/lib/location";
 import { RadiusFilter } from "@/components/RadiusFilter";
 import { EditRequestDialog } from "@/components/EditRequestDialog";
+import { MobileSearchBar } from "@/components/MobileSearchBar";
 
 export function RequestsBrowsePage() {
   const { user } = useAuth();
@@ -86,31 +87,31 @@ export function RequestsBrowsePage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background flex-1 w-full min-w-0">
-      <section className="sticky top-14 z-30 bg-background/95 backdrop-blur-md pt-3 pb-3 md:pt-4 md:relative md:top-auto md:z-auto shadow-sm md:shadow-none">
+      {/* MOBILE HEADER - matches rest of app */}
+      <div className="md:hidden bg-white">
+        <div className="flex items-center gap-2 px-4 pt-3 pb-1">
+          <button onClick={() => window.history.back()} className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-muted transition-colors">
+            <ArrowLeft className="h-5 w-5 text-navy" />
+          </button>
+          <h2 className="font-display text-lg font-bold text-navy">Service Requests</h2>
+        </div>
+        <MobileSearchBar placeholder="Search requests" value={q} onChange={(e: any) => setQ(e.target.value)} />
+      </div>
+
+      {/* DESKTOP HEADER */}
+      <section className="hidden md:block bg-surface/95 backdrop-blur-md pt-4 pb-3 shadow-sm">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <h1 className="font-display text-2xl font-bold tracking-tight text-navy sm:text-4xl hidden md:block">
-                Service Requests
-              </h1>
-              <p className="mt-1 text-sm text-muted-foreground sm:text-lg hidden md:block">
-                Find jobs near you and send quotes.
-              </p>
-            </div>
-            <div className="flex w-full justify-center md:w-auto md:justify-end">
-              <div className="inline-flex rounded-full bg-muted p-1 shrink-0 shadow-sm">
-                <Link to="/services" className="rounded-full px-6 py-2 text-sm font-medium text-muted-foreground hover:text-navy transition-colors">Services</Link>
-                <Link to="/requests/browse" className="rounded-full max-md:bg-orange max-md:text-white md:bg-background px-6 py-2 text-sm font-semibold md:text-navy shadow-sm">Requests</Link>
-              </div>
-            </div>
-          </div>
+          <h1 className="font-display text-2xl font-bold tracking-tight text-navy sm:text-4xl">
+            Service Requests
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground sm:text-lg">
+            Find jobs near you and send quotes.
+          </p>
         </div>
       </section>
 
-      <section className="relative overflow-hidden bg-background pb-4 pt-3 md:pt-4 sm:pb-8 md:shadow-none">
-        {/* Decorative background blur */}
-        <div className="absolute inset-x-0 -top-40 -z-10 mx-auto h-[400px] w-full max-w-4xl rounded-[100%] bg-orange/5 blur-[100px]" />
-        
+      {/* DESKTOP SEARCH */}
+      <section className="hidden md:block bg-surface/95 pb-4 pt-3 sm:pb-8">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <form
             onSubmit={(e) => {
@@ -130,12 +131,12 @@ export function RequestsBrowsePage() {
             </div>
             <div className="hidden h-8 w-px bg-border sm:block" />
             
-            <div className="relative flex shrink-0 items-center justify-center rounded-full bg-surface focus-within:border-orange h-[52px] w-[52px] sm:h-auto sm:w-auto sm:flex-1 sm:px-4 sm:py-1 sm:bg-transparent">
-              <MapPin className="h-5 w-5 text-muted-foreground shrink-0 sm:mr-2" />
+            <div className="relative flex shrink-0 items-center justify-center rounded-full bg-surface focus-within:border-orange h-auto w-auto flex-1 px-4 py-1 bg-transparent">
+              <MapPin className="h-5 w-5 text-muted-foreground shrink-0 mr-2" />
               <select
                 value={loc}
                 onChange={(e) => setLoc(e.target.value)}
-                className="absolute inset-0 h-full w-full opacity-0 cursor-pointer sm:relative sm:opacity-100 bg-transparent min-h-[44px] text-base outline-none text-foreground appearance-none"
+                className="relative bg-transparent min-h-[44px] text-base outline-none text-foreground appearance-none w-full"
                 title="Location"
               >
                 <option value="">All Locations</option>
@@ -149,79 +150,14 @@ export function RequestsBrowsePage() {
               </select>
             </div>
             
-            <button className="shrink-0 h-[52px] w-[52px] sm:h-auto sm:w-auto rounded-full bg-navy sm:px-6 flex items-center justify-center sm:py-2.5 text-base font-bold text-white transition hover:bg-navy/90 active:scale-[0.98]">
-              <Search className="h-5 w-5 sm:hidden" />
-              <span className="hidden sm:inline">Search</span>
+            <button className="shrink-0 h-auto w-auto rounded-full bg-navy px-6 flex items-center justify-center py-2.5 text-base font-bold text-white transition hover:bg-navy/90 active:scale-[0.98]">
+              Search
             </button>
           </form>
         </div>
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-4 sm:px-6 sm:py-6 lg:px-8 w-full flex-1 min-w-0">
-        {/* Filter chips */}
-        <div className="-mx-4 flex items-center gap-2 overflow-x-auto px-4 pb-2 scrollbar-hide sm:mx-0 sm:px-0 after:content-[''] after:w-px after:shrink-0">
-          {requestFilterChips
-            .filter((c) => ["all", "urgent", "today", "week", "nearby"].includes(c.value))
-            .map((c) => (
-              <Pill key={c.value} active={chip === c.value} onClick={() => setChip(c.value)}>
-                {c.label}
-              </Pill>
-            ))}
-          <button
-            onClick={() => setShowMoreFilters((s) => !s)}
-            className={`shrink-0 inline-flex min-h-[40px] items-center gap-1.5 rounded-full border px-4 py-2 text-sm font-semibold transition active:scale-[0.98] ${
-              showMoreFilters ? "border-navy bg-navy text-navy-foreground shadow-sm" : "border-border bg-background text-muted-foreground hover:border-navy hover:text-navy"
-            }`}
-          >
-            <SlidersHorizontal className="h-4 w-4" /> More filters
-          </button>
-        </div>
-
-        {showMoreFilters && (
-          <div className="mt-4 grid gap-5 rounded-2xl border border-border bg-card p-5 shadow-sm sm:grid-cols-2 md:p-6">
-            <div>
-              <p className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">Category</p>
-              <select
-                value={cat}
-                onChange={(e) => setCat(e.target.value)}
-                className="w-full rounded-xl border border-border bg-background px-4 py-3 min-h-[48px] text-base outline-none focus:border-navy"
-              >
-                <option value="">All categories</option>
-                {categories.map((c) => (
-                  <option key={c.slug} value={c.slug}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-              {category && (
-                <p className="mt-2 text-sm text-muted-foreground">{category.blurb}</p>
-              )}
-            </div>
-            <div className="space-y-3 text-base md:text-sm">
-              <label className="flex items-center gap-3 p-1 -m-1">
-                <input type="checkbox" className="h-5 w-5 md:h-4 md:w-4 rounded border-border text-navy" checked={urgentOnly} onChange={(e) => setUrgentOnly(e.target.checked)} /> <span className="font-medium text-navy">Urgent only</span>
-              </label>
-              <label className="flex items-center gap-3 p-1 -m-1">
-                <input type="checkbox" className="h-5 w-5 md:h-4 md:w-4 rounded border-border text-navy" checked={budgetShown} onChange={(e) => setBudgetShown(e.target.checked)} /> <span className="font-medium text-navy">Budget shown</span>
-              </label>
-              <label className="flex items-center gap-3 p-1 -m-1">
-                <input
-                  type="checkbox"
-                  className="h-5 w-5 md:h-4 md:w-4 rounded border-border text-navy disabled:opacity-50"
-                  checked={nearMe}
-                  onChange={(e) => setNearMe(e.target.checked)}
-                  disabled={!myDistrict}
-                />
-                <span className="font-medium text-navy">Near me {myDistrict ? `(${myDistrict})` : "(set your district)"}</span>
-              </label>
-            </div>
-            <div className="sm:col-span-2 pt-2 border-t border-border/50">
-              <p className="mb-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">Distance</p>
-              <RadiusFilter value={radiusKm} onChange={setRadiusKm} disabled={!userLoc} />
-            </div>
-          </div>
-        )}
-
         {/* Safety notice compact */}
         <SafetyNotice />
 

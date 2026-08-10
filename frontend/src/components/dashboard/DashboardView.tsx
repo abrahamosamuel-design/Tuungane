@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { Link } from "@tanstack/react-router";
-import { Menu, Search, Bell, Heart, MessageCircle, MoreHorizontal, Star, ChevronRight, Wrench, Zap, Sparkles, Calendar, GraduationCap } from "lucide-react";
+import { Menu, Search, Bell, Heart, MessageCircle, MoreHorizontal, Star, ChevronRight, Wrench, Zap, Sparkles, Calendar, GraduationCap, FileText } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { apiClient } from "@/lib/api";
 import { FeedAvatar } from "@/components/feed/FeedAvatar";
@@ -11,6 +11,7 @@ import { useQuery } from "@tanstack/react-query";
 import { MobileSearchBar } from "@/components/MobileSearchBar";
 import { CategoryScroll } from "@/components/CategoryScroll";
 import { ServiceVerticalList } from "@/components/ServiceVerticalList";
+
 export function DashboardView() {
   const { user } = useAuth();
   const { location: userLoc } = useUserLocation();
@@ -78,59 +79,32 @@ export function DashboardView() {
   const mixedFeed = useMemo(() => {
     const feed: any[] = [];
     
-    // Dummy posts to pad out the feed
-    const dummyPosts = [
-      { id: 'dp1', author: 'Tuungane Admin', avatar: null, time: '1 day ago', location: 'Uganda', content: 'Welcome to Tuungane! Find the best service providers around you. Join the community and connect with skilled professionals.', likes: 124, comments: 23 },
-      { id: 'dp2', author: 'Genesis Car Wash', avatar: null, time: '2 days ago', location: 'Entebbe', content: 'Get 20% off all full car washes this weekend! Come by and give your ride the shine it deserves. Located opposite the main market.', likes: 45, comments: 8 },
-      { id: 'dp3', author: 'Sarah Painter', avatar: null, time: '3 days ago', location: 'Kampala', content: 'Just finished a beautiful living room painting project. Check out the before and after photos on my profile!', likes: 89, comments: 14 },
-      { id: 'dp4', author: 'Kato Electricals', avatar: null, time: '5 days ago', location: 'Wakiso', content: 'Reminder: Always ensure your wiring is checked annually by a certified professional to prevent fire hazards.', likes: 210, comments: 45 },
-      { id: 'dp5', author: 'Tuungane Tips', avatar: null, time: '1 week ago', location: 'Uganda', content: 'Did you know you can leave verified reviews for providers you have hired? Help others by sharing your experiences.', likes: 56, comments: 5 },
-      { id: 'dp6', author: 'John Plumbing', avatar: null, time: '2 weeks ago', location: 'Jinja', content: 'Available for emergency plumbing repairs 24/7. Call us anytime!', likes: 12, comments: 1 },
-      { id: 'dp7', author: 'Clean Sweep', avatar: null, time: '3 weeks ago', location: 'Kampala', content: 'We offer deep cleaning services for offices and residential homes. Get a free quote today.', likes: 34, comments: 4 },
-    ];
-
     let profIdx = 0;
     let reqIdx = 0;
-    
-    // Duplicate dummy posts to ensure the feed is long enough
-    const allPosts = [...dummyPosts, ...dummyPosts, ...dummyPosts];
+    let itemCount = 0;
 
-    let postsSinceInjection = 0;
-    let injectionCount = 0;
-    const injectionGaps = [3, 1, 4, 2, 4, 1, 3, 2];
-    
-    for (let i = 0; i < allPosts.length; i++) {
-       const p = allPosts[i];
-       feed.push({ type: 'post', id: `post-${i}`, data: p });
-       postsSinceInjection++;
-       
-       const targetGap = injectionGaps[injectionCount % injectionGaps.length];
-       if (postsSinceInjection >= targetGap) {
-          const canInjectService = profIdx + 1 < realProfiles.length;
-          const canInjectRequest = reqIdx < realRequests.length;
-          
-          if (!canInjectService && !canInjectRequest) continue;
-          
-          let injectService = false;
-          if (canInjectService && canInjectRequest) {
-             injectService = injectionCount % 2 === 0;
-          } else if (canInjectService) {
-             injectService = true;
-          }
-          
-          if (injectService) {
-             const p1 = realProfiles[profIdx++];
-             const p2 = realProfiles[profIdx++];
-             feed.push({ type: 'provider_pair', id: `pair-${injectionCount}`, providers: [p1, p2] });
-             postsSinceInjection = 0;
-             injectionCount++;
-          } else {
-             const r = realRequests[reqIdx++];
-             feed.push({ type: 'request', id: `req-${injectionCount}`, data: r });
-             postsSinceInjection = 0;
-             injectionCount++;
-          }
-       }
+    // Interleave real profiles and requests
+    while (profIdx < realProfiles.length || reqIdx < realRequests.length) {
+      // Alternate: inject provider pair, then request
+      if (itemCount % 2 === 0 && profIdx + 1 < realProfiles.length) {
+        const p1 = realProfiles[profIdx++];
+        const p2 = realProfiles[profIdx++];
+        feed.push({ type: 'provider_pair', id: `pair-${itemCount}`, providers: [p1, p2] });
+      } else if (reqIdx < realRequests.length) {
+        const r = realRequests[reqIdx++];
+        feed.push({ type: 'request', id: `req-${itemCount}`, data: r });
+      } else if (profIdx + 1 < realProfiles.length) {
+        const p1 = realProfiles[profIdx++];
+        const p2 = realProfiles[profIdx++];
+        feed.push({ type: 'provider_pair', id: `pair-${itemCount}`, providers: [p1, p2] });
+      } else if (profIdx < realProfiles.length) {
+        // Single remaining provider
+        const p1 = realProfiles[profIdx++];
+        feed.push({ type: 'provider_pair', id: `pair-${itemCount}`, providers: [p1] });
+      } else {
+        break;
+      }
+      itemCount++;
     }
     
     return feed;
@@ -139,7 +113,7 @@ export function DashboardView() {
   return (
     <div className="flex min-h-screen flex-col bg-background pb-20 md:pb-0">
       
-      {/* NEW MOBILE UI */}
+      {/* MOBILE UI */}
       <div className="md:hidden bg-white">
         <MobileSearchBar placeholder="Search friend services" />
         <CategoryScroll 
@@ -297,51 +271,7 @@ export function DashboardView() {
           <div className="rounded-3xl border border-border bg-card p-5 shadow-sm">
             <h2 className="mb-4 text-sm font-semibold text-navy">Recent Reviews</h2>
             <div className="space-y-5">
-               {/* Dummy Review 1 */}
-               <div className="space-y-2">
-                 <div className="flex items-center justify-between">
-                   <div className="flex gap-1 text-orange">
-                     <Star className="h-3 w-3 fill-current" />
-                     <Star className="h-3 w-3 fill-current" />
-                     <Star className="h-3 w-3 fill-current" />
-                     <Star className="h-3 w-3 fill-current" />
-                     <Star className="h-3 w-3 fill-current" />
-                   </div>
-                   <span className="text-[10px] text-muted-foreground">Just now</span>
-                 </div>
-                 <p className="text-xs font-medium text-navy leading-snug">
-                   "Fixed my sink in under 20 minutes. Very professional and clean!"
-                 </p>
-                 <div className="flex items-center gap-2">
-                   <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-muted text-[8px] font-bold">JD</div>
-                   <p className="text-[10px] text-muted-foreground line-clamp-1">
-                     John D. reviewed <span className="font-semibold text-navy">Kato Plumbers</span>
-                   </p>
-                 </div>
-               </div>
-               
-               {/* Dummy Review 2 */}
-               <div className="space-y-2">
-                 <div className="flex items-center justify-between">
-                   <div className="flex gap-1 text-orange">
-                     <Star className="h-3 w-3 fill-current" />
-                     <Star className="h-3 w-3 fill-current" />
-                     <Star className="h-3 w-3 fill-current" />
-                     <Star className="h-3 w-3 fill-current" />
-                     <Star className="h-3 w-3 fill-current" />
-                   </div>
-                   <span className="text-[10px] text-muted-foreground">2h ago</span>
-                 </div>
-                 <p className="text-xs font-medium text-navy leading-snug">
-                   "The best deep cleaning service I've ever used. Highly recommend."
-                 </p>
-                 <div className="flex items-center gap-2">
-                   <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-muted text-[8px] font-bold">SM</div>
-                   <p className="text-[10px] text-muted-foreground line-clamp-1">
-                     Sarah M. reviewed <span className="font-semibold text-navy">Sparkle Cleaners</span>
-                   </p>
-                 </div>
-               </div>
+               <p className="text-xs text-muted-foreground text-center py-4">No reviews yet. Reviews from completed jobs will appear here.</p>
             </div>
           </div>
           

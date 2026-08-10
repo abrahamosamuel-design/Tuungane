@@ -48,7 +48,7 @@ function ServiceDetailPage() {
   }
 
   // Use cover_url from service, or fallback to profile avatar/cover, or a default placeholder
-  const imageUrl = service.media?.[0]?.url || service.profile?.cover_url || service.profile?.avatar_url || "https://picsum.photos/800/800";
+  const imageUrl = service.media?.[0]?.url || service.profile?.cover_url || service.profile?.avatar_url || null;
   const displayPrice = service.price_note || (service.price_min_ugx ? "From UGX " + service.price_min_ugx.toLocaleString() : null);
   
   const handleOrder = () => {
@@ -182,51 +182,27 @@ function ServiceDetailPage() {
           {/* Timeline Tab */}
           {activeTab === "timeline" && (
             <div className="space-y-5">
-              {([
-                {
-                  img: service.media?.[0]?.url || service.profile?.cover_url || "https://picsum.photos/seed/work1/600/400",
-                  caption: "Completed a 3-bedroom rental refurbishment in Entebbe — new flooring, fresh paint, and modern fixtures throughout.",
-                  date: "Aug 5, 2026",
-                },
-                {
-                  img: service.media?.[1]?.url || "https://picsum.photos/seed/work2/600/400",
-                  caption: "Handed over a fully furnished long-stay apartment in Kampala. Client loved the balcony view!",
-                  date: "Jul 28, 2026",
-                },
-                {
-                  img: service.media?.[2]?.url || "https://picsum.photos/seed/work3/600/400",
-                  caption: "Land sale finalized in Wakiso. Clean title, ready for development.",
-                  date: "Jul 15, 2026",
-                },
-                {
-                  img: "https://picsum.photos/seed/work4/600/400",
-                  caption: "New office space fit-out for a tech startup — open plan layout, glass partitions, and ergonomic seating.",
-                  date: "Jun 30, 2026",
-                },
-              ] as const).map((item, idx) => (
-                <div key={idx} className="group overflow-hidden rounded-2xl border border-border bg-card">
-                  <div className="relative aspect-[16/9] w-full overflow-hidden bg-muted">
-                    <img
-                      src={item.img}
-                      alt={item.caption}
-                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-                      loading="lazy"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                    <span className="absolute bottom-2 left-3 flex items-center gap-1 text-[10px] font-medium text-white/90">
-                      <ImageIcon className="h-3 w-3" />
-                      Work Post
-                    </span>
+              {service.media?.length > 0 ? (
+                service.media.map((m: any, idx: number) => (
+                  <div key={idx} className="group overflow-hidden rounded-2xl border border-border bg-card">
+                    <div className="relative aspect-[16/9] w-full overflow-hidden bg-muted">
+                      <img
+                        src={m.url}
+                        alt="Work post"
+                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                        loading="lazy"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                      <span className="absolute bottom-2 left-3 flex items-center gap-1 text-[10px] font-medium text-white/90">
+                        <ImageIcon className="h-3 w-3" />
+                        Work Post
+                      </span>
+                    </div>
                   </div>
-                  <div className="px-4 py-3">
-                    <p className="text-sm leading-relaxed text-navy">{item.caption}</p>
-                    <span className="mt-1.5 flex items-center gap-1 text-[11px] text-muted-foreground">
-                      <Clock className="h-3 w-3" />
-                      {item.date}
-                    </span>
-                  </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-8">No timeline posts yet.</p>
+              )}
             </div>
           )}
         </div>

@@ -6,6 +6,7 @@ export type CategoryItem = {
   icon: React.ReactNode;
   colorClass: string;
   isMore?: boolean;
+  link?: string;
 };
 
 export function CategoryScroll({ title, categories }: { title: string; categories: CategoryItem[] }) {
@@ -21,8 +22,8 @@ export function CategoryScroll({ title, categories }: { title: string; categorie
         {categories.map((cat) => (
           <Link
             key={cat.id}
-            to={`/services`}
-            search={cat.isMore ? undefined : ({ q: cat.name } as any)}
+            to={cat.link || `/services`}
+            search={!cat.link && !cat.isMore ? ({ q: cat.name } as any) : undefined}
             className="flex flex-1 min-w-[72px] flex-col items-center gap-2 snap-start"
           >
             <div className={`flex h-[72px] w-[72px] items-center justify-center rounded-[24px] ${cat.colorClass} text-white shadow-sm transition-transform hover:scale-105 active:scale-95`}>

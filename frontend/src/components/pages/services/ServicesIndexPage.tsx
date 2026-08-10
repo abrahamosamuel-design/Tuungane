@@ -270,6 +270,26 @@ export function ServicesIndexPage({ initialSort }: { initialSort?: "recent" }) {
           {/* MOBILE DEFAULT: CATEGORIES LIST */}
           <div className={`md:hidden ${isSearching ? 'hidden' : 'block'}`}>
             <MobileSearchBar placeholder="Search friend services" value={q} onChange={(e) => setQ(e.target.value)} />
+
+            {/* Requests Card */}
+            <div className="px-6 pt-2 pb-2">
+              <h2 className="font-display text-xl font-bold text-navy mb-4">Requests</h2>
+              <Link
+                to="/requests/browse"
+                className="flex items-center gap-4 rounded-[24px] border border-orange/30 bg-orange/5 p-5 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.06)] transition-transform hover:-translate-y-0.5 active:scale-[0.98]"
+              >
+                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-orange/15 text-orange">
+                  <ClipboardList className="h-6 w-6" />
+                </div>
+                <div className="flex flex-1 flex-col gap-0.5">
+                  <span className="text-[15px] font-bold text-navy">Browse Service Requests</span>
+                  <span className="text-[13px] font-medium text-muted-foreground/80">See what people need help with</span>
+                </div>
+                <ChevronRight className="h-5 w-5 text-orange/60" />
+              </Link>
+            </div>
+
+            {/* Services */}
             <h2 className="font-display text-xl font-bold text-navy mb-4 px-6 pt-2">Services</h2>
             <div className="flex flex-col gap-4 px-6 pb-6">
               {(dbCats ?? categories).map((c) => {
