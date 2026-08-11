@@ -143,7 +143,13 @@ export function DashboardView() {
                   <div key={item.id} className="grid grid-cols-2 gap-4">
                     {item.providers.map((p: any) => (
                       <div key={p.id} className="rounded-3xl border border-border bg-card p-4 shadow-sm text-center">
-                         <img src={p.avatar} className="mx-auto h-12 w-12 rounded-full object-cover mb-2" />
+                         {p.avatar_url ? (
+                           <img src={p.avatar_url} className="mx-auto h-12 w-12 rounded-full object-cover mb-2" />
+                         ) : (
+                           <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-orange/10 text-orange font-bold text-sm mb-2">
+                             {(p.name || "?").charAt(0).toUpperCase()}
+                           </div>
+                         )}
                          <h4 className="font-semibold text-sm text-navy truncate">{p.name}</h4>
                          <p className="text-[10px] text-muted-foreground">{p.category}</p>
                          <div className="mt-2 flex items-center justify-center gap-1 text-[10px] font-medium text-orange">
