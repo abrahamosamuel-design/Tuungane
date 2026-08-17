@@ -3,6 +3,9 @@
   "outputDirectory": "frontend/dist",
   "installCommand": "npm install",
   "rewrites": [
-    { "source": "/((?!api/).*)", "destination": "/index.html" }
+    {
+      "source": "/((?!api/|assets/|_next/).*)",
+      "destination": "/index.html"
+    }
   ]
 }

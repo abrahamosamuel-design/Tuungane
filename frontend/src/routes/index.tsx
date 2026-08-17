@@ -99,7 +99,7 @@ function Index() {
       {/* NEW MOBILE UI */}
       <div className="md:hidden pt-4 bg-white">
         <div className="relative mb-6 h-[400px] w-full overflow-hidden">
-           <img src="https://images.unsplash.com/photo-1542037104857-ffbb0b91552d?auto=format&fit=crop&q=80" alt="Provider" className="h-full w-full object-cover" />
+           <img src="/hero-bg.png" alt="Provider" className="h-full w-full object-cover" />
            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
            <div className="absolute bottom-6 left-4 right-4 text-center">
              <Link to="/login" search={{ tab: "signup" } as never} className="block w-full rounded-full bg-orange py-3.5 text-sm font-bold text-white shadow-lg transition-transform hover:scale-[1.02] active:scale-95">
