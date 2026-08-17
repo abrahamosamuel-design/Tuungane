@@ -1,262 +1,376 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { User, Building2, Search, ClipboardList, Sparkles, Compass, ArrowRight, Check } from "lucide-react";
-import { apiClient } from "@/lib/api";
-import { useAuth } from "@/hooks/use-auth";
-import { organisationTypes, type OrganisationType } from "@/data/organisationTypes";
-import { toast } from "sonner";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  ArrowRight,
+  Camera,
+  Briefcase,
+  ClipboardList,
+  PartyPopper,
+  Loader2,
+} from "lucide-react";
+
+import { Avatar } from "@/components/social/Avatar";
 import { Logo } from "@/components/Logo";
+import { useAuth } from "@/hooks/use-auth";
+import { apiClient } from "@/lib/api";
+import { uploadMedia } from "@/lib/upload";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
   head: () => ({ meta: [{ title: "Welcome to Tuungane" }] }),
   component: Onboarding,
 });
 
-type Identity = "individual" | "institution";
-type NextAction = "find" | "request" | "list" | "explore";
+/* ---------- helpers ---------- */
+
+function getDisplayName(
+  user: { user_metadata?: Record<string, unknown> | null; email?: string | null } | null | undefined,
+): string {
+  if (!user) return "";
+  const meta = (user.user_metadata ?? {}) as Record<string, unknown>;
+  const candidates = [meta.full_name, meta.name, meta.display_name];
+  for (const c of candidates) {
+    if (typeof c === "string" && c.trim()) return c.trim();
+  }
+  return "";
+}
+
+function markOnboarded() {
+  try {
+    localStorage.setItem("tuungane_onboarded", "1");
+    localStorage.setItem("tuungane_welcome_seen", "1");
+  } catch {
+    /* ignore */
+  }
+}
+
+/* ---------- root component ---------- */
+
+type NextAction = "list" | "request" | null;
 
 function Onboarding() {
   const { user, loading } = useAuth();
   const nav = useNavigate();
-  const [step, setStep] = useState<1 | 2>(1);
-  const [identity, setIdentity] = useState<Identity | null>(null);
-  const [orgName, setOrgName] = useState("");
-  const [orgType, setOrgType] = useState<OrganisationType | "">("");
-  const [busy, setBusy] = useState(false);
+  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [chosenAction, setChosenAction] = useState<NextAction>(null);
 
   useEffect(() => {
     if (!loading && !user) nav({ to: "/login" });
   }, [loading, user, nav]);
 
-  const saveIdentity = async () => {
-    if (!user || !identity) return;
-    setBusy(true);
-    const patch: {
-      profile_identity: Identity;
-      organisation_name?: string;
-      organisation_type?: string;
-    } = { profile_identity: identity };
-    if (identity === "institution") {
-      if (orgName.trim()) patch.organisation_name = orgName.trim();
-      if (orgType) patch.organisation_type = orgType;
-    }
-    try {
-      await apiClient.put("/profiles/me", patch);
-      setStep(2);
-    } catch (error: any) {
-      toast.error(error.response?.data?.error || "Failed to update profile");
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  const finish = async (next: NextAction) => {
-    try { localStorage.setItem("tuungane_welcome_seen", "1"); } catch { /* ignore */ }
-    try { localStorage.setItem("tuungane_onboarded", "1"); } catch { /* ignore */ }
-    if (user) {
-      // Fire-and-forget: don't block navigation on the flag write.
-      apiClient.put("/profiles/me", { has_completed_onboarding: true }).catch(() => {});
-    }
-    const map: Record<NextAction, string> = {
-      find: "/services",
-      request: "/requests/new",
-      list: "/profiles/new",
-      explore: "/",
-    };
-    nav({ to: map[next] });
-  };
-
   if (!user) return null;
+
+  const goToStep2 = () => setStep(2);
+
+  const goToStep3 = (action: NextAction) => {
+    setChosenAction(action);
+    setStep(3);
+  };
+
+  const finish = async () => {
+    markOnboarded();
+    apiClient.put("/profiles/me", { has_completed_onboarding: true }).catch(() => {});
+
+    const dest =
+      chosenAction === "list"
+        ? "/profiles/new"
+        : chosenAction === "request"
+          ? "/requests/new"
+          : "/dashboard";
+
+    nav({ to: dest });
+  };
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-orange/5 via-background to-green/5 flex flex-col items-center justify-center p-4 py-12">
-      <div className="w-full max-w-2xl bg-card/80 backdrop-blur-xl rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-border/50 p-6 sm:p-10 relative overflow-hidden">
-        
+      <div className="w-full max-w-lg bg-card/80 backdrop-blur-xl rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-border/50 p-6 sm:p-10 relative overflow-hidden">
         {/* Decorative blur blobs */}
         <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 bg-orange/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-64 h-64 bg-green/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col">
-          <div className="mb-10 flex justify-center">
+          {/* Logo */}
+          <div className="mb-6 flex justify-center">
             <Logo className="h-10 w-auto" />
           </div>
 
-          <div className="mb-8 flex items-center justify-center gap-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            <span className={step === 1 ? "text-orange" : ""}>Step 1</span>
-            <span className="h-px w-8 bg-border" />
-            <span className={step === 2 ? "text-orange" : ""}>Step 2</span>
-          </div>
+          {/* Step indicator */}
+          <StepIndicator current={step} />
 
-          {step === 1 ? (
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <h1 className="text-center font-display text-3xl font-bold text-navy sm:text-4xl">
-                How are you joining Tuungane?
-              </h1>
-              <p className="mt-3 text-center text-sm text-muted-foreground max-w-md mx-auto">
-                Pick the option that best describes you. You can always change this later in Settings.
-              </p>
-
-              <div className="mt-8 grid gap-4 sm:grid-cols-2">
-                <IdentityCard
-                  selected={identity === "individual"}
-                  onClick={() => setIdentity("individual")}
-                  icon={<User className="h-6 w-6" />}
-                  title="Individual Profile"
-                  body="For people who want to connect, find or offer services, share updates, and grow their network."
-                  tone="navy"
-                />
-                <IdentityCard
-                  selected={identity === "institution"}
-                  onClick={() => setIdentity("institution")}
-                  icon={<Building2 className="h-6 w-6" />}
-                  title="Institution / Organisation"
-                  body="For schools, NGOs, churches, companies, SACCOs, training centres and other organisations."
-                  tone="green"
-                />
-              </div>
-
-              {identity === "institution" && (
-                <div className="mt-6 space-y-4 rounded-2xl border border-green/20 bg-green/5 p-5 animate-in fade-in zoom-in-95 duration-300">
-                  <p className="text-xs font-medium text-green-700/80">
-                    A couple of quick details — you can complete the rest later.
-                  </p>
-                  <div className="space-y-4">
-                    <div>
-                      <label className="text-xs font-semibold text-navy">Organisation name</label>
-                      <input
-                        value={orgName}
-                        onChange={(e) => setOrgName(e.target.value)}
-                        placeholder="e.g. Rabboni Christian Learning Center"
-                        className="mt-1.5 w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none transition focus:border-green focus:ring-2 focus:ring-green/20"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-xs font-semibold text-navy">Organisation type</label>
-                      <select
-                        value={orgType}
-                        onChange={(e) => setOrgType(e.target.value as OrganisationType | "")}
-                        className="mt-1.5 w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none transition focus:border-green focus:ring-2 focus:ring-green/20"
-                      >
-                        <option value="">Select a type…</option>
-                        {organisationTypes.map((t) => (
-                          <option key={t.value} value={t.value}>{t.label}</option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <div className="mt-10 flex items-center justify-between border-t border-border pt-6">
-                <button
-                  type="button"
-                  onClick={() => finish("explore")}
-                  className="text-sm font-semibold text-muted-foreground transition hover:text-navy"
-                >
-                  Skip for now
-                </button>
-                <button
-                  type="button"
-                  onClick={saveIdentity}
-                  disabled={!identity || busy}
-                  className="inline-flex items-center gap-2 rounded-full bg-orange px-6 py-3 text-sm font-bold text-orange-foreground shadow-md transition-all hover:brightness-110 hover:shadow-lg disabled:opacity-50 disabled:hover:shadow-md disabled:hover:brightness-100"
-                >
-                  {busy ? "Saving…" : "Continue"} <ArrowRight className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="animate-in fade-in slide-in-from-right-8 duration-500">
-              <h1 className="text-center font-display text-3xl font-bold text-navy sm:text-4xl">
-                What would you like to do first?
-              </h1>
-              <p className="mt-3 text-center text-sm text-muted-foreground max-w-md mx-auto">
-                Just a starting point — you can do all of these later.
-              </p>
-
-              <div className="mt-8 grid gap-4 sm:grid-cols-2">
-                <ActionCard onClick={() => finish("find")} icon={<Search className="h-6 w-6" />} title="Find a service" body="Browse people offering services near you." tone="navy" />
-                <ActionCard onClick={() => finish("request")} icon={<ClipboardList className="h-6 w-6" />} title="Post a service request" body="Describe what you need and get responses." tone="orange" />
-                <ActionCard onClick={() => finish("list")} icon={<Sparkles className="h-6 w-6" />} title="List my service" body="Offer a skill and become discoverable." tone="green" />
-                <ActionCard onClick={() => finish("explore")} icon={<Compass className="h-6 w-6" />} title="Explore Tuungane" body="Just look around — no commitment." tone="muted" />
-              </div>
-            </div>
-          )}
+          {/* Steps */}
+          {step === 1 && <Step1Welcome user={user} onContinue={goToStep2} />}
+          {step === 2 && <Step2Action onChoose={goToStep3} />}
+          {step === 3 && <Step3ThankYou onFinish={finish} />}
         </div>
       </div>
     </main>
   );
 }
 
-function IdentityCard({
-  selected, onClick, icon, title, body, tone,
-}: {
-  selected: boolean;
-  onClick: () => void;
-  icon: React.ReactNode;
-  title: string;
-  body: string;
-  tone: "navy" | "green";
-}) {
-  const border = tone === "green" ? "border-green bg-green/5 ring-4 ring-green/10" : "border-navy bg-navy/5 ring-4 ring-navy/10";
-  const iconBg = tone === "green" ? "bg-green text-white shadow-green/20" : "bg-navy text-white shadow-navy/20";
+/* ---------- step indicator ---------- */
+
+function StepIndicator({ current }: { current: 1 | 2 | 3 }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`group relative rounded-2xl border-2 p-5 text-left transition-all duration-300 ${
-        selected ? `${border} scale-[1.02] shadow-lg` : "border-border/50 bg-background hover:border-border hover:bg-muted/30"
-      }`}
-    >
-      <div className={`flex h-12 w-12 items-center justify-center rounded-xl shadow-lg transition-transform group-hover:scale-105 ${iconBg}`}>
-        {icon}
-      </div>
-      <h3 className="mt-4 font-display text-lg font-bold text-navy">{title}</h3>
-      <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{body}</p>
-      {selected && (
-        <span className="absolute right-4 top-4 inline-flex h-6 w-6 items-center justify-center rounded-full bg-navy text-white shadow-sm animate-in zoom-in">
-          <Check className="h-3.5 w-3.5" />
-        </span>
-      )}
-    </button>
+    <div className="mb-8 flex items-center justify-center gap-2">
+      {[1, 2, 3].map((s) => (
+        <div
+          key={s}
+          className={`h-2 rounded-full transition-all duration-500 ${
+            s === current
+              ? "w-8 bg-orange"
+              : s < current
+                ? "w-2 bg-orange/60"
+                : "w-2 bg-border"
+          }`}
+        />
+      ))}
+    </div>
   );
 }
 
-function ActionCard({
-  onClick, icon, title, body, tone,
+/* ---------- step 1: welcome + photo + name ---------- */
+
+function Step1Welcome({
+  user,
+  onContinue,
 }: {
-  onClick: () => void;
-  icon: React.ReactNode;
-  title: string;
-  body: string;
-  tone: "navy" | "orange" | "green" | "muted";
+  user: { id: string; email?: string | null; user_metadata?: Record<string, unknown> | null };
+  onContinue: () => void;
 }) {
-  const iconBg =
-    tone === "orange" ? "bg-orange text-orange-foreground shadow-orange/20" :
-    tone === "green" ? "bg-green text-green-foreground shadow-green/20" :
-    tone === "muted" ? "bg-muted text-navy shadow-black/5" :
-    "bg-navy text-white shadow-navy/20";
-  
-  const hoverBorder = 
-    tone === "orange" ? "hover:border-orange" :
-    tone === "green" ? "hover:border-green" :
-    tone === "muted" ? "hover:border-muted-foreground" :
-    "hover:border-navy";
+  const prefillName = useMemo(() => getDisplayName(user), [user]);
+  const [fullName, setFullName] = useState(prefillName);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [uploadBusy, setUploadBusy] = useState(false);
+  const [saveBusy, setSaveBusy] = useState(false);
+  const [nameError, setNameError] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  // Load existing avatar if any
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data } = await apiClient<{ data: { avatar_url: string | null; full_name: string | null } }>("/profiles/me");
+        if (cancelled) return;
+        if (data.data?.avatar_url) setAvatarUrl(data.data.avatar_url);
+        // If server has a name and we don't have one from Google metadata, use it
+        if (data.data?.full_name && !fullName) setFullName(data.data.full_name);
+      } catch {
+        /* ignore */
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  const handleFile = async (file: File) => {
+    if (!file.type.startsWith("image/")) { toast.error("Please choose an image file"); return; }
+    if (file.size > 8 * 1024 * 1024) { toast.error("Image must be smaller than 8 MB"); return; }
+    setUploadBusy(true);
+    try {
+      const url = await uploadMedia(user.id, file, "avatars");
+      await apiClient.put("/profiles/me", { avatar_url: url });
+      setAvatarUrl(url);
+      toast.success("Photo added!");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Upload failed");
+    } finally {
+      setUploadBusy(false);
+    }
+  };
+
+  const handleContinue = async () => {
+    const trimmed = fullName.trim();
+    if (!trimmed) {
+      setNameError(true);
+      return;
+    }
+    setSaveBusy(true);
+    try {
+      await apiClient.put("/profiles/me", { full_name: trimmed });
+      onContinue();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Failed to save name");
+    } finally {
+      setSaveBusy(false);
+    }
+  };
 
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`group rounded-2xl border-2 border-border/50 bg-background p-5 text-left transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${hoverBorder}`}
-    >
-      <div className={`flex h-12 w-12 items-center justify-center rounded-xl shadow-lg transition-transform group-hover:scale-105 ${iconBg}`}>
-        {icon}
+    <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <h1 className="text-center font-display text-3xl font-bold text-navy sm:text-4xl">
+        Welcome to Tuungane
+      </h1>
+      <p className="mt-3 text-center text-sm text-muted-foreground max-w-sm mx-auto">
+        Let's set up your profile so people can connect with you.
+      </p>
+
+      {/* Avatar upload */}
+      <div className="mt-8 flex flex-col items-center">
+        <button
+          type="button"
+          onClick={() => fileRef.current?.click()}
+          disabled={uploadBusy}
+          className="group relative"
+        >
+          <Avatar name={fullName || user.email || "You"} url={avatarUrl} size={100} />
+          <span className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full bg-orange text-white shadow-md transition-transform group-hover:scale-110">
+            {uploadBusy ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Camera className="h-4 w-4" />
+            )}
+          </span>
+        </button>
+        <p className="mt-3 text-xs text-muted-foreground">
+          Tap to add a profile photo <span className="text-muted-foreground/60">(optional)</span>
+        </p>
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
+        />
       </div>
-      <h3 className="mt-4 font-display text-lg font-bold text-navy">{title}</h3>
-      <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{body}</p>
-      <span className={`mt-4 inline-flex items-center gap-1.5 text-xs font-bold transition-transform group-hover:translate-x-1 ${tone === 'orange' ? 'text-orange' : tone === 'green' ? 'text-green' : tone === 'muted' ? 'text-muted-foreground' : 'text-navy'}`}>
-        Continue <ArrowRight className="h-4 w-4" />
-      </span>
-    </button>
+
+      {/* Name input */}
+      <div className="mt-6">
+        <label htmlFor="onboarding-name" className="block text-xs font-semibold text-navy mb-1.5">
+          Your Name <span className="text-red-500">*</span>
+        </label>
+        <input
+          id="onboarding-name"
+          type="text"
+          value={fullName}
+          onChange={(e) => {
+            setFullName(e.target.value);
+            if (nameError && e.target.value.trim()) setNameError(false);
+          }}
+          placeholder="Enter your full name"
+          className={`w-full rounded-xl border bg-background px-4 py-3 text-sm outline-none transition focus:ring-2 ${
+            nameError
+              ? "border-red-400 focus:border-red-400 focus:ring-red-200"
+              : "border-border focus:border-orange focus:ring-orange/20"
+          }`}
+        />
+        {nameError && (
+          <p className="mt-1.5 text-xs text-red-500 animate-in fade-in">
+            Please enter your name to continue
+          </p>
+        )}
+      </div>
+
+      {/* Continue */}
+      <div className="mt-8">
+        <button
+          type="button"
+          onClick={handleContinue}
+          disabled={saveBusy}
+          className="flex w-full items-center justify-center gap-2 rounded-full bg-orange px-6 py-3.5 text-sm font-bold text-orange-foreground shadow-md transition-all hover:brightness-110 hover:shadow-lg disabled:opacity-50"
+        >
+          {saveBusy ? "Saving…" : "Continue"} <ArrowRight className="h-4 w-4" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- step 2: list or request ---------- */
+
+function Step2Action({ onChoose }: { onChoose: (action: NextAction) => void }) {
+  return (
+    <div className="animate-in fade-in slide-in-from-right-8 duration-500">
+      <h1 className="text-center font-display text-2xl font-bold text-navy sm:text-3xl">
+        What would you like to do?
+      </h1>
+      <p className="mt-3 text-center text-sm text-muted-foreground max-w-sm mx-auto">
+        Pick a starting point — you can always do both later.
+      </p>
+
+      <div className="mt-8 grid gap-4">
+        <button
+          type="button"
+          onClick={() => onChoose("list")}
+          className="group flex items-start gap-4 rounded-2xl border-2 border-border/50 bg-background p-5 text-left transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-green"
+        >
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-green text-white shadow-lg shadow-green/20 transition-transform group-hover:scale-105">
+            <Briefcase className="h-6 w-6" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <h3 className="font-display text-lg font-bold text-navy">List a Service</h3>
+            <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+              Offer your skills — plumbing, cleaning, tutoring and more. Get discovered by people who need you.
+            </p>
+            <span className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-green transition-transform group-hover:translate-x-1">
+              Get started <ArrowRight className="h-3.5 w-3.5" />
+            </span>
+          </div>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onChoose("request")}
+          className="group flex items-start gap-4 rounded-2xl border-2 border-border/50 bg-background p-5 text-left transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-orange"
+        >
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-orange text-orange-foreground shadow-lg shadow-orange/20 transition-transform group-hover:scale-105">
+            <ClipboardList className="h-6 w-6" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <h3 className="font-display text-lg font-bold text-navy">Request a Service</h3>
+            <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+              Describe what you need — a leaky sink, a delivery, or anything else — and skilled people will respond.
+            </p>
+            <span className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-orange transition-transform group-hover:translate-x-1">
+              Post a request <ArrowRight className="h-3.5 w-3.5" />
+            </span>
+          </div>
+        </button>
+      </div>
+
+      {/* Skip */}
+      <div className="mt-6 text-center">
+        <button
+          type="button"
+          onClick={() => onChoose(null)}
+          className="text-xs font-medium text-muted-foreground hover:text-navy transition-colors"
+        >
+          Skip for now
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- step 3: thank you ---------- */
+
+function Step3ThankYou({ onFinish }: { onFinish: () => void }) {
+  return (
+    <div className="animate-in fade-in zoom-in-95 duration-500 flex flex-col items-center text-center py-4">
+      {/* Celebration icon */}
+      <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-orange/20 via-green/20 to-orange/20 mb-6">
+        <PartyPopper className="h-10 w-10 text-orange" />
+      </div>
+
+      <h1 className="font-display text-3xl font-bold text-navy sm:text-4xl">
+        Thank you for joining!
+      </h1>
+      <p className="mt-4 text-sm text-muted-foreground max-w-xs mx-auto leading-relaxed">
+        You're all set. Welcome to the Tuungane community — where neighbours connect and help each other thrive. 🎉
+      </p>
+
+      {/* Animated arrow button */}
+      <button
+        type="button"
+        onClick={onFinish}
+        className="mt-10 group flex items-center gap-3 rounded-full bg-navy px-8 py-4 text-sm font-bold text-white shadow-lg transition-all hover:shadow-xl hover:brightness-110 active:scale-95"
+      >
+        Let's go
+        <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+      </button>
+
+      <p className="mt-4 text-[11px] text-muted-foreground/60">
+        You can explore everything from your dashboard
+      </p>
+    </div>
   );
 }

@@ -34,7 +34,7 @@ function isEngaged(pathname: string, isAuthed: boolean): boolean {
   const engagedPaths = [
     "/dashboard",
     "/me",
-    "/welcome",
+    "/onboarding",
     "/settings",
     "/requests",
     "/profiles/new",

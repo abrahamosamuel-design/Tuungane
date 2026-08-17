@@ -42,7 +42,6 @@ import { Route as BusinessesNewRouteImport } from './routes/businesses.new'
 import { Route as BusinessesCreateRouteImport } from './routes/businesses.create'
 import { Route as BusinessesSlugRouteImport } from './routes/businesses.$slug'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
-import { Route as AuthenticatedWelcomeRouteImport } from './routes/_authenticated/welcome'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedMeRouteImport } from './routes/_authenticated/me'
@@ -227,11 +226,6 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
   path: '/auth/callback',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedWelcomeRoute = AuthenticatedWelcomeRouteImport.update({
-  id: '/welcome',
-  path: '/welcome',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
@@ -352,7 +346,6 @@ export interface FileRoutesByFullPath {
   '/me': typeof AuthenticatedMeRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/settings': typeof AuthenticatedSettingsRoute
-  '/welcome': typeof AuthenticatedWelcomeRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/businesses/$slug': typeof BusinessesSlugRoute
   '/businesses/create': typeof BusinessesCreateRoute
@@ -404,7 +397,6 @@ export interface FileRoutesByTo {
   '/me': typeof AuthenticatedMeRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/settings': typeof AuthenticatedSettingsRoute
-  '/welcome': typeof AuthenticatedWelcomeRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/businesses/$slug': typeof BusinessesSlugRoute
   '/businesses/create': typeof BusinessesCreateRoute
@@ -459,7 +451,6 @@ export interface FileRoutesById {
   '/_authenticated/me': typeof AuthenticatedMeRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
-  '/_authenticated/welcome': typeof AuthenticatedWelcomeRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/businesses/$slug': typeof BusinessesSlugRoute
   '/businesses/create': typeof BusinessesCreateRoute
@@ -514,7 +505,6 @@ export interface FileRouteTypes {
     | '/me'
     | '/onboarding'
     | '/settings'
-    | '/welcome'
     | '/auth/callback'
     | '/businesses/$slug'
     | '/businesses/create'
@@ -566,7 +556,6 @@ export interface FileRouteTypes {
     | '/me'
     | '/onboarding'
     | '/settings'
-    | '/welcome'
     | '/auth/callback'
     | '/businesses/$slug'
     | '/businesses/create'
@@ -620,7 +609,6 @@ export interface FileRouteTypes {
     | '/_authenticated/me'
     | '/_authenticated/onboarding'
     | '/_authenticated/settings'
-    | '/_authenticated/welcome'
     | '/auth/callback'
     | '/businesses/$slug'
     | '/businesses/create'
@@ -916,13 +904,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/welcome': {
-      id: '/_authenticated/welcome'
-      path: '/welcome'
-      fullPath: '/welcome'
-      preLoaderRoute: typeof AuthenticatedWelcomeRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/settings': {
       id: '/_authenticated/settings'
       path: '/settings'
@@ -1060,7 +1041,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedMeRoute: typeof AuthenticatedMeRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
-  AuthenticatedWelcomeRoute: typeof AuthenticatedWelcomeRoute
   AuthenticatedMessagesIdRoute: typeof AuthenticatedMessagesIdRoute
   AuthenticatedNotificationsIdRoute: typeof AuthenticatedNotificationsIdRoute
   AuthenticatedNotificationsPreferencesRoute: typeof AuthenticatedNotificationsPreferencesRoute
@@ -1081,7 +1061,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMeRoute: AuthenticatedMeRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
-  AuthenticatedWelcomeRoute: AuthenticatedWelcomeRoute,
   AuthenticatedMessagesIdRoute: AuthenticatedMessagesIdRoute,
   AuthenticatedNotificationsIdRoute: AuthenticatedNotificationsIdRoute,
   AuthenticatedNotificationsPreferencesRoute:
