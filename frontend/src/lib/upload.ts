@@ -58,13 +58,6 @@ export async function compressImage(file: File, quality = 0.7): Promise<File> {
 }
 
 export async function uploadMedia(userId: string, file: File, folder = "posts"): Promise<string> {
-  if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
-    throw new Error("Upload is not configured correctly for this project.");
-  }
-
-  const ext = file.name.split(".").pop() ?? "jpg";
-  const path = `${userId}/${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-
   const {
     data: { session },
   } = await supabase.auth.getSession();
@@ -73,27 +66,44 @@ export async function uploadMedia(userId: string, file: File, folder = "posts"):
     throw new Error("Your session expired. Please log in again and retry the upload.");
   }
 
-  const response = await fetch(toStorageObjectUrl(path), {
+  // Request a presigned URL from our backend
+  const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+  const presignRes = await fetch(`${baseUrl}/upload/presign`, {
     method: "POST",
     headers: {
-      apikey: SUPABASE_PUBLISHABLE_KEY,
+      "Content-Type": "application/json",
       Authorization: `Bearer ${session.access_token}`,
-      "x-upsert": "false",
-      "content-type": file.type || "application/octet-stream",
+    },
+    body: JSON.stringify({
+      folder,
+      fileName: file.name,
+      contentType: file.type || "application/octet-stream",
+    }),
+  });
+
+  if (!presignRes.ok) {
+    const errorPayload = await presignRes.json().catch(() => null);
+    throw new Error(errorPayload?.error || "Failed to generate secure upload link.");
+  }
+
+  const { uploadUrl, publicUrl } = await presignRes.json();
+
+  if (!uploadUrl || !publicUrl) {
+    throw new Error("Backend did not return required upload URLs.");
+  }
+
+  // PUT the file directly to Cloudflare R2
+  const response = await fetch(uploadUrl, {
+    method: "PUT",
+    headers: {
+      "Content-Type": file.type || "application/octet-stream",
     },
     body: file,
   });
 
   if (!response.ok) {
-    const payload = await response.json().catch(() => null);
-    const message = payload?.message || payload?.error || "Upload failed";
-    throw new Error(
-      message.includes("row-level security policy")
-        ? "Upload failed because your sign-in session was not attached correctly. Please refresh and try again."
-        : message,
-    );
+    throw new Error("Failed to upload media to cloud storage.");
   }
 
-  const { data } = supabase.storage.from("tuungane-media").getPublicUrl(path);
-  return data.publicUrl;
+  return publicUrl;
 }
