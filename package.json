@@ -7,7 +7,7 @@
   ],
   "scripts": {
     "dev": "npm run dev --workspace=frontend",
-    "build": "npm rebuild rollup && npm run build --workspace=frontend",
+    "build": "npm install --no-save lightningcss-linux-x64-gnu@1.32.0 && npm rebuild rollup && npm run build --workspace=frontend",
     "start:backend": "npm run start --workspace=backend",
     "dev:backend": "npm run dev --workspace=backend"
   },
