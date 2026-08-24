@@ -13,13 +13,20 @@ const getSupabaseUserClient = (req) => {
 export const upsertReview = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { provider_user_id, rating, text, public_profile_id } = req.body;
+    const { provider_user_id, rating, text, public_profile_id, media_urls } = req.body;
+    
+    // Fallback: Since we can't alter the remote DB right now, encode media_urls into the text field if they exist
+    let encodedText = text || '';
+    if (media_urls && media_urls.length > 0) {
+      encodedText = `${encodedText}\n\n[MEDIA]${JSON.stringify(media_urls)}[/MEDIA]`;
+    }
 
-    const { data, error } = await supabaseAdmin.from("reviews").upsert({
+    const supabaseClient = getSupabaseUserClient(req);
+    const { data, error } = await supabaseClient.from("reviews").upsert({
       provider_user_id, 
       user_id: userId, 
       rating, 
-      text,
+      text: encodedText,
       public_profile_id
     }, { onConflict: "provider_user_id,user_id" });
 
@@ -27,7 +34,7 @@ export const upsertReview = async (req, res) => {
     res.json({ success: true, data });
   } catch (err) {
     console.error('Error upserting review:', err);
-    res.status(500).json({ error: 'Failed to post review' });
+    res.status(500).json({ error: 'Failed to post review: ' + (err.message || JSON.stringify(err)) });
   }
 };
 

@@ -3,7 +3,24 @@ import { getSupabaseUserClient } from './messages.js';
 export const createDirectBooking = async (req, res) => {
   try {
     const userId = req.user.id;
-    const payload = { ...req.body, customer_id: userId };
+    const {
+      provider_id,
+      service_needed,
+      description,
+      price_total,
+      quantity,
+      media_urls
+    } = req.body;
+
+    const payload = { 
+      customer_id: userId,
+      provider_id,
+      service_needed,
+      description,
+      price_total,
+      quantity,
+      media_urls 
+    };
     
     const supabaseUser = getSupabaseUserClient(req);
     const { data, error } = await supabaseUser
@@ -32,7 +49,25 @@ export const getMyDirectBookings = async (req, res) => {
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    res.json({ data });
+
+    const rs = data || [];
+    const ids = Array.from(new Set(rs.flatMap(r => [r.customer_id, r.provider_id]).filter(id => !!id)));
+    
+    let profs = [];
+    if (ids.length) {
+      const { data: p } = await supabaseUser.from('profiles').select('id,full_name,avatar_url').in('id', ids);
+      profs = p || [];
+    }
+    
+    const pmap = new Map(profs.map(p => [p.id, { full_name: p.full_name, avatar_url: p.avatar_url }]));
+    
+    const merged = rs.map(r => ({
+      ...r,
+      customer: pmap.get(r.customer_id),
+      provider: r.provider_id ? pmap.get(r.provider_id) : undefined
+    }));
+
+    res.json({ data: merged });
   } catch (err) {
     console.error('Error fetching direct bookings:', err);
     res.status(500).json({ error: 'Failed to fetch bookings' });

@@ -3,11 +3,13 @@ import { useEffect, useState } from "react";
 
 import { apiClient } from "@/lib/api";
 import { useAuth } from "@/hooks/use-auth";
-import { MessageSquare, ShieldCheck, Briefcase, CheckCircle2, Loader2, Clock, ImagePlus, ArrowRight } from "lucide-react";
+import { MessageSquare, ShieldCheck, Briefcase, CheckCircle2, Loader2, Clock, ImagePlus, ArrowRight, X, Star } from "lucide-react";
 import { timeAgo } from "@/lib/format";
 import { Avatar } from "@/components/social/Avatar";
 import { EmptyState } from "@/components/EmptyState";
 import { AddTimelinePostDialog } from "@/components/AddTimelinePostDialog";
+import { SubmitReviewDialog } from "@/components/SubmitReviewDialog";
+import { MessageButton } from "@/components/MessageButton";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/messages/")({
@@ -49,6 +51,7 @@ type BookedJob = {
   has_feedback?: boolean;
   provider_confirmed_completion?: boolean;
   customer_confirmed_completion?: boolean;
+  is_direct_booking?: boolean;
 };
 
 function MessagesIndex() {
@@ -69,6 +72,7 @@ function MessagesIndex() {
 
   // Timeline post dialog
   const [postDialog, setPostDialog] = useState<{ open: boolean; jobTitle: string; requestId: string }>({ open: false, jobTitle: "", requestId: "" });
+  const [reviewDialog, setReviewDialog] = useState<{ open: boolean; providerId: string; providerName: string; providerAvatar: string | null; serviceTitle: string } | null>(null);
 
   // Load Messages
   useEffect(() => {
@@ -80,7 +84,7 @@ function MessagesIndex() {
         const { data } = await apiClient<{ data: any[] }>("/messages");
         if (!active) return;
 
-        let list = data.data || [];
+        let list = Array.isArray(data) ? data : (data?.data || []);
 
         setRows(list as Row[]);
 
@@ -133,8 +137,8 @@ function MessagesIndex() {
         // Sort by created_at
         list.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
-        // Filter to only requested, accepted, or in_progress jobs
-        list = list.filter((j: BookedJob) => ["requested", "accepted", "in_progress"].includes(j.status));
+        // Filter to only requested, accepted, in_progress, or completed jobs
+        list = list.filter((j: BookedJob) => ["requested", "accepted", "in_progress", "completed"].includes(j.status));
         setJobs(list);
         setJobsLoaded(true);
       } catch (err) {
@@ -157,7 +161,7 @@ function MessagesIndex() {
       }
       toast.success("Job marked as complete!");
       // Refresh list
-      setJobs((prev) => prev.map((j) => j.id === job.id ? { ...j, status: "completed" } : j).filter((j) => ["accepted", "in_progress"].includes(j.status)));
+      setJobs((prev) => prev.map((j) => j.id === job.id ? { ...j, status: "completed" } : j).filter((j) => ["accepted", "in_progress", "completed"].includes(j.status)));
     } catch (err: any) {
       toast.error(err?.message || "Failed to mark as complete");
     } finally {
@@ -171,11 +175,25 @@ function MessagesIndex() {
     if (status === "requested") return <span className="inline-flex items-center gap-1 rounded-full bg-yellow-100 px-2.5 py-0.5 text-[11px] font-semibold text-yellow-700"><Clock className="h-3 w-3" />Pending</span>;
     if (status === "in_progress") return <span className="inline-flex items-center gap-1 rounded-full bg-orange/15 px-2.5 py-0.5 text-[11px] font-semibold text-orange"><Clock className="h-3 w-3" />In Progress</span>;
     if (status === "accepted") return <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2.5 py-0.5 text-[11px] font-semibold text-blue-700"><CheckCircle2 className="h-3 w-3" />Confirmed</span>;
+    if (status === "completed") return <span className="inline-flex items-center gap-1 rounded-full bg-green/15 px-2.5 py-0.5 text-[11px] font-semibold text-green"><CheckCircle2 className="h-3 w-3" />Completed</span>;
     return null;
   };
 
   return (
     <>
+      {reviewDialog && (
+        <SubmitReviewDialog
+          open={reviewDialog.open}
+          onOpenChange={(open) => {
+            if (!open) setReviewDialog(null);
+            else setReviewDialog({ ...reviewDialog, open });
+          }}
+          providerId={reviewDialog.providerId}
+          providerName={reviewDialog.providerName}
+          providerAvatar={reviewDialog.providerAvatar}
+          serviceTitle={reviewDialog.serviceTitle}
+        />
+      )}
       <section className="mx-auto max-w-7xl w-full min-w-0 px-4 sm:px-6 lg:px-8 pt-6 pb-24 md:pt-8 md:pb-8">
         {/* Toggle Pill */}
         <div className="flex justify-center">
@@ -351,7 +369,9 @@ function MessagesIndex() {
                         </>
                       )}
                       
-                      {(job.status === "requested" || job.status === "in_progress") && (!isCustomer || job.provider_id) && (
+                      {/* Message/Contact Button */}
+                      {((!isCustomer && ["requested", "accepted", "in_progress"].includes(job.status)) ||
+                        (isCustomer && ["accepted", "in_progress"].includes(job.status) && job.provider_id)) && (
                         <button
                           onClick={async () => {
                             try {
@@ -372,11 +392,31 @@ function MessagesIndex() {
                           className="flex items-center gap-1.5 rounded-full bg-navy/10 px-4 py-2 text-xs font-semibold text-navy hover:bg-navy/20 transition-colors"
                         >
                           <MessageSquare className="h-3.5 w-3.5" />
-                          Message
+                          {isCustomer ? "Contact" : "Message"}
                         </button>
                       )}
 
-                      {["accepted", "in_progress"].includes(job.status) && (
+                      {/* Customer Actions */}
+                      {isCustomer && job.status === "completed" && (
+                        <button
+                          onClick={() => {
+                            setReviewDialog({
+                              open: true,
+                              providerId: otherParty?.id || "",
+                              providerName: otherParty?.full_name || "Provider",
+                              providerAvatar: otherParty?.avatar_url || null,
+                              serviceTitle: job.title || job.service_needed || "Service",
+                            });
+                          }}
+                          className="flex items-center gap-1.5 rounded-full bg-orange px-4 py-2 text-xs font-semibold text-white hover:bg-orange/90 transition-colors"
+                        >
+                          <Star className="h-3.5 w-3.5" />
+                          Submit Review
+                        </button>
+                      )}
+
+                      {/* Provider Actions */}
+                      {!isCustomer && ["accepted", "in_progress"].includes(job.status) && (
                         <>
                           <button
                             onClick={() => handleMarkComplete(job)}

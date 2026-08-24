@@ -100,19 +100,24 @@ function Me() {
   const loadDashboard = async () => {
     if (!user || dashLoaded) return;
     try {
-      const [svcRes, reqRes] = await Promise.all([
+      const [svcRes, reqRes, dbRes] = await Promise.all([
         apiClient<{ data: any[] }>("/services/me"),
         apiClient<{ data: { data: any[] } }>("/requests/me?role=all"),
+        apiClient<{ data: { data: any[] } }>("/direct-bookings/me"),
       ]);
       const svcList = svcRes.data || [];
-      const reqList = (reqRes.data?.data ?? []) as ServiceRequestRow[];
+      const reqList = ((reqRes as any).data?.data?.data ?? (reqRes as any).data?.data ?? (reqRes as any).data ?? []) as ServiceRequestRow[];
+      const dbList = ((dbRes as any).data?.data?.data ?? (dbRes as any).data?.data ?? (dbRes as any).data ?? []) as any[];
+      const all: any[] = [...reqList, ...dbList];
+      all.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+
       setServices(svcList);
-      setRequests(reqList.slice(0, 5));
+      setRequests(all.filter((r: any) => r.customer_id === user.id).slice(0, 5));
       setCounts({
         services: svcList.length,
-        requests: reqList.length,
-        completed: reqList.filter(r => r.status === "completed").length,
-        pending: reqList.filter(r => ["requested", "accepted", "in_progress"].includes(r.status)).length,
+        requests: reqList.filter(r => r.customer_id === user.id).length,
+        completed: all.filter(r => r.status === "completed" && (r.provider_id === user.id || r.selected_provider_id === user.id)).length,
+        pending: all.filter(r => ["requested", "accepted", "in_progress"].includes(r.status) && (r.provider_id === user.id || r.selected_provider_id === user.id)).length,
       });
     } catch {}
     setDashLoaded(true);
@@ -225,7 +230,9 @@ function Me() {
                 <input type="file" accept="image/*" className="hidden" disabled={busy} onChange={e => e.target.files?.[0] && onAvatar(e.target.files[0])} />
               </label>
             </div>
-            <h1 className="mt-3 text-xl font-bold text-navy">{profile.full_name}</h1>
+            <h1 className="mt-3 text-xl font-bold text-navy">
+              {profile.full_name?.trim() || user?.user_metadata?.full_name || user?.user_metadata?.name || "Anonymous User"}
+            </h1>
             {(profile.town || profile.district) && (
               <p className="mt-0.5 flex items-center gap-1 text-sm text-muted-foreground">
                 <MapPin className="h-3.5 w-3.5 text-orange" />

@@ -161,6 +161,7 @@ function UserProfile() {
   const [reviews, setReviews] = useState<Array<{ id: string; rating: number; text: string; created_at: string; user_id: string; profile?: { full_name: string; avatar_url: string | null } }>>([]);
   const [tab, setTab] = useState<Tab>("timeline");
   const [services, setServices] = useState<ProfileServiceRow[]>([]);
+  const [jobsDone, setJobsDone] = useState(0);
   const [ownerPublicProfileId, setOwnerPublicProfileId] = useState<string | null>(null);
   const [svcDialog, setSvcDialog] = useState<{ open: boolean; mode: "create" | "edit"; initial?: Partial<ServiceForm> }>({ open: false, mode: "create" });
   const [recOpen, setRecOpen] = useState(false);
@@ -254,6 +255,7 @@ function UserProfile() {
       setReviews(auxData.reviews);
       setFeedback(auxData.feedback);
       setCanReview(auxData.canReview);
+      setJobsDone(auxData.jobsDone || 0);
       setOwnerPublicProfileId(auxData.ownerPublicProfileId);
     }
   }, [auxData, loaderData.sp]);
@@ -263,15 +265,22 @@ function UserProfile() {
   const loadOwnerRequests = async () => {
     if (!user || ownerReqLoaded) return;
     try {
-      const { data } = await apiClient<{ data: { data: any[] } }>("/requests/me?role=all");
-      const list = data.data?.data ?? data.data ?? [];
-      setOwnerRequests(Array.isArray(list) ? list.slice(0, 5) : []);
-      const all: any[] = Array.isArray(list) ? list : [];
+      const [reqsRes, dbsRes] = await Promise.all([
+        apiClient.get<{ data: { data: any[] } }>("/requests/me?role=all"),
+        apiClient.get<{ data: { data: any[] } }>("/direct-bookings/me")
+      ]);
+      const listReqs = (reqsRes as any).data?.data?.data ?? (reqsRes as any).data?.data ?? (reqsRes as any).data ?? [];
+      const listDbs = (dbsRes as any).data?.data?.data ?? (dbsRes as any).data?.data ?? (dbsRes as any).data ?? [];
+      
+      const all: any[] = [...(Array.isArray(listReqs) ? listReqs : []), ...(Array.isArray(listDbs) ? listDbs : [])];
+      all.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+
+      setOwnerRequests(all.filter((r: any) => r.customer_id === user.id).slice(0, 5));
       setOwnerCounts({
         services: services.length,
-        requests: all.length,
-        completed: all.filter((r: any) => r.status === "completed").length,
-        pending: all.filter((r: any) => ["requested","accepted","in_progress"].includes(r.status)).length,
+        requests: Array.isArray(listReqs) ? listReqs.filter(r => r.customer_id === user.id).length : 0,
+        completed: all.filter((r: any) => r.status === "completed" && (r.provider_id === user.id || r.selected_provider_id === user.id)).length,
+        pending: all.filter((r: any) => ["requested","accepted","in_progress"].includes(r.status) && (r.provider_id === user.id || r.selected_provider_id === user.id)).length,
       });
     } catch {}
     setOwnerReqLoaded(true);
@@ -282,8 +291,8 @@ function UserProfile() {
     creditsLoaded.current = user.id;
     try {
       const { data } = await apiClient<{ data: { transactions: Tx[]; requests: CreditReq[] } }>("/credits/personal");
-      setTxs(data.data?.transactions ?? []);
-      setCreditReqs(data.data?.requests ?? []);
+      setTxs((data as any).data?.transactions ?? (data as any).transactions ?? []);
+      setCreditReqs((data as any).data?.requests ?? (data as any).requests ?? []);
     } catch {}
   };
 
@@ -368,25 +377,32 @@ function UserProfile() {
   const isOwn = user?.id === id;
   const isProvider = !!profile?.is_provider;
   const visibleTabs = TABS.filter((t) => (!t.providerOnly || isProvider) && (!t.ownerOnly || isOwn) && (!t.adminOnly || isModerator));
+  
+  // ── UNIFIED RATING ──
+  const totalReviews = feedback.length + reviews.length;
+  const totalRatingPoints = feedback.reduce((s, r) => s + r.rating, 0) + reviews.reduce((s, r) => s + (r.rating || 0), 0);
+  const avgRating = totalReviews > 0 ? totalRatingPoints / totalReviews : 0;
+  const portfolioPosts = posts.filter((p) => p.media_urls.length > 0);
+
+  // ── DASHBOARD LOGIC ──
+  type OTab = OwnerTab;
+  const ownerTabs = [
+    { id: "dashboard" as OTab, label: "Dashboard",  icon: <LayoutDashboard className="h-[15px] w-[15px]" /> },
+    { id: "credits"   as OTab, label: "My Credits", icon: <Coins className="h-[15px] w-[15px]" /> },
+    { id: "settings"  as OTab, label: "Settings",   icon: <Settings className="h-[15px] w-[15px]" /> },
+  ];
+  const fmtUgx = (n: number) => `${n.toLocaleString()} UGX`;
+  const pendingPkgIds   = new Set(creditReqs.filter(r => r.status === "pending").map(r => r.package_id).filter(Boolean) as string[]);
+  const pendingPkgNames = new Set(creditReqs.filter(r => r.status === "pending").map(r => r.package_name));
+  
+  if (isOwn && !ownerReqLoaded) {
+    loadOwnerRequests();
+  }
 
   if (!profile) return <RouteNotFoundCard title="Profile not found" message="This user profile may have been removed." />;
 
-  // â”€â”€ OWNER: 3-tab dashboard matching reference design â”€â”€
-  if (isOwn) {
-    type OTab = OwnerTab;
-    const ownerTabs = [
-      { id: "dashboard" as OTab, label: "Dashboard",  icon: <LayoutDashboard className="h-[15px] w-[15px]" /> },
-      { id: "credits"   as OTab, label: "My Credits", icon: <Coins className="h-[15px] w-[15px]" /> },
-      { id: "settings"  as OTab, label: "Settings",   icon: <Settings className="h-[15px] w-[15px]" /> },
-    ];
-    const fmtUgx = (n: number) => `${n.toLocaleString()} UGX`;
-    const pendingPkgIds   = new Set(creditReqs.filter(r => r.status === "pending").map(r => r.package_id).filter(Boolean) as string[]);
-    const pendingPkgNames = new Set(creditReqs.filter(r => r.status === "pending").map(r => r.package_name));
-    const avgRatingOwner  = feedback.length ? feedback.reduce((s, r) => s + r.rating, 0) / feedback.length : 0;
-    if (!ownerReqLoaded) loadOwnerRequests();
-
-    return (
-      <div className="min-h-screen" style={{ background: "linear-gradient(180deg,#f47b16 0%,#f47b16 38%,#ffffff 38%)" }}>
+  return (
+    <div className="min-h-screen" style={{ background: "linear-gradient(180deg,#f47b16 0%,#f47b16 38%,#ffffff 38%)" }}>
 
         {/* HEADER / BANNER */}
         <div className="relative group overflow-hidden" style={{ paddingBottom: "140px", background: sp?.cover_url ? `url(${sp.cover_url}) center/cover no-repeat` : "linear-gradient(135deg,#f47b16 0%,#e06210 100%)" }}>
@@ -396,8 +412,15 @@ function UserProfile() {
               <div className="absolute top-10 right-20 h-[72px] w-[72px] rounded-full opacity-10 pointer-events-none" style={{ background: "radial-gradient(circle,#fff 0%,transparent 70%)" }} />
             </>
           )}
+          {/* Back Button */}
+          <button 
+            onClick={() => window.history.back()}
+            className="absolute left-4 top-4 flex aspect-square h-9 w-9 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-sm hover:bg-white/40"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </button>
           {/* Cover Photo Upload — top right */}
-          {isProvider && (
+          {isOwn && isProvider && (
             <div className="absolute top-4 right-4 z-10">
               <label className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm hover:bg-black/60 transition shadow-sm" title="Change cover photo">
                 {uploadingCover ? <Loader2 className="h-4 w-4 animate-spin text-white" /> : <Camera className="h-4 w-4" />}
@@ -422,9 +445,10 @@ function UserProfile() {
               <div className="rounded-full overflow-hidden bg-white" style={{ width: 120, height: 120, border: "5px solid #fff", boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
                 <Avatar name={profile.full_name} url={profile.avatar_url} size={120} />
               </div>
-              <label className="absolute bottom-1 right-1 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border-[3px] border-white shadow-lg" style={{ background: "#f47b16" }}>
-                {uploadingAvatar ? <Loader2 className="h-4 w-4 animate-spin text-white" /> : <Camera className="h-4 w-4 text-white" />}
-                <input type="file" accept="image/*" className="hidden" disabled={ownerBusy || uploadingAvatar}
+              {isOwn && (
+                <label className="absolute bottom-1 right-1 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border-[3px] border-white shadow-lg" style={{ background: "#f47b16" }}>
+                  {uploadingAvatar ? <Loader2 className="h-4 w-4 animate-spin text-white" /> : <Camera className="h-4 w-4 text-white" />}
+                  <input type="file" accept="image/*" className="hidden" disabled={ownerBusy || uploadingAvatar}
                   onChange={e => {
                     const f = e.target.files?.[0];
                     if (f && user) {
@@ -435,13 +459,16 @@ function UserProfile() {
                         .finally(() => setUploadingAvatar(false));
                     }
                   }} />
-              </label>
+                </label>
+              )}
             </div>
           </div>
 
           {/* Name + Location */}
           <div className="mt-3 text-center px-6">
-            <h1 className="text-[22px] font-extrabold" style={{ color: "#1a2b4b" }}>{profile.full_name}</h1>
+            <h1 className="text-[22px] font-extrabold" style={{ color: "#1a2b4b" }}>
+              {profile.full_name?.trim() || sp?.business_name || (user?.id === profile.id ? (user?.user_metadata?.full_name || user?.user_metadata?.name) : null) || "Anonymous User"}
+            </h1>
             {(profile.town || profile.district) && (
               <p className="mt-1 flex items-center justify-center gap-1 text-[13px]" style={{ color: "#9ca3af" }}>
                 <MapPin className="h-3.5 w-3.5" style={{ color: "#f47b16" }} />
@@ -450,13 +477,22 @@ function UserProfile() {
             )}
           </div>
 
-          {/* Edit + Share */}
-          <div className="mt-5 flex gap-3 px-6">
-            <button onClick={() => setEditOpen(true)}
-              className="flex-1 flex items-center justify-center gap-2 rounded-full py-3 text-[13px] font-bold transition hover:opacity-80"
-              style={{ border: "2.5px solid #1a2b4b", color: "#1a2b4b", background: "#fff" }}>
-              <Pencil className="h-4 w-4" /> Edit
-            </button>
+          {/* Action Buttons */}
+          <div className="mt-5 flex gap-3 px-6 max-w-sm mx-auto">
+            {isOwn ? (
+              <button onClick={() => setEditOpen(true)}
+                className="flex-1 flex items-center justify-center gap-2 rounded-full py-3 text-[13px] font-bold transition hover:opacity-80"
+                style={{ border: "2.5px solid #1a2b4b", color: "#1a2b4b", background: "#fff" }}>
+                <Pencil className="h-4 w-4" /> Edit
+              </button>
+            ) : (
+               <button onClick={() => setContactModalOpen(true)}
+                className="flex-1 flex items-center justify-center gap-2 rounded-full py-3 text-[13px] font-bold text-white transition hover:brightness-110"
+                style={{ background: "#1a2b4b" }}>
+                <MessageSquare className="h-4 w-4" /> Message
+              </button>
+            )}
+            
             <button onClick={share}
               className="flex-1 flex items-center justify-center gap-2 rounded-full py-3 text-[13px] font-bold text-white transition hover:brightness-110"
               style={{ background: "#f47b16", boxShadow: "0 4px 14px rgba(244,123,22,0.4)" }}>
@@ -472,16 +508,18 @@ function UserProfile() {
             </div>
             <div className="flex items-center gap-1.5">
               <Star className="h-5 w-5" style={{ fill: "#f47b16", color: "#f47b16" }} />
-              <span className="text-[20px] font-extrabold" style={{ color: "#1a2b4b" }}>{avgRatingOwner > 0 ? avgRatingOwner.toFixed(1) : "\u2014"}</span>
+              <span className="text-[20px] font-extrabold" style={{ color: "#1a2b4b" }}>{avgRating > 0 ? avgRating.toFixed(1) : "\u2014"}</span>
             </div>
             <div className="text-center">
-              <p className="text-[20px] font-extrabold" style={{ color: "#1a2b4b" }}>{ownerCounts.completed}</p>
+              <p className="text-[20px] font-extrabold" style={{ color: "#1a2b4b" }}>{isOwn ? ownerCounts.completed : jobsDone}</p>
               <p className="text-[11px] mt-0.5" style={{ color: "#9ca3af" }}>Jobs done</p>
             </div>
           </div>
 
-          {/* Tabs */}
-          <div className="mt-4 flex" style={{ borderBottom: "2px solid #f3f4f6" }}>
+          {isOwn ? (
+          <>
+            {/* Tabs */}
+            <div className="mt-4 flex" style={{ borderBottom: "2px solid #f3f4f6" }}>
             {ownerTabs.map(t => (
               <button key={t.id}
                 onClick={() => {
@@ -832,215 +870,25 @@ function UserProfile() {
                 </div>
               </div>
             )}
-
           </div>
-        </div>
-      </div>
-    );
-  }
-  if (!profile) {
-    return (
-      <>
-        <div className="mx-auto max-w-2xl px-4 py-16 text-center">
-          <h2 className="text-xl font-bold text-navy">Profile not found</h2>
-          <p className="mt-2 text-muted-foreground">This user may not have set up their profile yet, or it has been removed.</p>
-        </div>
-      </>
-    );
-  }
-
-  const verifiedRating = feedback.length ? feedback.reduce((s, r) => s + r.rating, 0) / feedback.length : 0;
-  const avgRating = verifiedRating;
-  const portfolioPosts = posts.filter((p) => p.media_urls.length > 0);
-
-  return (
-    <>
-      <section className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-6">
-        {sp?.seeded_by_official && sp.seeded_status !== "claimed" && (
-          <div className="mb-3 flex flex-col gap-3 rounded-2xl border border-orange/40 bg-orange/5 p-4 text-sm sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-start gap-3">
-              <BadgeCheck className="mt-0.5 h-5 w-5 shrink-0 text-orange" />
-              <div>
-                <p className="font-semibold text-navy">
-                  Added by Tuungane Official
-                  {sp.seeded_status === "claim_pending" && <span className="ml-2 rounded-full bg-orange/20 px-2 py-0.5 text-[10px] font-semibold text-orange">Claim under review</span>}
-                </p>
-                <p className="mt-0.5 text-xs text-muted-foreground">This profile was added by Tuungane to help people discover this provider. If this is your business, claim it to manage it directly.</p>
-              </div>
-            </div>
-            {user && user.id !== id && sp.seeded_status === "unclaimed" && (
-              <button onClick={() => setClaimOpen(true)} className="shrink-0 rounded-full bg-orange px-4 py-2 text-xs font-semibold text-orange-foreground hover:brightness-110">
-                Claim this profile
-
-              </button>
-            )}
-          </div>
-        )}
-        {/* Header card with banner */}
-        <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-elevated)]">
-          {/* Banner */}
-          <div className="group relative h-32 w-full bg-muted sm:h-48 rounded-t-2xl">
-            {(sp?.cover_url || sp?.header_url) ? (
-              <img src={sp?.cover_url || sp?.header_url || ""} alt="Cover" className="h-full w-full object-cover" />
-            ) : (
-              <div className="h-full w-full bg-gradient-to-r from-orange/20 to-orange/5"></div>
-            )}
-            
-            <button 
-              onClick={() => window.history.back()}
-              data-icon-only={true}
-              className="absolute left-4 top-4 flex aspect-square h-9 w-9 shrink-0 p-0 items-center justify-center rounded-full bg-white/80 text-black shadow-sm backdrop-blur-sm z-10 md:hidden hover:bg-white"
-            >
-              <ArrowLeft className="h-4 w-4" />
-            </button>
-            
-            {isOwn && isProvider && (
-              <label className="absolute bottom-2 right-2 flex cursor-pointer items-center gap-1.5 rounded-full bg-black/60 px-3 py-1.5 text-xs font-semibold text-white shadow backdrop-blur-sm transition hover:bg-black/80 opacity-0 group-hover:opacity-100 focus-within:opacity-100 sm:bottom-4 sm:right-4">
-                <Camera className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">Change cover</span>
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  disabled={uploadingCover}
-                  onChange={(e) => uploadCover(e.target.files?.[0] ?? null)}
-                />
-              </label>
-            )}
-            {uploadingCover && (
-               <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-                 <span className="text-sm font-semibold text-white">Uploading...</span>
-               </div>
-            )}
-          </div>
-
-          <div className="p-5 sm:p-6">
-            <div className="relative flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 sm:gap-6">
-              {/* Avatar overlapping the banner */}
-              <div className="-mt-16 sm:-mt-20 shrink-0 relative self-start sm:self-auto">
-                <div className="inline-block rounded-full border-4 border-card bg-card">
-                  {isOwn ? (
-                    <label className="group relative block cursor-pointer rounded-full" aria-label="Change profile photo">
-                      <Avatar name={profile.full_name} url={profile.avatar_url} size={112} className="h-24 w-24 sm:h-28 sm:w-28" />
-                      <span className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-full bg-black/45 text-white opacity-0 transition-opacity group-hover:opacity-100">
-                        <Camera className="h-6 w-6" />
-                      </span>
-                      {uploadingAvatar && (
-                        <span className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-full bg-black/55 text-[10px] font-semibold text-white">
-                          UploadingÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦
-                        </span>
-                      )}
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        disabled={uploadingAvatar}
-                        onChange={(e) => uploadAvatar(e.target.files?.[0] ?? null)}
-                      />
-                    </label>
-                  ) : (
-                    <Avatar name={profile.full_name} url={profile.avatar_url} size={112} className="h-24 w-24 sm:h-28 sm:w-28" />
-                  )}
-                </div>
-              </div>
-
-              {/* Mobile top-right icons */}
-              <div className="absolute right-0 top-0 flex gap-2 sm:hidden pt-2">
-                 {!isOwn && isProvider && <SaveButton providerUserId={id} variant="icon" />}
-                 <button onClick={share} aria-label="Share" data-icon-only={true} className="inline-flex aspect-square h-9 w-9 shrink-0 p-0 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition hover:border-orange hover:text-orange"><Share2 className="h-4 w-4" /></button>
-                 {!isOwn && user && <ReportProfileButton kind="service_profile" id={id} variant="icon" className="h-9 w-9" />}
-              </div>
-
-              {/* Action Buttons */}
-              <div className={`flex-wrap items-center gap-2 sm:pb-2 ${!isOwn ? 'hidden sm:flex' : 'flex'}`}>
-                {!isOwn && isProvider && (
-                  <button
-                    onClick={() => {
-                      requireAuth(() => setRequestOpen(true), {
-                        title: "Sign in to request this service",
-                        message: "Create a free Tuungane account to send a request to this provider.",
-                        redirect: `/u/${id}`,
-                      });
-                    }}
-                    className="hidden sm:inline-flex rounded-full bg-orange px-5 py-2.5 text-sm font-semibold text-orange-foreground shadow-sm hover:brightness-110"
-                  >
-                    Request service
-                  </button>
-                )}
-                <div className="hidden sm:block">
-                  {!isOwn && isProvider && <FollowButton providerUserId={id} onChange={setFollowers} />}
-                </div>
-
-                {/* Desktop full buttons */}
-                <div className="hidden sm:flex items-center gap-2">
-                   {!isOwn && isProvider && <SaveButton providerUserId={id} variant="full" />}
-                   <button onClick={share} aria-label="Share" className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-3 py-2 text-xs font-semibold text-navy hover:border-orange"><Share2 className="h-3.5 w-3.5" /> Share</button>
-                   {!isOwn && user && <ReportProfileButton kind="service_profile" id={id} variant="full" />}
-                </div>
-
-                {isOwn && isProvider && (
-                  <BoostButton boostType="boost_profile" entityType="provider_profile" entityId={id} label="Boost profile" dialogTitle="Boost your provider profile" dialogDescription="Increase your visibility across Tuungane for a set period." />
-                )}
-                {isOwn && (
-                  <button onClick={() => setEditOpen(true)} className="rounded-full bg-orange px-4 py-2 text-xs font-semibold text-orange-foreground hover:brightness-110">
-                    Edit profile
-                  </button>
-                )}
-              </div>
-            </div>
-
-            <div className="mt-4 w-full min-w-0 text-left">
-              <h1 className="font-display text-2xl font-bold text-navy flex items-center gap-2 flex-wrap">
-                {sp?.business_name || profile.full_name}
-                <ProfileBoostBadges providerId={id} />
-                <IdentityBadges status={identity} className="mt-0" />
-              </h1>
-              
-              {sp?.business_name && sp.business_name !== profile.full_name && (
-                <p className="mt-1 text-sm font-medium text-muted-foreground">
-                  {profile.full_name}
-                </p>
-              )}
-              
-              <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
-                {avgRating > 0 ? (
-                  <span className="inline-flex items-center gap-1.5"><Star className="h-4 w-4 fill-orange text-orange" /> <strong className="text-navy">{avgRating.toFixed(1)}</strong></span>
-                ) : isProvider ? (
-                  <span className="inline-flex items-center gap-1.5 text-muted-foreground">No rating yet</span>
-                ) : null}
-                
-                {isProvider && (
-                  <span className="inline-flex items-center gap-1.5"><strong className="text-navy">{feedback.length}</strong> jobs done</span>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Tabs */}
-        <div className="sticky top-16 z-10 -mx-4 mt-4 overflow-x-auto border-b border-border bg-background/95 px-4 backdrop-blur max-w-[100vw] sm:max-w-none">
-          <div className="flex gap-1">
-            {visibleTabs.map((t) => {
-              const isActive = tab === t.id;
-              const className = `relative whitespace-nowrap px-4 py-3 text-sm font-semibold transition ${isActive ? "text-orange" : "text-muted-foreground hover:text-navy"}`;
-              
-              if (t.href) {
+          </>
+        ) : (
+          <div className="bg-white px-2 pt-2 pb-16">
+            <div className="mt-4 flex px-4" style={{ borderBottom: "2px solid #f3f4f6" }}>
+              {visibleTabs.map((t) => {
+                const isActive = tab === t.id;
+                const className = `relative whitespace-nowrap px-4 py-3 text-[13px] font-bold transition ${isActive ? "text-[#f47b16]" : "text-[#9ca3af] hover:text-[#1a2b4b]"}`;
+                if (t.href) {
+                  return <Link key={t.id} to={t.href as any} className={className}>{t.label}</Link>;
+                }
                 return (
-                  <Link key={t.id} to={t.href as any} className={className}>
+                  <button key={t.id} onClick={() => setTab(t.id)} className={className}>
                     {t.label}
-                  </Link>
+                    {isActive && <span className="absolute inset-x-2 bottom-0 h-0.5 bg-[#f47b16]" />}
+                  </button>
                 );
-              }
-
-              return (
-                <button key={t.id} onClick={() => setTab(t.id)} className={className}>
-                  {t.label}
-                  {isActive && <span className="absolute inset-x-2 bottom-0 h-0.5 bg-orange" />}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+              })}
+            </div>
 
         <div className="mt-5 space-y-4 pb-10">
 
@@ -1072,7 +920,7 @@ function UserProfile() {
                   {avgRating > 0 && (
                     <div className="text-right">
                       <p className="font-display text-2xl font-bold text-navy leading-none">{avgRating.toFixed(1)}</p>
-                      <p className="text-[11px] text-muted-foreground">{feedback.length} verified</p>
+                      <p className="text-[11px] text-muted-foreground">{feedback.length + reviews.length} verified</p>
                     </div>
                   )}
                 </div>
@@ -1081,7 +929,7 @@ function UserProfile() {
                   <button onClick={() => setRevOpen(true)} className="w-full rounded-2xl border-2 border-dashed border-green/40 bg-green/5 p-3 text-sm font-semibold text-green hover:bg-green/10">+ Write a verified review</button>
                 )}
 
-                {feedback.length === 0 ? (
+                {feedback.length === 0 && reviews.length === 0 ? (
                   <div className="rounded-2xl border border-dashed border-border bg-card p-6 text-center text-sm">
                     <p className="font-semibold text-navy">
                       {recs.length > 0 ? "This provider has endorsements, but no verified Tuungane reviews yet." : "No verified reviews yet."}
@@ -1096,11 +944,24 @@ function UserProfile() {
                           <Avatar name={f.profile?.full_name ?? "Member"} url={f.profile?.avatar_url ?? null} size={36} />
                           <div>
                             <p className="flex flex-wrap items-center gap-2 text-sm font-semibold text-navy">{f.profile?.full_name ?? "Member"} <VerifiedReviewBadge /></p>
-                            <p className="text-xs text-muted-foreground">{f.service_provided} Ãƒâ€šÃ‚Â· {timeAgo(f.created_at)}</p>
+                            <p className="text-xs text-muted-foreground">{f.service_provided} · {timeAgo(f.created_at)}</p>
                           </div>
-                          <span className="ml-auto text-sm text-orange">{"ÃƒÂ¢Ã‹Å“Ã¢â‚¬Â¦".repeat(f.rating)}{"ÃƒÂ¢Ã‹Å“Ã¢â‚¬Â ".repeat(5 - f.rating)}</span>
+                          <span className="ml-auto text-sm text-orange">{"★".repeat(f.rating)}{"☆".repeat(5 - f.rating)}</span>
                         </div>
                         {f.review_text && <p className="mt-3 text-sm text-foreground/90">{f.review_text}</p>}
+                      </div>
+                    ))}
+                    {reviews.map((r) => (
+                      <div key={r.id} className="rounded-2xl border border-green/30 bg-green/5 p-4">
+                        <div className="flex items-center gap-3">
+                          <Avatar name={r.profile?.full_name ?? "Member"} url={r.profile?.avatar_url ?? null} size={36} />
+                          <div>
+                            <p className="flex flex-wrap items-center gap-2 text-sm font-semibold text-navy">{r.profile?.full_name ?? "Member"} <VerifiedReviewBadge /></p>
+                            <p className="text-xs text-muted-foreground">Booked service · {timeAgo(r.created_at)}</p>
+                          </div>
+                          <span className="ml-auto text-sm text-orange">{"★".repeat(r.rating || 0)}{"☆".repeat(5 - (r.rating || 0))}</span>
+                        </div>
+                        {r.text && <p className="mt-3 text-sm text-foreground/90">{r.text}</p>}
                       </div>
                     ))}
                   </div>
@@ -1327,7 +1188,9 @@ function UserProfile() {
             onSaved={() => window.location.reload()}
           />
         )}
-      </section>
+      </div>
+      )}
+
 
       {!isOwn && isProvider && (
         <MobileActionBar className="bottom-0">
@@ -1342,8 +1205,8 @@ function UserProfile() {
           </button>
         </MobileActionBar>
       )}
-    </>
-
+        </div>
+      </div>
   );
 }
 

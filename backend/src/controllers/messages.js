@@ -21,6 +21,8 @@ export const getConversations = async (req, res) => {
       .limit(100);
 
     if (error) throw error;
+    
+    console.log(`[DEBUG] getConversations for userId=${userId}: found ${list?.length} rows. list=`, JSON.stringify(list, null, 2));
 
     const userIds = Array.from(new Set((list || []).flatMap(r => [r.customer_id, r.provider_id]).filter(id => id !== userId)));
     const reqIds = Array.from(new Set((list || []).map(r => r.service_request_id).filter(x => !!x)));
@@ -65,7 +67,6 @@ export const getConversationById = async (req, res) => {
       .maybeSingle();
 
     console.log(`[DEBUG] getConversationById(${id}): cErr=`, cErr, `c=`, c);
-    require('fs').appendFileSync('debug.log', `[DEBUG] getConversationById(${id}): cErr=${JSON.stringify(cErr)} c=${JSON.stringify(c)}\n`);
 
     if (cErr || !c) return res.status(404).json({ error: 'Conversation not found' });
     if (c.customer_id !== userId && c.provider_id !== userId) return res.status(403).json({ error: 'Forbidden' });
@@ -75,10 +76,10 @@ export const getConversationById = async (req, res) => {
     const [{ data: prof }, { data: r }, { data: db }, { data: msgs }] = await Promise.all([
       supabaseUser.from("profiles").select("id,full_name,avatar_url").eq("id", otherId).maybeSingle(),
       c.service_request_id
-        ? supabaseUser.from("service_requests").select("id,service_needed,title,status,location,budget_range,selected_provider_id,urgent_flag,urgency,public_profile_id,quantity,price_total").eq("id", c.service_request_id).maybeSingle()
+        ? supabaseUser.from("service_requests").select("id,service_needed,title,description,status,location,budget_range,selected_provider_id,urgent_flag,urgency,public_profile_id,quantity,price_total,attachment_url,media_urls").eq("id", c.service_request_id).maybeSingle()
         : Promise.resolve({ data: null }),
       c.direct_booking_id
-        ? supabaseUser.from("direct_bookings").select("id,service_needed,description,status,price_total,quantity").eq("id", c.direct_booking_id).maybeSingle()
+        ? supabaseUser.from("direct_bookings").select("id,service_needed,description,status,price_total,quantity,attachment_url,media_urls").eq("id", c.direct_booking_id).maybeSingle()
         : Promise.resolve({ data: null }),
       supabaseUser.from("messages").select("id,conversation_id,sender_id,receiver_id,body,created_at,is_read").eq("conversation_id", id).order("created_at", { ascending: true }),
     ]);
@@ -127,6 +128,21 @@ export const sendMessage = async (req, res) => {
     }).select().single();
 
     if (mErr) throw mErr;
+
+    // Update conversation metadata
+    const isCustomer = conv.customer_id === userId;
+    const updatePayload = {
+      last_message_at: new Date().toISOString(),
+      last_message_preview: body.length > 50 ? body.substring(0, 47) + "..." : body,
+    };
+    if (isCustomer) {
+      updatePayload.provider_unread_count = (conv.provider_unread_count || 0) + 1;
+    } else {
+      updatePayload.customer_unread_count = (conv.customer_unread_count || 0) + 1;
+    }
+
+    await supabaseUser.from("conversations").update(updatePayload).eq("id", conv.id);
+
     res.json({ data: msg });
   } catch (err) {
     console.error('Error sending message:', err);
@@ -185,7 +201,6 @@ export const startOrGetConversation = async (req, res) => {
     if (error) throw error;
     res.json({ data });
   } catch (err) {
-    import('fs').then(fs => fs.writeFileSync('rpc_error.log', JSON.stringify(err, null, 2)));
     console.error('Error starting conversation:', err);
     res.status(500).json({ error: 'Failed to start conversation' });
   }

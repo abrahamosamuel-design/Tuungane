@@ -218,9 +218,7 @@ function MessagesIconLink() {
     <Link to="/messages" aria-label="Messages" className="relative flex h-9 w-9 items-center justify-center rounded-full bg-muted text-navy hover:bg-orange/20 hover:text-orange transition-colors">
       <MessageSquare className="h-5 w-5" />
       {n > 0 && (
-        <span className="absolute -right-0.5 -top-0.5 inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-orange px-1 text-[10px] font-bold text-orange-foreground shadow-sm">
-          {n > 99 ? "99+" : n}
-        </span>
+        <span className="absolute top-0 right-0 block h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-background"></span>
       )}
     </Link>
   );

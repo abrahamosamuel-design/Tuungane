@@ -42,9 +42,7 @@ export function MobileBottomNav() {
               <div className="relative flex items-center justify-center">
                 <MessageSquare className="h-5 w-5" />
                 {unreadMessages > 0 && (
-                  <span className="absolute -right-2 -top-1 inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-orange px-1 text-[9px] font-bold text-white">
-                    {unreadMessages > 99 ? "99+" : unreadMessages}
-                  </span>
+                  <span className="absolute -right-0.5 -top-0.5 block h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-background"></span>
                 )}
               </div>
             }

@@ -5,13 +5,42 @@ import { supabaseAdmin } from '../lib/supabaseClient.js';
 export const getMyProfile = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { data, error } = await supabaseAdmin
+    let { data, error } = await supabaseAdmin
       .from("profiles")
       .select("*")
       .eq("id", userId)
       .maybeSingle();
 
     if (error) throw error;
+
+    if (data) {
+      let updated = false;
+      let newName = data.full_name;
+      let newAvatar = data.avatar_url;
+
+      if (!newName || newName.trim() === '') {
+        const metaName = req.user.user_metadata?.full_name || req.user.user_metadata?.name;
+        if (metaName) {
+          newName = metaName;
+          updated = true;
+        }
+      }
+
+      if (!newAvatar) {
+        const metaAvatar = req.user.user_metadata?.avatar_url || req.user.user_metadata?.picture;
+        if (metaAvatar) {
+          newAvatar = metaAvatar;
+          updated = true;
+        }
+      }
+
+      if (updated) {
+        await supabaseAdmin.from("profiles").update({ full_name: newName, avatar_url: newAvatar }).eq("id", userId);
+        data.full_name = newName;
+        data.avatar_url = newAvatar;
+      }
+    }
+
     res.json({ data });
   } catch (err) {
     console.error('Error fetching my profile:', err);
@@ -313,7 +342,35 @@ export const updateMyProfileFull = async (req, res) => {
 export const getMyProfileDetails = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { data: p } = await supabaseAdmin.from("profiles").select("*").eq("id", userId).maybeSingle();
+    let { data: p } = await supabaseAdmin.from("profiles").select("*").eq("id", userId).maybeSingle();
+    
+    if (p) {
+      let updated = false;
+      let newName = p.full_name;
+      let newAvatar = p.avatar_url;
+
+      if (!newName || newName.trim() === '') {
+        const metaName = req.user.user_metadata?.full_name || req.user.user_metadata?.name;
+        if (metaName) {
+          newName = metaName;
+          updated = true;
+        }
+      }
+
+      if (!newAvatar) {
+        const metaAvatar = req.user.user_metadata?.avatar_url || req.user.user_metadata?.picture;
+        if (metaAvatar) {
+          newAvatar = metaAvatar;
+          updated = true;
+        }
+      }
+
+      if (updated) {
+        await supabaseAdmin.from("profiles").update({ full_name: newName, avatar_url: newAvatar }).eq("id", userId);
+        p.full_name = newName;
+        p.avatar_url = newAvatar;
+      }
+    }
     
     const [
       { data: f },
@@ -743,9 +800,24 @@ export const getProviderAuxData = async (req, res) => {
       canReview = (completedCount || 0) > 0;
     }
 
+    let jobsDone = 0;
+    const { count: totalCompletedReqs } = await supabaseAdmin
+      .from("service_requests")
+      .select("id", { count: "exact", head: true })
+      .eq("provider_id", id)
+      .eq("status", "completed");
+      
+    const { count: totalCompletedDbs } = await supabaseAdmin
+      .from("direct_bookings")
+      .select("id", { count: "exact", head: true })
+      .eq("provider_id", id)
+      .eq("status", "completed");
+      
+    jobsDone = (totalCompletedReqs || 0) + (totalCompletedDbs || 0);
+
     res.json({
       data: {
-        contact, services, posts: ps || [], followers, recs, reviews, feedback, canReview, ownerPublicProfileId
+        contact, services, posts: ps || [], followers, recs, reviews, feedback, canReview, ownerPublicProfileId, jobsDone
       }
     });
   } catch (err) {

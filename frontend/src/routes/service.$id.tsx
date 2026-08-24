@@ -246,7 +246,34 @@ function ServiceDetailPage() {
                               <Star key={i} className="h-3 w-3 fill-current" />
                             ))}
                           </div>
-                          <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">{r.text}</p>
+                          
+                          {(() => {
+                            let displayText = r.text || "";
+                            let mediaUrls: string[] = [];
+                            const mediaMatch = displayText.match(/\[MEDIA\](.*?)\[\/MEDIA\]/);
+                            if (mediaMatch) {
+                              try {
+                                mediaUrls = JSON.parse(mediaMatch[1]);
+                                displayText = displayText.replace(mediaMatch[0], "").trim();
+                              } catch (e) {
+                                // Ignore parse error
+                              }
+                            }
+                            return (
+                              <>
+                                {displayText && <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">{displayText}</p>}
+                                {mediaUrls.length > 0 && (
+                                  <div className="mt-3 flex gap-2 overflow-x-auto">
+                                    {mediaUrls.map((url, i) => (
+                                      <div key={i} className="h-20 w-20 shrink-0 overflow-hidden rounded-lg border border-border bg-muted">
+                                        <img src={url} alt="Attached" className="h-full w-full object-cover" />
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </>
+                            );
+                          })()}
                         </div>
                       </div>
                     </div>

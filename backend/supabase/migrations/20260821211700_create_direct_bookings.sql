@@ -43,11 +43,10 @@ ALTER TABLE public.conversations
 ALTER TABLE public.conversations 
   ALTER COLUMN service_request_id DROP NOT NULL;
 
--- Ensure a conversation is linked to exactly one request OR direct booking
+-- Ensure a conversation is not linked to BOTH a request and a direct booking
 ALTER TABLE public.conversations
   ADD CONSTRAINT conv_link_check CHECK (
-    (service_request_id IS NOT NULL AND direct_booking_id IS NULL) OR
-    (service_request_id IS NULL AND direct_booking_id IS NOT NULL)
+    (service_request_id IS NULL) OR (direct_booking_id IS NULL)
   );
 
 -- Update start_or_get_conversation function to handle both
