@@ -1,4 +1,14 @@
 import { supabaseAdmin } from '../lib/supabaseClient.js';
+import { createClient } from '@supabase/supabase-js';
+
+const getSupabaseUserClient = (req) => {
+  const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || '';
+  const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_PUBLISHABLE_KEY || process.env.VITE_SUPABASE_PUBLISHABLE_KEY || '';
+  const token = req.headers.authorization?.split(' ')[1];
+  return createClient(supabaseUrl, supabaseAnonKey, {
+    global: { headers: { Authorization: `Bearer ${token}` } },
+  });
+};
 
 export const getRequests = async (req, res) => {
   try {
@@ -93,7 +103,8 @@ export const getMyRequests = async (req, res) => {
     const userId = req.user.id;
     const { role = 'customer' } = req.query;
     
-    let query = supabaseAdmin
+    const supabaseUser = getSupabaseUserClient(req);
+    let query = supabaseUser
       .from('service_requests')
       .select('*')
       .order('created_at', { ascending: false });
@@ -118,11 +129,11 @@ export const getMyRequests = async (req, res) => {
     let fb = [];
     
     if (ids.length) {
-      const { data: p } = await supabaseAdmin.from('profiles').select('id,full_name,avatar_url').in('id', ids);
+      const { data: p } = await supabaseUser.from('profiles').select('id,full_name,avatar_url').in('id', ids);
       profs = p || [];
     }
     if (reqIds.length) {
-      const { data: f } = await supabaseAdmin.from('service_feedback').select('service_request_id').in('service_request_id', reqIds);
+      const { data: f } = await supabaseUser.from('service_feedback').select('service_request_id').in('service_request_id', reqIds);
       fb = f || [];
     }
     
@@ -167,7 +178,8 @@ export const createRequest = async (req, res) => {
     const userId = req.user.id;
     const payload = { ...req.body, customer_id: userId };
     
-    const { data, error } = await supabaseAdmin
+    const supabaseUser = getSupabaseUserClient(req);
+    const { data, error } = await supabaseUser
       .from('service_requests')
       .insert(payload)
       .select()
@@ -177,7 +189,7 @@ export const createRequest = async (req, res) => {
     res.status(201).json({ data });
   } catch (err) {
     console.error('Error creating request:', err);
-    res.status(500).json({ error: 'Failed to create request' });
+    res.status(500).json({ error: err.message || 'Failed to create request', details: err });
   }
 };
 
@@ -526,5 +538,27 @@ export const getMatchingRequests = async (req, res) => {
   } catch (err) {
     console.error('Error fetching matching requests:', err);
     res.status(500).json({ error: 'Failed to fetch matching requests' });
+  }
+};
+
+export const acceptJob = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { price_total } = req.body;
+    const userId = req.user.id;
+    
+    const { data, error } = await supabaseAdmin
+      .from('service_requests')
+      .update({ status: 'accepted', price_total })
+      .eq('id', id)
+      .eq('provider_id', userId)
+      .select()
+      .single();
+
+    if (error) throw error;
+    res.json({ data });
+  } catch (err) {
+    console.error('Error accepting job:', err);
+    res.status(500).json({ error: 'Failed to accept job' });
   }
 };

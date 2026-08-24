@@ -20,7 +20,8 @@ import {
   logContactReveal,
   submitFeedback,
   getMatchingRequests,
-  openDispute
+  openDispute,
+  acceptJob
 } from '../controllers/requests.js';
 import { requireAuth, optionalAuth } from '../middleware/auth.js';
 
@@ -45,6 +46,7 @@ router.post('/:id/responses', createResponse);
 router.patch('/responses/:response_id', updateResponse);
 router.post('/:id/dispute', openDispute);
 router.post('/:id/feedback', submitFeedback);
+router.post('/:id/accept', acceptJob);
 
 // Contact Logging & Gates
 router.get('/contact_gate/:providerId', checkContactGate);

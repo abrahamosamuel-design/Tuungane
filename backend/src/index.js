@@ -29,6 +29,7 @@ import dashboardRoutes from './routes/dashboard.js';
 import messagesRoutes from './routes/messages.js';
 import creditsRoutes from './routes/credits.js';
 import adminRoutes from './routes/admin.js';
+import directBookingRoutes from './routes/direct_bookings.js';
 
 // Basic health check route
 app.get('/api/health', (req, res) => {
@@ -47,6 +48,7 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/messages', messagesRoutes);
 app.use('/api/credits', creditsRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/direct-bookings', directBookingRoutes);
 
 app.listen(port, () => {
   console.log(`Backend server listening on port ${port}`);

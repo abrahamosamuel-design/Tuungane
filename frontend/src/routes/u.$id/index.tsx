@@ -54,6 +54,17 @@ import { RouteErrorCard, RouteNotFoundCard } from "@/lib/route-boundaries";
 import { CategoryScroll } from "@/components/CategoryScroll";
 import { ServiceVerticalList } from "@/components/ServiceVerticalList";
 
+function StatusBadge({ status }: { status: string }) {
+  const map: Record<string, { c: string; label: string; icon: React.ReactNode }> = {
+    pending:   { c: "bg-orange/15 text-orange",           label: "Pending approval", icon: <Clock className="h-3 w-3" /> },
+    paid:      { c: "bg-green/15 text-green",             label: "Paid",             icon: <Check className="h-3 w-3" /> },
+    rejected:  { c: "bg-destructive/15 text-destructive", label: "Rejected",         icon: <XIcon className="h-3 w-3" /> },
+    cancelled: { c: "bg-muted text-muted-foreground",     label: "Cancelled",        icon: <XIcon className="h-3 w-3" /> },
+  };
+  const s = map[status] ?? { c: "bg-muted text-muted-foreground", label: status || "Unknown", icon: <Info className="h-3 w-3" /> };
+  return <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-semibold whitespace-nowrap ${s.c}`}>{s.icon}{s.label}</span>;
+}
+
 export const Route = createFileRoute("/u/$id/")({
   staticData: { hideHeaderOnMobile: true },
   loader: async ({ params }) => {
@@ -111,9 +122,9 @@ type Tab = "timeline" | "reviews" | "services" | "requests" | "admin";
 
 const TABS: { id: Tab; label: string; providerOnly?: boolean; ownerOnly?: boolean; adminOnly?: boolean; href?: string }[] = [
   { id: "timeline", label: "Timeline" },
-  { id: "requests", label: "My Requests", ownerOnly: true },
-  { id: "reviews", label: "Reviews", providerOnly: true },
   { id: "services", label: "Services", providerOnly: true },
+  { id: "reviews", label: "Reviews", providerOnly: true },
+  { id: "requests", label: "My Requests", ownerOnly: true },
   { id: "admin", label: "Admin Console", ownerOnly: true, adminOnly: true, href: "/admin" },
 ];
 
@@ -307,6 +318,16 @@ function UserProfile() {
     finally { setCreditSubmitting(null); }
   };
 
+  const cancelRequest = async (id: string) => {
+    try {
+      await apiClient.put(`/credits/requests/${id}/cancel`, {});
+      toast.success("Request cancelled");
+      loadOwnerCredits();
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || "Failed to cancel request");
+    }
+  };
+
 
 
 
@@ -367,20 +388,29 @@ function UserProfile() {
     return (
       <div className="min-h-screen" style={{ background: "linear-gradient(180deg,#f47b16 0%,#f47b16 38%,#ffffff 38%)" }}>
 
-        {/* ORANGE HEADER */}
-        <div className="relative" style={{ paddingBottom: "80px", background: "linear-gradient(135deg,#f47b16 0%,#e06210 100%)" }}>
-          <div className="absolute top-0 right-0 h-44 w-44 rounded-full opacity-20 pointer-events-none" style={{ background: "radial-gradient(circle,#fff 0%,transparent 70%)", transform: "translate(30%,-30%)" }} />
-          <div className="absolute top-10 right-20 h-[72px] w-[72px] rounded-full opacity-10 pointer-events-none" style={{ background: "radial-gradient(circle,#fff 0%,transparent 70%)" }} />
-          {/* Sign out button — top right */}
-          <div className="flex justify-end pr-4 pt-5">
-            <button
-              onClick={() => signOut?.()}
-              title="Sign out"
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-white/25 text-white backdrop-blur-sm hover:bg-white/35 transition"
-            >
-              <LogOut className="h-5 w-5" />
-            </button>
-          </div>
+        {/* HEADER / BANNER */}
+        <div className="relative group overflow-hidden" style={{ paddingBottom: "140px", background: sp?.cover_url ? `url(${sp.cover_url}) center/cover no-repeat` : "linear-gradient(135deg,#f47b16 0%,#e06210 100%)" }}>
+          {!sp?.cover_url && (
+            <>
+              <div className="absolute top-0 right-0 h-44 w-44 rounded-full opacity-20 pointer-events-none" style={{ background: "radial-gradient(circle,#fff 0%,transparent 70%)", transform: "translate(30%,-30%)" }} />
+              <div className="absolute top-10 right-20 h-[72px] w-[72px] rounded-full opacity-10 pointer-events-none" style={{ background: "radial-gradient(circle,#fff 0%,transparent 70%)" }} />
+            </>
+          )}
+          {/* Cover Photo Upload — top right */}
+          {isProvider && (
+            <div className="absolute top-4 right-4 z-10">
+              <label className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm hover:bg-black/60 transition shadow-sm" title="Change cover photo">
+                {uploadingCover ? <Loader2 className="h-4 w-4 animate-spin text-white" /> : <Camera className="h-4 w-4" />}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  disabled={uploadingCover}
+                  onChange={(e) => uploadCover(e.target.files?.[0] ?? null)}
+                />
+              </label>
+            </div>
+          )}
         </div>
 
         {/* WHITE BODY â€” rounded top, full width, no floating shadow */}
@@ -388,7 +418,7 @@ function UserProfile() {
 
           {/* Avatar overlapping the orange-white boundary */}
           <div className="flex justify-center">
-            <div className="relative" style={{ marginTop: "-60px" }}>
+            <div className="relative" style={{ marginTop: "-50px" }}>
               <div className="rounded-full overflow-hidden bg-white" style={{ width: 120, height: 120, border: "5px solid #fff", boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
                 <Avatar name={profile.full_name} url={profile.avatar_url} size={120} />
               </div>
@@ -514,11 +544,9 @@ function UserProfile() {
                         <p className="truncate text-sm font-semibold" style={{ color: "#1a2b4b" }}>{s.title}</p>
                         {s.price_guidance_ugx && <p className="text-xs" style={{ color: "#9ca3af" }}>From UGX {s.price_guidance_ugx.toLocaleString()}</p>}
                       </div>
-                      {ownerPublicProfileId && (
-                        <Link to="/profiles/$id" params={{ id: ownerPublicProfileId }} className="rounded-lg px-2.5 py-1 text-xs font-semibold flex-shrink-0" style={{ background: "#f1f5f9", color: "#1a2b4b" }}>
-                          <Pencil className="h-3 w-3 inline mr-1" />Edit
-                        </Link>
-                      )}
+                      <Link to="/service/$id" params={{ id: s.id }} className="rounded-lg px-4 py-1.5 text-xs font-semibold flex-shrink-0" style={{ background: "#f1f5f9", color: "#1a2b4b", hover: "bg-gray-200" }}>
+                        View
+                      </Link>
                     </div>
                   ))}
                 </div>
@@ -550,65 +578,200 @@ function UserProfile() {
             )}
 
             {ownerTab === "credits" && (
-              <div className="space-y-4 pb-10">
-                <div className="rounded-2xl p-5" style={{ background: "linear-gradient(135deg,#fff7ed,#fff)", border: "1.5px solid #fed7aa" }}>
-                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide" style={{ color: "#f47b16" }}><Coins className="h-4 w-4" /> Tuungane Credits</div>
-                  <div className="mt-2 flex items-end gap-2">
-                    <span className="text-5xl font-black leading-none" style={{ color: "#1a2b4b" }}>{(balance ?? 0).toLocaleString()}</span>
-                    <span className="text-lg font-semibold mb-1" style={{ color: "#9ca3af" }}>credits</span>
+              <div className="space-y-6 pb-10">
+                {/* A. Balance hero */}
+                <div className="rounded-2xl bg-gradient-to-br from-orange-100/50 via-orange-50/30 to-white border border-orange-200/50 p-5 sm:p-7">
+                  <div className="flex items-center gap-2 text-xs font-semibold text-orange-500 uppercase tracking-wide">
+                    <Coins className="h-4 w-4" /> Tuungane Credits
                   </div>
-                  <p className="mt-2 text-sm" style={{ color: "#9ca3af" }}>Boost visibility, feature posts, and promote your services.</p>
-                  <a href="#credit-packages" className="mt-4 inline-flex items-center rounded-full px-5 py-2.5 text-sm font-bold text-white" style={{ background: "#f47b16" }}>Buy credits</a>
+                  <h1 className="mt-2 text-4xl sm:text-5xl font-bold leading-none" style={{ color: "#1a2b4b" }}>
+                    {(balance ?? 0).toLocaleString()}
+                    <span className="ml-2 text-lg sm:text-xl font-semibold text-gray-400">credits</span>
+                  </h1>
+                  <p className="mt-3 text-sm text-gray-500">
+                    Use credits to boost your profile, feature posts, mark requests urgent, and promote your services.
+                  </p>
+                  <div className="mt-4 flex flex-wrap items-center gap-3">
+                    <a href="#packages" className="inline-flex items-center rounded-full px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:brightness-110" style={{ background: "#f47b16" }}>Buy credits</a>
+                    <span className="text-xs text-gray-400">Free to join · Basic use stays free</span>
+                  </div>
                 </div>
-                <div className="flex gap-3 rounded-xl bg-white p-4 text-sm" style={{ border: "1.5px solid #f3f4f6", color: "#9ca3af" }}>
+
+                {/* B. How credits work / not-cash notice */}
+                <div className="flex gap-3 rounded-xl border border-gray-200 bg-white p-4 text-sm text-gray-500">
                   <Info className="h-5 w-5 flex-shrink-0" style={{ color: "#1a2b4b" }} />
-                  <p><strong style={{ color: "#1a2b4b" }}>Credits are not cash.</strong> Used inside Tuungane for boosts, features and promotions. Cannot be withdrawn.</p>
+                  <p>
+                    <strong style={{ color: "#1a2b4b" }}>Credits are not cash.</strong> They are used inside Tuungane to boost visibility,
+                    feature posts, highlight requests, and promote services. Credits cannot be withdrawn as money.
+                  </p>
                 </div>
-                <div id="credit-packages">
-                  <h2 className="mb-3 text-base font-extrabold" style={{ color: "#1a2b4b" }}>Buy credits</h2>
-                  <div className="grid grid-cols-2 gap-3">
-                    {pkgs.map(p => {
+
+                {/* How buying works */}
+                <div className="rounded-xl border border-gray-200 bg-white p-5">
+                  <h2 className="text-base font-bold" style={{ color: "#1a2b4b" }}>How buying credits works</h2>
+                  <ol className="mt-3 space-y-1.5 text-sm text-gray-500 list-decimal pl-5">
+                    <li>Choose a credit package</li>
+                    <li>Tap <span className="font-semibold" style={{ color: "#1a2b4b" }}>Request purchase</span></li>
+                    <li>Follow the payment instructions from Tuungane</li>
+                    <li>Admin confirms your payment</li>
+                    <li>Your credits are added automatically</li>
+                  </ol>
+                </div>
+
+                {/* C. Packages */}
+                <div id="packages">
+                  <h2 className="mb-3 text-xl font-bold" style={{ color: "#1a2b4b" }}>Buy credits</h2>
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                    {pkgs.map((p) => {
                       const hasPending = pendingPkgIds.has(p.id) || pendingPkgNames.has(p.name);
                       const isSubmitting = creditSubmitting === p.id;
                       return (
-                        <div key={p.id} className="flex flex-col rounded-2xl bg-white p-4" style={{ border: "1.5px solid #f3f4f6", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
-                          <div className="text-xs font-medium" style={{ color: "#9ca3af" }}>{p.name}</div>
-                          <div className="mt-1 flex items-baseline gap-1"><span className="text-2xl font-black" style={{ color: "#1a2b4b" }}>{p.credits}</span><span className="text-xs" style={{ color: "#9ca3af" }}>credits</span></div>
-                          <div className="text-sm font-bold" style={{ color: "#f47b16" }}>{fmtUgx(p.amount_ugx)}</div>
-                          <button disabled={isSubmitting || hasPending} onClick={() => requestPurchase(p)} className="mt-3 w-full rounded-full py-2 text-xs font-bold text-white transition disabled:opacity-60" style={{ background: hasPending ? "#fed7aa" : "#1a2b4b" }}>
-                            {hasPending ? "Pending\u2026" : isSubmitting ? "Submitting\u2026" : "Buy"}
+                        <div key={p.id} className="flex flex-col rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition hover:border-orange-300 hover:shadow-md">
+                          <div className="text-xs font-medium text-gray-500">{p.name}</div>
+                          <div className="mt-1 flex items-baseline gap-1.5">
+                            <span className="text-2xl font-bold leading-none" style={{ color: "#1a2b4b" }}>{p.credits}</span>
+                            <span className="text-sm font-medium text-gray-500">credits</span>
+                          </div>
+                          <div className="mt-1 text-sm font-bold" style={{ color: "#f47b16" }}>{fmtUgx(p.amount_ugx)}</div>
+                          <button
+                            disabled={isSubmitting || hasPending}
+                            onClick={() => requestPurchase(p)}
+                            className={`mt-3 w-full rounded-full px-4 py-2 text-sm font-semibold transition ${
+                              hasPending
+                                ? "bg-orange-100 text-orange-500 cursor-not-allowed"
+                                : "text-white disabled:opacity-60"
+                            }`}
+                            style={{ background: hasPending ? undefined : "#1a2b4b" }}
+                          >
+                            {hasPending ? "Pending approval" : isSubmitting ? "Submitting…" : "Request purchase"}
                           </button>
                         </div>
                       );
                     })}
-                    {pkgs.length === 0 && <div className="col-span-2 rounded-xl p-6 text-center text-sm" style={{ border: "1.5px dashed #e5e7eb", color: "#9ca3af" }}>No packages available.</div>}
+                    {pkgs.length === 0 && <div className="col-span-2 rounded-xl p-6 text-center text-sm border-2 border-dashed border-gray-200 text-gray-400">No packages available.</div>}
                   </div>
                 </div>
+
+                {/* D. Purchase requests */}
                 {creditReqs.length > 0 && (
-                  <div className="rounded-2xl bg-white p-5" style={{ border: "1.5px solid #f3f4f6" }}>
-                    <h2 className="text-sm font-extrabold mb-4" style={{ color: "#1a2b4b" }}>Purchase Requests</h2>
-                    <div className="space-y-2">
-                      {creditReqs.slice(0, 5).map(r => (
-                        <div key={r.id} className="flex items-center justify-between rounded-xl p-3" style={{ border: "1.5px solid #f3f4f6", background: "#f9fafb" }}>
-                          <div><p className="text-sm font-semibold" style={{ color: "#1a2b4b" }}>{r.package_name}</p><p className="text-xs" style={{ color: "#9ca3af" }}>{r.credits_requested} credits &middot; {timeAgo(r.created_at)}</p></div>
-                          <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${r.status==="paid" ? "bg-green-100 text-green-700" : ""}`} style={r.status==="pending" ? { background: "#fff7ed", color: "#f47b16" } : r.status!=="paid" ? { background: "#f3f4f6", color: "#9ca3af" } : {}}>{r.status}</span>
+                  <div>
+                    <h2 className="mb-3 text-xl font-bold" style={{ color: "#1a2b4b" }}>Your purchase requests</h2>
+                    <div className="space-y-3 sm:hidden">
+                      {creditReqs.map((r) => (
+                        <div key={r.id} className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="font-semibold" style={{ color: "#1a2b4b" }}>{r.package_name}</div>
+                            <StatusBadge status={r.status} />
+                          </div>
+                          <div className="mt-1 text-sm text-gray-500">
+                            {r.credits_requested} credits · {fmtUgx(r.amount_ugx)}
+                          </div>
+                          <div className="mt-2 flex items-center justify-between text-xs text-gray-500">
+                            <span>Requested {timeAgo(r.created_at)}</span>
+                            {r.status === "pending" && (
+                              <button onClick={() => cancelRequest(r.id)} className="text-red-500 hover:underline font-medium">Cancel</button>
+                            )}
+                          </div>
                         </div>
                       ))}
+                    </div>
+                    <div className="hidden overflow-hidden rounded-xl border border-gray-200 sm:block">
+                      <table className="w-full text-sm bg-white">
+                        <thead className="bg-gray-50 text-left text-xs uppercase text-gray-500">
+                          <tr>
+                            <th className="px-4 py-2">Package</th>
+                            <th className="px-4 py-2">Credits</th>
+                            <th className="px-4 py-2">Amount</th>
+                            <th className="px-4 py-2">Status</th>
+                            <th className="px-4 py-2">When</th>
+                            <th />
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {creditReqs.map((r) => (
+                            <tr key={r.id} className="border-t border-gray-200">
+                              <td className="px-4 py-3 font-medium" style={{ color: "#1a2b4b" }}>{r.package_name}</td>
+                              <td className="px-4 py-3">{r.credits_requested}</td>
+                              <td className="px-4 py-3">{fmtUgx(r.amount_ugx)}</td>
+                              <td className="px-4 py-3"><StatusBadge status={r.status} /></td>
+                              <td className="px-4 py-3 text-gray-500 whitespace-nowrap">{timeAgo(r.created_at)}</td>
+                              <td className="px-4 py-3 text-right">
+                                {r.status === "pending" && (
+                                  <button onClick={() => cancelRequest(r.id)} className="text-xs text-red-500 hover:underline">Cancel</button>
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     </div>
                   </div>
                 )}
-                <div className="rounded-2xl bg-white p-5" style={{ border: "1.5px solid #f3f4f6" }}>
-                  <h2 className="text-sm font-extrabold mb-4" style={{ color: "#1a2b4b" }}>Transaction History</h2>
-                  {txs.length === 0 ? <p className="text-sm py-2" style={{ color: "#9ca3af" }}>No activity yet.</p> : (
-                    <div className="space-y-2">
-                      {txs.slice(0, 6).map(t => (
-                        <div key={t.id} className="flex items-center justify-between rounded-xl p-3" style={{ border: "1.5px solid #f3f4f6", background: "#f9fafb" }}>
-                          <div className="min-w-0"><p className="truncate text-sm" style={{ color: "#1a2b4b" }}>{t.reason || t.transaction_type.replace(/_/g, " ")}</p><p className="text-xs" style={{ color: "#9ca3af" }}>{timeAgo(t.created_at)}</p></div>
-                          <span className={`text-base font-bold flex-shrink-0 ${t.amount >= 0 ? "text-green-600" : "text-red-500"}`}>{t.amount > 0 ? "+" : ""}{t.amount}</span>
-                        </div>
-                      ))}
-                    </div>
+
+                {/* E. Transactions */}
+                <div>
+                  <h2 className="mb-3 text-xl font-bold" style={{ color: "#1a2b4b" }}>Transaction history</h2>
+                  {txs.length === 0 ? (
+                    <div className="rounded-xl border border-dashed border-gray-200 p-6 text-center text-sm text-gray-400">No credit activity yet.</div>
+                  ) : (
+                    <>
+                      <div className="space-y-2 sm:hidden">
+                        {txs.map((t) => (
+                          <div key={t.id} className="rounded-xl border border-gray-200 bg-white p-3 shadow-sm">
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="min-w-0">
+                                <div className={`text-base font-bold ${t.amount >= 0 ? "text-green-600" : "text-red-500"}`}>
+                                  {t.amount > 0 ? "+" : ""}{t.amount} <span className="text-xs font-medium text-gray-400">credits</span>
+                                </div>
+                                <div className="mt-0.5 text-sm truncate" style={{ color: "#1a2b4b" }}>{t.reason || t.transaction_type.replace(/_/g, " ")}</div>
+                              </div>
+                              <div className="text-xs text-gray-400 whitespace-nowrap">{timeAgo(t.created_at)}</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="hidden overflow-hidden rounded-xl border border-gray-200 sm:block">
+                        <table className="w-full text-sm bg-white">
+                          <thead className="bg-gray-50 text-left text-xs uppercase text-gray-500">
+                            <tr><th className="px-4 py-2">Type</th><th className="px-4 py-2">Amount</th><th className="px-4 py-2">Reason</th><th className="px-4 py-2">When</th></tr>
+                          </thead>
+                          <tbody>
+                            {txs.map((t) => (
+                              <tr key={t.id} className="border-t border-gray-200">
+                                <td className="px-4 py-3 font-medium" style={{ color: "#1a2b4b" }}>{t.transaction_type.replace(/_/g, " ")}</td>
+                                <td className={`px-4 py-3 font-semibold ${t.amount >= 0 ? "text-green-600" : "text-red-500"}`}>{t.amount > 0 ? "+" : ""}{t.amount}</td>
+                                <td className="px-4 py-3 text-gray-500">{t.reason}</td>
+                                <td className="px-4 py-3 text-gray-500 whitespace-nowrap">{timeAgo(t.created_at)}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </>
                   )}
+                </div>
+
+                {/* F. Earn & spend */}
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="rounded-xl border border-gray-200 bg-white p-5">
+                    <h3 className="text-base font-bold" style={{ color: "#1a2b4b" }}>Earn credits</h3>
+                    <ul className="mt-2 space-y-1.5 text-sm text-gray-500">
+                      <li>• 10 starter credits when you join</li>
+                      <li>• Admin-awarded credits for useful community contributions</li>
+                      <li>• Refunds from cancelled boosts where applicable</li>
+                    </ul>
+                  </div>
+                  <div className="rounded-xl border border-gray-200 bg-white p-5">
+                    <h3 className="text-base font-bold" style={{ color: "#1a2b4b" }}>Spend credits</h3>
+                    <ul className="mt-2 space-y-1.5 text-sm text-gray-500">
+                      <li>• Boost your provider profile</li>
+                      <li>• Feature a service post</li>
+                      <li>• Mark a request as urgent</li>
+                      <li>• Send a priority response</li>
+                      <li>• Feature a business/profile page where allowed</li>
+                      <li>• Promote completed-work posts</li>
+                    </ul>
+                  </div>
                 </div>
               </div>
             )}
@@ -661,10 +824,10 @@ function UserProfile() {
                       <span className="font-semibold" style={{ color: "#1a2b4b" }}>Advanced Settings</span>
                       <ChevronRight className="h-4 w-4" style={{ color: "#9ca3af" }} />
                     </Link>
-                    <Link to="/credits" className="flex items-center justify-between px-1 py-3 text-sm transition hover:opacity-70">
-                      <span className="font-semibold" style={{ color: "#1a2b4b" }}>Full Credits Page</span>
-                      <ChevronRight className="h-4 w-4" style={{ color: "#9ca3af" }} />
-                    </Link>
+                    <button onClick={() => { signOut(); nav({ to: "/" }); }} className="flex items-center justify-between w-full px-1 py-3 text-sm transition hover:opacity-70" style={{ borderTop: "1px solid #f3f4f6" }}>
+                      <span className="font-semibold text-red-500">Sign Out</span>
+                      <LogOut className="h-4 w-4 text-red-500" />
+                    </button>
                   </div>
                 </div>
               </div>
@@ -833,176 +996,25 @@ function UserProfile() {
                 <IdentityBadges status={identity} className="mt-0" />
               </h1>
               
-              {sp && (
-                <p className="mt-1 text-sm font-medium text-orange">
-                  {formatSubcategory(sp.subcategory)} {cat && <span className="text-muted-foreground">Ãƒâ€šÃ‚Â· {cat.name}</span>}
+              {sp?.business_name && sp.business_name !== profile.full_name && (
+                <p className="mt-1 text-sm font-medium text-muted-foreground">
+                  {profile.full_name}
                 </p>
               )}
               
-              <p className="mt-2 whitespace-pre-wrap text-sm text-foreground/85">
-                {sp?.bio || profile.bio || (isProvider ? "No description yet." : "This member hasn't added a bio yet.")}
-              </p>
-              
-              <div className="mt-3">
-                <TrustBadgeInline userId={id} />
-              </div>
-              
               <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted-foreground">
-                <span className="inline-flex items-center gap-1.5"><Users className="h-4 w-4" /> <strong className="text-navy">{followers}</strong> followers</span>
-                <span className="inline-flex items-center gap-1.5"><ThumbsUp className="h-4 w-4" /> <strong className="text-navy">{recs.length}</strong> endorsements</span>
                 {avgRating > 0 ? (
-                  <span className="inline-flex items-center gap-1.5"><Star className="h-4 w-4 fill-orange text-orange" /> <strong className="text-navy">{avgRating.toFixed(1)}</strong> ({feedback.length} verified)</span>
+                  <span className="inline-flex items-center gap-1.5"><Star className="h-4 w-4 fill-orange text-orange" /> <strong className="text-navy">{avgRating.toFixed(1)}</strong></span>
                 ) : isProvider ? (
                   <span className="inline-flex items-center gap-1.5 text-muted-foreground">No rating yet</span>
                 ) : null}
-
-                {(sp?.town || profile.town) ? (
-                  <span className="inline-flex items-center gap-1.5">
-                    <MapPin className="h-4 w-4 text-muted-foreground" /> 
-                    {sp?.town || profile.town}{(sp?.district || profile.district) && `, ${sp?.district || profile.district}`}
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1.5 text-muted-foreground/50">
-                    <MapPin className="h-4 w-4" /> ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â
-                  </span>
+                
+                {isProvider && (
+                  <span className="inline-flex items-center gap-1.5"><strong className="text-navy">{feedback.length}</strong> jobs done</span>
                 )}
               </div>
             </div>
           </div>
-
-          {/* Provider Details (Only rendered if sp exists) */}
-          {sp && (
-            <div className="border-t border-border/60 bg-muted/10 p-5 sm:p-6">
-              <h3 className="font-display text-base font-bold text-navy">Service Details</h3>
-              <dl className="mt-4 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
-                <Row label="Areas served" value={sp.areas_served?.join(", ") || sp.town || "ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â"} />
-                <Row label="Availability" value={sp.availability?.replace(/_/g, " ") || "ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â"} />
-                <Row label="Experience" value={sp.years_experience ? `${sp.years_experience} years` : "ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â"} />
-                <Row label="Verification" value={sp.verified === "verified" ? "Verified" : sp.verified === "pending" ? "Verification pending" : "Not yet verified"} />
-                {sp.phone && <Row label="Phone" value={sp.phone} />}
-                {sp.email && <Row label="Email" value={sp.email} />}
-              </dl>
-
-              {!isOwn && (
-                <div className="mt-5 flex flex-wrap gap-2">
-                  <Link
-                    to="/messages"
-                    search={{ to: id } as never}
-                    className="inline-flex items-center gap-1 rounded-full bg-orange px-4 py-2 text-xs font-semibold text-orange-foreground hover:brightness-110"
-                  >
-                    Message on Tuungane
-                  </Link>
-                  {sp.phone && (
-                    <a href={`tel:${sp.phone}`} className="inline-flex items-center gap-1 rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-navy hover:border-orange">
-                      <Phone className="h-3.5 w-3.5" /> Call
-                    </a>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
-
-
-        {isOwn && !isProvider && (
-          <div className="mt-4 rounded-2xl border border-orange/40 bg-gradient-to-br from-orange/10 to-orange/5 p-5">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-start gap-3 min-w-0">
-                <div className="shrink-0 rounded-full bg-orange/15 p-2 text-orange"><BadgeCheck className="h-5 w-5" /></div>
-                <div className="min-w-0">
-                  <p className="font-semibold text-navy">Want people to find you on Tuungane?</p>
-                  <p className="mt-0.5 text-sm text-muted-foreground">Your account is currently a Member Profile. To appear under Services, search, categories, and homepage provider cards, list a service.</p>
-                </div>
-              </div>
-              <Link
-                to="/profiles/new"
-                className="shrink-0 rounded-full bg-orange px-5 py-2.5 text-center text-sm font-semibold text-orange-foreground shadow-sm hover:brightness-110"
-              >
-                List a Service
-              </Link>
-            </div>
-          </div>
-        )}
-
-        {isOwn && (
-          <div className="mt-4 flex flex-col gap-2">
-            <Link to="/settings" className="flex items-center justify-between rounded-xl bg-card p-4 border border-border shadow-[var(--shadow-elevated)] transition-colors hover:bg-muted/50">
-              <span className="font-semibold text-navy">Settings</span>
-              <ChevronRight className="h-5 w-5 text-muted-foreground" />
-            </Link>
-            <Link to="/credits" className="flex items-center justify-between rounded-xl bg-card p-4 border border-border shadow-[var(--shadow-elevated)] transition-colors hover:bg-muted/50">
-              <span className="font-semibold text-navy">My Credits</span>
-              <ChevronRight className="h-5 w-5 text-muted-foreground" />
-            </Link>
-          </div>
-        )}
-
-
-        {sp && (sp.price_type || isOwn) && (
-          <div className="mt-4">
-            {sp.price_type ? (
-              <PriceGuideCard
-                guide={{ ...sp, price_type: sp.price_type as PriceType | null }}
-                onEdit={isOwn ? () => setEditOpen(true) : undefined}
-              />
-            ) : isOwn ? (
-              <PriceGuideEmptyOwner onAdd={() => setEditOpen(true)} />
-            ) : null}
-          </div>
-        )}
-
-
-        {!isOwn && isProvider && user && (
-          gate.unlocked && gate.requestId ? (
-            <div className="mt-4">
-              <ContactOptionsUnlocked
-                customerId={user.id}
-                providerId={id}
-                serviceRequestId={gate.requestId}
-                phone={sp?.phone ?? null}
-                email={sp?.email ?? null}
-              />
-            </div>
-          ) : (
-            <div className="mt-4 flex flex-wrap items-center gap-2">
-              <ProviderQuickContact providerId={id} source="provider_profile" />
-              {!isOwn && isProvider && (
-                <div className="sm:hidden">
-                  <FollowButton providerUserId={id} onChange={setFollowers} />
-                </div>
-              )}
-              <span className="mt-1 w-full text-xs text-muted-foreground">Tip: request the service through Tuungane to keep your job tracked and reviewable.</span>
-            </div>
-          )
-        )}
-
-
-        {/* NEW MOBILE UI */}
-        <div className="md:hidden mt-6 bg-white rounded-[24px] shadow-sm border border-border/40 overflow-hidden">
-          <CategoryScroll 
-            title="Available list uploads"
-            categories={[
-              { id: "c1", name: "Plumbing", icon: <Wrench className="h-6 w-6" />, colorClass: "bg-navy" },
-              { id: "c2", name: "Electric", icon: <Zap className="h-6 w-6" />, colorClass: "bg-orange" },
-              { id: "c3", name: "Cleaning", icon: <Sparkles className="h-6 w-6" />, colorClass: "bg-green" },
-              { id: "c4", name: "Stoutness", icon: <ClipboardList className="h-6 w-6" />, colorClass: "bg-green/80" },
-            ]} 
-          />
-          <ServiceVerticalList 
-            title="Service list"
-            items={services.length > 0 ? services.map(s => ({
-              id: s.id,
-              name: s.title,
-              subtitle: s.price_guidance_ugx ? `From UGX ${s.price_guidance_ugx.toLocaleString()}` : undefined,
-              icon: <Star className="h-6 w-6" />, // Or map icons based on category
-              to: `/u/${id}?tab=services`
-            })) : [
-              { id: "s1", name: "Plectric", icon: <Zap className="h-6 w-6" />, to: "#" },
-              { id: "s2", name: "Electric", icon: <Zap className="h-6 w-6 text-orange" />, to: "#" },
-              { id: "s3", name: "Cleaning", icon: <Sparkles className="h-6 w-6 text-green" />, to: "#" },
-              { id: "s4", name: "Pecatut proess", icon: <ClipboardList className="h-6 w-6 text-orange" />, to: "#" },
-            ]}
-          />
         </div>
 
         {/* Tabs */}
@@ -1193,18 +1205,13 @@ function UserProfile() {
                           {s.price_note && <p className="mt-1 text-[11px] text-muted-foreground">{s.price_note}</p>}
                         </div>
                         {!isOwn && isProvider && (
-                          <button
-                            onClick={() => {
-                              requireAuth(() => setRequestOpen(true), {
-                                title: "Sign in to request this service",
-                                message: "Create a free Tuungane account to send a request to this provider.",
-                                redirect: `/u/${id}`,
-                              });
-                            }}
-                            className="shrink-0 rounded-xl bg-orange px-3 py-2 text-xs font-semibold text-orange-foreground"
+                          <Link
+                            to="/service/$id"
+                            params={{ id: s.id }}
+                            className="shrink-0 rounded-xl bg-orange px-4 py-2 text-xs font-semibold text-orange-foreground hover:brightness-110"
                           >
-                            Request
-                          </button>
+                            View
+                          </Link>
                         )}
                         {isOwn && (
                           <button

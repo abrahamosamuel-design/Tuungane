@@ -37,7 +37,7 @@ const _apiClient = async function<T = any>(endpoint: string, options: RequestIni
   if (!response.ok) {
     let errorMessage = 'An error occurred';
     try {
-      const errorData = await response.json();
+      const errorData = await response.clone().json();
       errorMessage = errorData.error || errorMessage;
     } catch (e) {
       errorMessage = await response.text();

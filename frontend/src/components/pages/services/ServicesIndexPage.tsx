@@ -1,6 +1,6 @@
 import { useMemo, useState, useEffect } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Search, MapPin, BadgeCheck, Wrench, Sparkles, Building2, Scissors, Truck, Car, GraduationCap, Camera, ChefHat, Laptop, HeartPulse, Sprout, MoreHorizontal, ShieldCheck, ChevronRight, Star, ClipboardList, Bell, Heart, Phone, MessageCircle, ArrowLeft } from "lucide-react";
+import { Search, MapPin, BadgeCheck, Wrench, Sparkles, Building2, Scissors, Truck, Car, GraduationCap, Camera, ChefHat, Laptop, HeartPulse, Sprout, MoreHorizontal, ShieldCheck, ChevronRight, ChevronDown, Star, ClipboardList, Bell, Heart, Phone, MessageCircle, ArrowLeft } from "lucide-react";
 
 import { categories } from "@/data/categories";
 import { apiClient } from "@/lib/api";
@@ -31,6 +31,7 @@ const iconMap: Record<string, any> = { Wrench, Sparkles, Building2, Scissors, Tr
 type RealFilter = "all" | "verified" | "featured" | "recent" | "available" | "near";
 
 export type RealProvider = {
+  service_id?: string;
   user_id: string;
   business_name: string | null;
   subcategory: string;
@@ -273,46 +274,85 @@ export function ServicesIndexPage({ initialSort }: { initialSort?: "recent" }) {
 
             {/* Requests Card */}
             <div className="px-6 pt-2 pb-2">
-              <h2 className="font-display text-xl font-bold text-navy mb-4">Requests</h2>
+              <h2 className="font-display text-xl font-bold text-navy mb-3">Requests</h2>
               <Link
                 to="/requests/browse"
-                className="flex items-center gap-4 rounded-[24px] border border-orange/30 bg-orange/5 p-5 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.06)] transition-transform hover:-translate-y-0.5 active:scale-[0.98]"
+                className="flex items-center gap-3 rounded-2xl border border-orange/30 bg-orange/5 p-4 shadow-sm transition-transform hover:-translate-y-0.5 active:scale-[0.98]"
               >
-                <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-orange/15 text-orange">
-                  <ClipboardList className="h-6 w-6" />
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-orange/15 text-orange">
+                  <ClipboardList className="h-5 w-5" />
                 </div>
                 <div className="flex flex-1 flex-col gap-0.5">
-                  <span className="text-[15px] font-bold text-navy">Browse Service Requests</span>
-                  <span className="text-[13px] font-medium text-muted-foreground/80">See what people need help with</span>
+                  <span className="text-sm font-bold text-navy">Browse Service Requests</span>
+                  <span className="text-xs font-medium text-muted-foreground/80">See what people need help with</span>
                 </div>
-                <ChevronRight className="h-5 w-5 text-orange/60" />
+                <ChevronRight className="h-4 w-4 text-orange/60" />
               </Link>
             </div>
 
+            {/* Popular Services (Horizontal Scroll) */}
+            {recommended.length > 0 && (
+              <div className="pt-2 pb-4">
+                <div className="flex items-center justify-between px-6 mb-4">
+                  <h2 className="font-display text-xl font-bold text-navy">Popular services</h2>
+                </div>
+                <div className="flex overflow-x-auto pb-4 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                  <div className="w-6 shrink-0" />
+                  {recommended.map((p, idx) => (
+                    <div key={p.user_id} className={`w-[240px] shrink-0 snap-start ${idx !== recommended.length - 1 ? 'mr-4' : ''}`}>
+                      <ProviderCardListMobile 
+                        p={p} 
+                        userLoc={userLoc} 
+                        onRequest={() => nav({ to: "/u/$id", params: { id: p.user_id } })} 
+                      />
+                    </div>
+                  ))}
+                  <div className="w-6 shrink-0" />
+                </div>
+              </div>
+            )}
+
             {/* Services */}
-            <h2 className="font-display text-xl font-bold text-navy mb-4 px-6 pt-2">Services</h2>
-            <div className="flex flex-col gap-4 px-6 pb-6">
-              {(dbCats ?? categories).map((c) => {
-                const Icon = iconMap[c.icon] || Sparkles;
+            <h2 className="font-display text-xl font-bold text-navy mb-3 px-6 pt-2">Services</h2>
+            <div className="flex flex-col gap-3 px-6 pb-6">
+              {(() => {
+                const allCats = dbCats ?? categories;
+                const displayCats = showAllCats ? allCats : allCats.slice(0, 4);
                 return (
-                  <button
-                    key={c.slug}
-                    onClick={() => {
-                      setSelectedCategory(c.slug);
-                      window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }}
-                    className="flex items-center gap-4 rounded-[24px] border border-border/30 bg-white p-5 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.06)] transition-transform hover:-translate-y-0.5 active:scale-[0.98] text-left"
-                  >
-                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-slate-100 text-navy">
-                      <Icon className="h-6 w-6" />
-                    </div>
-                    <div className="flex flex-1 flex-col gap-0.5">
-                      <span className="text-[15px] font-bold text-navy">{c.name}</span>
-                    </div>
-                    <ChevronRight className="h-5 w-5 text-navy/40" />
-                  </button>
+                  <>
+                    {displayCats.map((c) => {
+                      const Icon = iconMap[c.icon] || Sparkles;
+                      return (
+                        <button
+                          key={c.slug}
+                          onClick={() => {
+                            setSelectedCategory(c.slug);
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                          }}
+                          className="flex items-center gap-3 rounded-2xl border border-border/30 bg-white p-3.5 shadow-sm transition-transform hover:-translate-y-0.5 active:scale-[0.98] text-left"
+                        >
+                          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-slate-100 text-navy">
+                            <Icon className="h-5 w-5" />
+                          </div>
+                          <div className="flex flex-1 flex-col gap-0.5">
+                            <span className="text-sm font-bold text-navy">{c.name}</span>
+                          </div>
+                          <ChevronRight className="h-4 w-4 text-navy/40" />
+                        </button>
+                      );
+                    })}
+                    {!showAllCats && allCats.length > 4 && (
+                      <button
+                        onClick={() => setShowAllCats(true)}
+                        className="flex items-center justify-center gap-2 rounded-2xl border border-border/30 bg-slate-50 p-3.5 shadow-sm transition-colors hover:bg-slate-100 text-sm font-bold text-navy mt-1"
+                      >
+                        More categories
+                        <ChevronDown className="h-4 w-4" />
+                      </button>
+                    )}
+                  </>
                 );
-              })}
+              })()}
             </div>
           </div>
 
@@ -330,12 +370,30 @@ export function ServicesIndexPage({ initialSort }: { initialSort?: "recent" }) {
              </div>
           </div>
 
-          <div className={`px-4 sm:px-0 ${!isSearching ? 'hidden md:block' : 'block'}`}>
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-2">
-              <h2 className="font-display text-xl font-bold text-navy sm:text-3xl hidden md:block">Service providers on Tuungane</h2>
+          {/* PROVIDER LIST SECTION */}
+          <div className="px-4 sm:px-0 mt-2 md:mt-8 mb-10">
+            <div className="flex flex-col gap-3">
+              <h2 className="font-display text-xl font-bold text-navy sm:text-3xl">Service providers on Tuungane</h2>
+              
+              {/* Filter Chips */}
+              <div className="flex overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 gap-2 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                {filterChips.map(c => (
+                  <button
+                    key={c.id}
+                    onClick={() => setFilter(c.id)}
+                    className={`shrink-0 whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-semibold transition-colors border ${
+                      filter === c.id 
+                        ? "bg-navy text-white border-navy" 
+                        : "bg-white text-muted-foreground border-border hover:bg-slate-50"
+                    }`}
+                  >
+                    {c.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+          <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
             <RadiusFilter value={radiusKm} onChange={setRadiusKm} disabled={!userLoc} />
           </div>
 
@@ -346,7 +404,7 @@ export function ServicesIndexPage({ initialSort }: { initialSort?: "recent" }) {
             </div>
           )}
 
-          <div className="mt-4 md:mt-6 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-1.5 md:gap-4 px-1.5 sm:px-0">
+          <div className="mt-4 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-1.5 md:gap-4 px-1.5 sm:px-0">
             {loadingReal && <p className="text-base text-muted-foreground col-span-full">Loading providers&hellip;</p>}
             {!loadingReal && realFiltered.map((p) => (
               <div key={p.user_id}>
@@ -493,7 +551,7 @@ function ProviderCardCompact({ p, userLoc, onRequest }: { p: RealProvider; userL
 
   return (
     <div className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm hover:shadow-md transition-shadow relative">
-      <Link to={p.slug ? "/p/$slug" : "/u/$id"} params={p.slug ? { slug: p.slug } : { id: p.user_id }} className="flex flex-col flex-1">
+      <Link to="/service/$id" params={{ id: p.service_id || p.user_id }} className="flex flex-col flex-1">
         {/* Top Image */}
         <div className="aspect-[4/3] w-full bg-muted relative overflow-hidden">
           {coverImage ? (
@@ -543,7 +601,7 @@ function ProviderCardListMobile({ p, userLoc, onRequest }: { p: RealProvider; us
     <div className="group flex flex-col overflow-hidden rounded-[20px] bg-white shadow-[0_4px_20px_rgb(0,0,0,0.06)] border border-border/40 relative h-full">
       
       {/* Image Section */}
-      <Link to={p.slug ? "/p/$slug" : "/u/$id"} params={p.slug ? { slug: p.slug } : { id: p.user_id }} className="relative aspect-[4/3] w-full shrink-0 overflow-hidden bg-muted block">
+      <Link to="/service/$id" params={{ id: p.service_id || p.user_id }} className="relative aspect-[4/3] w-full shrink-0 overflow-hidden bg-muted block">
         {coverImage ? (
           <img src={coverImage} alt={name} className="absolute inset-0 h-full w-full object-cover" />
         ) : (
@@ -579,7 +637,7 @@ function ProviderCardListMobile({ p, userLoc, onRequest }: { p: RealProvider; us
          {/* Action Row */}
          <div className="mt-auto pt-2.5 flex items-center gap-1.5">
             <Link 
-              to={p.slug ? "/p/$slug" : "/u/$id"} params={p.slug ? { slug: p.slug } : { id: p.user_id }}
+              to="/service/$id" params={{ id: p.service_id || p.user_id }}
               className="flex h-[36px] flex-1 items-center justify-center rounded-[8px] bg-orange text-[12.5px] font-bold text-white hover:brightness-110 transition-all shadow-[0_4px_12px_rgba(249,115,22,0.3)]"
             >
                View details

@@ -429,22 +429,123 @@ export const getProfileById = async (req, res) => {
   }
 };
 
-export const createPublicProfile = async (req, res) => {
+import { createClient } from '@supabase/supabase-js';
+
+const getSupabaseUserClient = (req) => {
+  const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || '';
+  const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_PUBLISHABLE_KEY || process.env.VITE_SUPABASE_PUBLISHABLE_KEY || '';
+  const token = req.headers.authorization?.split(' ')[1];
+  return createClient(supabaseUrl, supabaseAnonKey, {
+    global: { headers: { Authorization: `Bearer ${token}` } }
+  });
+};
+
+export const createBusinessProfile = async (req, res) => {
   try {
     const userId = req.user.id;
-    const payload = { ...req.body, owner_id: userId };
+    const { name, slug, district, town, bio, avatar_url } = req.body;
+    const supabaseUser = getSupabaseUserClient(req);
+
+    // Ensure slug is unique, append random string if needed (already done in frontend but good to be safe)
     
-    const { data, error } = await supabaseAdmin
-      .from('public_profiles')
+    const payload = {
+      owner_id: userId,
+      profile_type: "business",
+      name: name,
+      slug: slug,
+      category_slug: "other", // default required field
+      subcategory: "General Business",
+      district: district || null,
+      town: town || null,
+      bio: bio || "",
+      avatar_url: avatar_url || null,
+      active: true,
+      verified: "unverified"
+    };
+
+    const { data: profile, error } = await supabaseUser
+      .from("public_profiles")
       .insert(payload)
       .select()
       .single();
 
     if (error) throw error;
-    res.status(201).json({ data });
+
+    res.status(201).json({ data: profile });
   } catch (err) {
-    console.error('Error creating public profile:', err);
-    res.status(500).json({ error: 'Failed to create public profile' });
+    console.error('Error creating business profile:', err);
+    res.status(500).json({ error: 'Failed to create business profile' });
+  }
+};
+
+export const createPublicProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { name, category_slug, subcategory, district, town, bio, promo_plan, price, price_unit, images, attach_to } = req.body;
+    const supabaseUser = getSupabaseUserClient(req);
+    
+    let profileId = null;
+    let userProfileId = null;
+
+    if (attach_to === 'individual') {
+      userProfileId = userId;
+    } else if (attach_to) {
+      // Check if user owns this business profile
+      const { data: businessProfile, error: eErr } = await supabaseUser
+        .from('public_profiles')
+        .select('id')
+        .eq('id', attach_to)
+        .eq('owner_id', userId)
+        .single();
+        
+      if (eErr || !businessProfile) {
+        throw new Error("Business profile not found or access denied");
+      }
+      profileId = businessProfile.id;
+    } else {
+      // Fallback: Check if they have an existing profile
+      const { data: existingProfiles } = await supabaseUser
+        .from('public_profiles')
+        .select('id')
+        .eq('owner_id', userId);
+        
+      if (existingProfiles && existingProfiles.length > 0) {
+        profileId = existingProfiles[0].id;
+      } else {
+        userProfileId = userId;
+      }
+    }
+    
+    // Create the service
+    const servicePayload = {
+      profile_id: profileId,
+      user_profile_id: userProfileId,
+      title: name,
+      category_slug,
+      subcategory,
+      description: bio || "",
+      district: district || null,
+      town: town || null,
+      active: true,
+      price_type: price_unit === "contact" ? null : (price_unit ? "fixed" : null),
+      price_fixed_ugx: price ? parseInt(price) : null,
+      price_currency: "UGX",
+      price_note: (price_unit && price_unit !== "contact") ? price_unit : null,
+      photos: images && Array.isArray(images) ? images : [],
+    };
+    
+    const { data: serviceRes, error: sErr } = await supabaseUser
+      .from('profile_services')
+      .insert(servicePayload)
+      .select()
+      .single();
+      
+    if (sErr) throw sErr;
+
+    res.status(201).json({ data: { serviceId: serviceRes.id } });
+  } catch (err) {
+    console.error('Error creating public profile or service:', err);
+    res.status(500).json({ error: 'Failed to create service' });
   }
 };
 
@@ -582,15 +683,21 @@ export const getProviderAuxData = async (req, res) => {
     const pubIds = (pubProfiles || []).map((p) => p.id);
     ownerPublicProfileId = pubIds[0] || null;
 
-    if (pubIds.length) {
-      const { data: svcRows } = await supabaseAdmin
-        .from("profile_services")
-        .select("id,title,description,active,is_primary,price_type,price_fixed_ugx,price_min_ugx,price_max_ugx,price_currency,price_note,price_guidance_ugx")
-        .in("profile_id", pubIds)
-        .order("is_primary", { ascending: false })
-        .order("sort_order", { ascending: true });
-      services = userId === id ? svcRows : (svcRows || []).filter((r) => r.active);
+    let query = supabaseAdmin
+      .from("profile_services")
+      .select("id,title,description,active,is_primary,price_type,price_fixed_ugx,price_min_ugx,price_max_ugx,price_currency,price_note,price_guidance_ugx");
+
+    if (pubIds.length > 0) {
+      query = query.or(`profile_id.in.(${pubIds.join(',')}),user_profile_id.eq.${id}`);
+    } else {
+      query = query.eq("user_profile_id", id);
     }
+    
+    const { data: svcRows } = await query
+      .order("is_primary", { ascending: false })
+      .order("sort_order", { ascending: true });
+
+    services = userId === id ? (svcRows || []) : (svcRows || []).filter((r) => r.active);
 
     const { data: ps } = await supabaseAdmin.from("timeline_posts").select("*").eq("provider_user_id", id).eq("hidden", false).order("created_at", { ascending: false });
     

@@ -168,67 +168,101 @@ export const getHomeFeed = async (req, res) => {
       reqs = data || [];
     }
 
-    const [{ data: ppData }, { data: spData }] = await Promise.all([
-      supabaseAdmin
-        .from("public_profiles")
-        .select(userId ? PP_COLS_AUTH : PP_COLS_GUEST)
-        .eq("suspended", false)
-        .not("owner_id", "is", null)
-        .order("verified", { ascending: false })
-        .order("updated_at", { ascending: false })
-        .limit(24),
-      supabaseAdmin
-        .from("service_profiles")
-        .select(userId ? SP_COLS_AUTH : SP_COLS_GUEST)
-        .eq("suspended", false)
-        .order("verified", { ascending: false })
-        .order("updated_at", { ascending: false })
-        .limit(24),
-    ]);
-    const ppRows = (ppData || []).map((r) => ({
+    const { data: vssData, error: vssError } = await supabaseAdmin
+      .from("v_search_services")
+      .select("*")
+      .order("updated_at", { ascending: false })
+      .limit(48);
+      
+    if (vssError) console.error("Error fetching v_search_services:", vssError);
+    
+    // Provs contains the items for the mixed feed. The frontend expects specific fields.
+    provs = (vssData || []).slice(0, 48).map((r) => ({
       ...r,
-      user_id: r.owner_id,
-      business_name: r.name,
+      user_id: r.user_id,
+      business_name: r.business_name,
+      name: r.business_name,
+      owner_id: r.user_id,
     }));
-    const ppOwners = new Set(ppRows.map((r) => r.user_id));
-    const spRows = (spData || []).filter((r) => !ppOwners.has(r.user_id));
-    provs = [...ppRows, ...spRows];
 
-    const [{ data: listingRows }, { data: spListingRows }] = await Promise.all([
-      supabaseAdmin
-        .from("public_profiles")
-        .select(userId ? PP_LISTING_COLS_AUTH : PP_LISTING_COLS_GUEST)
-        .eq("suspended", false)
-        .not("owner_id", "is", null)
-        .order("created_at", { ascending: false })
-        .limit(12),
-      supabaseAdmin
-        .from("service_profiles")
-        .select(userId ? SP_LISTING_COLS_AUTH : SP_LISTING_COLS_GUEST)
-        .eq("suspended", false)
-        .order("created_at", { ascending: false })
-        .limit(12),
-    ]);
-    const ppListings = (listingRows || []).map((r) => ({
+    // For the listings row above the mixed feed (usually sorted by created_at)
+    const { data: vssListings } = await supabaseAdmin
+      .from("v_search_services")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(12);
+
+    const listings = (vssListings || []).map((r) => ({
       ...r,
-      user_id: r.owner_id,
-      business_name: r.name,
+      user_id: r.user_id,
+      business_name: r.business_name,
+      name: r.business_name,
+      owner_id: r.user_id,
     }));
-    const ppOwnerSet = new Set(ppListings.map((l) => l.user_id));
-    const spListings = (spListingRows || [])
-      .filter((r) => !ppOwnerSet.has(r.user_id))
-      .map((r) => ({ ...r, id: r.user_id, slug: null }));
-    const listings = [...ppListings, ...spListings]
-      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-      .slice(0, 12);
 
     let provider = false;
     if (userId) {
-      const [{ count: ppCount }, { count: spCount }] = await Promise.all([
-        supabaseAdmin.from("public_profiles").select("id", { count: "exact", head: true }).eq("owner_id", userId),
-        supabaseAdmin.from("service_profiles").select("user_id", { count: "exact", head: true }).eq("user_id", userId),
-      ]);
-      provider = ((ppCount || 0) + (spCount || 0)) > 0;
+      const { count: vssCount } = await supabaseAdmin
+        .from("v_search_services")
+        .select("service_id", { count: "exact", head: true })
+        .eq("user_id", userId);
+      provider = (vssCount || 0) > 0;
+    }
+
+    // Fetch timeline posts for the mixed feed
+    let timelinePosts = [];
+    try {
+      const { data: tpRaw } = await supabaseAdmin
+        .from("timeline_posts")
+        .select("id,provider_user_id,service_id,text,category_slug,location,media_urls,featured,created_at,post_type,district,town,area")
+        .eq("hidden", false)
+        .in("post_type", ALLOWED_TYPES)
+        .order("created_at", { ascending: false })
+        .limit(20);
+
+      const tpFiltered = (tpRaw || []).filter(isQuality);
+      if (tpFiltered.length) {
+        const tpUserIds = Array.from(new Set(tpFiltered.map((p) => p.provider_user_id)));
+        const [{ data: tpProfs }, { data: tpSps }, { data: tpPps }] = await Promise.all([
+          supabaseAdmin.from("profiles").select("id,full_name,avatar_url,is_provider").in("id", tpUserIds),
+          supabaseAdmin.from("service_profiles").select("user_id,business_name,verified,suspended,cover_url").in("user_id", tpUserIds),
+          supabaseAdmin.from("public_profiles").select("owner_id,name,avatar_url,cover_url,verified").in("owner_id", tpUserIds),
+        ]);
+
+        const tpProfMap = new Map((tpProfs || []).map((p) => [p.id, p]));
+        const tpSpMap = new Map((tpSps || []).map((s) => [s.user_id, s]));
+        const tpPpMap = new Map((tpPps || []).filter((p) => p.owner_id).map((p) => [p.owner_id, p]));
+
+        const tpServiceIds = Array.from(new Set(tpFiltered.map((p) => p.service_id).filter(Boolean)));
+        const tpServiceMap = new Map();
+        if (tpServiceIds.length) {
+          const { data: tpServices } = await supabaseAdmin.from("profile_services").select("id,title").in("id", tpServiceIds);
+          (tpServices || []).forEach(s => tpServiceMap.set(s.id, s.title));
+        }
+
+        timelinePosts = tpFiltered
+          .map((p) => {
+            const prof = tpProfMap.get(p.provider_user_id);
+            const sp = tpSpMap.get(p.provider_user_id);
+            const pp = tpPpMap.get(p.provider_user_id);
+            const serviceTitle = p.service_id ? tpServiceMap.get(p.service_id) : null;
+            if (sp?.suspended) return null;
+
+            const fullName = serviceTitle || sp?.business_name || pp?.name || prof?.full_name || "Service Provider";
+            const avatar = prof?.avatar_url || pp?.avatar_url || pp?.cover_url || sp?.cover_url || null;
+            const isVerified = sp?.verified === "verified" || pp?.verified === "verified";
+
+            return {
+              ...p,
+              author: { full_name: fullName, avatar_url: avatar },
+              is_verified: isVerified,
+              service_title: serviceTitle,
+            };
+          })
+          .filter(Boolean);
+      }
+    } catch (tpErr) {
+      console.error("Failed to fetch timeline posts for home feed:", tpErr);
     }
 
     res.json({
@@ -238,6 +272,7 @@ export const getHomeFeed = async (req, res) => {
         providers: provs,
         recentListings: listings,
         isProvider: provider,
+        timelinePosts,
       }
     });
   } catch (err) {
@@ -298,7 +333,25 @@ export const getFeedPosts = async (req, res) => {
       });
     }
 
-    let mapped = (rows ?? []).map((r) => ({ ...r, author: profMap.get(r.provider_user_id) }));
+    const serviceIds = Array.from(new Set((rows ?? []).map((r) => r.service_id).filter(Boolean)));
+    const serviceMap = new Map();
+    if (serviceIds.length) {
+      const { data: services } = await supabaseAdmin.from("profile_services").select("id, title").in("id", serviceIds);
+      (services ?? []).forEach(s => serviceMap.set(s.id, s.title));
+    }
+
+    let mapped = (rows ?? []).map((r) => {
+      const baseAuthor = profMap.get(r.provider_user_id);
+      const serviceTitle = r.service_id ? serviceMap.get(r.service_id) : null;
+      return { 
+        ...r, 
+        author: {
+          ...baseAuthor,
+          full_name: serviceTitle || baseAuthor?.full_name
+        },
+        service_title: serviceTitle
+      };
+    });
     
     if (filter === "popular") {
       const postIds = mapped.map((r) => r.id);

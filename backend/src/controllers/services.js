@@ -1,29 +1,167 @@
 import { supabaseAdmin } from '../lib/supabaseClient.js';
+import { createClient } from '@supabase/supabase-js';
+
+const getSupabaseUserClient = (req) => {
+  const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || '';
+  const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_PUBLISHABLE_KEY || process.env.VITE_SUPABASE_PUBLISHABLE_KEY || '';
+  const token = req.headers.authorization?.split(' ')[1];
+  return createClient(supabaseUrl, supabaseAnonKey, {
+    global: { headers: { Authorization: `Bearer ${token}` } }
+  });
+};
+
 
 export const getServiceById = async (req, res) => {
   try {
     const { id } = req.params;
-    const { data: service, error: serviceError } = await supabaseAdmin
+    let { data: service, error: serviceError } = await supabaseAdmin
       .from('profile_services')
       .select(`
         *,
         profile:public_profiles!profile_services_profile_id_fkey (
           id, owner_id, name, avatar_url, verified,
           town, district, area, slug
+        ),
+        user_profile:profiles!profile_services_user_profile_id_fkey (
+          id, full_name, avatar_url
         )
       `)
       .eq('id', id)
       .single();
 
-    if (serviceError) throw serviceError;
+    if (serviceError) {
+      // Fallback: If not found in profile_services, try v_search_services (for legacy public_profiles / service_profiles)
+      const { data: fallback, error: fallbackErr } = await supabaseAdmin
+        .from('v_search_services')
+        .select('*')
+        .eq('service_id', id)
+        .single();
+        
+      if (fallbackErr) throw fallbackErr;
+      
+      service = {
+        id: fallback.service_id,
+        title: fallback.business_name,
+        description: fallback.bio,
+        subcategory: fallback.subcategory,
+        category_slug: fallback.category_slug,
+        profile_id: fallback.user_id,
+        user_profile_id: fallback.user_id,
+        price_type: fallback.price_type,
+        price_fixed_ugx: fallback.price_fixed_ugx,
+        price_min_ugx: fallback.price_min_ugx,
+        price_max_ugx: fallback.price_max_ugx,
+        price_currency: fallback.price_currency,
+        price_note: fallback.price_note,
+        profile: {
+          id: fallback.user_id,
+          owner_id: fallback.user_id,
+          name: fallback.business_name,
+          avatar_url: fallback.avatar_url,
+          cover_url: fallback.cover_url,
+          verified: fallback.verified,
+          town: fallback.town,
+          district: fallback.district,
+          slug: fallback.slug
+        }
+      };
+    }
     
-    // Fetch associated media
-    const { data: media } = await supabaseAdmin
+    // Normalize the profile data for the frontend (for standard profile_services)
+    if (!service.profile && service.user_profile) {
+      service.profile = {
+        id: service.user_profile.id,
+        name: service.user_profile.full_name,
+        avatar_url: service.user_profile.avatar_url,
+        isPersonal: true
+      };
+    }
+    
+    // Fetch associated media using the service's own ID
+    let mediaQuery = supabaseAdmin
       .from('service_media')
       .select('*')
-      .eq('profile_id', service.profile_id); // Assuming media is linked to profile for now
+      .eq('service_id', service.id);
+      
+    const { data: media } = await mediaQuery;
 
-    res.json({ data: { ...service, media: media || [] } });
+    // Fetch reviews for the provider
+    let reviewsQuery = supabaseAdmin
+      .from('reviews')
+      .select('id, rating, text, created_at, user_id')
+      .eq('hidden', false)
+      .order('created_at', { ascending: false });
+      
+    if (service.profile_id) {
+      reviewsQuery = reviewsQuery.eq('public_profile_id', service.profile_id);
+    } else {
+      reviewsQuery = reviewsQuery.eq('provider_user_id', service.user_profile_id);
+    }
+    const { data: rawReviews } = await reviewsQuery;
+    
+    let rating = 0;
+    let reviewCount = 0;
+    let reviews = [];
+    
+    if (rawReviews && rawReviews.length > 0) {
+      reviewCount = rawReviews.length;
+      rating = Number((rawReviews.reduce((acc, r) => acc + (r.rating || 0), 0) / reviewCount).toFixed(1));
+      
+      const userIds = Array.from(new Set(rawReviews.map(r => r.user_id)));
+      const { data: users } = await supabaseAdmin
+        .from('profiles')
+        .select('id, full_name, avatar_url')
+        .in('id', userIds);
+        
+      const userMap = new Map((users || []).map(u => [u.id, u]));
+      
+      reviews = rawReviews.map(r => ({
+        ...r,
+        user: userMap.get(r.user_id) || null
+      }));
+    }
+
+    // Fetch timeline posts for the provider (including posts explicitly linked to this service, and general provider posts)
+    const providerUserId = service.user_profile_id || service.profile?.owner_id || service.profile?.id;
+    let postsQuery = supabaseAdmin
+      .from('timeline_posts')
+      .select('*')
+      .eq('hidden', false)
+      .or(`service_id.eq.${service.id}${providerUserId ? `,provider_user_id.eq.${providerUserId}` : ''}`)
+      .order('created_at', { ascending: false })
+      .limit(30);
+    const { data: timeline_posts } = await postsQuery;
+    
+    let enrichedPosts = [];
+    if (timeline_posts && timeline_posts.length > 0) {
+      const userIds = [...new Set(timeline_posts.map(p => p.provider_user_id).filter(Boolean))];
+      let userMap = new Map();
+      if (userIds.length > 0) {
+        const { data: users } = await supabaseAdmin
+          .from('profiles')
+          .select('id, full_name, avatar_url')
+          .in('id', userIds);
+        userMap = new Map((users || []).map(u => [u.id, u]));
+      }
+
+      enrichedPosts = timeline_posts.map(p => {
+        const user = userMap.get(p.provider_user_id);
+        return {
+          ...p,
+          service_title: service.title,
+          author: {
+            full_name: user?.full_name || service.profile?.name || service.title,
+            avatar_url: user?.avatar_url || service.profile?.avatar_url,
+            is_provider: true,
+            district: service.profile?.district,
+            town: service.profile?.town,
+            area: service.profile?.area
+          }
+        };
+      });
+    }
+
+    res.json({ data: { ...service, media: media || [], reviews, rating, reviewCount, timeline_posts: enrichedPosts } });
   } catch (err) {
     console.error('Error fetching service:', err);
     res.status(500).json({ error: 'Failed to fetch service' });
@@ -32,49 +170,60 @@ export const getServiceById = async (req, res) => {
 
 export const getMyServices = async (req, res) => {
   try {
-    const { data: services, error } = await supabaseAdmin
-      .from('profile_services')
-      .select(`
-        *,
-        profile:public_profiles!profile_services_profile_id_fkey (
-          id, name, avatar_url, slug
-        )
-      `)
-      .eq('profile.owner_id', req.user.id)
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      // Supabase inner join filter syntax trick might fail if not properly used.
-      // Alternatively, query profiles first.
-      const { data: profiles } = await supabaseAdmin
-        .from('public_profiles')
-        .select('id, name, avatar_url, slug')
-        .eq('owner_id', req.user.id);
-        
-      if (!profiles || profiles.length === 0) {
-        return res.json({ data: [] });
-      }
+    const userId = req.user.id;
+    
+    // First, get all public profiles owned by the user
+    const { data: profiles } = await supabaseAdmin
+      .from('public_profiles')
+      .select('id, name, avatar_url, slug')
+      .eq('owner_id', userId);
       
-      const profileIds = profiles.map(p => p.id);
-      const { data: userServices, error: servError } = await supabaseAdmin
-        .from('profile_services')
-        .select('*')
-        .in('profile_id', profileIds)
-        .order('created_at', { ascending: false });
-        
-      if (servError) throw servError;
-      
-      const enrichedServices = userServices.map(s => ({
-        ...s,
-        profile: profiles.find(p => p.id === s.profile_id)
-      }));
-      
-      return res.json({ data: enrichedServices });
+    const profileIds = profiles ? profiles.map(p => p.id) : [];
+    
+    // Then get all services that belong to these profiles OR the user directly
+    let query = supabaseAdmin.from('profile_services').select('*');
+    
+    if (profileIds.length > 0) {
+      query = query.or(`profile_id.in.(${profileIds.join(',')}),user_profile_id.eq.${userId}`);
+    } else {
+      query = query.eq('user_profile_id', userId);
     }
-
-    // Filter out null profiles if inner join failed
-    const validServices = services.filter(s => s.profile);
-    res.json({ data: validServices });
+    
+    const { data: userServices, error: servError } = await query.order('created_at', { ascending: false });
+    
+    if (servError) throw servError;
+    
+    // Fetch personal profile details if there are personal services
+    const hasPersonalServices = userServices.some(s => s.user_profile_id);
+    let personalProfile = null;
+    if (hasPersonalServices) {
+      const { data: pp } = await supabaseAdmin
+        .from('profiles')
+        .select('id, full_name, avatar_url')
+        .eq('id', userId)
+        .single();
+      personalProfile = pp;
+    }
+    
+    const enrichedServices = userServices.map(s => {
+      let profileData = null;
+      if (s.profile_id && profiles) {
+        profileData = profiles.find(p => p.id === s.profile_id);
+      } else if (s.user_profile_id && personalProfile) {
+        profileData = {
+          id: personalProfile.id,
+          name: personalProfile.full_name,
+          avatar_url: personalProfile.avatar_url,
+          isPersonal: true
+        };
+      }
+      return {
+        ...s,
+        profile: profileData
+      };
+    });
+    
+    res.json({ data: enrichedServices });
   } catch (err) {
     console.error('Error fetching my services:', err);
     res.status(500).json({ error: 'Failed to fetch my services' });
@@ -124,14 +273,22 @@ export const updateProfileService = async (req, res) => {
     const { id } = req.params;
     const payload = req.body;
     
-    const { data, error } = await supabaseAdmin
+    console.log('--- updateProfileService ---');
+    console.log('ID:', id);
+    console.log('Payload:', payload);
+    
+    const supabaseUser = getSupabaseUserClient(req);
+    const { data, error } = await supabaseUser
       .from('profile_services')
       .update(payload)
       .eq('id', id)
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Update Error:', error);
+      throw error;
+    }
     res.json({ data });
   } catch (err) {
     console.error('Error updating profile service:', err);
@@ -343,43 +500,20 @@ export const searchServices = async (req, res) => {
     const filter = req.query.filter || 'all';
     const isRecent = filter === 'recent';
 
-    const ppCols = isGuest
-      ? "owner_id,slug,name,subcategory,bio,town,district,areas_served,service_radius_km,category_slug,verified,updated_at,created_at,availability,cover_url,avatar_url"
-      : "owner_id,slug,name,subcategory,bio,town,district,area,latitude,longitude,areas_served,service_radius_km,category_slug,verified,updated_at,created_at,availability,cover_url,avatar_url";
-
-    const spCols = isGuest
-      ? "user_id,business_name,subcategory,bio,town,district,areas_served,service_radius_km,category_slug,verified,updated_at,created_at,availability,cover_url,seeded_by_official,seeded_status,years_experience,price_type,price_fixed_ugx,price_min_ugx,price_max_ugx,price_currency,price_note,media_urls"
-      : "user_id,business_name,subcategory,bio,town,district,area,latitude,longitude,areas_served,service_radius_km,category_slug,verified,updated_at,created_at,availability,cover_url,seeded_by_official,seeded_status,years_experience,price_type,price_fixed_ugx,price_min_ugx,price_max_ugx,price_currency,price_note,media_urls";
-
-    const build = (from, cols) => {
-      let q = supabaseAdmin.from(from).select(cols).eq("suspended", false);
-      if (from === "public_profiles") q = q.not("owner_id", "is", null);
-      q = isRecent ? q.order("created_at", { ascending: false }) : q.order("updated_at", { ascending: false });
-      q = q.limit(60);
-      if (filter === "featured") q = q.eq("verified", "featured");
-      if (filter === "verified") q = q.in("verified", ["verified", "featured"]);
-      if (filter === "available") q = q.eq("availability", "available");
-      return q;
-    };
-
-    const [{ data: ppData }, { data: spData }] = await Promise.all([
-      build("public_profiles", ppCols),
-      build("service_profiles", spCols),
-    ]);
-
-    const ppRows = (ppData || []).map((r) => ({
-      ...r,
-      user_id: r.owner_id,
-      business_name: r.name,
-      seeded_by_official: false,
-      seeded_status: null,
-    }));
+    // We use the new unified v_search_services view which combines profile_services, public_profiles, and service_profiles.
+    let q = supabaseAdmin.from("v_search_services").select("*");
     
-    const ppOwners = new Set(ppRows.map((r) => r.user_id));
-    const spRows = (spData || []).filter((r) => !ppOwners.has(r.user_id));
-    const merged = [...ppRows, ...spRows];
+    q = isRecent ? q.order("created_at", { ascending: false }) : q.order("updated_at", { ascending: false });
+    q = q.limit(60);
     
-    const ids = merged.map((p) => p.user_id);
+    if (filter === "featured") q = q.eq("verified", "featured");
+    if (filter === "verified") q = q.in("verified", ["verified", "featured"]);
+    if (filter === "available") q = q.eq("availability", "available");
+
+    const { data: merged, error } = await q;
+    if (error) throw error;
+
+    const ids = (merged || []).map((p) => p.user_id).filter(Boolean);
     const profMap = new Map();
     const trustMap = new Map();
     
@@ -403,7 +537,7 @@ export const searchServices = async (req, res) => {
       }));
     }
 
-    const data = merged.map((p) => ({
+    const data = (merged || []).map((p) => ({
       ...p,
       profile: profMap.get(p.user_id) || null,
       trust_score: trustMap.get(p.user_id)?.trust_score || 0,

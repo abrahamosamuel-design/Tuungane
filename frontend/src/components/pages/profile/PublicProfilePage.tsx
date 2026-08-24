@@ -3,6 +3,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { apiClient } from "@/lib/api";
 import { useAuth } from "@/hooks/use-auth";
 import { useAuthGate } from "@/components/RequireAuthDialog";
+import { DirectBookingDialog } from "./DirectBookingDialog";
 import {
   ArrowLeft,
   Star,
@@ -10,10 +11,11 @@ import {
   Pencil,
   LayoutDashboard,
   Share2,
-  Shield,
   MessageSquare,
   Clock,
-  ImageIcon
+  ImageIcon,
+  Phone,
+  Shield
 } from "lucide-react";
 import { Avatar } from "@/components/social/Avatar";
 import { formatPrice } from "@/lib/price-guide";
@@ -37,6 +39,7 @@ type PublicProfile = {
   cover_url: string | null;
   district: string | null;
   town: string | null;
+  phone: string | null;
 };
 
 type ServiceProfileExtras = {
@@ -82,6 +85,8 @@ export function PublicProfilePage({ slug }: { slug: string }) {
   const [media, setMedia] = useState<ServiceMediaItem[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
+  const [bookingOpen, setBookingOpen] = useState(false);
+  const [selectedServiceForBooking, setSelectedServiceForBooking] = useState<any>(undefined);
   const [mediaManagerOpen, setMediaManagerOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"reviews" | "timeline">("reviews");
 
@@ -135,7 +140,16 @@ export function PublicProfilePage({ slug }: { slug: string }) {
 
   const requestService = () => {
     requireAuth(
-      () => nav({ to: "/requests/new", search: { profileId: profile.id, serviceId: "" } as never }),
+      () => {
+        setSelectedServiceForBooking(services.length > 0 ? services[0] : {
+          id: profile.id,
+          title: profile.name,
+          category_slug: profile.category_slug,
+          subcategory: profile.subcategory,
+          price_fixed_ugx: extras?.price_min
+        });
+        setBookingOpen(true);
+      },
       { title: "Sign in to Order", message: "Create a free Tuungane account to order.", redirect: `/p/${slug}` }
     );
   };
@@ -205,7 +219,15 @@ export function PublicProfilePage({ slug }: { slug: string }) {
                     <div className="flex justify-between items-start flex-col gap-2">
                       <div>
                         <p className="font-semibold text-sm md:text-base text-navy">{s.title}</p>
-                        {s.price_guidance_ugx && <p className="text-xs md:text-sm text-orange font-medium mt-1">From UGX {s.price_guidance_ugx.toLocaleString()}</p>}
+                        {s.price_fixed_ugx ? (
+                          <p className="text-xs md:text-sm text-orange font-medium mt-1">
+                            UGX {s.price_fixed_ugx.toLocaleString()} {s.price_note ? `/ ${s.price_note}` : ""}
+                          </p>
+                        ) : s.price_guidance_ugx ? (
+                          <p className="text-xs md:text-sm text-orange font-medium mt-1">From UGX {s.price_guidance_ugx.toLocaleString()}</p>
+                        ) : (
+                          <p className="text-xs md:text-sm text-orange font-medium mt-1">Contact for price</p>
+                        )}
                       </div>
                       <span className="rounded-full bg-orange/10 px-3 py-1 text-xs font-semibold text-orange mt-2">View Details</span>
                     </div>
@@ -347,12 +369,20 @@ export function PublicProfilePage({ slug }: { slug: string }) {
           <h3 className="text-3xl font-bold text-navy mb-8">{displayPrice}</h3>
           
           {!isOwner && (
-            <button 
-              onClick={() => requestService()}
-              className="w-full rounded-full bg-black py-4 text-center text-lg font-bold text-white shadow-lg hover:bg-gray-900 active:scale-[0.98] transition-transform"
-            >
-              Order Now
-            </button>
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={() => requestService()}
+                className="flex-1 rounded-full bg-orange py-4 text-center text-lg font-bold text-white shadow-lg hover:bg-orange/90 active:scale-[0.98] transition-transform"
+              >
+                Request Service
+              </button>
+              <a
+                href={`tel:${profile?.phone || ''}`}
+                className="flex h-[60px] w-[60px] shrink-0 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg hover:bg-[#20b858] active:scale-[0.98] transition-transform"
+              >
+                <Phone className="h-6 w-6 fill-current" />
+              </a>
+            </div>
           )}
 
           {isOwner && (
@@ -382,12 +412,20 @@ export function PublicProfilePage({ slug }: { slug: string }) {
       {/* Sticky Bottom Action Bar (Mobile Only) */}
       {!isOwner && (
         <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-white px-5 py-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] md:hidden">
-          <button 
-            onClick={() => requestService()}
-            className="w-full rounded-full bg-black py-4 text-center font-bold text-white shadow-lg hover:bg-gray-900 active:scale-[0.98] transition-transform"
-          >
-            Order Now
-          </button>
+          <div className="flex items-center gap-3 w-full">
+            <button 
+              onClick={() => requestService()}
+              className="flex-1 rounded-full bg-orange py-4 text-center font-bold text-white shadow-lg hover:bg-orange/90 active:scale-[0.98] transition-transform"
+            >
+              Request Service
+            </button>
+            <a
+              href={`tel:${profile?.phone || ''}`}
+              className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg hover:bg-[#20b858] active:scale-[0.98] transition-transform"
+            >
+              <Phone className="h-6 w-6 fill-current" />
+            </a>
+          </div>
         </div>
       )}
 
@@ -398,6 +436,15 @@ export function PublicProfilePage({ slug }: { slug: string }) {
             <ServiceMediaManager ownerId={profile.owner_id} profileId={profile.id} />
           </DialogContent>
         </Dialog>
+      )}
+
+      {owner && profile && (
+        <DirectBookingDialog 
+          open={bookingOpen} 
+          onOpenChange={setBookingOpen} 
+          providerId={profile.owner_id} 
+          service={selectedServiceForBooking} 
+        />
       )}
     </div>
   );

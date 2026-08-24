@@ -10,9 +10,10 @@
     "dev": "node --watch src/index.js"
   },
   "dependencies": {
-    "express": "^4.21.2",
+    "@supabase/supabase-js": "^2.47.16",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
-    "@supabase/supabase-js": "^2.47.16"
+    "express": "^4.21.2",
+    "pg": "^8.23.0"
   }
 }

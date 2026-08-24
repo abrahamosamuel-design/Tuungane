@@ -1,8 +1,13 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Star, MessageSquare, Clock, ImageIcon } from "lucide-react";
+import { ArrowLeft, Star, MessageSquare, Clock, ImageIcon, Phone, Coins, Plus } from "lucide-react";
 import { apiClient } from "@/lib/api";
 import { useAuthGate } from "@/components/RequireAuthDialog";
+import { PostCard } from "@/components/social/PostCard";
+import { AddTimelinePostDialog } from "@/components/AddTimelinePostDialog";
+import { useAuth } from "@/hooks/use-auth";
+import { useCreditWallet } from "@/hooks/use-credits";
+import { DirectBookingDialog } from "@/components/pages/profile/DirectBookingDialog";
 
 export const Route = createFileRoute("/service/$id")({
   staticData: { hideHeaderOnMobile: true, hideBottomNavOnMobile: true, hideHeader: true, hideBottomNav: true },
@@ -16,22 +21,30 @@ function ServiceDetailPage() {
   const { id } = Route.useParams();
   const nav = useNavigate();
   const { requireAuth } = useAuthGate();
+  const { user } = useAuth();
+  const { balance } = useCreditWallet();
   
   const [service, setService] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"reviews" | "timeline">("reviews");
+  const [postDialogOpen, setPostDialogOpen] = useState(false);
+  const [bookingOpen, setBookingOpen] = useState(false);
+
+  const isOwner = user?.id && service && (user.id === service.user_profile_id || user.id === service.profile?.owner_id);
+
+  const fetchService = async () => {
+    try {
+      const res = await apiClient<{ data: any }>(`/services/detail/${id}`);
+      setService(res.data);
+    } catch (err) {
+      console.error("Failed to load service", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    (async () => {
-      try {
-        const res = await apiClient<{ data: any }>(`/services/detail/${id}`);
-        setService(res.data);
-      } catch (err) {
-        console.error("Failed to load service", err);
-      } finally {
-        setLoading(false);
-      }
-    })();
+    fetchService();
   }, [id]);
 
   if (loading) {
@@ -47,26 +60,61 @@ function ServiceDetailPage() {
     );
   }
 
-  // Use cover_url from service, or fallback to profile avatar/cover, or a default placeholder
-  const imageUrl = service.media?.[0]?.url || service.profile?.cover_url || service.profile?.avatar_url || null;
-  const displayPrice = service.price_note || (service.price_min_ugx ? "From UGX " + service.price_min_ugx.toLocaleString() : null);
+  // Gather all available images and deduplicate
+  let images: string[] = [];
+  if (service.media && service.media.length > 0) {
+    images.push(...service.media.map((m: any) => m.url));
+  }
+  if (service.photos && service.photos.length > 0) {
+    images.push(...service.photos);
+  }
+  if (images.length === 0) {
+    if (service.profile?.cover_url) images.push(service.profile.cover_url);
+    if (service.profile?.avatar_url && !service.profile?.cover_url) images.push(service.profile.avatar_url);
+  }
+  images = Array.from(new Set(images.filter(Boolean)));
+  
+  let priceDisplay = "Price varies";
+  if (service.price_fixed_ugx) {
+    priceDisplay = `UGX ${service.price_fixed_ugx.toLocaleString()}`;
+    if (service.price_note) priceDisplay += ` / ${service.price_note}`;
+  } else if (service.price_min_ugx) {
+    priceDisplay = `From UGX ${service.price_min_ugx.toLocaleString()}`;
+    if (service.price_note) priceDisplay += ` / ${service.price_note}`;
+  } else if (service.price_note) {
+    priceDisplay = service.price_note;
+  }
   
   const handleOrder = () => {
     requireAuth(
-      () => nav({ to: "/requests/new", search: { profileId: service.profile_id, serviceId: service.id } as never }),
+      () => setBookingOpen(true),
       { title: "Sign in to Order", message: "Create an account to order this service.", redirect: `/service/${id}` }
     );
   };
 
   return (
     <div className="relative min-h-screen bg-muted/20 pb-24 font-sans">
-      {/* Top Hero Image (Full Bleed) */}
+      {/* Top Hero Image (Full Bleed with Slider) */}
       <div className="relative h-[55vh] w-full bg-black">
-        <img src={imageUrl} alt={service.title} className="h-full w-full object-cover opacity-90" />
+        {images.length > 1 ? (
+          <div className="flex h-full w-full overflow-x-auto snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+            {images.map((img, idx) => (
+              <div key={idx} className="h-full w-full shrink-0 snap-center relative">
+                <img src={img} alt={`${service.title} - Image ${idx + 1}`} className="h-full w-full object-cover opacity-90" />
+                <div className="absolute bottom-12 right-4 rounded-full bg-black/60 px-3 py-1 text-xs font-bold text-white backdrop-blur-md shadow-sm z-10">
+                  {idx + 1} / {images.length}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <img src={images[0] || ""} alt={service.title} className="h-full w-full object-cover opacity-90" />
+        )}
+        
         {/* Back Button Overlay */}
         <button 
           onClick={() => window.history.back()}
-          className="absolute left-4 top-6 flex h-10 w-10 items-center justify-center rounded-full bg-white/80 text-black shadow-sm backdrop-blur-sm"
+          className="absolute left-4 top-6 z-20 flex h-10 w-10 items-center justify-center rounded-full bg-white/80 text-black shadow-sm backdrop-blur-sm transition-transform hover:scale-105"
         >
           <ArrowLeft className="h-5 w-5" />
         </button>
@@ -77,13 +125,13 @@ function ServiceDetailPage() {
         
         <h1 className="text-2xl font-bold tracking-tight text-navy">{service.title}</h1>
         
-        <div className="mt-3 flex items-center justify-between">
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
           <div className="text-lg font-bold text-orange">
-            {displayPrice || (service.price_fixed_ugx ? `UGX ${service.price_fixed_ugx.toLocaleString()}` : "Price varies")}
+            {priceDisplay}
           </div>
-          <div className="flex items-center gap-1 text-sm font-semibold text-navy">
+          <div className="flex shrink-0 items-center gap-1 text-sm font-semibold text-navy whitespace-nowrap">
             <Star className="h-4 w-4 fill-orange text-orange" />
-            4.8 <span className="font-normal text-muted-foreground">(24 reviews)</span>
+            {service.rating > 0 ? service.rating : "New"} <span className="font-normal text-muted-foreground">({service.reviewCount || 0} reviews)</span>
           </div>
         </div>
 
@@ -96,7 +144,9 @@ function ServiceDetailPage() {
 
         {/* Provider Profile Info */}
         <div className="mt-8 rounded-2xl border border-border bg-card p-4">
-          <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Offered by</h2>
+          <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            {service.profile?.isPersonal ? "Offered by (Individual)" : "Offered by (Business)"}
+          </h2>
           <div className="flex items-center gap-3">
             <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-orange/10 flex items-center justify-center text-orange font-bold">
               {service.profile?.avatar_url ? (
@@ -108,10 +158,22 @@ function ServiceDetailPage() {
             <div className="flex-1 overflow-hidden">
               <h3 className="truncate font-semibold text-navy">{service.profile?.name}</h3>
               <p className="truncate text-xs text-muted-foreground">
-                {[service.profile?.town, service.profile?.district].filter(Boolean).join(", ")}
+                {[
+                  service.profile?.isPersonal ? service.district : service.profile?.town, 
+                  service.profile?.isPersonal ? service.town : service.profile?.district
+                ].filter(Boolean).join(", ")}
               </p>
             </div>
-            <button onClick={() => nav({ to: `/p/${service.profile?.slug || service.profile?.id}` })} className="rounded-full bg-orange/10 px-4 py-1.5 text-xs font-semibold text-orange">
+            <button 
+              onClick={() => {
+                if (service.profile?.isPersonal) {
+                  nav({ to: `/u/${service.profile?.id}` as any });
+                } else {
+                  nav({ to: `/p/${service.profile?.slug || service.profile?.id}` });
+                }
+              }} 
+              className="rounded-full bg-orange/10 px-4 py-1.5 text-xs font-semibold text-orange"
+            >
               View
             </button>
           </div>
@@ -119,86 +181,89 @@ function ServiceDetailPage() {
 
         {/* Reviews / Timeline Toggle */}
         <div className="mt-8 mb-4">
-          {/* Tab Pills */}
-          <div className="flex items-center gap-2 rounded-full bg-muted/60 p-1 w-fit mb-6">
-            <button
-              id="tab-reviews"
-              onClick={() => setActiveTab("reviews")}
-              className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-semibold transition-all ${
-                activeTab === "reviews"
-                  ? "bg-white text-navy shadow-sm"
-                  : "text-muted-foreground hover:text-navy"
-              }`}
-            >
-              <MessageSquare className="h-3.5 w-3.5" />
-              Reviews
-            </button>
-            <button
-              id="tab-timeline"
-              onClick={() => setActiveTab("timeline")}
-              className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-semibold transition-all ${
-                activeTab === "timeline"
-                  ? "bg-white text-navy shadow-sm"
-                  : "text-muted-foreground hover:text-navy"
-              }`}
-            >
-              <Clock className="h-3.5 w-3.5" />
-              Timeline
-            </button>
+          {/* Tab Pills & Post Update Button */}
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-2 rounded-full bg-muted/60 p-1 w-fit">
+              <button
+                id="tab-reviews"
+                onClick={() => setActiveTab("reviews")}
+                className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-semibold transition-all ${
+                  activeTab === "reviews"
+                    ? "bg-white text-navy shadow-sm"
+                    : "text-muted-foreground hover:text-navy"
+                }`}
+              >
+                <MessageSquare className="h-3.5 w-3.5" />
+                Reviews
+              </button>
+              <button
+                id="tab-timeline"
+                onClick={() => setActiveTab("timeline")}
+                className={`flex items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-semibold transition-all ${
+                  activeTab === "timeline"
+                    ? "bg-white text-navy shadow-sm"
+                    : "text-muted-foreground hover:text-navy"
+                }`}
+              >
+                <Clock className="h-3.5 w-3.5" />
+                Timeline
+              </button>
+            </div>
+
+            {isOwner && activeTab === "timeline" && (
+              <button
+                onClick={() => setPostDialogOpen(true)}
+                className="flex items-center gap-1.5 rounded-full bg-navy px-4 py-1.5 text-xs font-semibold text-white shadow-sm transition-colors hover:bg-navy/90 shrink-0 whitespace-nowrap"
+              >
+                <Plus className="h-3.5 w-3.5" />
+                Post
+              </button>
+            )}
           </div>
 
           {/* Reviews Tab */}
           {activeTab === "reviews" && (
             <div className="space-y-4">
-              {/* Review item */}
-              {([
-                { initials: "JD", name: "John Doe", stars: 5, date: "2 days ago", comment: "Amazing service! Really delivered exactly what I was looking for. Highly recommend." },
-                { initials: "AM", name: "Amina M.", stars: 5, date: "1 week ago", comment: "Very professional and timely. Will definitely work with them again." },
-                { initials: "RK", name: "Robert K.", stars: 4, date: "3 weeks ago", comment: "Good quality work, the property was exactly as described. Happy with the results." },
-              ] as const).map((r, idx) => (
-                <div key={idx} className="border-b border-border pb-4 last:border-0">
-                  <div className="flex items-start gap-3">
-                    <div className="h-9 w-9 shrink-0 rounded-full bg-orange/10 flex items-center justify-center text-xs font-bold text-orange">
-                      {r.initials}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        <p className="text-xs font-semibold text-navy">{r.name}</p>
-                        <span className="text-[10px] text-muted-foreground">{r.date}</span>
+              {service.reviews?.length > 0 ? (
+                service.reviews.map((r: any, idx: number) => {
+                  const initials = r.user?.full_name?.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase() || "?";
+                  const dateString = new Date(r.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+                  return (
+                    <div key={idx} className="border-b border-border pb-4 last:border-0">
+                      <div className="flex items-start gap-3">
+                        <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-orange/10 flex items-center justify-center text-xs font-bold text-orange">
+                          {r.user?.avatar_url ? (
+                            <img src={r.user.avatar_url} alt="Avatar" className="h-full w-full object-cover" />
+                          ) : initials}
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-center justify-between">
+                            <p className="text-xs font-semibold text-navy">{r.user?.full_name || "Anonymous User"}</p>
+                            <span className="text-[10px] text-muted-foreground">{dateString}</span>
+                          </div>
+                          <div className="flex text-orange mt-0.5">
+                            {Array.from({ length: r.rating || 0 }).map((_, i) => (
+                              <Star key={i} className="h-3 w-3 fill-current" />
+                            ))}
+                          </div>
+                          <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">{r.text}</p>
+                        </div>
                       </div>
-                      <div className="flex text-orange mt-0.5">
-                        {Array.from({ length: r.stars }).map((_, i) => (
-                          <Star key={i} className="h-3 w-3 fill-current" />
-                        ))}
-                      </div>
-                      <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">{r.comment}</p>
                     </div>
-                  </div>
-                </div>
-              ))}
+                  );
+                })
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-8">No reviews yet.</p>
+              )}
             </div>
           )}
 
           {/* Timeline Tab */}
           {activeTab === "timeline" && (
             <div className="space-y-5">
-              {service.media?.length > 0 ? (
-                service.media.map((m: any, idx: number) => (
-                  <div key={idx} className="group overflow-hidden rounded-2xl border border-border bg-card">
-                    <div className="relative aspect-[16/9] w-full overflow-hidden bg-muted">
-                      <img
-                        src={m.url}
-                        alt="Work post"
-                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-                        loading="lazy"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                      <span className="absolute bottom-2 left-3 flex items-center gap-1 text-[10px] font-medium text-white/90">
-                        <ImageIcon className="h-3 w-3" />
-                        Work Post
-                      </span>
-                    </div>
-                  </div>
+              {service.timeline_posts?.length > 0 ? (
+                service.timeline_posts.map((post: any) => (
+                  <PostCard key={post.id} post={post} />
                 ))
               ) : (
                 <p className="text-sm text-muted-foreground text-center py-8">No timeline posts yet.</p>
@@ -210,15 +275,63 @@ function ServiceDetailPage() {
 
       {/* Sticky Bottom Action Bar */}
       <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-white px-5 py-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] md:static md:shadow-none md:border-t-0 md:bg-transparent">
-        <div className="mx-auto max-w-2xl">
-          <button 
-            onClick={handleOrder}
-            className="w-full rounded-full bg-black py-4 text-center font-bold text-white shadow-lg hover:bg-gray-900 active:scale-[0.98] transition-transform"
-          >
-            Order Now
-          </button>
+        <div className="mx-auto max-w-2xl flex items-center gap-3">
+          {isOwner ? (
+            <>
+              <button 
+                onClick={() => nav({ to: `/profiles/new`, search: { edit: service.id } as any })}
+                className="flex-1 rounded-full border-2 border-gray-200 bg-white py-3.5 text-center font-bold text-gray-700 hover:bg-gray-50 active:scale-[0.98] transition-transform"
+              >
+                Edit Service
+              </button>
+              <button 
+                onClick={() => nav({ to: `/credits` as any })}
+                className="flex-1 flex items-center justify-center gap-2 rounded-full bg-orange py-4 font-bold text-white shadow-lg hover:bg-orange/90 active:scale-[0.98] transition-transform"
+              >
+                <span>Promote |</span>
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-orange-200 bg-orange-100 px-3 py-1 text-sm font-semibold text-orange-500">
+                  <Coins className="h-4 w-4" />
+                  {balance?.toLocaleString() || 0}
+                </span>
+              </button>
+            </>
+          ) : (
+            <>
+              <button 
+                onClick={handleOrder}
+                className="flex-1 rounded-full bg-orange py-4 text-center font-bold text-white shadow-lg hover:bg-orange/90 active:scale-[0.98] transition-transform"
+              >
+                Request Service
+              </button>
+              <a
+                href={`tel:${service.user_profile?.phone || service.profile?.phone || ''}`}
+                className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg hover:bg-[#20b858] active:scale-[0.98] transition-transform"
+              >
+                <Phone className="h-6 w-6 fill-current" />
+              </a>
+            </>
+          )}
         </div>
       </div>
+      {/* Timeline Post Dialog */}
+      <AddTimelinePostDialog
+        open={postDialogOpen}
+        onClose={() => setPostDialogOpen(false)}
+        jobTitle={service?.title || "this service"}
+        requestId=""
+        serviceId={service?.id}
+        onPosted={() => {
+          fetchService();
+        }}
+      />
+      
+      {/* Booking Dialog */}
+      <DirectBookingDialog 
+        open={bookingOpen} 
+        onOpenChange={setBookingOpen} 
+        providerId={service?.user_profile_id || service?.profile?.owner_id} 
+        service={service} 
+      />
     </div>
   );
 }

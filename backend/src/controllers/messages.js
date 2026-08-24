@@ -1,11 +1,21 @@
-import { supabaseAdmin } from '../lib/supabaseClient.js';
+import { createClient } from '@supabase/supabase-js';
+
+export const getSupabaseUserClient = (req) => {
+  const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || '';
+  const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_PUBLISHABLE_KEY || process.env.VITE_SUPABASE_PUBLISHABLE_KEY || '';
+  const token = req.headers.authorization?.split(' ')[1];
+  return createClient(supabaseUrl, supabaseAnonKey, {
+    global: { headers: { Authorization: `Bearer ${token}` } }
+  });
+};
 
 export const getConversations = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { data: list, error } = await supabaseAdmin
+    const supabaseUser = getSupabaseUserClient(req);
+    const { data: list, error } = await supabaseUser
       .from("conversations")
-      .select("id,service_request_id,customer_id,provider_id,status,last_message_at,last_message_preview,customer_unread_count,provider_unread_count")
+      .select("id,service_request_id,direct_booking_id,customer_id,provider_id,status,last_message_at,last_message_preview,customer_unread_count,provider_unread_count")
       .or(`customer_id.eq.${userId},provider_id.eq.${userId}`)
       .order("last_message_at", { ascending: false })
       .limit(100);
@@ -14,21 +24,24 @@ export const getConversations = async (req, res) => {
 
     const userIds = Array.from(new Set((list || []).flatMap(r => [r.customer_id, r.provider_id]).filter(id => id !== userId)));
     const reqIds = Array.from(new Set((list || []).map(r => r.service_request_id).filter(x => !!x)));
+    const dbIds = Array.from(new Set((list || []).map(r => r.direct_booking_id).filter(x => !!x)));
 
-    const [{ data: profs }, { data: reqs }] = await Promise.all([
-      userIds.length ? supabaseAdmin.from("profiles").select("id,full_name,avatar_url").in("id", userIds) : Promise.resolve({ data: [] }),
-      reqIds.length ? supabaseAdmin.from("service_requests").select("id,service_needed,title").in("id", reqIds) : Promise.resolve({ data: [] }),
+    const [{ data: profs }, { data: reqs }, { data: dbs }] = await Promise.all([
+      userIds.length ? supabaseUser.from("profiles").select("id,full_name,avatar_url").in("id", userIds) : Promise.resolve({ data: [] }),
+      reqIds.length ? supabaseUser.from("service_requests").select("id,service_needed,title").in("id", reqIds) : Promise.resolve({ data: [] }),
+      dbIds.length ? supabaseUser.from("direct_bookings").select("id,service_needed,description").in("id", dbIds) : Promise.resolve({ data: [] }),
     ]);
 
     const profilesMap = new Map((profs || []).map(p => [p.id, p]));
     const requestsMap = new Map((reqs || []).map(r => [r.id, r]));
+    const dbMap = new Map((dbs || []).map(r => [r.id, r]));
 
     const result = (list || []).map(r => {
       const otherId = r.customer_id === userId ? r.provider_id : r.customer_id;
       return {
         ...r,
         otherProfile: profilesMap.get(otherId) || null,
-        request: r.service_request_id ? requestsMap.get(r.service_request_id) || null : null
+        request: r.service_request_id ? requestsMap.get(r.service_request_id) || null : (r.direct_booking_id ? dbMap.get(r.direct_booking_id) || null : null)
       };
     });
 
@@ -43,29 +56,36 @@ export const getConversationById = async (req, res) => {
   try {
     const userId = req.user.id;
     const { id } = req.params;
+    const supabaseUser = getSupabaseUserClient(req);
 
-    const { data: c, error: cErr } = await supabaseAdmin
+    const { data: c, error: cErr } = await supabaseUser
       .from("conversations")
-      .select("id,service_request_id,customer_id,provider_id,status,provider_response_id")
+      .select("id,service_request_id,direct_booking_id,customer_id,provider_id,status,provider_response_id")
       .eq("id", id)
       .maybeSingle();
+
+    console.log(`[DEBUG] getConversationById(${id}): cErr=`, cErr, `c=`, c);
+    require('fs').appendFileSync('debug.log', `[DEBUG] getConversationById(${id}): cErr=${JSON.stringify(cErr)} c=${JSON.stringify(c)}\n`);
 
     if (cErr || !c) return res.status(404).json({ error: 'Conversation not found' });
     if (c.customer_id !== userId && c.provider_id !== userId) return res.status(403).json({ error: 'Forbidden' });
 
     const otherId = c.customer_id === userId ? c.provider_id : c.customer_id;
     
-    const [{ data: prof }, { data: r }, { data: msgs }] = await Promise.all([
-      supabaseAdmin.from("profiles").select("id,full_name,avatar_url").eq("id", otherId).maybeSingle(),
+    const [{ data: prof }, { data: r }, { data: db }, { data: msgs }] = await Promise.all([
+      supabaseUser.from("profiles").select("id,full_name,avatar_url").eq("id", otherId).maybeSingle(),
       c.service_request_id
-        ? supabaseAdmin.from("service_requests").select("id,service_needed,title,status,location,budget_range,selected_provider_id,urgent_flag,urgency,public_profile_id").eq("id", c.service_request_id).maybeSingle()
+        ? supabaseUser.from("service_requests").select("id,service_needed,title,status,location,budget_range,selected_provider_id,urgent_flag,urgency,public_profile_id,quantity,price_total").eq("id", c.service_request_id).maybeSingle()
         : Promise.resolve({ data: null }),
-      supabaseAdmin.from("messages").select("id,conversation_id,sender_id,receiver_id,body,created_at,is_read").eq("conversation_id", id).order("created_at", { ascending: true }),
+      c.direct_booking_id
+        ? supabaseUser.from("direct_bookings").select("id,service_needed,description,status,price_total,quantity").eq("id", c.direct_booking_id).maybeSingle()
+        : Promise.resolve({ data: null }),
+      supabaseUser.from("messages").select("id,conversation_id,sender_id,receiver_id,body,created_at,is_read").eq("conversation_id", id).order("created_at", { ascending: true }),
     ]);
 
     let serviceProfile = null;
     if (r?.public_profile_id) {
-      const { data: sp } = await supabaseAdmin.from("public_profiles").select("id,name").eq("id", r.public_profile_id).maybeSingle();
+      const { data: sp } = await supabaseUser.from("public_profiles").select("id,name").eq("id", r.public_profile_id).maybeSingle();
       serviceProfile = sp;
     }
 
@@ -73,7 +93,7 @@ export const getConversationById = async (req, res) => {
       data: {
         conv: c,
         other: prof,
-        req: r,
+        req: r || db, // Use db as req if r is null for seamless frontend compatibility
         messages: msgs || [],
         serviceProfile
       }
@@ -89,16 +109,17 @@ export const sendMessage = async (req, res) => {
     const userId = req.user.id;
     const { id } = req.params;
     const { body } = req.body;
+    const supabaseUser = getSupabaseUserClient(req);
     
     if (!body || body.length > 4000) return res.status(400).json({ error: 'Invalid message body' });
 
-    const { data: conv, error: cErr } = await supabaseAdmin.from("conversations").select("*").eq("id", id).maybeSingle();
+    const { data: conv, error: cErr } = await supabaseUser.from("conversations").select("*").eq("id", id).maybeSingle();
     if (cErr || !conv) return res.status(404).json({ error: 'Conversation not found' });
     if (conv.customer_id !== userId && conv.provider_id !== userId) return res.status(403).json({ error: 'Forbidden' });
 
     const receiverId = conv.customer_id === userId ? conv.provider_id : conv.customer_id;
     
-    const { data: msg, error: mErr } = await supabaseAdmin.from("messages").insert({
+    const { data: msg, error: mErr } = await supabaseUser.from("messages").insert({
       conversation_id: conv.id,
       sender_id: userId,
       receiver_id: receiverId,
@@ -118,8 +139,9 @@ export const reportConversation = async (req, res) => {
     const userId = req.user.id;
     const { id } = req.params;
     const { reason } = req.body;
+    const supabaseUser = getSupabaseUserClient(req);
 
-    const { error } = await supabaseAdmin.from("reports").insert({
+    const { error } = await supabaseUser.from("reports").insert({
       reporter_id: userId,
       target_type: "conversation",
       target_id: id,
@@ -137,8 +159,9 @@ export const blockUser = async (req, res) => {
   try {
     const userId = req.user.id;
     const { id: otherId } = req.body;
+    const supabaseUser = getSupabaseUserClient(req);
 
-    const { error } = await supabaseAdmin.from("user_blocks").insert({ blocker_id: userId, blocked_id: otherId });
+    const { error } = await supabaseUser.from("user_blocks").insert({ blocker_id: userId, blocked_id: otherId });
     if (error) throw error;
     res.json({ success: true });
   } catch (err) {
@@ -150,16 +173,19 @@ export const blockUser = async (req, res) => {
 export const startOrGetConversation = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { _customer_id, _provider_id, _service_request_id, _provider_response_id, _initial_message_body } = req.body;
-    // ensure caller is one of the parties
-    if (userId !== _customer_id && userId !== _provider_id) return res.status(403).json({ error: 'Forbidden' });
+    const { _provider_id, _service_request_id, _direct_booking_id, _provider_response_id } = req.body;
     
-    const { data, error } = await supabaseAdmin.rpc("start_or_get_conversation", {
-      _customer_id, _provider_id, _service_request_id, _provider_response_id, _initial_message_body
+    const supabaseUser = getSupabaseUserClient(req);
+    const { data, error } = await supabaseUser.rpc("start_or_get_conversation", {
+      _provider_id, 
+      _service_request_id: _service_request_id || null, 
+      _direct_booking_id: _direct_booking_id || null,
+      _provider_response_id: _provider_response_id || null
     });
     if (error) throw error;
     res.json({ data });
   } catch (err) {
+    import('fs').then(fs => fs.writeFileSync('rpc_error.log', JSON.stringify(err, null, 2)));
     console.error('Error starting conversation:', err);
     res.status(500).json({ error: 'Failed to start conversation' });
   }
@@ -169,7 +195,8 @@ export const startDirectConversation = async (req, res) => {
   try {
     const userId = req.user.id;
     const { _provider_id } = req.body;
-    const { data, error } = await supabaseAdmin.rpc("start_direct_conversation", {
+    const supabaseUser = getSupabaseUserClient(req);
+    const { data, error } = await supabaseUser.rpc("start_direct_conversation", {
       _provider_id
     });
     if (error) throw error;
@@ -184,10 +211,11 @@ export const markConversationRead = async (req, res) => {
   try {
     const userId = req.user.id;
     const { id } = req.params;
+    const supabaseUser = getSupabaseUserClient(req);
     // Must authenticate as the user to correctly clear their side's unread count using the RPC, wait, RPC uses auth.uid().
     // If backend uses service_key, `auth.uid()` in RPC will be null. We must either pass the caller ID to a custom RPC or manually update the rows.
     // RPC `mark_conversation_read` uses `auth.uid()`. Since we bypass RLS, we should just update it manually here.
-    const { data: conv } = await supabaseAdmin.from("conversations").select("customer_id, provider_id").eq("id", id).maybeSingle();
+    const { data: conv } = await supabaseUser.from("conversations").select("customer_id, provider_id").eq("id", id).maybeSingle();
     if (!conv) return res.status(404).json({ error: 'Conversation not found' });
     
     let updateObj = {};
@@ -196,8 +224,8 @@ export const markConversationRead = async (req, res) => {
     else return res.status(403).json({ error: 'Forbidden' });
 
     await Promise.all([
-      supabaseAdmin.from("conversations").update(updateObj).eq("id", id),
-      supabaseAdmin.from("messages").update({ is_read: true }).eq("conversation_id", id).eq("receiver_id", userId).eq("is_read", false)
+      supabaseUser.from("conversations").update(updateObj).eq("id", id),
+      supabaseUser.from("messages").update({ is_read: true }).eq("conversation_id", id).eq("receiver_id", userId).eq("is_read", false)
     ]);
 
     res.json({ success: true });
@@ -210,8 +238,9 @@ export const markConversationRead = async (req, res) => {
 export const getUnreadCount = async (req, res) => {
   try {
     const userId = req.user.id;
+    const supabaseUser = getSupabaseUserClient(req);
     // RPC `get_unread_message_count` also uses `auth.uid()`. Let's query it manually.
-    const { count, error } = await supabaseAdmin
+    const { count, error } = await supabaseUser
       .from("messages")
       .select("*", { count: "exact", head: true })
       .eq("receiver_id", userId)

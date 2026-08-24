@@ -2,7 +2,6 @@ import { ReactNode } from "react";
 import { Header } from "./Header";
 import { Footer } from "./Footer";
 import { MobileBottomNav } from "./MobileBottomNav";
-import { RequestFab } from "./RequestFab";
 import { OfflineBanner } from "./OfflineBanner";
 import { AuthGateProvider } from "./RequireAuthDialog";
 import { useAuth } from "@/hooks/use-auth";
@@ -40,7 +39,6 @@ export function Layout({ children }: { children: ReactNode }) {
 
         <main className={`flex-1 w-full min-w-0 flex flex-col ${headerPaddingClass}`}>{children}</main>
         {!shouldHideFooter && <Footer />}
-        <RequestFab />
         
         {hideBottomNavOnMobile ? (
           <div className="hidden md:block">

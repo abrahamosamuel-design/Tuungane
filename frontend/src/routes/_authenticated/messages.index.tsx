@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
 import { apiClient } from "@/lib/api";
@@ -53,6 +53,7 @@ type BookedJob = {
 
 function MessagesIndex() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>("messages");
 
   // Messages state
@@ -115,11 +116,25 @@ function MessagesIndex() {
 
     const load = async () => {
       try {
-        const { data } = await apiClient.get<{ data: BookedJob[] }>("/requests/me", { params: { role: "all" } });
+        const [{ data: reqs }, { data: dbs }] = await Promise.all([
+          apiClient.get<{ data: BookedJob[] }>("/requests/me", { params: { role: "all" } }),
+          apiClient.get<{ data: BookedJob[] }>("/direct-bookings/me")
+        ]);
         if (!active) return;
-        let list = (data as any)?.data || data || [];
-        // Filter to only accepted / in_progress jobs
-        list = list.filter((j: BookedJob) => ["accepted", "in_progress"].includes(j.status));
+        let listReqs = (reqs as any)?.data || reqs || [];
+        let listDbs = (dbs as any)?.data || dbs || [];
+        
+        // Add a flag to distinguish them
+        listReqs = listReqs.map((j: any) => ({ ...j, is_direct_booking: false }));
+        listDbs = listDbs.map((j: any) => ({ ...j, is_direct_booking: true }));
+
+        let list = [...listReqs, ...listDbs];
+        
+        // Sort by created_at
+        list.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+        // Filter to only requested, accepted, or in_progress jobs
+        list = list.filter((j: BookedJob) => ["requested", "accepted", "in_progress"].includes(j.status));
         setJobs(list);
         setJobsLoaded(true);
       } catch (err) {
@@ -132,13 +147,17 @@ function MessagesIndex() {
     return () => { active = false; };
   }, [user?.id, tab]);
 
-  const handleMarkComplete = async (jobId: string) => {
-    setCompleting(jobId);
+  const handleMarkComplete = async (job: BookedJob) => {
+    setCompleting(job.id);
     try {
-      await apiClient.post(`/requests/${jobId}/confirm_completion`, {});
+      if (job.is_direct_booking) {
+        await apiClient.patch(`/direct-bookings/${job.id}`, { status: "completed" });
+      } else {
+        await apiClient.post(`/requests/${job.id}/confirm_completion`, {});
+      }
       toast.success("Job marked as complete!");
       // Refresh list
-      setJobs((prev) => prev.map((j) => j.id === jobId ? { ...j, status: "completed" } : j).filter((j) => ["accepted", "in_progress"].includes(j.status)));
+      setJobs((prev) => prev.map((j) => j.id === job.id ? { ...j, status: "completed" } : j).filter((j) => ["accepted", "in_progress"].includes(j.status)));
     } catch (err: any) {
       toast.error(err?.message || "Failed to mark as complete");
     } finally {
@@ -149,6 +168,7 @@ function MessagesIndex() {
   if (!user) return null;
 
   const statusBadge = (status: string) => {
+    if (status === "requested") return <span className="inline-flex items-center gap-1 rounded-full bg-yellow-100 px-2.5 py-0.5 text-[11px] font-semibold text-yellow-700"><Clock className="h-3 w-3" />Pending</span>;
     if (status === "in_progress") return <span className="inline-flex items-center gap-1 rounded-full bg-orange/15 px-2.5 py-0.5 text-[11px] font-semibold text-orange"><Clock className="h-3 w-3" />In Progress</span>;
     if (status === "accepted") return <span className="inline-flex items-center gap-1 rounded-full bg-blue-100 px-2.5 py-0.5 text-[11px] font-semibold text-blue-700"><CheckCircle2 className="h-3 w-3" />Confirmed</span>;
     return null;
@@ -286,22 +306,96 @@ function MessagesIndex() {
                     </div>
 
                     {/* Card Actions */}
-                    <div className="flex items-center gap-2 border-t border-border bg-muted/20 px-4 py-3">
-                      <button
-                        onClick={() => handleMarkComplete(job.id)}
-                        disabled={completing === job.id}
-                        className="flex items-center gap-1.5 rounded-full bg-green/10 px-4 py-2 text-xs font-semibold text-green hover:bg-green/20 transition-colors disabled:opacity-50"
-                      >
-                        {completing === job.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle2 className="h-3.5 w-3.5" />}
-                        Mark Complete
-                      </button>
-                      <button
-                        onClick={() => setPostDialog({ open: true, jobTitle: job.title || job.service_needed, requestId: job.id })}
-                        className="flex items-center gap-1.5 rounded-full bg-orange/10 px-4 py-2 text-xs font-semibold text-orange hover:bg-orange/20 transition-colors"
-                      >
-                        <ImagePlus className="h-3.5 w-3.5" />
-                        Add Timeline Post
-                      </button>
+                    <div className="flex flex-wrap items-center gap-2 border-t border-border bg-muted/20 px-4 py-3">
+                      {job.status === "requested" && !isCustomer && (
+                        <>
+                          <button
+                            onClick={() => {
+                              if (job.is_direct_booking) {
+                                apiClient.patch(`/direct-bookings/${job.id}`, { status: "accepted" })
+                                  .then(() => {
+                                    toast.success("Job accepted!");
+                                    setJobs(prev => prev.map(j => j.id === job.id ? { ...j, status: "accepted" } : j));
+                                  }).catch(err => toast.error(err.message || "Failed to accept job"));
+                              } else {
+                                apiClient.post(`/requests/${job.id}/responses`, {
+                                  message: "I can help you with this.",
+                                  price_estimate: job.price_total || 0,
+                                }).then(() => {
+                                  toast.success("Job accepted!");
+                                  setJobs(prev => prev.map(j => j.id === job.id ? { ...j, status: "accepted" } : j));
+                                }).catch(err => toast.error(err.message || "Failed to accept job"));
+                              }
+                            }}
+                            className="flex items-center gap-1.5 rounded-full bg-green px-4 py-2 text-xs font-semibold text-white hover:bg-green/90 transition-colors"
+                          >
+                            <CheckCircle2 className="h-3.5 w-3.5" />
+                            Accept Job
+                          </button>
+                          
+                          {job.is_direct_booking && (
+                            <button
+                              onClick={() => {
+                                apiClient.patch(`/direct-bookings/${job.id}`, { status: "declined" })
+                                  .then(() => {
+                                    toast.success("Job rejected.");
+                                    setJobs(prev => prev.filter(j => j.id !== job.id));
+                                  }).catch(err => toast.error(err.message || "Failed to reject job"));
+                              }}
+                              className="flex items-center gap-1.5 rounded-full bg-red-100 px-4 py-2 text-xs font-semibold text-red-600 hover:bg-red-200 transition-colors"
+                            >
+                              <X className="h-3.5 w-3.5" />
+                              Reject Job
+                            </button>
+                          )}
+                        </>
+                      )}
+                      
+                      {(job.status === "requested" || job.status === "in_progress") && (!isCustomer || job.provider_id) && (
+                        <button
+                          onClick={async () => {
+                            try {
+                              const res = await apiClient.post("/messages/start", {
+                                _customer_id: job.customer_id,
+                                _provider_id: isCustomer ? job.provider_id : user.id,
+                                _service_request_id: job.is_direct_booking ? undefined : job.id,
+                                _direct_booking_id: job.is_direct_booking ? job.id : undefined,
+                                _initial_message_body: `Hello! I have a service request: ${job.service_needed}`,
+                              });
+                              if (res.data) {
+                                navigate({ to: `/messages/${res.data}` });
+                              }
+                            } catch (err) {
+                              toast.error("Failed to start conversation");
+                            }
+                          }}
+                          className="flex items-center gap-1.5 rounded-full bg-navy/10 px-4 py-2 text-xs font-semibold text-navy hover:bg-navy/20 transition-colors"
+                        >
+                          <MessageSquare className="h-3.5 w-3.5" />
+                          Message
+                        </button>
+                      )}
+
+                      {["accepted", "in_progress"].includes(job.status) && (
+                        <>
+                          <button
+                            onClick={() => handleMarkComplete(job)}
+                            disabled={completing === job.id}
+                            className="flex items-center gap-1.5 rounded-full bg-green/10 px-4 py-2 text-xs font-semibold text-green hover:bg-green/20 transition-colors disabled:opacity-50"
+                          >
+                            {completing === job.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <CheckCircle2 className="h-3.5 w-3.5" />}
+                            Mark Complete
+                          </button>
+                          <button
+                            onClick={() => setPostDialog({ open: true, jobTitle: job.title || job.service_needed, requestId: job.id })}
+                            className="flex items-center gap-1.5 rounded-full bg-orange/10 px-4 py-2 text-xs font-semibold text-orange hover:bg-orange/20 transition-colors"
+                          >
+                            <ImagePlus className="h-3.5 w-3.5" />
+                            Add to Timeline
+                          </button>
+                        </>
+                      )}
+
                       <Link
                         to="/requests/$id"
                         params={{ id: job.id }}

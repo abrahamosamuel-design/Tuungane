@@ -36,6 +36,7 @@ export interface PostRow {
   area?: string | null;
   latitude?: number | null;
   longitude?: number | null;
+  service_title?: string | null;
   author?: {
     full_name: string;
     avatar_url: string | null;

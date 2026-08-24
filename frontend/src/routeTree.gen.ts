@@ -38,7 +38,6 @@ import { Route as OpportunitiesNewRouteImport } from './routes/opportunities.new
 import { Route as OpportunitiesIdRouteImport } from './routes/opportunities.$id'
 import { Route as OfficialPostsIdRouteImport } from './routes/official-posts.$id'
 import { Route as GuidesPropertyMaintenanceKampalaRouteImport } from './routes/guides.property-maintenance-kampala'
-import { Route as BusinessesNewRouteImport } from './routes/businesses.new'
 import { Route as BusinessesCreateRouteImport } from './routes/businesses.create'
 import { Route as BusinessesSlugRouteImport } from './routes/businesses.$slug'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
@@ -47,7 +46,6 @@ import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authentic
 import { Route as AuthenticatedMeRouteImport } from './routes/_authenticated/me'
 import { Route as AuthenticatedListSkillRouteImport } from './routes/_authenticated/list-skill'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
-import { Route as AuthenticatedCreditsRouteImport } from './routes/_authenticated/credits'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as UIdIndexRouteImport } from './routes/u.$id/index'
 import { Route as AuthenticatedRequestsIndexRouteImport } from './routes/_authenticated/requests.index'
@@ -60,6 +58,7 @@ import { Route as AuthenticatedProfilesIdRouteImport } from './routes/_authentic
 import { Route as AuthenticatedNotificationsPreferencesRouteImport } from './routes/_authenticated/notifications.preferences'
 import { Route as AuthenticatedNotificationsIdRouteImport } from './routes/_authenticated/notifications.$id'
 import { Route as AuthenticatedMessagesIdRouteImport } from './routes/_authenticated/messages.$id'
+import { Route as AuthenticatedBusinessesNewRouteImport } from './routes/_authenticated/businesses.new'
 
 const TrustRoute = TrustRouteImport.update({
   id: '/trust',
@@ -206,11 +205,6 @@ const GuidesPropertyMaintenanceKampalaRoute =
     path: '/guides/property-maintenance-kampala',
     getParentRoute: () => rootRouteImport,
   } as any)
-const BusinessesNewRoute = BusinessesNewRouteImport.update({
-  id: '/new',
-  path: '/new',
-  getParentRoute: () => BusinessesRoute,
-} as any)
 const BusinessesCreateRoute = BusinessesCreateRouteImport.update({
   id: '/create',
   path: '/create',
@@ -249,11 +243,6 @@ const AuthenticatedListSkillRoute = AuthenticatedListSkillRouteImport.update({
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const AuthenticatedCreditsRoute = AuthenticatedCreditsRouteImport.update({
-  id: '/credits',
-  path: '/credits',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
@@ -323,6 +312,12 @@ const AuthenticatedMessagesIdRoute = AuthenticatedMessagesIdRouteImport.update({
   path: '/messages/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedBusinessesNewRoute =
+  AuthenticatedBusinessesNewRouteImport.update({
+    id: '/businesses/new',
+    path: '/businesses/new',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -340,7 +335,6 @@ export interface FileRoutesByFullPath {
   '/terms': typeof TermsRoute
   '/trust': typeof TrustRoute
   '/admin': typeof AuthenticatedAdminRoute
-  '/credits': typeof AuthenticatedCreditsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/list-skill': typeof AuthenticatedListSkillRoute
   '/me': typeof AuthenticatedMeRoute
@@ -349,7 +343,6 @@ export interface FileRoutesByFullPath {
   '/auth/callback': typeof AuthCallbackRoute
   '/businesses/$slug': typeof BusinessesSlugRoute
   '/businesses/create': typeof BusinessesCreateRoute
-  '/businesses/new': typeof BusinessesNewRoute
   '/guides/property-maintenance-kampala': typeof GuidesPropertyMaintenanceKampalaRoute
   '/official-posts/$id': typeof OfficialPostsIdRoute
   '/opportunities/$id': typeof OpportunitiesIdRoute
@@ -364,6 +357,7 @@ export interface FileRoutesByFullPath {
   '/businesses/': typeof BusinessesIndexRoute
   '/profiles/': typeof ProfilesIndexRoute
   '/services/': typeof ServicesIndexRoute
+  '/businesses/new': typeof AuthenticatedBusinessesNewRoute
   '/messages/$id': typeof AuthenticatedMessagesIdRoute
   '/notifications/$id': typeof AuthenticatedNotificationsIdRoute
   '/notifications/preferences': typeof AuthenticatedNotificationsPreferencesRoute
@@ -391,7 +385,6 @@ export interface FileRoutesByTo {
   '/terms': typeof TermsRoute
   '/trust': typeof TrustRoute
   '/admin': typeof AuthenticatedAdminRoute
-  '/credits': typeof AuthenticatedCreditsRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/list-skill': typeof AuthenticatedListSkillRoute
   '/me': typeof AuthenticatedMeRoute
@@ -400,7 +393,6 @@ export interface FileRoutesByTo {
   '/auth/callback': typeof AuthCallbackRoute
   '/businesses/$slug': typeof BusinessesSlugRoute
   '/businesses/create': typeof BusinessesCreateRoute
-  '/businesses/new': typeof BusinessesNewRoute
   '/guides/property-maintenance-kampala': typeof GuidesPropertyMaintenanceKampalaRoute
   '/official-posts/$id': typeof OfficialPostsIdRoute
   '/opportunities/$id': typeof OpportunitiesIdRoute
@@ -415,6 +407,7 @@ export interface FileRoutesByTo {
   '/businesses': typeof BusinessesIndexRoute
   '/profiles': typeof ProfilesIndexRoute
   '/services': typeof ServicesIndexRoute
+  '/businesses/new': typeof AuthenticatedBusinessesNewRoute
   '/messages/$id': typeof AuthenticatedMessagesIdRoute
   '/notifications/$id': typeof AuthenticatedNotificationsIdRoute
   '/notifications/preferences': typeof AuthenticatedNotificationsPreferencesRoute
@@ -445,7 +438,6 @@ export interface FileRoutesById {
   '/terms': typeof TermsRoute
   '/trust': typeof TrustRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
-  '/_authenticated/credits': typeof AuthenticatedCreditsRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/list-skill': typeof AuthenticatedListSkillRoute
   '/_authenticated/me': typeof AuthenticatedMeRoute
@@ -454,7 +446,6 @@ export interface FileRoutesById {
   '/auth/callback': typeof AuthCallbackRoute
   '/businesses/$slug': typeof BusinessesSlugRoute
   '/businesses/create': typeof BusinessesCreateRoute
-  '/businesses/new': typeof BusinessesNewRoute
   '/guides/property-maintenance-kampala': typeof GuidesPropertyMaintenanceKampalaRoute
   '/official-posts/$id': typeof OfficialPostsIdRoute
   '/opportunities/$id': typeof OpportunitiesIdRoute
@@ -469,6 +460,7 @@ export interface FileRoutesById {
   '/businesses/': typeof BusinessesIndexRoute
   '/profiles/': typeof ProfilesIndexRoute
   '/services/': typeof ServicesIndexRoute
+  '/_authenticated/businesses/new': typeof AuthenticatedBusinessesNewRoute
   '/_authenticated/messages/$id': typeof AuthenticatedMessagesIdRoute
   '/_authenticated/notifications/$id': typeof AuthenticatedNotificationsIdRoute
   '/_authenticated/notifications/preferences': typeof AuthenticatedNotificationsPreferencesRoute
@@ -499,7 +491,6 @@ export interface FileRouteTypes {
     | '/terms'
     | '/trust'
     | '/admin'
-    | '/credits'
     | '/dashboard'
     | '/list-skill'
     | '/me'
@@ -508,7 +499,6 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/businesses/$slug'
     | '/businesses/create'
-    | '/businesses/new'
     | '/guides/property-maintenance-kampala'
     | '/official-posts/$id'
     | '/opportunities/$id'
@@ -523,6 +513,7 @@ export interface FileRouteTypes {
     | '/businesses/'
     | '/profiles/'
     | '/services/'
+    | '/businesses/new'
     | '/messages/$id'
     | '/notifications/$id'
     | '/notifications/preferences'
@@ -550,7 +541,6 @@ export interface FileRouteTypes {
     | '/terms'
     | '/trust'
     | '/admin'
-    | '/credits'
     | '/dashboard'
     | '/list-skill'
     | '/me'
@@ -559,7 +549,6 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/businesses/$slug'
     | '/businesses/create'
-    | '/businesses/new'
     | '/guides/property-maintenance-kampala'
     | '/official-posts/$id'
     | '/opportunities/$id'
@@ -574,6 +563,7 @@ export interface FileRouteTypes {
     | '/businesses'
     | '/profiles'
     | '/services'
+    | '/businesses/new'
     | '/messages/$id'
     | '/notifications/$id'
     | '/notifications/preferences'
@@ -603,7 +593,6 @@ export interface FileRouteTypes {
     | '/terms'
     | '/trust'
     | '/_authenticated/admin'
-    | '/_authenticated/credits'
     | '/_authenticated/dashboard'
     | '/_authenticated/list-skill'
     | '/_authenticated/me'
@@ -612,7 +601,6 @@ export interface FileRouteTypes {
     | '/auth/callback'
     | '/businesses/$slug'
     | '/businesses/create'
-    | '/businesses/new'
     | '/guides/property-maintenance-kampala'
     | '/official-posts/$id'
     | '/opportunities/$id'
@@ -627,6 +615,7 @@ export interface FileRouteTypes {
     | '/businesses/'
     | '/profiles/'
     | '/services/'
+    | '/_authenticated/businesses/new'
     | '/_authenticated/messages/$id'
     | '/_authenticated/notifications/$id'
     | '/_authenticated/notifications/preferences'
@@ -876,13 +865,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GuidesPropertyMaintenanceKampalaRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/businesses/new': {
-      id: '/businesses/new'
-      path: '/new'
-      fullPath: '/businesses/new'
-      preLoaderRoute: typeof BusinessesNewRouteImport
-      parentRoute: typeof BusinessesRoute
-    }
     '/businesses/create': {
       id: '/businesses/create'
       path: '/create'
@@ -937,13 +919,6 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/credits': {
-      id: '/_authenticated/credits'
-      path: '/credits'
-      fullPath: '/credits'
-      preLoaderRoute: typeof AuthenticatedCreditsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/admin': {
@@ -1030,17 +1005,24 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMessagesIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/businesses/new': {
+      id: '/_authenticated/businesses/new'
+      path: '/businesses/new'
+      fullPath: '/businesses/new'
+      preLoaderRoute: typeof AuthenticatedBusinessesNewRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
-  AuthenticatedCreditsRoute: typeof AuthenticatedCreditsRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedListSkillRoute: typeof AuthenticatedListSkillRoute
   AuthenticatedMeRoute: typeof AuthenticatedMeRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedBusinessesNewRoute: typeof AuthenticatedBusinessesNewRoute
   AuthenticatedMessagesIdRoute: typeof AuthenticatedMessagesIdRoute
   AuthenticatedNotificationsIdRoute: typeof AuthenticatedNotificationsIdRoute
   AuthenticatedNotificationsPreferencesRoute: typeof AuthenticatedNotificationsPreferencesRoute
@@ -1055,12 +1037,12 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminRoute: AuthenticatedAdminRoute,
-  AuthenticatedCreditsRoute: AuthenticatedCreditsRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedListSkillRoute: AuthenticatedListSkillRoute,
   AuthenticatedMeRoute: AuthenticatedMeRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedBusinessesNewRoute: AuthenticatedBusinessesNewRoute,
   AuthenticatedMessagesIdRoute: AuthenticatedMessagesIdRoute,
   AuthenticatedNotificationsIdRoute: AuthenticatedNotificationsIdRoute,
   AuthenticatedNotificationsPreferencesRoute:
@@ -1080,14 +1062,12 @@ const AuthenticatedRouteRouteWithChildren =
 interface BusinessesRouteChildren {
   BusinessesSlugRoute: typeof BusinessesSlugRoute
   BusinessesCreateRoute: typeof BusinessesCreateRoute
-  BusinessesNewRoute: typeof BusinessesNewRoute
   BusinessesIndexRoute: typeof BusinessesIndexRoute
 }
 
 const BusinessesRouteChildren: BusinessesRouteChildren = {
   BusinessesSlugRoute: BusinessesSlugRoute,
   BusinessesCreateRoute: BusinessesCreateRoute,
-  BusinessesNewRoute: BusinessesNewRoute,
   BusinessesIndexRoute: BusinessesIndexRoute,
 }
 

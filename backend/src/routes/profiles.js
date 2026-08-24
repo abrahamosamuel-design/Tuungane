@@ -6,6 +6,7 @@ import {
   getMyCounts,
   getProfileById, 
   createPublicProfile, 
+  createBusinessProfile,
   updatePublicProfile, 
   deletePublicProfile, 
   getMyPublicProfiles,
@@ -60,6 +61,7 @@ router.put('/me/privacy', updatePrivacySettings);
 
 // Public profiles management
 router.get('/public/me', getMyPublicProfiles);
+router.post('/public/business', createBusinessProfile);
 router.post('/public', createPublicProfile);
 router.patch('/public/:id', updatePublicProfile);
 router.delete('/public/:id', deletePublicProfile);

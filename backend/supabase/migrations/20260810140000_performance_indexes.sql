@@ -1,9 +1,9 @@
 -- Performance Indexes for Tuungane App
 
 -- Profiles table
-CREATE INDEX IF NOT EXISTS idx_profiles_category_slug ON profiles(category_slug);
-CREATE INDEX IF NOT EXISTS idx_profiles_district ON profiles(district);
-CREATE INDEX IF NOT EXISTS idx_profiles_is_verified ON profiles(is_verified);
+CREATE INDEX IF NOT EXISTS idx_public_profiles_category_slug ON public_profiles(category_slug);
+CREATE INDEX IF NOT EXISTS idx_public_profiles_district ON public_profiles(district);
+CREATE INDEX IF NOT EXISTS idx_public_profiles_verified ON public_profiles(verified);
 
 -- Service Requests table
 CREATE INDEX IF NOT EXISTS idx_service_requests_customer_id ON service_requests(customer_id);

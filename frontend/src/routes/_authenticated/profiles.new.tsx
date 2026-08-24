@@ -1,18 +1,21 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { ArrowLeft, ImagePlus, X, CheckCircle2, Zap } from "lucide-react";
 import { apiClient } from "@/lib/api";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
-import { uploadMedia } from "@/lib/upload";
+import { uploadMedia, compressImage } from "@/lib/upload";
 import { SERVICE_CATEGORIES } from "@/data/service-categories";
 import { useCreditWallet } from "@/hooks/use-credits";
 import { LocationAutocomplete } from "@/components/LocationAutocomplete";
 import { filterDistricts, filterTowns } from "@/data/uganda-locations";
 
 export const Route = createFileRoute("/_authenticated/profiles/new")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    edit: search.edit as string | undefined,
+  }),
   staticData: { hideHeaderOnMobile: true, hideBottomNavOnMobile: true },
-  head: () => ({ meta: [{ title: "List a service â€” Tuungane" }] }),
+  head: () => ({ meta: [{ title: "List a service — Tuungane" }] }),
   component: NewProfile,
 });
 
@@ -31,6 +34,7 @@ function NewProfile() {
   const { user } = useAuth();
   const nav = useNavigate();
   const { balance } = useCreditWallet();
+  const { edit } = Route.useSearch();
 
   // Form state
   const [name, setName] = useState("");
@@ -47,7 +51,53 @@ function NewProfile() {
   const [uploadingImg, setUploadingImg] = useState(false);
   const [useCustomUnit, setUseCustomUnit] = useState(false);
   const [customUnit, setCustomUnit] = useState("");
+  
+  const [businesses, setBusinesses] = useState<any[]>([]);
+  const [attachTo, setAttachTo] = useState<string>("individual");
   const fileRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data } = await apiClient<{ data: any[] }>('/profiles/public/me');
+        if (data && data.length > 0) {
+          setBusinesses(data);
+        }
+      } catch (err) {
+        console.error("Could not fetch businesses", err);
+      }
+      
+      if (edit) {
+        try {
+          const { data } = await apiClient<{ data: any }>(`/services/detail/${edit}`);
+          if (data) {
+            setName(data.title || data.name || "");
+            setCategorySlug(data.category_slug || SERVICE_CATEGORIES[0].slug);
+            setSubcategory(data.subcategory || SERVICE_CATEGORIES[0].services[0].service);
+            setContactForPrice(data.price === null && data.price_unit === "contact");
+            setPrice(data.price_fixed_ugx?.toString() || data.price?.toString() || "");
+            setDistrict(data.district || data.profile?.district || "");
+            setTown(data.town || data.profile?.town || "");
+            setBio(data.description || data.bio || "");
+            setPromoId(data.promo_plan || "free");
+            
+            const imageUrls = data.photos || data.media?.map((m: any) => m.url) || data.images || [];
+            setImages(imageUrls);
+            setAttachTo(data.attach_to || "individual");
+            
+            const foundCat = SERVICE_CATEGORIES.find(c => c.slug === data.category_slug) ?? SERVICE_CATEGORIES[0];
+            const foundSvc = foundCat.services.find(s => s.service === data.subcategory) ?? foundCat.services[0];
+            if (data.price_unit && data.price_unit !== "contact" && data.price_unit !== foundSvc.unit) {
+              setUseCustomUnit(true);
+              setCustomUnit(data.price_unit);
+            }
+          }
+        } catch (err) {
+          toast.error("Could not fetch service details for editing");
+        }
+      }
+    })();
+  }, [edit]);
 
   const cat = SERVICE_CATEGORIES.find(c => c.slug === categorySlug) ?? SERVICE_CATEGORIES[0];
   const serviceEntry = cat.services.find(s => s.service === subcategory) ?? cat.services[0];
@@ -65,9 +115,17 @@ function NewProfile() {
     const files = Array.from(e.target.files ?? []);
     if (!files.length || !user) return;
     if (images.length + files.length > 5) { toast.error("Max 5 images"); return; }
+    
+    const validFiles = files.filter(f => f.size <= 3 * 1024 * 1024);
+    if (validFiles.length < files.length) {
+      toast.error("Images must be 3MB or less");
+    }
+    if (validFiles.length === 0) return;
+
     setUploadingImg(true);
     try {
-      const urls = await Promise.all(files.map(f => uploadMedia(user.id, f, "service-images")));
+      const compressedFiles = await Promise.all(validFiles.map(f => compressImage(f, 0.7)));
+      const urls = await Promise.all(compressedFiles.map(f => uploadMedia(user.id, f, "service-images")));
       setImages(prev => [...prev, ...urls]);
     } catch { toast.error("Image upload failed"); }
     finally { setUploadingImg(false); if (fileRef.current) fileRef.current.value = ""; }
@@ -81,9 +139,25 @@ function NewProfile() {
     setBusy(true);
     const slug = `${slugify(name) || "profile"}-${Math.random().toString(36).slice(2, 8)}`;
     try {
-      const { data } = await apiClient<{ data: { id: string; slug: string } }>(`/profiles/public`, {
-        method: "POST",
-        body: JSON.stringify({
+      const url = edit ? `/services/${edit}` : `/profiles/public`;
+      const method = edit ? "PATCH" : "POST";
+      
+      let payload;
+      if (edit) {
+        payload = {
+          title: name.trim(),
+          category_slug: categorySlug,
+          subcategory,
+          description: bio || "",
+          district: district || null,
+          town: town || null,
+          price_type: contactForPrice ? null : (activeUnit ? "fixed" : null),
+          price_fixed_ugx: contactForPrice ? null : (price ? Number(price) : null),
+          price_note: contactForPrice ? null : activeUnit,
+          photos: images,
+        };
+      } else {
+        payload = {
           profile_type: "individual",
           slug,
           name: name.trim(),
@@ -94,12 +168,24 @@ function NewProfile() {
           bio: bio || "",
           price: contactForPrice ? null : (price ? Number(price) : null),
           price_unit: contactForPrice ? "contact" : activeUnit,
+          attach_to: attachTo,
           images,
           promo_plan: promoId === "free" ? null : promoId,
-        }),
+        };
+      }
+
+      const { data } = await apiClient<{ data: { id: string; slug: string; serviceId?: string } }>(url, {
+        method,
+        body: JSON.stringify(payload),
       });
-      toast.success("Your service is live!");
-      nav({ to: "/p/$slug", params: { slug: data.slug }, search: { welcome: "1" } as never });
+      toast.success(edit ? "Service updated!" : "Your service is live!");
+      if (edit) {
+        nav({ to: `/service/${data.id}`, search: { welcome: "1" } as any });
+      } else if (data.serviceId) {
+        nav({ to: `/service/${data.serviceId}`, search: { welcome: "1" } as any });
+      } else {
+        nav({ to: `/p/$slug`, params: { slug: data.slug }, search: { welcome: "1" } as never });
+      }
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not create service");
     } finally { setBusy(false); }
@@ -109,14 +195,34 @@ function NewProfile() {
     <div className="min-h-screen bg-gray-50">
       {/* Fixed top bar */}
       <div className="sticky top-0 z-30 flex items-center justify-between bg-white px-4 py-3 shadow-sm">
-        <button onClick={() => window.history.back()} className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-gray-100">
+        <button onClick={() => nav({ to: "/" })} className="flex h-9 w-9 items-center justify-center rounded-full hover:bg-gray-100">
           <ArrowLeft className="h-5 w-5 text-gray-700" />
         </button>
-        <h1 className="text-base font-bold text-gray-900">List a service</h1>
+        <h1 className="text-base font-bold text-gray-900">{edit ? "Edit Service" : "List a service"}</h1>
         <div className="w-9" />
       </div>
 
       <form onSubmit={submit} className="mx-auto max-w-lg space-y-0 pb-10">
+
+        {/* ATTACH TO */}
+        {businesses.length > 0 && (
+          <Section>
+            <label className="block text-sm font-semibold text-gray-700">Attach this service to *</label>
+            <p className="mt-1 text-xs text-gray-500">Choose whether to list this gig personally, or under one of your registered businesses.</p>
+            <select
+              value={attachTo}
+              onChange={e => setAttachTo(e.target.value)}
+              className="mt-3 w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm outline-none focus:border-orange-400"
+            >
+              <option value="individual">My Individual Profile (Personal Gig)</option>
+              {businesses.map(b => (
+                <option key={b.id} value={b.id}>
+                  Business: {b.name}
+                </option>
+              ))}
+            </select>
+          </Section>
+        )}
 
         {/* SERVICE NAME */}
         <Section>
@@ -296,7 +402,7 @@ function NewProfile() {
         <div className="px-4 pt-2">
           <button disabled={busy || uploadingImg}
             className="w-full rounded-2xl bg-orange-500 py-4 text-base font-bold text-white shadow-lg shadow-orange-200 transition hover:brightness-105 disabled:opacity-50">
-            {busy ? "Creatingâ€¦" : "List my service"}
+            {busy ? (edit ? "Updating..." : "Creating...") : (edit ? "Update my service" : "List my service")}
           </button>
         </div>
 

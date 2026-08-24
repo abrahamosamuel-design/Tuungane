@@ -1,4 +1,14 @@
 import { supabaseAdmin } from '../lib/supabaseClient.js';
+import { createClient } from '@supabase/supabase-js';
+
+const getSupabaseUserClient = (req) => {
+  const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || '';
+  const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY || process.env.SUPABASE_PUBLISHABLE_KEY || process.env.VITE_SUPABASE_PUBLISHABLE_KEY || '';
+  const token = req.headers.authorization?.split(' ')[1];
+  return createClient(supabaseUrl, supabaseAnonKey, {
+    global: { headers: { Authorization: `Bearer ${token}` } }
+  });
+};
 
 export const upsertReview = async (req, res) => {
   try {
@@ -329,12 +339,14 @@ export const submitReport = async (req, res) => {
 export const addPost = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { business_page_id, public_profile_id, text, category_slug, location, media_urls, post_type } = req.body;
+    const { business_page_id, public_profile_id, text, category_slug, location, media_urls, post_type, service_id } = req.body;
+    const supabaseUser = getSupabaseUserClient(req);
     
-    const { error } = await supabaseAdmin.from("timeline_posts").insert({
+    const { error } = await supabaseUser.from("timeline_posts").insert({
       provider_user_id: userId,
       business_page_id: business_page_id || null,
       public_profile_id: public_profile_id || null,
+      service_id: service_id || null,
       text: text || null,
       category_slug: category_slug || null,
       location: location || null,
@@ -345,6 +357,7 @@ export const addPost = async (req, res) => {
     if (error) throw error;
     res.json({ success: true });
   } catch (err) {
+    console.error("Add post error:", err);
     res.status(500).json({ error: 'Failed to add post' });
   }
 };

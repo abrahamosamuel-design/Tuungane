@@ -10,12 +10,13 @@ type Props = {
   onClose: () => void;
   jobTitle: string;
   requestId: string;
+  serviceId?: string;
   onPosted?: () => void;
 };
 
 type MediaItem = { url: string; type: "image" | "video" };
 
-export function AddTimelinePostDialog({ open, onClose, jobTitle, requestId, onPosted }: Props) {
+export function AddTimelinePostDialog({ open, onClose, jobTitle, requestId, serviceId, onPosted }: Props) {
   const { user } = useAuth();
   const [text, setText] = useState("");
   const [media, setMedia] = useState<MediaItem[]>([]);
@@ -60,6 +61,7 @@ export function AddTimelinePostDialog({ open, onClose, jobTitle, requestId, onPo
         text: text.trim(),
         media_urls: media.map((m) => m.url),
         post_type: "work_update",
+        service_id: serviceId || null,
       });
       toast.success("Timeline post added!");
       setText("");

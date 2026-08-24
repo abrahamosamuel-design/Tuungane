@@ -7,6 +7,7 @@ import { ArrowLeft, Send, ShieldCheck, Flag, Ban, Loader2, MapPin, ExternalLink,
 import { Avatar } from "@/components/social/Avatar";
 import { toast } from "sonner";
 import { markConversationRead } from "@/lib/messaging";
+import { AcceptJobDialog } from "@/components/pages/profile/AcceptJobDialog";
 
 export const Route = createFileRoute("/_authenticated/messages/$id")({
     staticData: {
@@ -37,7 +38,7 @@ type Msg = {
 };
 
 type Profile = { id: string; full_name: string; avatar_url: string | null };
-type Req = { id: string; service_needed: string; title: string | null; status: string; location: string | null; budget_range: string | null; selected_provider_id: string | null; urgent_flag: boolean | null; urgency: string | null; public_profile_id: string | null };
+type Req = { id: string; service_needed: string; title: string | null; status: string; location: string | null; budget_range: string | null; selected_provider_id: string | null; urgent_flag: boolean | null; urgency: string | null; public_profile_id: string | null; quantity: number | null; price_total: number | null };
 type ServiceProfile = { id: string; name: string };
 
 
@@ -53,6 +54,7 @@ function ConversationPage() {
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
   const [busy, setBusy] = useState(true);
+  const [acceptJobOpen, setAcceptJobOpen] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -195,6 +197,8 @@ function ConversationPage() {
                 </div>
                 <p className="mt-1 truncate text-sm font-semibold text-navy">{req.title || req.service_needed}</p>
                 <div className="mt-1 flex flex-wrap items-center gap-3 text-[11px] text-muted-foreground">
+                  {req.quantity && <span>Qty: {req.quantity}</span>}
+                  {req.price_total && <span>Total: UGX {req.price_total.toLocaleString()}</span>}
                   {req.location && <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" /> {req.location}</span>}
                   {req.budget_range && <span>Budget: {req.budget_range}</span>}
                   <span>With: {other?.full_name ?? "User"}</span>
@@ -209,6 +213,11 @@ function ConversationPage() {
             <div className="mt-2 flex flex-wrap gap-1.5">
               {conv.customer_id === user.id && req.status === "requested" && (
                 <Link to="/requests/$id" params={{ id: req.id }} className="rounded-full bg-orange px-3 py-1 text-[11px] font-semibold text-orange-foreground hover:brightness-110">Select provider</Link>
+              )}
+              {conv.provider_id === user.id && req.status === "requested" && (
+                <button onClick={() => setAcceptJobOpen(true)} className="rounded-full bg-orange px-3 py-1 text-[11px] font-semibold text-orange-foreground hover:brightness-110">
+                  <CheckCircle2 className="mr-1 inline h-3 w-3" /> Accept Job
+                </button>
               )}
               {conv.provider_id === user.id && req.status === "accepted" && (
                 <Link to="/requests/$id" params={{ id: req.id }} className="rounded-full bg-orange px-3 py-1 text-[11px] font-semibold text-orange-foreground hover:brightness-110">
@@ -274,6 +283,16 @@ function ConversationPage() {
           </div>
         </div>
       </section>
+
+      {req && acceptJobOpen && (
+        <AcceptJobDialog
+          open={acceptJobOpen}
+          onOpenChange={setAcceptJobOpen}
+          requestId={req.id}
+          initialPrice={req.price_total || 0}
+          onAccepted={() => setReq({ ...req, status: 'accepted' })}
+        />
+      )}
     </>
   );
 }
