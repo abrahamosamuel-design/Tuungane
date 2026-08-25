@@ -7,7 +7,7 @@
   ],
   "scripts": {
     "dev": "npm run dev --workspace=frontend",
-    "build": "npm install --no-save lightningcss-linux-x64-gnu@1.32.0 @tailwindcss/oxide-linux-x64-gnu@4.3.1 && npm rebuild rollup && npm run build --workspace=frontend",
+    "build": "node -e \"if (process.platform === 'linux') require('child_process').execSync('npm install --no-save lightningcss-linux-x64-gnu@1.32.0 @tailwindcss/oxide-linux-x64-gnu@4.3.1', {stdio: 'inherit'})\" && npm rebuild rollup && npm run build --workspace=frontend",
     "start:backend": "npm run start --workspace=backend",
     "dev:backend": "npm run dev --workspace=backend"
   },
