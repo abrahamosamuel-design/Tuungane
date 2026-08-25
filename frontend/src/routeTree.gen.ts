@@ -42,6 +42,7 @@ import { Route as BusinessesCreateRouteImport } from './routes/businesses.create
 import { Route as BusinessesSlugRouteImport } from './routes/businesses.$slug'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedRecoveryRouteImport } from './routes/_authenticated/recovery'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedMeRouteImport } from './routes/_authenticated/me'
 import { Route as AuthenticatedListSkillRouteImport } from './routes/_authenticated/list-skill'
@@ -225,6 +226,11 @@ const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedRecoveryRoute = AuthenticatedRecoveryRouteImport.update({
+  id: '/recovery',
+  path: '/recovery',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
@@ -339,6 +345,7 @@ export interface FileRoutesByFullPath {
   '/list-skill': typeof AuthenticatedListSkillRoute
   '/me': typeof AuthenticatedMeRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/recovery': typeof AuthenticatedRecoveryRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/businesses/$slug': typeof BusinessesSlugRoute
@@ -389,6 +396,7 @@ export interface FileRoutesByTo {
   '/list-skill': typeof AuthenticatedListSkillRoute
   '/me': typeof AuthenticatedMeRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/recovery': typeof AuthenticatedRecoveryRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/businesses/$slug': typeof BusinessesSlugRoute
@@ -442,6 +450,7 @@ export interface FileRoutesById {
   '/_authenticated/list-skill': typeof AuthenticatedListSkillRoute
   '/_authenticated/me': typeof AuthenticatedMeRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
+  '/_authenticated/recovery': typeof AuthenticatedRecoveryRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/businesses/$slug': typeof BusinessesSlugRoute
@@ -495,6 +504,7 @@ export interface FileRouteTypes {
     | '/list-skill'
     | '/me'
     | '/onboarding'
+    | '/recovery'
     | '/settings'
     | '/auth/callback'
     | '/businesses/$slug'
@@ -545,6 +555,7 @@ export interface FileRouteTypes {
     | '/list-skill'
     | '/me'
     | '/onboarding'
+    | '/recovery'
     | '/settings'
     | '/auth/callback'
     | '/businesses/$slug'
@@ -597,6 +608,7 @@ export interface FileRouteTypes {
     | '/_authenticated/list-skill'
     | '/_authenticated/me'
     | '/_authenticated/onboarding'
+    | '/_authenticated/recovery'
     | '/_authenticated/settings'
     | '/auth/callback'
     | '/businesses/$slug'
@@ -893,6 +905,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/recovery': {
+      id: '/_authenticated/recovery'
+      path: '/recovery'
+      fullPath: '/recovery'
+      preLoaderRoute: typeof AuthenticatedRecoveryRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/onboarding': {
       id: '/_authenticated/onboarding'
       path: '/onboarding'
@@ -1021,6 +1040,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedListSkillRoute: typeof AuthenticatedListSkillRoute
   AuthenticatedMeRoute: typeof AuthenticatedMeRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
+  AuthenticatedRecoveryRoute: typeof AuthenticatedRecoveryRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedBusinessesNewRoute: typeof AuthenticatedBusinessesNewRoute
   AuthenticatedMessagesIdRoute: typeof AuthenticatedMessagesIdRoute
@@ -1041,6 +1061,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedListSkillRoute: AuthenticatedListSkillRoute,
   AuthenticatedMeRoute: AuthenticatedMeRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
+  AuthenticatedRecoveryRoute: AuthenticatedRecoveryRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedBusinessesNewRoute: AuthenticatedBusinessesNewRoute,
   AuthenticatedMessagesIdRoute: AuthenticatedMessagesIdRoute,

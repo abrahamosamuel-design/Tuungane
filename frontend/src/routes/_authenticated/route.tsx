@@ -5,6 +5,7 @@ import { apiClient } from "@/lib/api";
 import { autoEnablePushIfNeeded } from "@/lib/push";
 
 const ONBOARDED_KEY = "tuungane_onboarded";
+const LEGACY_CHECKED_KEY = "tuungane_legacy_checked";
 
 function AuthenticatedLayout() {
   const nav = useNavigate();
@@ -24,6 +25,18 @@ function AuthenticatedLayout() {
       const { data: sess } = await supabase.auth.getUser();
       if (cancelled || !sess.user) return;
       try {
+        // First check for legacy duplicate
+        if (localStorage.getItem(LEGACY_CHECKED_KEY) !== "1" && !window.location.pathname.startsWith("/recovery")) {
+          const { data: legacyRes } = await apiClient<{ data: { isDuplicate: boolean } }>("/recovery/check");
+          if (cancelled) return;
+          if (legacyRes.data?.isDuplicate) {
+            nav({ to: "/recovery" });
+            return;
+          } else {
+            localStorage.setItem(LEGACY_CHECKED_KEY, "1");
+          }
+        }
+
         const { data: profile } = await apiClient<{ data: { has_completed_onboarding: boolean } }>("/profiles/me");
         if (cancelled) return;
         if (!profile.data || profile.data.has_completed_onboarding === false) {
@@ -32,7 +45,7 @@ function AuthenticatedLayout() {
           localStorage.setItem(ONBOARDED_KEY, "1");
         }
       } catch (err) {
-        console.error("Failed to check onboarding status", err);
+        console.error("Failed to check onboarding/legacy status", err);
       }
     })();
     return () => { cancelled = true; };

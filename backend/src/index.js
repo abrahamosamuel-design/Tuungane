@@ -31,6 +31,7 @@ import creditsRoutes from './routes/credits.js';
 import adminRoutes from './routes/admin.js';
 import directBookingRoutes from './routes/direct_bookings.js';
 import uploadRoutes from './routes/upload.js';
+import recoveryRoutes from './routes/recovery.js';
 
 // Basic health check route
 app.get('/api/health', (req, res) => {
@@ -43,6 +44,7 @@ app.use('/api/requests', requestRoutes);
 app.use('/api/services', serviceRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use('/api/recovery', recoveryRoutes);
 app.use('/api/social', socialRoutes);
 app.use('/api/trust', trustRoutes);
 app.use('/api/feed', feedRoutes);
