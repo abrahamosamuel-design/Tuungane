@@ -72,14 +72,14 @@ export const getMyCounts = async (req, res) => {
       supabaseAdmin.from("service_requests").select("*", { count: "exact", head: true }).eq("customer_id", userId).not("status", "in", "(completed,cancelled)"),
       supabaseAdmin.rpc("get_unread_message_count", { _user_id: userId })
     ]);
-    
+
     // Note: get_unread_message_count usually uses auth.uid() in supabase, 
     // but here we might need to modify it or we just query conversations manually if it fails
     // Let's assume get_unread_message_count is not modified for admin yet, so let's query it manually:
     // A user's unread messages count is the number of conversations where user_id matches and unread_count > 0
     // Actually, `get_unread_message_count` is a view or RPC. Let's just query `conversations` where user is participant.
     // Wait, the original code did: `supabase.rpc("get_unread_message_count")`. We'll keep it simple and just do it manually.
-    
+
     const { data: convs } = await supabaseAdmin.from("conversations").select("unread_count").or(`participant1_id.eq.${userId},participant2_id.eq.${userId}`);
     const unreadMessagesCount = (convs || []).reduce((acc, c) => acc + (c.unread_count || 0), 0);
 
@@ -120,7 +120,7 @@ export const getProviderContacts = async (req, res) => {
       .eq("provider_id", userId)
       .order("clicked_at", { ascending: false })
       .limit(100);
-      
+
     const map = new Map();
     for (const r of (data || [])) {
       const key = r.customer_id;
@@ -128,11 +128,11 @@ export const getProviderContacts = async (req, res) => {
       if (existing) {
         existing.methods.add(r.contact_method);
       } else {
-        map.set(key, { 
-          customer_id: r.customer_id, 
-          service_request_id: r.service_request_id, 
-          last_at: r.clicked_at, 
-          methods: new Set([r.contact_method]) 
+        map.set(key, {
+          customer_id: r.customer_id,
+          service_request_id: r.service_request_id,
+          last_at: r.clicked_at,
+          methods: new Set([r.contact_method])
         });
       }
     }
@@ -142,14 +142,14 @@ export const getProviderContacts = async (req, res) => {
       ? await supabaseAdmin.from("profiles").select("id,full_name,avatar_url").in("id", ids)
       : { data: [] };
     const pm = new Map((profs || []).map((p) => [p.id, { full_name: p.full_name, avatar_url: p.avatar_url }]));
-    
+
     // Transform Sets to arrays for JSON serialization
-    const finalData = list.map((r) => ({ 
-      ...r, 
+    const finalData = list.map((r) => ({
+      ...r,
       methods: Array.from(r.methods),
-      profile: pm.get(r.customer_id) 
+      profile: pm.get(r.customer_id)
     }));
-    
+
     res.json({ data: finalData });
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch contacts' });
@@ -160,14 +160,14 @@ export const getCustomerContacts = async (req, res) => {
   try {
     const userId = req.user.id;
     const { limit = 5 } = req.query;
-    
+
     const { data } = await supabaseAdmin
       .from("contact_logs")
       .select("provider_id,service_request_id,contact_method,clicked_at")
       .eq("customer_id", userId)
       .order("clicked_at", { ascending: false })
       .limit(parseInt(limit, 10) || 100);
-      
+
     const map = new Map();
     for (const r of (data || [])) {
       const key = r.provider_id;
@@ -175,11 +175,11 @@ export const getCustomerContacts = async (req, res) => {
       if (existing) {
         existing.methods.add(r.contact_method);
       } else {
-        map.set(key, { 
-          provider_id: r.provider_id, 
-          service_request_id: r.service_request_id, 
-          last_at: r.clicked_at, 
-          methods: new Set([r.contact_method]) 
+        map.set(key, {
+          provider_id: r.provider_id,
+          service_request_id: r.service_request_id,
+          last_at: r.clicked_at,
+          methods: new Set([r.contact_method])
         });
       }
     }
@@ -189,14 +189,14 @@ export const getCustomerContacts = async (req, res) => {
       ? await supabaseAdmin.from("profiles").select("id,full_name,avatar_url").in("id", ids)
       : { data: [] };
     const pm = new Map((profs || []).map((p) => [p.id, { full_name: p.full_name, avatar_url: p.avatar_url }]));
-    
+
     // Transform Sets to arrays for JSON serialization
-    const finalData = list.map((r) => ({ 
-      ...r, 
+    const finalData = list.map((r) => ({
+      ...r,
       methods: Array.from(r.methods),
-      profile: pm.get(r.provider_id) 
+      profile: pm.get(r.provider_id)
     }));
-    
+
     res.json({ data: finalData });
   } catch (err) {
     console.error('Error fetching customer contacts:', err);
@@ -245,21 +245,21 @@ export const deletePublicProfile = async (req, res) => {
   try {
     const userId = req.user.id;
     const { id } = req.params;
-    
+
     // Verify ownership
     const { data: existing, error: err1 } = await supabaseAdmin
       .from("public_profiles")
       .select("owner_id")
       .eq("id", id)
       .single();
-      
+
     if (err1 || existing.owner_id !== userId) {
       return res.status(403).json({ error: 'Unauthorized' });
     }
 
     await supabaseAdmin.from("profile_services").delete().eq("profile_id", id);
     const { error } = await supabaseAdmin.from("public_profiles").delete().eq("id", id);
-    
+
     if (error) throw error;
     res.json({ success: true });
   } catch (err) {
@@ -279,7 +279,7 @@ export const browseProfiles = async (req, res) => {
       .limit(100);
 
     if (pError) throw pError;
-    
+
     let services = [];
     if (profiles && profiles.length > 0) {
       const ids = profiles.map((p) => p.id);
@@ -290,12 +290,12 @@ export const browseProfiles = async (req, res) => {
         .eq("active", true)
         .order("is_primary", { ascending: false })
         .order("sort_order");
-        
+
       if (!sError) {
         services = ps || [];
       }
     }
-    
+
     res.json({ data: { profiles: profiles || [], services } });
   } catch (err) {
     console.error('Error browsing profiles:', err);
@@ -328,8 +328,28 @@ export const updateMyProfileFull = async (req, res) => {
     }
 
     if (serviceProfilePatch) {
+      // 1. Update service_profiles
       const { error: e2 } = await supabaseAdmin.from("service_profiles").update(serviceProfilePatch).eq("user_id", userId);
       if (e2) throw e2;
+
+      // 2. Also update public_profiles to keep them in sync
+      const pubPatch = {};
+      if (serviceProfilePatch.cover_url !== undefined) pubPatch.cover_url = serviceProfilePatch.cover_url;
+      if (serviceProfilePatch.business_name !== undefined) pubPatch.name = serviceProfilePatch.business_name;
+      if (serviceProfilePatch.bio !== undefined) pubPatch.bio = serviceProfilePatch.bio;
+      if (serviceProfilePatch.category_slug !== undefined) pubPatch.category_slug = serviceProfilePatch.category_slug;
+      if (serviceProfilePatch.subcategory !== undefined) pubPatch.subcategory = serviceProfilePatch.subcategory;
+      if (serviceProfilePatch.district !== undefined) pubPatch.district = serviceProfilePatch.district;
+      if (serviceProfilePatch.town !== undefined) pubPatch.town = serviceProfilePatch.town;
+
+      if (Object.keys(pubPatch).length > 0) {
+        const { error: e3 } = await supabaseAdmin
+          .from("public_profiles")
+          .update(pubPatch)
+          .eq("owner_id", userId)
+          .eq("profile_type", "individual");
+        if (e3) throw e3;
+      }
     }
 
     res.json({ success: true });
@@ -343,7 +363,7 @@ export const getMyProfileDetails = async (req, res) => {
   try {
     const userId = req.user.id;
     let { data: p } = await supabaseAdmin.from("profiles").select("*").eq("id", userId).maybeSingle();
-    
+
     if (p) {
       let updated = false;
       let newName = p.full_name;
@@ -371,7 +391,7 @@ export const getMyProfileDetails = async (req, res) => {
         p.avatar_url = newAvatar;
       }
     }
-    
+
     const [
       { data: f },
       { data: s },
@@ -478,7 +498,7 @@ export const getProfileById = async (req, res) => {
 
     if (error) throw error;
     if (!data) return res.status(404).json({ error: 'Profile not found' });
-    
+
     res.json({ data });
   } catch (err) {
     console.error('Error fetching profile:', err);
@@ -504,7 +524,7 @@ export const createBusinessProfile = async (req, res) => {
     const supabaseUser = getSupabaseUserClient(req);
 
     // Ensure slug is unique, append random string if needed (already done in frontend but good to be safe)
-    
+
     const payload = {
       owner_id: userId,
       profile_type: "business",
@@ -540,7 +560,7 @@ export const createPublicProfile = async (req, res) => {
     const userId = req.user.id;
     const { name, category_slug, subcategory, district, town, bio, promo_plan, price, price_unit, images, attach_to } = req.body;
     const supabaseUser = getSupabaseUserClient(req);
-    
+
     let profileId = null;
     let userProfileId = null;
 
@@ -554,7 +574,7 @@ export const createPublicProfile = async (req, res) => {
         .eq('id', attach_to)
         .eq('owner_id', userId)
         .single();
-        
+
       if (eErr || !businessProfile) {
         throw new Error("Business profile not found or access denied");
       }
@@ -565,14 +585,14 @@ export const createPublicProfile = async (req, res) => {
         .from('public_profiles')
         .select('id')
         .eq('owner_id', userId);
-        
+
       if (existingProfiles && existingProfiles.length > 0) {
         profileId = existingProfiles[0].id;
       } else {
         userProfileId = userId;
       }
     }
-    
+
     // Create the service
     const servicePayload = {
       profile_id: profileId,
@@ -590,13 +610,13 @@ export const createPublicProfile = async (req, res) => {
       price_note: (price_unit && price_unit !== "contact") ? price_unit : null,
       photos: images && Array.isArray(images) ? images : [],
     };
-    
+
     const { data: serviceRes, error: sErr } = await supabaseUser
       .from('profile_services')
       .insert(servicePayload)
       .select()
       .single();
-      
+
     if (sErr) throw sErr;
 
     res.status(201).json({ data: { serviceId: serviceRes.id } });
@@ -611,14 +631,14 @@ export const updatePublicProfile = async (req, res) => {
     const userId = req.user.id;
     const { id } = req.params;
     const payload = req.body;
-    
+
     // Make sure the user owns the profile
     const { data: existing, error: err1 } = await supabaseAdmin
       .from('public_profiles')
       .select('owner_id')
       .eq('id', id)
       .single();
-      
+
     if (err1 || existing.owner_id !== userId) {
       return res.status(403).json({ error: 'Unauthorized to update this profile' });
     }
@@ -646,7 +666,32 @@ export const getFullProfile = async (req, res) => {
       supabaseAdmin.from("service_profiles").select("business_name,subcategory,bio,category_slug,district,town,verified,cover_url,header_url").eq("user_id", id).maybeSingle(),
     ]);
 
-    res.json({ data: { profile: profileRes.data, sp: spRes.data } });
+    let spData = spRes.data;
+    if (!spData) {
+      // Fallback: Query public_profiles table for this user
+      const { data: pub } = await supabaseAdmin
+        .from("public_profiles")
+        .select("name,subcategory,bio,category_slug,district,town,verified,cover_url")
+        .eq("owner_id", id)
+        .eq("profile_type", "individual")
+        .maybeSingle();
+      
+      if (pub) {
+        spData = {
+          business_name: pub.name,
+          subcategory: pub.subcategory,
+          bio: pub.bio,
+          category_slug: pub.category_slug,
+          district: pub.district,
+          town: pub.town,
+          verified: pub.verified,
+          cover_url: pub.cover_url,
+          header_url: null
+        };
+      }
+    }
+
+    res.json({ data: { profile: profileRes.data, sp: spData } });
   } catch (err) {
     console.error('Error fetching full profile:', err);
     res.status(500).json({ error: 'Failed to fetch full profile' });
@@ -661,7 +706,7 @@ export const getPublicProfileBySlug = async (req, res) => {
       .select("*")
       .eq("slug", slug)
       .maybeSingle();
-      
+
     if (!p) {
       return res.status(404).json({ error: 'Profile not found' });
     }
@@ -749,7 +794,7 @@ export const getProviderAuxData = async (req, res) => {
     } else {
       query = query.eq("user_profile_id", id);
     }
-    
+
     const { data: svcRows } = await query
       .order("is_primary", { ascending: false })
       .order("sort_order", { ascending: true });
@@ -757,7 +802,7 @@ export const getProviderAuxData = async (req, res) => {
     services = userId === id ? (svcRows || []) : (svcRows || []).filter((r) => r.active);
 
     const { data: ps } = await supabaseAdmin.from("timeline_posts").select("*").eq("provider_user_id", id).eq("hidden", false).order("created_at", { ascending: false });
-    
+
     const [fcRes, rRes, vRes] = await Promise.all([
       supabaseAdmin.rpc("get_provider_follower_count", { _provider: id }),
       supabaseAdmin.from("provider_recommendations").select("id,service,message,rating,created_at,user_id").eq("provider_user_id", id).eq("hidden", false).order("created_at", { ascending: false }),
@@ -766,7 +811,7 @@ export const getProviderAuxData = async (req, res) => {
 
     const followers = typeof fcRes.data === "number" ? fcRes.data : 0;
     const ids = Array.from(new Set([...(rRes.data || []).map((r) => r.user_id), ...(vRes.data || []).map((r) => r.user_id)]));
-    
+
     let pm = new Map();
     if (ids.length) {
       const { data: ps2 } = await supabaseAdmin.from("profiles").select("id,full_name,avatar_url").in("id", ids);
@@ -779,10 +824,10 @@ export const getProviderAuxData = async (req, res) => {
     const { data: fbRes } = await supabaseAdmin.from("service_feedback")
       .select("id,rating,review_text,service_provided,created_at,customer_id,would_recommend")
       .eq("provider_id", id).eq("is_visible", true).order("created_at", { ascending: false });
-    
+
     const fbList = fbRes || [];
     const fbIds = Array.from(new Set(fbList.map((f) => f.customer_id).filter((x) => !pm.has(x))));
-    
+
     if (fbIds.length) {
       const { data: ps3 } = await supabaseAdmin.from("profiles").select("id,full_name,avatar_url").in("id", fbIds);
       (ps3 || []).forEach((p) => pm.set(p.id, { full_name: p.full_name, avatar_url: p.avatar_url }));
@@ -806,13 +851,13 @@ export const getProviderAuxData = async (req, res) => {
       .select("id", { count: "exact", head: true })
       .eq("provider_id", id)
       .eq("status", "completed");
-      
+
     const { count: totalCompletedDbs } = await supabaseAdmin
       .from("direct_bookings")
       .select("id", { count: "exact", head: true })
       .eq("provider_id", id)
       .eq("status", "completed");
-      
+
     jobsDone = (totalCompletedReqs || 0) + (totalCompletedDbs || 0);
 
     res.json({
@@ -829,7 +874,7 @@ export const submitProfileReport = async (req, res) => {
   try {
     const userId = req.user.id;
     const { profile_kind, profile_id, reason, description } = req.body;
-    
+
     const { error } = await supabaseAdmin.from("profile_reports").insert({
       profile_kind,
       profile_id,
@@ -837,7 +882,7 @@ export const submitProfileReport = async (req, res) => {
       reason,
       description: description || null,
     });
-    
+
     if (error) throw error;
     res.json({ success: true });
   } catch (err) {
@@ -859,11 +904,11 @@ export const getSuspendedStatus = async (req, res) => {
 export const submitClaimRequest = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { 
-      service_profile_user_id, full_name, phone_number, whatsapp_number, 
-      email, relationship_to_profile, explanation, supporting_file_url 
+    const {
+      service_profile_user_id, full_name, phone_number, whatsapp_number,
+      email, relationship_to_profile, explanation, supporting_file_url
     } = req.body;
-    
+
     const { error: insertError } = await supabaseAdmin.from("profile_claim_requests").insert({
       service_profile_user_id,
       requester_user_id: userId,
@@ -876,12 +921,12 @@ export const submitClaimRequest = async (req, res) => {
       supporting_file_url: supporting_file_url || null,
     });
     if (insertError) throw insertError;
-    
+
     const { error: updateError } = await supabaseAdmin.from("service_profiles")
       .update({ seeded_status: "claim_pending" })
       .eq("user_id", service_profile_user_id);
     if (updateError) throw updateError;
-    
+
     res.json({ success: true });
   } catch (err) {
     console.error('Error submitting claim request:', err);

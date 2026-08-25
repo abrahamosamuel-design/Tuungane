@@ -53,20 +53,35 @@ router.get('/check', requireAuth, async (req, res) => {
       
       // We also need to get the email address of the owner_id so we can send the magic link to it
       // if it's different from the public profile's visible email.
-      const { data: { user: legacyUser }, error: userError } = await supabaseAdmin.auth.admin.getUserById(legacyProfile.owner_id);
-      
-      if (!userError && legacyUser && legacyUser.email) {
+      let authEmail = null;
+      try {
+        const { data: { user: legacyUser }, error: userError } = await supabaseAdmin.auth.admin.getUserById(legacyProfile.owner_id);
+        if (!userError && legacyUser && legacyUser.email) {
+          authEmail = legacyUser.email;
+        }
+      } catch (e) {
+        console.error('Error fetching user from auth admin:', e.message);
+      }
+
+      // Fallback to the profile's own email column if the auth admin call fails
+      if (!authEmail && legacyProfile.email) {
+        authEmail = legacyProfile.email;
+      }
+
+      if (authEmail) {
          // Attach the true auth email to the profile so the frontend can mask it (e.g. j***@gmail.com)
-         legacyProfile.auth_email = legacyUser.email;
+         legacyProfile.auth_email = authEmail;
          
          return res.json({
-           isDuplicate: true,
-           legacyProfile
+           data: {
+             isDuplicate: true,
+             legacyProfile
+           }
          });
       }
     }
 
-    res.json({ isDuplicate: false });
+    res.json({ data: { isDuplicate: false } });
   } catch (error) {
     console.error('Error checking for legacy profiles:', error);
     res.status(500).json({ error: 'Failed to check legacy profiles' });
@@ -108,15 +123,35 @@ router.post('/send-magic-link', requireAuth, async (req, res) => {
     }
 
     // Retrieve the legacy user's actual email
-    const { data: { user: legacyUser }, error: userError } = await supabaseAdmin.auth.admin.getUserById(legacyOwnerId);
+    let authEmail = null;
+    try {
+      const { data: { user: legacyUser }, error: userError } = await supabaseAdmin.auth.admin.getUserById(legacyOwnerId);
+      if (!userError && legacyUser && legacyUser.email) {
+        authEmail = legacyUser.email;
+      }
+    } catch (e) {
+      console.error('Error fetching user from auth admin:', e.message);
+    }
 
-    if (userError || !legacyUser || !legacyUser.email) {
+    if (!authEmail) {
+      // Fallback to public_profiles email column
+      const { data: profile } = await supabaseAdmin
+        .from('public_profiles')
+        .select('email')
+        .eq('owner_id', legacyOwnerId)
+        .maybeSingle();
+      if (profile && profile.email) {
+        authEmail = profile.email;
+      }
+    }
+
+    if (!authEmail) {
       return res.status(400).json({ error: 'Legacy account has no associated email address to send a link to.' });
     }
 
     // Send the magic link
     const { error: otpError } = await supabaseAdmin.auth.signInWithOtp({
-      email: legacyUser.email,
+      email: authEmail,
       options: {
         shouldCreateUser: false
       }

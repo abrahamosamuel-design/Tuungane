@@ -29,7 +29,7 @@ function AuthenticatedLayout() {
         if (localStorage.getItem(LEGACY_CHECKED_KEY) !== "1" && !window.location.pathname.startsWith("/recovery")) {
           const { data: legacyRes } = await apiClient<{ data: { isDuplicate: boolean } }>("/recovery/check");
           if (cancelled) return;
-          if (legacyRes.data?.isDuplicate) {
+          if (legacyRes?.isDuplicate) {
             nav({ to: "/recovery" });
             return;
           } else {
@@ -39,7 +39,7 @@ function AuthenticatedLayout() {
 
         const { data: profile } = await apiClient<{ data: { has_completed_onboarding: boolean } }>("/profiles/me");
         if (cancelled) return;
-        if (!profile.data || profile.data.has_completed_onboarding === false) {
+        if (!profile || profile.has_completed_onboarding === false) {
           nav({ to: "/onboarding" });
         } else {
           localStorage.setItem(ONBOARDED_KEY, "1");

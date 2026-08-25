@@ -405,7 +405,7 @@ function UserProfile() {
     <div className="min-h-screen" style={{ background: "linear-gradient(180deg,#f47b16 0%,#f47b16 38%,#ffffff 38%)" }}>
 
         {/* HEADER / BANNER */}
-        <div className="relative group overflow-hidden" style={{ paddingBottom: "140px", background: sp?.cover_url ? `url(${sp.cover_url}) center/cover no-repeat` : "linear-gradient(135deg,#f47b16 0%,#e06210 100%)" }}>
+        <div className="relative group overflow-hidden h-48 sm:h-64 w-full" style={{ background: sp?.cover_url ? `url(${sp.cover_url}) center/cover no-repeat` : "linear-gradient(135deg,#f47b16 0%,#e06210 100%)" }}>
           {!sp?.cover_url && (
             <>
               <div className="absolute top-0 right-0 h-44 w-44 rounded-full opacity-20 pointer-events-none" style={{ background: "radial-gradient(circle,#fff 0%,transparent 70%)", transform: "translate(30%,-30%)" }} />

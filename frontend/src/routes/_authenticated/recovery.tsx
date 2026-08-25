@@ -19,14 +19,14 @@ function RecoveryPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Check if we have a legacy profile
-    apiClient<{ isDuplicate: boolean; legacyProfile: any }>("/recovery/check")
+    apiClient<{ data: { isDuplicate: boolean; legacyProfile: any } }>("/recovery/check")
       .then((res) => {
-        if (!res.isDuplicate || !res.legacyProfile) {
+        const data = res.data;
+        if (!data || !data.isDuplicate || !data.legacyProfile) {
           // If no duplicate found, they shouldn't be here. Send them to home.
           navigate({ to: "/" });
         } else {
-          setLegacyProfile(res.legacyProfile);
+          setLegacyProfile(data.legacyProfile);
         }
       })
       .catch((err) => {
