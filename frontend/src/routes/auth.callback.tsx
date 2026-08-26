@@ -20,7 +20,7 @@ function AuthCallback() {
         if (errorParam) {
           console.error("[AuthCallback] OAuth error:", errorParam, errorDesc);
           if (!cancelled) {
-            setStatus("Unable to sign in. Redirecting...");
+            setStatus(`OAuth Error: ${errorDesc || errorParam}. Redirecting...`);
             setTimeout(() => nav({ to: "/login", replace: true }), 2000);
           }
           return;
@@ -40,6 +40,12 @@ function AuthCallback() {
           if (data.session) {
             if (!cancelled) nav({ to: "/dashboard", replace: true });
             return;
+          } else {
+            if (!cancelled) {
+              setStatus("No session returned from code exchange. Redirecting...");
+              setTimeout(() => nav({ to: "/login", replace: true }), 4000);
+            }
+            return;
           }
         }
 
@@ -53,6 +59,11 @@ function AuthCallback() {
             }
             await new Promise((r) => setTimeout(r, 300));
           }
+          if (!cancelled) {
+            setStatus("Timeout waiting for hash session. Redirecting...");
+            setTimeout(() => nav({ to: "/login", replace: true }), 4000);
+          }
+          return;
         }
 
         // Fallback: check existing session
@@ -66,8 +77,8 @@ function AuthCallback() {
         }
 
         if (!cancelled) {
-          setStatus("Unable to sign in. Redirecting...");
-          setTimeout(() => nav({ to: "/login", replace: true }), 2000);
+          setStatus("Timeout waiting for fallback session (no code or hash provided). Redirecting...");
+          setTimeout(() => nav({ to: "/login", replace: true }), 4000);
         }
       } catch (err) {
         console.error("[AuthCallback] Error:", err);
