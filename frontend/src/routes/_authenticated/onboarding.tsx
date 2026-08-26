@@ -18,6 +18,10 @@ import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
   head: () => ({ meta: [{ title: "Welcome to Tuungane" }] }),
+  staticData: {
+    hideHeader: true,
+    hideBottomNavOnMobile: true,
+  },
   component: Onboarding,
 });
 

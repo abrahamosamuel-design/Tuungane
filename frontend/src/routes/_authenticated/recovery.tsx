@@ -13,6 +13,10 @@ export const Route = createFileRoute("/_authenticated/recovery")({
     legacyOwnerId: typeof s.legacyOwnerId === "string" ? s.legacyOwnerId : undefined,
     claimToken: typeof s.claimToken === "string" ? s.claimToken : undefined,
   }),
+  staticData: {
+    hideHeader: true,
+    hideBottomNavOnMobile: true,
+  },
   component: RecoveryPage,
 });
 
@@ -111,12 +115,9 @@ function RecoveryPage() {
     setSendingLink(true);
     setError(null);
     try {
-      const res = await apiClient<{ data: { email: string; message: string } }>("/recovery/send-magic-link", {
-        method: "POST",
-        body: {
-          legacyOwnerId: legacyProfile.owner_id,
-          email: emailToSend,
-        },
+      const res = await apiClient.post<{ data: { email: string; message: string } }>("/recovery/send-magic-link", {
+        legacyOwnerId: legacyProfile.owner_id,
+        email: emailToSend,
       });
 
       setSentToEmail(res.data?.email || emailToSend);
@@ -302,7 +303,7 @@ function RecoveryPage() {
         </CardContent>
         <CardFooter className="flex flex-col gap-2.5 pt-1">
           <Button
-            className="w-full bg-tuungane-orange hover:bg-tuungane-orange/90 text-white font-bold h-11"
+            className="w-full bg-tuungane-blue hover:bg-tuungane-blue/90 text-white font-bold h-11"
             size="lg"
             onClick={handleSendMagicLink}
             disabled={sendingLink}
