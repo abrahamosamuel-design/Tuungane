@@ -140,6 +140,20 @@ router.get('/check', requireAuth, async (req, res) => {
               };
               break;
             }
+            
+            // If no public or service profile, but profile matches name/email, we can still recover the profile itself
+            // since they may have other records (reviews, timeline posts) linked to it.
+            legacyProfile = {
+              id: pm.id,
+              owner_id: pm.id,
+              name: pm.full_name || 'Legacy User',
+              avatar_url: pm.avatar_url || null,
+              phone: null,
+              email: email,
+              bio: null,
+              category_slug: null
+            };
+            break;
           }
         }
         if (legacyProfile) break;
