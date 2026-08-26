@@ -29,7 +29,15 @@ function AuthCallback() {
         // PKCE flow: ?code= parameter
         if (code) {
           const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-          if (!error && data.session) {
+          if (error) {
+            console.error("[AuthCallback] exchangeCodeForSession error:", error);
+            if (!cancelled) {
+              setStatus(`Sign in error: ${error.message}. Redirecting...`);
+              setTimeout(() => nav({ to: "/login", replace: true }), 4000);
+            }
+            return;
+          }
+          if (data.session) {
             if (!cancelled) nav({ to: "/dashboard", replace: true });
             return;
           }

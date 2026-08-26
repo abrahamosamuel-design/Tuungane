@@ -246,6 +246,10 @@ router.post('/confirm-claim', requireAuth, async (req, res) => {
       return res.status(400).json({ error: 'legacyOwnerId is required' });
     }
 
+    let targetUserId = currentUserId;
+    let targetEmail = currentUserEmail;
+    let requiresRelogin = false;
+
     // Verify token if provided
     if (claimToken && pendingClaims.has(claimToken)) {
       const claim = pendingClaims.get(claimToken);
@@ -253,51 +257,60 @@ router.post('/confirm-claim', requireAuth, async (req, res) => {
         pendingClaims.delete(claimToken);
         return res.status(400).json({ error: 'Confirmation link has expired. Please request a new one.' });
       }
+      targetUserId = claim.requesterUserId;
+      targetEmail = claim.email;
+      
+      // If the magic link logged them into a different account (like a new email-only account),
+      // we must transfer to their original requester account, not the newly created email account.
+      if (currentUserId !== targetUserId) {
+        requiresRelogin = true;
+      }
+      
       pendingClaims.delete(claimToken);
     }
 
-    console.log(`[Transfer IDs] Transferring legacy owner ${legacyOwnerId} to confirmed user ${currentUserId}`);
+    console.log(`[Transfer IDs] Transferring legacy owner ${legacyOwnerId} to confirmed user ${targetUserId}`);
 
     // 1. Transfer public_profiles
     const { error: ppErr } = await supabaseAdmin
       .from('public_profiles')
-      .update({ owner_id: currentUserId, email: currentUserEmail || undefined })
+      .update({ owner_id: targetUserId, email: targetEmail || undefined })
       .eq('owner_id', legacyOwnerId);
     if (ppErr) console.error('Error transferring public_profiles:', ppErr);
 
     // 2. Transfer service_profiles
     const { error: spErr } = await supabaseAdmin
       .from('service_profiles')
-      .update({ user_id: currentUserId, email: currentUserEmail || undefined })
+      .update({ user_id: targetUserId, email: targetEmail || undefined })
       .eq('user_id', legacyOwnerId);
     if (spErr) console.error('Error transferring service_profiles:', spErr);
 
     // 3. Transfer profile_services
     const { error: psErr } = await supabaseAdmin
       .from('profile_services')
-      .update({ user_profile_id: currentUserId })
+      .update({ user_profile_id: targetUserId })
       .eq('user_profile_id', legacyOwnerId);
     if (psErr) console.error('Error transferring profile_services:', psErr);
 
     // 4. Transfer business_pages
     const { error: bpErr } = await supabaseAdmin
       .from('business_pages')
-      .update({ owner_id: currentUserId })
+      .update({ owner_id: targetUserId })
       .eq('owner_id', legacyOwnerId);
     if (bpErr) console.error('Error transferring business_pages:', bpErr);
 
     // 5. Transfer timeline_posts
     const { error: tpErr } = await supabaseAdmin
       .from('timeline_posts')
-      .update({ provider_user_id: currentUserId })
+      .update({ provider_user_id: targetUserId })
       .eq('provider_user_id', legacyOwnerId);
     if (tpErr) console.error('Error transferring timeline_posts:', tpErr);
 
     // 6. Transfer reviews & recommendations
-    await supabaseAdmin.from('reviews').update({ provider_user_id: currentUserId }).eq('provider_user_id', legacyOwnerId);
-    await supabaseAdmin.from('provider_recommendations').update({ provider_user_id: currentUserId }).eq('provider_user_id', legacyOwnerId);
+    await supabaseAdmin.from('reviews').update({ provider_user_id: targetUserId }).eq('provider_user_id', legacyOwnerId);
+    await supabaseAdmin.from('provider_recommendations').update({ provider_user_id: targetUserId }).eq('provider_user_id', legacyOwnerId);
 
-    // 7. Update current user's profile with old profile info
+    // 7. Update target user's profile with old profile info
     const { data: oldProfile } = await supabaseAdmin.from('profiles').select('*').eq('id', legacyOwnerId).maybeSingle();
     const profileUpdates = {
       is_provider: true,
@@ -309,12 +322,39 @@ router.post('/confirm-claim', requireAuth, async (req, res) => {
     const { error: profErr } = await supabaseAdmin
       .from('profiles')
       .update(profileUpdates)
-      .eq('id', currentUserId);
+      .eq('id', targetUserId);
     if (profErr) console.error('Error updating profile:', profErr);
+
+    // 8. Delete temporary or legacy auth users to free up the email and clean up
+    const usersToDelete = new Set();
+    if (currentUserId !== targetUserId) usersToDelete.add(currentUserId);
+    if (legacyOwnerId !== targetUserId) usersToDelete.add(legacyOwnerId);
+
+    for (const uid of usersToDelete) {
+      try {
+        await supabaseAdmin.auth.admin.deleteUser(uid);
+      } catch (e) {
+        // Ignore if user doesn't exist in Auth
+      }
+    }
+
+    // 9. Now that the email is free, assign it to the target user so they can log in with it
+    if (targetEmail) {
+      try {
+        await supabaseAdmin.auth.admin.updateUserById(targetUserId, {
+          email: targetEmail,
+          email_confirm: true,
+          user_metadata: { email_verified: true }
+        });
+      } catch (e) {
+        console.error('Failed to update auth email for target user:', e);
+      }
+    }
 
     res.json({
       data: {
         success: true,
+        requiresRelogin,
         message: 'Account ownership verified! All services and profile listings have been transferred.'
       }
     });

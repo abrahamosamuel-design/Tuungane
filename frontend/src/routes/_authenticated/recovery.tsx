@@ -48,14 +48,24 @@ function RecoveryPage() {
         legacyOwnerId,
         claimToken,
       })
-        .then(() => {
+        .then(async (res: any) => {
           localStorage.setItem("tuungane_legacy_checked", "1");
           localStorage.setItem("tuungane_onboarded", "1");
           setTransferred(true);
-          toast.success("Account ownership confirmed! All services and listings have been transferred.");
-          setTimeout(() => {
-            navigate({ to: "/dashboard" });
-          }, 2000);
+          
+          if (res.data?.requiresRelogin) {
+            toast.success("Account confirmed! Please log back in to your original account to see your data.");
+            const { supabase } = await import("@/integrations/supabase/client");
+            await supabase.auth.signOut();
+            setTimeout(() => {
+              navigate({ to: "/login" });
+            }, 3000);
+          } else {
+            toast.success("Account ownership confirmed! All services and listings have been transferred.");
+            setTimeout(() => {
+              navigate({ to: "/dashboard" });
+            }, 2000);
+          }
         })
         .catch((err) => {
           console.error("Error confirming claim:", err);
