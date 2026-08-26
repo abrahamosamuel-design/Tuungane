@@ -13,6 +13,7 @@ export function Layout({ children }: { children: ReactNode }) {
   const hideFooter = matches.some((m) => m.staticData?.hideFooter);
   const hideBottomNavOnMobileUnauth = matches.some((m) => m.staticData?.hideBottomNavOnMobileUnauth);
   const hideBottomNavOnMobile = matches.some((m) => m.staticData?.hideBottomNavOnMobile);
+  const hideBottomNav = matches.some((m) => m.staticData?.hideBottomNav);
   const hideHeaderOnMobile = matches.some((m) => m.staticData?.hideHeaderOnMobile);
   const hideHeader = matches.some((m) => m.staticData?.hideHeader);
 
@@ -40,7 +41,7 @@ export function Layout({ children }: { children: ReactNode }) {
         <main className={`flex-1 w-full min-w-0 flex flex-col ${headerPaddingClass}`}>{children}</main>
         {!shouldHideFooter && <Footer />}
         
-        {hideBottomNavOnMobile ? (
+        {hideBottomNav ? null : hideBottomNavOnMobile ? (
           <div className="hidden md:block">
             <MobileBottomNav />
           </div>

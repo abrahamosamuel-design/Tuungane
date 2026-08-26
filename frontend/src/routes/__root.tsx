@@ -134,6 +134,7 @@ declare module '@tanstack/react-router' {
     hideFooter?: boolean;
     hideBottomNavOnMobileUnauth?: boolean;
     hideBottomNavOnMobile?: boolean;
+    hideBottomNav?: boolean;
     hideHeaderOnMobile?: boolean;
     hideHeader?: boolean;
   }

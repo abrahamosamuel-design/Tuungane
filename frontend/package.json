@@ -49,6 +49,7 @@
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^15.15.0",
     "prettier": "^3.7.3",
+    "puppeteer": "^25.9.0",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.56.1",
     "vite": "^7.3.1"
@@ -58,7 +59,7 @@
   },
   "optionalDependencies": {
     "@rollup/rollup-linux-x64-gnu": "^4.40.0",
-    "lightningcss-linux-x64-gnu": "1.32.0",
-    "@tailwindcss/oxide-linux-x64-gnu": "4.3.1"
+    "@tailwindcss/oxide-linux-x64-gnu": "4.3.1",
+    "lightningcss-linux-x64-gnu": "1.32.0"
   }
 }

@@ -15,7 +15,7 @@ export const Route = createFileRoute("/_authenticated/recovery")({
   }),
   staticData: {
     hideHeader: true,
-    hideBottomNavOnMobile: true,
+    hideBottomNav: true,
   },
   component: RecoveryPage,
 });

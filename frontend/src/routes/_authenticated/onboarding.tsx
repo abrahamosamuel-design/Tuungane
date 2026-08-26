@@ -20,7 +20,7 @@ export const Route = createFileRoute("/_authenticated/onboarding")({
   head: () => ({ meta: [{ title: "Welcome to Tuungane" }] }),
   staticData: {
     hideHeader: true,
-    hideBottomNavOnMobile: true,
+    hideBottomNav: true,
   },
   component: Onboarding,
 });
