@@ -179,7 +179,9 @@ export function HomeFeedSections() {
         const tb = new Date(b.created_at).getTime();
         const ta = new Date(a.created_at).getTime();
         if (tb !== ta) return tb - ta;
-        return b.id.localeCompare(a.id);
+        const bId = b.id || b.user_id || "";
+        const aId = a.id || a.user_id || "";
+        return bId.localeCompare(aId);
       })
       .slice(0, 6);
   }, [recentListings]);

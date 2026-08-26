@@ -140,7 +140,7 @@ function RecoveryPage() {
   if (loading) {
     return (
       <div className="flex h-[80vh] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-tuungane-blue" />
+        <Loader2 className="h-8 w-8 animate-spin text-navy" />
       </div>
     );
   }
@@ -150,9 +150,9 @@ function RecoveryPage() {
     return (
       <div className="container mx-auto flex max-w-md flex-col items-center justify-center p-6 text-center mt-16">
         <div className="mb-6 rounded-full bg-orange-100 p-5 ring-8 ring-orange-50">
-          <Loader2 className="h-12 w-12 animate-spin text-tuungane-orange" />
+          <Loader2 className="h-12 w-12 animate-spin text-orange" />
         </div>
-        <h1 className="mb-3 text-2xl font-bold text-tuungane-blue">Verifying Magic Link...</h1>
+        <h1 className="mb-3 text-2xl font-bold text-navy">Verifying Magic Link...</h1>
         <p className="text-sm text-gray-600">
           Securing ownership and transferring your previous listings and profile IDs to your account.
         </p>
@@ -167,11 +167,11 @@ function RecoveryPage() {
         <div className="mb-6 rounded-full bg-green-100 p-4 ring-8 ring-green-50">
           <CheckCircle2 className="h-12 w-12 text-green-600" />
         </div>
-        <h1 className="mb-3 text-2xl font-bold text-tuungane-blue">Ownership Confirmed!</h1>
+        <h1 className="mb-3 text-2xl font-bold text-navy">Ownership Confirmed!</h1>
         <p className="mb-6 text-gray-600 text-sm leading-relaxed">
           Your profile, listings, and services from the previous platform have been successfully transferred to your new account.
         </p>
-        <div className="flex items-center gap-2 text-xs font-semibold text-tuungane-orange">
+        <div className="flex items-center gap-2 text-xs font-semibold text-orange">
           <span>Redirecting to your dashboard</span>
           <Loader2 className="h-3.5 w-3.5 animate-spin" />
         </div>
@@ -183,12 +183,12 @@ function RecoveryPage() {
   if (linkSent) {
     return (
       <div className="container mx-auto max-w-lg p-6 mt-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <Card className="border-t-4 border-t-tuungane-orange shadow-lg">
+        <Card className="border-t-4 border-t-orange shadow-lg">
           <CardHeader className="text-center pb-2">
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-orange-100 ring-8 ring-orange-50">
-              <Mail className="h-7 w-7 text-tuungane-orange" />
+              <Mail className="h-7 w-7 text-orange" />
             </div>
-            <CardTitle className="text-2xl text-tuungane-blue">Check Your Email</CardTitle>
+            <CardTitle className="text-2xl text-navy">Check Your Email</CardTitle>
             <CardDescription className="text-sm pt-2">
               For security, we've sent a magic link to confirm ownership of this account.
             </CardDescription>
@@ -236,13 +236,13 @@ function RecoveryPage() {
   // State: Initial Welcome / Confirmation screen
   return (
     <div className="container mx-auto max-w-lg p-6 mt-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <Card className="border-t-4 border-t-tuungane-orange shadow-lg">
+      <Card className="border-t-4 border-t-orange shadow-lg">
         <CardHeader className="text-center pb-3">
-          <div className="mx-auto mb-3 flex items-center justify-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-tuungane-blue">
+          <div className="mx-auto mb-3 flex items-center justify-center gap-1.5 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-navy">
             <ShieldCheck className="h-4 w-4" />
             <span>Ownership Verification</span>
           </div>
-          <CardTitle className="text-2xl font-bold text-tuungane-blue">Welcome to the new Tuungane!</CardTitle>
+          <CardTitle className="text-2xl font-bold text-navy">Welcome to the new Tuungane!</CardTitle>
           <CardDescription className="text-sm pt-1">
             We found an existing account matching your details from our previous platform. Is this you?
           </CardDescription>
@@ -251,13 +251,13 @@ function RecoveryPage() {
           <div className="rounded-xl border bg-gray-50/80 p-5 flex flex-col items-center">
             <Avatar className="h-20 w-20 border-4 border-white shadow-sm mb-3">
               <AvatarImage src={legacyProfile?.avatar_url || ""} />
-              <AvatarFallback className="bg-tuungane-blue text-white text-xl font-bold">
+              <AvatarFallback className="bg-navy text-white text-xl font-bold">
                 {legacyProfile?.name?.charAt(0) || "U"}
               </AvatarFallback>
             </Avatar>
             <h3 className="text-lg font-bold text-gray-900 text-center">{legacyProfile?.name}</h3>
             {legacyProfile?.category_slug && (
-              <span className="mt-1 inline-flex items-center rounded-full bg-tuungane-orange/10 px-2.5 py-0.5 text-xs font-semibold text-tuungane-orange capitalize">
+              <span className="mt-1 inline-flex items-center rounded-full bg-orange/10 px-2.5 py-0.5 text-xs font-semibold text-orange capitalize">
                 {legacyProfile.category_slug}
               </span>
             )}
@@ -288,7 +288,7 @@ function RecoveryPage() {
               value={emailInput}
               onChange={(e) => setEmailInput(e.target.value)}
               placeholder="Enter your email address"
-              className="w-full rounded-xl border border-gray-300 bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-tuungane-orange focus:ring-2 focus:ring-tuungane-orange/20"
+              className="w-full rounded-xl border border-gray-300 bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-orange focus:ring-2 focus:ring-orange/20"
             />
             <p className="text-[11px] text-gray-500">
               For security, clicking the link in your email will confirm ownership and transfer your listings.
@@ -303,7 +303,7 @@ function RecoveryPage() {
         </CardContent>
         <CardFooter className="flex flex-col gap-2.5 pt-1">
           <Button
-            className="w-full bg-tuungane-blue hover:bg-tuungane-blue/90 text-white font-bold h-11"
+            className="w-full bg-navy hover:bg-navy/90 text-white font-bold h-11"
             size="lg"
             onClick={handleSendMagicLink}
             disabled={sendingLink}
