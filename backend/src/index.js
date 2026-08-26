@@ -54,6 +54,9 @@ app.use('/api/credits', creditsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/direct-bookings', directBookingRoutes);
 
+import { startPushDispatcher } from './pushDispatcher.js';
+
 app.listen(port, () => {
   console.log(`Backend server listening on port ${port}`);
+  startPushDispatcher();
 });

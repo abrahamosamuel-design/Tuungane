@@ -1,0 +1,205 @@
+﻿TUUNGANE
+Connect to Opportunity
+Personal Profiles & Service Profiles
+Developer Product Specification
+Version 1.0 | 26 August 2026
+Purpose: Define the distinction, structure, relationships, and user flows for Tuunganeâ€™s Personal Profiles and Service 
+Profiles. The goal is to make the platform clear to users while supporting people who offer one or multiple services.
+1. Core Product Principle
+Tuungane should treat a person and the services they offer as related but distinct objects.
+Layer
+Core Question
+Primary Purpose
+Personal Profile
+Who are you?
+Identity, network, activity, background and reputation as a person.
+Service Profile
+What do you offer?
+Describe, market, discover and request a specific service.
+Key rule: Personal profiles should not become
+ duplicate business/service listings. Service-specific commercial information belongs on the Service Profile.
+2. Personal Profile
+The Personal Profile is the individualâ€™s identity and network layer.
+Profile Header: 
+Profile photo, full name, username, locat
+ion, short bio, Connect button, Message button and verification status where applicable.
+About: 
+Short introduction, skills/interests, areas of expertise, education/training, experience, languages and location.
+My Services: 
+A list of the userâ€™s active 
+Service Profiles. Each service should link to its dedicated Service Profile.
+Activity: 
+Posts, shared opportunities, discussions, questions and other relevant activity.
+Connections: 
+Connections, followers/following and, where supported, mutual connections.
+Opportunities: 
+Opportunities posted or shared by the user; additional saved/applied functionality can be added later.
+Trust & Verification: 
+Phone verification, identity verification, business verification where relevant, completed requests and membership i
+nformation. A broader Trust Score can be introduced later.
+3. Personal Profile Example
+JOHN OKELLO
+Entebbe, Uganda
+Entrepreneur | Photographer | Digital Creator
+Building businesses, creating visual stories and connecting people to opportunities.
+About: E
+ntrepreneur based in Entebbe with interests in photography, digital marketing and entrepreneurship.
+Services: Professional Photography | Graphic Design | Social Media Management
+Activity: Johnâ€™s posts, shared opportunities and discussions
+Connections: 245
+ connections
+Verification: Phone verified | Identity verified
+4. Service Profile
+The Service Profile is the commercial/discovery layer for one specific service. It should be more transactional than the Personal Profile.
+Service Header: 
+Service name/title, 
+location, rating/review count where available, provider identity, link to the providerâ€™s Personal Profile, Message button and primary Request Service button.
+Service Description: 
+Clear explanation of what the service does and the customer problems it solve
+s.
+What Is Offered: 
+Specific services, categories, packages or types of work included.
+Portfolio / Gallery: 
+Photos, videos, previous work, before/after examples, certificates or other relevant evidence. The presentation can adapt by service category.
+Prici
+ng: 
+Starting price or packages where appropriate. Pricing may be optional where services require quotation.
+Service Area: 
+Locations served and whether the provider travels.
+Availability: 
+Whether the provider is accepting requests and, later, working days/t
+ime availability.
+Reviews & Ratings: 
+Reviews specifically about this Service Profile. Service-specific ratings should not be confused with ratings of the person.
+Trust Indicators: 
+Relevant verification, completed requests, membership information and future
+ Tuungane Trust Score.
+Service Provider: 
+A concise provider card linking to the Personal Profile.
+Similar Services: 
+Related or alternative services to encourage discovery.
+5. What Belongs Where
+Information
+Personal Profile
+Service Profile
+Name / identity
+âœ“
+Provider reference only
+Personal bio
+âœ“
+No
+Skills / interests
+âœ“
+Only if directly relevant to service
+Service description
+No
+âœ“
+Service packages
+No
+âœ“
+Service pricing
+No
+âœ“
+Portfolio / service work
+Optional personal activity
+âœ“
+Service-specific reviews
+No
+âœ“
+Connections / network
+âœ“
+No
+Posts / activity
+âœ“
+Optional service updates
+Service area
+General location
+âœ“
+Request This Service
+No
+âœ“
+6. Multiple Service Profiles
+A single Personal Profile may own multiple Service Profiles. This is an intentional MVP 
+capability and should be supported cleanly in the data model and UI.
+Example:
+John Okello (Personal Profile)
+Professional Photography
+Graphic Design
+Event Decoration
+Each Service Profile should have its own description, portfolio, pricing, availability, 
+service area, reviews and request flow, while all remain linked to the same Personal Profile.
+7. Service Profile â†’ Service Request Flow
+The primary conversion action on a Service Profile should be Request Service.
+User discovers a Service Profile.
+User rev
+iews the service, portfolio, pricing, service area, availability and trust signals.
+User selects Request This Service.
+Request form captures the need, description, location, preferred date/time, optional budget and attachments.
+Request is sent to the provi
+der.
+Provider responds/quotes through Tuungane.
+User and provider communicate and proceed through the request workflow.
+On completion, the request can be closed using the agreed completion mechanism and the user can leave a service-specific review.
+8. Reco
+mmended Service Profile Layout
+Service name + rating + location
+Provider identity + View Personal Profile
+Request Service + Message
+Service description
+What is offered
+Portfolio / gallery
+Pricing / packages
+Service area
+Availability
+Reviews & ratings
+Trust
+ / verification
+About the provider
+/offered by
+Similar services
+9. UX & Product Rules
+Always make it visually obvious whether the user is viewing a person or a service.
+The primary action on a Personal Profile is connection/network interaction; the primary action on a
+ Service Profile is requesting the service.
+Do not duplicate detailed service information on the Personal Profile.
+Every Service Profile should clearly identify and link to its providerâ€™s Personal Profile.
+Service-specific reviews should be attached to the
+ relevant Service Profile.
+A person should be able to manage multiple Service Profiles from their Personal Profile.
+A user should be able to discover services without needing to understand the providerâ€™s personal profile first.
+The structure should remain 
+mobile-first and work cleanly within Tuunganeâ€™s existing Service Requests and provider discovery flows.
+10. Suggested Data Relationship
+At a high level, the relationship sho
+uld be:
+User / Personal Profile  1 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ N  Service Profiles
+Each Service Pr
+ofile belongs to one Personal Profile/provider. A Personal Profile can have zero, one or multiple Service Profiles. Service Requests and service-specific reviews should reference the Service Profile rather than only the person.
+11. MVP Priority
+Implement t
+he Personal Profile and Service Profile as distinct but linked entities.
+Support multiple Service Profiles per Personal Profile.
+Make Service Profile discovery and Request Service the primary service conversion path.
+Show the provider clearly on every Serv
+ice Profile and allow navigation to their Personal Profile.
+Implement service-specific reviews and ratings.
+Keep detailed commercial/service information off the Personal Profile.
+Leave advanced features such as full availability calendars and advanced 
+Trust Scores for later phases unless already required by the current build.
+12. Developer Acceptance Criteria
+A registered individual can have a Personal Profile without offering any service.
+A user can create and manage multiple Service Profiles.
+Each Ser
+vice Profile is independently editable and discoverable.
+Each Service Profile identifies its owner and links back to the ownerâ€™s Personal Profile.
+The Personal Profile lists the userâ€™s active Service Profiles.
+Service-specific reviews appear on the relevan
+t Service Profile.
+A Service Profile has a clear Request Service CTA.
+The Request Service CTA opens the existing Tuungane Service Request workflow.
+Personal activity/network information does not get mixed into the serviceâ€™s commercial details.
+The design i
+s responsive and mobile-first.
+13. Product Vision
+This structure allows Tuungane to become more than a service directory. People build identities and networks, while their individual services build their own discoverability, portfolios, reviews and demand.
+ The two layers work together: WHO you are â†’ WHAT you offer â†’ WHAT someone needs â†’ CONNECTION â†’ COMPLETION â†’ TRUST.

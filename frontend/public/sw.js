@@ -3,6 +3,8 @@
 // fallback page. Sensitive data (messages, API responses, user info) is never
 // cached — only static shell assets and the offline page.
 
+importScripts('/sw-push.js');
+
 const VERSION = "tuungane-v1";
 const STATIC_CACHE = `${VERSION}-static`;
 const RUNTIME_CACHE = `${VERSION}-runtime`;

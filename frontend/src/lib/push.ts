@@ -2,9 +2,9 @@
 import { supabase } from "@/integrations/supabase/client";
 
 const VAPID_PUBLIC_KEY =
-  "BGUeqqWeNHctNhwNMfMcPexYjZIRYIizxwgMIfPx88PnTmt23RPu1L7x1gMvJ7kOuBiBM0R-bjLkXFd7-IUBvHc";
+  "BIr-EPGZBrxyaOU2tuoDBgyMr3Ge_4HfaUbA34q-W0K6qw3ttAY4arXibxShyrBj9l8bsklMVy0yKGvXlP7ue0M";
 
-const SW_URL = "/sw-push.js";
+const SW_URL = "/sw.js";
 
 export function isPushSupported(): boolean {
   if (typeof window === "undefined") return false;

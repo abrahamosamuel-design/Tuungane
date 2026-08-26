@@ -7,6 +7,7 @@ import { NotificationsBell } from "./NotificationsBell";
 import { CreditBalanceChip } from "./CreditBalanceChip";
 import { useCreditWallet } from "@/hooks/use-credits";
 import { apiClient } from "@/lib/api";
+import { PushPrompt } from "./PushPrompt";
 
 import { useAuth } from "@/hooks/use-auth";
 import { listSkillHref } from "@/lib/cta";
@@ -45,7 +46,7 @@ export function Header() {
 
   return (
     <header className={`fixed inset-x-0 top-0 z-50 transition-transform duration-300 ease-in-out ${isVisible ? "translate-y-0" : "-translate-y-full"}`}>
-
+      <PushPrompt />
       {/* Main Header Pill */}
       <div className="bg-background/95 backdrop-blur-md">
         <div className="mx-auto flex h-14 md:h-[4.5rem] lg:h-[5rem] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">

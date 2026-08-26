@@ -19,3 +19,12 @@ root.render(
     <RouterProvider router={router} />
   </StrictMode>,
 )
+
+// Register Service Worker for PWA (offline caching and push)
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch((err) => {
+      console.error('ServiceWorker registration failed: ', err);
+    });
+  });
+}
