@@ -7,6 +7,7 @@ import { FeedAvatar } from "@/components/feed/FeedAvatar";
 import { Avatar } from "@/components/social/Avatar";
 import { useUserLocation } from "@/hooks/use-user-location";
 import { toast } from "sonner";
+import { PostMedia } from "@/components/social/PostMedia";
 
 import { useQuery } from "@tanstack/react-query";
 
@@ -356,7 +357,7 @@ function TimelinePostCard({ data }: { data: any }) {
   useEffect(() => {
     (async () => {
       try {
-        const { data: res } = await apiClient(`/social/posts/${data.id}/interactions`);
+        const res = await apiClient(`/social/posts/${data.id}/interactions`);
         if (res.data) {
           setLikes(res.data.likes);
           setLiked(res.data.liked);
@@ -374,7 +375,7 @@ function TimelinePostCard({ data }: { data: any }) {
   const toggleLike = async () => {
     if (!requireAuth() || !user) return;
     try {
-      const { data: res } = await apiClient.post(`/social/posts/${data.id}/likes`, {});
+      const res = await apiClient.post(`/social/posts/${data.id}/likes`, {});
       if (res.liked !== liked) {
         setLiked(res.liked);
         setLikes(l => res.liked ? l + 1 : Math.max(0, l - 1));
@@ -386,7 +387,7 @@ function TimelinePostCard({ data }: { data: any }) {
 
   const loadComments = async () => {
     try {
-      const { data: res } = await apiClient(`/social/posts/${data.id}/comments`);
+      const res = await apiClient(`/social/posts/${data.id}/comments`);
       setComments(res.data || []);
       setCommentCount((res.data || []).length);
     } catch { /* ignore */ }
@@ -399,8 +400,8 @@ function TimelinePostCard({ data }: { data: any }) {
       await apiClient.post(`/social/posts/${data.id}/comments`, { text: newComment.trim() });
       setNewComment("");
       loadComments();
-    } catch {
-      toast.error("Failed to add comment");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to add comment");
     } finally {
       setCommentBusy(false);
     }
@@ -443,16 +444,8 @@ function TimelinePostCard({ data }: { data: any }) {
 
         {/* Media */}
         {hasImages && (
-          <div className={`mb-3 overflow-hidden rounded-xl ${data.mediaUrls.length > 1 ? "grid grid-cols-2 gap-1" : ""}`}>
-            {data.mediaUrls.slice(0, 4).map((url: string, i: number) => (
-              <img
-                key={i}
-                src={url}
-                alt="Post media"
-                className={`w-full object-cover ${data.mediaUrls.length === 1 ? "max-h-52" : "h-28"}`}
-                loading="lazy"
-              />
-            ))}
+          <div className="mb-3">
+            <PostMedia urls={data.mediaUrls} alt={data.authorName} />
           </div>
         )}
 
@@ -483,23 +476,13 @@ function TimelinePostCard({ data }: { data: any }) {
         >
           <MessageCircle className="h-3.5 w-3.5" /> Comment
         </button>
-        {data.serviceId ? (
-          <Link
-            to="/service/$id"
-            params={{ id: data.serviceId }}
-            className="flex flex-1 items-center justify-center gap-1.5 border-l border-border py-2.5 text-xs font-semibold text-navy/60 hover:bg-muted/50 transition-colors"
-          >
-            <ChevronRight className="h-4 w-4" /> View
-          </Link>
-        ) : (
-          <Link
-            to="/u/$id"
-            params={{ id: data.providerId }}
-            className="flex flex-1 items-center justify-center gap-1.5 border-l border-border py-2.5 text-xs font-semibold text-navy/60 hover:bg-muted/50 transition-colors"
-          >
-            <ChevronRight className="h-4 w-4" /> View
-          </Link>
-        )}
+        <Link
+          to="/posts/$id"
+          params={{ id: data.id }}
+          className="flex flex-1 items-center justify-center gap-1.5 border-l border-border py-2.5 text-xs font-semibold text-navy/60 hover:bg-muted/50 transition-colors"
+        >
+          <ChevronRight className="h-4 w-4" /> View
+        </Link>
       </div>
 
       {/* Comments section */}

@@ -280,7 +280,7 @@ export const addPostComment = async (req, res) => {
     res.json({ success: true });
   } catch (err) {
     console.error('Error adding comment:', err);
-    res.status(500).json({ error: 'Failed to add comment' });
+    res.status(500).json({ error: 'Failed to add comment: ' + (err.message || JSON.stringify(err)) });
   }
 };
 

@@ -25,7 +25,7 @@ export function OfficialPostCard({ post, account, onChanged }: { post: OfficialP
   useEffect(() => {
     (async () => {
       try {
-        const { data: interactionRes } = await apiClient(`/admin/official-posts/${post.id}/interactions`);
+        const interactionRes = await apiClient(`/admin/official-posts/${post.id}/interactions`);
         if (interactionRes) {
           setLikes(interactionRes.likes);
           setLiked(interactionRes.liked);
@@ -40,7 +40,7 @@ export function OfficialPostCard({ post, account, onChanged }: { post: OfficialP
   const toggleLike = async () => {
     if (!user) return toast.error("Sign in to like posts");
     try {
-      const { data: res } = await apiClient.post(`/admin/official-posts/${post.id}/likes`, {});
+      const res = await apiClient.post(`/admin/official-posts/${post.id}/likes`, {});
       if (res.liked !== liked) {
         setLiked(res.liked);
         setLikes(l => res.liked ? l + 1 : Math.max(0, l - 1));

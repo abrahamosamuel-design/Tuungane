@@ -4,7 +4,7 @@ import { ArrowLeft, ImagePlus, X, CheckCircle2, Zap } from "lucide-react";
 import { apiClient } from "@/lib/api";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
-import { uploadMedia, compressImage } from "@/lib/upload";
+import { uploadMedia } from "@/lib/upload";
 import { SERVICE_CATEGORIES } from "@/data/service-categories";
 import { useCreditWallet } from "@/hooks/use-credits";
 import { LocationAutocomplete } from "@/components/LocationAutocomplete";
@@ -124,8 +124,7 @@ function NewProfile() {
 
     setUploadingImg(true);
     try {
-      const compressedFiles = await Promise.all(validFiles.map(f => compressImage(f, 0.7)));
-      const urls = await Promise.all(compressedFiles.map(f => uploadMedia(user.id, f, "service-images")));
+      const urls = await Promise.all(validFiles.map(f => uploadMedia(user.id, f, "service-images")));
       setImages(prev => [...prev, ...urls]);
     } catch { toast.error("Image upload failed"); }
     finally { setUploadingImg(false); if (fileRef.current) fileRef.current.value = ""; }

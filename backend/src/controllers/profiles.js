@@ -69,19 +69,20 @@ export const getMyCounts = async (req, res) => {
       { data: unreadMessagesData }
     ] = await Promise.all([
       supabaseAdmin.from("notifications").select("*", { count: "exact", head: true }).eq("user_id", userId).eq("read", false),
-      supabaseAdmin.from("service_requests").select("*", { count: "exact", head: true }).eq("customer_id", userId).not("status", "in", "(completed,cancelled)"),
+      supabaseAdmin.from("service_requests").select("*", { count: "exact", head: true }).or(`customer_id.eq.${userId},provider_id.eq.${userId}`).not("status", "in", "(completed,cancelled,disputed)"),
       supabaseAdmin.rpc("get_unread_message_count", { _user_id: userId })
     ]);
 
-    // Note: get_unread_message_count usually uses auth.uid() in supabase, 
-    // but here we might need to modify it or we just query conversations manually if it fails
-    // Let's assume get_unread_message_count is not modified for admin yet, so let's query it manually:
-    // A user's unread messages count is the number of conversations where user_id matches and unread_count > 0
-    // Actually, `get_unread_message_count` is a view or RPC. Let's just query `conversations` where user is participant.
-    // Wait, the original code did: `supabase.rpc("get_unread_message_count")`. We'll keep it simple and just do it manually.
-
-    const { data: convs } = await supabaseAdmin.from("conversations").select("unread_count").or(`participant1_id.eq.${userId},participant2_id.eq.${userId}`);
-    const unreadMessagesCount = (convs || []).reduce((acc, c) => acc + (c.unread_count || 0), 0);
+    // Manually query conversations for unread counts
+    const { data: convs } = await supabaseAdmin
+      .from("conversations")
+      .select("customer_id, provider_id, customer_unread_count, provider_unread_count")
+      .or(`customer_id.eq.${userId},provider_id.eq.${userId}`);
+      
+    const unreadMessagesCount = (convs || []).reduce((acc, c) => {
+      const count = c.customer_id === userId ? c.customer_unread_count : c.provider_unread_count;
+      return acc + (count || 0);
+    }, 0);
 
     res.json({
       data: {

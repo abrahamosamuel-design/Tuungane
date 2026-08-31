@@ -7,6 +7,9 @@ import { PostCard, type PostRow } from "@/components/social/PostCard";
 import { useUserLocation } from "@/hooks/use-user-location";
 
 export const Route = createFileRoute("/posts/$id")({
+  staticData: {
+    hideBottomNav: true,
+  },
   head: ({ params }) => {
     const url = `https://tuungane.com/posts/${params.id}`;
     const title = "Post — Tuungane";
@@ -54,14 +57,17 @@ function PostDetail() {
 
   return (
     <>
-      <div className="mx-auto max-w-2xl px-4 py-6">
-        <Link
-          to="/feed"
-          className="mb-4 inline-flex items-center gap-1 text-sm font-semibold text-navy hover:underline"
-        >
-          <ArrowLeft className="h-4 w-4" /> Back to feed
-        </Link>
-        {loading ? (
+      <div className="mx-auto max-w-2xl flex flex-col min-h-[100dvh]">
+        <div className="px-4 pt-6 shrink-0">
+          <button
+            onClick={() => window.history.length > 2 ? window.history.back() : window.location.href = '/'}
+            className="mb-4 inline-flex items-center gap-1 text-sm font-semibold text-navy hover:underline"
+          >
+            <ArrowLeft className="h-4 w-4" /> Back
+          </button>
+        </div>
+        <div className="flex-1 pb-0">
+          {loading ? (
           <div className="rounded-2xl border border-border bg-card p-6 text-center text-sm text-muted-foreground">
             Loading post…
           </div>
@@ -70,8 +76,9 @@ function PostDetail() {
             This post is no longer available.
           </div>
         ) : (
-          <PostCard post={post} userLoc={userLoc} />
+          <PostCard post={post} userLoc={userLoc} autoExpandComments={true} />
         )}
+        </div>
       </div>
     </>
   );

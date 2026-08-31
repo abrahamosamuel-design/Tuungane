@@ -1,6 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || (typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.hostname}:3000/api` : 'http://localhost:3000/api');
 
 /**
  * Core API client that automatically injects the Supabase JWT token.
@@ -30,6 +30,7 @@ const _apiClient = async function<T = any>(endpoint: string, options: RequestIni
   const url = `${API_BASE_URL}${endpoint}`;
   
   const response = await fetch(url, {
+    cache: 'no-cache',
     ...options,
     headers,
   });

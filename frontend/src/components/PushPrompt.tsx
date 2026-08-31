@@ -40,7 +40,7 @@ export function PushPrompt() {
   };
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 z-50 md:bottom-6 md:left-auto md:right-6 md:w-96 animate-in slide-in-from-bottom-5 fade-in duration-300">
+    <div className="fixed top-20 left-4 right-4 z-50 md:top-24 md:left-auto md:right-6 md:w-96 animate-in slide-in-from-top-5 fade-in duration-300">
       <div className="relative overflow-hidden rounded-2xl border border-orange/20 bg-card p-4 shadow-xl">
         <div className="absolute -right-6 -top-6 h-24 w-24 rounded-full bg-orange/10 blur-xl"></div>
         

@@ -30,6 +30,7 @@ export interface PostRow {
   featured: boolean;
   created_at: string;
   post_type?: PostTypeValue | null;
+  service_id?: string | null;
   title?: string | null;
   district?: string | null;
   town?: string | null;
@@ -49,15 +50,15 @@ export interface PostRow {
   };
 }
 
-interface Props { post: PostRow; onChanged?: () => void; userLoc?: UserLocation | null }
+interface Props { post: PostRow; onChanged?: () => void; userLoc?: UserLocation | null; autoExpandComments?: boolean }
 
-export function PostCard({ post, onChanged, userLoc }: Props) {
+export function PostCard({ post, onChanged, userLoc, autoExpandComments = false }: Props) {
   const { user, isModerator } = useAuth();
   const nav = useNavigate();
   const [likes, setLikes] = useState(0);
   const [liked, setLiked] = useState(false);
   const [commentCount, setCommentCount] = useState(0);
-  const [showComments, setShowComments] = useState(false);
+  const [showComments, setShowComments] = useState(autoExpandComments);
   const [comments, setComments] = useState<Array<{ id: string; user_id: string; text: string; created_at: string; profile?: { full_name: string; avatar_url: string | null } }>>([]);
   const [newComment, setNewComment] = useState("");
   const [reportOpen, setReportOpen] = useState(false);
@@ -68,7 +69,7 @@ export function PostCard({ post, onChanged, userLoc }: Props) {
   useEffect(() => {
     (async () => {
       try {
-        const { data: res } = await apiClient(`/social/posts/${post.id}/interactions`);
+        const res = await apiClient(`/social/posts/${post.id}/interactions`);
         if (res.data) {
           setLikes(res.data.likes);
           setLiked(res.data.liked);
@@ -80,9 +81,15 @@ export function PostCard({ post, onChanged, userLoc }: Props) {
     })();
   }, [post.id, user]);
 
+  useEffect(() => {
+    if (autoExpandComments) {
+      loadComments();
+    }
+  }, [autoExpandComments, post.id]);
+
   const loadComments = async () => {
     try {
-      const { data: res } = await apiClient(`/social/posts/${post.id}/comments`);
+      const res = await apiClient(`/social/posts/${post.id}/comments`);
       setComments(res.data || []);
       setCommentCount((res.data || []).length);
     } catch (err) {
@@ -98,7 +105,7 @@ export function PostCard({ post, onChanged, userLoc }: Props) {
   const toggleLike = async () => {
     if (!requireAuth() || !user) return;
     try {
-      const { data: res } = await apiClient.post(`/social/posts/${post.id}/likes`, {});
+      const res = await apiClient.post(`/social/posts/${post.id}/likes`, {});
       if (res.liked !== liked) {
         setLiked(res.liked);
         setLikes(l => res.liked ? l + 1 : Math.max(0, l - 1));
@@ -141,7 +148,7 @@ export function PostCard({ post, onChanged, userLoc }: Props) {
 
   const hidePost = async () => {
     try {
-      const { data: res } = await apiClient.put(`/social/posts/${post.id}/hide`, {});
+      const res = await apiClient.put(`/social/posts/${post.id}/hide`, {});
       toast.success(res.hidden ? "Post hidden" : "Post restored");
       onChanged?.();
     } catch (error: any) {
@@ -167,18 +174,22 @@ export function PostCard({ post, onChanged, userLoc }: Props) {
       <PostShell
         header={
           <div className="flex items-start justify-between gap-3">
-            <Link to="/u/$id" params={{ id: post.provider_user_id }} className="flex items-center gap-3">
-              <Avatar name={post.author?.full_name ?? "Provider"} url={post.author?.avatar_url ?? null} size={44} />
-              <div className="leading-tight">
-                <p className="font-semibold text-navy">{post.author?.full_name ?? "Service Provider"}</p>
-                {authorType && <p className="text-[11px] font-medium text-orange">{authorType}</p>}
-                <p className="text-xs text-muted-foreground">
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <Link to="/u/$id" params={{ id: post.provider_user_id }} className="shrink-0">
+                <Avatar name={post.author?.full_name ?? "Provider"} url={post.author?.avatar_url ?? null} size={44} />
+              </Link>
+              <div className="leading-tight flex-1 min-w-0">
+                <Link to="/u/$id" params={{ id: post.provider_user_id }} className="hover:underline block truncate">
+                  <p className="font-semibold text-navy truncate">{post.author?.full_name ?? "Service Provider"}</p>
+                </Link>
+                {authorType && <p className="text-[11px] font-medium text-orange truncate">{authorType}</p>}
+                <p className="text-xs text-muted-foreground truncate">
                   {post.location && <><MapPin className="mr-0.5 inline h-3 w-3" />{post.location} · </>}
-                  {timeAgo(post.created_at)}
+                  <Link to="/posts/$id" params={{ id: post.id }} className="hover:underline">{timeAgo(post.created_at)}</Link>
                 </p>
               </div>
-            </Link>
-            <div className="flex flex-col items-end gap-1.5 sm:gap-2">
+            </div>
+            <div className="flex flex-col items-end gap-1.5 sm:gap-2 shrink-0">
               <div className="flex flex-wrap items-center justify-end gap-1">
                 {userLoc && (
                   <NearYouBadge
@@ -196,13 +207,14 @@ export function PostCard({ post, onChanged, userLoc }: Props) {
                 {boosts.map((b) => <BoostBadge key={b.id} type={b.boost_type} />)}
                 {post.hidden && <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-xs font-medium text-destructive">Hidden</span>}
               </div>
-              {post.author?.is_provider && user?.id !== post.provider_user_id && (
+              {post.author?.is_provider && (
                 <Link
-                  to="/requests/new"
-                  search={{ providerId: post.provider_user_id } as never}
-                  className="rounded-full bg-orange px-3 py-1.5 text-xs font-semibold text-orange-foreground shadow-sm hover:brightness-110"
+                  to="/u/$id"
+                  search={{ serviceId: post.service_id } as never}
+                  params={{ id: post.provider_user_id }}
+                  className="rounded-full bg-navy px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:brightness-110"
                 >
-                  Request service
+                  View service
                 </Link>
               )}
             </div>
@@ -220,7 +232,7 @@ export function PostCard({ post, onChanged, userLoc }: Props) {
         message={post.text ? <PostText text={post.text} /> : null}
         media={post.media_urls?.length ? <PostMedia urls={post.media_urls} alt={post.author?.full_name ?? "Post"} /> : null}
         actions={
-          <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-col gap-3">
             {(likes > 0 || commentCount > 0) && (
               <div className="flex w-full items-center justify-between pb-1 text-xs text-muted-foreground">
                 <span>{likes > 0 && `${likes} like${likes === 1 ? "" : "s"}`}</span>
@@ -229,36 +241,21 @@ export function PostCard({ post, onChanged, userLoc }: Props) {
                 </button>
               </div>
             )}
-            <div className="flex flex-wrap items-center gap-1">
-              <ActionBtn onClick={toggleLike} active={liked} icon={<Heart className={`h-4 w-4 ${liked ? "fill-current" : ""}`} />} label="Like" />
-              <ActionBtn onClick={() => { setShowComments((v) => !v); if (!showComments) loadComments(); }} icon={<MessageCircle className="h-4 w-4" />} label="Comment" />
-              <ActionBtn onClick={() => { if (requireAuth()) setRecOpen(true); }} icon={<ThumbsUp className="h-4 w-4" />} label="Recommend" />
-              <ActionBtn onClick={share} icon={<Share2 className="h-4 w-4" />} label="Share" />
-            </div>
-            <div className="flex items-center gap-1">
-              {user?.id === post.provider_user_id && (() => {
-                const isCompleted = post.post_type === "completed_job" || post.post_type === "before_after";
-                return (
-                  <BoostButton
-                    boostType={isCompleted ? "promote_completed_work" : "feature_post"}
-                    entityType="post"
-                    entityId={post.id}
-                    label={isCompleted ? "Promote" : "Feature"}
-                    isActive={hasBoost("feature_post") || hasBoost("promote_completed_work")}
-                    dialogTitle={isCompleted ? "Promote this completed work" : "Feature this post"}
-                    dialogDescription="Highlight this post across Tuungane so more people see it."
-                    onActivated={refreshBoosts}
-                  />
-                );
-              })()}
-              <ActionBtn onClick={() => { if (requireAuth()) setReportOpen(true); }} icon={<Flag className="h-4 w-4" />} label="" small />
-              {user?.id === post.provider_user_id && <ActionBtn onClick={() => setEditOpen(true)} icon={<Pencil className="h-4 w-4" />} label="" small />}
-              {user?.id === post.provider_user_id && <ActionBtn onClick={deletePost} icon={<Trash2 className="h-4 w-4 text-destructive" />} label="" small />}
-              {isModerator && <ActionBtn onClick={hidePost} icon={<EyeOff className="h-4 w-4 text-amber-600" />} label="" small />}
+            
+            <div className="flex items-center justify-between border-t border-b border-border/40 py-1">
+              <div className="flex items-center gap-1">
+                <ActionBtn onClick={toggleLike} active={liked} icon={<Heart className={`h-4 w-4 ${liked ? "fill-current" : ""}`} />} label="Like" />
+                <ActionBtn onClick={() => { setShowComments((v) => !v); if (!showComments) loadComments(); }} icon={<MessageCircle className="h-4 w-4" />} label="Comment" />
+                <ActionBtn onClick={share} icon={<Share2 className="h-4 w-4" />} label="Share" />
+              </div>
+              <div className="flex items-center gap-1">
+                {user?.id === post.provider_user_id && <ActionBtn onClick={() => setEditOpen(true)} icon={<Pencil className="h-4 w-4" />} label="Edit" />}
+                {user?.id === post.provider_user_id && <ActionBtn onClick={deletePost} icon={<Trash2 className="h-4 w-4 text-destructive" />} label="Delete" />}
+              </div>
             </div>
 
             {showComments && (
-              <div className="mt-2 w-full space-y-3 border-t border-border pt-3">
+              <div className={`mt-4 w-full space-y-3 pt-3`}>
                 {comments.length === 0 && <p className="text-xs text-muted-foreground">No comments yet. Be the first to comment.</p>}
                 {comments.map((c) => (
                   <div key={c.id} className="flex items-start gap-2">
@@ -273,9 +270,11 @@ export function PostCard({ post, onChanged, userLoc }: Props) {
                   </div>
                 ))}
                 {user && (
-                  <div className="flex gap-2">
-                    <input value={newComment} onChange={(e) => setNewComment(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addComment()} placeholder="Write a comment..." className="flex-1 rounded-full border border-border bg-background px-4 py-2 text-sm outline-none focus:border-orange" />
-                    <button onClick={addComment} className="rounded-full bg-orange px-4 text-sm font-semibold text-orange-foreground">Post</button>
+                  <div className="sticky bottom-0 z-10 flex gap-2 bg-card pb-safe pt-3 -mx-4 px-4 sm:-mx-5 sm:px-5 border-t border-border/50 shadow-[0_-4px_10px_-5px_rgba(0,0,0,0.05)] mt-4">
+                    <div className="flex-1 flex gap-2">
+                      <input value={newComment} onChange={(e) => setNewComment(e.target.value)} onKeyDown={(e) => e.key === "Enter" && addComment()} placeholder="Write a comment..." className="flex-1 rounded-full border border-border bg-background px-4 py-2 text-sm outline-none focus:border-orange" />
+                      <button onClick={addComment} className="rounded-full bg-orange px-4 text-sm font-semibold text-orange-foreground shadow-sm hover:brightness-110">Post</button>
+                    </div>
                   </div>
                 )}
               </div>

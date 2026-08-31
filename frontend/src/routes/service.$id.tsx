@@ -145,7 +145,7 @@ function ServiceDetailPage() {
         {/* Provider Profile Info */}
         <div className="mt-8 rounded-2xl border border-border bg-card p-4">
           <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-            {service.profile?.isPersonal ? "Offered by (Individual)" : "Offered by (Business)"}
+            Offered by
           </h2>
           <div className="flex items-center gap-3">
             <div className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-orange/10 flex items-center justify-center text-orange font-bold">

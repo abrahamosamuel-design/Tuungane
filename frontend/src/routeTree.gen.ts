@@ -13,33 +13,22 @@ import { Route as TrustRouteImport } from './routes/trust'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as OpportunitiesRouteImport } from './routes/opportunities'
 import { Route as OfficialRouteImport } from './routes/official'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
-import { Route as FeedRouteImport } from './routes/feed'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as ConfirmEmailRouteImport } from './routes/confirm-email'
-import { Route as BusinessesRouteImport } from './routes/businesses'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ServicesIndexRouteImport } from './routes/services.index'
 import { Route as ProfilesIndexRouteImport } from './routes/profiles.index'
-import { Route as BusinessesIndexRouteImport } from './routes/businesses.index'
-import { Route as ServicesRequestsRouteImport } from './routes/services.requests'
 import { Route as ServicesSlugRouteImport } from './routes/services.$slug'
 import { Route as ServiceIdRouteImport } from './routes/service.$id'
-import { Route as RequestsBrowseRouteImport } from './routes/requests.browse'
-import { Route as ProvidersIdRouteImport } from './routes/providers.$id'
 import { Route as PostsIdRouteImport } from './routes/posts.$id'
 import { Route as PSlugRouteImport } from './routes/p.$slug'
-import { Route as OpportunitiesNewRouteImport } from './routes/opportunities.new'
-import { Route as OpportunitiesIdRouteImport } from './routes/opportunities.$id'
 import { Route as OfficialPostsIdRouteImport } from './routes/official-posts.$id'
 import { Route as GuidesPropertyMaintenanceKampalaRouteImport } from './routes/guides.property-maintenance-kampala'
-import { Route as BusinessesCreateRouteImport } from './routes/businesses.create'
-import { Route as BusinessesSlugRouteImport } from './routes/businesses.$slug'
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedRecoveryRouteImport } from './routes/_authenticated/recovery'
@@ -81,11 +70,6 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
-const OpportunitiesRoute = OpportunitiesRouteImport.update({
-  id: '/opportunities',
-  path: '/opportunities',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const OfficialRoute = OfficialRouteImport.update({
   id: '/official',
   path: '/official',
@@ -101,11 +85,6 @@ const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
   path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
-const FeedRoute = FeedRouteImport.update({
-  id: '/feed',
-  path: '/feed',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
@@ -114,11 +93,6 @@ const ContactRoute = ContactRouteImport.update({
 const ConfirmEmailRoute = ConfirmEmailRouteImport.update({
   id: '/confirm-email',
   path: '/confirm-email',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BusinessesRoute = BusinessesRouteImport.update({
-  id: '/businesses',
-  path: '/businesses',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -145,16 +119,6 @@ const ProfilesIndexRoute = ProfilesIndexRouteImport.update({
   path: '/profiles/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const BusinessesIndexRoute = BusinessesIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => BusinessesRoute,
-} as any)
-const ServicesRequestsRoute = ServicesRequestsRouteImport.update({
-  id: '/services/requests',
-  path: '/services/requests',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ServicesSlugRoute = ServicesSlugRouteImport.update({
   id: '/services/$slug',
   path: '/services/$slug',
@@ -163,16 +127,6 @@ const ServicesSlugRoute = ServicesSlugRouteImport.update({
 const ServiceIdRoute = ServiceIdRouteImport.update({
   id: '/service/$id',
   path: '/service/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RequestsBrowseRoute = RequestsBrowseRouteImport.update({
-  id: '/requests/browse',
-  path: '/requests/browse',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProvidersIdRoute = ProvidersIdRouteImport.update({
-  id: '/providers/$id',
-  path: '/providers/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PostsIdRoute = PostsIdRouteImport.update({
@@ -185,16 +139,6 @@ const PSlugRoute = PSlugRouteImport.update({
   path: '/p/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
-const OpportunitiesNewRoute = OpportunitiesNewRouteImport.update({
-  id: '/new',
-  path: '/new',
-  getParentRoute: () => OpportunitiesRoute,
-} as any)
-const OpportunitiesIdRoute = OpportunitiesIdRouteImport.update({
-  id: '/$id',
-  path: '/$id',
-  getParentRoute: () => OpportunitiesRoute,
-} as any)
 const OfficialPostsIdRoute = OfficialPostsIdRouteImport.update({
   id: '/official-posts/$id',
   path: '/official-posts/$id',
@@ -206,16 +150,6 @@ const GuidesPropertyMaintenanceKampalaRoute =
     path: '/guides/property-maintenance-kampala',
     getParentRoute: () => rootRouteImport,
   } as any)
-const BusinessesCreateRoute = BusinessesCreateRouteImport.update({
-  id: '/create',
-  path: '/create',
-  getParentRoute: () => BusinessesRoute,
-} as any)
-const BusinessesSlugRoute = BusinessesSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => BusinessesRoute,
-} as any)
 const AuthCallbackRoute = AuthCallbackRouteImport.update({
   id: '/auth/callback',
   path: '/auth/callback',
@@ -328,14 +262,11 @@ const AuthenticatedBusinessesNewRoute =
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
-  '/businesses': typeof BusinessesRouteWithChildren
   '/confirm-email': typeof ConfirmEmailRoute
   '/contact': typeof ContactRoute
-  '/feed': typeof FeedRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/official': typeof OfficialRoute
-  '/opportunities': typeof OpportunitiesRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
@@ -348,20 +279,12 @@ export interface FileRoutesByFullPath {
   '/recovery': typeof AuthenticatedRecoveryRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/auth/callback': typeof AuthCallbackRoute
-  '/businesses/$slug': typeof BusinessesSlugRoute
-  '/businesses/create': typeof BusinessesCreateRoute
   '/guides/property-maintenance-kampala': typeof GuidesPropertyMaintenanceKampalaRoute
   '/official-posts/$id': typeof OfficialPostsIdRoute
-  '/opportunities/$id': typeof OpportunitiesIdRoute
-  '/opportunities/new': typeof OpportunitiesNewRoute
   '/p/$slug': typeof PSlugRoute
   '/posts/$id': typeof PostsIdRoute
-  '/providers/$id': typeof ProvidersIdRoute
-  '/requests/browse': typeof RequestsBrowseRoute
   '/service/$id': typeof ServiceIdRoute
   '/services/$slug': typeof ServicesSlugRoute
-  '/services/requests': typeof ServicesRequestsRoute
-  '/businesses/': typeof BusinessesIndexRoute
   '/profiles/': typeof ProfilesIndexRoute
   '/services/': typeof ServicesIndexRoute
   '/businesses/new': typeof AuthenticatedBusinessesNewRoute
@@ -382,11 +305,9 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/confirm-email': typeof ConfirmEmailRoute
   '/contact': typeof ContactRoute
-  '/feed': typeof FeedRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/official': typeof OfficialRoute
-  '/opportunities': typeof OpportunitiesRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
@@ -399,20 +320,12 @@ export interface FileRoutesByTo {
   '/recovery': typeof AuthenticatedRecoveryRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/auth/callback': typeof AuthCallbackRoute
-  '/businesses/$slug': typeof BusinessesSlugRoute
-  '/businesses/create': typeof BusinessesCreateRoute
   '/guides/property-maintenance-kampala': typeof GuidesPropertyMaintenanceKampalaRoute
   '/official-posts/$id': typeof OfficialPostsIdRoute
-  '/opportunities/$id': typeof OpportunitiesIdRoute
-  '/opportunities/new': typeof OpportunitiesNewRoute
   '/p/$slug': typeof PSlugRoute
   '/posts/$id': typeof PostsIdRoute
-  '/providers/$id': typeof ProvidersIdRoute
-  '/requests/browse': typeof RequestsBrowseRoute
   '/service/$id': typeof ServiceIdRoute
   '/services/$slug': typeof ServicesSlugRoute
-  '/services/requests': typeof ServicesRequestsRoute
-  '/businesses': typeof BusinessesIndexRoute
   '/profiles': typeof ProfilesIndexRoute
   '/services': typeof ServicesIndexRoute
   '/businesses/new': typeof AuthenticatedBusinessesNewRoute
@@ -433,14 +346,11 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/about': typeof AboutRoute
-  '/businesses': typeof BusinessesRouteWithChildren
   '/confirm-email': typeof ConfirmEmailRoute
   '/contact': typeof ContactRoute
-  '/feed': typeof FeedRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/login': typeof LoginRoute
   '/official': typeof OfficialRoute
-  '/opportunities': typeof OpportunitiesRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
@@ -453,20 +363,12 @@ export interface FileRoutesById {
   '/_authenticated/recovery': typeof AuthenticatedRecoveryRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/auth/callback': typeof AuthCallbackRoute
-  '/businesses/$slug': typeof BusinessesSlugRoute
-  '/businesses/create': typeof BusinessesCreateRoute
   '/guides/property-maintenance-kampala': typeof GuidesPropertyMaintenanceKampalaRoute
   '/official-posts/$id': typeof OfficialPostsIdRoute
-  '/opportunities/$id': typeof OpportunitiesIdRoute
-  '/opportunities/new': typeof OpportunitiesNewRoute
   '/p/$slug': typeof PSlugRoute
   '/posts/$id': typeof PostsIdRoute
-  '/providers/$id': typeof ProvidersIdRoute
-  '/requests/browse': typeof RequestsBrowseRoute
   '/service/$id': typeof ServiceIdRoute
   '/services/$slug': typeof ServicesSlugRoute
-  '/services/requests': typeof ServicesRequestsRoute
-  '/businesses/': typeof BusinessesIndexRoute
   '/profiles/': typeof ProfilesIndexRoute
   '/services/': typeof ServicesIndexRoute
   '/_authenticated/businesses/new': typeof AuthenticatedBusinessesNewRoute
@@ -487,14 +389,11 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
-    | '/businesses'
     | '/confirm-email'
     | '/contact'
-    | '/feed'
     | '/forgot-password'
     | '/login'
     | '/official'
-    | '/opportunities'
     | '/reset-password'
     | '/sitemap.xml'
     | '/terms'
@@ -507,20 +406,12 @@ export interface FileRouteTypes {
     | '/recovery'
     | '/settings'
     | '/auth/callback'
-    | '/businesses/$slug'
-    | '/businesses/create'
     | '/guides/property-maintenance-kampala'
     | '/official-posts/$id'
-    | '/opportunities/$id'
-    | '/opportunities/new'
     | '/p/$slug'
     | '/posts/$id'
-    | '/providers/$id'
-    | '/requests/browse'
     | '/service/$id'
     | '/services/$slug'
-    | '/services/requests'
-    | '/businesses/'
     | '/profiles/'
     | '/services/'
     | '/businesses/new'
@@ -541,11 +432,9 @@ export interface FileRouteTypes {
     | '/about'
     | '/confirm-email'
     | '/contact'
-    | '/feed'
     | '/forgot-password'
     | '/login'
     | '/official'
-    | '/opportunities'
     | '/reset-password'
     | '/sitemap.xml'
     | '/terms'
@@ -558,20 +447,12 @@ export interface FileRouteTypes {
     | '/recovery'
     | '/settings'
     | '/auth/callback'
-    | '/businesses/$slug'
-    | '/businesses/create'
     | '/guides/property-maintenance-kampala'
     | '/official-posts/$id'
-    | '/opportunities/$id'
-    | '/opportunities/new'
     | '/p/$slug'
     | '/posts/$id'
-    | '/providers/$id'
-    | '/requests/browse'
     | '/service/$id'
     | '/services/$slug'
-    | '/services/requests'
-    | '/businesses'
     | '/profiles'
     | '/services'
     | '/businesses/new'
@@ -591,14 +472,11 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/about'
-    | '/businesses'
     | '/confirm-email'
     | '/contact'
-    | '/feed'
     | '/forgot-password'
     | '/login'
     | '/official'
-    | '/opportunities'
     | '/reset-password'
     | '/sitemap.xml'
     | '/terms'
@@ -611,20 +489,12 @@ export interface FileRouteTypes {
     | '/_authenticated/recovery'
     | '/_authenticated/settings'
     | '/auth/callback'
-    | '/businesses/$slug'
-    | '/businesses/create'
     | '/guides/property-maintenance-kampala'
     | '/official-posts/$id'
-    | '/opportunities/$id'
-    | '/opportunities/new'
     | '/p/$slug'
     | '/posts/$id'
-    | '/providers/$id'
-    | '/requests/browse'
     | '/service/$id'
     | '/services/$slug'
-    | '/services/requests'
-    | '/businesses/'
     | '/profiles/'
     | '/services/'
     | '/_authenticated/businesses/new'
@@ -645,14 +515,11 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AboutRoute: typeof AboutRoute
-  BusinessesRoute: typeof BusinessesRouteWithChildren
   ConfirmEmailRoute: typeof ConfirmEmailRoute
   ContactRoute: typeof ContactRoute
-  FeedRoute: typeof FeedRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   LoginRoute: typeof LoginRoute
   OfficialRoute: typeof OfficialRoute
-  OpportunitiesRoute: typeof OpportunitiesRouteWithChildren
   ResetPasswordRoute: typeof ResetPasswordRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
@@ -662,11 +529,8 @@ export interface RootRouteChildren {
   OfficialPostsIdRoute: typeof OfficialPostsIdRoute
   PSlugRoute: typeof PSlugRoute
   PostsIdRoute: typeof PostsIdRoute
-  ProvidersIdRoute: typeof ProvidersIdRoute
-  RequestsBrowseRoute: typeof RequestsBrowseRoute
   ServiceIdRoute: typeof ServiceIdRoute
   ServicesSlugRoute: typeof ServicesSlugRoute
-  ServicesRequestsRoute: typeof ServicesRequestsRoute
   ProfilesIndexRoute: typeof ProfilesIndexRoute
   ServicesIndexRoute: typeof ServicesIndexRoute
   UIdIndexRoute: typeof UIdIndexRoute
@@ -702,13 +566,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/opportunities': {
-      id: '/opportunities'
-      path: '/opportunities'
-      fullPath: '/opportunities'
-      preLoaderRoute: typeof OpportunitiesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/official': {
       id: '/official'
       path: '/official'
@@ -730,13 +587,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/feed': {
-      id: '/feed'
-      path: '/feed'
-      fullPath: '/feed'
-      preLoaderRoute: typeof FeedRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/contact': {
       id: '/contact'
       path: '/contact'
@@ -749,13 +599,6 @@ declare module '@tanstack/react-router' {
       path: '/confirm-email'
       fullPath: '/confirm-email'
       preLoaderRoute: typeof ConfirmEmailRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/businesses': {
-      id: '/businesses'
-      path: '/businesses'
-      fullPath: '/businesses'
-      preLoaderRoute: typeof BusinessesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -793,20 +636,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfilesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/businesses/': {
-      id: '/businesses/'
-      path: '/'
-      fullPath: '/businesses/'
-      preLoaderRoute: typeof BusinessesIndexRouteImport
-      parentRoute: typeof BusinessesRoute
-    }
-    '/services/requests': {
-      id: '/services/requests'
-      path: '/services/requests'
-      fullPath: '/services/requests'
-      preLoaderRoute: typeof ServicesRequestsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/services/$slug': {
       id: '/services/$slug'
       path: '/services/$slug'
@@ -819,20 +648,6 @@ declare module '@tanstack/react-router' {
       path: '/service/$id'
       fullPath: '/service/$id'
       preLoaderRoute: typeof ServiceIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/requests/browse': {
-      id: '/requests/browse'
-      path: '/requests/browse'
-      fullPath: '/requests/browse'
-      preLoaderRoute: typeof RequestsBrowseRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/providers/$id': {
-      id: '/providers/$id'
-      path: '/providers/$id'
-      fullPath: '/providers/$id'
-      preLoaderRoute: typeof ProvidersIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/posts/$id': {
@@ -849,20 +664,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/opportunities/new': {
-      id: '/opportunities/new'
-      path: '/new'
-      fullPath: '/opportunities/new'
-      preLoaderRoute: typeof OpportunitiesNewRouteImport
-      parentRoute: typeof OpportunitiesRoute
-    }
-    '/opportunities/$id': {
-      id: '/opportunities/$id'
-      path: '/$id'
-      fullPath: '/opportunities/$id'
-      preLoaderRoute: typeof OpportunitiesIdRouteImport
-      parentRoute: typeof OpportunitiesRoute
-    }
     '/official-posts/$id': {
       id: '/official-posts/$id'
       path: '/official-posts/$id'
@@ -876,20 +677,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/guides/property-maintenance-kampala'
       preLoaderRoute: typeof GuidesPropertyMaintenanceKampalaRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/businesses/create': {
-      id: '/businesses/create'
-      path: '/create'
-      fullPath: '/businesses/create'
-      preLoaderRoute: typeof BusinessesCreateRouteImport
-      parentRoute: typeof BusinessesRoute
-    }
-    '/businesses/$slug': {
-      id: '/businesses/$slug'
-      path: '/$slug'
-      fullPath: '/businesses/$slug'
-      preLoaderRoute: typeof BusinessesSlugRouteImport
-      parentRoute: typeof BusinessesRoute
     }
     '/auth/callback': {
       id: '/auth/callback'
@@ -1080,48 +867,15 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
-interface BusinessesRouteChildren {
-  BusinessesSlugRoute: typeof BusinessesSlugRoute
-  BusinessesCreateRoute: typeof BusinessesCreateRoute
-  BusinessesIndexRoute: typeof BusinessesIndexRoute
-}
-
-const BusinessesRouteChildren: BusinessesRouteChildren = {
-  BusinessesSlugRoute: BusinessesSlugRoute,
-  BusinessesCreateRoute: BusinessesCreateRoute,
-  BusinessesIndexRoute: BusinessesIndexRoute,
-}
-
-const BusinessesRouteWithChildren = BusinessesRoute._addFileChildren(
-  BusinessesRouteChildren,
-)
-
-interface OpportunitiesRouteChildren {
-  OpportunitiesIdRoute: typeof OpportunitiesIdRoute
-  OpportunitiesNewRoute: typeof OpportunitiesNewRoute
-}
-
-const OpportunitiesRouteChildren: OpportunitiesRouteChildren = {
-  OpportunitiesIdRoute: OpportunitiesIdRoute,
-  OpportunitiesNewRoute: OpportunitiesNewRoute,
-}
-
-const OpportunitiesRouteWithChildren = OpportunitiesRoute._addFileChildren(
-  OpportunitiesRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AboutRoute: AboutRoute,
-  BusinessesRoute: BusinessesRouteWithChildren,
   ConfirmEmailRoute: ConfirmEmailRoute,
   ContactRoute: ContactRoute,
-  FeedRoute: FeedRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   LoginRoute: LoginRoute,
   OfficialRoute: OfficialRoute,
-  OpportunitiesRoute: OpportunitiesRouteWithChildren,
   ResetPasswordRoute: ResetPasswordRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
@@ -1131,11 +885,8 @@ const rootRouteChildren: RootRouteChildren = {
   OfficialPostsIdRoute: OfficialPostsIdRoute,
   PSlugRoute: PSlugRoute,
   PostsIdRoute: PostsIdRoute,
-  ProvidersIdRoute: ProvidersIdRoute,
-  RequestsBrowseRoute: RequestsBrowseRoute,
   ServiceIdRoute: ServiceIdRoute,
   ServicesSlugRoute: ServicesSlugRoute,
-  ServicesRequestsRoute: ServicesRequestsRoute,
   ProfilesIndexRoute: ProfilesIndexRoute,
   ServicesIndexRoute: ServicesIndexRoute,
   UIdIndexRoute: UIdIndexRoute,

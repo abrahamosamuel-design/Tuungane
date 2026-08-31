@@ -53,10 +53,12 @@ type BookedJob = {
   customer_confirmed_completion?: boolean;
   is_direct_booking?: boolean;
 };
+import { useMyCounts } from "@/components/Header";
 
 function MessagesIndex() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const counts = useMyCounts();
   const [tab, setTab] = useState<Tab>("messages");
 
   // Messages state
@@ -213,7 +215,7 @@ function MessagesIndex() {
           <button
             id="tab-booked"
             onClick={() => setTab("booked")}
-            className={`flex items-center gap-1.5 rounded-full px-5 py-2 text-sm font-semibold transition-all ${
+            className={`relative flex items-center gap-1.5 rounded-full px-5 py-2 text-sm font-semibold transition-all ${
               tab === "booked"
                 ? "bg-white text-navy shadow-sm"
                 : "text-muted-foreground hover:text-navy"
@@ -221,6 +223,9 @@ function MessagesIndex() {
           >
             <Briefcase className="h-4 w-4" />
             Booked Jobs
+            {counts.activeRequests > 0 && (
+              <span className="absolute right-2 top-2 block h-2 w-2 rounded-full bg-red-500"></span>
+            )}
           </button>
         </div>
         </div>
@@ -296,7 +301,10 @@ function MessagesIndex() {
                 </div>
               )}
               {jobs.map((job) => {
-                const isCustomer = job.customer_id === user.id;
+                // When testing with the same account, default to provider view so actions are available
+                const isProvider = job.provider_id === user.id;
+                const isCustomer = job.customer_id === user.id && !isProvider;
+                
                 const otherParty = isCustomer ? job.provider : job.customer;
                 const roleLabel = isCustomer ? "Provider" : "Customer";
 
@@ -371,7 +379,7 @@ function MessagesIndex() {
                       
                       {/* Message/Contact Button */}
                       {((!isCustomer && ["requested", "accepted", "in_progress"].includes(job.status)) ||
-                        (isCustomer && ["accepted", "in_progress"].includes(job.status) && job.provider_id)) && (
+                        (isCustomer && ["requested", "accepted", "in_progress"].includes(job.status) && job.provider_id)) && (
                         <button
                           onClick={async () => {
                             try {

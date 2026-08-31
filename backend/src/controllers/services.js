@@ -39,6 +39,13 @@ export const getServiceById = async (req, res) => {
         
       if (fallbackErr) throw fallbackErr;
       
+      // Fetch personal profile for the fallback user
+      const { data: personalProf } = await supabaseAdmin
+        .from('profiles')
+        .select('id, full_name, avatar_url')
+        .eq('id', fallback.user_id)
+        .maybeSingle();
+
       service = {
         id: fallback.service_id,
         title: fallback.business_name,
@@ -53,7 +60,14 @@ export const getServiceById = async (req, res) => {
         price_max_ugx: fallback.price_max_ugx,
         price_currency: fallback.price_currency,
         price_note: fallback.price_note,
-        profile: {
+        profile: personalProf ? {
+          id: personalProf.id,
+          name: personalProf.full_name,
+          avatar_url: personalProf.avatar_url,
+          isPersonal: true,
+          town: fallback.town,
+          district: fallback.district,
+        } : {
           id: fallback.user_id,
           owner_id: fallback.user_id,
           name: fallback.business_name,

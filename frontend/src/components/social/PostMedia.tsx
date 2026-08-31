@@ -42,7 +42,7 @@ export function PostMedia({ urls, alt }: { urls: string[]; alt: string }) {
       {urls.length === 1 ? (
         <button
           type="button"
-          onClick={() => open(0)}
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); open(0); }}
           className="relative block w-full overflow-hidden bg-muted/40 sm:rounded-xl"
           aria-label={isVideo(urls[0]) ? "Play video" : "Open image"}
         >
@@ -54,7 +54,7 @@ export function PostMedia({ urls, alt }: { urls: string[]; alt: string }) {
             <button
               key={i}
               type="button"
-              onClick={() => open(i)}
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); open(i); }}
               className="relative block aspect-square overflow-hidden bg-muted/40"
               aria-label={`Open item ${i + 1}`}
             >

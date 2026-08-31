@@ -26,7 +26,7 @@ import {
 } from "lucide-react";
 
 const MAX_BYTES = 50 * 1024 * 1024; // 50MB
-const MAX_VIDEO_SECONDS = 120;
+const MAX_VIDEO_SECONDS = 30;
 const STORAGE_BUCKET = "tuungane-media";
 
 // Turn a stored public URL back into the object path inside the bucket so we can
@@ -145,7 +145,12 @@ export function ServiceMediaManager({ ownerId, profileId }: { ownerId: string; p
             }
           }
         }
-        const url = await uploadMedia(ownerId, file, "service-media");
+        
+        const toastId = toast.loading(`Uploading ${file.name}...`);
+        const url = await uploadMedia(ownerId, file, "service-media", (msg) => {
+          toast.loading(`${file.name}: ${msg}`, { id: toastId });
+        });
+        
         await apiClient.post("/services/media", {
           service_user_id: ownerId,
           public_profile_id: profileId,
@@ -157,9 +162,10 @@ export function ServiceMediaManager({ ownerId, profileId }: { ownerId: string; p
           is_cover: items.length === 0 && inserted === 0,
         });
         inserted++;
+        toast.success(`Uploaded ${file.name}`, { id: toastId });
       } catch (e) {
-        const message = e instanceof Error ? e.message : "Upload failed";
-        toast.error(message);
+        console.error("Upload fail:", e);
+        toast.error(`Failed to upload ${file.name}`, { id: "upload-error" });
       }
     }
     if (fileRef.current) fileRef.current.value = "";
@@ -247,10 +253,18 @@ export function ServiceMediaManager({ ownerId, profileId }: { ownerId: string; p
     if (replaceRef.current) replaceRef.current.value = "";
     setReplaceTarget(null);
     if (!file || !target) return;
+    const toastId = toast.loading(`Uploading replacement...`);
+    
     const isVideo = file.type.startsWith("video/");
     const isImage = file.type.startsWith("image/");
-    if (!isVideo && !isImage) return toast.error("Please pick a photo or video");
-    if (file.size > MAX_BYTES) return toast.error("File is over 50 MB");
+    if (!isVideo && !isImage) {
+      toast.error("Please pick a photo or video", { id: toastId });
+      return;
+    }
+    if (file.size > MAX_BYTES) {
+      toast.error("File is over 50 MB", { id: toastId });
+      return;
+    }
     setBusy(true);
     try {
       let duration: number | null = null;
@@ -258,7 +272,7 @@ export function ServiceMediaManager({ ownerId, profileId }: { ownerId: string; p
       if (isVideo) {
         const meta = await probeVideo(file);
         if (meta.duration > MAX_VIDEO_SECONDS) {
-          toast.error(`Video is longer than ${MAX_VIDEO_SECONDS}s — please trim it`);
+          toast.error(`Video is longer than ${MAX_VIDEO_SECONDS}s`, { id: toastId });
           setBusy(false);
           return;
         }
@@ -270,7 +284,7 @@ export function ServiceMediaManager({ ownerId, profileId }: { ownerId: string; p
             { type: "image/jpeg" },
           );
           try {
-            thumbUrl = await uploadMedia(ownerId, thumbFile, "service-media/thumbs");
+            thumbUrl = await uploadMedia(ownerId, thumbFile, "service-media/thumbs", (msg) => toast.loading(msg, { id: toastId }));
           } catch {
             /* non-fatal */
           }
@@ -278,7 +292,11 @@ export function ServiceMediaManager({ ownerId, profileId }: { ownerId: string; p
       } else {
         thumbUrl = null;
       }
-      const url = await uploadMedia(ownerId, file, "service-media");
+      
+      const url = await uploadMedia(ownerId, file, "service-media", (msg) => {
+        toast.loading(msg, { id: toastId });
+      });
+      
       await apiClient.patch(`/services/media/${target.id}`, {
         kind: isVideo ? "video" : "photo",
         url,
@@ -296,10 +314,10 @@ export function ServiceMediaManager({ ownerId, profileId }: { ownerId: string; p
           await apiClient.put('/profiles/me/full', { service_profile: { cover_url: coverUrl } });
         }
       }
-      toast.success("Media updated");
+      toast.success("Media replaced successfully", { id: toastId });
       load();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Replace failed");
+      toast.error("Failed to replace media");
     } finally {
       setBusy(false);
     }
