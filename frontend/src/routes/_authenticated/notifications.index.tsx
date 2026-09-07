@@ -5,8 +5,9 @@ import { apiClient } from "@/lib/api";
 import { useAuth } from "@/hooks/use-auth";
 import { Avatar } from "@/components/social/Avatar";
 import { timeAgo } from "@/lib/format";
-import { Heart, MessageCircle, ThumbsUp, Star, UserPlus, ClipboardList, CheckCircle2, PlayCircle, Send, ShieldCheck, AlertTriangle, XCircle, Settings, ArrowLeft } from "lucide-react";
+import { Heart, MessageCircle, ThumbsUp, Star, UserPlus, ClipboardList, CheckCircle2, PlayCircle, Send, ShieldCheck, AlertTriangle, XCircle, Settings, ArrowLeft, BellRing } from "lucide-react";
 import { isTypeEnabled, loadNotifPrefs, type NotifPrefs, DEFAULT_PREFS } from "@/lib/notification-prefs";
+import { isPushSupported, enablePush, hasUserOptedOutOfPush, getPushPermission } from "@/lib/push";
 
 export const Route = createFileRoute("/_authenticated/notifications/")({
   head: () => ({ meta: [{ title: "Notifications — Tuungane" }] }),
@@ -54,6 +55,19 @@ function NotificationsPage() {
   const [busy, setBusy] = useState(true);
   const [filter, setFilter] = useState<"all" | "jobs" | "social">("all");
   const [prefs, setPrefs] = useState<NotifPrefs>(DEFAULT_PREFS);
+  
+  const [showPushOptIn, setShowPushOptIn] = useState(false);
+  const [pushBusy, setPushBusy] = useState(false);
+
+  useEffect(() => {
+    if (isPushSupported()) {
+      const perm = getPushPermission();
+      // Show if they previously opted out (meaning they clicked "Not now")
+      if (perm === "default" && hasUserOptedOutOfPush()) {
+        setShowPushOptIn(true);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     setPrefs(loadNotifPrefs());
@@ -112,6 +126,34 @@ function NotificationsPage() {
             <button key={o.v} onClick={() => setFilter(o.v)} className={`rounded-full px-3 py-1 text-xs font-semibold ${filter === o.v ? "bg-orange text-orange-foreground" : "text-muted-foreground"}`}>{o.label}</button>
           ))}
         </div>
+
+        {showPushOptIn && (
+          <div className="mt-5 flex items-center justify-between gap-3 rounded-2xl border border-orange/20 bg-orange/5 p-4 shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-orange/10 text-orange">
+                <BellRing className="h-5 w-5" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-navy">Enable push notifications</p>
+                <p className="text-xs text-muted-foreground mt-0.5 max-w-[250px]">Stay updated on jobs and messages without opening the app.</p>
+              </div>
+            </div>
+            <button 
+              onClick={async () => {
+                setPushBusy(true);
+                const result = await enablePush();
+                setPushBusy(false);
+                if (result.ok || result.reason === "denied") {
+                  setShowPushOptIn(false);
+                }
+              }}
+              disabled={pushBusy}
+              className="shrink-0 rounded-full bg-orange px-4 py-2 text-xs font-bold text-white shadow-sm hover:bg-orange/90 disabled:opacity-50 transition"
+            >
+              {pushBusy ? "Enabling..." : "Enable"}
+            </button>
+          </div>
+        )}
 
         <div className="mt-5 space-y-2">
           {busy && <p className="text-sm text-muted-foreground">Loading…</p>}
