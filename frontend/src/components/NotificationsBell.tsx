@@ -2,8 +2,9 @@ import { Bell } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { apiClient } from "@/lib/api";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
+import { supabase } from "@/integrations/supabase/client";
 import { isTypeEnabled, loadNotifPrefs, type NotifPrefs, DEFAULT_PREFS } from "@/lib/notification-prefs";
 
 export function NotificationsBell() {
@@ -17,6 +18,8 @@ export function NotificationsBell() {
     return () => window.removeEventListener("tuungane:notif-prefs-changed", onChange);
   }, []);
 
+  const queryClient = useQueryClient();
+
   const { data: count = 0 } = useQuery({
     queryKey: ["notifications", "bell", user?.id, prefs],
     queryFn: async () => {
@@ -29,8 +32,27 @@ export function NotificationsBell() {
       }
     },
     enabled: !!user,
-    refetchInterval: 30000,
   });
+
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase.channel("public:notifications:bell")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` },
+        () => queryClient.invalidateQueries({ queryKey: ["notifications", "bell", user.id] })
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` },
+        () => queryClient.invalidateQueries({ queryKey: ["notifications", "bell", user.id] })
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, queryClient]);
 
   if (!user) return null;
   return (
