@@ -109,7 +109,8 @@ function NotificationDetailPage() {
     if (notif.target_type === "service_request" && notif.target_id) return `/requests/${notif.target_id}`;
     if (notif.target_type === "service_feedback" && user) return `/u/${user.id}`;
     if (notif.target_type === "profile" && notif.target_id) return `/u/${notif.target_id}`;
-    if (notif.target_type === "post" && user) return `/u/${user.id}`;
+    if (notif.target_type === "post" && notif.target_id) return `/posts/${notif.target_id}`;
+    if (notif.target_type === "conversation" && notif.target_id) return `/messages/${notif.target_id}`;
     return "/feed";
   };
 
@@ -119,6 +120,7 @@ function NotificationDetailPage() {
     if (notif.target_type === "service_feedback") return "View feedback";
     if (notif.target_type === "profile") return "View profile";
     if (notif.target_type === "post") return "View post";
+    if (notif.target_type === "conversation") return "View message";
     return "Go to feed";
   };
 
