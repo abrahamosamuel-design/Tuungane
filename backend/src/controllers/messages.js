@@ -312,21 +312,9 @@ export const startHireContact = async (req, res) => {
       await supabaseUser.from("conversations").update(updatePayload).eq("id", conversationId);
     }
 
-    // 3. Insert notification
-    await supabaseUser.from("notifications").insert({
-      user_id: _provider_id,
-      actor_id: userId,
-      type: "hire_interest",
-      title: "Someone is interested in hiring you",
-      body: "Check your messages to respond.",
-      link: `/messages/${conversationId}`
-    });
-
     res.json({ data: conversationId });
   } catch (err) {
     console.error('Error in startHireContact:', err);
     res.status(500).json({ error: 'Failed to start hire contact' });
   }
 };
-
-
