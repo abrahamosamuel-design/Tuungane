@@ -346,6 +346,20 @@ function TimelinePostCard({ data }: { data: any }) {
   const label = POST_TYPE_LABELS[data.postType] || "Update";
   const hasImages = data.mediaUrls && data.mediaUrls.length > 0;
 
+  let parsedJob: any = null;
+  let customLabel = label;
+  let isJobPost = false;
+  if (data.text && typeof data.text === 'string' && data.text.trim().startsWith('{') && data.text.trim().endsWith('}')) {
+    try {
+      const p = JSON.parse(data.text);
+      if (p.type === 'job_opportunity' || p.type === 'job_request') {
+        parsedJob = p;
+        isJobPost = true;
+        customLabel = p.type === 'job_opportunity' ? 'Hiring' : 'Need a job';
+      }
+    } catch { /* ignore */ }
+  }
+
   const [likes, setLikes] = useState(0);
   const [liked, setLiked] = useState(false);
   const [commentCount, setCommentCount] = useState(0);
@@ -430,8 +444,8 @@ function TimelinePostCard({ data }: { data: any }) {
               {data.location ? ` • ${data.location}` : ""}
             </p>
           </div>
-          <span className="rounded-md bg-navy/5 px-2 py-0.5 text-[10px] font-semibold text-navy/60 shrink-0">
-            {label}
+          <span className={`rounded-md px-2 py-0.5 text-[10px] font-semibold shrink-0 ${isJobPost ? 'bg-green text-white' : 'bg-navy/5 text-navy/60'}`}>
+            {customLabel}
           </span>
         </div>
 
@@ -439,26 +453,18 @@ function TimelinePostCard({ data }: { data: any }) {
         {(() => {
           if (!data.text) return null;
           
-          try {
-            // Check if it's JSON
-            if (data.text.trim().startsWith('{') && data.text.trim().endsWith('}')) {
-              const parsed = JSON.parse(data.text);
-              if (parsed.type === 'job_opportunity' || parsed.type === 'job_request') {
-                return (
-                  <div className="mb-3 rounded-xl border border-border bg-muted/20 p-3">
-                    <h4 className="font-semibold text-navy text-sm mb-1">{parsed.job_title}</h4>
-                    <div className="flex flex-col gap-1 text-[11px] text-muted-foreground">
-                      {parsed.company_name && <p><span className="font-medium text-navy/70">Company:</span> {parsed.company_name}</p>}
-                      {parsed.location && <p><span className="font-medium text-navy/70">Location:</span> {parsed.location}</p>}
-                      {parsed.salary && <p><span className="font-medium text-navy/70">Salary:</span> {parsed.salary}</p>}
-                      {parsed.qualification && <p><span className="font-medium text-navy/70">Qualification:</span> {parsed.qualification}</p>}
-                    </div>
-                  </div>
-                );
-              }
-            }
-          } catch {
-            // Not valid JSON or parsing failed, fallback to plain text
+          if (isJobPost && parsedJob) {
+            return (
+              <div className="mb-3 rounded-xl border border-border bg-muted/20 p-3">
+                <h4 className="font-semibold text-navy text-sm mb-1">{parsedJob.job_title}</h4>
+                <div className="flex flex-col gap-1 text-[11px] text-muted-foreground">
+                  {parsedJob.company_name && <p><span className="font-medium text-navy/70">Company:</span> {parsedJob.company_name}</p>}
+                  {parsedJob.location && <p><span className="font-medium text-navy/70">Location:</span> {parsedJob.location}</p>}
+                  {parsedJob.salary && <p><span className="font-medium text-navy/70">Salary:</span> {parsedJob.salary}</p>}
+                  {parsedJob.qualification && <p><span className="font-medium text-navy/70">Qualification:</span> {parsedJob.qualification}</p>}
+                </div>
+              </div>
+            );
           }
 
           return (
@@ -487,29 +493,41 @@ function TimelinePostCard({ data }: { data: any }) {
       </div>
 
       {/* Action bar */}
-      <div className="flex items-stretch border-t border-border">
-        <button
-          onClick={toggleLike}
-          className={`flex flex-1 items-center justify-center gap-1.5 py-2.5 text-xs font-semibold transition-colors ${
-            liked ? "bg-navy/5 text-navy" : "text-navy/60 hover:bg-muted/50"
-          }`}
-        >
-          <Heart className={`h-3.5 w-3.5 ${liked ? "fill-current" : ""}`} /> Like
-        </button>
-        <button
-          onClick={toggleComments}
-          className="flex flex-1 items-center justify-center gap-1.5 border-l border-border py-2.5 text-xs font-semibold text-navy/60 hover:bg-muted/50 transition-colors"
-        >
-          <MessageCircle className="h-3.5 w-3.5" /> Comment
-        </button>
-        <Link
-          to="/posts/$id"
-          params={{ id: data.id }}
-          className="flex flex-1 items-center justify-center gap-1.5 border-l border-border py-2.5 text-xs font-semibold text-navy/60 hover:bg-muted/50 transition-colors"
-        >
-          <ChevronRight className="h-4 w-4" /> View
-        </Link>
-      </div>
+      {isJobPost ? (
+        <div className="p-3 border-t border-border">
+          <Link
+            to="/posts/$id"
+            params={{ id: data.id }}
+            className="flex w-full items-center justify-center rounded-xl bg-orange py-2.5 text-sm font-bold text-white transition-opacity hover:opacity-90 active:opacity-100"
+          >
+            {parsedJob.type === 'job_opportunity' ? 'Apply for this job' : 'Hire this professional'}
+          </Link>
+        </div>
+      ) : (
+        <div className="flex items-stretch border-t border-border">
+          <button
+            onClick={toggleLike}
+            className={`flex flex-1 items-center justify-center gap-1.5 py-2.5 text-xs font-semibold transition-colors ${
+              liked ? "bg-navy/5 text-navy" : "text-navy/60 hover:bg-muted/50"
+            }`}
+          >
+            <Heart className={`h-3.5 w-3.5 ${liked ? "fill-current" : ""}`} /> Like
+          </button>
+          <button
+            onClick={toggleComments}
+            className="flex flex-1 items-center justify-center gap-1.5 border-l border-border py-2.5 text-xs font-semibold text-navy/60 hover:bg-muted/50 transition-colors"
+          >
+            <MessageCircle className="h-3.5 w-3.5" /> Comment
+          </button>
+          <Link
+            to="/posts/$id"
+            params={{ id: data.id }}
+            className="flex flex-1 items-center justify-center gap-1.5 border-l border-border py-2.5 text-xs font-semibold text-navy/60 hover:bg-muted/50 transition-colors"
+          >
+            <ChevronRight className="h-4 w-4" /> View
+          </Link>
+        </div>
+      )}
 
       {/* Comments section */}
       {showComments && (
