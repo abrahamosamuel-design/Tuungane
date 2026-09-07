@@ -802,7 +802,15 @@ export const getProviderAuxData = async (req, res) => {
 
     services = userId === id ? (svcRows || []) : (svcRows || []).filter((r) => r.active);
 
-    const { data: ps } = await supabaseAdmin.from("timeline_posts").select("*").eq("provider_user_id", id).eq("hidden", false).order("created_at", { ascending: false });
+    const { data: psRaw } = await supabaseAdmin.from("timeline_posts").select("*").eq("provider_user_id", id).eq("hidden", false).order("created_at", { ascending: false });
+    const { data: userProfile } = await supabaseAdmin.from("profiles").select("id,full_name,avatar_url").eq("id", id).maybeSingle();
+    
+    const serviceTitleMap = new Map((svcRows || []).map(s => [s.id, s.title]));
+    const ps = (psRaw || []).map(p => ({
+      ...p,
+      author: userProfile ? { ...userProfile, is_provider: true } : null,
+      service_title: p.service_id ? (serviceTitleMap.get(p.service_id) || null) : null
+    }));
 
     const [fcRes, rRes, vRes] = await Promise.all([
       supabaseAdmin.rpc("get_provider_follower_count", { _provider: id }),

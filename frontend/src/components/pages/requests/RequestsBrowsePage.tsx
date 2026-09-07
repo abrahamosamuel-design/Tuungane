@@ -18,7 +18,7 @@ import { RadiusFilter } from "@/components/RadiusFilter";
 import { EditRequestDialog } from "@/components/EditRequestDialog";
 import { MobileSearchBar } from "@/components/MobileSearchBar";
 
-export function RequestsBrowsePage() {
+export function RequestsBrowsePage({ hideHeader = false, hideFilters = false, externalQuery }: { hideHeader?: boolean, hideFilters?: boolean, externalQuery?: string } = {}) {
   const { user } = useAuth();
   const { location: userLoc } = useUserLocation();
   const { categories } = useCategories();
@@ -58,7 +58,7 @@ export function RequestsBrowsePage() {
       if (urgentOnly) searchParams.set("urgentOnly", "true");
       if (budgetShown) searchParams.set("budgetShown", "true");
       if (loc) searchParams.set("loc", loc);
-      if (q) searchParams.set("q", q);
+      if (q || externalQuery) searchParams.set("q", externalQuery || q);
       if (myDistrict) searchParams.set("myDistrict", myDistrict);
       if (nearMe) searchParams.set("nearMe", "true");
 
@@ -75,7 +75,7 @@ export function RequestsBrowsePage() {
   useEffect(() => {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cat, chip, urgentOnly, budgetShown, nearMe, myDistrict, user?.id]);
+  }, [cat, chip, urgentOnly, budgetShown, nearMe, myDistrict, user?.id, externalQuery]);
 
   const category = useMemo(() => categories.find((c) => c.slug === cat), [cat]);
   const rankedItems = useMemo(() => {
@@ -88,76 +88,82 @@ export function RequestsBrowsePage() {
   return (
     <div className="flex flex-col min-h-screen bg-background flex-1 w-full min-w-0">
       {/* MOBILE HEADER - matches rest of app */}
-      <div className="md:hidden bg-white">
-        <div className="flex items-center gap-2 px-4 pt-3 pb-1">
-          <button onClick={() => window.history.back()} className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-muted transition-colors">
-            <ArrowLeft className="h-5 w-5 text-navy" />
-          </button>
-          <h2 className="font-display text-lg font-bold text-navy">Service Requests</h2>
+      {!hideHeader && (
+        <div className="md:hidden bg-white">
+          <div className="flex items-center gap-2 px-4 pt-3 pb-1">
+            <button onClick={() => window.history.back()} className="flex h-10 w-10 items-center justify-center rounded-full hover:bg-muted transition-colors">
+              <ArrowLeft className="h-5 w-5 text-navy" />
+            </button>
+            <h2 className="font-display text-lg font-bold text-navy">Service Requests</h2>
+          </div>
+          <MobileSearchBar placeholder="Search requests" value={q} onChange={(e: any) => setQ(e.target.value)} />
         </div>
-        <MobileSearchBar placeholder="Search requests" value={q} onChange={(e: any) => setQ(e.target.value)} />
-      </div>
+      )}
 
       {/* DESKTOP HEADER */}
-      <section className="hidden md:block bg-surface/95 backdrop-blur-md pt-4 pb-3 shadow-sm">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <h1 className="font-display text-2xl font-bold tracking-tight text-navy sm:text-4xl">
-            Service Requests
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground sm:text-lg">
-            Find jobs near you and send quotes.
-          </p>
-        </div>
-      </section>
+      {!hideHeader && (
+        <section className="hidden md:block bg-surface/95 backdrop-blur-md pt-4 pb-3 shadow-sm">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <h1 className="font-display text-2xl font-bold tracking-tight text-navy sm:text-4xl">
+              Service Requests
+            </h1>
+            <p className="mt-1 text-sm text-muted-foreground sm:text-lg">
+              Find jobs near you and send quotes.
+            </p>
+          </div>
+        </section>
+      )}
 
       {/* DESKTOP SEARCH */}
-      <section className="hidden md:block bg-surface/95 pb-4 pt-3 sm:pb-8">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              load();
-            }}
-            className="flex flex-row items-center gap-2 rounded-full border border-border bg-card p-2 md:p-3 shadow-sm md:shadow-md"
-          >
-            <div className="flex flex-1 items-center gap-2 rounded-full bg-surface px-3 py-1 sm:bg-transparent min-w-0">
-              <Search className="h-5 w-5 text-muted-foreground shrink-0" />
-              <input
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-                placeholder="What service do you need?"
-                className="w-full min-w-0 bg-transparent min-h-[44px] text-base outline-none placeholder:text-muted-foreground"
-              />
-            </div>
-            <div className="hidden h-8 w-px bg-border sm:block" />
-            
-            <div className="relative flex shrink-0 items-center justify-center rounded-full bg-surface focus-within:border-orange h-auto w-auto flex-1 px-4 py-1 bg-transparent">
-              <MapPin className="h-5 w-5 text-muted-foreground shrink-0 mr-2" />
-              <select
-                value={loc}
-                onChange={(e) => setLoc(e.target.value)}
-                className="relative bg-transparent min-h-[44px] text-base outline-none text-foreground appearance-none w-full"
-                title="Location"
-              >
-                <option value="">All Locations</option>
-                <option value="Kampala">Kampala</option>
-                <option value="Entebbe">Entebbe</option>
-                <option value="Wakiso">Wakiso</option>
-                <option value="Jinja">Jinja</option>
-                <option value="Gulu">Gulu</option>
-                <option value="Mbarara">Mbarara</option>
-                <option value="Mbale">Mbale</option>
-              </select>
-            </div>
-            
-            <button className="shrink-0 h-auto w-auto rounded-full bg-navy px-6 flex items-center justify-center py-2.5 text-base font-bold text-white transition hover:bg-navy/90 active:scale-[0.98]">
-              Search
-            </button>
-          </form>
-        </div>
-      </section>
+      {!hideHeader && (
+        <section className="hidden md:block bg-surface/95 pb-4 pt-3 sm:pb-8">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                load();
+              }}
+              className="flex flex-row items-center gap-2 rounded-full border border-border bg-card p-2 md:p-3 shadow-sm md:shadow-md"
+            >
+              <div className="flex flex-1 items-center gap-2 rounded-full bg-surface px-3 py-1 sm:bg-transparent min-w-0">
+                <Search className="h-5 w-5 text-muted-foreground shrink-0" />
+                <input
+                  value={q}
+                  onChange={(e) => setQ(e.target.value)}
+                  placeholder="What service do you need?"
+                  className="w-full min-w-0 bg-transparent min-h-[44px] text-base outline-none placeholder:text-muted-foreground"
+                />
+              </div>
+              <div className="hidden h-8 w-px bg-border sm:block" />
+              
+              <div className="relative flex shrink-0 items-center justify-center rounded-full bg-surface focus-within:border-orange h-auto w-auto flex-1 px-4 py-1 bg-transparent">
+                <MapPin className="h-5 w-5 text-muted-foreground shrink-0 mr-2" />
+                <select
+                  value={loc}
+                  onChange={(e) => setLoc(e.target.value)}
+                  className="relative bg-transparent min-h-[44px] text-base outline-none text-foreground appearance-none w-full"
+                  title="Location"
+                >
+                  <option value="">All Locations</option>
+                  <option value="Kampala">Kampala</option>
+                  <option value="Entebbe">Entebbe</option>
+                  <option value="Wakiso">Wakiso</option>
+                  <option value="Jinja">Jinja</option>
+                  <option value="Gulu">Gulu</option>
+                  <option value="Mbarara">Mbarara</option>
+                  <option value="Mbale">Mbale</option>
+                </select>
+              </div>
+              
+              <button className="shrink-0 h-auto w-auto rounded-full bg-navy px-6 flex items-center justify-center py-2.5 text-base font-bold text-white transition hover:bg-navy/90 active:scale-[0.98]">
+                Search
+              </button>
+            </form>
+          </div>
+        </section>
+      )}
 
-      <section className="mx-auto max-w-7xl px-4 py-4 sm:px-6 sm:py-6 lg:px-8 w-full flex-1 min-w-0">
+      <section className={`mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 w-full flex-1 min-w-0 ${hideHeader ? "py-2 sm:py-2" : "py-4 sm:py-6"}`}>
         {/* Safety notice compact */}
         <SafetyNotice />
 

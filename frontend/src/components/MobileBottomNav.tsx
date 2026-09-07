@@ -1,5 +1,5 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { Home, Wrench, User as UserIcon, MessageSquare, Plus } from "lucide-react";
+import { Home, Wrench, User as UserIcon, Briefcase, Plus } from "lucide-react";
 import { useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useMyCounts } from "@/components/Header";
@@ -8,7 +8,6 @@ import { CreateChoiceSheet } from "@/components/CreateChoiceSheet";
 export function MobileBottomNav() {
   const { user } = useAuth();
   const counts = useMyCounts();
-  const unreadMessages = counts.unreadMessages;
   const location = useLocation();
   const isServicesOrRequests = location.pathname.startsWith("/services") || location.pathname.startsWith("/requests");
   const [createOpen, setCreateOpen] = useState(false);
@@ -34,18 +33,11 @@ export function MobileBottomNav() {
             </button>
           </div>
 
-          {/* Messages */}
+          {/* Opportunities */}
           <Tab
-            to="/messages"
-            label="Messages"
-            icon={
-              <div className="relative flex items-center justify-center">
-                <MessageSquare className="h-5 w-5" />
-                {unreadMessages > 0 && (
-                  <span className="absolute -right-0.5 -top-0.5 block h-2.5 w-2.5 rounded-full bg-red-500 ring-2 ring-background"></span>
-                )}
-              </div>
-            }
+            to="/opportunities"
+            label="Opportunities"
+            icon={<Briefcase className="h-5 w-5" />}
           />
 
           {/* Profile */}

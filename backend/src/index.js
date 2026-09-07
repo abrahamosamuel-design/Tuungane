@@ -9,7 +9,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
 
 // Initialize Supabase Admin Client
 // Using the service role key to bypass RLS since this backend will act as the authority
@@ -30,6 +30,7 @@ import messagesRoutes from './routes/messages.js';
 import creditsRoutes from './routes/credits.js';
 import adminRoutes from './routes/admin.js';
 import directBookingRoutes from './routes/direct_bookings.js';
+import opportunitiesRoutes from './routes/opportunities.js';
 import uploadRoutes from './routes/upload.js';
 import recoveryRoutes from './routes/recovery.js';
 
@@ -53,6 +54,7 @@ app.use('/api/messages', messagesRoutes);
 app.use('/api/credits', creditsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/direct-bookings', directBookingRoutes);
+app.use('/api/opportunities', opportunitiesRoutes);
 
 import { startPushDispatcher } from './pushDispatcher.js';
 

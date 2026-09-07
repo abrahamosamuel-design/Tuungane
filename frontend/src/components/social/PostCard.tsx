@@ -167,7 +167,8 @@ export function PostCard({ post, onChanged, userLoc, autoExpandComments = false 
   };
 
   const ptMeta = post.post_type ? postTypeMap[post.post_type] : null;
-  const authorType = post.author?.is_provider ? "Service Provider" : null;
+  const displayName = post.service_title || post.author?.full_name || "Service Provider";
+  const authorType = post.service_title ? (post.author?.full_name || "Service Provider") : (post.author?.is_provider ? "Service Provider" : null);
 
   return (
     <>
@@ -180,7 +181,7 @@ export function PostCard({ post, onChanged, userLoc, autoExpandComments = false 
               </Link>
               <div className="leading-tight flex-1 min-w-0">
                 <Link to="/u/$id" params={{ id: post.provider_user_id }} className="hover:underline block truncate">
-                  <p className="font-semibold text-navy truncate">{post.author?.full_name ?? "Service Provider"}</p>
+                  <p className="font-semibold text-navy truncate">{displayName}</p>
                 </Link>
                 {authorType && <p className="text-[11px] font-medium text-orange truncate">{authorType}</p>}
                 <p className="text-xs text-muted-foreground truncate">

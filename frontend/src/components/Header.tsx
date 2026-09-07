@@ -61,6 +61,7 @@ export function Header() {
               {user ? (
                 <>
                   <CreditBalanceChip />
+                  <MessagesIconLink />
                   <NotificationsBell />
                 </>
               ) : (

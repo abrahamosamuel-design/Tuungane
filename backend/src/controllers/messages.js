@@ -269,3 +269,64 @@ export const getUnreadCount = async (req, res) => {
   }
 };
 
+export const startHireContact = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { _provider_id, initial_message } = req.body;
+    const supabaseUser = getSupabaseUserClient(req);
+
+    // 1. Start or get conversation
+    const { data: convId, error: convErr } = await supabaseUser.rpc("start_direct_conversation", {
+      _provider_id
+    });
+    if (convErr) throw convErr;
+
+    const conversationId = typeof convId === 'object' ? convId.id : convId;
+
+    // 2. Insert message
+    if (initial_message) {
+      await supabaseUser.from("messages").insert({
+        conversation_id: conversationId,
+        sender_id: userId,
+        receiver_id: _provider_id,
+        body: initial_message,
+      });
+
+      // Fetch the current conversation to get unread counts safely
+      const { data: conv } = await supabaseUser.from("conversations").select("*").eq("id", conversationId).single();
+      const isCustomer = conv && conv.customer_id === userId;
+      
+      const updatePayload = {
+        last_message_at: new Date().toISOString(),
+        last_message_preview: initial_message.length > 50 ? initial_message.substring(0, 47) + "..." : initial_message,
+      };
+      
+      if (conv) {
+        if (isCustomer) {
+          updatePayload.provider_unread_count = (conv.provider_unread_count || 0) + 1;
+        } else {
+          updatePayload.customer_unread_count = (conv.customer_unread_count || 0) + 1;
+        }
+      }
+
+      await supabaseUser.from("conversations").update(updatePayload).eq("id", conversationId);
+    }
+
+    // 3. Insert notification
+    await supabaseUser.from("notifications").insert({
+      user_id: _provider_id,
+      actor_id: userId,
+      type: "hire_interest",
+      title: "Someone is interested in hiring you",
+      body: "Check your messages to respond.",
+      link: `/messages/${conversationId}`
+    });
+
+    res.json({ data: conversationId });
+  } catch (err) {
+    console.error('Error in startHireContact:', err);
+    res.status(500).json({ error: 'Failed to start hire contact' });
+  }
+};
+
+

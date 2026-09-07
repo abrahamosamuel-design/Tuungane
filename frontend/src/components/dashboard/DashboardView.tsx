@@ -286,7 +286,7 @@ function ProviderCard({ data }: { data: any }) {
         <Link
           to="/service/$id"
           params={{ id: data.id }}
-          className="flex flex-1 items-center justify-center gap-2 rounded-full bg-orange py-2.5 text-xs font-bold text-white hover:brightness-110 transition-all"
+          className="flex flex-1 items-center justify-center gap-2 rounded-full bg-navy py-2.5 text-xs font-bold text-white hover:brightness-110 transition-all"
         >
           <CalendarPlus className="h-4 w-4" /> Request service
         </Link>

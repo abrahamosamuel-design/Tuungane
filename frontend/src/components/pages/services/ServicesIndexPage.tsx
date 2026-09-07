@@ -196,7 +196,6 @@ export function ServicesIndexPage({ initialSort }: { initialSort?: "recent" }) {
             <div className="flex w-full justify-center md:w-auto md:justify-end">
               <div className="inline-flex rounded-full bg-muted p-1 shrink-0 shadow-sm">
                 <Link to="/services" className="rounded-full max-md:bg-orange max-md:text-white md:bg-background px-6 py-2 text-sm font-semibold md:text-navy shadow-sm">Services</Link>
-                <Link to="/requests/browse" className="rounded-full px-6 py-2 text-sm font-medium text-muted-foreground hover:text-navy transition-colors">Requests</Link>
               </div>
             </div>
           </div>
@@ -271,24 +270,6 @@ export function ServicesIndexPage({ initialSort }: { initialSort?: "recent" }) {
           {/* MOBILE DEFAULT: CATEGORIES LIST */}
           <div className={`md:hidden ${isSearching ? 'hidden' : 'block'}`}>
             <MobileSearchBar placeholder="Search friend services" value={q} onChange={(e) => setQ(e.target.value)} />
-
-            {/* Requests Card */}
-            <div className="px-6 pt-2 pb-2">
-              <h2 className="font-display text-xl font-bold text-navy mb-3">Requests</h2>
-              <Link
-                to="/requests/browse"
-                className="flex items-center gap-3 rounded-2xl border border-orange/30 bg-orange/5 p-4 shadow-sm transition-transform hover:-translate-y-0.5 active:scale-[0.98]"
-              >
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-orange/15 text-orange">
-                  <ClipboardList className="h-5 w-5" />
-                </div>
-                <div className="flex flex-1 flex-col gap-0.5">
-                  <span className="text-sm font-bold text-navy">Browse Service Requests</span>
-                  <span className="text-xs font-medium text-muted-foreground/80">See what people need help with</span>
-                </div>
-                <ChevronRight className="h-4 w-4 text-orange/60" />
-              </Link>
-            </div>
 
             {/* Popular Services (Horizontal Scroll) */}
             {recommended.length > 0 && (

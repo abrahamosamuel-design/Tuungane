@@ -32,6 +32,7 @@ import { Route as GuidesPropertyMaintenanceKampalaRouteImport } from './routes/g
 import { Route as AuthCallbackRouteImport } from './routes/auth.callback'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedRecoveryRouteImport } from './routes/_authenticated/recovery'
+import { Route as AuthenticatedOpportunitiesRouteImport } from './routes/_authenticated/opportunities'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedMeRouteImport } from './routes/_authenticated/me'
 import { Route as AuthenticatedListSkillRouteImport } from './routes/_authenticated/list-skill'
@@ -45,6 +46,9 @@ import { Route as AuthenticatedRequestsNewRouteImport } from './routes/_authenti
 import { Route as AuthenticatedRequestsIdRouteImport } from './routes/_authenticated/requests.$id'
 import { Route as AuthenticatedProfilesNewRouteImport } from './routes/_authenticated/profiles.new'
 import { Route as AuthenticatedProfilesIdRouteImport } from './routes/_authenticated/profiles.$id'
+import { Route as AuthenticatedOpportunitiesNewRequestRouteImport } from './routes/_authenticated/opportunities_.new-request'
+import { Route as AuthenticatedOpportunitiesNewRouteImport } from './routes/_authenticated/opportunities_.new'
+import { Route as AuthenticatedOpportunitiesJobIdRouteImport } from './routes/_authenticated/opportunities_.$jobId'
 import { Route as AuthenticatedNotificationsPreferencesRouteImport } from './routes/_authenticated/notifications.preferences'
 import { Route as AuthenticatedNotificationsIdRouteImport } from './routes/_authenticated/notifications.$id'
 import { Route as AuthenticatedMessagesIdRouteImport } from './routes/_authenticated/messages.$id'
@@ -165,6 +169,12 @@ const AuthenticatedRecoveryRoute = AuthenticatedRecoveryRouteImport.update({
   path: '/recovery',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedOpportunitiesRoute =
+  AuthenticatedOpportunitiesRouteImport.update({
+    id: '/opportunities',
+    path: '/opportunities',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
@@ -235,6 +245,24 @@ const AuthenticatedProfilesIdRoute = AuthenticatedProfilesIdRouteImport.update({
   path: '/profiles/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedOpportunitiesNewRequestRoute =
+  AuthenticatedOpportunitiesNewRequestRouteImport.update({
+    id: '/opportunities_/new-request',
+    path: '/opportunities/new-request',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedOpportunitiesNewRoute =
+  AuthenticatedOpportunitiesNewRouteImport.update({
+    id: '/opportunities_/new',
+    path: '/opportunities/new',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedOpportunitiesJobIdRoute =
+  AuthenticatedOpportunitiesJobIdRouteImport.update({
+    id: '/opportunities_/$jobId',
+    path: '/opportunities/$jobId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedNotificationsPreferencesRoute =
   AuthenticatedNotificationsPreferencesRouteImport.update({
     id: '/notifications/preferences',
@@ -276,6 +304,7 @@ export interface FileRoutesByFullPath {
   '/list-skill': typeof AuthenticatedListSkillRoute
   '/me': typeof AuthenticatedMeRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/opportunities': typeof AuthenticatedOpportunitiesRoute
   '/recovery': typeof AuthenticatedRecoveryRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/auth/callback': typeof AuthCallbackRoute
@@ -291,6 +320,9 @@ export interface FileRoutesByFullPath {
   '/messages/$id': typeof AuthenticatedMessagesIdRoute
   '/notifications/$id': typeof AuthenticatedNotificationsIdRoute
   '/notifications/preferences': typeof AuthenticatedNotificationsPreferencesRoute
+  '/opportunities/$jobId': typeof AuthenticatedOpportunitiesJobIdRoute
+  '/opportunities/new': typeof AuthenticatedOpportunitiesNewRoute
+  '/opportunities/new-request': typeof AuthenticatedOpportunitiesNewRequestRoute
   '/profiles/$id': typeof AuthenticatedProfilesIdRoute
   '/profiles/new': typeof AuthenticatedProfilesNewRoute
   '/requests/$id': typeof AuthenticatedRequestsIdRoute
@@ -317,6 +349,7 @@ export interface FileRoutesByTo {
   '/list-skill': typeof AuthenticatedListSkillRoute
   '/me': typeof AuthenticatedMeRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/opportunities': typeof AuthenticatedOpportunitiesRoute
   '/recovery': typeof AuthenticatedRecoveryRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/auth/callback': typeof AuthCallbackRoute
@@ -332,6 +365,9 @@ export interface FileRoutesByTo {
   '/messages/$id': typeof AuthenticatedMessagesIdRoute
   '/notifications/$id': typeof AuthenticatedNotificationsIdRoute
   '/notifications/preferences': typeof AuthenticatedNotificationsPreferencesRoute
+  '/opportunities/$jobId': typeof AuthenticatedOpportunitiesJobIdRoute
+  '/opportunities/new': typeof AuthenticatedOpportunitiesNewRoute
+  '/opportunities/new-request': typeof AuthenticatedOpportunitiesNewRequestRoute
   '/profiles/$id': typeof AuthenticatedProfilesIdRoute
   '/profiles/new': typeof AuthenticatedProfilesNewRoute
   '/requests/$id': typeof AuthenticatedRequestsIdRoute
@@ -360,6 +396,7 @@ export interface FileRoutesById {
   '/_authenticated/list-skill': typeof AuthenticatedListSkillRoute
   '/_authenticated/me': typeof AuthenticatedMeRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
+  '/_authenticated/opportunities': typeof AuthenticatedOpportunitiesRoute
   '/_authenticated/recovery': typeof AuthenticatedRecoveryRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/auth/callback': typeof AuthCallbackRoute
@@ -375,6 +412,9 @@ export interface FileRoutesById {
   '/_authenticated/messages/$id': typeof AuthenticatedMessagesIdRoute
   '/_authenticated/notifications/$id': typeof AuthenticatedNotificationsIdRoute
   '/_authenticated/notifications/preferences': typeof AuthenticatedNotificationsPreferencesRoute
+  '/_authenticated/opportunities_/$jobId': typeof AuthenticatedOpportunitiesJobIdRoute
+  '/_authenticated/opportunities_/new': typeof AuthenticatedOpportunitiesNewRoute
+  '/_authenticated/opportunities_/new-request': typeof AuthenticatedOpportunitiesNewRequestRoute
   '/_authenticated/profiles/$id': typeof AuthenticatedProfilesIdRoute
   '/_authenticated/profiles/new': typeof AuthenticatedProfilesNewRoute
   '/_authenticated/requests/$id': typeof AuthenticatedRequestsIdRoute
@@ -403,6 +443,7 @@ export interface FileRouteTypes {
     | '/list-skill'
     | '/me'
     | '/onboarding'
+    | '/opportunities'
     | '/recovery'
     | '/settings'
     | '/auth/callback'
@@ -418,6 +459,9 @@ export interface FileRouteTypes {
     | '/messages/$id'
     | '/notifications/$id'
     | '/notifications/preferences'
+    | '/opportunities/$jobId'
+    | '/opportunities/new'
+    | '/opportunities/new-request'
     | '/profiles/$id'
     | '/profiles/new'
     | '/requests/$id'
@@ -444,6 +488,7 @@ export interface FileRouteTypes {
     | '/list-skill'
     | '/me'
     | '/onboarding'
+    | '/opportunities'
     | '/recovery'
     | '/settings'
     | '/auth/callback'
@@ -459,6 +504,9 @@ export interface FileRouteTypes {
     | '/messages/$id'
     | '/notifications/$id'
     | '/notifications/preferences'
+    | '/opportunities/$jobId'
+    | '/opportunities/new'
+    | '/opportunities/new-request'
     | '/profiles/$id'
     | '/profiles/new'
     | '/requests/$id'
@@ -486,6 +534,7 @@ export interface FileRouteTypes {
     | '/_authenticated/list-skill'
     | '/_authenticated/me'
     | '/_authenticated/onboarding'
+    | '/_authenticated/opportunities'
     | '/_authenticated/recovery'
     | '/_authenticated/settings'
     | '/auth/callback'
@@ -501,6 +550,9 @@ export interface FileRouteTypes {
     | '/_authenticated/messages/$id'
     | '/_authenticated/notifications/$id'
     | '/_authenticated/notifications/preferences'
+    | '/_authenticated/opportunities_/$jobId'
+    | '/_authenticated/opportunities_/new'
+    | '/_authenticated/opportunities_/new-request'
     | '/_authenticated/profiles/$id'
     | '/_authenticated/profiles/new'
     | '/_authenticated/requests/$id'
@@ -699,6 +751,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedRecoveryRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/opportunities': {
+      id: '/_authenticated/opportunities'
+      path: '/opportunities'
+      fullPath: '/opportunities'
+      preLoaderRoute: typeof AuthenticatedOpportunitiesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/onboarding': {
       id: '/_authenticated/onboarding'
       path: '/onboarding'
@@ -790,6 +849,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfilesIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/opportunities_/new-request': {
+      id: '/_authenticated/opportunities_/new-request'
+      path: '/opportunities/new-request'
+      fullPath: '/opportunities/new-request'
+      preLoaderRoute: typeof AuthenticatedOpportunitiesNewRequestRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/opportunities_/new': {
+      id: '/_authenticated/opportunities_/new'
+      path: '/opportunities/new'
+      fullPath: '/opportunities/new'
+      preLoaderRoute: typeof AuthenticatedOpportunitiesNewRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/opportunities_/$jobId': {
+      id: '/_authenticated/opportunities_/$jobId'
+      path: '/opportunities/$jobId'
+      fullPath: '/opportunities/$jobId'
+      preLoaderRoute: typeof AuthenticatedOpportunitiesJobIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/notifications/preferences': {
       id: '/_authenticated/notifications/preferences'
       path: '/notifications/preferences'
@@ -827,12 +907,16 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedListSkillRoute: typeof AuthenticatedListSkillRoute
   AuthenticatedMeRoute: typeof AuthenticatedMeRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
+  AuthenticatedOpportunitiesRoute: typeof AuthenticatedOpportunitiesRoute
   AuthenticatedRecoveryRoute: typeof AuthenticatedRecoveryRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedBusinessesNewRoute: typeof AuthenticatedBusinessesNewRoute
   AuthenticatedMessagesIdRoute: typeof AuthenticatedMessagesIdRoute
   AuthenticatedNotificationsIdRoute: typeof AuthenticatedNotificationsIdRoute
   AuthenticatedNotificationsPreferencesRoute: typeof AuthenticatedNotificationsPreferencesRoute
+  AuthenticatedOpportunitiesJobIdRoute: typeof AuthenticatedOpportunitiesJobIdRoute
+  AuthenticatedOpportunitiesNewRoute: typeof AuthenticatedOpportunitiesNewRoute
+  AuthenticatedOpportunitiesNewRequestRoute: typeof AuthenticatedOpportunitiesNewRequestRoute
   AuthenticatedProfilesIdRoute: typeof AuthenticatedProfilesIdRoute
   AuthenticatedProfilesNewRoute: typeof AuthenticatedProfilesNewRoute
   AuthenticatedRequestsIdRoute: typeof AuthenticatedRequestsIdRoute
@@ -848,6 +932,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedListSkillRoute: AuthenticatedListSkillRoute,
   AuthenticatedMeRoute: AuthenticatedMeRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
+  AuthenticatedOpportunitiesRoute: AuthenticatedOpportunitiesRoute,
   AuthenticatedRecoveryRoute: AuthenticatedRecoveryRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedBusinessesNewRoute: AuthenticatedBusinessesNewRoute,
@@ -855,6 +940,10 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedNotificationsIdRoute: AuthenticatedNotificationsIdRoute,
   AuthenticatedNotificationsPreferencesRoute:
     AuthenticatedNotificationsPreferencesRoute,
+  AuthenticatedOpportunitiesJobIdRoute: AuthenticatedOpportunitiesJobIdRoute,
+  AuthenticatedOpportunitiesNewRoute: AuthenticatedOpportunitiesNewRoute,
+  AuthenticatedOpportunitiesNewRequestRoute:
+    AuthenticatedOpportunitiesNewRequestRoute,
   AuthenticatedProfilesIdRoute: AuthenticatedProfilesIdRoute,
   AuthenticatedProfilesNewRoute: AuthenticatedProfilesNewRoute,
   AuthenticatedRequestsIdRoute: AuthenticatedRequestsIdRoute,

@@ -20,9 +20,8 @@ export function AcceptJobDialog({ open, onOpenChange, requestId, initialPrice, o
     e.preventDefault();
     setBusy(true);
     try {
-      await apiClient(`/service-requests/${requestId}/accept`, {
-        method: "POST",
-        body: JSON.stringify({ price_total: price }),
+      await apiClient.post(`/requests/${requestId}/accept`, {
+        price_total: parseFloat(String(price)),
       });
       toast.success("Job accepted successfully!");
       onAccepted();

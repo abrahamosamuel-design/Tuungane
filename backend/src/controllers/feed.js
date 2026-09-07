@@ -42,7 +42,7 @@ export const getCommunityUpdates = async (req, res) => {
       .order("created_at", { ascending: false })
       .limit(40);
 
-    const raw = (data || []).filter(isQuality);
+    const raw = data || [];
     if (!raw.length) return res.json({ data: [] });
 
     const ids = Array.from(new Set(raw.map((p) => p.provider_user_id)));
@@ -172,12 +172,12 @@ export const getHomeFeed = async (req, res) => {
       .from("v_search_services")
       .select("*")
       .order("updated_at", { ascending: false })
-      .limit(48);
+      .limit(8);
       
     if (vssError) console.error("Error fetching v_search_services:", vssError);
     
     // Provs contains the items for the mixed feed. The frontend expects specific fields.
-    provs = (vssData || []).slice(0, 48).map((r) => ({
+    provs = (vssData || []).slice(0, 8).map((r) => ({
       ...r,
       user_id: r.user_id,
       business_name: r.business_name,
@@ -220,7 +220,7 @@ export const getHomeFeed = async (req, res) => {
         .order("created_at", { ascending: false })
         .limit(20);
 
-      const tpFiltered = (tpRaw || []).filter(isQuality);
+      const tpFiltered = tpRaw || [];
       if (tpFiltered.length) {
         const tpUserIds = Array.from(new Set(tpFiltered.map((p) => p.provider_user_id)));
         const [{ data: tpProfs }, { data: tpSps }, { data: tpPps }] = await Promise.all([

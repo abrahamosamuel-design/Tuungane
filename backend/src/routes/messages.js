@@ -7,6 +7,7 @@ import {
   blockUser,
   startOrGetConversation,
   startDirectConversation,
+  startHireContact,
   markConversationRead,
   getUnreadCount
 } from '../controllers/messages.js';
@@ -19,6 +20,7 @@ router.use(requireAuth);
 router.get('/unread-count', getUnreadCount);
 router.post('/start', startOrGetConversation);
 router.post('/start-direct', startDirectConversation);
+router.post('/hire-contact', startHireContact);
 router.get('/', getConversations);
 router.get('/:id', getConversationById);
 router.post('/:id/messages', sendMessage);

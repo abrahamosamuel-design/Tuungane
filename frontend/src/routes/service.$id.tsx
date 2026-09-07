@@ -166,12 +166,8 @@ function ServiceDetailPage() {
             </div>
             <button 
               onClick={() => {
-                if (service.profile?.isPersonal) {
-                  nav({ to: `/u/${service.profile?.id}` as any });
-                } else {
-                  nav({ to: `/p/${service.profile?.slug || service.profile?.id}` });
-                }
-              }} 
+                nav({ to: `/u/${service.user_profile_id || service.profile?.owner_id || service.profile?.id}` as any });
+              }}  
               className="rounded-full bg-orange/10 px-4 py-1.5 text-xs font-semibold text-orange"
             >
               View

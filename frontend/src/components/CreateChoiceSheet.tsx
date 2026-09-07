@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ClipboardList, Sparkles, X, ArrowRight } from "lucide-react";
+import { ClipboardList, Sparkles, X, ArrowRight, Briefcase, UserCircle } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { CTA, listSkillHref } from "@/lib/cta";
 
@@ -59,6 +59,36 @@ export function CreateChoiceSheet({
               <p className="text-xs text-foreground/75">For people looking for a service.</p>
             </div>
             <ArrowRight className="mt-2 h-5 w-5 shrink-0 text-green" />
+          </Link>
+
+          <Link
+            to="/opportunities/new"
+            onClick={onClose}
+            className="flex items-start gap-3 rounded-2xl border border-blue-500/30 bg-blue-500/5 p-4 transition hover:border-blue-500"
+          >
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-500 text-white">
+              <Briefcase className="h-5 w-5" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="font-display text-base font-bold text-navy">List Job Opportunity</p>
+              <p className="text-xs text-foreground/75">For companies or people looking to hire.</p>
+            </div>
+            <ArrowRight className="mt-2 h-5 w-5 shrink-0 text-blue-500" />
+          </Link>
+
+          <Link
+            to="/opportunities/new-request"
+            onClick={onClose}
+            className="flex items-start gap-3 rounded-2xl border border-purple-500/30 bg-purple-500/5 p-4 transition hover:border-purple-500"
+          >
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-purple-500 text-white">
+              <UserCircle className="h-5 w-5" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="font-display text-base font-bold text-navy">Post Job Request</p>
+              <p className="text-xs text-foreground/75">For individuals looking for a job.</p>
+            </div>
+            <ArrowRight className="mt-2 h-5 w-5 shrink-0 text-purple-500" />
           </Link>
         </div>
       </div>

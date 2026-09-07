@@ -16,7 +16,7 @@ export const Route = createFileRoute("/_authenticated/requests/")({
   component: RequestsPage,
 });
 
-function RequestsPage() {
+export function RequestsPage({ hideHeader = false }: { hideHeader?: boolean } = {}) {
   const { user, loading } = useAuth();
   const nav = useNavigate();
   const [role, setRole] = useState<"customer" | "provider">("customer");
@@ -84,11 +84,15 @@ function RequestsPage() {
 
   return (
     <>
-      <section className="mx-auto max-w-3xl px-4 py-6">
-        <h1 className="font-display text-3xl font-bold text-navy">Service requests</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Track requests, mark progress, and leave verified reviews.</p>
+      <section className={hideHeader ? "" : "mx-auto max-w-3xl px-4 py-6"}>
+        {!hideHeader && (
+          <>
+            <h1 className="font-display text-3xl font-bold text-navy">Service requests</h1>
+            <p className="mt-1 text-sm text-muted-foreground">Track requests, mark progress, and leave verified reviews.</p>
+          </>
+        )}
 
-        <div className="mt-4 inline-flex rounded-full border border-border bg-card p-1">
+        <div className={`inline-flex rounded-full border border-border bg-card p-1 ${hideHeader ? "" : "mt-4"}`}>
           <button onClick={() => setRole("customer")} className={`rounded-full px-4 py-1.5 text-xs font-semibold ${role === "customer" ? "bg-orange text-orange-foreground" : "text-muted-foreground"}`}>Requests I sent</button>
           <button onClick={() => setRole("provider")} className={`rounded-full px-4 py-1.5 text-xs font-semibold ${role === "provider" ? "bg-orange text-orange-foreground" : "text-muted-foreground"}`}>Requests I received</button>
         </div>
