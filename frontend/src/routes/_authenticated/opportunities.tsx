@@ -199,9 +199,9 @@ function OpportunitiesPage() {
         </button>
       </div>
 
-      <div className="mt-2 flex flex-wrap items-center justify-between gap-1.5 pb-2">
+      <div className="mt-2 flex items-center gap-2 pb-2 overflow-x-auto no-scrollbar w-full">
         <select 
-          className="shrink-0 rounded-lg border border-border bg-card px-2 py-1.5 text-[10px] sm:text-xs font-medium text-navy hover:bg-muted/50 transition outline-none"
+          className="flex-1 min-w-0 shrink-0 rounded-lg border border-border bg-card px-2 py-1.5 text-[10px] sm:text-xs font-medium text-navy hover:bg-muted/50 transition outline-none"
           value={locationFilter}
           onChange={(e) => setLocationFilter(e.target.value)}
         >
@@ -210,7 +210,7 @@ function OpportunitiesPage() {
         </select>
 
         <select 
-          className="shrink-0 rounded-lg border border-border bg-card px-2 py-1.5 text-[10px] sm:text-xs font-medium text-navy hover:bg-muted/50 transition outline-none"
+          className="flex-1 min-w-0 shrink-0 rounded-lg border border-border bg-card px-2 py-1.5 text-[10px] sm:text-xs font-medium text-navy hover:bg-muted/50 transition outline-none"
           value={categoryFilter}
           onChange={(e) => setCategoryFilter(e.target.value)}
         >
@@ -221,12 +221,12 @@ function OpportunitiesPage() {
         </select>
 
         <select 
-          className="shrink-0 rounded-lg border border-border bg-card px-2 py-1.5 text-[10px] sm:text-xs font-medium text-navy hover:bg-muted/50 transition outline-none"
+          className="flex-1 min-w-0 shrink-0 rounded-lg border border-border bg-card px-2 py-1.5 text-[10px] sm:text-xs font-medium text-navy hover:bg-muted/50 transition outline-none"
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value)}
         >
-          <option value="newest">Newest first</option>
-          <option value="oldest">Oldest first</option>
+          <option value="newest">Newest</option>
+          <option value="oldest">Oldest</option>
         </select>
       </div>
 
