@@ -117,10 +117,23 @@ function OpportunitiesPage() {
     }
   };
 
-  const filteredItems = opportunities.filter(item => {
+  const [locationFilter, setLocationFilter] = useState("all");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [sortBy, setSortBy] = useState("newest");
+
+  const uniqueLocations = Array.from(new Set(opportunities.map(o => o.location).filter(Boolean)));
+  const uniqueCategories = Array.from(new Set(opportunities.map(o => o.originalData?.category_slug).filter(Boolean)));
+
+  let filteredItems = opportunities.filter(item => {
     // Filter by type
     if (activeFilter !== "all" && item.type !== activeFilter) return false;
     
+    // Filter by location
+    if (locationFilter !== "all" && item.location !== locationFilter) return false;
+
+    // Filter by category
+    if (categoryFilter !== "all" && item.originalData?.category_slug !== categoryFilter) return false;
+
     // Filter by search query
     if (searchQuery) {
       const sq = searchQuery.toLowerCase();
@@ -133,6 +146,13 @@ function OpportunitiesPage() {
     
     return true;
   });
+
+  if (sortBy === "oldest") {
+    filteredItems.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  } else {
+    // default is newest
+    filteredItems.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }
 
   return (
     <section className="mx-auto max-w-4xl w-full overflow-x-hidden px-4 pt-0 pb-20 flex flex-col min-h-screen">
@@ -180,21 +200,34 @@ function OpportunitiesPage() {
       </div>
 
       <div className="mt-2 flex flex-wrap items-center justify-between gap-1.5 pb-2">
-        <button className="flex shrink-0 items-center gap-1 rounded-lg border border-border bg-card px-2 py-1.5 text-[10px] sm:text-xs font-medium text-navy hover:bg-muted/50 transition">
-          <MapPin className="h-3 w-3 text-muted-foreground" />
-          All Locations
-          <ChevronDown className="h-3 w-3 text-muted-foreground" />
-        </button>
-        <button className="flex shrink-0 items-center gap-1 rounded-lg border border-border bg-card px-2 py-1.5 text-[10px] sm:text-xs font-medium text-navy hover:bg-muted/50 transition">
-          <LayoutGrid className="h-3 w-3 text-muted-foreground" />
-          All Categories
-          <ChevronDown className="h-3 w-3 text-muted-foreground" />
-        </button>
-        <button className="flex shrink-0 items-center gap-1 rounded-lg border border-border bg-card px-2 py-1.5 text-[10px] sm:text-xs font-medium text-navy hover:bg-muted/50 transition">
-          <ArrowDownUp className="h-3 w-3 text-muted-foreground" />
-          Sort
-          <ChevronDown className="h-3 w-3 text-muted-foreground" />
-        </button>
+        <select 
+          className="shrink-0 rounded-lg border border-border bg-card px-2 py-1.5 text-[10px] sm:text-xs font-medium text-navy hover:bg-muted/50 transition outline-none"
+          value={locationFilter}
+          onChange={(e) => setLocationFilter(e.target.value)}
+        >
+          <option value="all">All Locations</option>
+          {uniqueLocations.map(loc => <option key={loc} value={loc}>{loc}</option>)}
+        </select>
+
+        <select 
+          className="shrink-0 rounded-lg border border-border bg-card px-2 py-1.5 text-[10px] sm:text-xs font-medium text-navy hover:bg-muted/50 transition outline-none"
+          value={categoryFilter}
+          onChange={(e) => setCategoryFilter(e.target.value)}
+        >
+          <option value="all">All Categories</option>
+          {uniqueCategories.map(cat => (
+            <option key={cat} value={cat}>{String(cat).charAt(0).toUpperCase() + String(cat).slice(1)}</option>
+          ))}
+        </select>
+
+        <select 
+          className="shrink-0 rounded-lg border border-border bg-card px-2 py-1.5 text-[10px] sm:text-xs font-medium text-navy hover:bg-muted/50 transition outline-none"
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value)}
+        >
+          <option value="newest">Newest first</option>
+          <option value="oldest">Oldest first</option>
+        </select>
       </div>
 
       <div className="mt-4 flex items-center justify-between border-b border-border/50 pb-4">
