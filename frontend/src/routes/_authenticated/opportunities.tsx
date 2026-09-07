@@ -234,9 +234,6 @@ function OpportunitiesPage() {
         <p className="text-sm font-semibold text-navy">
           {filteredItems.length} opportunities found
         </p>
-        <button className="flex items-center gap-1.5 text-sm font-bold text-blue-600 hover:text-blue-700 transition">
-          <SlidersHorizontal className="h-4 w-4" /> Filter
-        </button>
       </div>
 
       <div className="mt-4 flex-1 flex flex-col gap-4">
