@@ -496,8 +496,8 @@ function TimelinePostCard({ data }: { data: any }) {
       {isJobPost ? (
         <div className="p-3 border-t border-border">
           <Link
-            to="/posts/$id"
-            params={{ id: data.id }}
+            to="/opportunities/$jobId"
+            params={{ jobId: data.id }}
             className="flex w-full items-center justify-center rounded-xl bg-orange py-2.5 text-sm font-bold text-white transition-opacity hover:opacity-90 active:opacity-100"
           >
             {parsedJob.type === 'job_opportunity' ? 'Apply for this job' : 'Hire this professional'}
