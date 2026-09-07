@@ -436,11 +436,37 @@ function TimelinePostCard({ data }: { data: any }) {
         </div>
 
         {/* Text */}
-        {data.text && (
-          <p className="mb-3 text-xs leading-relaxed text-navy/70 whitespace-pre-line">
-            {data.text.length > 180 ? data.text.slice(0, 180) + "…" : data.text}
-          </p>
-        )}
+        {(() => {
+          if (!data.text) return null;
+          
+          try {
+            // Check if it's JSON
+            if (data.text.trim().startsWith('{') && data.text.trim().endsWith('}')) {
+              const parsed = JSON.parse(data.text);
+              if (parsed.type === 'job_opportunity' || parsed.type === 'job_request') {
+                return (
+                  <div className="mb-3 rounded-xl border border-border bg-muted/20 p-3">
+                    <h4 className="font-semibold text-navy text-sm mb-1">{parsed.job_title}</h4>
+                    <div className="flex flex-col gap-1 text-[11px] text-muted-foreground">
+                      {parsed.company_name && <p><span className="font-medium text-navy/70">Company:</span> {parsed.company_name}</p>}
+                      {parsed.location && <p><span className="font-medium text-navy/70">Location:</span> {parsed.location}</p>}
+                      {parsed.salary && <p><span className="font-medium text-navy/70">Salary:</span> {parsed.salary}</p>}
+                      {parsed.qualification && <p><span className="font-medium text-navy/70">Qualification:</span> {parsed.qualification}</p>}
+                    </div>
+                  </div>
+                );
+              }
+            }
+          } catch {
+            // Not valid JSON or parsing failed, fallback to plain text
+          }
+
+          return (
+            <p className="mb-3 text-xs leading-relaxed text-navy/70 whitespace-pre-line">
+              {data.text.length > 180 ? data.text.slice(0, 180) + "…" : data.text}
+            </p>
+          );
+        })()}
 
         {/* Media */}
         {hasImages && (
