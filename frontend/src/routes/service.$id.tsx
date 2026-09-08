@@ -1,6 +1,6 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ArrowLeft, Star, MessageSquare, Clock, ImageIcon, Phone, Coins, Plus } from "lucide-react";
+import { ArrowLeft, Star, MessageSquare, Clock, ImageIcon, Phone, Coins, Plus, MapPin } from "lucide-react";
 import { apiClient } from "@/lib/api";
 import { useAuthGate } from "@/components/RequireAuthDialog";
 import { PostCard } from "@/components/social/PostCard";
@@ -32,10 +32,18 @@ function ServiceDetailPage() {
 
   const isOwner = user?.id && service && (user.id === service.user_profile_id || user.id === service.profile?.owner_id);
 
+  const [showAllReviews, setShowAllReviews] = useState(false);
+  const [allServices, setAllServices] = useState<any[]>([]);
+
   const fetchService = async () => {
     try {
       const res = await apiClient<{ data: any }>(`/services/detail/${id}`);
       setService(res.data);
+      
+      const searchRes = await apiClient<{ data: any[] }>(`/services/search`);
+      if (searchRes.data) {
+        setAllServices(searchRes.data);
+      }
     } catch (err) {
       console.error("Failed to load service", err);
     } finally {
@@ -221,60 +229,70 @@ function ServiceDetailPage() {
           {activeTab === "reviews" && (
             <div className="space-y-4">
               {service.reviews?.length > 0 ? (
-                service.reviews.map((r: any, idx: number) => {
-                  const initials = r.user?.full_name?.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase() || "?";
-                  const dateString = new Date(r.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
-                  return (
-                    <div key={idx} className="border-b border-border pb-4 last:border-0">
-                      <div className="flex items-start gap-3">
-                        <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-orange/10 flex items-center justify-center text-xs font-bold text-orange">
-                          {r.user?.avatar_url ? (
-                            <img src={r.user.avatar_url} alt="Avatar" className="h-full w-full object-cover" />
-                          ) : initials}
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between">
-                            <p className="text-xs font-semibold text-navy">{r.user?.full_name || "Anonymous User"}</p>
-                            <span className="text-[10px] text-muted-foreground">{dateString}</span>
+                <>
+                  {(showAllReviews ? service.reviews : service.reviews.slice(0, 1)).map((r: any, idx: number) => {
+                    const initials = r.user?.full_name?.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase() || "?";
+                    const dateString = new Date(r.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+                    return (
+                      <div key={idx} className="border-b border-border pb-4 last:border-0">
+                        <div className="flex items-start gap-3">
+                          <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-orange/10 flex items-center justify-center text-xs font-bold text-orange">
+                            {r.user?.avatar_url ? (
+                              <img src={r.user.avatar_url} alt="Avatar" className="h-full w-full object-cover" />
+                            ) : initials}
                           </div>
-                          <div className="flex text-orange mt-0.5">
-                            {Array.from({ length: r.rating || 0 }).map((_, i) => (
-                              <Star key={i} className="h-3 w-3 fill-current" />
-                            ))}
-                          </div>
-                          
-                          {(() => {
-                            let displayText = r.text || "";
-                            let mediaUrls: string[] = [];
-                            const mediaMatch = displayText.match(/\[MEDIA\](.*?)\[\/MEDIA\]/);
-                            if (mediaMatch) {
-                              try {
-                                mediaUrls = JSON.parse(mediaMatch[1]);
-                                displayText = displayText.replace(mediaMatch[0], "").trim();
-                              } catch (e) {
-                                // Ignore parse error
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between">
+                              <p className="text-xs font-semibold text-navy">{r.user?.full_name || "Anonymous User"}</p>
+                              <span className="text-[10px] text-muted-foreground">{dateString}</span>
+                            </div>
+                            <div className="flex text-orange mt-0.5">
+                              {Array.from({ length: r.rating || 0 }).map((_, i) => (
+                                <Star key={i} className="h-3 w-3 fill-current" />
+                              ))}
+                            </div>
+                            
+                            {(() => {
+                              let displayText = r.text || "";
+                              let mediaUrls: string[] = [];
+                              const mediaMatch = displayText.match(/\[MEDIA\](.*?)\[\/MEDIA\]/);
+                              if (mediaMatch) {
+                                try {
+                                  mediaUrls = JSON.parse(mediaMatch[1]);
+                                  displayText = displayText.replace(mediaMatch[0], "").trim();
+                                } catch (e) {
+                                  // Ignore parse error
+                                }
                               }
-                            }
-                            return (
-                              <>
-                                {displayText && <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">{displayText}</p>}
-                                {mediaUrls.length > 0 && (
-                                  <div className="mt-3 flex gap-2 overflow-x-auto">
-                                    {mediaUrls.map((url, i) => (
-                                      <div key={i} className="h-20 w-20 shrink-0 overflow-hidden rounded-lg border border-border bg-muted">
-                                        <img src={url} alt="Attached" className="h-full w-full object-cover" />
-                                      </div>
-                                    ))}
-                                  </div>
-                                )}
-                              </>
-                            );
-                          })()}
+                              return (
+                                <>
+                                  {displayText && <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">{displayText}</p>}
+                                  {mediaUrls.length > 0 && (
+                                    <div className="mt-3 flex gap-2 overflow-x-auto">
+                                      {mediaUrls.map((url, i) => (
+                                        <div key={i} className="h-20 w-20 shrink-0 overflow-hidden rounded-lg border border-border bg-muted">
+                                          <img src={url} alt="Attached" className="h-full w-full object-cover" />
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                </>
+                              );
+                            })()}
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  );
-                })
+                    );
+                  })}
+                  {!showAllReviews && service.reviews.length > 1 && (
+                    <button 
+                      onClick={() => setShowAllReviews(true)}
+                      className="w-full mt-4 rounded-full border border-border py-2 text-sm font-semibold text-navy hover:bg-muted"
+                    >
+                      More Reviews ({service.reviews.length - 1})
+                    </button>
+                  )}
+                </>
               ) : (
                 <p className="text-sm text-muted-foreground text-center py-8">No reviews yet.</p>
               )}
@@ -294,6 +312,83 @@ function ServiceDetailPage() {
             </div>
           )}
         </div>
+
+        {/* Similar Services and Other Services */}
+        {allServices.length > 0 && (
+          <div className="mt-12 mb-8">
+            {allServices.filter(s => s.category_slug === service.category_slug && s.user_id !== (service.user_profile_id || service.profile?.owner_id)).length > 0 && (
+              <>
+                <h2 className="mb-4 text-lg font-bold text-navy">Similar Services</h2>
+                <div className="flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                  {allServices
+                    .filter(s => s.category_slug === service.category_slug && s.user_id !== (service.user_profile_id || service.profile?.owner_id))
+                    .slice(0, 5)
+                    .map((s, idx) => {
+                      const name = s.business_name || s.profile?.full_name || s.profile?.name || "Provider";
+                      const coverImage = s.cover_url || (s.media_urls && s.media_urls[0]) || s.profile?.avatar_url;
+                      return (
+                        <div key={idx} className="w-[180px] shrink-0 snap-start">
+                          <Link to="/service/$id" params={{ id: s.service_id || s.user_id || s.id }} className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm hover:shadow-md transition-shadow relative">
+                            <div className="aspect-[4/3] w-full bg-muted relative overflow-hidden">
+                              {coverImage ? (
+                                <img src={coverImage} alt={name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center bg-surface">
+                                  <span className="text-muted-foreground/30 text-2xl font-bold uppercase">{name.substring(0, 2)}</span>
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex flex-col flex-1 p-3">
+                              <h3 className="font-display text-sm font-bold leading-tight text-navy line-clamp-1">{name}</h3>
+                              <p className="mt-1 text-xs font-medium text-foreground/80 line-clamp-1">{s.subcategory || s.category_slug}</p>
+                              <p className="mt-1 flex items-center gap-1 text-[11px] text-muted-foreground line-clamp-1">
+                                <MapPin className="h-3 w-3 shrink-0" /> {s.town || s.district || "Uganda"}
+                              </p>
+                            </div>
+                          </Link>
+                        </div>
+                      );
+                    })}
+                </div>
+              </>
+            )}
+
+            {allServices.filter(s => s.category_slug !== service.category_slug && s.user_id !== (service.user_profile_id || service.profile?.owner_id)).length > 0 && (
+              <>
+                <h2 className="mt-8 mb-4 text-lg font-bold text-navy">Other Services</h2>
+                <div className="grid grid-cols-2 gap-4 pb-4">
+                  {allServices
+                    .filter(s => s.category_slug !== service.category_slug && s.user_id !== (service.user_profile_id || service.profile?.owner_id))
+                    .slice(0, 6)
+                    .map((s, idx) => {
+                      const name = s.business_name || s.profile?.full_name || s.profile?.name || "Provider";
+                      const coverImage = s.cover_url || (s.media_urls && s.media_urls[0]) || s.profile?.avatar_url;
+                      return (
+                        <Link key={idx} to="/service/$id" params={{ id: s.service_id || s.user_id || s.id }} className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm hover:shadow-md transition-shadow relative">
+                          <div className="aspect-[4/3] w-full bg-muted relative overflow-hidden">
+                            {coverImage ? (
+                              <img src={coverImage} alt={name} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center bg-surface">
+                                <span className="text-muted-foreground/30 text-2xl font-bold uppercase">{name.substring(0, 2)}</span>
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex flex-col flex-1 p-3">
+                            <h3 className="font-display text-sm font-bold leading-tight text-navy line-clamp-1">{name}</h3>
+                            <p className="mt-1 text-xs font-medium text-foreground/80 line-clamp-1">{s.subcategory || s.category_slug}</p>
+                            <p className="mt-1 flex items-center gap-1 text-[11px] text-muted-foreground line-clamp-1">
+                              <MapPin className="h-3 w-3 shrink-0" /> {s.town || s.district || "Uganda"}
+                            </p>
+                          </div>
+                        </Link>
+                      );
+                    })}
+                </div>
+              </>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Sticky Bottom Action Bar */}

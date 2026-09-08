@@ -12,16 +12,22 @@ if (!dbPass || !projectId) {
   process.exit(1);
 }
 
-const connectionString = `postgresql://postgres.${projectId}:${encodeURIComponent(dbPass)}@aws-0-eu-central-1.pooler.supabase.com:6543/postgres`;
+const connectionString = `postgresql://postgres:${encodeURIComponent(dbPass)}@db.${projectId}.supabase.co:5432/postgres`;
 
 const client = new pg.Client({
   connectionString,
 });
 
 async function run() {
+  const fileArg = process.argv[2];
+  if (!fileArg) {
+    console.error("Please provide a path to the SQL file.");
+    process.exit(1);
+  }
+
   try {
     await client.connect();
-    const sqlPath = path.resolve('supabase', 'migrations', '20260903120000_create_job_opportunities.sql');
+    const sqlPath = path.resolve(fileArg);
     const sql = fs.readFileSync(sqlPath, 'utf8');
     
     await client.query(sql);
