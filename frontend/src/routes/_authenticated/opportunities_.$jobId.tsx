@@ -248,7 +248,7 @@ function JobDetailsPage() {
           <div className="mt-10">
             {isOwner ? (
               <button
-                onClick={() => toast.info("Edit functionality coming soon!")}
+                onClick={() => nav({ to: `/opportunities/${jobId}/edit` })}
                 className="flex w-full items-center justify-center gap-2 rounded-2xl bg-muted px-4 py-4 font-bold text-[15px] text-navy transition-transform hover:scale-[1.02] active:scale-95 shadow-sm border border-border"
               >
                 <Pencil className="h-4 w-4" />

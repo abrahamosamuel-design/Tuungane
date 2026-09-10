@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { Eye, EyeOff, Check, AlertCircle, Loader2 } from "lucide-react";
 
 import { Logo } from "@/components/Logo";
+import { PhoneInput } from "@/components/PhoneInput";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/use-auth";
 import { toast } from "sonner";
@@ -43,9 +44,11 @@ export function LoginPage({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [phone, setPhone] = useState("");
   const [emailTouched, setEmailTouched] = useState(false);
   const [passwordTouched, setPasswordTouched] = useState(false);
   const [confirmPasswordTouched, setConfirmPasswordTouched] = useState(false);
+  const [phoneTouched, setPhoneTouched] = useState(false);
 
   const [busy, setBusy] = useState(false);
   const [googleBusy, setGoogleBusy] = useState(false);
@@ -62,6 +65,8 @@ export function LoginPage({
   const emailValid = emailRegex.test(email.trim());
   const passwordValid = password.length >= 6;
   const passwordsMatch = password === confirmPassword;
+  const phoneValid = phone.length > 10; // Simple validation for country code + length
+
   const showEmailError = emailTouched && email.length > 0 && !emailValid;
   const showPasswordError = passwordTouched && password.length > 0 && !passwordValid;
   const showConfirmPasswordError = confirmPasswordTouched && confirmPassword.length > 0 && !passwordsMatch;
@@ -76,7 +81,7 @@ export function LoginPage({
     return s;
   }, [password]);
 
-  const canSubmitEmail = emailValid && passwordValid && (tab === "login" || passwordsMatch) && !busy;
+  const canSubmitEmail = emailValid && passwordValid && (tab === "login" || (passwordsMatch && phoneValid)) && !busy;
 
   if (!loading && user) return null;
 
@@ -108,8 +113,11 @@ export function LoginPage({
     setError(null);
     setEmailTouched(true);
     setPasswordTouched(true);
-    if (tab === "signup") setConfirmPasswordTouched(true);
-    if (!emailValid || !passwordValid || (tab === "signup" && !passwordsMatch)) return;
+    if (tab === "signup") {
+      setConfirmPasswordTouched(true);
+      setPhoneTouched(true);
+    }
+    if (!emailValid || !passwordValid || (tab === "signup" && (!passwordsMatch || !phoneValid))) return;
     setBusy(true);
     try {
       if (tab === "signup") {
@@ -117,7 +125,10 @@ export function LoginPage({
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo: `${window.location.origin}/login?verified=true${redirectUrl ? `&redirect=${encodeURIComponent(redirectUrl)}` : ''}` },
+          options: { 
+            emailRedirectTo: `${window.location.origin}/login?verified=true${redirectUrl ? `&redirect=${encodeURIComponent(redirectUrl)}` : ''}`,
+            data: { phone }
+          },
         });
         if (error) throw error;
         try { localStorage.removeItem("tuungane_welcome_seen"); } catch { /* ignore */ }
@@ -204,6 +215,16 @@ export function LoginPage({
               </div>
               {showEmailError && <p className="mt-1.5 text-xs text-destructive font-medium">Enter a valid email like name@example.com</p>}
             </div>
+
+            {tab === "signup" && (
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Phone Number</label>
+                <div className="mt-1.5">
+                  <PhoneInput value={phone} onChange={setPhone} required />
+                </div>
+                {phoneTouched && !phoneValid && <p className="mt-1.5 text-xs text-destructive font-medium">Enter a valid complete phone number</p>}
+              </div>
+            )}
 
             <div>
               <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Password</label>

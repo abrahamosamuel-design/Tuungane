@@ -223,3 +223,158 @@ export const getJobRequests = async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
+export const updateJobOpportunity = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { id } = req.params;
+    const { job_title, company_name, location, qualification, salary, cover_image_url } = req.body;
+
+    if (!job_title || !company_name || !location) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    // Verify ownership
+    const { data: existing, error: fetchErr } = await supabaseAdmin
+      .from('timeline_posts')
+      .select('provider_user_id, text')
+      .eq('id', id)
+      .eq('post_type', 'opportunity_shared')
+      .single();
+
+    if (fetchErr || !existing) {
+      return res.status(404).json({ error: 'Job opportunity not found' });
+    }
+    if (existing.provider_user_id !== userId) {
+      return res.status(403).json({ error: 'Unauthorized to update this opportunity' });
+    }
+
+    let existingPayload = {};
+    try {
+      existingPayload = JSON.parse(existing.text);
+    } catch (e) {
+      existingPayload = {};
+    }
+
+    const payload = {
+      ...existingPayload,
+      job_title,
+      company_name,
+      location,
+      qualification: qualification || "",
+      salary: salary || ""
+    };
+
+    const updateData = {
+      text: JSON.stringify(payload),
+      location
+    };
+
+    if (cover_image_url !== undefined) {
+      updateData.media_urls = cover_image_url ? [cover_image_url] : [];
+    }
+
+    const { data, error } = await supabaseAdmin
+      .from('timeline_posts')
+      .update(updateData)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    res.json({ data });
+  } catch (err) {
+    console.error('updateJobOpportunity error:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+export const updateJobRequest = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { id } = req.params;
+    const { 
+      job_title, 
+      resume_summary, 
+      experience_years, 
+      location, 
+      cover_image_url,
+      full_name,
+      age,
+      gender,
+      address,
+      contact_info,
+      academic_qualifications,
+      working_experience,
+      skills,
+      hobbies,
+      referees
+    } = req.body;
+
+    if (!job_title || !resume_summary || !location) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    // Verify ownership
+    const { data: existing, error: fetchErr } = await supabaseAdmin
+      .from('timeline_posts')
+      .select('provider_user_id, text')
+      .eq('id', id)
+      .eq('post_type', 'opportunity_shared')
+      .single();
+
+    if (fetchErr || !existing) {
+      return res.status(404).json({ error: 'Job request not found' });
+    }
+    if (existing.provider_user_id !== userId) {
+      return res.status(403).json({ error: 'Unauthorized to update this request' });
+    }
+
+    let existingPayload = {};
+    try {
+      existingPayload = JSON.parse(existing.text);
+    } catch (e) {
+      existingPayload = {};
+    }
+
+    const payload = {
+      ...existingPayload,
+      job_title,
+      resume_summary,
+      experience_years: experience_years || "",
+      location,
+      full_name: full_name || "",
+      age: age || "",
+      gender: gender || "",
+      address: address || "",
+      contact_info: contact_info || "",
+      academic_qualifications: academic_qualifications || "",
+      working_experience: working_experience || "",
+      skills: skills || "",
+      hobbies: hobbies || "",
+      referees: referees || ""
+    };
+
+    const updateData = {
+      text: JSON.stringify(payload),
+      location
+    };
+
+    if (cover_image_url !== undefined) {
+      updateData.media_urls = cover_image_url ? [cover_image_url] : [];
+    }
+
+    const { data, error } = await supabaseAdmin
+      .from('timeline_posts')
+      .update(updateData)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    res.json({ data });
+  } catch (err) {
+    console.error('updateJobRequest error:', err);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};

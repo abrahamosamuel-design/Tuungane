@@ -4,6 +4,7 @@ import { Footer } from "./Footer";
 import { MobileBottomNav } from "./MobileBottomNav";
 import { OfflineBanner } from "./OfflineBanner";
 import { AuthGateProvider } from "./RequireAuthDialog";
+import { ContactPromptDialog } from "./ContactPromptDialog";
 import { useAuth } from "@/hooks/use-auth";
 import { Link, useMatches } from "@tanstack/react-router";
 
@@ -28,6 +29,7 @@ export function Layout({ children }: { children: ReactNode }) {
 
   return (
     <AuthGateProvider>
+      <ContactPromptDialog />
       <div className="flex min-h-dvh flex-col relative bg-background overflow-x-hidden">
         <OfflineBanner />
         

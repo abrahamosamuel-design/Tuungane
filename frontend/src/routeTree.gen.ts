@@ -53,6 +53,7 @@ import { Route as AuthenticatedNotificationsPreferencesRouteImport } from './rou
 import { Route as AuthenticatedNotificationsIdRouteImport } from './routes/_authenticated/notifications.$id'
 import { Route as AuthenticatedMessagesIdRouteImport } from './routes/_authenticated/messages.$id'
 import { Route as AuthenticatedBusinessesNewRouteImport } from './routes/_authenticated/businesses.new'
+import { Route as AuthenticatedOpportunitiesJobIdEditRouteImport } from './routes/_authenticated/opportunities_.$jobId_.edit'
 
 const TrustRoute = TrustRouteImport.update({
   id: '/trust',
@@ -286,6 +287,12 @@ const AuthenticatedBusinessesNewRoute =
     path: '/businesses/new',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedOpportunitiesJobIdEditRoute =
+  AuthenticatedOpportunitiesJobIdEditRouteImport.update({
+    id: '/opportunities_/$jobId_/edit',
+    path: '/opportunities/$jobId/edit',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -331,6 +338,7 @@ export interface FileRoutesByFullPath {
   '/notifications/': typeof AuthenticatedNotificationsIndexRoute
   '/requests/': typeof AuthenticatedRequestsIndexRoute
   '/u/$id/': typeof UIdIndexRoute
+  '/opportunities/$jobId/edit': typeof AuthenticatedOpportunitiesJobIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -376,6 +384,7 @@ export interface FileRoutesByTo {
   '/notifications': typeof AuthenticatedNotificationsIndexRoute
   '/requests': typeof AuthenticatedRequestsIndexRoute
   '/u/$id': typeof UIdIndexRoute
+  '/opportunities/$jobId/edit': typeof AuthenticatedOpportunitiesJobIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -423,6 +432,7 @@ export interface FileRoutesById {
   '/_authenticated/notifications/': typeof AuthenticatedNotificationsIndexRoute
   '/_authenticated/requests/': typeof AuthenticatedRequestsIndexRoute
   '/u/$id/': typeof UIdIndexRoute
+  '/_authenticated/opportunities_/$jobId_/edit': typeof AuthenticatedOpportunitiesJobIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -470,6 +480,7 @@ export interface FileRouteTypes {
     | '/notifications/'
     | '/requests/'
     | '/u/$id/'
+    | '/opportunities/$jobId/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -515,6 +526,7 @@ export interface FileRouteTypes {
     | '/notifications'
     | '/requests'
     | '/u/$id'
+    | '/opportunities/$jobId/edit'
   id:
     | '__root__'
     | '/'
@@ -561,6 +573,7 @@ export interface FileRouteTypes {
     | '/_authenticated/notifications/'
     | '/_authenticated/requests/'
     | '/u/$id/'
+    | '/_authenticated/opportunities_/$jobId_/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -898,6 +911,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedBusinessesNewRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/opportunities_/$jobId_/edit': {
+      id: '/_authenticated/opportunities_/$jobId_/edit'
+      path: '/opportunities/$jobId/edit'
+      fullPath: '/opportunities/$jobId/edit'
+      preLoaderRoute: typeof AuthenticatedOpportunitiesJobIdEditRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -924,6 +944,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedMessagesIndexRoute: typeof AuthenticatedMessagesIndexRoute
   AuthenticatedNotificationsIndexRoute: typeof AuthenticatedNotificationsIndexRoute
   AuthenticatedRequestsIndexRoute: typeof AuthenticatedRequestsIndexRoute
+  AuthenticatedOpportunitiesJobIdEditRoute: typeof AuthenticatedOpportunitiesJobIdEditRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -951,6 +972,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedMessagesIndexRoute: AuthenticatedMessagesIndexRoute,
   AuthenticatedNotificationsIndexRoute: AuthenticatedNotificationsIndexRoute,
   AuthenticatedRequestsIndexRoute: AuthenticatedRequestsIndexRoute,
+  AuthenticatedOpportunitiesJobIdEditRoute:
+    AuthenticatedOpportunitiesJobIdEditRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
