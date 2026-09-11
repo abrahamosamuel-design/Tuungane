@@ -32,10 +32,10 @@ export const getServiceById = async (req, res) => {
         *,
         profile:public_profiles!profile_services_profile_id_fkey (
           id, owner_id, name, avatar_url, verified,
-          town, district, area, slug
+          town, district, area, slug, phone
         ),
         user_profile:profiles!profile_services_user_profile_id_fkey (
-          id, full_name, avatar_url
+          id, full_name, avatar_url, phone
         )
       `)
       .eq('id', id)
@@ -54,7 +54,7 @@ export const getServiceById = async (req, res) => {
       // Fetch personal profile for the fallback user
       const { data: personalProf } = await supabaseAdmin
         .from('profiles')
-        .select('id, full_name, avatar_url')
+        .select('id, full_name, avatar_url, phone')
         .eq('id', fallback.user_id)
         .maybeSingle();
 
@@ -76,6 +76,7 @@ export const getServiceById = async (req, res) => {
           id: personalProf.id,
           name: personalProf.full_name,
           avatar_url: personalProf.avatar_url,
+          phone: personalProf.phone,
           isPersonal: true,
           town: fallback.town,
           district: fallback.district,
