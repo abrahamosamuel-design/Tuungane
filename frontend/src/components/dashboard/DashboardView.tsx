@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, forwardRef, Ref } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Search, MoreHorizontal, Star, Wrench, Zap, Sparkles, Heart, MessageCircle, MessageSquare, Send, MapPin, ChevronRight, CalendarPlus } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
@@ -9,10 +9,11 @@ import { useUserLocation } from "@/hooks/use-user-location";
 import { toast } from "sonner";
 import { PostMedia } from "@/components/social/PostMedia";
 
-import { useQuery } from "@tanstack/react-query";
-
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { VirtuosoGrid } from "react-virtuoso";
 import { MobileSearchBar } from "@/components/MobileSearchBar";
 import { CategoryScroll } from "@/components/CategoryScroll";
+import { getOptimizedImageUrl } from "@/lib/image";
 
 /* ---------- helpers ---------- */
 
@@ -65,18 +66,19 @@ export function DashboardView() {
   const { user } = useAuth();
   const { location: userLoc } = useUserLocation();
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
     queryKey: ["dashboard-data", userLoc?.latitude, userLoc?.longitude],
-    queryFn: async () => {
+    initialPageParam: 1,
+    queryFn: async ({ pageParam = 1 }) => {
       const hasCoords = userLoc?.latitude != null && userLoc?.longitude != null;
-      const params: any = {};
+      const params: any = { page: pageParam, limit: 15 };
       if (hasCoords) {
-        params.lat = userLoc!.latitude;
-        params.lng = userLoc!.longitude;
+        params.latitude = userLoc!.latitude;
+        params.longitude = userLoc!.longitude;
       }
 
-      const homeRes = await apiClient.get("/feed/home", { params }).catch(() => ({ data: {} }));
-      const homeData = homeRes.data || {};
+      const homeRes = await apiClient.get("/feed/home", { params }).catch(() => ({ data: { data: {} } }));
+      const homeData = homeRes.data?.data || homeRes.data || {};
 
       const requestsData = homeData.requests || [];
       const formattedRequests = requestsData.map((r: any) => ({
@@ -92,7 +94,7 @@ export function DashboardView() {
       }));
 
       const formattedProfiles = (homeData.providers || []).map((p: any) => ({
-        id: p.service_id,
+        id: p.service_id || p.user_id,
         owner_id: p.user_id,
         slug: p.slug,
         name: p.business_name || p.name || p.profile?.full_name || "Provider",
@@ -126,35 +128,28 @@ export function DashboardView() {
         profiles: formattedProfiles,
         requests: formattedRequests,
         timelinePosts: formattedTimeline,
+        nextPage: (formattedProfiles.length + formattedRequests.length + formattedTimeline.length) > 0 ? pageParam + 1 : undefined,
       };
     },
+    getNextPageParam: (lastPage) => lastPage.nextPage,
     staleTime: 1000 * 60 * 5,
   });
 
-  const realProfiles = data?.profiles || [];
-  const realRequests = data?.requests || [];
-  const realTimeline = data?.timelinePosts || [];
-
   const mixedFeed = useMemo(() => {
-    const feed: FeedItem[] = [];
-
-    // Individual provider cards (not pairs)
-    realProfiles.forEach((p: any, i: number) => {
-      feed.push({ type: "provider", id: `prov-${p.id || i}`, data: p });
+    if (!data) return [];
+    const allItems: FeedItem[] = [];
+    
+    data.pages.forEach((page, pageIndex) => {
+        const pageFeed: FeedItem[] = [];
+        page.profiles.forEach((p: any) => pageFeed.push({ type: "provider", id: `prov-${p.id}`, data: p }));
+        page.requests.forEach((r: any) => pageFeed.push({ type: "request", id: `req-${r.id}`, data: r }));
+        page.timelinePosts.forEach((tp: any) => pageFeed.push({ type: "timeline_post", id: `tp-${tp.id}`, data: tp }));
+        
+        allItems.push(...shuffleArray(pageFeed, timeSeed() + pageIndex));
     });
 
-    // Requests
-    realRequests.forEach((r: any, i: number) => {
-      feed.push({ type: "request", id: `req-${i}`, data: r });
-    });
-
-    // Timeline posts
-    realTimeline.forEach((tp: any, i: number) => {
-      feed.push({ type: "timeline_post", id: `tp-${tp.id || i}`, data: tp });
-    });
-
-    return shuffleArray(feed, timeSeed());
-  }, [realProfiles, realRequests, realTimeline]);
+    return allItems;
+  }, [data]);
 
   return (
     <div className="flex min-h-screen flex-col bg-background pb-20 md:pb-0">
@@ -189,8 +184,25 @@ export function DashboardView() {
         {isLoading && <div className="text-sm text-muted-foreground text-center py-12">Loading feed...</div>}
         {!isLoading && mixedFeed.length === 0 && <div className="text-sm text-muted-foreground text-center py-12">No community posts yet.</div>}
         
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 pb-8">
-          {mixedFeed.map((item) => {
+        <VirtuosoGrid
+          useWindowScroll
+          data={mixedFeed}
+          endReached={() => {
+            if (hasNextPage && !isFetchingNextPage) fetchNextPage();
+          }}
+          components={{
+            List: forwardRef((props, ref) => (
+              <div
+                {...props}
+                ref={ref as Ref<HTMLDivElement>}
+                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 pb-8"
+              />
+            )),
+            Item: (props) => (
+              <div {...props} className="flex flex-col h-full" />
+            )
+          }}
+          itemContent={(index, item) => {
             if (item.type === "provider") {
               return <ProviderCard key={item.id} data={item.data} />;
             }
@@ -201,8 +213,9 @@ export function DashboardView() {
               return <TimelinePostCard key={item.id} data={item.data} />;
             }
             return null;
-          })}
-        </div>
+          }}
+        />
+        {isFetchingNextPage && <div className="text-center py-4 text-sm text-muted-foreground">Loading more...</div>}
       </div>
     </div>
   );
@@ -224,7 +237,7 @@ function ProviderCard({ data }: { data: any }) {
         {/* Header: avatar + name + category */}
         <div className="flex items-start gap-3 mb-3">
           {data.avatar_url ? (
-            <img src={data.avatar_url} className="h-11 w-11 rounded-full object-cover shrink-0" />
+            <img src={getOptimizedImageUrl(data.avatar_url, 64, 64)} className="h-11 w-11 rounded-full object-cover shrink-0" />
           ) : (
             <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-navy/10 text-navy font-bold text-sm">
               {(data.name || "?").charAt(0).toUpperCase()}{(data.name || "?").split(" ")[1]?.charAt(0)?.toUpperCase() || ""}

@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Star, MessageSquare, Clock, ImageIcon, Phone, Coins, Plus, MapPin } from "lucide-react";
 import { apiClient } from "@/lib/api";
 import { useAuthGate } from "@/components/RequireAuthDialog";
@@ -24,38 +25,33 @@ function ServiceDetailPage() {
   const { user } = useAuth();
   const { balance } = useCreditWallet();
   
-  const [service, setService] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"reviews" | "timeline">("reviews");
   const [postDialogOpen, setPostDialogOpen] = useState(false);
   const [bookingOpen, setBookingOpen] = useState(false);
+  const [showAllReviews, setShowAllReviews] = useState(false);
+
+  // Fetch service details using React Query for instant local caching
+  const { data: service, isLoading: loading, refetch: fetchService } = useQuery({
+    queryKey: ['service', id],
+    queryFn: async () => {
+      const res = await apiClient<{ data: any }>(`/services/detail/${id}`);
+      return res.data;
+    }
+  });
+
+  // Fetch similar services in the background without blocking the UI
+  const { data: allServices = [] } = useQuery({
+    queryKey: ['services', 'all'],
+    queryFn: async () => {
+      const searchRes = await apiClient<{ data: any[] }>(`/services/search`);
+      return searchRes.data || [];
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  });
 
   const isOwner = user?.id && service && (user.id === service.user_profile_id || user.id === service.profile?.owner_id);
 
-  const [showAllReviews, setShowAllReviews] = useState(false);
-  const [allServices, setAllServices] = useState<any[]>([]);
-
-  const fetchService = async () => {
-    try {
-      const res = await apiClient<{ data: any }>(`/services/detail/${id}`);
-      setService(res.data);
-      
-      const searchRes = await apiClient<{ data: any[] }>(`/services/search`);
-      if (searchRes.data) {
-        setAllServices(searchRes.data);
-      }
-    } catch (err) {
-      console.error("Failed to load service", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchService();
-  }, [id]);
-
-  if (loading) {
+  if (loading && !service) {
     return <div className="p-8 text-center text-sm text-muted-foreground">Loading service...</div>;
   }
 

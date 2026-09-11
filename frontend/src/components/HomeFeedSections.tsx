@@ -27,7 +27,7 @@ import { FeedAvatar } from "@/components/feed/FeedAvatar";
 import { ExpandableText } from "@/components/feed/ExpandableText";
 import { MediaGrid } from "@/components/feed/MediaGrid";
 import { useAuthGate } from "@/components/RequireAuthDialog";
-
+import { getOptimizedImageUrl } from "@/lib/image";
 
 
 
@@ -142,22 +142,19 @@ export function HomeFeedSections() {
   const { requests = [], hasNearbyReqs = false, providers = [], recentListings = [], isProvider = false } = data ?? {};
 
   const topRequests = useMemo(() => {
-    const sorted = sortByProximity(requests, userLoc, (r) => r);
-    const boosted = [...sorted].sort((a, b) => {
+    const boosted = [...requests].sort((a, b) => {
       const af = isFeaturedTarget(a, featured) ? 1 : 0;
       const bf = isFeaturedTarget(b, featured) ? 1 : 0;
       if (bf !== af) return bf - af;
       return (b.urgent_flag ? 1 : 0) - (a.urgent_flag ? 1 : 0);
     });
-    const withinDefault = filterByRadius(boosted, userLoc, (r) => r, 20);
-    return (withinDefault.length >= 3 ? withinDefault : boosted).slice(0, 3);
-  }, [requests, userLoc, featured]);
+    return boosted.slice(0, 3);
+  }, [requests, featured]);
 
   const topProviders = useMemo(() => {
-    const sorted = sortByProximity(providers, userLoc, (p) => p);
-    const boosted = [...sorted].sort((a, b) => {
-      const av = a.verified === "verified" ? 1 : 0;
-      const bv = b.verified === "verified" ? 1 : 0;
+    const boosted = [...providers].sort((a, b) => {
+      const av = a.verified === "verified" || a.verified === "featured" ? 1 : 0;
+      const bv = b.verified === "verified" || b.verified === "featured" ? 1 : 0;
       if (bv !== av) return bv - av;
       const aa = (a.availability || "available").toLowerCase() === "available" ? 1 : 0;
       const ba = (b.availability || "available").toLowerCase() === "available" ? 1 : 0;
@@ -166,9 +163,8 @@ export function HomeFeedSections() {
       const bf = isFeaturedTarget(b, featured) ? 1 : 0;
       return bf - af;
     });
-    const withinDefault = filterByRadius(boosted, userLoc, (p) => p, 20);
-    return (withinDefault.length >= 3 ? withinDefault : boosted).slice(0, 6);
-  }, [providers, userLoc, featured]);
+    return boosted.slice(0, 6);
+  }, [providers, featured]);
 
   const topListings = useMemo(() => {
     // Strict "Recently listed" order: newest created_at first.
@@ -532,7 +528,8 @@ function ProviderCard({ p, userLoc }: { p: NearbyProvider; userLoc: ReturnType<t
   const name = p.business_name || p.profile?.full_name || "Provider";
   const isVerified = p.verified === "verified" || p.verified === "featured";
   
-  const coverImage = p.cover_url || (p.media_urls && p.media_urls.length > 0 ? p.media_urls[0] : null) || p.profile?.avatar_url;
+  const rawCover = p.cover_url || (p.media_urls && p.media_urls.length > 0 ? p.media_urls[0] : null) || p.profile?.avatar_url;
+  const coverImage = getOptimizedImageUrl(rawCover, 400, 300, 'cover');
   const linkProps = p.slug ? ({ to: "/p/$slug", params: { slug: p.slug } } as const) : ({ to: "/u/$id", params: { id: p.user_id } } as const);
 
   return (
@@ -591,7 +588,8 @@ function ServiceListingCard({
   const name = l.business_name || l.profile?.full_name || formatSubcategory(l.subcategory) || cat?.name || "Service";
   const isVerified = l.verified === "verified" || l.verified === "featured";
   
-  const coverImage = l.cover_url || l.avatar_url || l.profile?.avatar_url;
+  const rawCover = l.cover_url || l.avatar_url || l.profile?.avatar_url;
+  const coverImage = getOptimizedImageUrl(rawCover, 400, 300, 'cover');
   const linkProps = l.slug ? ({ to: "/p/$slug", params: { slug: l.slug } } as const) : ({ to: "/u/$id", params: { id: l.user_id } } as const);
 
   return (

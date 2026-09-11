@@ -34,8 +34,10 @@ export const getRequests = async (req, res) => {
 
 export const browseRequests = async (req, res) => {
   try {
-    const { cat, chip, urgentOnly, budgetShown, loc, q, myDistrict } = req.query;
+    const { cat, chip, urgentOnly, budgetShown, loc, q, myDistrict, limit = 20, page = 1 } = req.query;
     const isGuest = !req.user;
+    const limitNum = parseInt(limit, 10);
+    const offset = (parseInt(page, 10) - 1) * limitNum;
     
     const cols = isGuest
       ? "id,provider_id,category_slug,subcategory,service_needed,title,visibility,district,town,description,preferred_date,preferred_time,urgency,budget_range,media_urls,status,urgent_flag,created_at,updated_at,service_profile_id,posted_as_type,posted_as_name,posted_as_avatar_url,posted_as_ref_type,posted_as_ref_id"
@@ -47,7 +49,7 @@ export const browseRequests = async (req, res) => {
       .eq("visibility", "public")
       .eq("status", "requested")
       .order("created_at", { ascending: false })
-      .limit(80);
+      .range(offset, offset + limitNum - 1);
 
     if (cat) query = query.eq("category_slug", cat);
     if (chip === "urgent" || urgentOnly === 'true') query = query.eq("urgent_flag", true);
@@ -65,7 +67,7 @@ export const browseRequests = async (req, res) => {
 
     let list = data || [];
 
-    if (!isGuest) {
+    if (!isGuest && list.length > 0) {
       const customerIds = Array.from(new Set(list.map((r) => r.customer_id).filter(Boolean)));
       const requestIds = list.map((r) => r.id);
       

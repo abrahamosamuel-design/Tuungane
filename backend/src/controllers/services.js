@@ -1,5 +1,13 @@
 import { supabaseAdmin } from '../lib/supabaseClient.js';
 import { createClient } from '@supabase/supabase-js';
+import NodeCache from 'node-cache';
+
+// Initialize cache with 30 seconds default TTL to absorb traffic spikes
+const apiCache = new NodeCache({ stdTTL: 30, checkperiod: 60 });
+
+const generateCacheKey = (req) => {
+  return `${req.baseUrl || ''}${req.path}?${new URLSearchParams(req.query).toString()}`;
+};
 
 const getSupabaseUserClient = (req) => {
   const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || '';
@@ -13,6 +21,10 @@ const getSupabaseUserClient = (req) => {
 
 export const getServiceById = async (req, res) => {
   try {
+    const cacheKey = generateCacheKey(req);
+    const cachedData = apiCache.get(cacheKey);
+    if (cachedData) return res.json(cachedData);
+
     const { id } = req.params;
     let { data: service, error: serviceError } = await supabaseAdmin
       .from('profile_services')
@@ -91,15 +103,9 @@ export const getServiceById = async (req, res) => {
       };
     }
     
-    // Fetch associated media using the service's own ID
-    let mediaQuery = supabaseAdmin
-      .from('service_media')
-      .select('*')
-      .eq('service_id', service.id);
-      
-    const { data: media } = await mediaQuery;
-
-    // Fetch reviews for the provider
+    // Run independent queries in parallel
+    const providerUserId = service.user_profile_id || service.profile?.owner_id || service.profile?.id;
+    
     let reviewsQuery = supabaseAdmin
       .from('reviews')
       .select('id, rating, text, created_at, user_id')
@@ -111,8 +117,39 @@ export const getServiceById = async (req, res) => {
     } else {
       reviewsQuery = reviewsQuery.eq('provider_user_id', service.user_profile_id);
     }
-    const { data: rawReviews } = await reviewsQuery;
-    
+
+    let postsQuery = supabaseAdmin
+      .from('timeline_posts')
+      .select('*')
+      .eq('hidden', false)
+      .or(`service_id.eq.${service.id}${providerUserId ? `,provider_user_id.eq.${providerUserId}` : ''}`)
+      .order('created_at', { ascending: false })
+      .limit(30);
+
+    const [
+      { data: media },
+      { data: rawReviews },
+      { data: timeline_posts }
+    ] = await Promise.all([
+      supabaseAdmin.from('service_media').select('*').eq('service_id', service.id),
+      reviewsQuery,
+      postsQuery
+    ]);
+
+    // Gather all user IDs needed for enrichment
+    const reviewUserIds = rawReviews ? Array.from(new Set(rawReviews.map(r => r.user_id))) : [];
+    const postUserIds = timeline_posts ? Array.from(new Set(timeline_posts.map(p => p.provider_user_id).filter(Boolean))) : [];
+    const allUserIds = Array.from(new Set([...reviewUserIds, ...postUserIds]));
+
+    let userMap = new Map();
+    if (allUserIds.length > 0) {
+      const { data: users } = await supabaseAdmin
+        .from('profiles')
+        .select('id, full_name, avatar_url')
+        .in('id', allUserIds);
+      userMap = new Map((users || []).map(u => [u.id, u]));
+    }
+
     let rating = 0;
     let reviewCount = 0;
     let reviews = [];
@@ -121,43 +158,14 @@ export const getServiceById = async (req, res) => {
       reviewCount = rawReviews.length;
       rating = Number((rawReviews.reduce((acc, r) => acc + (r.rating || 0), 0) / reviewCount).toFixed(1));
       
-      const userIds = Array.from(new Set(rawReviews.map(r => r.user_id)));
-      const { data: users } = await supabaseAdmin
-        .from('profiles')
-        .select('id, full_name, avatar_url')
-        .in('id', userIds);
-        
-      const userMap = new Map((users || []).map(u => [u.id, u]));
-      
       reviews = rawReviews.map(r => ({
         ...r,
         user: userMap.get(r.user_id) || null
       }));
     }
 
-    // Fetch timeline posts for the provider (including posts explicitly linked to this service, and general provider posts)
-    const providerUserId = service.user_profile_id || service.profile?.owner_id || service.profile?.id;
-    let postsQuery = supabaseAdmin
-      .from('timeline_posts')
-      .select('*')
-      .eq('hidden', false)
-      .or(`service_id.eq.${service.id}${providerUserId ? `,provider_user_id.eq.${providerUserId}` : ''}`)
-      .order('created_at', { ascending: false })
-      .limit(30);
-    const { data: timeline_posts } = await postsQuery;
-    
     let enrichedPosts = [];
     if (timeline_posts && timeline_posts.length > 0) {
-      const userIds = [...new Set(timeline_posts.map(p => p.provider_user_id).filter(Boolean))];
-      let userMap = new Map();
-      if (userIds.length > 0) {
-        const { data: users } = await supabaseAdmin
-          .from('profiles')
-          .select('id, full_name, avatar_url')
-          .in('id', userIds);
-        userMap = new Map((users || []).map(u => [u.id, u]));
-      }
-
       enrichedPosts = timeline_posts.map(p => {
         const user = userMap.get(p.provider_user_id);
         return {
@@ -175,7 +183,9 @@ export const getServiceById = async (req, res) => {
       });
     }
 
-    res.json({ data: { ...service, media: media || [], reviews, rating, reviewCount, timeline_posts: enrichedPosts } });
+    const responseData = { data: { ...service, media: media || [], reviews, rating, reviewCount, timeline_posts: enrichedPosts } };
+    apiCache.set(cacheKey, responseData, 60); // Cache for 60 seconds
+    res.json(responseData);
   } catch (err) {
     console.error('Error fetching service:', err);
     res.status(500).json({ error: 'Failed to fetch service' });
@@ -348,6 +358,10 @@ export const deleteProfileService = async (req, res) => {
 
 export const getServicesMetadata = async (req, res) => {
   try {
+    const cacheKey = generateCacheKey(req);
+    const cachedData = apiCache.get(cacheKey);
+    if (cachedData) return res.json(cachedData);
+
     const [{ data: cs }, { data: ss }] = await Promise.all([
       supabaseAdmin.from("service_categories").select("slug,name,icon,blurb,sort_order,active").eq("active", true).order("sort_order").order("name"),
       supabaseAdmin.from("service_subcategories").select("category_slug,name,sort_order,active").eq("active", true).order("sort_order").order("name"),
@@ -379,7 +393,9 @@ export const getServicesMetadata = async (req, res) => {
       return 0;
     });
 
-    res.json({ data });
+    const responseData = { data };
+    apiCache.set(cacheKey, responseData, 300); // Metadata changes rarely, cache for 5 minutes
+    res.json(responseData);
   } catch (err) {
     console.error('Error fetching metadata:', err);
     res.status(500).json({ error: 'Failed to fetch metadata' });
@@ -388,6 +404,10 @@ export const getServicesMetadata = async (req, res) => {
 
 export const getFeaturedLocations = async (req, res) => {
   try {
+    const cacheKey = generateCacheKey(req);
+    const cachedData = apiCache.get(cacheKey);
+    if (cachedData) return res.json(cachedData);
+
     const { data } = await supabaseAdmin
       .from("featured_locations")
       .select("id,country,region,district,town,area,category_slug,priority,note,active")
@@ -408,7 +428,9 @@ export const getFeaturedLocations = async (req, res) => {
       longitude: coordMap.get(r.id)?.longitude || null 
     }));
     
-    res.json({ data: list });
+    const responseData = { data: list };
+    apiCache.set(cacheKey, responseData, 300); // 5 mins cache
+    res.json(responseData);
   } catch (err) {
     console.error('Error fetching featured locations:', err);
     res.status(500).json({ error: 'Failed to fetch featured locations' });
@@ -417,91 +439,78 @@ export const getFeaturedLocations = async (req, res) => {
 
 export const getHomeNearby = async (req, res) => {
   try {
-    const { latitude, longitude } = req.query;
+    const cacheKey = generateCacheKey(req);
+    const cachedData = apiCache.get(cacheKey);
+    if (cachedData) return res.json(cachedData);
+
+    const { latitude, longitude, limit = 20, page = 1 } = req.query;
     const lat = latitude ? parseFloat(latitude) : null;
     const lng = longitude ? parseFloat(longitude) : null;
+    const limitNum = parseInt(limit, 10);
+    const offset = (parseInt(page, 10) - 1) * limitNum;
     const hasCoords = lat !== null && lng !== null && !isNaN(lat) && !isNaN(lng);
 
-    let reqs = null;
-    let provs = null;
+    let reqs = [];
+    let provs = [];
 
     if (hasCoords) {
-      const { data: rpcReqs } = await supabaseAdmin.rpc("nearby_service_requests", {
-        in_lat: lat,
-        in_lng: lng,
-        in_radius_km: 50,
-        in_limit: 20,
-      });
-      reqs = rpcReqs || null;
+      const [reqsRes, provsRes] = await Promise.all([
+        supabaseAdmin.rpc("nearby_service_requests", {
+          in_lat: lat,
+          in_lng: lng,
+          in_radius_km: 50,
+          in_limit: limitNum,
+          in_offset: offset,
+        }),
+        supabaseAdmin.rpc("get_nearby_services", {
+          in_lat: lat,
+          in_lng: lng,
+          in_radius_km: 50,
+          in_limit: limitNum,
+          in_offset: offset,
+        })
+      ]);
+      reqs = reqsRes.data || [];
+      provs = (provsRes.data || []).map(p => ({
+        ...p,
+        profile: {
+          id: p.user_id,
+          full_name: p.profile_full_name,
+          avatar_url: p.final_avatar_url
+        }
+      }));
+    } else {
+      // Fallback without coordinates
+      const [reqsRes, provsRes] = await Promise.all([
+        supabaseAdmin
+          .from("service_requests")
+          .select("id,title,service_needed,description,budget_range,urgent_flag,created_at,district,town,area,location")
+          .eq("visibility", "public")
+          .eq("status", "requested")
+          .is("provider_id", null)
+          .order("created_at", { ascending: false })
+          .range(offset, offset + limitNum - 1),
+        supabaseAdmin
+          .from("v_search_services_enriched")
+          .select("*")
+          .order("updated_at", { ascending: false })
+          .range(offset, offset + limitNum - 1)
+      ]);
+      
+      reqs = reqsRes.data || [];
+      provs = (provsRes.data || []).map(p => ({
+        ...p,
+        profile: {
+          id: p.user_id,
+          full_name: p.profile_full_name,
+          avatar_url: p.final_avatar_url
+        }
+      }));
     }
 
-    const [{ data: rRows }, { data: pRows }, { data: spRowsRaw }] = await Promise.all([
-      reqs
-        ? Promise.resolve({ data: reqs })
-        : supabaseAdmin
-            .from("service_requests")
-            .select("id,title,service_needed,description,budget_range,urgent_flag,created_at,district,town,area,location")
-            .eq("visibility", "public")
-            .eq("status", "requested")
-            .is("provider_id", null)
-            .order("created_at", { ascending: false })
-            .limit(40),
-      supabaseAdmin
-        .from("public_profiles")
-        .select("id,owner_id,name,subcategory,town,district,area,service_radius_km,areas_served,verified")
-        .eq("suspended", false)
-        .not("owner_id", "is", null)
-        .order("updated_at", { ascending: false })
-        .limit(40),
-      supabaseAdmin
-        .from("service_profiles")
-        .select("user_id,business_name,subcategory,town,district,area,service_radius_km,areas_served,verified")
-        .eq("suspended", false)
-        .order("updated_at", { ascending: false })
-        .limit(40),
-    ]);
-    
-    const rRaw = rRows || [];
-    const pRaw = pRows || [];
-    const spRaw = spRowsRaw || [];
-    const ppOwners = new Set(pRaw.map((r) => r.owner_id));
-    const spNew = spRaw.filter((r) => !ppOwners.has(r.user_id));
-
-    const [{ data: reqCoords }, { data: provCoords }, { data: spCoords }] = await Promise.all([
-      rRaw.length ? supabaseAdmin.rpc("get_service_request_coords", { _ids: rRaw.map((r) => r.id) }) : Promise.resolve({ data: [] }),
-      pRaw.length ? supabaseAdmin.rpc("get_public_profile_coords", { _ids: pRaw.map((r) => r.id) }) : Promise.resolve({ data: [] }),
-      spNew.length ? supabaseAdmin.rpc("get_service_profile_coords", { _ids: spNew.map((r) => r.user_id) }) : Promise.resolve({ data: [] }),
-    ]);
-
-    const reqCoordMap = new Map((reqCoords || []).map((c) => [c.id, c]));
-    const provCoordMap = new Map((provCoords || []).map((c) => [c.id, c]));
-    const spCoordMap = new Map((spCoords || []).map((c) => [c.user_id, c]));
-
-    reqs = rRaw.map((r) => ({ ...r, latitude: reqCoordMap.get(r.id)?.latitude || null, longitude: reqCoordMap.get(r.id)?.longitude || null }));
-    const ppProvs = pRaw.map((r) => ({
-      ...r,
-      user_id: r.owner_id,
-      business_name: r.name,
-      latitude: provCoordMap.get(r.id)?.latitude || null,
-      longitude: provCoordMap.get(r.id)?.longitude || null,
-    }));
-    const spProvs = spNew.map((r) => ({
-      ...r,
-      latitude: spCoordMap.get(r.user_id)?.latitude || null,
-      longitude: spCoordMap.get(r.user_id)?.longitude || null,
-    }));
-    provs = [...ppProvs, ...spProvs];
-
-    const provIds = provs.map((p) => p.user_id);
-    const profMap = new Map();
-    if (provIds.length) {
-      const { data: profs } = await supabaseAdmin.from("profiles").select("id,full_name,avatar_url").in("id", provIds);
-      (profs || []).forEach((p) => profMap.set(p.id, p));
-    }
-    
-    provs = provs.map((p) => ({ ...p, profile: profMap.get(p.user_id) || null }));
-
-    res.json({ data: { requests: reqs, providers: provs } });
+    const responseData = { data: { requests: reqs, providers: provs } };
+    apiCache.set(cacheKey, responseData); // 30s default cache
+    res.json(responseData);
   } catch (err) {
     console.error('Error fetching home nearby data:', err);
     res.status(500).json({ error: 'Failed to fetch nearby data' });
@@ -510,15 +519,19 @@ export const getHomeNearby = async (req, res) => {
 
 export const searchServices = async (req, res) => {
   try {
-    const isGuest = !req.user;
-    const filter = req.query.filter || 'all';
-    const isRecent = filter === 'recent';
+    const cacheKey = generateCacheKey(req);
+    const cachedData = apiCache.get(cacheKey);
+    if (cachedData) return res.json(cachedData);
 
-    // We use the new unified v_search_services view which combines profile_services, public_profiles, and service_profiles.
-    let q = supabaseAdmin.from("v_search_services").select("*");
+    const { filter = 'all', limit = 20, page = 1 } = req.query;
+    const isRecent = filter === 'recent';
+    const limitNum = parseInt(limit, 10);
+    const offset = (parseInt(page, 10) - 1) * limitNum;
+
+    let q = supabaseAdmin.from("v_search_services_enriched").select("*");
     
     q = isRecent ? q.order("created_at", { ascending: false }) : q.order("updated_at", { ascending: false });
-    q = q.limit(60);
+    q = q.range(offset, offset + limitNum - 1);
     
     if (filter === "featured") q = q.eq("verified", "featured");
     if (filter === "verified") q = q.in("verified", ["verified", "featured"]);
@@ -527,41 +540,18 @@ export const searchServices = async (req, res) => {
     const { data: merged, error } = await q;
     if (error) throw error;
 
-    const ids = (merged || []).map((p) => p.user_id).filter(Boolean);
-    const profMap = new Map();
-    const trustMap = new Map();
-    
-    if (ids.length) {
-      const profsPromise = isGuest
-        ? Promise.resolve({ data: [] })
-        : supabaseAdmin.from("profiles").select("id,full_name,avatar_url").in("id", ids);
-        
-      const [profsRes, trustRes] = await Promise.all([
-        profsPromise,
-        supabaseAdmin.from("provider_trust_stats").select("provider_id,trust_score,average_rating,completed_service_requests,total_verified_reviews,response_rate").in("provider_id", ids),
-      ]);
-      
-      (profsRes.data || []).forEach((p) => profMap.set(p.id, p));
-      (trustRes.data || []).forEach((t) => trustMap.set(t.provider_id, {
-        trust_score: Number(t.trust_score || 0),
-        average_rating: Number(t.average_rating || 0),
-        completed_jobs: Number(t.completed_service_requests || 0),
-        verified_reviews: Number(t.total_verified_reviews || 0),
-        response_rate: Number(t.response_rate || 0),
-      }));
-    }
-
     const data = (merged || []).map((p) => ({
       ...p,
-      profile: profMap.get(p.user_id) || null,
-      trust_score: trustMap.get(p.user_id)?.trust_score || 0,
-      average_rating: trustMap.get(p.user_id)?.average_rating || 0,
-      completed_jobs: trustMap.get(p.user_id)?.completed_jobs || 0,
-      verified_reviews: trustMap.get(p.user_id)?.verified_reviews || 0,
-      response_rate: trustMap.get(p.user_id)?.response_rate || 0,
+      profile: {
+        id: p.user_id,
+        full_name: p.profile_full_name,
+        avatar_url: p.final_avatar_url
+      }
     }));
 
-    res.json({ data });
+    const responseData = { data };
+    apiCache.set(cacheKey, responseData);
+    res.json(responseData);
   } catch (err) {
     console.error('Error searching services:', err);
     res.status(500).json({ error: 'Failed to search services' });
@@ -570,80 +560,59 @@ export const searchServices = async (req, res) => {
 
 export const getCategoryServices = async (req, res) => {
   try {
+    const cacheKey = generateCacheKey(req);
+    const cachedData = apiCache.get(cacheKey);
+    if (cachedData) return res.json(cachedData);
+
     const { slug } = req.params;
-    const isGuest = !req.user;
+    const { limit = 20, page = 1 } = req.query;
+    const limitNum = parseInt(limit, 10);
+    const offset = (parseInt(page, 10) - 1) * limitNum;
 
-    const ppCols = isGuest
-      ? "owner_id,slug,name,subcategory,bio,town,district,areas_served,service_radius_km,category_slug,verified,updated_at,created_at,availability,cover_url,avatar_url"
-      : "owner_id,slug,name,subcategory,bio,town,district,area,latitude,longitude,areas_served,service_radius_km,category_slug,verified,updated_at,created_at,availability,cover_url,avatar_url";
+    const { data: inCatRaw } = await supabaseAdmin
+      .from("v_search_services_enriched")
+      .select("*")
+      .eq("category_slug", slug)
+      .order("updated_at", { ascending: false })
+      .range(offset, offset + limitNum - 1);
 
-    const spCols = isGuest
-      ? "user_id,business_name,subcategory,bio,town,district,areas_served,service_radius_km,category_slug,verified,updated_at,created_at,availability,cover_url,seeded_by_official,seeded_status,years_experience,price_type,price_fixed_ugx,price_min_ugx,price_max_ugx,price_currency,price_note,media_urls"
-      : "user_id,business_name,subcategory,bio,town,district,area,latitude,longitude,areas_served,service_radius_km,category_slug,verified,updated_at,created_at,availability,cover_url,seeded_by_official,seeded_status,years_experience,price_type,price_fixed_ugx,price_min_ugx,price_max_ugx,price_currency,price_note,media_urls";
-
-    const build = (from, cols) => {
-      let q = supabaseAdmin.from(from).select(cols).eq("suspended", false).order("updated_at", { ascending: false }).limit(200);
-      if (from === "public_profiles") q = q.not("owner_id", "is", null);
-      return q;
-    };
-
-    const [{ data: ppData }, { data: spData }] = await Promise.all([
-      build("public_profiles", ppCols),
-      build("service_profiles", spCols),
-    ]);
-
-    const ppRows = (ppData || []).map((r) => ({
+    const inCat = (inCatRaw || []).map(r => ({
       ...r,
-      user_id: r.owner_id,
-      business_name: r.name,
-      seeded_by_official: false,
-      seeded_status: null,
+      full_name: r.profile_full_name || null,
+      avatar_url: r.final_avatar_url || r.cover_url || null,
+      rating: r.average_rating || 0,
+      profile: {
+        id: r.user_id,
+        full_name: r.profile_full_name,
+        avatar_url: r.final_avatar_url
+      }
     }));
     
-    const ppOwners = new Set(ppRows.map((r) => r.user_id));
-    const spRows = (spData || []).filter((r) => !ppOwners.has(r.user_id));
-    const all = [...ppRows, ...spRows];
-    
-    const ids = all.map((p) => p.user_id);
-    const profMap = new Map();
-    const trustMap = new Map();
-    
-    if (ids.length) {
-      const profsPromise = isGuest
-        ? Promise.resolve({ data: [] })
-        : supabaseAdmin.from("profiles").select("id,full_name,avatar_url").in("id", ids);
+    let outCat = [];
+    if (page == 1) {
+      const { data: outCatRaw } = await supabaseAdmin
+        .from("v_search_services_enriched")
+        .select("*")
+        .neq("category_slug", slug)
+        .order("trust_score", { ascending: false })
+        .limit(6);
         
-      const [profsRes, trustRes] = await Promise.all([
-        profsPromise,
-        supabaseAdmin.from("provider_trust_stats").select("provider_id,trust_score,average_rating,completed_service_requests,total_verified_reviews,response_rate").in("provider_id", ids),
-      ]);
-      
-      (profsRes.data || []).forEach((p) => profMap.set(p.id, p));
-      (trustRes.data || []).forEach((t) => trustMap.set(t.provider_id, {
-        trust_score: Number(t.trust_score || 0),
-        average_rating: Number(t.average_rating || 0),
-        completed_jobs: Number(t.completed_service_requests || 0),
-        verified_reviews: Number(t.total_verified_reviews || 0),
-        response_rate: Number(t.response_rate || 0),
+      outCat = (outCatRaw || []).map(r => ({
+        ...r,
+        full_name: r.profile_full_name || null,
+        avatar_url: r.final_avatar_url || r.cover_url || null,
+        rating: r.average_rating || 0,
+        profile: {
+          id: r.user_id,
+          full_name: r.profile_full_name,
+          avatar_url: r.final_avatar_url
+        }
       }));
     }
 
-    const enrich = (r) => ({
-      ...r,
-      full_name: profMap.get(r.user_id)?.full_name || null,
-      avatar_url: profMap.get(r.user_id)?.avatar_url || r.cover_url || null,
-      rating: trustMap.get(r.user_id)?.average_rating || 0,
-    });
-
-    const inCat = all.filter((r) => r.category_slug === slug).map(enrich);
-    const outCat = all.filter((r) => r.category_slug !== slug).map(enrich).sort((a, b) => {
-      const rA = a.verified === "featured" ? 2 : a.verified === "verified" ? 1 : 0;
-      const rB = b.verified === "featured" ? 2 : b.verified === "verified" ? 1 : 0;
-      if (rB !== rA) return rB - rA;
-      return (b.rating || 0) - (a.rating || 0);
-    }).slice(0, 6);
-
-    res.json({ list: inCat, others: outCat });
+    const responseData = { list: inCat, others: outCat };
+    apiCache.set(cacheKey, responseData);
+    res.json(responseData);
   } catch (err) {
     console.error('Error fetching category services:', err);
     res.status(500).json({ error: 'Failed to fetch category services' });

@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft } from "lucide-react";
 
 import { apiClient } from "@/lib/api";
@@ -32,33 +32,19 @@ export const Route = createFileRoute("/posts/$id")({
 function PostDetail() {
   const { id } = useParams({ from: "/posts/$id" });
   const { location: userLoc } = useUserLocation();
-  const [post, setPost] = useState<PostRow | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [notFound, setNotFound] = useState(false);
 
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      setLoading(true);
-      try {
-        const res = await apiClient<{ data: PostRow }>(`/social/posts/${id}`);
-        if (!mounted) return;
-        setPost(res.data);
-      } catch (err) {
-        if (!mounted) return;
-        setNotFound(true);
-      }
-      if (mounted) setLoading(false);
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, [id]);
+  const { data: post, isLoading: loading, isError } = useQuery({
+    queryKey: ['post', id],
+    queryFn: async () => {
+      const res = await apiClient<{ data: PostRow }>(`/social/posts/${id}`);
+      return res.data;
+    }
+  });
 
   return (
     <>
       <div className="mx-auto max-w-2xl flex flex-col min-h-[100dvh]">
-        <div className="px-4 pt-6 shrink-0">
+        <div className="px-4 pt-6 shrink-0 flex justify-start">
           <button
             onClick={() => window.history.length > 2 ? window.history.back() : window.location.href = '/'}
             className="mb-4 inline-flex items-center gap-1 text-sm font-semibold text-navy hover:underline"
@@ -66,18 +52,18 @@ function PostDetail() {
             <ArrowLeft className="h-4 w-4" /> Back
           </button>
         </div>
-        <div className="flex-1 pb-0">
-          {loading ? (
-          <div className="rounded-2xl border border-border bg-card p-6 text-center text-sm text-muted-foreground">
-            Loading post…
-          </div>
-        ) : notFound || !post ? (
-          <div className="rounded-2xl border border-border bg-card p-6 text-center text-sm text-muted-foreground">
-            This post is no longer available.
-          </div>
-        ) : (
-          <PostCard post={post} userLoc={userLoc} autoExpandComments={true} />
-        )}
+        <div className="flex-1 pb-0 px-4">
+          {loading && !post ? (
+            <div className="py-12 text-center text-sm text-muted-foreground">
+              Loading post...
+            </div>
+          ) : isError || !post ? (
+            <div className="py-12 text-center text-sm text-muted-foreground">
+              This post is no longer available.
+            </div>
+          ) : (
+            <PostCard post={post} userLoc={userLoc} autoExpandComments={true} />
+          )}
         </div>
       </div>
     </>

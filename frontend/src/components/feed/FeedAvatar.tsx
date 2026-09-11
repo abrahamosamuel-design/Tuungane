@@ -1,3 +1,5 @@
+import { getOptimizedImageUrl } from "@/lib/image";
+
 /**
  * Shared circular avatar that falls back to initials when no photo exists.
  * Used by feed-style cards (provider services, service requests).
@@ -13,6 +15,7 @@ export function FeedAvatar({
   size?: number;
   ring?: boolean;
 }) {
+  const optimizedSrc = getOptimizedImageUrl(src, size, size, 'cover');
   const initials =
     name
       .split(/\s+/)
@@ -21,9 +24,9 @@ export function FeedAvatar({
       .map((w) => w[0]?.toUpperCase())
       .join("") || "?";
   const ringCls = ring ? "ring-2 ring-green/60 ring-offset-2 ring-offset-card" : "";
-  return src ? (
+  return optimizedSrc ? (
     <img
-      src={src}
+      src={optimizedSrc}
       alt={name}
       loading="lazy"
       width={size}

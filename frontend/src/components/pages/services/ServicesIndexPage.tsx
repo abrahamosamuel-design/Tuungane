@@ -25,6 +25,7 @@ import { PriceGuideChip } from "@/components/PriceGuide";
 import type { PriceType } from "@/lib/price-guide";
 import { MobileSearchBar } from "@/components/MobileSearchBar";
 import { Logo } from "@/components/Logo";
+import { getOptimizedImageUrl } from "@/lib/image";
 
 const iconMap: Record<string, any> = { Wrench, Sparkles, Building2, Scissors, Truck, Car, GraduationCap, Camera, ChefHat, Laptop, HeartPulse, Sprout, MoreHorizontal };
 
@@ -528,7 +529,8 @@ function ProviderCardCompact({ p, userLoc, onRequest }: { p: RealProvider; userL
   const name = p.business_name || p.profile?.full_name || "Provider";
   const isVerified = p.verified === "verified" || p.verified === "featured";
   
-  const coverImage = p.cover_url || (p.media_urls && p.media_urls.length > 0 ? p.media_urls[0] : null) || p.profile?.avatar_url;
+  const rawCover = p.cover_url || (p.media_urls && p.media_urls.length > 0 ? p.media_urls[0] : null) || p.profile?.avatar_url;
+  const coverImage = getOptimizedImageUrl(rawCover, 400, 300, 'cover');
 
   return (
     <div className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm hover:shadow-md transition-shadow relative">
@@ -576,7 +578,8 @@ function ProviderCardCompact({ p, userLoc, onRequest }: { p: RealProvider; userL
 function ProviderCardListMobile({ p, userLoc, onRequest }: { p: RealProvider; userLoc?: UserLocation | null; onRequest: () => void }) {
   const name = p.business_name || p.profile?.full_name || "Provider";
   const isVerified = p.verified === "verified" || p.verified === "featured";
-  const coverImage = p.cover_url || (p.media_urls && p.media_urls.length > 0 ? p.media_urls[0] : null) || p.profile?.avatar_url;
+  const rawCover = p.cover_url || (p.media_urls && p.media_urls.length > 0 ? p.media_urls[0] : null) || p.profile?.avatar_url;
+  const coverImage = getOptimizedImageUrl(rawCover, 400, 300, 'cover');
 
   return (
     <div className="group flex flex-col overflow-hidden rounded-[20px] bg-white shadow-[0_4px_20px_rgb(0,0,0,0.06)] border border-border/40 relative h-full">
