@@ -22,9 +22,9 @@ export function getOptimizedImageUrl(
   try {
     const urlObj = new URL(url);
     const domain = urlObj.hostname;
-    // Check if the domain is tuungane.com or it's a known R2 custom domain, 
+    // Check if the domain is tuungane.com (custom domain with Image Resizing enabled)
     // and ensure it doesn't already have cdn-cgi to prevent double applying.
-    if (!url.includes('/cdn-cgi/image/') && (domain.includes('tuungane.com') || domain.includes('r2.dev'))) {
+    if (!url.includes('/cdn-cgi/image/') && domain.includes('tuungane.com')) {
       const path = urlObj.pathname + urlObj.search;
       return `${urlObj.origin}/cdn-cgi/image/width=${width},height=${height},fit=${format}${path}`;
     }
