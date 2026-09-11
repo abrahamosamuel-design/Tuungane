@@ -10,7 +10,6 @@ import { toast } from "sonner";
 import { PostMedia } from "@/components/social/PostMedia";
 
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { VirtuosoGrid } from "react-virtuoso";
 import { MobileSearchBar } from "@/components/MobileSearchBar";
 import { CategoryScroll } from "@/components/CategoryScroll";
 import { getOptimizedImageUrl } from "@/lib/image";
@@ -59,8 +58,6 @@ type FeedItem =
   | { type: "provider"; id: string; data: any }
   | { type: "request"; id: string; data: any }
   | { type: "timeline_post"; id: string; data: any };
-
-/* ---------- main component ---------- */
 
 export function DashboardView() {
   const { user } = useAuth();
@@ -184,25 +181,8 @@ export function DashboardView() {
         {isLoading && <div className="text-sm text-muted-foreground text-center py-12">Loading feed...</div>}
         {!isLoading && mixedFeed.length === 0 && <div className="text-sm text-muted-foreground text-center py-12">No community posts yet.</div>}
         
-        <VirtuosoGrid
-          useWindowScroll
-          data={mixedFeed}
-          endReached={() => {
-            if (hasNextPage && !isFetchingNextPage) fetchNextPage();
-          }}
-          components={{
-            List: forwardRef((props, ref) => (
-              <div
-                {...props}
-                ref={ref as Ref<HTMLDivElement>}
-                className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 pb-8"
-              />
-            )),
-            Item: (props) => (
-              <div {...props} className="flex flex-col h-full" />
-            )
-          }}
-          itemContent={(index, item) => {
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 pb-8">
+          {mixedFeed.map((item) => {
             if (item.type === "provider") {
               return <ProviderCard key={item.id} data={item.data} />;
             }
@@ -213,9 +193,32 @@ export function DashboardView() {
               return <TimelinePostCard key={item.id} data={item.data} />;
             }
             return null;
-          }}
-        />
-        {isFetchingNextPage && <div className="text-center py-4 text-sm text-muted-foreground">Loading more...</div>}
+          })}
+        </div>
+
+        {/* Infinite Scroll Trigger */}
+        {hasNextPage && (
+          <div 
+            className="w-full py-8 text-center"
+            ref={(el) => {
+              if (!el) return;
+              const observer = new IntersectionObserver(
+                ([entry]) => {
+                  if (entry.isIntersecting && hasNextPage && !isFetchingNextPage) {
+                    fetchNextPage();
+                  }
+                },
+                { rootMargin: "200px" }
+              );
+              observer.observe(el);
+              return () => observer.disconnect();
+            }}
+          >
+            {isFetchingNextPage ? (
+              <span className="text-sm text-muted-foreground">Loading more...</span>
+            ) : null}
+          </div>
+        )}
       </div>
     </div>
   );

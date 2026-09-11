@@ -30,7 +30,7 @@ export function Layout({ children }: { children: ReactNode }) {
   return (
     <AuthGateProvider>
       <ContactPromptDialog />
-      <div className="flex min-h-dvh flex-col relative bg-background overflow-x-hidden">
+      <div className="flex min-h-dvh flex-col relative bg-background">
         <OfflineBanner />
         
         {/* Conditionally hide Header on mobile or entirely for specific routes */}

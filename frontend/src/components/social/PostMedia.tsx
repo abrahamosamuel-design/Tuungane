@@ -43,10 +43,10 @@ export function PostMedia({ urls, alt }: { urls: string[]; alt: string }) {
         <button
           type="button"
           onClick={(e) => { e.preventDefault(); e.stopPropagation(); open(0); }}
-          className="relative block w-full overflow-hidden bg-muted/40 sm:rounded-xl"
+          className="relative block w-full aspect-[4/3] overflow-hidden bg-muted/40 sm:rounded-xl"
           aria-label={isVideo(urls[0]) ? "Play video" : "Open image"}
         >
-          {renderThumb(urls[0], "mx-auto block max-h-[640px] w-full object-contain")}
+          {renderThumb(urls[0], "h-full w-full object-cover")}
         </button>
       ) : (
         <div className="grid grid-cols-2 gap-1 overflow-hidden sm:rounded-xl">
