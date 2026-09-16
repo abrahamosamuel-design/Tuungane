@@ -13,6 +13,8 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { MobileSearchBar } from "@/components/MobileSearchBar";
 import { CategoryScroll } from "@/components/CategoryScroll";
 import { getOptimizedImageUrl } from "@/lib/image";
+import { useMyCounts } from "@/components/Header";
+import { ClipboardList, TrendingUp } from "lucide-react";
 
 /* ---------- helpers ---------- */
 
@@ -166,34 +168,79 @@ export function DashboardView() {
       </div>
 
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 pt-2 md:pt-8">
-        {/* Section header */}
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <h1 className="font-display text-xl font-bold text-navy md:text-2xl">Trusted providers near you</h1>
-            <p className="text-xs text-muted-foreground mt-1">Find local providers offering services around your area.</p>
-          </div>
-          <Link to="/services" className="hidden sm:inline-flex items-center gap-1 text-sm font-semibold text-navy hover:text-orange transition-colors">
-            View all <span className="text-lg">→</span>
-          </Link>
-        </div>
+        <div className="lg:grid lg:grid-cols-12 lg:gap-8 items-start">
+          
+          {/* ================= LEFT COLUMN (Desktop Only) ================= */}
+          <aside className="hidden lg:block lg:col-span-3 space-y-6 lg:sticky lg:top-24 h-fit">
+             <LeftSidebar user={user} />
+          </aside>
 
-        {/* Feed grid */}
-        {isLoading && <div className="text-sm text-muted-foreground text-center py-12">Loading feed...</div>}
-        {!isLoading && mixedFeed.length === 0 && <div className="text-sm text-muted-foreground text-center py-12">No community posts yet.</div>}
-        
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 pb-8">
-          {mixedFeed.map((item) => {
-            if (item.type === "provider") {
-              return <ProviderCard key={item.id} data={item.data} />;
-            }
-            if (item.type === "request") {
-              return <RequestCard key={item.id} data={item.data} />;
-            }
-            if (item.type === "timeline_post") {
-              return <TimelinePostCard key={item.id} data={item.data} />;
-            }
-            return null;
-          })}
+          {/* ================= CENTER COLUMN (Feed) ================= */}
+          <section className="col-span-12 lg:col-span-6 space-y-6">
+            
+            {/* Section header (Mobile/Tablet only) */}
+            <div className="mb-6 flex items-center justify-between lg:hidden">
+              <div>
+                <h1 className="font-display text-xl font-bold text-navy md:text-2xl">Trusted providers near you</h1>
+                <p className="text-xs text-muted-foreground mt-1">Find local providers offering services around your area.</p>
+              </div>
+              <Link to="/services" className="hidden sm:inline-flex items-center gap-1 text-sm font-semibold text-navy hover:text-orange transition-colors">
+                View all <span className="text-lg">→</span>
+              </Link>
+            </div>
+
+            {/* Desktop Sticky Top Bar */}
+            <div className="hidden lg:flex flex-col gap-6 sticky top-24 z-30 pb-4 pt-2 -mt-2 bg-background">
+              {/* Desktop Post Creation Card (hidden on mobile) */}
+              <div className="bg-surface-container-lowest rounded-2xl border border-border-hairline shadow-sm p-4">
+                 <div className="flex items-center gap-3">
+                   <FeedAvatar src={user?.profile?.avatar_url || ""} name={user?.profile?.full_name || user?.email || "User"} size={40} />
+                   <button className="flex-1 text-left bg-surface-alt hover:bg-surface-container-low px-4 py-2.5 rounded-full text-sm text-outline border border-border-hairline/80 transition-colors">
+                     What opportunity or service are you looking for today, {user?.profile?.full_name?.split(' ')[0] || user?.email?.split('@')[0] || "friend"}?
+                   </button>
+                 </div>
+                 <div className="flex items-center justify-between pt-3 mt-3 border-t border-border-hairline/70">
+                   <Link to="/requests/new" className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-semibold text-orange hover:bg-orange/10 transition-all">
+                     <Wrench className="h-4 w-4" /> Post a Project Need
+                   </Link>
+                   <Link to="/opportunities/new-request" className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-semibold text-navy hover:bg-surface-alt transition-all">
+                     <Zap className="h-4 w-4 text-green" /> Share Opportunity
+                   </Link>
+                 </div>
+              </div>
+
+              {/* Desktop Feed Filter Tabs */}
+              <div className="flex bg-surface-container-lowest rounded-2xl border border-border-hairline shadow-sm p-1.5 items-center overflow-x-auto gap-1">
+                <button className="px-3.5 py-1.5 rounded-xl text-sm font-semibold bg-navy text-white shrink-0 shadow-sm">All Updates</button>
+                <button className="px-3.5 py-1.5 rounded-xl text-sm font-medium text-navy/70 hover:bg-surface-alt hover:text-navy transition-colors shrink-0">Service Requests & Inquiries</button>
+                <button className="px-3.5 py-1.5 rounded-xl text-sm font-medium text-navy/70 hover:bg-surface-alt hover:text-navy transition-colors shrink-0">Opportunities & Tenders</button>
+              </div>
+            </div>
+
+            {/* Feed List */}
+            {isLoading && <div className="text-sm text-muted-foreground text-center py-12">Loading feed...</div>}
+            {!isLoading && mixedFeed.length === 0 && <div className="text-sm text-muted-foreground text-center py-12">No community posts yet.</div>}
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-col gap-5 pb-8">
+              {mixedFeed.map((item) => {
+                if (item.type === "provider") {
+                  return <ProviderCard key={item.id} data={item.data} />;
+                }
+                if (item.type === "request") {
+                  return <RequestCard key={item.id} data={item.data} />;
+                }
+                if (item.type === "timeline_post") {
+                  return <TimelinePostCard key={item.id} data={item.data} />;
+                }
+                return null;
+              })}
+            </div>
+          </section>
+
+          {/* ================= RIGHT COLUMN (Desktop Only) ================= */}
+          <aside className="hidden lg:block lg:col-span-3 space-y-6 lg:sticky lg:top-24 h-fit pb-12">
+             <RightSidebar />
+          </aside>
         </div>
 
         {/* Infinite Scroll Trigger */}
@@ -219,6 +266,107 @@ export function DashboardView() {
             ) : null}
           </div>
         )}
+      </div>
+    </div>
+  );
+}
+
+/* ---------- Sidebar Components (Desktop Only) ---------- */
+
+function LeftSidebar({ user }: { user: any }) {
+  const counts = useMyCounts(); 
+  
+  return (
+    <>
+      <div className="bg-surface-container-lowest rounded-2xl border border-border-hairline shadow-sm overflow-hidden">
+        <div className="h-16 bg-gradient-to-r from-navy to-orange relative">
+          <div className="absolute -bottom-6 left-4">
+            <div className="w-14 h-14 rounded-full ring-4 ring-surface-container-lowest overflow-hidden bg-surface-alt">
+              <FeedAvatar src={user?.profile?.avatar_url} name={user?.profile?.full_name || user?.email || "User"} size={56} />
+            </div>
+          </div>
+        </div>
+        <div className="pt-8 px-4 pb-4">
+          <h3 className="text-sm font-bold text-navy leading-tight">{user?.profile?.full_name || user?.email?.split('@')[0]}</h3>
+          <p className="text-xs text-outline mt-0.5">{user?.profile?.town || "Uganda"}</p>
+          
+          <div className="grid grid-cols-2 gap-1 py-2 my-3 border-y border-border-hairline/70 text-center">
+            <Link to="/requests" className="hover:bg-surface-alt/80 p-1.5 rounded-xl transition-colors">
+              <span className="block text-sm font-bold text-navy">{counts.activeRequests || 0}</span>
+              <span className="text-xs text-outline block leading-tight">My Requests</span>
+            </Link>
+            <Link to="/messages" className="hover:bg-surface-alt/80 p-1.5 rounded-xl transition-colors border-l border-border-hairline/60">
+              <span className="block text-sm font-bold text-orange">{counts.unreadMessages || 0}</span>
+              <span className="text-xs text-outline block leading-tight">Unread Msgs</span>
+            </Link>
+          </div>
+        </div>
+      </div>
+      
+      <div className="bg-surface-container-lowest rounded-2xl border border-border-hairline shadow-sm p-2">
+        <div className="px-2 py-1.5">
+          <span className="text-[10px] text-outline font-bold tracking-wider uppercase">Shortcuts & Hubs</span>
+        </div>
+        <nav className="space-y-0.5 mt-1">
+          <Link to="/requests" className="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-navy hover:bg-surface-alt transition-all group">
+            <div className="flex items-center gap-2">
+              <span className="w-8 h-8 rounded-lg bg-orange/15 text-orange flex items-center justify-center group-hover:scale-105 transition-transform">
+                <ClipboardList className="h-4 w-4" />
+              </span>
+              <span>My Active Requests</span>
+            </div>
+          </Link>
+          <Link to="/services" className="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-navy hover:bg-surface-alt transition-all group">
+            <div className="flex items-center gap-2">
+              <span className="w-8 h-8 rounded-lg bg-navy/10 text-navy flex items-center justify-center group-hover:scale-105 transition-transform">
+                <Search className="h-4 w-4" />
+              </span>
+              <span>Services Directory</span>
+            </div>
+          </Link>
+          <Link to="/opportunities" className="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-navy hover:bg-surface-alt transition-all group">
+            <div className="flex items-center gap-2">
+              <span className="w-8 h-8 rounded-lg bg-green/15 text-green flex items-center justify-center group-hover:scale-105 transition-transform">
+                <Zap className="h-4 w-4" />
+              </span>
+              <span>Opportunities</span>
+            </div>
+          </Link>
+        </nav>
+      </div>
+    </>
+  );
+}
+
+function RightSidebar() {
+  return (
+    <div className="bg-surface-container-lowest rounded-2xl border border-border-hairline shadow-sm p-4">
+      <div className="flex items-center justify-between pb-3 border-b border-border-hairline">
+        <div className="flex items-center gap-2">
+          <TrendingUp className="h-5 w-5 text-orange" />
+          <h3 className="text-sm font-bold text-navy">Trending Opps</h3>
+        </div>
+        <Link to="/opportunities" className="text-xs text-orange font-semibold hover:underline">View All</Link>
+      </div>
+      <div className="divide-y divide-border-hairline/70 mt-2">
+        <div className="py-3 group">
+          <div className="flex items-center justify-between">
+            <span className="text-[9px] font-bold text-orange uppercase tracking-wider">CIVIC TENDER</span>
+            <span className="text-xs text-outline">2d left</span>
+          </div>
+          <Link to="/opportunities" className="text-sm font-semibold text-navy group-hover:text-orange transition-colors line-clamp-2 mt-1">
+            Supply of Commercial Cold Storage Units for Market
+          </Link>
+        </div>
+        <div className="py-3 group">
+          <div className="flex items-center justify-between">
+            <span className="text-[9px] font-bold text-green uppercase tracking-wider">COOPERATIVE GIG</span>
+            <span className="text-xs text-outline">5h left</span>
+          </div>
+          <Link to="/opportunities" className="text-sm font-semibold text-navy group-hover:text-orange transition-colors line-clamp-2 mt-1">
+            Chartered Agronomy Surveyor for Macadamia Cooperative
+          </Link>
+        </div>
       </div>
     </div>
   );

@@ -7,7 +7,6 @@ const ALLOWED_TYPES = [
   "new_service",
   "completed_job",
   "before_after",
-  "opportunity_shared",
 ];
 
 const POPULAR_CATEGORIES = [

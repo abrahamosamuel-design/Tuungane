@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
-import { ArrowLeft, MapPin, Phone, Loader2, Star, CheckCircle2, Copy, Send } from "lucide-react";
+import { ArrowLeft, MapPin, Phone, Loader2, Star, CheckCircle2, Copy, Send, AlertCircle, Calendar, Clock } from "lucide-react";
 
 import { Avatar } from "@/components/social/Avatar";
 import { StatusTracker } from "@/components/StatusTracker";
@@ -288,7 +288,7 @@ function RequestDetailsPage() {
     if (visible === "completed" && isCustomer && !hasFeedback) {
       return { label: "Leave review", onClick: () => setFeedbackOpen(true), icon: <Star className="h-4 w-4" /> };
     }
-    if (visible === "open" && !isCustomer && canRespond) {
+    if (visible === "open" && !isCustomer && canRespond && req.provider_id !== user.id) {
       return { label: "Respond to this request", onClick: () => setResponseDialogOpen(true), icon: <Send className="h-4 w-4" /> };
     }
     if (visible === "in_progress" && isAssignedProvider && req.status === "accepted") {
@@ -300,76 +300,156 @@ function RequestDetailsPage() {
   return (
     <>
       <section className="mx-auto max-w-3xl px-4 py-6">
-        <Link to="/requests" className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-orange"><ArrowLeft className="h-3 w-3" /> Back to my requests</Link>
+        <button onClick={() => window.history.length > 2 ? window.history.back() : nav({ to: '/requests' })} className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-orange"><ArrowLeft className="h-3 w-3" /> Go back</button>
 
-        <div className="mt-3 rounded-2xl border border-border bg-card p-5">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase ${meta.color}`}>{meta.label}</span>
-            {req.urgent_flag && <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-bold uppercase text-destructive">Urgent</span>}
-            <span className="text-[10px] text-muted-foreground">{timeAgo(req.created_at)}</span>
-            <span className="ml-auto text-[10px] text-muted-foreground">{responseCount} {responseCount === 1 ? "response" : "responses"}</span>
-          </div>
-          <h1 className="mt-2 font-display text-2xl font-bold text-navy">{req.title || req.service_needed}</h1>
-          {req.subcategory && <p className="text-sm text-muted-foreground">{formatSubcategory(req.subcategory)}</p>}
-          <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-            <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" /> {req.location}{req.town && `, ${req.town}`}</span>
-            {req.budget_range && <span className="font-semibold text-orange">Budget: {req.budget_range}</span>}
-            {req.preferred_date && <span>Preferred: {req.preferred_date}{req.preferred_time && ` ${req.preferred_time}`}</span>}
-            <span>When: {urgencyLabel}</span>
-          </div>
-          {req.description && <p className="mt-3 whitespace-pre-wrap text-sm text-foreground/85">{req.description}</p>}
-          {req.attachment_url && <img src={req.attachment_url} alt="" className="mt-3 max-h-56 rounded-lg border border-border" />}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-4">
+          
+          {/* Main Content Column */}
+          <div className="lg:col-span-2 space-y-6">
+            <section className="rounded-2xl border border-border bg-card p-5 shadow-sm relative overflow-hidden">
+              {/* Decorative gradient blob */}
+              <div className="absolute top-0 right-0 -mr-16 -mt-16 w-32 h-32 rounded-full bg-orange/10 blur-3xl pointer-events-none"></div>
 
-          <div className="mt-4 border-t border-border pt-3">
-            <StatusTracker status={req.status} />
+              <div className="flex flex-wrap items-center gap-2 mb-3">
+                <span className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase ${meta.color}`}>{meta.label}</span>
+                {req.urgent_flag && <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-[10px] font-bold uppercase text-destructive flex items-center gap-1"><AlertCircle className="w-3 h-3"/> Urgent</span>}
+                <span className="text-[10px] text-muted-foreground">{timeAgo(req.created_at)}</span>
+                <span className="ml-auto text-[11px] font-medium text-navy/70 bg-navy/5 px-2.5 py-0.5 rounded-full">{responseCount} {responseCount === 1 ? "response" : "responses"}</span>
+              </div>
+              
+              <h1 className="font-display text-2xl font-bold text-navy">{req.title || req.service_needed}</h1>
+              {req.subcategory && <p className="text-sm font-medium text-orange mt-1">{formatSubcategory(req.subcategory)}</p>}
+              
+              <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-muted-foreground pb-4 border-b border-border/50">
+                <span className="inline-flex items-center gap-1"><MapPin className="h-4 w-4 text-orange" /> {req.location}{req.town && `, ${req.town}`}</span>
+                {req.preferred_date && <span className="inline-flex items-center gap-1"><Calendar className="h-4 w-4 text-orange" /> {req.preferred_date}{req.preferred_time && ` ${req.preferred_time}`}</span>}
+                <span className="inline-flex items-center gap-1"><Clock className="h-4 w-4 text-orange" /> {urgencyLabel}</span>
+              </div>
+
+              <div className="space-y-5 mt-5">
+                {req.description && (
+                  <div>
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Service Description</h3>
+                    <p className="text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed">{req.description}</p>
+                  </div>
+                )}
+
+                {req.budget_range && (
+                  <div className="bg-orange/5 border border-orange/10 p-3 rounded-xl inline-block">
+                    <p className="text-xs text-orange/80 font-medium mb-0.5">Budget Range</p>
+                    <p className="font-semibold text-orange">{req.budget_range}</p>
+                  </div>
+                )}
+
+                {/* Media Section */}
+                {(req.attachment_url || (req.media_urls && req.media_urls.length > 0)) && (
+                  <div className="pt-2">
+                    <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Attachments & Reference</h3>
+                    <div className="flex flex-wrap gap-3">
+                      {req.attachment_url && (
+                        <a href={req.attachment_url} target="_blank" rel="noreferrer" className="relative h-24 w-24 rounded-xl overflow-hidden border border-border bg-muted flex-shrink-0 group block shadow-sm">
+                           <img src={req.attachment_url} alt="Attachment" className="h-full w-full object-cover group-hover:scale-105 transition-transform" />
+                        </a>
+                      )}
+                      {req.media_urls?.map((url, i) => (
+                        <a key={i} href={url} target="_blank" rel="noreferrer" className="relative h-24 w-24 rounded-xl overflow-hidden border border-border bg-muted flex-shrink-0 group block shadow-sm">
+                           <img src={url} alt={`Attachment ${i}`} className="h-full w-full object-cover group-hover:scale-105 transition-transform" />
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-6 border-t border-border pt-4">
+                <StatusTracker status={req.status} />
+              </div>
+            </section>
           </div>
 
-          {primaryAction && (
-            <div className="mt-4 flex flex-wrap items-center gap-2">
-              <button
-                onClick={primaryAction.onClick}
-                disabled={busy}
-                className="inline-flex items-center gap-2 rounded-full bg-orange px-5 py-2.5 text-sm font-semibold text-orange-foreground hover:brightness-110 disabled:opacity-60"
-              >
-                {primaryAction.icon}
-                {primaryAction.label}
-              </button>
-              {visible === "in_progress" && isCustomer && (req.selected_provider_id || req.provider_id) && (
-                <MessageButton
-                  serviceRequestId={req.id}
-                  providerId={(req.selected_provider_id ?? req.provider_id) as string}
-                  size="sm"
-                />
+          {/* Right Column: Actions */}
+          <div className="space-y-6">
+            <section className="rounded-2xl border border-border bg-card p-5 shadow-sm space-y-4">
+              <h3 className="font-semibold text-navy">Actions</h3>
+              
+              {visible === "open" && !isCustomer && canRespond && req.provider_id === user.id ? (
+                <div className="flex flex-col gap-3">
+                  <button
+                    onClick={() => updateStatus("accepted")}
+                    disabled={busy}
+                    className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-green px-4 py-3 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-60 transition-colors shadow-sm"
+                  >
+                    <CheckCircle2 className="h-4 w-4" /> Accept Job
+                  </button>
+                  <MessageButton
+                    serviceRequestId={req.id}
+                    providerId={req.provider_id}
+                    label="Message"
+                    className="w-full !bg-navy !text-white hover:!brightness-110" 
+                  />
+                  <button
+                    onClick={() => updateStatus("cancelled")}
+                    disabled={busy}
+                    className="w-full inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-card px-4 py-3 text-sm font-semibold text-navy hover:border-red-500 hover:text-red-500 disabled:opacity-60 transition-colors"
+                  >
+                    Reject Request
+                  </button>
+                </div>
+              ) : primaryAction ? (
+                <div className="flex flex-col gap-2">
+                  <button
+                    onClick={primaryAction.onClick}
+                    disabled={busy}
+                    className="w-full inline-flex items-center justify-center gap-2 rounded-xl bg-orange px-4 py-3 text-sm font-semibold text-orange-foreground hover:brightness-110 disabled:opacity-60 transition-colors shadow-sm"
+                  >
+                    {primaryAction.icon}
+                    {primaryAction.label}
+                  </button>
+                  
+                  {visible === "in_progress" && isCustomer && (req.selected_provider_id || req.provider_id) && (
+                    <MessageButton
+                      serviceRequestId={req.id}
+                      providerId={(req.selected_provider_id ?? req.provider_id) as string}
+                      size="sm"
+                    />
+                  )}
+                  
+                  {visible === "completed" && (req.selected_provider_id || req.provider_id) && (
+                    <Link
+                      to="/u/$id"
+                      params={{ id: (req.selected_provider_id ?? req.provider_id) as string }}
+                      className="w-full inline-flex items-center justify-center rounded-xl border border-border bg-card px-4 py-3 text-sm font-semibold text-navy hover:border-orange transition-colors"
+                    >
+                      View provider profile
+                    </Link>
+                  )}
+                  
+                  {isCustomer && (visible === "completed" || visible === "cancelled") && (
+                    <Link
+                      to="/requests/new"
+                      search={{
+                        category: req.category_slug ?? "",
+                        subcategory: req.subcategory ?? "",
+                        title: req.service_needed ?? "",
+                        location: req.location ?? "",
+                        district: req.district ?? "",
+                        town: req.town ?? "",
+                        area: req.area ?? "",
+                        providerId: visible === "completed" ? ((req.selected_provider_id ?? req.provider_id) ?? "") : "",
+                      } as never}
+                      className="w-full inline-flex items-center justify-center rounded-xl border border-orange bg-orange/5 px-4 py-3 text-sm font-semibold text-orange hover:bg-orange/10 transition-colors"
+                    >
+                      Post similar request
+                    </Link>
+                  )}
+                </div>
+              ) : null}
+              
+              {!primaryAction && !(visible === "open" && !isCustomer && canRespond && req.provider_id === user.id) && (
+                <p className="text-sm text-muted-foreground text-center py-2">No actions available at this time.</p>
               )}
-              {visible === "completed" && (req.selected_provider_id || req.provider_id) && (
-                <Link
-                  to="/u/$id"
-                  params={{ id: (req.selected_provider_id ?? req.provider_id) as string }}
-                  className="rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-navy hover:border-orange"
-                >
-                  View provider
-                </Link>
-              )}
-              {isCustomer && (visible === "completed" || visible === "cancelled") && (
-                <Link
-                  to="/requests/new"
-                  search={{
-                    category: req.category_slug ?? "",
-                    subcategory: req.subcategory ?? "",
-                    title: req.service_needed ?? "",
-                    location: req.location ?? "",
-                    district: req.district ?? "",
-                    town: req.town ?? "",
-                    area: req.area ?? "",
-                    providerId: visible === "completed" ? ((req.selected_provider_id ?? req.provider_id) ?? "") : "",
-                  } as never}
-                  className="rounded-full bg-orange px-4 py-2 text-xs font-semibold text-orange-foreground hover:brightness-110"
-                >
-                  Request again
-                </Link>
-              )}
-            </div>
-          )}
+            </section>
+          </div>
         </div>
 
         <div className="mt-3"><SafetyNote>{SAFETY_TIPS.request}</SafetyNote></div>
@@ -479,7 +559,7 @@ function RequestDetailsPage() {
         )}
 
         {/* Provider view: own response */}
-        {!isCustomer && req.status === "requested" && (
+        {!isCustomer && req.status === "requested" && req.provider_id !== user.id && (
           <div className="mt-6 rounded-2xl border border-border bg-card p-4">
             {myResponse ? (
               <>
@@ -545,7 +625,7 @@ function RequestDetailsPage() {
 
       {(() => {
         // Choose the most relevant single primary CTA for mobile.
-        if (!isCustomer && canRespond) {
+        if (!isCustomer && canRespond && req.provider_id !== user.id) {
           return (
             <MobileActionBar>
               <button onClick={() => setResponseDialogOpen(true)} className="inline-flex flex-1 items-center justify-center gap-2 rounded-full bg-orange px-4 py-3 text-sm font-semibold text-orange-foreground"><Send className="h-4 w-4" /> Respond to request</button>

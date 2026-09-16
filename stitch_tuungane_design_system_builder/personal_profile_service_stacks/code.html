@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Tuungane - Juma Mwangi Profile &amp; Service Stacks</title>
+<!-- Google Fonts: Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Config Verbatim -->
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "primary-fixed": "#d6e3ff",
+            "on-primary-fixed": "#071c36",
+            "text-jet": "#050505",
+            "tertiary-container": "#00250c",
+            "tertiary-fixed-dim": "#64de83",
+            "on-tertiary-fixed-variant": "#005323",
+            "inverse-on-surface": "#eaf1ff",
+            "inverse-primary": "#b5c7ea",
+            "surface-tint": "#4d5f7d",
+            "on-secondary-fixed-variant": "#7d2d00",
+            "outline": "#75777e",
+            "primary-fixed-dim": "#b5c7ea",
+            "error-container": "#ffdad6",
+            "secondary-container": "#fe6a19",
+            "tertiary": "#000802",
+            "surface-container-highest": "#d3e4fe",
+            "inverse-surface": "#213145",
+            "growth-green-light": "#E8F7EE",
+            "outline-variant": "#c4c6ce",
+            "surface-dim": "#cbdbf5",
+            "on-error-container": "#93000a",
+            "growth-green-border": "#A3E2B8",
+            "border-subtle": "#E2E8F0",
+            "surface-variant": "#d3e4fe",
+            "secondary-fixed": "#ffdbcd",
+            "border-hairline": "#DADDE1",
+            "canvas-subtle": "#F8FAFC",
+            "surface-container": "#e5eeff",
+            "on-tertiary": "#ffffff",
+            "surface-bright": "#f8f9ff",
+            "primary": "#000615",
+            "hero-indigo-stop": "#1E3A8A",
+            "on-primary-container": "#7587a7",
+            "surface": "#f8f9ff",
+            "on-surface": "#0b1c30",
+            "on-error": "#ffffff",
+            "on-background": "#0b1c30",
+            "text-muted-mobile": "#4B4F56",
+            "on-tertiary-fixed": "#00210a",
+            "error": "#ba1a1a",
+            "on-primary": "#ffffff",
+            "surface-container-high": "#dce9ff",
+            "on-tertiary-container": "#0a9b49",
+            "on-secondary-container": "#591e00",
+            "orange-gradient-end": "#FF8A42",
+            "secondary": "#a43e00",
+            "surface-container-low": "#eff4ff",
+            "tertiary-fixed": "#81fb9c",
+            "destructive-red": "#E53935",
+            "on-secondary": "#ffffff",
+            "background": "#f8f9ff",
+            "surface-alt": "#F1F5F9",
+            "on-primary-fixed-variant": "#364764",
+            "primary-container": "#0b1f3a",
+            "surface-container-lowest": "#ffffff",
+            "on-surface-variant": "#44474d",
+            "on-secondary-fixed": "#360f00",
+            "secondary-fixed-dim": "#ffb596",
+            "navy-dark": "#0B192C"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-md": "1rem",
+            "gutter": "1.5rem",
+            "space-xl": "2rem",
+            "space-sm": "0.5rem",
+            "margin-desktop": "2rem",
+            "space-xs": "0.25rem",
+            "gutter-mobile": "0.5rem",
+            "margin": "1.5rem",
+            "gutter-desktop": "2rem",
+            "margin-mobile": "0.75rem",
+            "space-lg": "1.5rem"
+          },
+          "fontFamily": {
+            "headline-md": ["Inter"],
+            "headline-lg-mobile": ["Inter"],
+            "display-2xl": ["Inter"],
+            "display-xl": ["Inter"],
+            "body-base": ["Inter"],
+            "display-lg": ["Inter"],
+            "body-sm": ["Inter"],
+            "body-base-mobile": ["Inter"],
+            "body-sm-mobile": ["Inter"],
+            "headline-sm": ["Inter"],
+            "label-compact-badge": ["Inter"],
+            "caption-mobile": ["Inter"],
+            "headline-lg": ["Inter"],
+            "caption": ["Inter"]
+          },
+          "fontSize": {
+            "headline-md": ["20px", {"lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600"}],
+            "headline-lg-mobile": ["22px", {"lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "700"}],
+            "display-2xl": ["60px", {"lineHeight": "66px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+            "display-xl": ["48px", {"lineHeight": "52px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+            "body-base": ["16px", {"lineHeight": "24px", "letterSpacing": "0", "fontWeight": "400"}],
+            "display-lg": ["36px", {"lineHeight": "42px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+            "body-sm": ["14px", {"lineHeight": "20px", "letterSpacing": "0", "fontWeight": "400"}],
+            "body-base-mobile": ["16.5px", {"lineHeight": "25.5px", "letterSpacing": "0", "fontWeight": "400"}],
+            "body-sm-mobile": ["15.5px", {"lineHeight": "23px", "letterSpacing": "0", "fontWeight": "400"}],
+            "headline-sm": ["18px", {"lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+            "label-compact-badge": ["9px", {"lineHeight": "16px", "letterSpacing": "0.025em", "fontWeight": "700"}],
+            "caption-mobile": ["13.4px", {"lineHeight": "21.6px", "letterSpacing": "0", "fontWeight": "500"}],
+            "headline-lg": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+            "caption": ["12px", {"lineHeight": "16px", "letterSpacing": "0", "fontWeight": "500"}]
+          }
+        },
+      },
+    }
+  </script>
+</head>
+<body class="bg-background text-on-surface font-body-base antialiased min-h-screen flex flex-col">
+<!-- TopNavBar (JSON Shared Component Anchor) -->
+<header class="bg-surface-container-lowest border-b border-border-hairline shadow-sm sticky top-0 z-40">
+<div class="flex justify-between items-center w-full px-gutter-desktop max-w-7xl mx-auto h-16">
+<!-- Brand & Left Search Cluster -->
+<div class="flex items-center gap-space-lg flex-1">
+<a class="text-headline-lg font-headline-lg font-bold text-navy-dark tracking-tight flex items-center gap-1.5" href="#">
+<span class="w-7 h-7 rounded-lg bg-navy-dark flex items-center justify-center text-surface-bright text-xs">
+<span class="material-symbols-outlined" data-icon="hub">hub</span>
+</span>
+          Tuungane
+        </a>
+<!-- Global Search Field -->
+<div class="relative max-w-md w-full hidden md:block">
+<span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-outline text-lg" data-icon="search">search</span>
+<input class="w-full bg-surface-alt border border-border-hairline rounded-full pl-10 pr-4 py-2 text-body-sm font-body-sm text-on-surface placeholder:text-outline focus:outline-none focus:border-secondary-container focus:ring-1 focus:ring-secondary-container transition-all" placeholder="Search engineers, solar installers, verified skills in Nairobi..." type="text"/>
+</div>
+</div>
+<!-- Navigation Links (Desktop) -->
+<nav class="hidden lg:flex items-center gap-6 px-4">
+<a class="text-secondary-container font-semibold border-b-2 border-secondary-container pb-1 text-body-sm font-body-sm" href="#">Services Directory</a>
+<a class="text-on-surface-variant font-medium hover:text-navy-dark text-body-sm font-body-sm transition-colors duration-150" href="#">Feed</a>
+<a class="text-on-surface-variant font-medium hover:text-navy-dark text-body-sm font-body-sm transition-colors duration-150" href="#">Opportunities</a>
+<a class="text-on-surface-variant font-medium hover:text-navy-dark text-body-sm font-body-sm transition-colors duration-150" href="#">Businesses</a>
+</nav>
+<!-- Trailing Action Icons & Authenticated User Profile -->
+<div class="flex items-center gap-space-sm pl-2">
+<button class="w-10 h-10 rounded-xl hover:bg-surface-alt flex items-center justify-center text-on-surface-variant transition-colors duration-150 relative" title="Messages">
+<span class="material-symbols-outlined" data-icon="chat">chat</span>
+<span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-secondary-container"></span>
+</button>
+<button class="w-10 h-10 rounded-xl hover:bg-surface-alt flex items-center justify-center text-on-surface-variant transition-colors duration-150 relative" title="Notifications">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-growth-green-border"></span>
+</button>
+<a class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-navy-dark hover:bg-primary-container text-surface-bright text-body-sm font-body-sm font-semibold transition-all active:scale-[0.98]" href="#create-service">
+<span class="material-symbols-outlined text-base" data-icon="add_circle">add_circle</span>
+          List a Service
+        </a>
+<!-- Authenticated Profile Thumbnail -->
+<div class="pl-2 border-l border-border-hairline flex items-center">
+<img alt="User Profile Avatar" class="w-9 h-9 rounded-full object-cover ring-2 ring-growth-green-border" data-alt="Square portrait of Juma Mwangi, an East African mechanical engineer in his mid-30s with confident warm eyes, short hair, wearing a crisp charcoal button-down work shirt against an energetic studio backdrop with subtle blue and daylight lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBgeKp1LBlNi7Gd2it7SNgi7py4u3cTtaTb9iAGGMN9ofubuWDsDaldtWNuyH2wAPcticsPLYfM8wiyWZEMdXp-7pWk0X48g5lAozQmAS0LbmwSxkdRmPXlOsWbzWbpI8Lg8dao-51Z9dbfyF8PR4SCSKrZBui252KFNEyS0949_cSjzOjMKGRVtwDSykFeYGlSuItsAaAhaEkkZ4aa7GgzoO5KRXDEvRhLIMAtapsXP6fSkOMTY7yQxQ"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Canvas Container -->
+<main class="flex-1 max-w-7xl mx-auto w-full px-margin-mobile sm:px-margin md:px-gutter-desktop py-space-md md:py-space-lg">
+<!-- Top Identity Card: Personal Profile Hero Banner (WHO You Are) -->
+<div class="bg-surface-container-lowest border border-border-hairline rounded-2xl shadow-sm overflow-hidden mb-space-lg">
+<!-- Cultural Modern African Geometric Accent Cover Banner -->
+<div class="relative h-44 sm:h-56 md:h-64 bg-navy-dark overflow-hidden">
+<!-- Modern Geometric Vector Pattern -->
+<div class="absolute inset-0 opacity-20" style="background-image: radial-gradient(#FF8A42 1px, transparent 1px), radial-gradient(#22A652 1px, #0B192C 1px); background-size: 24px 24px; background-position: 0 0, 12px 12px;"></div>
+<div class="absolute inset-0 bg-gradient-to-r from-navy-dark via-navy-dark/90 to-hero-indigo-stop/40"></div>
+<div class="absolute -right-16 -top-16 w-80 h-80 rounded-full bg-secondary-container/20 blur-3xl"></div>
+<div class="absolute left-1/3 -bottom-10 w-64 h-64 rounded-full bg-tertiary-fixed-dim/10 blur-2xl"></div>
+<!-- Cover Metadata Badge -->
+<div class="absolute top-4 right-4 sm:top-6 sm:right-6 flex items-center gap-2">
+<span class="bg-navy-dark/80 backdrop-blur-md text-surface-bright px-3 py-1 rounded-full border border-surface-container-highest/20 text-caption font-caption flex items-center gap-1.5">
+<span class="material-symbols-outlined text-sm text-secondary-container" data-icon="solar_power">solar_power</span>
+            Clean Energy &amp; Engineering Grid
+          </span>
+</div>
+</div>
+<!-- Identity Details Header Section -->
+<div class="px-space-md sm:px-space-lg md:px-space-xl pb-space-lg relative">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md -mt-16 sm:-mt-20 mb-space-md">
+<!-- Avatar + Personal Title Cluster -->
+<div class="flex flex-col sm:flex-row items-start sm:items-end gap-4 sm:gap-6">
+<div class="relative">
+<img alt="Personal Profile photo of authenticated member" class="w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 rounded-2xl object-cover ring-4 ring-surface-container-lowest shadow-md bg-surface-alt" data-alt="Headshot of Juma Mwangi, a friendly professional Kenyan mechanical engineer in his mid thirties, smiling confidently with well-lit features against a bright neutral setting, wearing professional dark attire with engineering badge." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDqXBIw43-ISanBc2IT99_GOyRNrh0LD76YiKSCxJGxq8Tl8BLu0elA5xf0yTNGxH1SJ0umYPbqkI3mxPR8LsCbUNtrW1WlZyyb9RSodo2af7hqln9LQ9SehnsN2pDisSnhnI9lFDkgJIOuqgMovK2MFuJFGL9e6LI7PDSOqVlegFB-IlteQqpK9qhkUVCSXd7xgA6YXOv0LG8GsmQjEki_hn0un7X5Jc1DQ0Q32ILD0-2IShAO-q5Hmg"/>
+<!-- Verified Green Check Badge (#22A652) -->
+<span class="absolute -bottom-2 -right-2 bg-growth-green-light border-2 border-growth-green-border text-[#22A652] rounded-full p-1 shadow-sm flex items-center justify-center" title="Verified Member by Government National ID &amp; EBK Council">
+<span class="material-symbols-outlined text-xl" data-icon="verified" data-weight="fill" style="font-variation-settings: 'FILL' 1;">verified</span>
+</span>
+</div>
+<div class="pt-2">
+<div class="flex flex-wrap items-center gap-2">
+<h1 class="text-headline-lg font-headline-lg text-navy-dark">Juma Mwangi</h1>
+<span class="bg-growth-green-light text-[#22A652] border border-growth-green-border text-label-compact-badge font-label-compact-badge rounded px-2 py-0.5 uppercase flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" data-icon="check_circle">check_circle</span>
+                  Verified Provider
+                </span>
+<span class="bg-surface-alt text-on-surface-variant border border-border-hairline text-caption font-caption rounded-full px-2.5 py-0.5">
+                  ID: KES-8829-NRB
+                </span>
+</div>
+<p class="text-body-base font-body-base font-medium text-on-surface-variant mt-1">
+                Mechanical Engineer &amp; Solar Energy Specialist • Nairobi, Kenya
+              </p>
+</div>
+</div>
+<!-- Self & Manager Action Buttons (Connect, Share, + New Service Profile) -->
+<div class="flex flex-wrap items-center gap-2.5 pt-2">
+<button class="px-4 py-2.5 rounded-xl border border-border-hairline bg-surface-container-lowest hover:bg-surface-alt text-navy-dark text-body-sm font-body-sm font-semibold shadow-sm flex items-center gap-2 transition-all active:scale-[0.98]">
+<span class="material-symbols-outlined text-base" data-icon="share">share</span>
+              Share Profile
+            </button>
+<button class="px-4 py-2.5 rounded-xl bg-navy-dark hover:bg-primary-container text-surface-bright text-body-sm font-body-sm font-semibold shadow-sm flex items-center gap-2 transition-all active:scale-[0.98]">
+<span class="material-symbols-outlined text-base" data-icon="person_add">person_add</span>
+              Connect / Network
+            </button>
+<button class="px-4 py-2.5 rounded-xl bg-secondary-container hover:brightness-105 text-surface-bright text-body-sm font-body-sm font-semibold shadow-md flex items-center gap-2 transition-all active:scale-[0.98]" id="create-service">
+<span class="material-symbols-outlined text-base" data-icon="add_box">add_box</span>
+              + Create New Service Profile
+            </button>
+</div>
+</div>
+<!-- Bio Content -->
+<div class="max-w-3xl">
+<p class="text-body-base font-body-base text-on-surface leading-relaxed">
+            Connecting sustainable energy solutions to Kenyan businesses and households. 8+ years hands-on experience in off-grid solar, commercial battery banks, industrial generator synchronization, and HVAC engineering audits.
+          </p>
+</div>
+<!-- Reputation Stats Bar -->
+<div class="mt-space-md pt-space-md border-t border-border-subtle grid grid-cols-2 sm:grid-cols-4 gap-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-growth-green-light text-[#22A652] flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="task_alt">task_alt</span>
+</div>
+<div>
+<div class="text-headline-sm font-headline-sm text-navy-dark">98%</div>
+<div class="text-caption font-caption text-on-surface-variant">Completion Rate</div>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-surface-container text-navy-dark flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="groups">groups</span>
+</div>
+<div>
+<div class="text-headline-sm font-headline-sm text-navy-dark">142</div>
+<div class="text-caption font-caption text-on-surface-variant">Direct Connections</div>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-secondary-fixed text-secondary flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="star" data-weight="fill" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<div>
+<div class="text-headline-sm font-headline-sm text-navy-dark flex items-center gap-1">
+                4.9 <span class="text-caption font-caption text-outline font-normal">(61 reviews)</span>
+</div>
+<div class="text-caption font-caption text-on-surface-variant">Average Rating</div>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-xl bg-surface-alt text-on-surface-variant flex items-center justify-center">
+<span class="material-symbols-outlined" data-icon="calendar_month">calendar_month</span>
+</div>
+<div>
+<div class="text-headline-sm font-headline-sm text-navy-dark">May 2022</div>
+<div class="text-caption font-caption text-on-surface-variant">Member Since</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Profile Tabbed Navigation Bar -->
+<div class="bg-surface-alt border-t border-border-hairline px-space-md sm:px-space-xl flex items-center gap-2 overflow-x-auto">
+<button class="px-4 py-3 text-body-sm font-body-sm font-semibold text-secondary-container border-b-2 border-secondary-container whitespace-nowrap flex items-center gap-2">
+<span class="material-symbols-outlined text-base" data-icon="layers">layers</span>
+          Services Offered (3)
+        </button>
+<button class="px-4 py-3 text-body-sm font-body-sm font-medium text-on-surface-variant hover:text-navy-dark border-b-2 border-transparent whitespace-nowrap flex items-center gap-2">
+<span class="material-symbols-outlined text-base" data-icon="badge">badge</span>
+          About &amp; Credentials
+        </button>
+<button class="px-4 py-3 text-body-sm font-body-sm font-medium text-on-surface-variant hover:text-navy-dark border-b-2 border-transparent whitespace-nowrap flex items-center gap-2">
+<span class="material-symbols-outlined text-base" data-icon="dynamic_feed">dynamic_feed</span>
+          Activity &amp; Posts
+        </button>
+<button class="px-4 py-3 text-body-sm font-body-sm font-medium text-on-surface-variant hover:text-navy-dark border-b-2 border-transparent whitespace-nowrap flex items-center gap-2">
+<span class="material-symbols-outlined text-base" data-icon="reviews">reviews</span>
+          Client Recommendations (28)
+        </button>
+</div>
+</div>
+<!-- Dual Layout: Main Services Stream (WHAT you offer 1-to-N) & Right Credential/Trust Rail -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
+<!-- Left / Center 8-Column: Service Stacks Cards -->
+<section class="lg:col-span-8 flex flex-col gap-space-lg">
+<div class="flex items-center justify-between">
+<div>
+<h2 class="text-headline-md font-headline-md text-navy-dark">Service Stacks Managed by Juma</h2>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Each service functions as an autonomous commercial profile with guaranteed SLA and verified escrow protection.</p>
+</div>
+<div class="hidden sm:flex items-center gap-2 text-caption font-caption text-outline">
+<span>Sort by:</span>
+<span class="font-semibold text-navy-dark cursor-pointer flex items-center">Popularity <span class="material-symbols-outlined text-sm" data-icon="expand_more">expand_more</span></span>
+</div>
+</div>
+<!-- SERVICE CARD 1: Commercial Solar PV & Battery Storage -->
+<article class="bg-surface-container-lowest border border-border-hairline rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
+<div class="p-space-md sm:p-space-lg">
+<!-- Top Card Header: Category + Status Badge -->
+<div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+<div class="flex items-center gap-2">
+<span class="bg-surface-container text-navy-dark text-label-compact-badge font-label-compact-badge px-2.5 py-0.5 rounded uppercase font-semibold">
+                  Renewable Energy
+                </span>
+<span class="text-caption font-caption text-outline">• ID: SVC-NRB-104</span>
+</div>
+<span class="bg-growth-green-light text-[#22A652] border border-growth-green-border text-label-compact-badge font-label-compact-badge rounded-full px-2.5 py-0.5 uppercase flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-[#22A652] animate-pulse"></span>
+                Accepting New Bookings
+              </span>
+</div>
+<!-- Service Title & Pricing Banner -->
+<div class="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-2">
+<h3 class="text-headline-md font-headline-md text-navy-dark hover:text-secondary-container transition-colors">
+<a href="#">Commercial Solar PV &amp; Battery Storage System Installation</a>
+</h3>
+<div class="text-right sm:text-right flex-shrink-0">
+<span class="text-caption font-caption text-outline block">Pricing Model</span>
+<span class="text-headline-sm font-headline-sm text-navy-dark font-bold text-secondary-container">KES 45,000</span>
+<span class="text-caption font-caption text-on-surface-variant block">onwards / phase</span>
+</div>
+</div>
+<!-- Service Description -->
+<p class="text-body-sm font-body-sm text-on-surface-variant mb-4">
+              Turnkey engineering design, roof-load structural assessment, LiFePO4 battery storage integration, and smart inverter synchronization for manufacturing plants, agricultural packhouses, and commercial institutions across Kenya.
+            </p>
+<!-- Metrics Cluster & Turnaround -->
+<div class="flex flex-wrap items-center gap-y-2 gap-x-5 py-2.5 px-3.5 bg-canvas-subtle rounded-xl border border-border-subtle mb-4 text-body-sm font-body-sm">
+<div class="flex items-center gap-1 text-secondary">
+<span class="material-symbols-outlined text-lg" data-icon="star" data-weight="fill" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-bold text-navy-dark">4.9</span>
+<span class="text-caption font-caption text-outline">(34 completed projects)</span>
+</div>
+<div class="flex items-center gap-1 text-on-surface-variant text-caption font-caption">
+<span class="material-symbols-outlined text-base text-outline" data-icon="schedule">schedule</span>
+                Typical deployment: 5–14 days
+              </div>
+<div class="flex items-center gap-1 text-on-surface-variant text-caption font-caption">
+<span class="material-symbols-outlined text-base text-outline" data-icon="security">security</span>
+                Standard 3-Year Craftsmanship Warranty
+              </div>
+</div>
+<!-- Portfolio Thumbnails Grid -->
+<div>
+<span class="text-caption font-caption text-outline font-semibold mb-2 block uppercase tracking-wider">Verified Portfolio Evidence (4 Installations)</span>
+<div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+<div class="relative group rounded-xl overflow-hidden aspect-[4/3] border border-border-hairline">
+<img alt="Rooftop solar installation Nairobi" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" data-alt="High-angle shot of a sprawling rooftop solar panel installation on a modern commercial facility in Nairobi with clear blue sky and industrial solar inverters neatly aligned under sunlight." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBvb9RF9wmn1fxQ58APYjicHkyHg3nq8trhDz8Xadmq9WyXQJhtOglXR5V7qnCEQ5DFoFIVM5NYkOyx9I3pOPC6lEe-zBuu4POo-4v0yjqhEZsgWXXL7j8Wqha8nGzOhZNNrej-KtjJjglYwx3m18qUU9r5fLD4Cg0b9nGwzxw4RrLqeoc9Pd5NvzBerjWuMefElBw40p8WDuGYZA5IRF-nvV30CJFHM7dA6m0XPEfU573BjYnm0Mp8yw"/>
+<span class="absolute bottom-1 left-1.5 bg-navy-dark/80 text-surface-bright text-[10px] px-1.5 py-0.5 rounded font-medium">Industrial Park 80kW</span>
+</div>
+<div class="relative group rounded-xl overflow-hidden aspect-[4/3] border border-border-hairline">
+<img alt="Battery storage racks" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" data-alt="Neat industrial electrical room showing lithium battery storage racks with glowing LED indicators, smart charge controllers, and labeled wiring harnesses installed with precision." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBCBh0jGvsQN4eGr7AmB0bDtctbT1b3DMTw12EytUldP0EELcpqaz8jC4lPEczj5sMxaDiUMeZn-lXfQrrQzzZPkBA61tGCMMvr7h0eOVb-6FTzfLotBbGgJdUoNHrFFX-KJ0FfKGpwou4hUfD3eU6312L_sxFdwg_i3_yw7KQc1drysf2XzO0iKZZjKc2rjU0-308dh3QeUsw4NKzd9cJMn0Bw3q8YjFNR3ytDcAw7HGlcp0qwtMjLkQ"/>
+<span class="absolute bottom-1 left-1.5 bg-navy-dark/80 text-surface-bright text-[10px] px-1.5 py-0.5 rounded font-medium">LiFePO4 45kWh Bank</span>
+</div>
+<div class="relative group rounded-xl overflow-hidden aspect-[4/3] border border-border-hairline">
+<img alt="Agricultural solar farm" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" data-alt="Solar photovoltaic array installed adjacent to agricultural greenhouses in Naivasha Kenya, with lush farmland background and bright equatorial daylight." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCthuidRdKUekyjB65Wxp5vuESx6MSGXELXQFTsUQ7EgRiSCbC3bclhX321uoiwA8LcMSLK6HR8oBq9tsIgWJaRHy7_c7ixCnkmfHo149DfEPbZt3zCe-zaI2ve7ZWPPZiY3hZFbT5WKyeF2NQrTIF5NFvJDATY6v0MRBq9eRnYljI9He-vACcg4Pc1b614olfg2mT_BBKIEM5pk3ttRF9zruz9laZhoyiN9oQ37XGvy73QP_Mggr8Www"/>
+<span class="absolute bottom-1 left-1.5 bg-navy-dark/80 text-surface-bright text-[10px] px-1.5 py-0.5 rounded font-medium">Naivasha Agri-Grid</span>
+</div>
+<div class="relative group rounded-xl overflow-hidden aspect-[4/3] border border-border-hairline bg-surface-alt flex flex-col items-center justify-center text-center p-2">
+<span class="material-symbols-outlined text-2xl text-navy-dark mb-1" data-icon="perm_media">perm_media</span>
+<span class="text-caption font-caption font-semibold text-navy-dark">+6 Detailed Specs</span>
+<span class="text-[10px] text-outline">Schematics &amp; SLDs</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Shelf (Design System Specification) -->
+<div class="bg-canvas-subtle border-t border-border-hairline px-space-md sm:px-space-lg py-3 flex items-center justify-between">
+<div class="flex items-center gap-2 text-caption font-caption text-on-surface-variant">
+<span class="w-2 h-2 rounded-full bg-[#22A652]"></span>
+<span>EPRA Class T3 Certified Lead Engineer</span>
+</div>
+<div class="flex items-center gap-3">
+<button class="text-body-sm font-body-sm font-semibold text-navy-dark hover:text-secondary-container transition-colors">
+                View Stack Details →
+              </button>
+<button class="px-4 py-2 rounded-xl bg-secondary-container hover:brightness-105 text-surface-bright text-body-sm font-body-sm font-semibold shadow-sm transition-all active:scale-[0.98]">
+                Request Service
+              </button>
+</div>
+</div>
+</article>
+<!-- SERVICE CARD 2: Industrial Generator Diagnostics & Maintenance -->
+<article class="bg-surface-container-lowest border border-border-hairline rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
+<div class="p-space-md sm:p-space-lg">
+<div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+<div class="flex items-center gap-2">
+<span class="bg-surface-container text-navy-dark text-label-compact-badge font-label-compact-badge px-2.5 py-0.5 rounded uppercase font-semibold">
+                  Mechanical Engineering
+                </span>
+<span class="text-caption font-caption text-outline">• ID: SVC-NRB-219</span>
+</div>
+<span class="bg-growth-green-light text-[#22A652] border border-growth-green-border text-label-compact-badge font-label-compact-badge rounded-full px-2.5 py-0.5 uppercase flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-[#22A652] animate-pulse"></span>
+                Accepting New Bookings
+              </span>
+</div>
+<div class="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-2">
+<h3 class="text-headline-md font-headline-md text-navy-dark hover:text-secondary-container transition-colors">
+<a href="#">Industrial Generator Diagnostics &amp; Preventive Maintenance</a>
+</h3>
+<div class="text-right sm:text-right flex-shrink-0">
+<span class="text-caption font-caption text-outline block">Pricing Model</span>
+<span class="text-headline-sm font-headline-sm text-navy-dark font-bold text-secondary-container">KES 12,000</span>
+<span class="text-caption font-caption text-on-surface-variant block">/ inspection visit</span>
+</div>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant mb-4">
+              Comprehensive load bank testing, automatic transfer switch (ATS) calibration, diesel injector tuning, cooling system flushes, and vibration analysis for backup generators ranging from 15kVA to 1250kVA.
+            </p>
+<div class="flex flex-wrap items-center gap-y-2 gap-x-5 py-2.5 px-3.5 bg-canvas-subtle rounded-xl border border-border-subtle mb-4 text-body-sm font-body-sm">
+<div class="flex items-center gap-1 text-secondary">
+<span class="material-symbols-outlined text-lg" data-icon="star" data-weight="fill" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-bold text-navy-dark">5.0</span>
+<span class="text-caption font-caption text-outline">(19 completed requests)</span>
+</div>
+<div class="flex items-center gap-1 text-on-surface-variant text-caption font-caption">
+<span class="material-symbols-outlined text-base text-outline" data-icon="bolt">bolt</span>
+                Response window: Under 4 Hours in Nairobi Metro
+              </div>
+<div class="flex items-center gap-1 text-on-surface-variant text-caption font-caption">
+<span class="material-symbols-outlined text-base text-outline" data-icon="verified_user">verified_user</span>
+                OEM-Grade Diagnostic Tools
+              </div>
+</div>
+<!-- Portfolio Thumbnails -->
+<div>
+<span class="text-caption font-caption text-outline font-semibold mb-2 block uppercase tracking-wider">Field Work Evidence (3 Audits)</span>
+<div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+<div class="relative group rounded-xl overflow-hidden aspect-[4/3] border border-border-hairline">
+<img alt="Generator maintenance check" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" data-alt="Mechanical engineer inspecting a heavy duty diesel generator engine in an industrial facility, using digital multimeters with protective gear under clean work lights." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCtLZgW9Ih92BGnOC3DDgdjcBf2O12_3KiDFpgp1IJ2BSblEeAL-rgCiR80jPWGyQGTvtCbtFd0hTKCwVo4XxPz7wWKYShgpYJXMO6KEexgrFKBn3GJf6QlX99nLCi-u-CrGRS6ckN9NyW4vqT3hZGXAtpjFl8EaT_pgrqyHr79-cU7xanjt6VXCZPxwsfR-LM8Mfd55LUG8nd7VlSbKiXp3aNVsXLQ2uh6EKvED32QF4Kb4_LMEvkAow"/>
+<span class="absolute bottom-1 left-1.5 bg-navy-dark/80 text-surface-bright text-[10px] px-1.5 py-0.5 rounded font-medium">500kVA Cummins Overhaul</span>
+</div>
+<div class="relative group rounded-xl overflow-hidden aspect-[4/3] border border-border-hairline">
+<img alt="ATS Cabinet Diagnostic" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" data-alt="Technician testing an Automatic Transfer Switch electrical cabinet with synchronized phase indicators and warning labels inside a corporate tower in Nairobi." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB5182Cpomec1TaeYxyNo0QGBnl79NF_Pg5G5R7dwquKh9iXgi308bxlX0V8sUiERGy8OmYA3ZyGowT-Mwom3vAEqesGeMr4JGBNVSNzq2nPprCCpC_TkYlriMEI6abQhWz1A8wyYSF8H8mhTJ5q-b1JH7j_HP44xmYP_GXpJCXHDALTYkgpmSi_-G9Z6EhYcUhk3FhLNxIzG8j0H6Llv1ttpPvelCo9ZUxNq93_mAPnXKpq2_GPlCtPg"/>
+<span class="absolute bottom-1 left-1.5 bg-navy-dark/80 text-surface-bright text-[10px] px-1.5 py-0.5 rounded font-medium">ATS Relay Calibration</span>
+</div>
+<div class="relative group rounded-xl overflow-hidden aspect-[4/3] border border-border-hairline">
+<img alt="Thermal imaging diagnostic" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" data-alt="Close up thermal imaging inspection scan showing temperature gradients on electrical generator alternator coils for preventive reliability diagnostics." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC51wk7TSr6S7DDAybP3rVj7Mkwyb3iSQK2fMC9Xkua2aIYzsMlt0RhejkvzUg2GYbqkEcbn1Z48TgdG11sqe7By4Huop1dw_bKNk7PYBKf82o7K-EBA9qS8a6IGevRWfYDC0GOu_hGWZhj1LYrIrl-AzASTjxeNu_-BCSM6dcem0FJ50iNSPu6XkJxn6euce8CUtgfeS0VMWHQfdp9hM_PAHPN4pMy5o6wAyXFnSjrY2gmo2LxoQ2caw"/>
+<span class="absolute bottom-1 left-1.5 bg-navy-dark/80 text-surface-bright text-[10px] px-1.5 py-0.5 rounded font-medium">Thermographic Scan</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Shelf -->
+<div class="bg-canvas-subtle border-t border-border-hairline px-space-md sm:px-space-lg py-3 flex items-center justify-between">
+<div class="flex items-center gap-2 text-caption font-caption text-on-surface-variant">
+<span class="w-2 h-2 rounded-full bg-[#22A652]"></span>
+<span>Emergency On-call Field Team Available</span>
+</div>
+<div class="flex items-center gap-3">
+<button class="text-body-sm font-body-sm font-semibold text-navy-dark hover:text-secondary-container transition-colors">
+                View Stack Details →
+              </button>
+<button class="px-4 py-2 rounded-xl bg-secondary-container hover:brightness-105 text-surface-bright text-body-sm font-body-sm font-semibold shadow-sm transition-all active:scale-[0.98]">
+                Request Service
+              </button>
+</div>
+</div>
+</article>
+<!-- SERVICE CARD 3: Energy Audit & Regulatory Compliance -->
+<article class="bg-surface-container-lowest border border-border-hairline rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
+<div class="p-space-md sm:p-space-lg">
+<div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+<div class="flex items-center gap-2">
+<span class="bg-surface-container text-navy-dark text-label-compact-badge font-label-compact-badge px-2.5 py-0.5 rounded uppercase font-semibold">
+                  Compliance &amp; Advisory
+                </span>
+<span class="text-caption font-caption text-outline">• ID: SVC-NRB-331</span>
+</div>
+<span class="bg-growth-green-light text-[#22A652] border border-growth-green-border text-label-compact-badge font-label-compact-badge rounded-full px-2.5 py-0.5 uppercase flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-[#22A652] animate-pulse"></span>
+                Accepting New Bookings
+              </span>
+</div>
+<div class="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-2">
+<h3 class="text-headline-md font-headline-md text-navy-dark hover:text-secondary-container transition-colors">
+<a href="#">Energy Audit &amp; Regulatory Compliance Advisory for SMEs</a>
+</h3>
+<div class="text-right sm:text-right flex-shrink-0">
+<span class="text-caption font-caption text-outline block">Pricing Model</span>
+<span class="text-headline-sm font-headline-sm text-navy-dark font-bold text-secondary-container">KES 30,000</span>
+<span class="text-caption font-caption text-on-surface-variant block">/ audit report</span>
+</div>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant mb-4">
+              Statutory investment-grade energy audits compliant with EPRA Energy Management Regulations (2012). Power factor correction planning, harmonic analysis, and actionable ROI roadmaps to lower monthly electricity tariffs.
+            </p>
+<div class="flex flex-wrap items-center gap-y-2 gap-x-5 py-2.5 px-3.5 bg-canvas-subtle rounded-xl border border-border-subtle mb-4 text-body-sm font-body-sm">
+<div class="flex items-center gap-1 text-secondary">
+<span class="material-symbols-outlined text-lg" data-icon="star" data-weight="fill" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-bold text-navy-dark">4.8</span>
+<span class="text-caption font-caption text-outline">(8 completed audits)</span>
+</div>
+<div class="flex items-center gap-1 text-on-surface-variant text-caption font-caption">
+<span class="material-symbols-outlined text-base text-outline" data-icon="fact_check">fact_check</span>
+                Deliverable: Official Signed EPRA Dossier
+              </div>
+<div class="flex items-center gap-1 text-on-surface-variant text-caption font-caption">
+<span class="material-symbols-outlined text-base text-outline" data-icon="savings">savings</span>
+                Average 18% Verified Utility Cost Reduction
+              </div>
+</div>
+<!-- Portfolio Thumbnails -->
+<div>
+<span class="text-caption font-caption text-outline font-semibold mb-2 block uppercase tracking-wider">Report Samples &amp; Audits</span>
+<div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+<div class="relative group rounded-xl overflow-hidden aspect-[4/3] border border-border-hairline">
+<img alt="Energy audit presentation" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" data-alt="Professional engineer presenting detailed energy consumption graphs and power factor analysis charts on a digital tablet in a clean boardroom setting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAgOrTR3QV-aIxtGUqkTg2j92VL6A4P4AfLPuyCFdxuvgGR_K2BlZKJCDMxORkO3AZPQ6I1DcKHG4Yk_ao24p0FRyRt-fX-TlEkw346-klTBs8cPlovk_8EXkf0EVKpF660n468k3PHUEPrBi3fTV-ft0MWe1HwJh5z-gxNirhzoWH2NneFOJ-xdT3-WFES7L5HDNa_bUROE4DwW0VMCCKKcqao-fQ_Kg5c-JWXcZH85wh7a09nZkq-2Q"/>
+<span class="absolute bottom-1 left-1.5 bg-navy-dark/80 text-surface-bright text-[10px] px-1.5 py-0.5 rounded font-medium">Bakery Plant Audit 2023</span>
+</div>
+<div class="relative group rounded-xl overflow-hidden aspect-[4/3] border border-border-hairline">
+<img alt="Power Quality Analyzer Equipment" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200" data-alt="Portable harmonic power quality analyzer connected to a main distribution board with cables and current clamps measuring commercial electricity loads." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAG9BA79ecXTaUx9f_euBKPFRAdNjR_Ch9rcuP7Vune2fkQfnU3vvlVEXCnNgvoJyrboJGEODvA0EWEyc2NwKWm0SO6FpEV4Fq1XU50Lt2E8NddaZSp0Hx9atEaKtZO_DMZBZk7kWrsXGOOq8RWoM39P2Cn3PnezK9_uzMvyyhLGgdMfVNv4rL0ZZDlZPD2fhGBIdAZXs_yz8msJYAHP2Io8ol66EdEU7etX-Jx7QX-2xw7qYxJ5qNQ8w"/>
+<span class="absolute bottom-1 left-1.5 bg-navy-dark/80 text-surface-bright text-[10px] px-1.5 py-0.5 rounded font-medium">Harmonic Load Analysis</span>
+</div>
+<div class="relative group rounded-xl overflow-hidden aspect-[4/3] border border-border-hairline bg-surface-alt flex flex-col items-center justify-center text-center p-2">
+<span class="material-symbols-outlined text-2xl text-navy-dark mb-1" data-icon="description">description</span>
+<span class="text-caption font-caption font-semibold text-navy-dark">Sample PDF Executive Summary</span>
+<span class="text-[10px] text-outline">EPRA Approved Template</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Bottom Shelf -->
+<div class="bg-canvas-subtle border-t border-border-hairline px-space-md sm:px-space-lg py-3 flex items-center justify-between">
+<div class="flex items-center gap-2 text-caption font-caption text-on-surface-variant">
+<span class="w-2 h-2 rounded-full bg-[#22A652]"></span>
+<span>Statutory Filing Deadline Assistance Available</span>
+</div>
+<div class="flex items-center gap-3">
+<button class="text-body-sm font-body-sm font-semibold text-navy-dark hover:text-secondary-container transition-colors">
+                View Stack Details →
+              </button>
+<button class="px-4 py-2 rounded-xl bg-secondary-container hover:brightness-105 text-surface-bright text-body-sm font-body-sm font-semibold shadow-sm transition-all active:scale-[0.98]">
+                Request Service
+              </button>
+</div>
+</div>
+</article>
+</section>
+<!-- Right Sidebar (4-Column): Professional Verifications & Civic Trust Rail -->
+<aside class="lg:col-span-4 flex flex-col gap-space-lg">
+<!-- 1. Trust & Verifications Checklist Card -->
+<div class="bg-surface-container-lowest border border-border-hairline rounded-2xl p-space-md shadow-sm">
+<div class="flex items-center gap-2 mb-3 pb-2 border-b border-border-hairline">
+<span class="material-symbols-outlined text-[#22A652]" data-icon="verified_user">verified_user</span>
+<h3 class="text-headline-sm font-headline-sm text-navy-dark">Institutional Credentials</h3>
+</div>
+<p class="text-caption font-caption text-on-surface-variant mb-4">
+            Tuungane authenticates professional documentation directly against Kenyan statutory bodies to safeguard client capital.
+          </p>
+<ul class="flex flex-col gap-3">
+<li class="flex items-start gap-3 p-2.5 rounded-xl bg-canvas-subtle border border-border-subtle">
+<span class="material-symbols-outlined text-[#22A652] text-xl mt-0.5" data-icon="check_circle" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<div class="flex-1">
+<div class="flex items-center justify-between">
+<span class="text-body-sm font-body-sm font-semibold text-navy-dark">National ID Verified</span>
+<span class="text-[10px] bg-growth-green-light text-[#22A652] font-bold px-1.5 py-0.5 rounded">PASSED</span>
+</div>
+<span class="text-caption font-caption text-outline block">Government IPRS Cross-Checked</span>
+</div>
+</li>
+<li class="flex items-start gap-3 p-2.5 rounded-xl bg-canvas-subtle border border-border-subtle">
+<span class="material-symbols-outlined text-[#22A652] text-xl mt-0.5" data-icon="check_circle" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<div class="flex-1">
+<div class="flex items-center justify-between">
+<span class="text-body-sm font-body-sm font-semibold text-navy-dark">KRA Tax Compliance</span>
+<span class="text-[10px] bg-growth-green-light text-[#22A652] font-bold px-1.5 py-0.5 rounded">ACTIVE</span>
+</div>
+<span class="text-caption font-caption text-outline block">PIN: A0049****** Verified Valid</span>
+</div>
+</li>
+<li class="flex items-start gap-3 p-2.5 rounded-xl bg-canvas-subtle border border-border-subtle">
+<span class="material-symbols-outlined text-[#22A652] text-xl mt-0.5" data-icon="check_circle" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<div class="flex-1">
+<div class="flex items-center justify-between">
+<span class="text-body-sm font-body-sm font-semibold text-navy-dark">Engineers Board of Kenya</span>
+<span class="text-[10px] bg-growth-green-light text-[#22A652] font-bold px-1.5 py-0.5 rounded">CERTIFIED</span>
+</div>
+<span class="text-caption font-caption text-outline block">EBK Reg. # B5288 • Mechanical</span>
+</div>
+</li>
+<li class="flex items-start gap-3 p-2.5 rounded-xl bg-canvas-subtle border border-border-subtle">
+<span class="material-symbols-outlined text-[#22A652] text-xl mt-0.5" data-icon="check_circle" data-weight="fill" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<div class="flex-1">
+<div class="flex items-center justify-between">
+<span class="text-body-sm font-body-sm font-semibold text-navy-dark">EPRA Solar PV License</span>
+<span class="text-[10px] bg-growth-green-light text-[#22A652] font-bold px-1.5 py-0.5 rounded">CLASS T3</span>
+</div>
+<span class="text-caption font-caption text-outline block">License # EPRA/SPV/2023/118</span>
+</div>
+</li>
+</ul>
+<div class="mt-4 pt-3 border-t border-border-hairline text-center">
+<a class="text-caption font-caption text-secondary font-semibold hover:underline flex items-center justify-center gap-1" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="open_in_new">open_in_new</span>
+              View Public Credential Audit Ledger
+            </a>
+</div>
+</div>
+<!-- 2. Civic Reputation & Trust Badges -->
+<div class="bg-surface-container-lowest border border-border-hairline rounded-2xl p-space-md shadow-sm">
+<div class="flex items-center justify-between mb-3 pb-2 border-b border-border-hairline">
+<h3 class="text-headline-sm font-headline-sm text-navy-dark">Civic Badges</h3>
+<span class="text-caption font-caption text-outline">Level 4 Citizen</span>
+</div>
+<div class="grid grid-cols-2 gap-2.5">
+<div class="p-2.5 rounded-xl bg-surface-alt border border-border-hairline flex flex-col items-center text-center">
+<span class="w-9 h-9 rounded-full bg-secondary-fixed text-secondary flex items-center justify-center mb-1">
+<span class="material-symbols-outlined text-lg" data-icon="local_police">local_police</span>
+</span>
+<span class="text-caption font-caption font-semibold text-navy-dark">100% On-Time</span>
+<span class="text-[10px] text-outline mt-0.5">34 Project Milestones</span>
+</div>
+<div class="p-2.5 rounded-xl bg-surface-alt border border-border-hairline flex flex-col items-center text-center">
+<span class="w-9 h-9 rounded-full bg-growth-green-light text-[#22A652] flex items-center justify-center mb-1">
+<span class="material-symbols-outlined text-lg" data-icon="lock">lock</span>
+</span>
+<span class="text-caption font-caption font-semibold text-navy-dark">Escrow Trusted</span>
+<span class="text-[10px] text-outline mt-0.5">Zero Payment Disputes</span>
+</div>
+<div class="p-2.5 rounded-xl bg-surface-alt border border-border-hairline flex flex-col items-center text-center">
+<span class="w-9 h-9 rounded-full bg-surface-container-highest text-navy-dark flex items-center justify-center mb-1">
+<span class="material-symbols-outlined text-lg" data-icon="eco">eco</span>
+</span>
+<span class="text-caption font-caption font-semibold text-navy-dark">Green Leader</span>
+<span class="text-[10px] text-outline mt-0.5">340kW Clean Offset</span>
+</div>
+<div class="p-2.5 rounded-xl bg-surface-alt border border-border-hairline flex flex-col items-center text-center">
+<span class="w-9 h-9 rounded-full bg-primary-fixed text-navy-dark flex items-center justify-center mb-1">
+<span class="material-symbols-outlined text-lg" data-icon="handshake">handshake</span>
+</span>
+<span class="text-caption font-caption font-semibold text-navy-dark">Top Mentor</span>
+<span class="text-[10px] text-outline mt-0.5">12 Apprentice Signoffs</span>
+</div>
+</div>
+</div>
+<!-- 3. Mutual Network Connections -->
+<div class="bg-surface-container-lowest border border-border-hairline rounded-2xl p-space-md shadow-sm">
+<div class="flex items-center justify-between mb-3 pb-2 border-b border-border-hairline">
+<div>
+<h3 class="text-headline-sm font-headline-sm text-navy-dark">Mutual Connections</h3>
+<span class="text-caption font-caption text-outline">18 people you both know</span>
+</div>
+<a class="text-caption font-caption text-secondary font-semibold hover:underline" href="#">See all</a>
+</div>
+<div class="flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<img alt="Wangari Kamau Profile Avatar" class="w-10 h-10 rounded-full object-cover" data-alt="Portrait of Wangari Kamau, an electrical engineer with safety goggles in an engineering office setting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCUhmRituY0JaIZ3o7PtVrRV2WIjjV8s_UBl7FlwIatextEC8H_FI2jgJJAQIzPhExGtK3xW9eLmP9X2p1ligREa4EvS0Qafv7PNl-vo-7ScWeTOvlYQfAPxQ56JZB7an6blsr4cxxjXjsZ_UCvetQCyzbfrIaq605JXkwCgXyCHUujn9og-6Mj1AMREOwNZUC---dPp9MgEtzI-oPC_V7GZrgCHAS1iF8hRvU5Oyc8jJPJA50ifxdBRg"/>
+<div>
+<h4 class="text-body-sm font-body-sm font-semibold text-navy-dark leading-tight">Eng. Wangari Kamau</h4>
+<span class="text-caption font-caption text-outline">Grid Specialist @ KenGen</span>
+</div>
+</div>
+<button class="w-8 h-8 rounded-lg bg-surface-alt hover:bg-secondary-fixed text-navy-dark flex items-center justify-center transition-colors" title="Message">
+<span class="material-symbols-outlined text-sm" data-icon="send">send</span>
+</button>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<img alt="Brian Omondi Profile Avatar" class="w-10 h-10 rounded-full object-cover" data-alt="Headshot of Brian Omondi, project manager wearing casual professional jacket against a sunlit urban Nairobi office background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCGKgenJ-IKAEjIat5WFo7UyK01d1fXR_Mz2tR9AXJEYNH3ORNKJmS30vtFgH1jYf70WZ-GiYN9T9v6A__nLHsN7vWVVhOz_OMwCMdnlWb7wk9FDXBR8glimBZ2w06EY5HAkU-XyTevgrpHeDj_vvg0Vq0zrVuvTjU2K8hXDg6YVDVtf8WrUYiSO2MIzxCIzXS965jbMX2JPel-exxqIiwZDhIDZ9wMmZnOq7cJpecP-fYKxkOlHdf1uA"/>
+<div>
+<h4 class="text-body-sm font-body-sm font-semibold text-navy-dark leading-tight">Brian Omondi</h4>
+<span class="text-caption font-caption text-outline">Director, Rift Valley AgroTech</span>
+</div>
+</div>
+<button class="w-8 h-8 rounded-lg bg-surface-alt hover:bg-secondary-fixed text-navy-dark flex items-center justify-center transition-colors" title="Message">
+<span class="material-symbols-outlined text-sm" data-icon="send">send</span>
+</button>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<img alt="Faith Chebet Profile Avatar" class="w-10 h-10 rounded-full object-cover" data-alt="Close up professional portrait of Faith Chebet, renewable energy consultant with bright smile in front of a white architectural wall." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCsOb2_7lXvu7caGp_DoABM-qgzaw-ki4YJA8BaqGOVdnM2fJKUSUEH0JQEPY_ijSqyQz7nSX5Z78-F7iE0KEP74toTkgj_J4ju6l5lu_fPE_uLAYPCTOpY6nLDIFDTac4uX3ixNaIo8UXff9jCO3hlTWzpGW9tzkjJ6VvNI6FDU7InKdsZXajaupbeu0wMYoipB7DKaDXdBL0r6eXACFncbxKiqyPOrduWy-xtEx82al6v2n36nhMVmA"/>
+<div>
+<h4 class="text-body-sm font-body-sm font-semibold text-navy-dark leading-tight">Faith Chebet</h4>
+<span class="text-caption font-caption text-outline">Solar Finance Lead @ Equity</span>
+</div>
+</div>
+<button class="w-8 h-8 rounded-lg bg-surface-alt hover:bg-secondary-fixed text-navy-dark flex items-center justify-center transition-colors" title="Message">
+<span class="material-symbols-outlined text-sm" data-icon="send">send</span>
+</button>
+</div>
+</div>
+</div>
+<!-- 4. Escrow & Guarantee Notice Pill -->
+<div class="p-4 rounded-2xl bg-canvas-subtle border border-border-hairline text-left">
+<div class="flex items-center gap-2 text-navy-dark font-semibold text-body-sm font-body-sm mb-1">
+<span class="material-symbols-outlined text-secondary-container" data-icon="shield">shield</span>
+            Tuungane SafeEscrow™ Guaranteed
+          </div>
+<p class="text-caption font-caption text-on-surface-variant leading-relaxed">
+            Funds for every request on Juma's service stacks are released in phased milestones only when you confirm physical signoff.
+          </p>
+</div>
+</aside>
+</div>
+</main>
+<!-- Web Footer (JSON Shared Component Anchor) -->
+<footer class="bg-navy-dark mt-space-xl border-t border-border-subtle">
+<div class="w-full py-space-xl px-gutter-desktop max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-space-md text-surface-bright">
+<div class="flex flex-col sm:flex-row items-center gap-4 text-center sm:text-left">
+<a class="text-headline-md font-headline-md font-bold text-surface-bright flex items-center gap-2" href="#">
+<span class="w-6 h-6 rounded bg-secondary-container flex items-center justify-center text-surface-bright text-xs">
+<span class="material-symbols-outlined text-sm" data-icon="hub">hub</span>
+</span>
+          Tuungane
+        </a>
+<span class="text-caption font-caption text-outline-variant">
+          © 2024 Tuungane Economic Marketplace. Empowering East African Enterprise.
+        </span>
+</div>
+<nav class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-body-sm font-body-sm">
+<a class="text-outline-variant hover:text-surface-bright transition-colors duration-150" href="#">Civic Guidelines</a>
+<a class="text-outline-variant hover:text-surface-bright transition-colors duration-150" href="#">Terms of Service</a>
+<a class="text-outline-variant hover:text-surface-bright transition-colors duration-150" href="#">Privacy Policy</a>
+<a class="text-outline-variant hover:text-surface-bright transition-colors duration-150" href="#">Verified Directory</a>
+<a class="text-outline-variant hover:text-surface-bright transition-colors duration-150" href="#">Trust &amp; Safety</a>
+<a class="text-surface-bright font-semibold underline transition-colors duration-150" href="#">Language: Kiswahili / English</a>
+</nav>
+</div>
+</footer>
+<!-- Mobile Floating Bottom Action (Mobile Only FAB replacement when browsing personal stacks) -->
+<div class="sm:hidden fixed bottom-4 right-4 z-50">
+<button class="w-14 h-14 rounded-full bg-secondary-container text-surface-bright flex items-center justify-center shadow-lg ring-4 ring-surface-container-lowest active:scale-95 transition-transform" title="Create New Service Profile">
+<span class="material-symbols-outlined text-2xl" data-icon="add">add</span>
+</button>
+</div>
+</body></html>

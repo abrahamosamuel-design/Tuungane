@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Full-Stack Web &amp; Mobile Application Engineering | Tuungane Marketplace</title>
+<!-- Material Symbols Outlined Font -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Google Fonts: Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "primary-fixed": "#d6e3ff",
+            "on-primary-fixed": "#071c36",
+            "text-jet": "#050505",
+            "tertiary-container": "#00250c",
+            "tertiary-fixed-dim": "#64de83",
+            "on-tertiary-fixed-variant": "#005323",
+            "inverse-on-surface": "#eaf1ff",
+            "inverse-primary": "#b5c7ea",
+            "surface-tint": "#4d5f7d",
+            "on-secondary-fixed-variant": "#7d2d00",
+            "outline": "#75777e",
+            "primary-fixed-dim": "#b5c7ea",
+            "error-container": "#ffdad6",
+            "secondary-container": "#fe6a19",
+            "tertiary": "#000802",
+            "surface-container-highest": "#d3e4fe",
+            "inverse-surface": "#213145",
+            "growth-green-light": "#E8F7EE",
+            "outline-variant": "#c4c6ce",
+            "surface-dim": "#cbdbf5",
+            "on-error-container": "#93000a",
+            "growth-green-border": "#A3E2B8",
+            "border-subtle": "#E2E8F0",
+            "surface-variant": "#d3e4fe",
+            "secondary-fixed": "#ffdbcd",
+            "border-hairline": "#DADDE1",
+            "canvas-subtle": "#F8FAFC",
+            "surface-container": "#e5eeff",
+            "on-tertiary": "#ffffff",
+            "surface-bright": "#f8f9ff",
+            "primary": "#000615",
+            "hero-indigo-stop": "#1E3A8A",
+            "on-primary-container": "#7587a7",
+            "surface": "#f8f9ff",
+            "on-surface": "#0b1c30",
+            "on-error": "#ffffff",
+            "on-background": "#0b1c30",
+            "text-muted-mobile": "#4B4F56",
+            "on-tertiary-fixed": "#00210a",
+            "error": "#ba1a1a",
+            "on-primary": "#ffffff",
+            "surface-container-high": "#dce9ff",
+            "on-tertiary-container": "#0a9b49",
+            "on-secondary-container": "#591e00",
+            "orange-gradient-end": "#FF8A42",
+            "secondary": "#a43e00",
+            "surface-container-low": "#eff4ff",
+            "tertiary-fixed": "#81fb9c",
+            "destructive-red": "#E53935",
+            "on-secondary": "#ffffff",
+            "background": "#f8f9ff",
+            "surface-alt": "#F1F5F9",
+            "on-primary-fixed-variant": "#364764",
+            "primary-container": "#0b1f3a",
+            "surface-container-lowest": "#ffffff",
+            "on-surface-variant": "#44474d",
+            "on-secondary-fixed": "#360f00",
+            "secondary-fixed-dim": "#ffb596",
+            "navy-dark": "#0B192C"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-md": "1rem",
+            "gutter": "1.5rem",
+            "space-xl": "2rem",
+            "space-sm": "0.5rem",
+            "margin-desktop": "2rem",
+            "space-xs": "0.25rem",
+            "gutter-mobile": "0.5rem",
+            "margin": "1.5rem",
+            "gutter-desktop": "2rem",
+            "margin-mobile": "0.75rem",
+            "space-lg": "1.5rem"
+          },
+          "fontFamily": {
+            "headline-md": ["Inter"],
+            "headline-lg-mobile": ["Inter"],
+            "display-2xl": ["Inter"],
+            "display-xl": ["Inter"],
+            "body-base": ["Inter"],
+            "display-lg": ["Inter"],
+            "body-sm": ["Inter"],
+            "body-base-mobile": ["Inter"],
+            "body-sm-mobile": ["Inter"],
+            "headline-sm": ["Inter"],
+            "label-compact-badge": ["Inter"],
+            "caption-mobile": ["Inter"],
+            "headline-lg": ["Inter"],
+            "caption": ["Inter"]
+          },
+          "fontSize": {
+            "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "headline-lg-mobile": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "700" }],
+            "display-2xl": ["60px", { "lineHeight": "66px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+            "display-xl": ["48px", { "lineHeight": "52px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+            "body-base": ["16px", { "lineHeight": "24px", "letterSpacing": "0", "fontWeight": "400" }],
+            "display-lg": ["36px", { "lineHeight": "42px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "body-sm": ["14px", { "lineHeight": "20px", "letterSpacing": "0", "fontWeight": "400" }],
+            "body-base-mobile": ["16.5px", { "lineHeight": "25.5px", "letterSpacing": "0", "fontWeight": "400" }],
+            "body-sm-mobile": ["15.5px", { "lineHeight": "23px", "letterSpacing": "0", "fontWeight": "400" }],
+            "headline-sm": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "label-compact-badge": ["9px", { "lineHeight": "16px", "letterSpacing": "0.025em", "fontWeight": "700" }],
+            "caption-mobile": ["13.4px", { "lineHeight": "21.6px", "letterSpacing": "0", "fontWeight": "500" }],
+            "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "caption": ["12px", { "lineHeight": "16px", "letterSpacing": "0", "fontWeight": "500" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .material-symbols-fill {
+      font-variation-settings: 'FILL' 1;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface antialiased selection:bg-secondary-fixed selection:text-navy-dark">
+<!-- Top Navigation Bar (Shared Component Anchor) -->
+<header class="sticky top-0 z-40 bg-surface-container-lowest dark:bg-surface-container-lowest border-b border-border-hairline dark:border-outline shadow-sm">
+<div class="flex justify-between items-center w-full px-gutter-desktop max-w-7xl mx-auto h-16">
+<!-- Brand & Search cluster -->
+<div class="flex items-center gap-space-lg">
+<a class="text-headline-lg font-headline-lg font-bold text-navy-dark dark:text-primary-fixed flex items-center gap-space-xs" href="#">
+<span class="w-8 h-8 rounded-lg bg-navy-dark text-on-primary flex items-center justify-center font-extrabold text-body-base">T</span>
+<span>Tuungane</span>
+</a>
+<!-- Search input -->
+<div class="relative hidden lg:block w-72">
+<span class="material-symbols-outlined absolute left-3 top-2.5 text-outline text-lg" data-icon="search">search</span>
+<input class="w-full pl-9 pr-4 py-1.5 rounded-full border border-border-hairline text-body-sm font-body-sm bg-surface-bright focus:outline-none focus:border-secondary-container focus:ring-1 focus:ring-secondary-container placeholder:text-outline-variant" placeholder="Search services, tech stacks, skills..." type="text"/>
+</div>
+</div>
+<!-- Main Navigation Links -->
+<nav class="hidden md:flex items-center gap-space-lg">
+<!-- Services Directory (ACTIVE based on screen intent) -->
+<a class="text-secondary-container dark:text-orange-gradient-end font-semibold border-b-2 border-secondary-container dark:border-orange-gradient-end pb-1 text-body-sm font-body-sm transition-colors duration-150" href="#">
+          Services Directory
+        </a>
+<a class="text-on-surface-variant dark:text-outline font-medium hover:text-navy-dark dark:hover:text-surface-bright text-body-sm font-body-sm transition-colors duration-150" href="#">
+          Feed
+        </a>
+<a class="text-on-surface-variant dark:text-outline font-medium hover:text-navy-dark dark:hover:text-surface-bright text-body-sm font-body-sm transition-colors duration-150" href="#">
+          Opportunities
+        </a>
+<a class="text-on-surface-variant dark:text-outline font-medium hover:text-navy-dark dark:hover:text-surface-bright text-body-sm font-body-sm transition-colors duration-150" href="#">
+          Businesses
+        </a>
+</nav>
+<!-- Trailing Action Cluster -->
+<div class="flex items-center gap-space-sm">
+<button aria-label="Messages" class="p-2 rounded-xl text-on-surface-variant hover:bg-surface-alt transition-colors duration-150 relative">
+<span class="material-symbols-outlined" data-icon="chat">chat</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-secondary-container"></span>
+</button>
+<button aria-label="Notifications" class="p-2 rounded-xl text-on-surface-variant hover:bg-surface-alt transition-colors duration-150 relative">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-destructive-red"></span>
+</button>
+<a class="hidden sm:inline-flex items-center px-4 py-2 rounded-xl bg-navy-dark text-on-primary font-semibold text-body-sm font-body-sm hover:bg-primary-container transition-colors duration-150 active:scale-[0.98]" href="#">
+          List a Service
+        </a>
+<!-- Profile Avatar Link -->
+<a class="flex items-center gap-space-xs pl-2" href="#">
+<img alt="User Profile Avatar" class="w-9 h-9 rounded-full object-cover border border-border-hairline" data-alt="A portrait headshot of a smiling young East African professional man in an executive navy blue shirt, clean studio background with natural light." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCu1YLu_cpoUPV95HSlk_H9FXMB5WQ7GaA48oE-FdT1WTqaPD8FmVki8zXBnDvb0Y1F-tXS2SvvVW4JAJYKM7Qw71xt2nQagn5ze4eYxJ64bvMcft5cs8HUZAuijQnfVy3anQht6_BgYqHnZAQYO7seUUXb74qPjsRpz4WrZMq84DMbQ8Wjl0xMwEKtBQlFTYYOhjkLNESTLawguN0GFzsRYawwEvFJ7OHfJcc8AvrlRIY-2zbmdKgMig"/>
+</a>
+</div>
+</div>
+</header>
+<!-- Sub-Header Breadcrumb Container -->
+<div class="bg-surface-container-lowest border-b border-border-hairline">
+<div class="max-w-7xl mx-auto px-gutter-desktop py-3 flex items-center text-caption font-caption text-outline">
+<a class="hover:text-navy-dark transition-colors duration-150 flex items-center gap-1" href="#">
+<span class="material-symbols-outlined text-sm" data-icon="storefront">storefront</span>
+<span>Services Directory</span>
+</a>
+<span class="material-symbols-outlined text-xs mx-2" data-icon="chevron_right">chevron_right</span>
+<a class="hover:text-navy-dark transition-colors duration-150" href="#">Tech &amp; Development</a>
+<span class="material-symbols-outlined text-xs mx-2" data-icon="chevron_right">chevron_right</span>
+<span class="text-navy-dark font-semibold truncate max-w-xs md:max-w-md">Full-Stack Web &amp; Mobile Engineering</span>
+</div>
+</div>
+<!-- Main Canvas -->
+<main class="max-w-7xl mx-auto px-gutter-desktop py-space-lg">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
+<!-- LEFT / CENTER COLUMN (65% width = 8 cols out of 12) -->
+<div class="lg:col-span-8 flex flex-col gap-space-lg">
+<!-- Service Hero Card -->
+<article class="bg-surface-container-lowest rounded-2xl border border-border-hairline p-space-lg shadow-sm">
+<!-- Category, Verification & Proximity Tags -->
+<div class="flex flex-wrap items-center gap-space-xs mb-space-sm">
+<span class="bg-surface-alt text-navy-dark rounded px-2 py-0.5 text-label-compact-badge font-label-compact-badge border border-border-hairline">
+              SOFTWARE DEVELOPMENT
+            </span>
+<span class="bg-growth-green-light text-on-tertiary-container border border-growth-green-border rounded px-2 py-0.5 text-label-compact-badge font-label-compact-badge flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" data-icon="verified">verified</span>
+              VERIFIED SERVICE
+            </span>
+<span class="bg-growth-green-light text-on-tertiary-container border border-growth-green-border rounded px-2 py-0.5 text-label-compact-badge font-label-compact-badge flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" data-icon="near_me">near_me</span>
+              KILIMANI, NAIROBI
+            </span>
+</div>
+<!-- Headline -->
+<h1 class="text-display-lg font-display-lg text-navy-dark mb-space-sm">
+            Full-Stack Web &amp; Mobile Application Engineering (React, Node, Cloud)
+          </h1>
+<!-- Meta stats & credentials bar -->
+<div class="flex flex-wrap items-center gap-space-md py-space-sm border-b border-border-hairline text-body-sm font-body-sm">
+<!-- Rating -->
+<div class="flex items-center gap-1">
+<span class="material-symbols-outlined text-secondary-container material-symbols-fill" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="font-bold text-navy-dark">4.98</span>
+<span class="text-outline">(56 completed client projects)</span>
+</div>
+<span class="text-border-hairline">•</span>
+<!-- Location Details -->
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined text-sm text-outline" data-icon="location_on">location_on</span>
+<span>Kilimani, Nairobi • Remote Available across EA</span>
+</div>
+<span class="text-border-hairline">•</span>
+<!-- Language/Speed -->
+<div class="flex items-center gap-1 text-on-surface-variant">
+<span class="material-symbols-outlined text-sm text-outline" data-icon="schedule">schedule</span>
+<span>Typically begins within 48h</span>
+</div>
+</div>
+<!-- Image Carousel / Portfolio Showcase -->
+<div class="mt-space-md flex flex-col gap-space-sm">
+<!-- Hero display image -->
+<div class="relative rounded-xl overflow-hidden border border-border-hairline bg-navy-dark group aspect-video md:h-96 w-full">
+<img alt="Completed client project interface" class="w-full h-full object-cover" data-alt="A clean modern SaaS enterprise dashboard interface displayed on a sleek laptop monitor. Modern corporate aesthetic with charts in deep navy, vibrant orange metric indicators, and high contrast typography. Clean bright studio lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBw0wmz9Dj0Zipxhfu5Ftygd7nWzazHkzhlWZmP4uft2JFZkvgAWTD7nLiuZmaP2A5gHGO0VzydfMAjM6sLL7E49pqYTfpcfyzS4PQMfAfSaCJfdKgmFz6__fO4URfDs4VPyjHJ_8_VaSDzSv9hlvVP4gGni9_0Gush0ttFYZ1EI1qSpcM8wkobjRRczTLBSeSjAyt5lBEFRYgVDeB-R6AgSWXqz5SnnYHCwE2bpOuEFcmNML4TDIQ-Hw"/>
+<div class="absolute bottom-3 left-3 bg-navy-dark/90 text-on-primary px-3 py-1.5 rounded-lg text-caption font-caption backdrop-blur-md flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-tertiary-fixed-dim" data-icon="check_circle">check_circle</span>
+<span>Production Project: East African Agritech Logistics System</span>
+</div>
+<div class="absolute top-3 right-3 bg-surface-container-lowest/90 text-navy-dark px-2.5 py-1 rounded-full text-caption font-caption font-semibold shadow-sm">
+                1 / 4
+              </div>
+</div>
+<!-- Thumbnail Reel -->
+<div class="grid grid-cols-4 gap-space-sm">
+<div class="relative rounded-lg overflow-hidden border-2 border-secondary-container aspect-video cursor-pointer">
+<img alt="Fintech mobile app preview" class="w-full h-full object-cover" data-alt="Screenshot of an intuitive mobile fintech application UI showcasing M-Pesa digital wallet integration, financial transaction charts, and clean card-based layout." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDBM_CQEq10NmvxGiQvTsBSlcDnyjuoM2wfFE2Y87HfnAqoWgt4nZLUI-ElehAEboRAh_swfyT_RIdgfWY8tV2Ydbc4lzkQ-HQgDbt1PRFE3qoaXWvwzmUd1zRyiB9sfOvjdqoZOHlI0DXddpkhsqAcpQ-I8nKmFb_XJkm99l_CPuFkjhyd5sUrKoCgguM-IzGa_5gc3K-tLGILKQ5rSf8Dws0V18u5L-eOroA_k5safPSCw6um3spRrw"/>
+</div>
+<div class="relative rounded-lg overflow-hidden border border-border-hairline aspect-video cursor-pointer hover:border-secondary-container transition-colors">
+<img alt="Logistics platform preview" class="w-full h-full object-cover" data-alt="Web application responsive viewport showcasing an inventory and logistics tracking system with live map coordinates and status badges in green and orange." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC9pi_BoVw32Ej9-OzBZCyMn38_4T9mZR0BNDNt4VZXV-0GqZ2mkueTxDxUFeOMGkoHELH_i4fdfvmQK45wIARQ7fTNzrgq7Xi64r_cddH79yXFC-DsvILsJyv1rtGPrL3udLb7uquDpXhPtA7U0GX3Yg5ezWIA0hg4T61KeymZIs3_diVEKHv7Ztuzg8GLvPg2lP0m2ytxoPqve0rrz4Kwa5YRVey6HOXnapDkj_OAoiCtRjNhUrkQvw"/>
+</div>
+<div class="relative rounded-lg overflow-hidden border border-border-hairline aspect-video cursor-pointer hover:border-secondary-container transition-colors">
+<img alt="Cloud infrastructure architecture" class="w-full h-full object-cover" data-alt="High tech software architecture diagram and continuous deployment dashboard illustrating Docker containers and AWS cloud infrastructure in a crisp modern layout." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCpYSnASMGMQgqjSdeuobhNh-SuhL63MwXaqyk3Yf-qi6TlA0oxSR7qXNNSvNjpZdHtzUefUoptZVzl-jTyNyIZz8EDpFueImGyYGQqW2HOcogaMycM8e8KHFfEeV1x6b-Px-AmJJUPdg1Wj1sZo7n4Hk3P_F-JD-5OMoqGV9FHbkl0xkJ5iD6-08K4Br3zUaeZZVNRNCfpNYoTLR-kj7yFMnR81PH9Ouo1oPYTLC-V8b3-OiHTCJa-mg"/>
+</div>
+<div class="relative rounded-lg overflow-hidden border border-border-hairline aspect-video cursor-pointer bg-navy-dark flex flex-col items-center justify-center text-on-primary p-2 text-center hover:bg-primary-container transition-colors">
+<span class="material-symbols-outlined text-lg" data-icon="photo_library">photo_library</span>
+<span class="text-caption font-caption font-semibold mt-1">+12 Case Studies</span>
+</div>
+</div>
+</div>
+<!-- Service Tags / Tech Stack Attachment -->
+<div class="mt-space-md pt-space-md border-t border-border-hairline">
+<h4 class="text-caption font-caption font-semibold text-outline uppercase tracking-wider mb-2">Core Competencies &amp; Tech Stack</h4>
+<div class="flex flex-wrap gap-2">
+<span class="px-2.5 py-1 rounded-lg bg-surface-alt text-navy-dark text-body-sm font-body-sm font-medium border border-border-hairline">React.js &amp; Next.js</span>
+<span class="px-2.5 py-1 rounded-lg bg-surface-alt text-navy-dark text-body-sm font-body-sm font-medium border border-border-hairline">React Native / Flutter</span>
+<span class="px-2.5 py-1 rounded-lg bg-surface-alt text-navy-dark text-body-sm font-body-sm font-medium border border-border-hairline">Node.js &amp; TypeScript</span>
+<span class="px-2.5 py-1 rounded-lg bg-surface-alt text-navy-dark text-body-sm font-body-sm font-medium border border-border-hairline">PostgreSQL &amp; Redis</span>
+<span class="px-2.5 py-1 rounded-lg bg-surface-alt text-navy-dark text-body-sm font-body-sm font-medium border border-border-hairline">AWS / Docker / K8s</span>
+<span class="px-2.5 py-1 rounded-lg bg-surface-alt text-navy-dark text-body-sm font-body-sm font-medium border border-border-hairline">M-Pesa Daraja API Integration</span>
+</div>
+</div>
+</article>
+<!-- Service Description & Scope of Work -->
+<section class="bg-surface-container-lowest rounded-2xl border border-border-hairline p-space-lg shadow-sm">
+<h2 class="text-headline-md font-headline-md text-navy-dark mb-space-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary-container" data-icon="terminal">terminal</span>
+<span>Service Overview &amp; Engineering Scope</span>
+</h2>
+<div class="prose max-w-none text-body-base font-body-base text-on-surface-variant space-y-4">
+<p>
+              I build resilient, high-performance web applications and cross-platform mobile apps structured specifically for East African market conditions—handling high mobile data constraints, offline synchronization, and seamless local payment rails like M-Pesa, Airtel Money, and card processing.
+            </p>
+<p>
+              Whether you are an established enterprise modernizing internal supply chain tools or an ambitious Nairobi startup shipping a market-ready MVP, every deliverable is built using clean domain-driven code architecture, complete unit test coverage, and enterprise-grade CI/CD pipelines.
+            </p>
+</div>
+<!-- Verified Deliverables Checklist -->
+<div class="mt-space-lg pt-space-md border-t border-border-hairline">
+<h3 class="text-headline-sm font-headline-sm text-navy-dark mb-space-sm">Guaranteed Deliverables in Every Contract</h3>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-space-sm">
+<div class="flex items-start gap-space-xs p-3 rounded-xl bg-canvas-subtle border border-border-subtle">
+<span class="material-symbols-outlined text-on-tertiary-container font-bold" data-icon="check_circle">check_circle</span>
+<div>
+<h4 class="text-body-sm font-body-sm font-semibold text-navy-dark">Complete Source Code Ownership</h4>
+<p class="text-caption font-caption text-on-surface-variant">Clean GitHub/GitLab repositories with thorough documentation and architecture diagrams.</p>
+</div>
+</div>
+<div class="flex items-start gap-space-xs p-3 rounded-xl bg-canvas-subtle border border-border-subtle">
+<span class="material-symbols-outlined text-on-tertiary-container font-bold" data-icon="check_circle">check_circle</span>
+<div>
+<h4 class="text-body-sm font-body-sm font-semibold text-navy-dark">Automated CI/CD Pipeline Setup</h4>
+<p class="text-caption font-caption text-on-surface-variant">Zero-downtime deployment workflows on AWS, DigitalOcean, or Google Cloud.</p>
+</div>
+</div>
+<div class="flex items-start gap-space-xs p-3 rounded-xl bg-canvas-subtle border border-border-subtle">
+<span class="material-symbols-outlined text-on-tertiary-container font-bold" data-icon="check_circle">check_circle</span>
+<div>
+<h4 class="text-body-sm font-body-sm font-semibold text-navy-dark">Mobile-First High-Glare Optimization</h4>
+<p class="text-caption font-caption text-on-surface-variant">Pixel-perfect responsive design tested against diverse smartphone screen sizes.</p>
+</div>
+</div>
+<div class="flex items-start gap-space-xs p-3 rounded-xl bg-canvas-subtle border border-border-subtle">
+<span class="material-symbols-outlined text-on-tertiary-container font-bold" data-icon="check_circle">check_circle</span>
+<div>
+<h4 class="text-body-sm font-body-sm font-semibold text-navy-dark">30 Days Post-Deployment Warranty</h4>
+<p class="text-caption font-caption text-on-surface-variant">Direct bug-fixing, patch support, and operational hand-off to your in-house team.</p>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Packages & Pricing Tier Comparison Table -->
+<section class="bg-surface-container-lowest rounded-2xl border border-border-hairline p-space-lg shadow-sm">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-space-md">
+<div>
+<h2 class="text-headline-md font-headline-md text-navy-dark">Packages &amp; Pricing Tiers</h2>
+<p class="text-body-sm font-body-sm text-outline">Transparent, milestone-based contracts protected by Tuungane Escrow.</p>
+</div>
+<div class="flex items-center gap-1.5 bg-growth-green-light px-3 py-1 rounded-full border border-growth-green-border text-caption font-caption text-on-tertiary-container font-semibold">
+<span class="material-symbols-outlined text-sm" data-icon="lock">lock</span>
+<span>Escrow Milestones Active</span>
+</div>
+</div>
+<!-- Tier Cards Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-md">
+<!-- BASIC TIER -->
+<div class="rounded-xl border border-border-hairline p-space-md flex flex-col justify-between hover:border-navy-dark transition-all duration-150 bg-surface-container-lowest">
+<div>
+<div class="text-label-compact-badge font-label-compact-badge uppercase text-outline tracking-wider mb-1">STARTER PACK</div>
+<h3 class="text-headline-sm font-headline-sm text-navy-dark">Basic MVP</h3>
+<p class="text-caption font-caption text-on-surface-variant mt-1 mb-4">Fast prototype, responsive landing funnel &amp; lead capture engine.</p>
+<div class="text-display-lg font-display-lg text-navy-dark mb-1">KES 25,000</div>
+<p class="text-caption font-caption text-outline mb-4">Est. Delivery: 7 business days</p>
+<ul class="space-y-2.5 text-body-sm font-body-sm text-on-surface-variant border-t border-border-hairline pt-4 mb-6">
+<li class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-on-tertiary-container" data-icon="check">check</span>
+<span>1-3 Responsive Pages</span>
+</li>
+<li class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-on-tertiary-container" data-icon="check">check</span>
+<span>Lead Capture &amp; Database</span>
+</li>
+<li class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-on-tertiary-container" data-icon="check">check</span>
+<span>Domain &amp; SSL Cloud Setup</span>
+</li>
+<li class="flex items-center gap-2 text-outline-variant">
+<span class="material-symbols-outlined text-sm text-outline-variant" data-icon="close">close</span>
+<span class="line-through">Custom API or Auth</span>
+</li>
+</ul>
+</div>
+<button class="w-full py-2.5 rounded-xl border border-navy-dark text-navy-dark font-semibold text-body-sm font-body-sm hover:bg-surface-alt transition-colors active:scale-[0.98]">
+                Select Basic
+              </button>
+</div>
+<!-- STANDARD TIER (FEATURED) -->
+<div class="rounded-xl border-2 border-secondary-container p-space-md flex flex-col justify-between shadow-md relative bg-surface-container-lowest">
+<div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-secondary-container text-on-secondary px-3 py-0.5 rounded-full text-label-compact-badge font-label-compact-badge uppercase font-bold tracking-wider">
+                MOST POPULAR
+              </div>
+<div>
+<div class="text-label-compact-badge font-label-compact-badge uppercase text-secondary-container tracking-wider mb-1">RECOMMENDED</div>
+<h3 class="text-headline-sm font-headline-sm text-navy-dark">Standard Web App</h3>
+<p class="text-caption font-caption text-on-surface-variant mt-1 mb-4">Complete production-ready web application with API &amp; payments.</p>
+<div class="text-display-lg font-display-lg text-secondary-container mb-1">KES 70,000</div>
+<p class="text-caption font-caption text-outline mb-4">Est. Delivery: 21 business days</p>
+<ul class="space-y-2.5 text-body-sm font-body-sm text-on-surface-variant border-t border-border-hairline pt-4 mb-6">
+<li class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-on-tertiary-container" data-icon="check">check</span>
+<span>Full React + Node Stack</span>
+</li>
+<li class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-on-tertiary-container" data-icon="check">check</span>
+<span>M-Pesa &amp; Card Gateway</span>
+</li>
+<li class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-on-tertiary-container" data-icon="check">check</span>
+<span>User Auth &amp; Role Access</span>
+</li>
+<li class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-on-tertiary-container" data-icon="check">check</span>
+<span>Admin Data Dashboard</span>
+</li>
+</ul>
+</div>
+<button class="w-full py-2.5 rounded-xl bg-secondary-container text-on-secondary font-semibold text-body-sm font-body-sm hover:brightness-105 transition-all shadow-sm active:scale-[0.98]">
+                Select Standard
+              </button>
+</div>
+<!-- PREMIUM TIER -->
+<div class="rounded-xl border border-border-hairline p-space-md flex flex-col justify-between hover:border-navy-dark transition-all duration-150 bg-surface-container-lowest">
+<div>
+<div class="text-label-compact-badge font-label-compact-badge uppercase text-outline tracking-wider mb-1">ENTERPRISE SUITE</div>
+<h3 class="text-headline-sm font-headline-sm text-navy-dark">Premium Multi-Platform</h3>
+<p class="text-caption font-caption text-on-surface-variant mt-1 mb-4">Web, iOS, and Android ecosystem with high-concurrency cloud setup.</p>
+<div class="text-display-lg font-display-lg text-navy-dark mb-1">KES 150,000</div>
+<p class="text-caption font-caption text-outline mb-4">Est. Delivery: 45 business days</p>
+<ul class="space-y-2.5 text-body-sm font-body-sm text-on-surface-variant border-t border-border-hairline pt-4 mb-6">
+<li class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-on-tertiary-container" data-icon="check">check</span>
+<span>Cross-Platform Mobile App</span>
+</li>
+<li class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-on-tertiary-container" data-icon="check">check</span>
+<span>Microservices Architecture</span>
+</li>
+<li class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-on-tertiary-container" data-icon="check">check</span>
+<span>Automated CI/CD &amp; Monitoring</span>
+</li>
+<li class="flex items-center gap-2">
+<span class="material-symbols-outlined text-sm text-on-tertiary-container" data-icon="check">check</span>
+<span>60-Day SLA &amp; Support</span>
+</li>
+</ul>
+</div>
+<button class="w-full py-2.5 rounded-xl border border-navy-dark text-navy-dark font-semibold text-body-sm font-body-sm hover:bg-surface-alt transition-colors active:scale-[0.98]">
+                Select Premium
+              </button>
+</div>
+</div>
+</section>
+<!-- Client Reviews & Ratings Breakdown -->
+<section class="bg-surface-container-lowest rounded-2xl border border-border-hairline p-space-lg shadow-sm">
+<div class="flex items-center justify-between mb-space-md">
+<div>
+<h2 class="text-headline-md font-headline-md text-navy-dark">Verified Project Testimonials</h2>
+<p class="text-body-sm font-body-sm text-outline">Verified reviews from clients who completed projects on Tuungane.</p>
+</div>
+<div class="text-right">
+<div class="text-headline-lg font-headline-lg font-bold text-navy-dark">4.98 / 5.0</div>
+<div class="flex items-center text-secondary-container justify-end">
+<span class="material-symbols-outlined text-sm material-symbols-fill" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-sm material-symbols-fill" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-sm material-symbols-fill" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-sm material-symbols-fill" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-sm material-symbols-fill" data-icon="star" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+</div>
+</div>
+<!-- Reviews Stream -->
+<div class="space-y-space-md">
+<!-- Review 1 -->
+<div class="p-space-md rounded-xl bg-surface-alt border border-border-subtle">
+<div class="flex items-center justify-between mb-2">
+<div class="flex items-center gap-3">
+<img alt="Faith Muthoni avatar" class="w-10 h-10 rounded-full object-cover border border-border-hairline" data-alt="Portrait photograph of a Kenyan female fintech entrepreneur wearing stylish glasses and warm blazer in an urban co-working space in Westlands Nairobi." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDldDiAYVXZpsqj7mV47kejdRkZQyBc5H1Dupo3nk25q7tc_nzuWhURnopGqqMh3ANN4Boj3NxKYoKV4qxHwHV3QXr7dIBmOYxpciivVkAt70Llo69IezmmyTr2fWKGQ5caaHwmOorcUo_MG7bcQFpMmwHsCt8u4w2u_zuDvccL_2cRDZMVNX-1Et8OkQpEhcai8n6Q_EIBIHpJmO1bXK7irMqiwIVfFTH3n6MDU8Y3stT60Hp4fckCWQ"/>
+<div>
+<h4 class="text-body-sm font-body-sm font-semibold text-navy-dark">Faith Muthoni</h4>
+<p class="text-caption font-caption text-outline">Founder, PesaFlow Logistics • Standard Web App</p>
+</div>
+</div>
+<span class="text-caption font-caption text-outline">3 weeks ago</span>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant">
+                "Amina delivered our core disbursement portal ahead of schedule. Her understanding of local payment gateways and edge cases with Kenyan telecom APIs saved us months of rework. Exceptional engineering and seamless communication."
+              </p>
+</div>
+<!-- Review 2 -->
+<div class="p-space-md rounded-xl bg-surface-alt border border-border-subtle">
+<div class="flex items-center justify-between mb-2">
+<div class="flex items-center gap-3">
+<img alt="David Kiprop avatar" class="w-10 h-10 rounded-full object-cover border border-border-hairline" data-alt="Corporate headshot of an African executive man in his late 30s wearing a modern tailored suit against a clean glass architectural backdrop." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBufHrCPqdRGZBIzXEa5Jk-dWOsnRXYQMGq95rcAlKwGvGxsekiao851tZwPj80AmF6rzmds8wdH-CBhlzqhkp2tn41N9_r8KFJrTq6tyfxjM91PDbcHauoruxyeMf4rQZ1FbkUrIOmevCyyLRpy4ubcph_61LudRMTd3V1w-Ud5lGWeA4jqK42ZvVQkXKnZdoyaPdchF2MxBWwXnTwnCH-IQVXHzca8CnbZQEQkhkUdaaUoMUzTxvp_w"/>
+<div>
+<h4 class="text-body-sm font-body-sm font-semibold text-navy-dark">David Kiprop</h4>
+<p class="text-caption font-caption text-outline">Director of Operations, Rift Valley Haulage • Premium Tier</p>
+</div>
+</div>
+<span class="text-caption font-caption text-outline">2 months ago</span>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant">
+                "We needed an offline-first vehicle fleet tracker that works in remote areas across the northern corridor. The React Native app has been rock solid. Highly recommended for enterprise buildouts."
+              </p>
+</div>
+</div>
+</section>
+</div>
+<!-- RIGHT SIDEBAR (35% width = 4 cols out of 12, STICKY) -->
+<aside class="lg:col-span-4 flex flex-col gap-space-lg lg:sticky lg:top-20">
+<!-- 'Request This Service' Conversion Widget -->
+<div class="bg-surface-container-lowest rounded-2xl border-2 border-secondary-container/30 p-space-lg shadow-md">
+<div class="flex items-baseline justify-between mb-space-sm">
+<span class="text-caption font-caption font-bold text-outline uppercase tracking-wider">INVESTMENT</span>
+<span class="text-caption font-caption text-on-tertiary-container bg-growth-green-light px-2 py-0.5 rounded font-semibold border border-growth-green-border">Fixed &amp; Milestone</span>
+</div>
+<div class="text-display-xl font-display-xl text-navy-dark mb-1">
+            KES 70,000
+          </div>
+<p class="text-body-sm font-body-sm text-outline mb-space-md">Standard web engineering package (Recommended)</p>
+<!-- Delivery Guarantee Micro-Badges -->
+<div class="space-y-2.5 mb-space-lg bg-surface-alt p-3 rounded-xl border border-border-subtle">
+<div class="flex items-center gap-2 text-body-sm font-body-sm text-navy-dark">
+<span class="material-symbols-outlined text-secondary-container" data-icon="schedule">schedule</span>
+<span class="font-medium">Estimated Delivery: <strong>21 Days</strong></span>
+</div>
+<div class="flex items-center gap-2 text-body-sm font-body-sm text-navy-dark">
+<span class="material-symbols-outlined text-on-tertiary-container" data-icon="electric_bolt">electric_bolt</span>
+<span class="font-medium">Response Guarantee: <strong>&lt; 2 Hours</strong></span>
+</div>
+<div class="flex items-center gap-2 text-body-sm font-body-sm text-navy-dark">
+<span class="material-symbols-outlined text-primary" data-icon="verified_user">verified_user</span>
+<span class="font-medium">Tuungane Escrow: <strong>100% Protected</strong></span>
+</div>
+</div>
+<!-- Primary Conversion Button (Orange) -->
+<button class="w-full py-3.5 px-4 rounded-xl bg-secondary-container text-on-secondary font-semibold text-body-base font-body-base shadow-lg shadow-secondary-container/20 hover:brightness-105 transition-all duration-150 active:scale-[0.98] flex items-center justify-center gap-2">
+<span>Send Service Request</span>
+<span class="material-symbols-outlined text-lg" data-icon="arrow_forward">arrow_forward</span>
+</button>
+<!-- Direct Message & Share Buttons -->
+<div class="grid grid-cols-2 gap-2 mt-space-sm">
+<button class="py-2.5 px-3 rounded-xl border border-border-hairline text-navy-dark font-medium text-body-sm font-body-sm hover:bg-surface-alt transition-colors flex items-center justify-center gap-1.5 active:scale-[0.98]">
+<span class="material-symbols-outlined text-base" data-icon="chat">chat</span>
+<span>Message</span>
+</button>
+<button class="py-2.5 px-3 rounded-xl border border-border-hairline text-navy-dark font-medium text-body-sm font-body-sm hover:bg-surface-alt transition-colors flex items-center justify-center gap-1.5 active:scale-[0.98]">
+<span class="material-symbols-outlined text-base" data-icon="share">share</span>
+<span>Share</span>
+</button>
+</div>
+<p class="text-caption font-caption text-outline text-center mt-3">
+            Milestone payments released only upon your code review approval.
+          </p>
+</div>
+<!-- Personal Profile Card ("WHO YOU ARE" Container - Distinct Separation) -->
+<div class="bg-surface-container-lowest rounded-2xl border border-border-hairline p-space-lg shadow-sm">
+<div class="text-label-compact-badge font-label-compact-badge uppercase text-outline tracking-wider mb-space-sm">
+            OFFERED BY LICENSED PROFESSIONAL
+          </div>
+<!-- Provider Identity Header -->
+<div class="flex items-start gap-space-md">
+<div class="relative">
+<img alt="Amina Odhiambo avatar" class="w-16 h-16 rounded-full object-cover border-2 border-secondary-container" data-alt="A distinguished African female software engineer and technical leader in Nairobi with natural hair, confident warm smile, wearing modern smart casual attire against a contemporary architectural office." src="https://lh3.googleusercontent.com/aida-public/AB6AXuABmVEjMXKNE1uzP3KXjip0GRJsohzzsD164gMbo86a1N6CZ3Iojfxiuy-UY1Qw4doER_R3tfMN8WVrk4XJMugALopMn_KKaEVjH8BzcukHgP-H70P2YsZ7fp4IAM5y5I3hlQn5t0ziHvd79fg8erbiM4X8QBoNFin782BVlGbiciYHj1zq4TQl3uiDud_jjVSI9Lxqce6e7Ro6bGkrksGSVVkJ-Wjf-wEsPi4Gk3rHPHs5OXzqWujikg"/>
+<span class="absolute bottom-0 right-0 w-4 h-4 bg-on-tertiary-container rounded-full border-2 border-surface-container-lowest" title="Available now"></span>
+</div>
+<div>
+<div class="flex items-center gap-1">
+<h3 class="text-headline-sm font-headline-sm text-navy-dark">Amina Odhiambo</h3>
+<span class="material-symbols-outlined text-on-tertiary-container text-base" data-icon="verified">verified</span>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant">Senior Software Architect</p>
+<p class="text-caption font-caption text-outline">Verified Member since 2021</p>
+</div>
+</div>
+<!-- Identity Verification Badges -->
+<div class="flex flex-wrap gap-1.5 my-space-md">
+<span class="bg-growth-green-light text-on-tertiary-container border border-growth-green-border rounded px-2 py-0.5 text-label-compact-badge font-label-compact-badge flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" data-icon="badge">badge</span>
+              NATIONAL ID VERIFIED
+            </span>
+<span class="bg-growth-green-light text-on-tertiary-container border border-growth-green-border rounded px-2 py-0.5 text-label-compact-badge font-label-compact-badge flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" data-icon="call">call</span>
+              PHONE VERIFIED
+            </span>
+<span class="bg-surface-alt text-navy-dark border border-border-hairline rounded px-2 py-0.5 text-label-compact-badge font-label-compact-badge flex items-center gap-1">
+<span class="material-symbols-outlined text-xs text-secondary-container" data-icon="stars">stars</span>
+              TOP RATED PROVIDER
+            </span>
+</div>
+<p class="text-body-sm font-body-sm text-on-surface-variant mb-space-md">
+            "Over 9 years building financial and logistics systems in Nairobi. Ex-Safaricom vendor engineer. Passionate about empowering local entrepreneurs through clean code."
+          </p>
+<!-- Dual Identity Link: Service Stack Attachment -->
+<div class="pt-space-sm border-t border-border-hairline">
+<a class="group flex items-center justify-between py-2 text-body-sm font-body-sm font-semibold text-secondary-container hover:text-navy-dark transition-colors" href="#">
+<span>View Personal Profile &amp; Other 3 Services</span>
+<span class="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform" data-icon="arrow_forward">arrow_forward</span>
+</a>
+<div class="mt-2 space-y-2">
+<a class="block p-2 rounded-lg bg-surface-alt hover:bg-surface-container-high transition-colors text-caption font-caption" href="#">
+<div class="font-semibold text-navy-dark">API Architecture &amp; System Audits</div>
+<div class="text-outline">From KES 45,000 • 18 completed</div>
+</a>
+<a class="block p-2 rounded-lg bg-surface-alt hover:bg-surface-container-high transition-colors text-caption font-caption" href="#">
+<div class="font-semibold text-navy-dark">Cloud Migration &amp; AWS DevOps</div>
+<div class="text-outline">From KES 50,000 • 24 completed</div>
+</a>
+</div>
+</div>
+</div>
+<!-- Trust & Safety Banner -->
+<div class="rounded-xl bg-canvas-subtle border border-border-hairline p-space-md text-caption font-caption text-on-surface-variant flex items-start gap-2.5">
+<span class="material-symbols-outlined text-navy-dark text-lg" data-icon="shield">shield</span>
+<p>
+<strong>Tuungane Trust Guarantee:</strong> All financial transactions are covered by regulatory escrow. Providers undergo biometric ID checks.
+          </p>
+</div>
+</aside>
+</div>
+</main>
+<!-- Mobile Fixed Bottom Action Bar (Mobile Responsive Fallback) -->
+<div class="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-surface-container-lowest/95 backdrop-blur-xl border-t border-border-hairline p-3 flex items-center justify-between gap-3 shadow-lg">
+<div>
+<span class="text-caption-mobile font-caption-mobile text-outline block">Standard Tier</span>
+<span class="text-headline-sm font-headline-sm text-navy-dark font-bold">KES 70,000</span>
+</div>
+<button class="flex-1 py-3 px-4 rounded-xl bg-secondary-container text-on-secondary font-semibold text-body-base-mobile font-body-base-mobile shadow-md text-center active:scale-[0.98]">
+      Request Service
+    </button>
+</div>
+<!-- Web Footer (Shared Component Anchor) -->
+<footer class="bg-navy-dark dark:bg-primary border-t border-border-subtle dark:border-outline mt-space-xl">
+<div class="w-full py-space-xl px-gutter-desktop max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-space-md">
+<div class="flex flex-col items-center md:items-start">
+<span class="text-headline-md font-headline-md font-bold text-surface-bright dark:text-surface-bright flex items-center gap-2">
+<span>Tuungane</span>
+</span>
+<p class="text-caption font-caption text-outline-variant dark:text-outline mt-1">
+          © 2024 Tuungane Economic Marketplace. Empowering East African Enterprise.
+        </p>
+</div>
+<nav class="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-body-sm font-body-sm text-outline-variant dark:text-outline">
+<a class="hover:text-surface-bright transition-colors duration-150" href="#">Civic Guidelines</a>
+<a class="hover:text-surface-bright transition-colors duration-150" href="#">Terms of Service</a>
+<a class="hover:text-surface-bright transition-colors duration-150" href="#">Privacy Policy</a>
+<a class="hover:text-surface-bright transition-colors duration-150" href="#">Verified Directory</a>
+<a class="hover:text-surface-bright transition-colors duration-150" href="#">Trust &amp; Safety</a>
+<a class="hover:text-surface-bright transition-colors duration-150" href="#">Language: Kiswahili / English</a>
+</nav>
+</div>
+</footer>
+</body></html>

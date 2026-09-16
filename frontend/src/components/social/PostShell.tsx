@@ -49,7 +49,7 @@ export function PostShell({
 
   return (
     <article
-      className={`bg-card shadow-none sm:shadow-sm sm:rounded-3xl ${accent !== "default" ? accentClass : ""} ${className}`}
+      className={`bg-card shadow-sm rounded-2xl border border-border sm:rounded-3xl ${accent !== "default" ? accentClass : ""} ${className}`}
     >
       {/* 1. Header */}
       <header className="px-4 pt-4 sm:px-5 sm:pt-5">{header}</header>

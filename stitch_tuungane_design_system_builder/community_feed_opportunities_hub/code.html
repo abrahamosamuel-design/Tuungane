@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Tuungane - Community Feed &amp; Economic Opportunities</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Inter Google Font -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration verbatim -->
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "primary-fixed": "#d6e3ff",
+            "on-primary-fixed": "#071c36",
+            "text-jet": "#050505",
+            "tertiary-container": "#00250c",
+            "tertiary-fixed-dim": "#64de83",
+            "on-tertiary-fixed-variant": "#005323",
+            "inverse-on-surface": "#eaf1ff",
+            "inverse-primary": "#b5c7ea",
+            "surface-tint": "#4d5f7d",
+            "on-secondary-fixed-variant": "#7d2d00",
+            "outline": "#75777e",
+            "primary-fixed-dim": "#b5c7ea",
+            "error-container": "#ffdad6",
+            "secondary-container": "#fe6a19",
+            "tertiary": "#000802",
+            "surface-container-highest": "#d3e4fe",
+            "inverse-surface": "#213145",
+            "growth-green-light": "#E8F7EE",
+            "outline-variant": "#c4c6ce",
+            "surface-dim": "#cbdbf5",
+            "on-error-container": "#93000a",
+            "growth-green-border": "#A3E2B8",
+            "border-subtle": "#E2E8F0",
+            "surface-variant": "#d3e4fe",
+            "secondary-fixed": "#ffdbcd",
+            "border-hairline": "#DADDE1",
+            "canvas-subtle": "#F8FAFC",
+            "surface-container": "#e5eeff",
+            "on-tertiary": "#ffffff",
+            "surface-bright": "#f8f9ff",
+            "primary": "#000615",
+            "hero-indigo-stop": "#1E3A8A",
+            "on-primary-container": "#7587a7",
+            "surface": "#f8f9ff",
+            "on-surface": "#0b1c30",
+            "on-error": "#ffffff",
+            "on-background": "#0b1c30",
+            "text-muted-mobile": "#4B4F56",
+            "on-tertiary-fixed": "#00210a",
+            "error": "#ba1a1a",
+            "on-primary": "#ffffff",
+            "surface-container-high": "#dce9ff",
+            "on-tertiary-container": "#0a9b49",
+            "on-secondary-container": "#591e00",
+            "orange-gradient-end": "#FF8A42",
+            "secondary": "#a43e00",
+            "surface-container-low": "#eff4ff",
+            "tertiary-fixed": "#81fb9c",
+            "destructive-red": "#E53935",
+            "on-secondary": "#ffffff",
+            "background": "#f8f9ff",
+            "surface-alt": "#F1F5F9",
+            "on-primary-fixed-variant": "#364764",
+            "primary-container": "#0b1f3a",
+            "surface-container-lowest": "#ffffff",
+            "on-surface-variant": "#44474d",
+            "on-secondary-fixed": "#360f00",
+            "secondary-fixed-dim": "#ffb596",
+            "navy-dark": "#0B192C"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "space-md": "1rem",
+            "gutter": "1.5rem",
+            "space-xl": "2rem",
+            "space-sm": "0.5rem",
+            "margin-desktop": "2rem",
+            "space-xs": "0.25rem",
+            "gutter-mobile": "0.5rem",
+            "margin": "1.5rem",
+            "gutter-desktop": "2rem",
+            "margin-mobile": "0.75rem",
+            "space-lg": "1.5rem"
+          },
+          "fontFamily": {
+            "headline-md": ["Inter"],
+            "headline-lg-mobile": ["Inter"],
+            "display-2xl": ["Inter"],
+            "display-xl": ["Inter"],
+            "body-base": ["Inter"],
+            "display-lg": ["Inter"],
+            "body-sm": ["Inter"],
+            "body-base-mobile": ["Inter"],
+            "body-sm-mobile": ["Inter"],
+            "headline-sm": ["Inter"],
+            "label-compact-badge": ["Inter"],
+            "caption-mobile": ["Inter"],
+            "headline-lg": ["Inter"],
+            "caption": ["Inter"]
+          },
+          "fontSize": {
+            "headline-md": ["20px", {"lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600"}],
+            "headline-lg-mobile": ["22px", {"lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "700"}],
+            "display-2xl": ["60px", {"lineHeight": "66px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+            "display-xl": ["48px", {"lineHeight": "52px", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+            "body-base": ["16px", {"lineHeight": "24px", "letterSpacing": "0", "fontWeight": "400"}],
+            "display-lg": ["36px", {"lineHeight": "42px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+            "body-sm": ["14px", {"lineHeight": "20px", "letterSpacing": "0", "fontWeight": "400"}],
+            "body-base-mobile": ["16.5px", {"lineHeight": "25.5px", "letterSpacing": "0", "fontWeight": "400"}],
+            "body-sm-mobile": ["15.5px", {"lineHeight": "23px", "letterSpacing": "0", "fontWeight": "400"}],
+            "headline-sm": ["18px", {"lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+            "label-compact-badge": ["9px", {"lineHeight": "16px", "letterSpacing": "0.025em", "fontWeight": "700"}],
+            "caption-mobile": ["13.4px", {"lineHeight": "21.6px", "letterSpacing": "0", "fontWeight": "500"}],
+            "headline-lg": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+            "caption": ["12px", {"lineHeight": "16px", "letterSpacing": "0", "fontWeight": "500"}]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .material-symbols-fill {
+      font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+  </style>
+</head>
+<body class="bg-canvas-subtle text-on-surface antialiased min-h-screen flex flex-col font-body-base">
+<!-- TOP APP BAR (Shared Component: TopNavBar) -->
+<header class="sticky top-0 z-40 bg-surface-container-lowest border-b border-border-hairline shadow-sm">
+<div class="flex justify-between items-center w-full px-gutter-desktop max-w-7xl mx-auto h-16">
+<!-- Brand & Search Bar (on_left) -->
+<div class="flex items-center gap-space-lg flex-1 max-w-xl">
+<a class="text-headline-lg font-headline-lg font-bold text-navy-dark tracking-tight flex items-center gap-space-xs shrink-0" href="#">
+<span class="w-8 h-8 rounded-xl bg-primary-container flex items-center justify-center text-surface-bright shadow-sm">
+<span class="material-symbols-outlined material-symbols-fill text-[20px] text-secondary-container">hub</span>
+</span>
+          Tuungane
+        </a>
+<!-- Search Bar with Pill Design -->
+<div class="relative w-full hidden sm:block">
+<span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-outline">
+<span class="material-symbols-outlined text-[18px]">search</span>
+</span>
+<input class="w-full pl-10 pr-4 py-2 text-body-sm font-body-sm bg-surface-alt border border-border-hairline rounded-full focus:outline-none focus:border-secondary-container focus:ring-2 focus:ring-secondary-container/20 transition-all placeholder:text-outline" placeholder="Search tenders, vetted craftspeople, local services in Nairobi..." type="text"/>
+</div>
+</div>
+<!-- Navigation Links -->
+<nav class="hidden md:flex items-center space-x-6 mx-space-md">
+<a class="text-on-surface-variant font-medium hover:text-navy-dark text-body-sm font-body-sm transition-colors duration-150" href="#">Services Directory</a>
+<!-- Active: Feed -->
+<a class="text-secondary-container font-semibold border-b-2 border-secondary-container pb-1 text-body-sm font-body-sm" href="#">Feed</a>
+<a class="text-on-surface-variant font-medium hover:text-navy-dark text-body-sm font-body-sm transition-colors duration-150" href="#">Opportunities</a>
+<a class="text-on-surface-variant font-medium hover:text-navy-dark text-body-sm font-body-sm transition-colors duration-150" href="#">Businesses</a>
+</nav>
+<!-- Trailing Action Cluster & User Profile -->
+<div class="flex items-center gap-space-sm shrink-0">
+<!-- List a Service Button -->
+<button class="hidden lg:flex items-center gap-1.5 bg-secondary-container text-on-secondary px-3.5 py-2 rounded-xl text-body-sm font-headline-sm font-semibold shadow-sm hover:brightness-105 active:scale-[0.98] transition-all duration-150">
+<span class="material-symbols-outlined text-[18px]">add</span>
+<span>List a Service</span>
+</button>
+<!-- Trailing Icons: chat, notifications -->
+<button aria-label="Messages" class="w-10 h-10 flex items-center justify-center rounded-xl text-on-surface-variant hover:bg-surface-alt transition-colors duration-150 relative">
+<span class="material-symbols-outlined text-[22px]">chat</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-secondary-container rounded-full ring-2 ring-surface-container-lowest"></span>
+</button>
+<button aria-label="Notifications" class="w-10 h-10 flex items-center justify-center rounded-xl text-on-surface-variant hover:bg-surface-alt transition-colors duration-150 relative">
+<span class="material-symbols-outlined text-[22px]">notifications</span>
+<span class="absolute top-2 right-2.5 w-2 h-2 bg-on-tertiary-container rounded-full ring-2 ring-surface-container-lowest"></span>
+</button>
+<div class="h-6 w-px bg-border-hairline mx-1"></div>
+<!-- User Profile Avatar Link -->
+<a class="flex items-center gap-2 p-1 rounded-xl hover:bg-surface-alt transition-all" href="#">
+<div class="relative w-9 h-9 rounded-full ring-2 ring-growth-green-border overflow-hidden bg-surface-alt">
+<img class="w-full h-full object-cover" data-alt="A dignified medium close-up portrait of Juma Mwangi, a confident East African tech and operations entrepreneur in his mid-30s with a warm and professional smile. He is wearing a crisp textured dark navy jacket over a neutral shirt. The portrait is taken under soft natural morning sunlight in a vibrant modern Nairobi co-working patio surrounded by lush green foliage. Clean commercial aesthetic with warm cinematic realism." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtHGz_XTG2xM1QapYRlgtY_nOBTyLJAbdgMGCDY0HcLEJ8Qe9L5KXF0H9N1ur4YpGnISERr1IKerOecQ_cDOZZN7gQqP5KvgEcqUQ17Yn8yv22HZOxp5ciZb6Jk6BlKU3dlUPhfkbTsHJLsDVMjNNyZwJ5-QsftbVICy0-zqYJK3jSsSk446ghWuPszPHX7towsP4pbOn6KQnO6sN8GnXoZpvOclmfv4a22k7UhMYWC2J-VhdNrwz0Xw"/>
+</div>
+<span class="material-symbols-outlined text-outline text-[16px] hidden sm:inline-block">expand_more</span>
+</a>
+</div>
+</div>
+</header>
+<!-- MAIN VIEWPORT CONTAINER: Classic 3-Column Layout -->
+<main class="flex-1 max-w-7xl w-full mx-auto px-gutter-desktop py-space-lg">
+<div class="grid grid-cols-12 gap-space-lg items-start">
+<!-- ================= LEFT COLUMN (25% ~ 3 Columns) ================= -->
+<aside class="col-span-12 lg:col-span-3 space-y-space-md">
+<!-- User Mini-Profile Snapshot Card -->
+<div class="bg-surface-container-lowest rounded-2xl border border-border-hairline shadow-sm overflow-hidden">
+<div class="h-16 bg-gradient-to-r from-primary-container via-navy-dark to-hero-indigo-stop relative">
+<div class="absolute -bottom-6 left-space-md">
+<div class="w-14 h-14 rounded-full ring-4 ring-surface-container-lowest overflow-hidden bg-surface-alt">
+<img class="w-full h-full object-cover" data-alt="Square portrait crop of Juma Mwangi smiling warmly against a bright Nairobi skyline background. Natural warm skin tones, professional grooming, modern business casual tone with navy clothing accents. High resolution clarity, warm diffused ambient lighting, and sharp focused facial expression representing trust and entrepreneurial capability." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA5m7JuYtSP1WjYv-1gzyEX8gEFTGhDRD2B78fBXbfvkhKoUfQblK2YQf35D_QJPhMCafjULllYFKDop4zpPe9xkcxbho0WQWaFMPjm49toQJY91dF2U54lBN9xPflk6UENQ6LL5en7SqQ1DmFXcHzdf2eKVr7-paRcbNWZK5dblVjcnRwhpYSIS5yVPOQpLAqZrx0F2yolHeBbXwTDmLZkLHQRYswDfE3gi7f1C3N5nhHxSuwWVmppbQ"/>
+</div>
+</div>
+</div>
+<div class="pt-8 px-space-md pb-space-md">
+<div class="flex items-center justify-between">
+<div>
+<h3 class="text-headline-sm font-headline-sm text-navy-dark font-bold leading-tight">Juma Mwangi</h3>
+<p class="text-caption font-caption text-outline flex items-center gap-1 mt-0.5">
+<span class="material-symbols-outlined text-[14px]">location_on</span>
+                  Kilimani, Nairobi
+                </p>
+</div>
+<span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-growth-green-light border border-growth-green-border text-on-tertiary-container text-label-compact-badge font-label-compact-badge">
+<span class="material-symbols-outlined text-[11px] material-symbols-fill">verified</span>
+                VERIFIED
+              </span>
+</div>
+<!-- Bio / Identity snippet -->
+<p class="text-body-sm font-body-sm text-on-surface-variant mt-space-sm leading-snug">
+              Renewable systems specialist &amp; infrastructure logistics manager.
+            </p>
+<!-- Quick Stats Bar -->
+<div class="grid grid-cols-3 gap-1 py-space-sm my-space-sm border-y border-border-hairline/70 text-center">
+<a class="hover:bg-surface-alt/80 p-1.5 rounded-xl transition-colors" href="#">
+<span class="block text-headline-sm font-headline-sm font-bold text-navy-dark">2</span>
+<span class="text-caption font-caption text-outline block leading-tight">My Services</span>
+</a>
+<a class="hover:bg-surface-alt/80 p-1.5 rounded-xl transition-colors border-x border-border-hairline/60" href="#">
+<span class="block text-headline-sm font-headline-sm font-bold text-secondary-container">5</span>
+<span class="text-caption font-caption text-outline block leading-tight">Saved Opps</span>
+</a>
+<a class="hover:bg-surface-alt/80 p-1.5 rounded-xl transition-colors" href="#">
+<span class="block text-headline-sm font-headline-sm font-bold text-navy-dark">320</span>
+<span class="text-caption font-caption text-outline block leading-tight">Network</span>
+</a>
+</div>
+<!-- Profile completion prompt -->
+<div class="p-2.5 rounded-xl bg-growth-green-light/60 border border-growth-green-border/50 flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-on-tertiary-container text-[18px]">verified_user</span>
+<span class="text-caption font-caption font-semibold text-on-tertiary-container">Tier-2 Citizen Trust Vetted</span>
+</div>
+<span class="material-symbols-outlined text-outline text-[16px]">chevron_right</span>
+</div>
+</div>
+</div>
+<!-- Navigation Shortcuts Card -->
+<div class="bg-surface-container-lowest rounded-2xl border border-border-hairline shadow-sm p-space-sm">
+<div class="px-space-sm py-1.5">
+<span class="text-label-compact-badge font-label-compact-badge text-outline tracking-wider uppercase">Shortcuts &amp; Hubs</span>
+</div>
+<nav class="space-y-0.5 mt-1">
+<a class="flex items-center justify-between px-3 py-2.5 rounded-xl text-body-sm font-body-sm font-medium text-navy-dark hover:bg-surface-alt transition-all group" href="#">
+<div class="flex items-center gap-space-sm">
+<span class="w-8 h-8 rounded-lg bg-orange-gradient-end/15 text-secondary-container flex items-center justify-center group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-[18px]">assignment_turned_in</span>
+</span>
+<span>My Active Requests</span>
+</div>
+<span class="text-caption font-caption font-semibold bg-secondary-container text-white px-2 py-0.5 rounded-full">3</span>
+</a>
+<a class="flex items-center justify-between px-3 py-2.5 rounded-xl text-body-sm font-body-sm font-medium text-navy-dark hover:bg-surface-alt transition-all group" href="#">
+<div class="flex items-center gap-space-sm">
+<span class="w-8 h-8 rounded-lg bg-hero-indigo-stop/10 text-hero-indigo-stop flex items-center justify-center group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-[18px]">location_city</span>
+</span>
+<span>Local Nairobi Hub</span>
+</div>
+<span class="w-2 h-2 rounded-full bg-on-tertiary-container"></span>
+</a>
+<a class="flex items-center justify-between px-3 py-2.5 rounded-xl text-body-sm font-body-sm font-medium text-navy-dark hover:bg-surface-alt transition-all group" href="#">
+<div class="flex items-center gap-space-sm">
+<span class="w-8 h-8 rounded-lg bg-surface-alt text-on-surface-variant flex items-center justify-center group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-[18px]">bookmark</span>
+</span>
+<span>Saved Services</span>
+</div>
+<span class="text-caption font-caption text-outline">12</span>
+</a>
+<a class="flex items-center justify-between px-3 py-2.5 rounded-xl text-body-sm font-body-sm font-medium text-navy-dark hover:bg-surface-alt transition-all group" href="#">
+<div class="flex items-center gap-space-sm">
+<span class="w-8 h-8 rounded-lg bg-growth-green-light text-on-tertiary-container flex items-center justify-center group-hover:scale-105 transition-transform">
+<span class="material-symbols-outlined text-[18px]">policy</span>
+</span>
+<span>Civic Guidelines</span>
+</div>
+<span class="material-symbols-outlined text-outline text-[16px]">launch</span>
+</a>
+</nav>
+</div>
+<!-- Economic Momentum Micro-Banner -->
+<div class="bg-gradient-to-br from-primary-container to-navy-dark text-surface-bright rounded-2xl p-space-md shadow-sm relative overflow-hidden">
+<div class="relative z-10">
+<span class="text-label-compact-badge font-label-compact-badge text-orange-gradient-end tracking-wider">MONTHLY ECONOMIC PULSE</span>
+<h4 class="text-headline-sm font-headline-sm font-semibold mt-1">KES 14.8M Exchanged</h4>
+<p class="text-caption font-caption text-inverse-primary mt-1">
+              Direct peer commerce across 840+ validated Nairobi SME micro-contracts this month.
+            </p>
+</div>
+<div class="absolute -right-4 -bottom-4 opacity-10 text-white pointer-events-none">
+<span class="material-symbols-outlined text-[110px]">payments</span>
+</div>
+</div>
+</aside>
+<!-- ================= CENTER COLUMN (50% ~ 6 Columns) ================= -->
+<section class="col-span-12 lg:col-span-6 space-y-space-md">
+<!-- Post / Need Creation Card -->
+<div class="bg-surface-container-lowest rounded-2xl border border-border-hairline shadow-sm p-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-full overflow-hidden shrink-0 bg-surface-alt ring-1 ring-border-hairline">
+<img class="w-full h-full object-cover" data-alt="Portrait avatar icon of Juma Mwangi wearing a dark blue linen shirt in daylight. Crisp resolution, friendly natural expression, professional headshot styling representing an authentic East African community participant." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDn9uxo3rN1z-7b9XNHYL0pTSSMQ_QM2ZwK9N2lYYX50nCcaSnWgRdXsBN_idukp19MxIt10gPzT0Kvu5fMyDRZUK5jkUQJlbuXYAEd7XGfrpoGTnOf8n27g6SL4tcHZoE3h38xF0zVulse6-JVziiub-YhXejF4cAoz6PelGSAOY_hQxfrv4D3YkpABFt-wwGSyIwL6RszX8GBoaUnVSGEgdcJFRSSOBrVGlmkA3bi2DDr0IrqkzSH4A"/>
+</div>
+<button class="w-full text-left bg-surface-alt hover:bg-surface-container-low px-4 py-2.5 rounded-full text-body-sm font-body-sm text-outline border border-border-hairline/80 transition-colors">
+              What opportunity or service are you looking for today, Juma?
+            </button>
+</div>
+<div class="flex items-center justify-between pt-space-sm mt-space-sm border-t border-border-hairline/70">
+<button class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-body-sm font-body-sm font-semibold text-secondary-container hover:bg-secondary-container/10 active:scale-[0.98] transition-all">
+<span class="material-symbols-outlined text-[20px]">assignment_add</span>
+<span>Post a Project Need</span>
+</button>
+<button class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-body-sm font-body-sm font-semibold text-navy-dark hover:bg-surface-alt active:scale-[0.98] transition-all">
+<span class="material-symbols-outlined text-[20px] text-on-tertiary-container">work_outline</span>
+<span>Share Opportunity</span>
+</button>
+<button class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-body-sm font-body-sm text-on-surface-variant hover:bg-surface-alt active:scale-[0.98] transition-all">
+<span class="material-symbols-outlined text-[20px] text-hero-indigo-stop">photo_library</span>
+<span>Add Media</span>
+</button>
+</div>
+</div>
+<!-- Feed Filter Tabs -->
+<div class="bg-surface-container-lowest rounded-2xl border border-border-hairline shadow-sm p-1.5 flex items-center overflow-x-auto gap-1">
+<button class="px-3.5 py-1.5 rounded-xl text-body-sm font-body-sm font-semibold bg-navy-dark text-white shrink-0 shadow-sm">
+            All Updates
+          </button>
+<button class="px-3.5 py-1.5 rounded-xl text-body-sm font-body-sm font-medium text-on-surface-variant hover:bg-surface-alt hover:text-navy-dark transition-colors shrink-0">
+            Service Requests &amp; Inquiries
+          </button>
+<button class="px-3.5 py-1.5 rounded-xl text-body-sm font-body-sm font-medium text-on-surface-variant hover:bg-surface-alt hover:text-navy-dark transition-colors shrink-0">
+            Economic Opportunities &amp; Tenders
+          </button>
+<button class="px-3.5 py-1.5 rounded-xl text-body-sm font-body-sm font-medium text-on-surface-variant hover:bg-surface-alt hover:text-navy-dark transition-colors shrink-0">
+            Civic Announcements
+          </button>
+</div>
+<!-- ================= FEED CARD 1: Service Request ================= -->
+<article class="bg-surface-container-lowest rounded-2xl border border-border-hairline shadow-sm hover:shadow-md transition-shadow">
+<!-- Card Header -->
+<div class="p-space-md pb-space-sm flex items-start justify-between">
+<div class="flex items-center gap-space-sm">
+<div class="relative w-11 h-11 rounded-full ring-2 ring-border-hairline overflow-hidden bg-surface-alt">
+<img class="w-full h-full object-cover" data-alt="Professional candid portrait of Faith Achieng, an East African female SME owner wearing an elegant mustard-yellow blazer in a bright modern Nairobi retail showroom. High clarity, warm natural window lighting, confident entrepreneurial demeanor, light-mode background aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCDqzGm2tsri0johCsq7VxxKe4d4Liisw5aPLHDbtUi03Ppl6M_pREX5gESnMOsIPk2ErD00X1ACxukHkSrJ4_6gSR5yLciFZ3MX1HkioaC4qzJnfyKxk7xGMmAv08kIQLBdezJx0-a2M0ceMhhw4s_9tJewMMeSGuu5uoetIyvjBTumK09Fy51KVMnDoeH73PJsc5JVV4X4VrzKRHcyNU1ryHWaqB0FHlloYjD91ozP59oiJhdOJrEhA"/>
+</div>
+<div>
+<div class="flex items-center gap-1.5">
+<h4 class="text-headline-sm font-headline-sm text-navy-dark font-bold">Faith Achieng</h4>
+<span class="inline-flex items-center px-1.5 py-0.5 rounded-full bg-growth-green-light border border-growth-green-border text-on-tertiary-container text-label-compact-badge font-label-compact-badge">
+<span class="material-symbols-outlined text-[10px] material-symbols-fill">verified</span>
+                    VETTED BIZ
+                  </span>
+</div>
+<p class="text-caption font-caption text-outline">
+                  Founder at Achieng Organic Foods · Industrial Area, Nairobi · 42 mins ago
+                </p>
+</div>
+</div>
+<!-- Category Tag -->
+<span class="px-2.5 py-1 rounded-full bg-surface-alt text-navy-dark border border-border-hairline text-caption font-caption font-semibold">
+              E-Commerce Setup
+            </span>
+</div>
+<!-- Card Body Content -->
+<div class="px-space-md pb-space-sm">
+<h3 class="text-headline-sm font-headline-sm font-bold text-navy-dark mb-1.5">
+              Seeking specialized Shopify / M-Pesa Daraja API integration specialist for fresh produce catalog
+            </h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant leading-relaxed">
+              We are scaling our farm-to-table organic delivery service across Nairobi West and Kilimani. We need a proven developer or agency team to configure automated M-Pesa STK push checkout, live stock syncing with our dispatch warehouse, and SMS route notifications.
+            </p>
+<!-- Specification Badges (Budget & Timeline) -->
+<div class="mt-space-sm flex flex-wrap items-center gap-2 p-3 bg-surface-alt/70 rounded-xl border border-border-hairline/60">
+<div class="flex items-center gap-1.5 text-body-sm font-body-sm text-navy-dark font-semibold">
+<span class="material-symbols-outlined text-[18px] text-secondary-container">payments</span>
+<span>Budget: KES 65,000 – 90,000</span>
+</div>
+<span class="text-outline">•</span>
+<div class="flex items-center gap-1.5 text-body-sm font-body-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-[18px] text-on-tertiary-container">schedule</span>
+<span>Timeline: 2 Weeks (Urgent)</span>
+</div>
+<span class="text-outline">•</span>
+<div class="flex items-center gap-1.5 text-caption font-caption text-outline">
+<span class="material-symbols-outlined text-[16px]">handshake</span>
+<span>Tuungane Escrow Protected</span>
+</div>
+</div>
+</div>
+<!-- Bottom Action Shelf -->
+<div class="px-space-md py-3 bg-canvas-subtle border-t border-border-hairline rounded-b-2xl flex items-center justify-between">
+<div class="flex items-center gap-4 text-outline text-caption font-caption">
+<span class="flex items-center gap-1 hover:text-navy-dark cursor-pointer">
+<span class="material-symbols-outlined text-[18px]">forum</span> 8 Inquiries
+              </span>
+<span class="flex items-center gap-1 hover:text-navy-dark cursor-pointer">
+<span class="material-symbols-outlined text-[18px]">share</span> Share
+              </span>
+</div>
+<div class="flex items-center gap-2">
+<button class="px-3 py-1.5 text-body-sm font-body-sm font-medium text-navy-dark hover:bg-surface-alt rounded-xl transition-all">
+                Save
+              </button>
+<button class="px-4 py-1.5 rounded-xl bg-secondary-container text-white text-body-sm font-headline-sm font-semibold shadow-sm hover:brightness-105 active:scale-[0.98] transition-all flex items-center gap-1">
+<span>Propose Service</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</article>
+<!-- ================= FEED CARD 2: Success Story Showcase ================= -->
+<article class="bg-surface-container-lowest rounded-2xl border border-border-hairline shadow-sm hover:shadow-md transition-shadow">
+<!-- Card Header -->
+<div class="p-space-md pb-space-sm flex items-start justify-between">
+<div class="flex items-center gap-space-sm">
+<div class="relative w-11 h-11 rounded-full ring-2 ring-growth-green-border overflow-hidden bg-surface-alt">
+<img class="w-full h-full object-cover" data-alt="Professional outdoor portrait of Bernard Omondi, a skilled East African solar engineer wearing a crisp navy work polo and hardhat lanyard. Background shows vibrant green agricultural fields in Kiambu under soft midday sunshine. Clear high contrast commercial quality, calm professional authority." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC9-Z-eHxOBZsLKAPle13GmOIyDZNtTuFBhIHJoERa8CPiP_zQtszyZOOlhTWfKEW_QjVj_9ysSGzmJKc79hUP8b697-pToMG04vAw0J3AuOs5aRp2rATuAztmYboT3cfjbrciqma1x-ftvq3YUztIaCxpUxOh9nPU3k6rL_KenIT79ZEeMYKY10tDWs-E5IlWQ1cnVtATft9BzlJo1FI7H96PFo1zMFjocqgGG8RNFl5-a3SrzyS4S-g"/>
+</div>
+<div>
+<div class="flex items-center gap-1.5">
+<h4 class="text-headline-sm font-headline-sm text-navy-dark font-bold">Bernard Omondi</h4>
+<span class="inline-flex items-center px-1.5 py-0.5 rounded-full bg-growth-green-light border border-growth-green-border text-on-tertiary-container text-label-compact-badge font-label-compact-badge">
+<span class="material-symbols-outlined text-[10px] material-symbols-fill">verified</span>
+                    MASTER INSTALLER
+                  </span>
+</div>
+<p class="text-caption font-caption text-outline">
+                  SunPower East Africa · Kiambu County Hub · 3 hours ago
+                </p>
+</div>
+</div>
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-growth-green-light text-on-tertiary-container text-caption font-caption font-semibold">
+<span class="material-symbols-outlined text-[14px]">stars</span>
+              Completed Project
+            </span>
+</div>
+<!-- Post Content -->
+<div class="px-space-md pb-space-sm space-y-space-sm">
+<p class="text-body-sm font-body-sm text-on-surface-variant leading-relaxed">
+              Proud to deliver this high-yield 7.5kW hybrid solar pumping station for <span class="font-semibold text-navy-dark">@KariukiGreenFarms</span> in Kiambu! Replaced an expensive diesel generator, cutting daily water extraction costs by 82%. Contract awarded and settled via Tuungane Milestone Escrow.
+            </p>
+<!-- Dual Before / After Image Grid -->
+<div class="grid grid-cols-2 gap-2 rounded-xl overflow-hidden border border-border-hairline">
+<div class="relative h-48 bg-surface-alt">
+<img class="w-full h-full object-cover" data-alt="Before image showing an old noisy mechanical diesel pump sitting on stained cracked concrete ground on an East African smallholder farm. Authentic rustic agricultural machinery setting, overcast natural daylight, documentary realistic style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCoW0sVSTgF-PyToKMVsfJwF2Lj9Msdl-FC4_v-So0zOsEFuOoy7Jf-K8s8IZ1b2tkxJF3dlitnApWvkqlP0fzHuyiAt3zJl2i3R5aPdDcJg0pgWMOibjZCmVJQWa2lokUfhYGLPTxgBgfZLmszzHZCwGLDk273pHjg3_JAfcixFlSyTUkLI0r43WhttFTDoiYTlybR00IxrTC1-xagYcxPwmgmY2fbedJ6PPR-d3V-kjtPWHwQI5KPTg"/>
+<span class="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-navy-dark/80 text-white text-caption font-caption font-bold tracking-wide backdrop-blur-sm">
+                  BEFORE: DIESEL GENSET
+                </span>
+</div>
+<div class="relative h-48 bg-surface-alt">
+<img class="w-full h-full object-cover" data-alt="After image displaying a modern, gleaming high-tech solar pump array and clean blue inverters mounted next to a lush vibrant green avocado and coffee farm in Kiambu. Bright clear sunny Kenyan sky, clean industrial finish, professional engineering showcase." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBNxRZ2g3DFzprJJV_BX86GmYaNzh8geMjIZo7bYHgr-ZIQjwkore-j-EQEl1iYF-DslFRyNomve0SqRjFdrcmfv9_0f0Om4hvmFRWyCZOe0IQ46LNKUku44wWfxlNciatuOaNL0ZH7Ei5RG1m6ykNhliqLJe8ngsiSsK_T3qWevwNMOYnvv8QPkCMCi0Kvt1u_OuvMDo-XeOYNfxFe2nBuGJgWHR_CGIzgb9DdOU4MMhrLH_NLOFG2Qg"/>
+<span class="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-on-tertiary-container text-white text-caption font-caption font-bold tracking-wide shadow-sm">
+                  AFTER: 7.5kW SOLAR HYBRID
+                </span>
+</div>
+</div>
+<!-- Client Review Callout -->
+<div class="p-3 bg-surface-alt rounded-xl border-l-4 border-on-tertiary-container flex items-start gap-2.5">
+<span class="material-symbols-outlined text-secondary-container text-[20px] shrink-0">format_quote</span>
+<div>
+<p class="text-body-sm font-body-sm text-navy-dark italic leading-snug">
+                  "Bernard and his apprentices finished 3 days ahead of rainy season. Professional commissioning report and transparent billing. Highly recommended on Tuungane."
+                </p>
+<p class="text-caption font-caption text-outline mt-1 font-medium">
+                  — Samuel Kariuki, Kiambu Farm Proprietor (Client Shoutout)
+                </p>
+</div>
+</div>
+</div>
+<!-- Bottom Shelf -->
+<div class="px-space-md py-3 bg-canvas-subtle border-t border-border-hairline rounded-b-2xl flex items-center justify-between">
+<div class="flex items-center gap-4 text-outline text-caption font-caption">
+<span class="flex items-center gap-1 text-secondary-container font-semibold cursor-pointer">
+<span class="material-symbols-outlined text-[18px] material-symbols-fill">thumb_up</span> 46 Endorsements
+              </span>
+<span class="flex items-center gap-1 hover:text-navy-dark cursor-pointer">
+<span class="material-symbols-outlined text-[18px]">chat_bubble_outline</span> 14 Comments
+              </span>
+</div>
+<a class="text-body-sm font-headline-sm font-semibold text-secondary-container hover:underline flex items-center gap-1" href="#">
+<span>View Bernard's Service Stack</span>
+<span class="material-symbols-outlined text-[16px]">chevron_right</span>
+</a>
+</div>
+</article>
+<!-- ================= FEED CARD 3: Urgent Opportunity Card ================= -->
+<article class="bg-surface-container-lowest rounded-2xl border-2 border-secondary-container/40 shadow-sm hover:shadow-md transition-all relative overflow-hidden">
+<div class="absolute top-0 right-0 w-28 h-28 bg-secondary-container/10 rounded-bl-full pointer-events-none -mr-6 -mt-6"></div>
+<div class="p-space-md pb-space-sm">
+<!-- Header Row -->
+<div class="flex items-start justify-between gap-2">
+<div class="flex items-center gap-2">
+<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-secondary-container/10 text-secondary-container border border-secondary-container/30 text-label-compact-badge font-label-compact-badge">
+<span class="material-symbols-outlined text-[12px] material-symbols-fill">bolt</span>
+                  URGENT TENDER NEED
+                </span>
+<span class="text-caption font-caption text-outline">Expires in 28 hours</span>
+</div>
+<!-- Location Pin -->
+<span class="inline-flex items-center gap-1 text-caption font-caption text-navy-dark font-medium bg-surface-alt px-2 py-0.5 rounded-lg border border-border-hairline">
+<span class="material-symbols-outlined text-[14px] text-secondary-container">location_on</span>
+                Machakos County
+              </span>
+</div>
+<!-- Opportunity Title -->
+<h3 class="text-headline-md font-headline-md font-bold text-navy-dark mt-2 mb-1.5">
+              Subcontractor Needed: Solar Microgrid Technician (Machakos County)
+            </h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant leading-relaxed">
+              Consortium contracting partner requires 2 certified EPRA Tier-2/3 photovoltaic technicians for a 3-day inverter commissioning sprint across 4 civic clinic sites in Kangundo &amp; Tala. Travel allowance &amp; daily stipends provided with Tuungane contract guaranty.
+            </p>
+<!-- Key Terms Matrix -->
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-2 my-space-sm p-3 bg-growth-green-light/40 rounded-xl border border-growth-green-border/50">
+<div>
+<span class="text-caption font-caption text-outline block">Fixed Subcontract Value</span>
+<span class="text-headline-sm font-headline-sm font-bold text-navy-dark">KES 85,000</span>
+</div>
+<div>
+<span class="text-caption font-caption text-outline block">Execution Window</span>
+<span class="text-body-sm font-body-sm font-semibold text-navy-dark">3 Days (Dec 12-14)</span>
+</div>
+<div>
+<span class="text-caption font-caption text-outline block">Credential Requirement</span>
+<span class="text-body-sm font-body-sm font-semibold text-on-tertiary-container flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[16px]">verified</span> EPRA Certified
+                </span>
+</div>
+</div>
+<!-- Poster Identity -->
+<div class="flex items-center justify-between text-caption font-caption text-outline pt-1">
+<div class="flex items-center gap-1.5">
+<span class="w-5 h-5 rounded-full bg-navy-dark text-white flex items-center justify-center text-[10px] font-bold">R</span>
+<span>Posted by Rift Valley Power &amp; Water Consortium (Govt Partner)</span>
+</div>
+<span>Verified Bond #9021</span>
+</div>
+</div>
+<!-- Bottom Action Shelf -->
+<div class="px-space-md py-3 bg-surface-alt/70 border-t border-border-hairline rounded-b-2xl flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="inline-block w-2.5 h-2.5 rounded-full bg-on-tertiary-container animate-pulse"></span>
+<span class="text-caption font-caption font-semibold text-on-tertiary-container">4 Slots Available · 7 Applications Received</span>
+</div>
+<div class="flex items-center gap-2">
+<button class="px-3.5 py-1.5 rounded-xl border border-border-hairline bg-surface-container-lowest text-navy-dark font-headline-sm font-semibold text-body-sm hover:bg-surface-alt active:scale-[0.98] transition-all">
+                Tender Specs
+              </button>
+<!-- Direct Orange CTA Button -->
+<button class="px-5 py-1.5 rounded-xl bg-secondary-container text-white text-body-sm font-headline-sm font-semibold shadow-md hover:brightness-105 active:scale-[0.98] transition-all flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[18px]">send</span>
+<span>Apply Now</span>
+</button>
+</div>
+</div>
+</article>
+</section>
+<!-- ================= RIGHT COLUMN (25% ~ 3 Columns) ================= -->
+<aside class="col-span-12 lg:col-span-3 space-y-space-md">
+<!-- Trending Opportunities Card -->
+<div class="bg-surface-container-lowest rounded-2xl border border-border-hairline shadow-sm p-space-md">
+<div class="flex items-center justify-between pb-space-sm border-b border-border-hairline">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary-container text-[20px]">trending_up</span>
+<h3 class="text-headline-sm font-headline-sm font-bold text-navy-dark">Trending Opps</h3>
+</div>
+<a class="text-caption font-caption text-secondary-container font-semibold hover:underline" href="#">View All</a>
+</div>
+<div class="divide-y divide-border-hairline/70 mt-2">
+<!-- Opportunity Item 1 -->
+<div class="py-3 group">
+<div class="flex items-center justify-between">
+<span class="text-label-compact-badge font-label-compact-badge text-secondary-container uppercase">RFQ · COUNTY TENDER</span>
+<span class="text-caption font-caption text-outline">2d left</span>
+</div>
+<a class="text-body-sm font-body-sm font-semibold text-navy-dark group-hover:text-secondary-container transition-colors line-clamp-2 mt-1" href="#">
+                Supply of 45 Commercial Cold Storage Units for Wakulima Market
+              </a>
+<div class="flex items-center justify-between text-caption font-caption mt-1.5">
+<span class="font-bold text-navy-dark">KES 1.2M – 1.8M</span>
+<span class="text-outline">Nairobi Central Hub</span>
+</div>
+</div>
+<!-- Opportunity Item 2 -->
+<div class="py-3 group">
+<div class="flex items-center justify-between">
+<span class="text-label-compact-badge font-label-compact-badge text-on-tertiary-container uppercase">COOPERATIVE GIG</span>
+<span class="text-caption font-caption text-outline">5h left</span>
+</div>
+<a class="text-body-sm font-body-sm font-semibold text-navy-dark group-hover:text-secondary-container transition-colors line-clamp-2 mt-1" href="#">
+                Chartered Agronomy Surveyor for 120-Acre Macadamia Cooperative
+              </a>
+<div class="flex items-center justify-between text-caption font-caption mt-1.5">
+<span class="font-bold text-navy-dark">KES 120,000</span>
+<span class="text-outline">Embu County</span>
+</div>
+</div>
+<!-- Opportunity Item 3 -->
+<div class="py-3 group">
+<div class="flex items-center justify-between">
+<span class="text-label-compact-badge font-label-compact-badge text-hero-indigo-stop uppercase">CIVIC TECH TENDER</span>
+<span class="text-caption font-caption text-outline">3d left</span>
+</div>
+<a class="text-body-sm font-body-sm font-semibold text-navy-dark group-hover:text-secondary-container transition-colors line-clamp-2 mt-1" href="#">
+                USSD Shortcode &amp; Bulk SMS Gateway Architect (Health Ministry)
+              </a>
+<div class="flex items-center justify-between text-caption font-caption mt-1.5">
+<span class="font-bold text-navy-dark">KES 350,000</span>
+<span class="text-outline">Remote / Nairobi</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Recommended Services Near You Card -->
+<div class="bg-surface-container-lowest rounded-2xl border border-border-hairline shadow-sm p-space-md">
+<div class="flex items-center justify-between pb-space-sm border-b border-border-hairline">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-on-tertiary-container text-[20px]">near_me</span>
+<h3 class="text-headline-sm font-headline-sm font-bold text-navy-dark">Vetted Near You</h3>
+</div>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-growth-green-light text-on-tertiary-container text-caption font-caption font-semibold">
+              Kilimani 3km
+            </span>
+</div>
+<div class="space-y-space-md mt-space-sm">
+<!-- Service Preview 1 -->
+<div class="p-3 bg-surface-alt/60 rounded-xl border border-border-hairline/80 hover:border-secondary-container/40 transition-colors">
+<div class="flex items-center gap-2.5">
+<div class="w-10 h-10 rounded-full overflow-hidden shrink-0 bg-surface-container-high ring-1 ring-border-hairline">
+<img class="w-full h-full object-cover" data-alt="Square portrait of Wanjiku Kamau, an East African female CPA and financial consultant dressed in sharp business attire in a modern glass office in Nairobi. High-key light-mode lighting, sharp professional focus, and a warm trustworthy expression." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA7WbfdyBxdnHTbbdNUvxc22KyJoIkqCb65sJIiqmEqKbsvUqDxHux7IckQU3PLK5kx6GK4wwoGbshJVNauUGvI2Jd5V-e3pZvxprCXxTrMOCY-uVMd47bjMNZUi4fPD-Er5CHzVlY-ldkmABInvzIbwjkSg5ycl-KIlb-VJGB68CpqzssjHgZkEJSCjkGR5F3TSTAm1X0jnVrGF9dIOsclVLc3rzfaLv3tcWSJ3PfCHnp5jfh7hlfjgQ"/>
+</div>
+<div class="flex-1 min-w-0">
+<h4 class="text-body-sm font-body-sm font-bold text-navy-dark truncate">Wanjiku &amp; Associates</h4>
+<p class="text-caption font-caption text-outline truncate">KRA Tax Filing &amp; SME Bookkeeping</p>
+</div>
+</div>
+<div class="flex items-center justify-between mt-2 pt-2 border-t border-border-hairline/60">
+<div class="flex items-center gap-1 text-caption font-caption text-secondary-container font-semibold">
+<span class="material-symbols-outlined text-[15px] material-symbols-fill">star</span>
+<span>4.9 (54 reviews)</span>
+</div>
+<button class="px-3 py-1 rounded-lg bg-surface-container-lowest text-navy-dark border border-border-hairline text-caption font-caption font-bold hover:bg-secondary-container hover:text-white hover:border-secondary-container transition-all">
+                  Request
+                </button>
+</div>
+</div>
+<!-- Service Preview 2 -->
+<div class="p-3 bg-surface-alt/60 rounded-xl border border-border-hairline/80 hover:border-secondary-container/40 transition-colors">
+<div class="flex items-center gap-2.5">
+<div class="w-10 h-10 rounded-full overflow-hidden shrink-0 bg-surface-container-high ring-1 ring-border-hairline">
+<img class="w-full h-full object-cover" data-alt="Square portrait of David Kiprop, an East African certified electrical and fiber optics master technician wearing a clean high-visibility vest and polo shirt with safety glasses pushed up. Daylight setting, warm approachable demeanor." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD6nObQNPZ7qZ7q9K5YNs2XzWkrOrUkMHrhkjB_tA1gSRZj2mKv-PriaDmLQBVSL915CTqckho-lVC1GPgAd5rnXT4Kua_Ck3Oe_IS2q_eStXyT_1VUQyRSvRSqGjRT5SrvkbwZUSJ26i6bYBWr3S1zjzqSghsojE6XAHS3X5YI2-zzHx6c37a5jZ4gBDjssFVWHdfCjVWzJMQoPYTTK3haGRi-WKhHuCutvX4K8Nyr4ogNuAfrEZsrfQ"/>
+</div>
+<div class="flex-1 min-w-0">
+<h4 class="text-body-sm font-body-sm font-bold text-navy-dark truncate">David Kiprop</h4>
+<p class="text-caption font-caption text-outline truncate">3-Phase Solar &amp; Backup Wiring</p>
+</div>
+</div>
+<div class="flex items-center justify-between mt-2 pt-2 border-t border-border-hairline/60">
+<div class="flex items-center gap-1 text-caption font-caption text-secondary-container font-semibold">
+<span class="material-symbols-outlined text-[15px] material-symbols-fill">star</span>
+<span>5.0 (38 reviews)</span>
+</div>
+<button class="px-3 py-1 rounded-lg bg-surface-container-lowest text-navy-dark border border-border-hairline text-caption font-caption font-bold hover:bg-secondary-container hover:text-white hover:border-secondary-container transition-all">
+                  Request
+                </button>
+</div>
+</div>
+</div>
+<div class="mt-space-sm pt-space-xs text-center">
+<a class="text-body-sm font-headline-sm font-semibold text-secondary-container hover:underline inline-flex items-center gap-1" href="#">
+<span>Browse Full Directory (3,400+)</span>
+<span class="material-symbols-outlined text-[16px]">east</span>
+</a>
+</div>
+</div>
+<!-- Language Switcher & Trust Widget -->
+<div class="bg-surface-container-lowest rounded-2xl border border-border-hairline p-space-sm flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-outline text-[18px]">language</span>
+<span class="text-caption font-caption font-medium text-navy-dark">Lugha / Language:</span>
+</div>
+<div class="flex items-center bg-surface-alt p-0.5 rounded-lg border border-border-hairline text-caption font-caption">
+<button class="px-2 py-0.5 rounded-md bg-surface-container-lowest font-bold text-navy-dark shadow-xs">English</button>
+<button class="px-2 py-0.5 rounded-md text-outline hover:text-navy-dark">Kiswahili</button>
+</div>
+</div>
+</aside>
+</div>
+</main>
+<!-- WEB FOOTER (Shared Component: Footer) -->
+<footer class="mt-space-xl bg-navy-dark text-surface-bright border-t border-border-subtle">
+<div class="w-full py-space-xl px-gutter-desktop max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-space-md">
+<!-- Brand & Copyright -->
+<div class="flex flex-col items-center md:items-start">
+<div class="flex items-center gap-2 text-headline-md font-headline-md font-bold text-surface-bright">
+<span class="material-symbols-outlined text-secondary-container text-[24px]">hub</span>
+          Tuungane Economic Marketplace
+        </div>
+<p class="text-caption font-caption text-outline-variant mt-1 text-center md:text-left">
+          © 2024 Tuungane Economic Marketplace. Empowering East African Enterprise.
+        </p>
+</div>
+<!-- Links Cluster -->
+<div class="flex flex-wrap justify-center items-center gap-x-6 gap-y-2 text-body-sm font-body-sm text-outline-variant">
+<a class="hover:text-surface-bright transition-colors duration-150" href="#">Civic Guidelines</a>
+<a class="hover:text-surface-bright transition-colors duration-150" href="#">Terms of Service</a>
+<a class="hover:text-surface-bright transition-colors duration-150" href="#">Privacy Policy</a>
+<a class="hover:text-surface-bright transition-colors duration-150" href="#">Verified Directory</a>
+<a class="hover:text-surface-bright transition-colors duration-150" href="#">Trust &amp; Safety</a>
+<span class="text-surface-bright font-semibold">Language: Kiswahili / English</span>
+</div>
+</div>
+</footer>
+</body></html>

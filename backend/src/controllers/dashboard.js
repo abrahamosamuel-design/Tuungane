@@ -7,7 +7,7 @@ export const getDashboardStats = async (req, res) => {
     const { data: profile } = await supabaseAdmin.from("profiles").select("full_name,avatar_url,is_provider").eq("id", userId).maybeSingle();
     const { data: sp } = await supabaseAdmin.rpc("get_my_service_profile", { user_id_param: userId }).maybeSingle();
 
-    const { data: posts } = await supabaseAdmin.from("timeline_posts").select("*").eq("provider_user_id", userId).order("created_at", { ascending: false });
+    const { data: posts } = await supabaseAdmin.from("timeline_posts").select("*").eq("provider_user_id", userId).neq("post_type", "opportunity_shared").order("created_at", { ascending: false });
     const postIds = (posts || []).map(r => r.id);
 
     let providerStats = { followers: 0, posts: posts?.length || 0, recs: 0, likes: 0, comments: 0, reviews: 0, saves: 0, opps: 0 };

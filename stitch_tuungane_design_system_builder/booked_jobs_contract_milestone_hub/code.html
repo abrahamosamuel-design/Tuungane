@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Messages &amp; Booked Jobs | Tuungane Marketplace</title>
+<!-- Tailwind CSS Play CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Material Symbols Font with literal transcription support -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Inter Google Font -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-container": "#e5eeff",
+            "on-secondary-fixed-variant": "#7d2d00",
+            "border-subtle": "#E2E8F0",
+            "on-error": "#ffffff",
+            "surface-container-high": "#dce9ff",
+            "primary-fixed-dim": "#b5c7ea",
+            "primary-fixed": "#d6e3ff",
+            "on-tertiary-fixed-variant": "#005323",
+            "primary-container": "#0b1f3a",
+            "surface": "#f8f9ff",
+            "on-surface": "#0b1c30",
+            "surface-bright": "#f8f9ff",
+            "tertiary": "#000802",
+            "text-jet": "#050505",
+            "on-primary-fixed-variant": "#364764",
+            "inverse-surface": "#213145",
+            "primary": "#000615",
+            "inverse-on-surface": "#eaf1ff",
+            "outline": "#75777e",
+            "tertiary-container": "#00250c",
+            "on-surface-variant": "#44474d",
+            "surface-container-low": "#eff4ff",
+            "secondary-container": "#fe6a19",
+            "text-muted-mobile": "#4B4F56",
+            "inverse-primary": "#b5c7ea",
+            "background": "#f8f9ff",
+            "on-background": "#0b1c30",
+            "orange-gradient-end": "#FF8A42",
+            "on-secondary": "#ffffff",
+            "growth-green-border": "#A3E2B8",
+            "on-primary-container": "#7587a7",
+            "growth-green-light": "#E8F7EE",
+            "on-secondary-container": "#591e00",
+            "surface-dim": "#cbdbf5",
+            "secondary-fixed-dim": "#ffb596",
+            "error-container": "#ffdad6",
+            "on-primary": "#ffffff",
+            "surface-tint": "#4d5f7d",
+            "surface-variant": "#d3e4fe",
+            "on-tertiary-container": "#0a9b49",
+            "surface-alt": "#F1F5F9",
+            "border-hairline": "#DADDE1",
+            "navy-dark": "#0B192C",
+            "canvas-subtle": "#F8FAFC",
+            "destructive-red": "#E53935",
+            "hero-indigo-stop": "#1E3A8A",
+            "secondary-fixed": "#ffdbcd",
+            "on-error-container": "#93000a",
+            "on-secondary-fixed": "#360f00",
+            "on-tertiary-fixed": "#00210a",
+            "on-tertiary": "#ffffff",
+            "surface-container-lowest": "#ffffff",
+            "outline-variant": "#c4c6ce",
+            "secondary": "#a43e00",
+            "on-primary-fixed": "#071c36",
+            "tertiary-fixed": "#81fb9c",
+            "error": "#ba1a1a",
+            "tertiary-fixed-dim": "#64de83",
+            "surface-container-highest": "#d3e4fe"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "gutter-mobile": "0.5rem",
+            "gutter-desktop": "2rem",
+            "margin": "1.5rem",
+            "space-lg": "1.5rem",
+            "gutter": "1.5rem",
+            "margin-desktop": "2rem",
+            "space-xs": "0.25rem",
+            "space-md": "1rem",
+            "space-sm": "0.5rem",
+            "margin-mobile": "0.75rem",
+            "space-xl": "2rem"
+          },
+          "fontFamily": {
+            "caption-mobile": ["Inter"],
+            "body-base-mobile": ["Inter"],
+            "body-sm-mobile": ["Inter"],
+            "headline-sm": ["Inter"],
+            "body-sm": ["Inter"],
+            "headline-md": ["Inter"],
+            "caption": ["Inter"],
+            "display-lg": ["Inter"],
+            "label-compact-badge": ["Inter"],
+            "headline-lg-mobile": ["Inter"],
+            "display-2xl": ["Inter"],
+            "headline-lg": ["Inter"],
+            "display-xl": ["Inter"],
+            "body-base": ["Inter"]
+          },
+          "fontSize": {
+            "caption-mobile": ["13.4px", { "lineHeight": "21.6px", "letterSpacing": "0", "fontWeight": "500" }],
+            "body-base-mobile": ["16.5px", { "lineHeight": "25.5px", "letterSpacing": "0", "fontWeight": "400" }],
+            "body-sm-mobile": ["15.5px", { "lineHeight": "23px", "letterSpacing": "0", "fontWeight": "400" }],
+            "headline-sm": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "body-sm": ["14px", { "lineHeight": "20px", "letterSpacing": "0", "fontWeight": "400" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "caption": ["12px", { "lineHeight": "16px", "letterSpacing": "0", "fontWeight": "500" }],
+            "display-lg": ["36px", { "lineHeight": "42px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "label-compact-badge": ["9px", { "lineHeight": "16px", "letterSpacing": "0.025em", "fontWeight": "700" }],
+            "headline-lg-mobile": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "700" }],
+            "display-2xl": ["60px", { "lineHeight": "66px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+            "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "display-xl": ["48px", { "lineHeight": "52px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+            "body-base": ["16px", { "lineHeight": "24px", "letterSpacing": "0", "fontWeight": "400" }]
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-family: 'Material Symbols Outlined';
+      font-weight: normal;
+      font-style: normal;
+      font-size: 20px;
+      line-height: 1;
+      letter-spacing: normal;
+      text-transform: none;
+      display: inline-block;
+      white-space: nowrap;
+      word-wrap: normal;
+      direction: ltr;
+      -webkit-font-feature-settings: 'liga';
+      -webkit-font-smoothing: antialiased;
+    }
+  </style>
+</head>
+<body class="bg-background text-on-surface font-body-base min-h-screen flex flex-col antialiased selection:bg-secondary-container/20 selection:text-secondary-container">
+<!-- TOP APP BAR -->
+<header class="sticky top-0 z-40 bg-surface-container-lowest border-b border-border-hairline shadow-sm">
+<div class="flex justify-between items-center w-full px-gutter-desktop max-w-7xl mx-auto h-16">
+<!-- Brand & Search -->
+<div class="flex items-center gap-space-lg">
+<a class="flex items-center gap-1.5 focus:outline-none" href="#">
+<span class="text-headline-lg font-headline-lg font-bold text-navy-dark tracking-tight">Tuungane</span>
+<span class="w-2.5 h-2.5 rounded-full bg-secondary-container inline-block mb-1"></span>
+</a>
+<!-- Global Marketplace Search Input -->
+<div class="relative w-80 hidden lg:block">
+<span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-outline">
+<span class="material-symbols-outlined text-lg">search</span>
+</span>
+<input class="w-full pl-9 pr-4 py-1.5 text-body-sm bg-surface-alt border border-border-hairline rounded-full focus:outline-none focus:border-secondary-container focus:ring-1 focus:ring-secondary-container/30 transition-all text-on-surface placeholder:text-outline" placeholder="Search services, contracts, talents..." type="text"/>
+</div>
+</div>
+<!-- Navigation Links -->
+<nav class="hidden md:flex items-center gap-space-lg">
+<a class="text-on-surface-variant font-medium text-body-sm hover:text-navy-dark transition-colors duration-150 py-1" href="#">Services Directory</a>
+<a class="text-on-surface-variant font-medium text-body-sm hover:text-navy-dark transition-colors duration-150 py-1" href="#">Feed</a>
+<a class="text-on-surface-variant font-medium text-body-sm hover:text-navy-dark transition-colors duration-150 py-1" href="#">Opportunities</a>
+<a class="text-on-surface-variant font-medium text-body-sm hover:text-navy-dark transition-colors duration-150 py-1" href="#">Businesses</a>
+</nav>
+<!-- Trailing Action Icons & Profile -->
+<div class="flex items-center gap-space-md">
+<!-- Chat icon with active badge -->
+<button aria-label="Messages" class="relative p-2 rounded-full text-on-surface-variant hover:bg-surface-alt transition-colors duration-150 active:scale-[0.98]">
+<span class="material-symbols-outlined">chat</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-secondary-container ring-2 ring-surface-container-lowest"></span>
+</button>
+<!-- Notifications Bell -->
+<button aria-label="Notifications" class="relative p-2 rounded-full text-on-surface-variant hover:bg-surface-alt transition-colors duration-150 active:scale-[0.98]">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-destructive-red ring-2 ring-surface-container-lowest"></span>
+</button>
+<!-- CTA Button -->
+<button class="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 bg-secondary-container hover:brightness-105 active:scale-[0.98] text-on-secondary rounded-xl text-body-sm font-semibold shadow-sm transition-all duration-150">
+<span class="material-symbols-outlined text-lg">add_circle</span>
+<span>List a Service</span>
+</button>
+<!-- User Profile Avatar -->
+<div class="flex items-center gap-2 pl-2 border-l border-border-hairline">
+<img alt="User Profile Avatar" class="w-9 h-9 rounded-full object-cover ring-2 ring-growth-green-border" data-alt="Professional corporate headshot of Juma Mwangi, a confident African engineer smiling warmly in modern business casual attire against an urban high-tech Nairobi office backdrop with subtle daylight illumination." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCmyGJuRTENjum4qPOZTXgke47_37ShWSGhgt3LnP7Yglt7oyA6oXkIpkWQoHmjX_u5P7Rwmm-8ryeYGDyiXi-ORqsOXtMXuQemvbSbl129E7Zb8kk6mNlB372U4DqIJvO76HIrP3ov4Z1qHtHZFY2mjhP2AK4SThRT1VX6kY0UBZ8lDKiXweV4Dzvj2F73zB7W9kIgyR0tL8LnlqsRGVgaD-tzO-txCvP1AftJupq9cK34gEuN7np-Sw"/>
+<div class="hidden xl:flex flex-col text-left">
+<span class="text-caption font-headline-sm text-navy-dark leading-tight">Juma Mwangi</span>
+<span class="text-[10px] text-on-tertiary-container font-semibold">Verified Member</span>
+</div>
+</div>
+</div>
+</div>
+</header>
+<!-- MAIN HUB CANVAS -->
+<main class="flex-1 w-full max-w-7xl mx-auto px-gutter-desktop py-space-lg">
+<!-- PAGE HEADER SECTION -->
+<section class="mb-space-lg">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md pb-space-md border-b border-border-hairline">
+<div>
+<!-- Sub-breadcrumb / Escrow Trust Header -->
+<div class="flex items-center gap-space-sm mb-2">
+<span class="text-caption font-label-compact-badge text-outline tracking-wider uppercase">SERVICE CONTRACTS &amp; MILESTONE TRACKING</span>
+<span class="text-border-hairline">·</span>
+<span class="inline-flex items-center gap-1 bg-growth-green-light border border-growth-green-border px-2 py-0.5 rounded-full text-caption font-semibold text-on-tertiary-container">
+<span class="w-1.5 h-1.5 rounded-full bg-on-tertiary-container animate-pulse"></span>
+              Escrow Protection Live
+            </span>
+</div>
+<h1 class="text-display-lg font-headline-lg font-bold text-navy-dark tracking-tight">Messages &amp; Booked Jobs</h1>
+<p class="text-body-sm font-body-sm text-on-surface-variant max-w-2xl mt-1">
+            Track active milestones, mark completed deliverables, post timeline updates, and request client sign-offs.
+          </p>
+</div>
+<!-- SEGMENTED CONTROL / TOGGLE PILL -->
+<div class="bg-surface-alt p-1 rounded-xl flex items-center border border-border-hairline shadow-inner self-start md:self-auto">
+<!-- Messages Toggle (Inactive) -->
+<button class="flex items-center gap-2 px-4 py-2 rounded-lg text-body-sm font-medium text-on-surface-variant hover:text-navy-dark transition-all duration-150">
+<span class="material-symbols-outlined text-lg text-outline">forum</span>
+<span>Messages</span>
+<span class="bg-surface-container text-primary text-caption font-semibold px-2 py-0.5 rounded-full">3</span>
+</button>
+<!-- Booked Jobs Toggle (Active) -->
+<button class="relative flex items-center gap-2 px-5 py-2 rounded-lg bg-surface-container-lowest text-navy-dark text-body-sm font-bold shadow-sm transition-all duration-150">
+<span class="material-symbols-outlined text-lg text-secondary-container" style="font-variation-settings: 'FILL' 1;">work</span>
+<span>Booked Jobs</span>
+<span class="bg-primary-container text-surface-bright text-caption font-semibold px-2 py-0.5 rounded-full">4</span>
+<span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-secondary-container ring-2 ring-surface-container-lowest"></span>
+</button>
+</div>
+</div>
+</section>
+<!-- 1. INFO BANNER -->
+<div class="mb-space-lg bg-orange-gradient-end/10 border border-secondary-container/20 rounded-2xl p-space-md flex items-start gap-space-md shadow-sm">
+<div class="p-2 bg-secondary-container/10 rounded-xl text-secondary-container shrink-0 mt-0.5">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">security</span>
+</div>
+<div class="flex-1 text-body-sm text-on-surface leading-relaxed">
+<strong class="font-semibold text-navy-dark">Booked Jobs Hub:</strong> All contracts here are backed by <span class="font-semibold text-secondary-container">Tuungane SafeEscrow™</span>. Mark milestones complete to trigger verification, post visual updates directly to client timelines, or leave mutual verified reviews.
+      </div>
+<button aria-label="Dismiss banner" class="text-outline hover:text-navy-dark text-body-sm p-1">
+<span class="material-symbols-outlined text-base">close</span>
+</button>
+</div>
+<!-- 2. SUMMARY METRICS BAR & FILTER CONTROLS -->
+<section class="space-y-space-md mb-space-xl">
+<!-- Metrics Grid -->
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-space-md">
+<div class="bg-surface-container-lowest border border-border-hairline rounded-2xl p-space-md shadow-sm flex items-center gap-space-md">
+<div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-primary-container shrink-0">
+<span class="material-symbols-outlined text-2xl">pending_actions</span>
+</div>
+<div>
+<span class="text-caption font-caption text-outline block">Active Contracts</span>
+<span class="text-headline-md font-headline-md font-bold text-navy-dark">3</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-border-hairline rounded-2xl p-space-md shadow-sm flex items-center gap-space-md">
+<div class="w-12 h-12 rounded-xl bg-growth-green-light flex items-center justify-center text-on-tertiary-container shrink-0">
+<span class="material-symbols-outlined text-2xl">lock</span>
+</div>
+<div>
+<span class="text-caption font-caption text-outline block">Total Escrow Value</span>
+<span class="text-headline-md font-headline-md font-bold text-navy-dark">KES 274,000</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-border-hairline rounded-2xl p-space-md shadow-sm flex items-center gap-space-md">
+<div class="w-12 h-12 rounded-xl bg-surface-alt flex items-center justify-center text-navy-dark shrink-0">
+<span class="material-symbols-outlined text-2xl">verified_user</span>
+</div>
+<div>
+<span class="text-caption font-caption text-outline block">Completed Jobs</span>
+<span class="text-headline-md font-headline-md font-bold text-navy-dark">12</span>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-border-hairline rounded-2xl p-space-md shadow-sm flex items-center gap-space-md">
+<div class="w-12 h-12 rounded-xl bg-orange-gradient-end/15 flex items-center justify-center text-secondary-container shrink-0">
+<span class="material-symbols-outlined text-2xl">assignment_late</span>
+</div>
+<div>
+<span class="text-caption font-caption text-outline block">Pending Sign-off</span>
+<span class="text-headline-md font-headline-md font-bold text-secondary-container">1</span>
+</div>
+</div>
+</div>
+<!-- Filters & Search Toolbar -->
+<div class="bg-surface-container-lowest border border-border-hairline rounded-2xl p-3 shadow-sm flex flex-col lg:flex-row items-center justify-between gap-space-md">
+<!-- Status Tabs -->
+<div class="flex items-center overflow-x-auto w-full lg:w-auto pb-1 lg:pb-0 gap-1.5">
+<button class="px-3.5 py-1.5 rounded-xl bg-navy-dark text-surface-bright text-body-sm font-semibold shrink-0 shadow-sm">
+            All Jobs (4)
+          </button>
+<button class="px-3.5 py-1.5 rounded-xl text-on-surface-variant hover:bg-surface-alt text-body-sm font-medium shrink-0 transition-colors">
+            In Progress (2)
+          </button>
+<button class="px-3.5 py-1.5 rounded-xl text-on-surface-variant hover:bg-surface-alt text-body-sm font-medium shrink-0 transition-colors">
+            Pending Confirmation (1)
+          </button>
+<button class="px-3.5 py-1.5 rounded-xl text-on-surface-variant hover:bg-surface-alt text-body-sm font-medium shrink-0 transition-colors">
+            Completed (1)
+          </button>
+</div>
+<!-- Role Filter and Search Filter -->
+<div class="flex items-center gap-3 w-full lg:w-auto">
+<!-- Role selector -->
+<div class="relative shrink-0">
+<select class="appearance-none bg-surface-alt border border-border-hairline rounded-xl pl-3 pr-8 py-2 text-body-sm font-medium text-navy-dark focus:outline-none focus:border-secondary-container focus:ring-1 focus:ring-secondary-container cursor-pointer">
+<option>All Roles</option>
+<option>As Provider (3)</option>
+<option>As Customer (1)</option>
+</select>
+<span class="material-symbols-outlined absolute right-2 top-2.5 pointer-events-none text-outline text-base">expand_more</span>
+</div>
+<!-- Search field -->
+<div class="relative w-full lg:w-72">
+<span class="material-symbols-outlined absolute left-3 top-2.5 pointer-events-none text-outline text-base">search</span>
+<input class="w-full pl-9 pr-3 py-2 bg-surface-container-lowest border border-border-hairline rounded-xl text-body-sm placeholder:text-outline focus:outline-none focus:border-secondary-container focus:ring-1 focus:ring-secondary-container" placeholder="Search booked jobs by order #, title, or client..." type="text"/>
+</div>
+</div>
+</div>
+</section>
+<!-- 3. BOOKED JOB CARDS LIST -->
+<section class="space-y-space-lg">
+<!-- CARD 1: ACTIVE MILESTONE / IN PROGRESS -->
+<article class="bg-surface-container-lowest border border-border-hairline rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden">
+<div class="p-space-lg">
+<!-- Top Meta Row -->
+<div class="flex flex-wrap items-center justify-between gap-3 pb-space-sm border-b border-border-subtle">
+<div class="flex items-center gap-2">
+<span class="px-2.5 py-0.5 rounded-full text-caption font-semibold bg-primary-fixed text-navy-dark border border-primary-fixed-dim">
+                In Progress
+              </span>
+<span class="text-caption font-semibold text-outline tracking-wider font-mono">Order #TNG-9014</span>
+</div>
+<!-- Escrow Badge -->
+<div class="flex items-center gap-1.5 px-3 py-1 bg-growth-green-light border border-growth-green-border rounded-xl">
+<span class="material-symbols-outlined text-on-tertiary-container text-base">lock</span>
+<span class="text-caption font-bold text-on-tertiary-container">Escrow Locked: KES 85,000</span>
+</div>
+</div>
+<!-- Title & Meta -->
+<div class="mt-space-md">
+<h2 class="text-headline-md font-headline-md font-bold text-navy-dark hover:text-secondary-container transition-colors cursor-pointer">
+              Commercial Solar PV &amp; Battery Storage Installation (80kW)
+            </h2>
+<div class="flex flex-wrap items-center gap-y-1 gap-x-space-md text-caption text-on-surface-variant mt-1.5">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm text-outline">location_on</span>
+                Nairobi Industrial Area
+              </span>
+<span>·</span>
+<span>Booked Oct 18, 2024</span>
+<span>·</span>
+<span class="text-secondary-container font-semibold">Target Completion: Nov 28, 2024</span>
+</div>
+</div>
+<!-- Partner Details Row -->
+<div class="mt-space-md p-3.5 bg-canvas-subtle rounded-xl flex flex-wrap items-center justify-between gap-4 border border-border-subtle">
+<!-- Provider (You) -->
+<div class="flex items-center gap-3">
+<img alt="Juma Mwangi profile" class="w-11 h-11 rounded-full object-cover ring-2 ring-secondary-container/20" data-alt="Close-up headshot of certified professional contractor Juma Mwangi wearing protective glasses and a clean work shirt, warm lighting with industrial backdrop." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDcaPTDhH44zAsRF06tfeORj4KPwS0rZZI00sKsF5hitfXLLlTHI2JR6PsdY39gR29aviLq2hgmvq-xuj4FCF2e11Cyc9U2sGqKvUn2RjO-4Kh8TcVo43ElINm0wMHSI34wvVkBl3iwALGFkXpB9gMKCVUS-4TGM4m4s44-6hohgh7EDnX38fdrTxjVGTMqeSKAUWBNnDK_jqsFw_DZRN2lhMlRYflq1N_fwS_pO_vSoDpyhWwoCwMbYw"/>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="text-body-sm font-semibold text-navy-dark">Juma Mwangi</span>
+<span class="px-2 py-0.2 rounded-full text-label-compact-badge bg-navy-dark text-surface-bright font-bold">You (Provider)</span>
+</div>
+<span class="text-caption text-outline">Solar Energy Systems Specialist</span>
+</div>
+</div>
+<!-- Client -->
+<div class="flex items-center gap-3 border-l-0 sm:border-l sm:pl-4 border-border-hairline">
+<div class="w-11 h-11 rounded-full bg-surface-container flex items-center justify-center font-bold text-navy-dark text-body-base">
+                AP
+              </div>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="text-body-sm font-semibold text-navy-dark">Apex Properties Ltd</span>
+<span class="px-2 py-0.2 rounded-full text-label-compact-badge bg-surface-alt text-on-surface-variant font-bold">Client</span>
+</div>
+<span class="text-caption text-outline">Commercial Property Management</span>
+</div>
+</div>
+</div>
+<!-- Milestone Progress Bar & Active State -->
+<div class="mt-space-lg space-y-2">
+<div class="flex justify-between items-center text-body-sm">
+<span class="font-semibold text-navy-dark flex items-center gap-1.5">
+<span class="material-symbols-outlined text-base text-secondary-container">flag</span>
+                Milestone 2 of 3 (Inverter &amp; Busbar Synchronisation)
+              </span>
+<span class="font-bold text-secondary-container">65% Overall</span>
+</div>
+<div class="w-full bg-surface-alt rounded-full h-2.5 overflow-hidden">
+<div class="bg-secondary-container h-2.5 rounded-full transition-all duration-500" style="width: 65%"></div>
+</div>
+<!-- Milestone Pills Breakdown -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-2.5 pt-2">
+<div class="p-2.5 rounded-xl border border-growth-green-border bg-growth-green-light flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-on-tertiary-container text-base" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="text-caption font-semibold text-navy-dark">M1: Site Survey &amp; Foundation</span>
+</div>
+<span class="text-caption text-on-tertiary-container font-bold">Released KES 30k</span>
+</div>
+<div class="p-2.5 rounded-xl border-2 border-secondary-container/50 bg-secondary-container/5 flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-secondary-container text-base animate-pulse">radio_button_checked</span>
+<span class="text-caption font-bold text-navy-dark">M2: Inverter &amp; High-Voltage</span>
+</div>
+<span class="text-caption text-secondary-container font-bold">Pending KES 35k</span>
+</div>
+<div class="p-2.5 rounded-xl border border-border-hairline bg-surface-alt flex items-center justify-between opacity-80">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-outline text-base">radio_button_unchecked</span>
+<span class="text-caption font-medium text-outline">M3: Grid Interconnection</span>
+</div>
+<span class="text-caption text-outline font-medium">KES 20k</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Card Contextual Action Shelf -->
+<div class="bg-canvas-subtle px-space-lg py-3.5 border-t border-border-hairline flex flex-wrap items-center justify-between gap-3">
+<div class="flex flex-wrap items-center gap-2">
+<!-- Post Update Button -->
+<button class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-surface-container-lowest border border-border-hairline hover:bg-surface-alt rounded-xl text-body-sm font-semibold text-navy-dark shadow-sm transition-all duration-150">
+<span class="material-symbols-outlined text-base text-secondary-container">photo_camera</span>
+<span>Post Update</span>
+</button>
+<!-- Mark Milestone Complete (Primary Green) -->
+<button class="inline-flex items-center gap-1.5 px-4 py-2 bg-on-tertiary-container hover:brightness-105 active:scale-[0.98] rounded-xl text-body-sm font-bold text-surface-bright shadow-sm transition-all duration-150">
+<span class="material-symbols-outlined text-base">task_alt</span>
+<span>Mark Milestone Complete</span>
+</button>
+<!-- Message Client Button -->
+<button class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-surface-container-lowest border border-border-hairline hover:border-navy-dark rounded-xl text-body-sm font-semibold text-navy-dark shadow-sm transition-all duration-150">
+<span class="material-symbols-outlined text-base">chat</span>
+<span>Message Client</span>
+</button>
+</div>
+<a class="text-caption font-bold text-navy-dark hover:text-secondary-container transition-colors inline-flex items-center gap-1" href="#">
+            View Full Contract
+            <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</a>
+</div>
+</article>
+<!-- CARD 2: PENDING CONFIRMATION -->
+<article class="bg-surface-container-lowest border border-border-hairline rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden">
+<div class="p-space-lg">
+<!-- Top Meta Row -->
+<div class="flex flex-wrap items-center justify-between gap-3 pb-space-sm border-b border-border-subtle">
+<div class="flex items-center gap-2">
+<span class="px-2.5 py-0.5 rounded-full text-caption font-semibold bg-amber-100 text-amber-900 border border-amber-300">
+                Pending Confirmation
+              </span>
+<span class="text-caption font-semibold text-outline tracking-wider font-mono">Order #TNG-9280</span>
+</div>
+<div class="flex items-center gap-1.5 px-3 py-1 bg-surface-alt border border-border-hairline rounded-xl">
+<span class="material-symbols-outlined text-outline text-base">savings</span>
+<span class="text-caption font-bold text-navy-dark">Proposed Retainer: KES 45,000</span>
+</div>
+</div>
+<!-- Title & Meta -->
+<div class="mt-space-md">
+<h2 class="text-headline-md font-headline-md font-bold text-navy-dark hover:text-secondary-container transition-colors cursor-pointer">
+              SME Business Tax Filing &amp; KRA Compliance Audit
+            </h2>
+<div class="flex flex-wrap items-center gap-y-1 gap-x-space-md text-caption text-on-surface-variant mt-1.5">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm text-outline">business</span>
+                Upper Hill Financial District
+              </span>
+<span>·</span>
+<span>Booked Today</span>
+<span>·</span>
+<span class="text-amber-800 font-semibold">Awaiting Provider Confirmation</span>
+</div>
+</div>
+<!-- Partner Details Row -->
+<div class="mt-space-md p-3.5 bg-canvas-subtle rounded-xl flex flex-wrap items-center justify-between gap-4 border border-border-subtle">
+<!-- Provider -->
+<div class="flex items-center gap-3">
+<img alt="Wanjiku Karanja" class="w-11 h-11 rounded-full object-cover ring-2 ring-primary-container/20" data-alt="Portrait of an experienced Kenyan female attorney named Wanjiku Karanja dressed in tailored corporate attire sitting in a sunlit law office in Upper Hill Nairobi." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAOOL0QgC7qfvv8wZFAZDsHzj9lZ_DDT7czu5oZNkLEc5Bzv97TWehyz0810KVVPyJzETUgEg1HnRFai7ULJ08LTueC8JnmjvX3N_at-7_fFRSX2uthjWmYQY93i-9g6QfY5Re35CTKVfCXDuFSEgSpM5Tcl93Vih-T7_sC_r9oJAYHSDL0z6iQkFg_kkMd9nGLrwGmKCCaOwmzYj2aZNPYTNfJMiJOYEDVjd1S563li2VBlIEK63cmMQ"/>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="text-body-sm font-semibold text-navy-dark">Wanjiku Karanja, Advocate</span>
+<span class="px-2 py-0.2 rounded-full text-label-compact-badge bg-surface-alt text-navy-dark font-bold">Provider</span>
+</div>
+<span class="text-caption text-outline">Senior Legal &amp; Tax Consultant</span>
+</div>
+</div>
+<!-- Client (You) -->
+<div class="flex items-center gap-3 border-l-0 sm:border-l sm:pl-4 border-border-hairline">
+<img alt="Juma Mwangi" class="w-11 h-11 rounded-full object-cover ring-2 ring-secondary-container" data-alt="Profile avatar photograph of Juma Mwangi looking professional in high-key daylight." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC_BjIDA0yExaHsCzCt22cX97Iyvrqrcg7XWqNNN2ZGRGZL28FzGW0VgMAztrrroVdDay9TRZ5wGbgLh44FNdebmOJxqOn-J9dgW2ae9lV-Hrbnuq7Zh6Zp9AveuxJvhKfCcLGaFTQkeBUDidHIfeL3F2hc-hS6o4NP2xa63qRXCtVHt7ShfzvvlsIrgMl7UvgtCrAI2B-QuDbIlNAVESoSRcPIio761w7bqU4rLcRVpeJ1PWLF3yKdFQ"/>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="text-body-sm font-semibold text-navy-dark">Juma Mwangi</span>
+<span class="px-2 py-0.2 rounded-full text-label-compact-badge bg-navy-dark text-surface-bright font-bold">You (Customer)</span>
+</div>
+<span class="text-caption text-outline">Director · CleanTech Ventures</span>
+</div>
+</div>
+</div>
+<!-- Escrow Trust Subtext -->
+<div class="mt-space-md p-3 bg-amber-50/70 border border-amber-200/60 rounded-xl flex items-center gap-2.5">
+<span class="material-symbols-outlined text-amber-700 text-lg">info</span>
+<p class="text-body-sm text-amber-900">
+              Client accepted service agreement terms. Escrow deposit of <span class="font-bold">KES 45,000</span> held safely in Tuungane Trust.
+            </p>
+</div>
+</div>
+<!-- Card Contextual Action Shelf -->
+<div class="bg-canvas-subtle px-space-lg py-3.5 border-t border-border-hairline flex flex-wrap items-center justify-between gap-3">
+<div class="flex flex-wrap items-center gap-2">
+<!-- Confirm Booking (Primary Navy) -->
+<button class="inline-flex items-center gap-1.5 px-4 py-2 bg-navy-dark hover:bg-primary active:scale-[0.98] rounded-xl text-body-sm font-semibold text-surface-bright shadow-sm transition-all duration-150">
+<span class="material-symbols-outlined text-base">check_circle</span>
+<span>Confirm Booking</span>
+</button>
+<!-- Review Terms (Outline) -->
+<button class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-surface-container-lowest border border-border-hairline hover:bg-surface-alt rounded-xl text-body-sm font-semibold text-navy-dark shadow-sm transition-all duration-150">
+<span class="material-symbols-outlined text-base">gavel</span>
+<span>Review Terms</span>
+</button>
+<!-- Message Client -->
+<button class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-surface-container-lowest border border-border-hairline hover:border-navy-dark rounded-xl text-body-sm font-semibold text-navy-dark shadow-sm transition-all duration-150">
+<span class="material-symbols-outlined text-base">chat</span>
+<span>Message Client</span>
+</button>
+</div>
+<span class="text-caption text-outline">Awaiting confirmation within 14 hrs</span>
+</div>
+</article>
+<!-- CARD 3: COMPLETED & AWAITING REVIEW -->
+<article class="bg-surface-container-lowest border border-border-hairline rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden">
+<div class="p-space-lg">
+<!-- Top Meta Row -->
+<div class="flex flex-wrap items-center justify-between gap-3 pb-space-sm border-b border-border-subtle">
+<div class="flex items-center gap-2">
+<span class="px-2.5 py-0.5 rounded-full text-caption font-semibold bg-growth-green-light text-on-tertiary-container border border-growth-green-border">
+                Completed
+              </span>
+<span class="text-caption font-semibold text-outline tracking-wider font-mono">Order #TNG-7492</span>
+</div>
+<div class="flex items-center gap-1.5 px-3 py-1 bg-surface-alt border border-border-hairline rounded-xl">
+<span class="material-symbols-outlined text-on-tertiary-container text-base" style="font-variation-settings: 'FILL' 1;">check</span>
+<span class="text-caption font-bold text-navy-dark">Settled via SafeEscrow: KES 144,000</span>
+</div>
+</div>
+<!-- Title & Meta -->
+<div class="mt-space-md">
+<h2 class="text-headline-md font-headline-md font-bold text-navy-dark hover:text-secondary-container transition-colors cursor-pointer">
+              Executive Corporate Catering - 120 Guests
+            </h2>
+<div class="flex flex-wrap items-center gap-y-1 gap-x-space-md text-caption text-on-surface-variant mt-1.5">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm text-outline">location_on</span>
+                Karen, Nairobi
+              </span>
+<span>·</span>
+<span>Completed Nov 02, 2024</span>
+<span>·</span>
+<span class="text-on-tertiary-container font-semibold">Milestones Released</span>
+</div>
+</div>
+<!-- Partner Details Row -->
+<div class="mt-space-md p-3.5 bg-canvas-subtle rounded-xl flex flex-wrap items-center justify-between gap-4 border border-border-subtle">
+<!-- Provider -->
+<div class="flex items-center gap-3">
+<img alt="Chef Grace Nekesa" class="w-11 h-11 rounded-full object-cover ring-2 ring-secondary-container/20" data-alt="Portrait photograph of Chef Grace Nekesa wearing pristine white chef uniform and apron in a modern commercial kitchen in Nairobi Kenya." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDi5FwUoiBMw7rx2-j0-i_AGRDQudarBTz95dMNNHmpvcTz4wRmdd_jYa5UZVfo4Hqaa98W17GP4N1NofFWY3prwb5NlLNXuhnw7OXIDKugdp765ZsvNBNBiEhf0tG8C3jEQCSeocycUsA4TMjxdy3cq-JIBb_97uD7j58X2-3L8kVf3dhyGH900o4p-D_T0ypZxV3X9O2HGYZVZ6rs2MuJ2WOTROAgMlDhzJnovsEgCqCNE8tlT-ADzQ"/>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="text-body-sm font-semibold text-navy-dark">Chef Grace Nekesa</span>
+<span class="px-2 py-0.2 rounded-full text-label-compact-badge bg-surface-alt text-navy-dark font-bold">Provider</span>
+</div>
+<span class="text-caption text-outline">Artisanal Catering &amp; Event Cuisine</span>
+</div>
+</div>
+<!-- Client (You) -->
+<div class="flex items-center gap-3 border-l-0 sm:border-l sm:pl-4 border-border-hairline">
+<div class="w-11 h-11 rounded-full bg-secondary-container/10 text-secondary-container flex items-center justify-center font-bold text-body-base">
+                JM
+              </div>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="text-body-sm font-semibold text-navy-dark">Juma Mwangi</span>
+<span class="px-2 py-0.2 rounded-full text-label-compact-badge bg-navy-dark text-surface-bright font-bold">Customer (You)</span>
+</div>
+<span class="text-caption text-outline">Verified Buyer</span>
+</div>
+</div>
+</div>
+<!-- Milestone Final Status Badge -->
+<div class="mt-space-md flex items-center gap-2 text-body-sm text-on-tertiary-container font-semibold">
+<span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1;">task_alt</span>
+<span>All 3 Milestones Approved &amp; Released (100%)</span>
+</div>
+</div>
+<!-- Card Contextual Action Shelf -->
+<div class="bg-canvas-subtle px-space-lg py-3.5 border-t border-border-hairline flex flex-wrap items-center justify-between gap-3">
+<div class="flex flex-wrap items-center gap-2">
+<!-- Leave Review Button (Primary Orange) -->
+<button class="inline-flex items-center gap-1.5 px-4 py-2 bg-secondary-container hover:brightness-105 active:scale-[0.98] rounded-xl text-body-sm font-bold text-on-secondary shadow-sm transition-all duration-150">
+<span class="material-symbols-outlined text-base" style="font-variation-settings: 'FILL' 1;">star</span>
+<span>Leave Review</span>
+</button>
+<!-- View Receipt & Invoice -->
+<button class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-surface-container-lowest border border-border-hairline hover:bg-surface-alt rounded-xl text-body-sm font-semibold text-navy-dark shadow-sm transition-all duration-150">
+<span class="material-symbols-outlined text-base">receipt_long</span>
+<span>View Receipt &amp; Invoice</span>
+</button>
+<!-- Add to Portfolio / Timeline -->
+<button class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-surface-container-lowest border border-border-hairline hover:bg-surface-alt rounded-xl text-body-sm font-semibold text-navy-dark shadow-sm transition-all duration-150">
+<span class="material-symbols-outlined text-base">auto_stories</span>
+<span>Add to Portfolio / Timeline</span>
+</button>
+<!-- Re-book Service -->
+<button class="inline-flex items-center gap-1.5 px-3 py-2 text-body-sm font-semibold text-navy-dark hover:text-secondary-container transition-colors">
+<span class="material-symbols-outlined text-base">repeat</span>
+<span>Re-book Service</span>
+</button>
+</div>
+</div>
+</article>
+<!-- CARD 4: ACTIVE / IN PROGRESS (PHASE 1) -->
+<article class="bg-surface-container-lowest border border-border-hairline rounded-2xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden">
+<div class="p-space-lg">
+<!-- Top Meta Row -->
+<div class="flex flex-wrap items-center justify-between gap-3 pb-space-sm border-b border-border-subtle">
+<div class="flex items-center gap-2">
+<span class="px-2.5 py-0.5 rounded-full text-caption font-semibold bg-primary-fixed text-navy-dark border border-primary-fixed-dim">
+                In Progress
+              </span>
+<span class="text-caption font-semibold text-outline tracking-wider font-mono">Order #TNG-8821</span>
+</div>
+<div class="flex items-center gap-1.5 px-3 py-1 bg-growth-green-light border border-growth-green-border rounded-xl">
+<span class="material-symbols-outlined text-on-tertiary-container text-base">lock</span>
+<span class="text-caption font-bold text-on-tertiary-container">Escrow Locked: KES 70,000</span>
+</div>
+</div>
+<!-- Title & Meta -->
+<div class="mt-space-md">
+<h2 class="text-headline-md font-headline-md font-bold text-navy-dark hover:text-secondary-container transition-colors cursor-pointer">
+              Full-Stack Web &amp; Mobile Application Engineering (React &amp; Daraja API)
+            </h2>
+<div class="flex flex-wrap items-center gap-y-1 gap-x-space-md text-caption text-on-surface-variant mt-1.5">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-sm text-outline">terminal</span>
+                Remote / Kilimani
+              </span>
+<span>·</span>
+<span>Started Nov 10, 2024</span>
+</div>
+</div>
+<!-- Partner Details Row -->
+<div class="mt-space-md p-3.5 bg-canvas-subtle rounded-xl flex flex-wrap items-center justify-between gap-4 border border-border-subtle">
+<!-- Provider -->
+<div class="flex items-center gap-3">
+<img alt="Amina Odhiambo" class="w-11 h-11 rounded-full object-cover ring-2 ring-primary-container/20" data-alt="Portrait photo of software engineer Amina Odhiambo sitting with laptop in a co-working technology hub in Kilimani Nairobi, clean ambient morning lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuABBu_TohQ4vo641RJpyIvDsTBcIrZldbOkjk7aBAVQJL6ChnFmMM9FOeMk4ECjQ3fLtUylXyjzwi3OujrlIBMdn9qY2FX5geJja4WzXWqYNlzh-pBdNxB_1igL01NvS9RQCzYECSeJ_mz-E5d6rVTmWmvmae7SGA9qe8mdDWpJE2Eg3a7sofDMk6s1YstAKsPy4-6YWlRb4vERl2MKq0Q57KbEeek-vnOtHoORLd2-aRXu8U54RVSddg"/>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="text-body-sm font-semibold text-navy-dark">Amina Odhiambo</span>
+<span class="px-2 py-0.2 rounded-full text-label-compact-badge bg-surface-alt text-navy-dark font-bold">Provider</span>
+</div>
+<span class="text-caption text-outline">Senior Fintech Engineer</span>
+</div>
+</div>
+<!-- Client (You) -->
+<div class="flex items-center gap-3 border-l-0 sm:border-l sm:pl-4 border-border-hairline">
+<img alt="Juma Mwangi" class="w-11 h-11 rounded-full object-cover ring-2 ring-secondary-container" data-alt="Professional avatar photo of user Juma Mwangi looking confident in casual office lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDEe2g6-4Wg4wgil4WargtOyptnMJNe8z1UsPkCjOWYMmffsxKiIfjkR94Luk61-Zqdr9ttsEZJajafVWq800IosOztMTaNNOJSge_8LfcwC3H8XP3TuJdcA2s2ssrskn3hKOpSp2a8XioH93KYXNZzIpT4igjFXJtSPVinwnye8aATfZ9FT-aQO0Kk2Iy27J40-e89gBYFQF9iDPGlkui8p4v-NcoABNMSos39Ptuf1Dbzdc7NmMKM-w"/>
+<div>
+<div class="flex items-center gap-1.5">
+<span class="text-body-sm font-semibold text-navy-dark">Juma Mwangi</span>
+<span class="px-2 py-0.2 rounded-full text-label-compact-badge bg-navy-dark text-surface-bright font-bold">You (Customer)</span>
+</div>
+<span class="text-caption text-outline">Product Lead</span>
+</div>
+</div>
+</div>
+<!-- Milestone Progress Bar -->
+<div class="mt-space-md space-y-2">
+<div class="flex justify-between items-center text-body-sm">
+<span class="font-semibold text-navy-dark flex items-center gap-1.5">
+<span class="material-symbols-outlined text-base text-secondary-container">flag</span>
+                Milestone 1 of 2 (Architecture &amp; API Webhooks)
+              </span>
+<span class="font-bold text-navy-dark">50% complete</span>
+</div>
+<div class="w-full bg-surface-alt rounded-full h-2.5 overflow-hidden">
+<div class="bg-primary-container h-2.5 rounded-full" style="width: 50%"></div>
+</div>
+</div>
+</div>
+<!-- Card Contextual Action Shelf -->
+<div class="bg-canvas-subtle px-space-lg py-3.5 border-t border-border-hairline flex flex-wrap items-center justify-between gap-3">
+<div class="flex flex-wrap items-center gap-2">
+<!-- Review Deliverables -->
+<button class="inline-flex items-center gap-1.5 px-4 py-2 bg-navy-dark hover:bg-primary active:scale-[0.98] rounded-xl text-body-sm font-semibold text-surface-bright shadow-sm transition-all duration-150">
+<span class="material-symbols-outlined text-base">code</span>
+<span>Review Deliverables</span>
+</button>
+<!-- Message Provider -->
+<button class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-surface-container-lowest border border-border-hairline hover:border-navy-dark rounded-xl text-body-sm font-semibold text-navy-dark shadow-sm transition-all duration-150">
+<span class="material-symbols-outlined text-base">chat</span>
+<span>Message Provider</span>
+</button>
+<!-- Request Milestone Revision -->
+<button class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-surface-container-lowest border border-border-hairline hover:bg-surface-alt rounded-xl text-body-sm font-semibold text-destructive-red shadow-sm transition-all duration-150">
+<span class="material-symbols-outlined text-base">published_with_changes</span>
+<span>Request Milestone Revision</span>
+</button>
+</div>
+</div>
+</article>
+</section>
+</main>
+<!-- WEB FOOTER -->
+<footer class="bg-navy-dark text-surface-bright mt-space-xl border-t border-border-subtle">
+<div class="w-full py-space-xl px-gutter-desktop max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-space-md">
+<!-- Brand & Copyright -->
+<div class="flex flex-col items-center md:items-start">
+<div class="flex items-center gap-1.5 mb-1">
+<span class="text-headline-md font-headline-md font-bold text-surface-bright">Tuungane</span>
+<span class="w-2 h-2 rounded-full bg-secondary-container"></span>
+</div>
+<p class="text-caption font-caption text-outline-variant">
+          © 2024 Tuungane Economic Marketplace. Empowering East African Enterprise.
+        </p>
+</div>
+<!-- Links List -->
+<div class="flex flex-wrap justify-center items-center gap-space-md text-body-sm font-body-sm">
+<a class="text-outline-variant hover:text-surface-bright transition-colors duration-150" href="#">Civic Guidelines</a>
+<a class="text-outline-variant hover:text-surface-bright transition-colors duration-150" href="#">Terms of Service</a>
+<a class="text-outline-variant hover:text-surface-bright transition-colors duration-150" href="#">Privacy Policy</a>
+<a class="text-outline-variant hover:text-surface-bright transition-colors duration-150" href="#">Verified Directory</a>
+<a class="text-outline-variant hover:text-surface-bright transition-colors duration-150" href="#">Trust &amp; Safety</a>
+<a class="text-outline-variant hover:text-surface-bright transition-colors duration-150 flex items-center gap-1" href="#">
+<span class="material-symbols-outlined text-sm">language</span>
+          Language: Kiswahili / English
+        </a>
+</div>
+</div>
+</footer>
+</body></html>

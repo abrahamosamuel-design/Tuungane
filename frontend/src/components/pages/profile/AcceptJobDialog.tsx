@@ -10,9 +10,10 @@ interface AcceptJobDialogProps {
   requestId: string;
   initialPrice: number;
   onAccepted: () => void;
+  isDirectBooking?: boolean;
 }
 
-export function AcceptJobDialog({ open, onOpenChange, requestId, initialPrice, onAccepted }: AcceptJobDialogProps) {
+export function AcceptJobDialog({ open, onOpenChange, requestId, initialPrice, onAccepted, isDirectBooking }: AcceptJobDialogProps) {
   const [price, setPrice] = useState<number>(initialPrice || 0);
   const [busy, setBusy] = useState(false);
 
@@ -20,9 +21,16 @@ export function AcceptJobDialog({ open, onOpenChange, requestId, initialPrice, o
     e.preventDefault();
     setBusy(true);
     try {
-      await apiClient.post(`/requests/${requestId}/accept`, {
-        price_total: parseFloat(String(price)),
-      });
+      if (isDirectBooking) {
+        await apiClient.patch(`/direct-bookings/${requestId}`, {
+          status: 'accepted',
+          price_total: parseFloat(String(price)),
+        });
+      } else {
+        await apiClient.post(`/requests/${requestId}/accept`, {
+          price_total: parseFloat(String(price)),
+        });
+      }
       toast.success("Job accepted successfully!");
       onAccepted();
       onOpenChange(false);

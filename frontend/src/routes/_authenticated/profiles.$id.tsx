@@ -10,7 +10,7 @@ import { ProfileStrengthCard } from "@/components/ProfileStrengthCard";
 import { RemovePhotoConfirm } from "@/components/RemovePhotoConfirm";
 import { computeProfileStrength } from "@/lib/profile-strength";
 import { toast } from "sonner";
-import { ArrowLeft, Plus, Trash2, Save, Camera, Pencil, Star } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Save, Camera, Pencil, Star, ImagePlus, X } from "lucide-react";
 import { ExpandableText } from "@/components/feed/ExpandableText";
 import { PriceGuideChip } from "@/components/PriceGuide";
 import { PRICE_TYPE_OPTIONS, validatePriceGuide, type PriceType, type PriceGuide } from "@/lib/price-guide";
@@ -431,7 +431,11 @@ function ServiceEditor({
   const [minP, setMinP] = useState<string>(service?.price_min_ugx?.toString() ?? "");
   const [maxP, setMaxP] = useState<string>(service?.price_max_ugx?.toString() ?? "");
   const [note, setNote] = useState<string>(service?.price_note ?? "");
+  const [photos, setPhotos] = useState<string[]>(service?.photos ?? []);
   const [busy, setBusy] = useState(false);
+  const [uploadingImg, setUploadingImg] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const { user } = useAuth();
 
   const parseNum = (v: string): number | null => {
     const cleaned = v.replace(/[^0-9]/g, "");
@@ -463,6 +467,7 @@ function ServiceEditor({
       price_max_ugx: guide.price_max_ugx,
       price_currency: "UGX",
       price_note: guide.price_note,
+      photos: photos,
     };
     try {
       if (mode === "create") {
@@ -495,6 +500,39 @@ function ServiceEditor({
       <div>
         <label className="text-xs font-medium text-navy">Description (optional)</label>
         <textarea value={desc} onChange={(e) => setDesc(e.target.value)} rows={2} className="mt-1 w-full resize-none rounded-xl border border-border px-3 py-2 text-sm outline-none focus:border-orange" />
+      </div>
+
+      <div>
+        <label className="text-xs font-medium text-navy">Photos (up to 5)</label>
+        <div className="mt-1 grid grid-cols-3 gap-2 sm:grid-cols-4">
+          {photos.map((url, idx) => (
+            <div key={idx} className="relative aspect-square overflow-hidden rounded-md border border-border">
+              <img src={url} alt="Service" className="h-full w-full object-cover" />
+              <button type="button" onClick={() => setPhotos(photos.filter((_, i) => i !== idx))} className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-white hover:bg-red-500">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          ))}
+          {photos.length < 5 && (
+            <button type="button" onClick={() => fileRef.current?.click()} disabled={busy || uploadingImg} className="flex aspect-square flex-col items-center justify-center gap-1 rounded-md border-2 border-dashed border-border bg-muted/20 text-muted-foreground hover:bg-muted/50 disabled:opacity-50">
+              {uploadingImg ? <span className="text-xs">Uploading…</span> : <><ImagePlus className="h-6 w-6" /><span className="text-[10px]">Add photo</span></>}
+            </button>
+          )}
+        </div>
+        <input type="file" ref={fileRef} accept="image/*" multiple className="hidden" onChange={async (e) => {
+          const files = Array.from(e.target.files ?? []);
+          if (!files.length || !user) return;
+          if (photos.length + files.length > 5) { toast.error("Max 5 images"); return; }
+          const validFiles = files.filter(f => f.size <= 3 * 1024 * 1024);
+          if (validFiles.length < files.length) toast.error("Images must be 3MB or less");
+          if (validFiles.length === 0) return;
+          setUploadingImg(true);
+          try {
+            const urls = await Promise.all(validFiles.map(f => uploadMedia(user.id, f, "service-images")));
+            setPhotos(prev => [...prev, ...urls]);
+          } catch { toast.error("Image upload failed"); }
+          finally { setUploadingImg(false); if (fileRef.current) fileRef.current.value = ""; }
+        }} />
       </div>
 
       <div className="rounded-xl border border-border bg-background/50 p-3">

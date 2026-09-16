@@ -78,13 +78,17 @@ export const updateDirectBooking = async (req, res) => {
   try {
     const userId = req.user.id;
     const { id } = req.params;
-    const { status } = req.body;
+    const { status, price_total } = req.body;
     
     const supabaseUser = getSupabaseUserClient(req);
     
+    const updates = { updated_at: new Date().toISOString() };
+    if (status !== undefined) updates.status = status;
+    if (price_total !== undefined) updates.price_total = price_total;
+
     const { data, error } = await supabaseUser
       .from('direct_bookings')
-      .update({ status, updated_at: new Date().toISOString() })
+      .update(updates)
       .eq('id', id)
       .select()
       .single();
@@ -107,5 +111,43 @@ export const updateDirectBooking = async (req, res) => {
   } catch (err) {
     console.error('Error updating direct booking:', err);
     res.status(500).json({ error: 'Failed to update booking' });
+  }
+};
+
+export const getDirectBookingById = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { id } = req.params;
+    const supabaseUser = getSupabaseUserClient(req);
+
+    const { data, error } = await supabaseUser
+      .from('direct_bookings')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) throw error;
+    if (!data) return res.status(404).json({ error: 'Booking not found' });
+
+    // Fetch customer and provider profiles
+    const ids = [data.customer_id, data.provider_id].filter(Boolean);
+    let profs = [];
+    if (ids.length) {
+      const { data: p } = await supabaseUser.from('profiles').select('id,full_name,avatar_url').in('id', ids);
+      profs = p || [];
+    }
+    
+    const pmap = new Map(profs.map(p => [p.id, { full_name: p.full_name, avatar_url: p.avatar_url }]));
+    
+    const merged = {
+      ...data,
+      customer: pmap.get(data.customer_id),
+      provider: data.provider_id ? pmap.get(data.provider_id) : undefined
+    };
+
+    res.json({ data: merged });
+  } catch (err) {
+    console.error('Error fetching direct booking by id:', err);
+    res.status(500).json({ error: 'Failed to fetch booking' });
   }
 };

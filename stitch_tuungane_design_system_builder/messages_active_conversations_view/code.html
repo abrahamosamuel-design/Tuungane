@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+
+<html class="h-full bg-canvas-subtle" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Messages &amp; Booked Jobs · Tuungane</title>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Inter Font -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration verbatim from Design System -->
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-container": "#e5eeff",
+            "on-secondary-fixed-variant": "#7d2d00",
+            "border-subtle": "#E2E8F0",
+            "on-error": "#ffffff",
+            "surface-container-high": "#dce9ff",
+            "primary-fixed-dim": "#b5c7ea",
+            "primary-fixed": "#d6e3ff",
+            "on-tertiary-fixed-variant": "#005323",
+            "primary-container": "#0b1f3a",
+            "surface": "#f8f9ff",
+            "on-surface": "#0b1c30",
+            "surface-bright": "#f8f9ff",
+            "tertiary": "#000802",
+            "text-jet": "#050505",
+            "on-primary-fixed-variant": "#364764",
+            "inverse-surface": "#213145",
+            "primary": "#000615",
+            "inverse-on-surface": "#eaf1ff",
+            "outline": "#75777e",
+            "tertiary-container": "#00250c",
+            "on-surface-variant": "#44474d",
+            "surface-container-low": "#eff4ff",
+            "secondary-container": "#fe6a19",
+            "text-muted-mobile": "#4B4F56",
+            "inverse-primary": "#b5c7ea",
+            "background": "#f8f9ff",
+            "on-background": "#0b1c30",
+            "orange-gradient-end": "#FF8A42",
+            "on-secondary": "#ffffff",
+            "growth-green-border": "#A3E2B8",
+            "on-primary-container": "#7587a7",
+            "growth-green-light": "#E8F7EE",
+            "on-secondary-container": "#591e00",
+            "surface-dim": "#cbdbf5",
+            "secondary-fixed-dim": "#ffb596",
+            "error-container": "#ffdad6",
+            "on-primary": "#ffffff",
+            "surface-tint": "#4d5f7d",
+            "surface-variant": "#d3e4fe",
+            "on-tertiary-container": "#0a9b49",
+            "surface-alt": "#F1F5F9",
+            "border-hairline": "#DADDE1",
+            "navy-dark": "#0B192C",
+            "canvas-subtle": "#F8FAFC",
+            "destructive-red": "#E53935",
+            "hero-indigo-stop": "#1E3A8A",
+            "secondary-fixed": "#ffdbcd",
+            "on-error-container": "#93000a",
+            "on-secondary-fixed": "#360f00",
+            "on-tertiary-fixed": "#00210a",
+            "on-tertiary": "#ffffff",
+            "surface-container-lowest": "#ffffff",
+            "outline-variant": "#c4c6ce",
+            "secondary": "#a43e00",
+            "on-primary-fixed": "#071c36",
+            "tertiary-fixed": "#81fb9c",
+            "error": "#ba1a1a",
+            "tertiary-fixed-dim": "#64de83",
+            "surface-container-highest": "#d3e4fe"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "gutter-mobile": "0.5rem",
+            "gutter-desktop": "2rem",
+            "margin": "1.5rem",
+            "space-lg": "1.5rem",
+            "gutter": "1.5rem",
+            "margin-desktop": "2rem",
+            "space-xs": "0.25rem",
+            "space-md": "1rem",
+            "space-sm": "0.5rem",
+            "margin-mobile": "0.75rem",
+            "space-xl": "2rem"
+          },
+          "fontFamily": {
+            "caption-mobile": ["Inter"],
+            "body-base-mobile": ["Inter"],
+            "body-sm-mobile": ["Inter"],
+            "headline-sm": ["Inter"],
+            "body-sm": ["Inter"],
+            "headline-md": ["Inter"],
+            "caption": ["Inter"],
+            "display-lg": ["Inter"],
+            "label-compact-badge": ["Inter"],
+            "headline-lg-mobile": ["Inter"],
+            "display-2xl": ["Inter"],
+            "headline-lg": ["Inter"],
+            "display-xl": ["Inter"],
+            "body-base": ["Inter"]
+          },
+          "fontSize": {
+            "caption-mobile": ["13.4px", { "lineHeight": "21.6px", "letterSpacing": "0", "fontWeight": "500" }],
+            "body-base-mobile": ["16.5px", { "lineHeight": "25.5px", "letterSpacing": "0", "fontWeight": "400" }],
+            "body-sm-mobile": ["15.5px", { "lineHeight": "23px", "letterSpacing": "0", "fontWeight": "400" }],
+            "headline-sm": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "body-sm": ["14px", { "lineHeight": "20px", "letterSpacing": "0", "fontWeight": "400" }],
+            "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+            "caption": ["12px", { "lineHeight": "16px", "letterSpacing": "0", "fontWeight": "500" }],
+            "display-lg": ["36px", { "lineHeight": "42px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "label-compact-badge": ["9px", { "lineHeight": "16px", "letterSpacing": "0.025em", "fontWeight": "700" }],
+            "headline-lg-mobile": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "700" }],
+            "display-2xl": ["60px", { "lineHeight": "66px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+            "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "display-xl": ["48px", { "lineHeight": "52px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+            "body-base": ["16px", { "lineHeight": "24px", "letterSpacing": "0", "fontWeight": "400" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .material-symbols-outlined.fill-icon {
+      font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+    }
+    /* Custom scrollbar styling for thread list and chat history */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #DADDE1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #c4c6ce;
+    }
+  </style>
+</head>
+<body class="min-h-full flex flex-col bg-canvas-subtle text-on-surface antialiased font-body-base text-body-base">
+<!-- TopNavBar (Shared Component JSON anchor) -->
+<header class="w-full bg-surface-container-lowest sticky top-0 z-40 shadow-sm border-b border-border-hairline">
+<div class="flex justify-between items-center w-full px-gutter-desktop max-w-7xl mx-auto h-16">
+<!-- Brand & Left Search -->
+<div class="flex items-center gap-space-lg">
+<a class="flex items-center gap-1.5 focus:outline-none" href="#">
+<span class="text-headline-lg font-headline-lg font-bold text-navy-dark tracking-tight">Tuungane</span>
+<span class="w-2.5 h-2.5 rounded-full bg-secondary-container inline-block mb-1"></span>
+</a>
+<!-- Global Quick Search -->
+<div class="hidden lg:flex items-center relative w-72">
+<span class="material-symbols-outlined absolute left-3 text-outline text-lg pointer-events-none">search</span>
+<input class="w-full pl-9 pr-3 py-1.5 bg-surface-alt border border-border-hairline rounded-xl text-body-sm font-body-sm text-navy-dark placeholder:text-outline focus:outline-none focus:border-secondary-container focus:ring-1 focus:ring-secondary-container" placeholder="Search directory, escrow jobs..." type="text"/>
+</div>
+</div>
+<!-- Navigation Links -->
+<nav class="hidden md:flex items-center gap-space-lg">
+<a class="text-on-surface-variant font-medium hover:text-navy-dark text-body-sm font-body-sm transition-colors duration-150" href="#">Services Directory</a>
+<a class="text-on-surface-variant font-medium hover:text-navy-dark text-body-sm font-body-sm transition-colors duration-150" href="#">Feed</a>
+<a class="text-on-surface-variant font-medium hover:text-navy-dark text-body-sm font-body-sm transition-colors duration-150" href="#">Opportunities</a>
+<a class="text-on-surface-variant font-medium hover:text-navy-dark text-body-sm font-body-sm transition-colors duration-150" href="#">Businesses</a>
+</nav>
+<!-- Trailing Action Cluster -->
+<div class="flex items-center gap-space-md">
+<!-- Messages/Chat Action (ACTIVE with unread badge) -->
+<a class="relative p-2 rounded-xl text-secondary-container bg-surface-alt transition-colors duration-150" href="#" title="Direct Messages">
+<span class="material-symbols-outlined fill-icon text-xl">chat</span>
+<span class="absolute top-1 right-1 w-2.5 h-2.5 bg-secondary-container rounded-full ring-2 ring-surface-container-lowest"></span>
+</a>
+<!-- Notifications Action -->
+<a class="p-2 rounded-xl text-on-surface-variant hover:text-navy-dark hover:bg-surface-alt transition-colors duration-150" href="#" title="Notifications">
+<span class="material-symbols-outlined text-xl">notifications</span>
+</a>
+<!-- Primary CTA: List a Service -->
+<button class="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-secondary-container text-on-secondary text-body-sm font-body-sm font-semibold shadow-sm hover:brightness-105 active:scale-[0.98] transition-all duration-150" type="button">
+<span class="material-symbols-outlined text-sm">add_circle</span>
+<span>List a Service</span>
+</button>
+<!-- Divider -->
+<div class="h-6 w-px bg-border-hairline"></div>
+<!-- User Profile Avatar (Juma Mwangi) -->
+<a class="flex items-center gap-2.5 group focus:outline-none" href="#">
+<img class="w-9 h-9 rounded-full object-cover border border-border-hairline ring-2 ring-transparent group-hover:ring-secondary-container/30 transition-all" data-alt="Photographic headshot of Juma Mwangi, a confident East African tech entrepreneur in his early thirties with a warm smile, wearing a dark navy casual blazer in a bright modern co-working office in Nairobi with soft sunlit lighting and clean professional architectural accents." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBYWJ8Y0wK6ll7Kv-EiQhNfd8wXhc7zffKNdaePK2Tta9nLndW7qOKFdZaUAvaMb69xQ10BXXreQ4aNPfGh6BFGL8JYlcu22M7mNZI6yR_F9NTRy5ntfWS6f28hrNmKvOzl37HJZSORhzp3eZM9DBtAseJqbbOP45Y0mln0kp33TO4eFhhmTG0jz2hLLeoK0DN_lZt-HZpI8g0lvGL-gSZZwA5E1UlLcDDTsLnk5yN-aB3hxkFGbNXaRg"/>
+<div class="hidden xl:flex flex-col text-left">
+<span class="text-body-sm font-body-sm font-semibold text-navy-dark leading-tight group-hover:text-secondary-container transition-colors">Juma Mwangi</span>
+<span class="text-caption font-caption text-outline leading-none">Client &amp; Provider</span>
+</div>
+</a>
+</div>
+</div>
+</header>
+<!-- Workspace Sub-Header & Segmented Control -->
+<section class="bg-surface-container-lowest border-b border-border-hairline">
+<div class="max-w-7xl mx-auto px-gutter-desktop py-space-md">
+<!-- Top meta line -->
+<div class="flex flex-wrap items-center justify-between gap-space-sm mb-3">
+<div class="flex items-center gap-space-sm">
+<span class="text-label-compact-badge font-label-compact-badge uppercase text-outline tracking-wider">Communication &amp; Escrow Workspace</span>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-growth-green-light border border-growth-green-border text-[#22A652] text-label-compact-badge font-label-compact-badge font-bold uppercase">
+<span class="material-symbols-outlined text-xs">verified_user</span>
+<span>Escrow Protection Live</span>
+</span>
+</div>
+<div class="flex items-center gap-4 text-caption font-caption text-on-surface-variant">
+<span class="flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-[#22A652] animate-pulse"></span>
+<span>M-Pesa Daraja Gateway Online</span>
+</span>
+<span class="text-outline">·</span>
+<span>Nairobi GMT+3 (10:14 AM)</span>
+</div>
+</div>
+<!-- Title & Toggle Pill Row -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+<div>
+<h1 class="text-headline-md font-headline-md font-bold text-navy-dark tracking-tight">Messages &amp; Booked Jobs</h1>
+<p class="text-body-sm font-body-sm text-on-surface-variant mt-0.5">Manage your direct client conversations, service inquiries, and project communications.</p>
+</div>
+<!-- Segmented Toggle Pill (Messages active vs Booked Jobs) -->
+<div class="inline-flex items-center p-1 bg-surface-alt rounded-xl border border-border-hairline shadow-inner">
+<!-- Active Messages Button -->
+<button class="flex items-center gap-2 px-4 py-2 rounded-lg bg-surface-container-lowest text-navy-dark font-semibold text-body-sm font-body-sm shadow-sm transition-all" type="button">
+<span class="material-symbols-outlined fill-icon text-secondary-container text-lg">chat_bubble</span>
+<span>Messages</span>
+<span class="px-1.5 py-0.2 bg-surface-alt text-secondary-container rounded-full text-caption font-caption font-bold">3</span>
+</button>
+<!-- Inactive Booked Jobs Button -->
+<button class="relative flex items-center gap-2 px-4 py-2 rounded-lg text-on-surface-variant hover:text-navy-dark font-medium text-body-sm font-body-sm transition-all hover:bg-surface-container-lowest/50" type="button">
+<span class="material-symbols-outlined text-lg">work</span>
+<span>Booked Jobs</span>
+<span class="px-1.5 py-0.2 bg-border-subtle text-on-surface-variant rounded-full text-caption font-caption">4</span>
+<!-- Red/Orange unread dot -->
+<span class="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-secondary-container ring-2 ring-surface-alt"></span>
+</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Main Content Body -->
+<main class="flex-1 max-w-7xl mx-auto w-full px-gutter-desktop py-space-md flex flex-col gap-space-md">
+<!-- 1. Safety & Escrow Assurance Banner -->
+<div class="w-full bg-[#22A652]/5 border border-[#22A652]/20 rounded-2xl p-space-md flex items-center justify-between gap-space-md">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-xl bg-growth-green-light border border-growth-green-border flex items-center justify-center flex-shrink-0 text-[#22A652]">
+<span class="material-symbols-outlined text-xl">shield</span>
+</div>
+<div class="text-body-sm font-body-sm text-navy-dark">
+<span class="font-bold text-navy-dark">Tuungane SafeTalk &amp; SafeEscrow™:</span>
+<span class="text-on-surface-variant">Keep discussions, milestones, and payments on-platform to guarantee client coverage under our East African SafeEscrow protocol.</span>
+</div>
+</div>
+<a class="hidden md:inline-flex items-center gap-1 text-caption font-caption font-semibold text-[#22A652] hover:underline flex-shrink-0" href="#">
+<span>Learn Protection Terms</span>
+<span class="material-symbols-outlined text-xs">arrow_forward</span>
+</a>
+</div>
+<!-- 2. Two-Column Workspace Canvas -->
+<div class="w-full bg-surface-container-lowest border border-border-hairline rounded-2xl shadow-sm flex flex-col lg:flex-row overflow-hidden min-h-[640px] max-h-[760px]">
+<!-- ================= LEFT COLUMN: Conversation List ================= -->
+<aside class="w-full lg:w-96 flex-shrink-0 border-b lg:border-b-0 lg:border-r border-border-hairline flex flex-col bg-surface-container-lowest">
+<!-- Search & Filter Controls -->
+<div class="p-space-md border-b border-border-hairline space-y-space-sm bg-surface-container-lowest">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3 top-2.5 text-outline text-lg pointer-events-none">search</span>
+<input class="w-full pl-9 pr-3 py-2 bg-surface-alt border border-border-hairline rounded-xl text-body-sm font-body-sm text-navy-dark placeholder:text-outline focus:outline-none focus:border-secondary-container focus:ring-1 focus:ring-secondary-container" placeholder="Search conversations or clients..." type="text"/>
+</div>
+<!-- Filter Pills -->
+<div class="flex items-center gap-1.5 overflow-x-auto pb-0.5">
+<button class="px-3 py-1 rounded-full text-caption font-caption font-semibold bg-navy-dark text-surface-bright shadow-xs">
+              All (5)
+            </button>
+<button class="px-3 py-1 rounded-full text-caption font-caption font-semibold bg-surface-alt text-on-surface-variant hover:text-navy-dark hover:bg-border-subtle transition-colors flex items-center gap-1">
+<span>Unread</span>
+<span class="w-4 h-4 rounded-full bg-secondary-container text-white flex items-center justify-center text-[10px] leading-none">3</span>
+</button>
+<button class="px-3 py-1 rounded-full text-caption font-caption font-medium bg-surface-alt text-on-surface-variant hover:text-navy-dark hover:bg-border-subtle transition-colors">
+              Service Requests (2)
+            </button>
+</div>
+</div>
+<!-- Scrollable Conversation Threads -->
+<div class="flex-1 overflow-y-auto divide-y divide-border-hairline">
+<!-- Thread 1 (ACTIVE / SELECTED: Amina Odhiambo) -->
+<div class="p-3.5 bg-surface-container-low border-l-4 border-secondary-container cursor-pointer transition-colors relative">
+<div class="flex items-start gap-3">
+<div class="relative flex-shrink-0">
+<img class="w-11 h-11 rounded-full object-cover border border-secondary-container ring-2 ring-secondary-container/20" data-alt="Portrayed professional headshot portrait of Amina Odhiambo, a sharp Kenyan software engineering lead smiling pleasantly, dressed in modern smart business attire against a luminous, airy Nairobi architectural tech studio." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDzcD4seoKyVu5Zdi3V3EBD2Tcfw_AZdk-CnBknbwKeNhf-L7pVJya2gMJXMCSF6Dw3OwsJY-Ba44skZhkfKacEF127SpmNy5EEljwhGA41_GpEpwbjbK-rL6avO2726rgkPKTJI-TnhtrNjQOML5c9rqKfMt8LNQUgfKomdoLDuDV7TjoG7yodJ2HSx3xiLgKEu8E5lnQwgcxlKVPh9O4yca4xbv8nePJddvVwbvzZDwXnVDynTdvRsw"/>
+<span class="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-[#22A652] ring-2 ring-surface-container-lowest"></span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-baseline justify-between mb-0.5">
+<span class="text-body-sm font-body-sm font-bold text-navy-dark truncate">Amina Odhiambo</span>
+<span class="text-caption font-caption text-secondary-container font-semibold">10m ago</span>
+</div>
+<div class="inline-flex items-center gap-1 text-[11px] font-semibold text-secondary-container mb-1 truncate max-w-full">
+<span class="material-symbols-outlined text-xs">layers</span>
+<span class="truncate">Re: Full-Stack Web App (M-Pesa Daraja)</span>
+</div>
+<p class="text-caption font-caption text-navy-dark font-medium line-clamp-1">
+                  Yes, exactly! I've updated the timeout handlers to 60 seconds...
+                </p>
+</div>
+<div class="flex-shrink-0 self-center">
+<span class="w-5 h-5 rounded-full bg-secondary-container text-white text-caption font-caption font-bold flex items-center justify-center shadow-xs">2</span>
+</div>
+</div>
+</div>
+<!-- Thread 2: Wanjiku Kamau -->
+<div class="p-3.5 hover:bg-surface-alt/70 cursor-pointer transition-colors">
+<div class="flex items-start gap-3">
+<div class="relative flex-shrink-0">
+<img class="w-11 h-11 rounded-full object-cover border border-border-hairline" data-alt="Professional portrait of Wanjiku Kamau, a creative commercial photographer from Kenya holding a digital camera body, warm studio softbox illumination, clean professional lighting in an East African creative agency setting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCtaJXh7sQooKjnhfrfI13aG5d_4x6M2eSaoMaD1qZHZy7aHTlG_4HkJCvSDqo6bcFMnSthc1nQ5-VcI8oS7pJXF5dyhuYf6tI0uXSipDKbjjssHGtzDBMXmPs4hDuhhquR77SfkTADDc_H_2hFh2Sszqab6nbeR2YfDJ_fE9hVJqBQ6jvGy_XIMqWfhbMcu2nq18P19-chehTbJittsSsivFg124mm-wIES7Lw3HmclAvhXWr7HLGknA"/>
+<span class="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-[#22A652] ring-2 ring-surface-container-lowest"></span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-baseline justify-between mb-0.5">
+<span class="text-body-sm font-body-sm font-bold text-navy-dark truncate">Wanjiku Kamau</span>
+<span class="text-caption font-caption text-outline">2h ago</span>
+</div>
+<div class="inline-flex items-center gap-1 text-[11px] font-medium text-outline mb-1 truncate max-w-full">
+<span class="material-symbols-outlined text-xs">photo_camera</span>
+<span class="truncate">Re: Need an Event Photographer</span>
+</div>
+<p class="text-caption font-caption text-on-surface-variant line-clamp-1">
+                  Sent the moodboard for the 3-day regional fintech symposium.
+                </p>
+</div>
+<div class="flex-shrink-0 self-center">
+<span class="w-5 h-5 rounded-full bg-secondary-container text-white text-caption font-caption font-bold flex items-center justify-center">1</span>
+</div>
+</div>
+</div>
+<!-- Thread 3: Apex Properties Ltd -->
+<div class="p-3.5 hover:bg-surface-alt/70 cursor-pointer transition-colors">
+<div class="flex items-start gap-3">
+<div class="relative flex-shrink-0">
+<img class="w-11 h-11 rounded-full object-cover border border-border-hairline" data-alt="Corporate minimalist logo mark icon for Apex Properties Ltd representing East African commercial real estate in sharp navy blue and mint accents against a crisp white studio background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDr2Vm4qRieFX0rx03fghXDG0U8t6h8jLUzrewDzbbvenEFo2aPjGPy5-OB2Fbny3QfiWly2oKq3NLD9bcmWdPsWwNgy-mtWRIbn8K2A9-2CtSyJ0yqLPtHGMT8Gr0VSXTRWaA_tNw3hWk-SCmfhOzwykw-YGO6e2VlPjLd_YQBTxGvXCC41JWfE3tj5au4HlfjYqlIaw-VuytB42XhrKE-MbBysFNm0oOb2kTu-M3oO-mOOPc6vJlzng"/>
+<span class="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-outline-variant ring-2 ring-surface-container-lowest"></span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-baseline justify-between mb-0.5">
+<div class="flex items-center gap-1 truncate">
+<span class="text-body-sm font-body-sm font-bold text-navy-dark truncate">Apex Properties Ltd</span>
+<span class="material-symbols-outlined text-[#22A652] text-xs">verified</span>
+</div>
+<span class="text-caption font-caption text-outline">Yesterday</span>
+</div>
+<div class="inline-flex items-center gap-1 text-[11px] font-medium text-outline mb-1 truncate max-w-full">
+<span class="material-symbols-outlined text-xs">plumbing</span>
+<span class="truncate">Re: Master Plumber Commercial Office</span>
+</div>
+<p class="text-caption font-caption text-outline line-clamp-1">
+                  Job sign-off completed. KES 45,000 released from escrow account.
+                </p>
+</div>
+<div class="flex-shrink-0 self-center text-outline">
+<span class="material-symbols-outlined text-sm">done_all</span>
+</div>
+</div>
+</div>
+<!-- Thread 4: Rift Valley Consortium -->
+<div class="p-3.5 hover:bg-surface-alt/70 cursor-pointer transition-colors">
+<div class="flex items-start gap-3">
+<div class="relative flex-shrink-0">
+<img class="w-11 h-11 rounded-full object-cover border border-border-hairline" data-alt="Emblem logo of Rift Valley Consortium, a green energy sustainable infrastructure group in Kenya featuring an abstract stylized solar ridge in dark teal and energetic orange hues on clean white background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB4hM4ablK69KlluHBOlXY_zERS-MZjXV-4jMwsHE7zIUPJ-SFh2t_tMGn1G8bd4qkYKaq-Vw-CEt44bVP0NNNoshSqzhgY7fxku9L7sOfVLKQGvms0vkBh1xxlu9akAbAu4XHgHY2o9r0nX489bYco-Ie00kOzOTla71oZSSoVY7Kajn5PtzUr_fB_PDu0kc6RekHblyTZbtwQW4cXH3gg8dPZztj33E-xooCRsF5pV0qug80A_EbEig"/>
+<span class="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-outline-variant ring-2 ring-surface-container-lowest"></span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-baseline justify-between mb-0.5">
+<span class="text-body-sm font-body-sm font-bold text-navy-dark truncate">Rift Valley Consortium</span>
+<span class="text-caption font-caption text-outline">3d ago</span>
+</div>
+<div class="inline-flex items-center gap-1 text-[11px] font-medium text-outline mb-1 truncate max-w-full">
+<span class="material-symbols-outlined text-xs">solar_power</span>
+<span class="truncate">Re: Machakos Solar Microgrid</span>
+</div>
+<p class="text-caption font-caption text-outline line-clamp-1">
+                  Drafting procurement schedule for inverters. Milestone #2 created.
+                </p>
+</div>
+<div class="flex-shrink-0 self-center text-outline">
+<span class="material-symbols-outlined text-sm">done_all</span>
+</div>
+</div>
+</div>
+<!-- Thread 5: Faith Chebet -->
+<div class="p-3.5 hover:bg-surface-alt/70 cursor-pointer transition-colors">
+<div class="flex items-start gap-3">
+<div class="relative flex-shrink-0">
+<img class="w-11 h-11 rounded-full object-cover border border-border-hairline" data-alt="Portrait photo of Faith Chebet, a Kenyan environmental compliance advisor with braided hair wearing business casual attire in an eco-friendly modern Nairobi office space, sunlit and high clarity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCt-G8ONohgvrOllB09Wo_77nKWAC-87fnnxdWQFRglW_RJ2EJ32EHCoZzlReQXAectjWQnNhdxYgtB1mrd4mgwhDhEJdVFbSuzEujPXNKTOlNrXJGtjVkRApFetBs8zFYFYYgVGcrz_R7dqR8JYAU-ut7RUMsvfx61MHfWeMIG8SpqFQleAADk23hwT1hu3CGVmOxpW7u7U5sotrh6Ycs2xBCHcxbK4O0pErai1wRPekYavDZKbGD0yA"/>
+<span class="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-outline-variant ring-2 ring-surface-container-lowest"></span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-baseline justify-between mb-0.5">
+<span class="text-body-sm font-body-sm font-bold text-navy-dark truncate">Faith Chebet</span>
+<span class="text-caption font-caption text-outline">5d ago</span>
+</div>
+<div class="inline-flex items-center gap-1 text-[11px] font-medium text-outline mb-1 truncate max-w-full">
+<span class="material-symbols-outlined text-xs">policy</span>
+<span class="truncate">Re: Energy Audit &amp; Regulatory Compliance</span>
+</div>
+<p class="text-caption font-caption text-outline line-clamp-1">
+                  EPRA submission certificates have been uploaded to project files.
+                </p>
+</div>
+<div class="flex-shrink-0 self-center text-outline">
+<span class="material-symbols-outlined text-sm">done_all</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Left Column Footer Metric -->
+<div class="p-space-md border-t border-border-hairline bg-surface-alt flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary-container text-base">lock</span>
+<span class="text-caption font-caption text-on-surface-variant">Total Escrow in Active Chats:</span>
+</div>
+<span class="text-body-sm font-body-sm font-bold text-navy-dark">KES 155,000</span>
+</div>
+</aside>
+<!-- ================= RIGHT COLUMN: Active Conversation Pane ================= -->
+<section class="flex-1 flex flex-col min-w-0 bg-surface-container-lowest">
+<!-- Conversation Header -->
+<div class="p-space-md border-b border-border-hairline bg-surface-container-lowest flex flex-wrap items-center justify-between gap-space-md">
+<!-- Participant Info -->
+<div class="flex items-center gap-3">
+<div class="relative">
+<img class="w-12 h-12 rounded-full object-cover border-2 border-[#22A652]" data-alt="Close-up crisp portrait of Amina Odhiambo, East African software engineer with natural braided hair and warm pleasant demeanor, studio light portrait with subtle warm highlights." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCUB5adn8ZQVOKhnS-QJlaAJX9ukjJzeiu5enp-kBZeOD_dPrUwRqq3PVSCMLnXGZTMuyDc-g4yCtjF2U56lJRmY3ZgFmtrhOEwStKnBOcEin8E1EKcFwOJnkXqu60nR7EUr5my-kAzLFBNu6c1n6cccIjhqPdMADu2Z_MnzS1XBT-ueMVLKVpjlR_03gAKAsGzF15Ie7mZGKqc18fX3xGUTSWM2O3_0MPkG7cGDzFI9oiD_bpk6Sdx6w"/>
+<span class="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-[#22A652] ring-2 ring-surface-container-lowest"></span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<h2 class="text-headline-sm font-headline-sm font-bold text-navy-dark">Amina Odhiambo</h2>
+<span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-growth-green-light border border-growth-green-border text-[#22A652] text-label-compact-badge font-label-compact-badge font-bold uppercase">
+<span class="material-symbols-outlined text-[11px]">verified</span>
+<span>Verified Provider</span>
+</span>
+</div>
+<div class="flex items-center gap-2 text-caption font-caption text-on-surface-variant mt-0.5">
+<span class="text-[#22A652] font-semibold flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-[#22A652]"></span>
+<span>Online now</span>
+</span>
+<span class="text-outline">·</span>
+<span>Typically replies in 15m</span>
+</div>
+</div>
+</div>
+<!-- Linked Job Actions Bar -->
+<div class="flex items-center gap-2 flex-wrap">
+<div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-surface-alt border border-border-hairline text-body-sm font-body-sm">
+<span class="material-symbols-outlined text-secondary-container text-base">receipt_long</span>
+<span class="font-semibold text-navy-dark">Job #TNG-8821:</span>
+<span class="text-on-surface-variant">Standard Web App</span>
+<span class="font-bold text-navy-dark border-l border-border-hairline pl-2">KES 70,000</span>
+</div>
+<button class="px-3 py-1.5 rounded-xl bg-surface-alt hover:bg-border-subtle text-navy-dark font-semibold text-body-sm font-body-sm transition-colors" type="button">
+              View Booking
+            </button>
+<button class="px-3 py-1.5 rounded-xl bg-navy-dark hover:bg-primary text-surface-bright font-semibold text-body-sm font-body-sm transition-colors flex items-center gap-1" type="button">
+<span class="material-symbols-outlined text-sm">payments</span>
+<span>Milestone Pay</span>
+</button>
+</div>
+</div>
+<!-- Pinned Escrow Status Ribbon inside chat -->
+<div class="bg-gradient-to-r from-surface-alt via-growth-green-light/40 to-surface-alt border-b border-border-hairline px-space-md py-2 flex items-center justify-between text-caption font-caption">
+<div class="flex items-center gap-2 text-navy-dark">
+<span class="material-symbols-outlined text-[#22A652] text-lg">verified</span>
+<span><strong>Milestone 1 (KES 35,000)</strong> is safely funded in Tuungane Escrow. Release funds only after validating work deliverables.</span>
+</div>
+<a class="text-secondary-container font-semibold hover:underline flex-shrink-0 ml-2" href="#">Audit Milestones</a>
+</div>
+<!-- Chat Timeline Bubbles Container -->
+<div class="flex-1 overflow-y-auto p-space-lg space-y-space-md bg-canvas-subtle">
+<!-- Date Separator -->
+<div class="flex items-center justify-center my-2">
+<span class="px-3 py-1 rounded-full bg-surface-container-lowest border border-border-hairline text-caption font-caption font-medium text-outline shadow-xs">
+              Today · 14 November 2024
+            </span>
+</div>
+<!-- Amina's Incoming Message -->
+<div class="flex items-start gap-3 max-w-xl">
+<img class="w-8 h-8 rounded-full object-cover mt-1 flex-shrink-0 border border-border-hairline" data-alt="Circular avatar shot of Amina Odhiambo, friendly smiling Kenyan technical consultant in casual studio light." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAdy5Cmn8IA8XfZJIqo69otRtEbhg7aBHPYUcv_FivZb_v303FKLcIkkAzIHlfv03U9oYITEtIwMVDtAzPHwk6OHABBkxtj3Q98O8J82tuZOaLfGH1Dx0hYLGoZdkMoadDAvV0BJOJ6wVIV2qEM7IPY2FE4AE1fYPvP41ZG2Ul1l1J5JZpc2nj4Yoyur76ddn7Ga00cilkJk936B3Uoxu2fEFT5pKPRIFfxS2-6NSSF6APILI4VQBRDbA"/>
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="text-caption font-caption font-bold text-navy-dark">Amina Odhiambo</span>
+<span class="text-caption font-caption text-outline">09:42 AM</span>
+</div>
+<div class="p-3.5 rounded-2xl rounded-tl-none bg-surface-container-lowest border border-border-hairline text-body-sm font-body-sm text-navy-dark shadow-xs leading-relaxed">
+                Habari Juma! I've completed the initial architecture review for your Nairobi marketplace dashboard. The Safaricom Daraja STK Push webhooks have been tested on sandbox with 100% callback reliability.
+              </div>
+</div>
+</div>
+<!-- Juma's Sent Message (Navy Background) -->
+<div class="flex items-start justify-end gap-2 max-w-xl ml-auto">
+<div class="flex flex-col items-end">
+<div class="flex items-center gap-1.5 mb-1">
+<span class="text-caption font-caption text-outline">09:50 AM</span>
+<span class="text-caption font-caption font-bold text-navy-dark">You</span>
+</div>
+<div class="p-3.5 rounded-2xl rounded-tr-none bg-navy-dark text-surface-bright text-body-sm font-body-sm shadow-sm leading-relaxed text-left">
+                Excellent news, Amina. Did you also test the fallback handling if a client closes their M-Pesa prompt on iOS devices?
+              </div>
+<div class="flex items-center gap-1 text-[11px] text-[#22A652] mt-0.5 mr-1 font-semibold">
+<span class="material-symbols-outlined text-xs">done_all</span>
+<span>Delivered &amp; Read</span>
+</div>
+</div>
+</div>
+<!-- Amina's Response + Document Attachment -->
+<div class="flex items-start gap-3 max-w-xl">
+<img class="w-8 h-8 rounded-full object-cover mt-1 flex-shrink-0 border border-border-hairline" data-alt="Square portrait of Amina Odhiambo, East African software tech lead with studio backdrop." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAnbtU44-eHkw49zTAljPMPOqz4O0Xu_oLmGsKw_IAJ_8dS5HEd4qvLOiak0YRLCH2CsrRReQ0i8f_zZlr9DkKSqHQdbKdNBTzR3y2yO4QjlqDXspgg_IR88BB-nc0pXlWuDaTnQEv5XPUl-2dAdTC6tX-oUtoyF9NTFMhxJsmOhXujherHADPV5YAKwET2Cnm2bL7b_QjKBge-gSc3DmIevdDGi4P7VRQjs_LqglZ-H-nX2xAyHTDfQw"/>
+<div class="space-y-2">
+<div class="flex items-center gap-2 mb-1">
+<span class="text-caption font-caption font-bold text-navy-dark">Amina Odhiambo</span>
+<span class="text-caption font-caption text-outline">09:53 AM</span>
+</div>
+<div class="p-3.5 rounded-2xl rounded-tl-none bg-surface-container-lowest border border-border-hairline text-body-sm font-body-sm text-navy-dark shadow-xs leading-relaxed">
+                Yes, exactly! I've updated the timeout handlers to 60 seconds with an instant polling fallback. Here is the revised architectural scope with endpoint documentation.
+              </div>
+<!-- File Attachment Card -->
+<div class="p-3 rounded-xl bg-surface-container-lowest border border-border-hairline flex items-center justify-between gap-3 shadow-xs hover:border-secondary-container transition-colors">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-red-50 text-destructive-red flex items-center justify-center flex-shrink-0">
+<span class="material-symbols-outlined text-2xl">picture_as_pdf</span>
+</div>
+<div>
+<h4 class="text-body-sm font-body-sm font-bold text-navy-dark leading-tight">tuungane-daraja-api-spec-v2.pdf</h4>
+<p class="text-caption font-caption text-outline">1.8 MB · Technical Specification</p>
+</div>
+</div>
+<div class="flex items-center gap-1">
+<button class="p-2 rounded-lg text-on-surface-variant hover:text-navy-dark hover:bg-surface-alt transition-colors" title="Download" type="button">
+<span class="material-symbols-outlined text-lg">download</span>
+</button>
+<button class="p-2 rounded-lg text-secondary-container hover:bg-surface-alt transition-colors" title="Preview document" type="button">
+<span class="material-symbols-outlined text-lg">visibility</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Message Composer -->
+<div class="p-space-md border-t border-border-hairline bg-surface-container-lowest">
+<form class="space-y-2">
+<!-- Input Area Container -->
+<div class="relative bg-surface-alt rounded-2xl border border-border-hairline focus-within:border-secondary-container focus-within:ring-1 focus-within:ring-secondary-container transition-all">
+<textarea class="w-full bg-transparent border-0 px-4 pt-3 pb-2 text-body-sm font-body-sm text-navy-dark placeholder:text-outline focus:ring-0 resize-none" placeholder="Write an escrow-protected message to Amina..." rows="2"></textarea>
+<!-- Toolbar & Action Row inside composer -->
+<div class="flex items-center justify-between px-3 pb-2 pt-1 border-t border-border-hairline/60">
+<div class="flex items-center gap-1">
+<button class="p-1.5 rounded-lg text-outline hover:text-navy-dark hover:bg-surface-container-lowest transition-colors" title="Attach file" type="button">
+<span class="material-symbols-outlined text-lg">attach_file</span>
+</button>
+<button class="p-1.5 rounded-lg text-outline hover:text-navy-dark hover:bg-surface-container-lowest transition-colors" title="Insert code block" type="button">
+<span class="material-symbols-outlined text-lg">code</span>
+</button>
+<button class="p-1.5 rounded-lg text-outline hover:text-navy-dark hover:bg-surface-container-lowest transition-colors" title="Add milestone invoice" type="button">
+<span class="material-symbols-outlined text-lg">request_quote</span>
+</button>
+<button class="p-1.5 rounded-lg text-outline hover:text-navy-dark hover:bg-surface-container-lowest transition-colors" title="Insert emoji" type="button">
+<span class="material-symbols-outlined text-lg">mood</span>
+</button>
+</div>
+<div class="flex items-center gap-3">
+<span class="hidden sm:inline text-[11px] text-outline">Escrow protected</span>
+<button class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-secondary-container hover:brightness-105 active:scale-[0.98] text-white font-semibold text-body-sm font-body-sm shadow-sm transition-all" type="button">
+<span>Send</span>
+<span class="material-symbols-outlined text-sm">send</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Encryption & shortcut micro-hint -->
+<div class="flex items-center justify-between text-caption font-caption text-outline px-1">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-xs text-[#22A652]">lock</span>
+<span>256-Bit Encrypted Communication · SafeEscrow Active</span>
+</span>
+<span class="hidden md:inline">Press Enter to send, Shift+Enter for new line</span>
+</div>
+</form>
+</div>
+</section>
+</div>
+</main>
+<!-- Web Footer (Verbatim from Shared Components JSON) -->
+<footer class="mt-auto bg-navy-dark text-surface-bright border-t border-border-subtle">
+<div class="w-full py-space-xl px-gutter-desktop max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-space-md">
+<!-- Brand & Copyright text -->
+<div class="flex flex-col sm:flex-row items-center gap-3 text-center sm:text-left">
+<span class="text-headline-md font-headline-md font-bold text-surface-bright">Tuungane</span>
+<span class="hidden sm:inline text-outline">|</span>
+<p class="text-body-sm font-body-sm text-outline-variant">
+          © 2024 Tuungane Economic Marketplace. Empowering East African Enterprise.
+        </p>
+</div>
+<!-- Footer Policy Links -->
+<div class="flex flex-wrap justify-center items-center gap-x-space-md gap-y-1 text-body-sm font-body-sm">
+<a class="text-outline-variant hover:text-surface-bright transition-colors duration-150" href="#">Civic Guidelines</a>
+<a class="text-outline-variant hover:text-surface-bright transition-colors duration-150" href="#">Terms of Service</a>
+<a class="text-outline-variant hover:text-surface-bright transition-colors duration-150" href="#">Privacy Policy</a>
+<a class="text-outline-variant hover:text-surface-bright transition-colors duration-150" href="#">Verified Directory</a>
+<a class="text-outline-variant hover:text-surface-bright transition-colors duration-150" href="#">Trust &amp; Safety</a>
+<a class="text-surface-bright font-semibold underline hover:text-secondary-container transition-colors duration-150" href="#">Language: Kiswahili / English</a>
+</div>
+</div>
+</footer>
+</body></html>

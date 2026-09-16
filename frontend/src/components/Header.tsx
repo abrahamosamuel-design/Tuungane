@@ -19,7 +19,7 @@ const primaryNav = [
 ];
 
 export function Header() {
-  const [menu, setMenu] = useState(false);
+
   const [more, setMore] = useState(false);
   const { user, loading, isModerator, signOut } = useAuth();
   const location = useLocation();
@@ -45,7 +45,7 @@ export function Header() {
   }, [lastScrollY]);
 
   return (
-    <header className={`fixed inset-x-0 top-0 z-50 transition-transform duration-300 ease-in-out ${isVisible ? "translate-y-0" : "-translate-y-full"}`}>
+    <header className={`fixed inset-x-0 top-0 z-50 transition-transform duration-300 ease-in-out ${isVisible ? "translate-y-0" : "-translate-y-full lg:translate-y-0"}`}>
       <PushPrompt />
       {/* Main Header Pill */}
       <div className="bg-background/95 backdrop-blur-md">
@@ -73,71 +73,81 @@ export function Header() {
           </div>
 
           {/* Desktop Header Layout */}
-          <Link to="/" className="hidden md:flex -ml-1 items-center" aria-label="Tuungane home">
-            <Logo className="h-14 w-auto" />
-          </Link>
-          
-          <nav className="hidden md:flex flex-1 items-center justify-center gap-8">
-            {(() => {
-              const navItems = user ? [
-                { to: "/dashboard", label: "Home", exact: true },
-                { to: "/services", label: "Services", exact: false },
-                { to: "/messages", label: "Messages", exact: false },
-                { to: "/u/$id", params: { id: user.id }, label: "Profile", exact: false },
-              ] : [
-                { to: "/", label: "Home", exact: true },
-                { to: "/services", label: "Services", exact: false },
-                { to: "/about", label: "About Us", exact: false },
-              ];
-
-              return navItems.map((n) => (
-                <Link
-                  key={n.to}
-                  to={n.to}
-                  params={n.params as never}
-                  preload="intent"
-                  className="text-sm font-medium text-navy/80 transition-colors hover:text-orange"
-                  activeProps={{ className: "text-orange font-bold" }}
-                  activeOptions={{ exact: n.exact }}
-                >
-                  {n.label}
+          {user ? (
+            <>
+              {/* Authenticated Desktop Header Layout */}
+              <div className="hidden md:flex items-center gap-6 flex-1 max-w-xl mr-8 lg:mr-12">
+                <Link to="/" className="flex items-center -ml-1 shrink-0" aria-label="Tuungane home">
+                  <Logo className="h-10 lg:h-12 w-auto" />
                 </Link>
-              ));
-            })()}
-          </nav>
+
+                {/* Search Bar with Pill Design */}
+                <div className="relative w-full hidden lg:block">
+                  <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-outline">
+                    <Search className="h-4 w-4" />
+                  </span>
+                  <input className="w-full pl-10 pr-4 py-2 text-sm bg-surface-alt border border-border-hairline rounded-full focus:outline-none focus:border-orange focus:ring-2 focus:ring-orange/20 transition-all placeholder:text-outline" placeholder="Search tenders, vetted craftspeople, local services..." type="text"/>
+                </div>
+              </div>
+              
+              <nav className="hidden md:flex items-center justify-end gap-6 lg:gap-8 ml-auto pl-8 lg:pl-16 mr-6">
+                {[
+                  { to: "/dashboard", label: "Home", exact: true },
+                  { to: "/services", label: "Services", exact: false },
+                  { to: "/opportunities", label: "Opportunities", exact: false },
+                  { to: `/u/${user.id}`, label: "My Account", exact: false },
+                ].map((n) => (
+                  <Link
+                    key={n.to}
+                    to={n.to as never}
+                    preload="intent"
+                    className="text-sm font-medium text-navy/70 hover:text-navy transition-colors duration-150"
+                    activeProps={{ className: "text-orange font-bold border-b-2 border-orange pb-1" }}
+                    activeOptions={{ exact: n.exact }}
+                  >
+                    {n.label}
+                  </Link>
+                ))}
+              </nav>
+            </>
+          ) : (
+            <>
+              {/* Unauthenticated Desktop Header Layout (Original) */}
+              <Link to="/" className="hidden md:flex -ml-1 items-center" aria-label="Tuungane home">
+                <Logo className="h-14 w-auto" />
+              </Link>
+              
+              <nav className="hidden md:flex flex-1 items-center justify-center gap-8">
+                {[
+                  { to: "/", label: "Home", exact: true },
+                  { to: "/services", label: "Services", exact: false },
+                  { to: "/about", label: "About Us", exact: false },
+                ].map((n) => (
+                  <Link
+                    key={n.to}
+                    to={n.to}
+                    preload="intent"
+                    className="text-sm font-medium text-navy/80 transition-colors hover:text-orange"
+                    activeProps={{ className: "text-orange font-bold" }}
+                    activeOptions={{ exact: n.exact }}
+                  >
+                    {n.label}
+                  </Link>
+                ))}
+              </nav>
+            </>
+          )}
 
           <div className="hidden items-center gap-3 md:flex">
           {loading ? null : user ? (
             <>
+            <Link to={listSkillHref(user) as never} className="hidden lg:flex items-center gap-1.5 rounded-full bg-orange px-4 py-1.5 text-sm font-semibold text-white shadow-sm transition-all hover:brightness-110 mr-2">
+              <Plus className="h-4 w-4" /> Create
+            </Link>
             <CreditBalanceChip />
             <MessagesIconLink />
             <NotificationsBell />
-            <div className="relative">
-              <button onClick={() => setMenu((m) => !m)} className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-3 py-1.5 text-sm font-medium text-navy hover:border-orange/60">
-                <UserIcon className="h-4 w-4" /> {user.email?.split("@")[0]}
-              </button>
-              {menu && (
-                <>
-                  <div className="fixed inset-0 z-40" onClick={() => setMenu(false)} />
-                  <div className="absolute right-0 z-50 mt-2 w-56 overflow-hidden rounded-xl border border-border bg-card shadow-lg">
-                    <MenuItem to="/dashboard" icon={<LayoutDashboard className="h-4 w-4" />} label="My dashboard" onClick={() => setMenu(false)} />
-                    <MenuItem to="/messages" icon={<MessageSquare className="h-4 w-4" />} label="Messages" onClick={() => setMenu(false)} />
-                    <MenuItem to="/requests" icon={<ClipboardList className="h-4 w-4" />} label="My Service Requests" onClick={() => setMenu(false)} />
-                    <MenuItem to="/requests/new" icon={<Plus className="h-4 w-4" />} label="Post a Service Request" onClick={() => setMenu(false)} />
-                    <MenuItem to={listSkillHref(user) as never} icon={<Sparkles className="h-4 w-4 text-green" />} label="List Your Service" onClick={() => setMenu(false)} />
-                    <MenuItem to="/me" icon={<UserIcon className="h-4 w-4" />} label="My profile" onClick={() => setMenu(false)} />
-                    <MenuItem to="/credits" icon={<Coins className="h-4 w-4" />} label="Tuungane Credits" onClick={() => setMenu(false)} />
-                    <div className="border-t border-border" />
-                    <MenuItem to="/feed" icon={<Rss className="h-4 w-4" />} label="Activity feed" onClick={() => setMenu(false)} />
-                    <MenuItem to="/official" icon={<Megaphone className="h-4 w-4" />} label="Official updates" onClick={() => setMenu(false)} />
-                    {isModerator && <MenuItem to="/admin" icon={<Shield className="h-4 w-4" />} label="Admin & moderation" onClick={() => setMenu(false)} />}
-                    <button onClick={() => { setMenu(false); signOut(); }} className="flex w-full items-center gap-2 border-t border-border px-3 py-2.5 text-left text-sm text-destructive hover:bg-muted">
-                      <LogOut className="h-4 w-4" /> Sign out
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
+
             </>
           ) : (
             <Link to="/login" search={{ tab: "signup" } as never} className="inline-flex items-center justify-center rounded-full bg-orange px-6 py-2 text-sm font-semibold text-orange-foreground shadow-sm transition-all hover:brightness-110">

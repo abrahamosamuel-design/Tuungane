@@ -70,7 +70,7 @@ export const Route = createFileRoute("/u/$id/")({
   loader: async ({ params }) => {
     try {
       const { data } = await apiClient.get(`/profiles/full/${params.id}`);
-      return { profile: data.profile, sp: data.sp };
+      return { profile: data?.profile, sp: data?.sp };
     } catch (err) {
       console.error("Profile load error:", err);
       return { profile: null, sp: null };
@@ -118,7 +118,7 @@ export const Route = createFileRoute("/u/$id/")({
   notFoundComponent: () => <RouteNotFoundCard title="Profile not found" message="This user profile may have been removed." />,
 });
 
-type Tab = "timeline" | "reviews" | "services" | "requests" | "admin";
+type Tab = "timeline" | "reviews" | "services" | "requests" | "admin" | "credits" | "settings";
 
 const TABS: { id: Tab; label: string; providerOnly?: boolean; ownerOnly?: boolean; adminOnly?: boolean; href?: string }[] = [
   { id: "timeline", label: "Timeline" },
@@ -143,7 +143,22 @@ type ProfileServiceRow = {
   price_guidance_ugx: number | null;
 };
 
-function UserProfile() {
+const parseReviewText = (text: string | null) => {
+  if (!text) return { text: "", media: [] };
+  const mediaRegex = /\[MEDIA\](.*?)\[\/MEDIA\]/g;
+  const matches = [...text.matchAll(mediaRegex)];
+  let cleanText = text.replace(mediaRegex, "").trim();
+  let mediaUrls: string[] = [];
+  matches.forEach(match => {
+    try {
+      const urls = JSON.parse(match[1]);
+      if (Array.isArray(urls)) mediaUrls.push(...urls);
+    } catch {}
+  });
+  return { text: cleanText, media: mediaUrls };
+};
+
+export default function UserProfile() {
   const { id } = useParams({ from: "/u/$id/" });
   const { user, isModerator, signOut } = useAuth() as any;
   const nav = useNavigate();
@@ -402,7 +417,8 @@ function UserProfile() {
   if (!profile) return <RouteNotFoundCard title="Profile not found" message="This user profile may have been removed." />;
 
   return (
-    <div className="min-h-screen" style={{ background: "linear-gradient(180deg,#f47b16 0%,#f47b16 38%,#ffffff 38%)" }}>
+    <>
+    <div className="lg:hidden min-h-screen" style={{ background: "linear-gradient(180deg,#f47b16 0%,#f47b16 38%,#ffffff 38%)" }}>
 
         {/* HEADER / BANNER */}
         <div className="relative group overflow-hidden h-48 sm:h-64 w-full" style={{ background: sp?.cover_url ? `url(${sp.cover_url}) center/cover no-repeat` : "linear-gradient(135deg,#f47b16 0%,#e06210 100%)" }}>
@@ -1087,6 +1103,7 @@ function UserProfile() {
                               price_min_ugx: s.price_min_ugx,
                               price_max_ugx: s.price_max_ugx,
                               price_note: s.price_note,
+                              photos: s.photos || [],
                             } })}
                             aria-label="Edit service"
                             className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-muted-foreground hover:bg-orange/10 hover:text-orange"
@@ -1207,6 +1224,546 @@ function UserProfile() {
       )}
         </div>
       </div>
+    
+    {/* DESKTOP LAYOUT (Stitch UI) */}
+    <div className="hidden lg:flex flex-col flex-1 max-w-7xl mx-auto w-full px-8 py-8">
+      {/* Top Identity Card */}
+      <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden mb-8">
+        
+        {/* Cover Banner */}
+        <div className="relative h-44 sm:h-56 md:h-64 bg-[#0B192C] overflow-hidden" style={{ background: sp?.cover_url ? `url(${sp.cover_url}) center/cover no-repeat` : undefined }}>
+          {!sp?.cover_url && (
+            <>
+              <div className="absolute inset-0 opacity-20" style={{ backgroundImage: "radial-gradient(#FF8A42 1px, transparent 1px), radial-gradient(#22A652 1px, #0B192C 1px)", backgroundSize: "24px 24px", backgroundPosition: "0 0, 12px 12px" }}></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-[#0B192C] via-[#0B192C]/90 to-[#1E3A8A]/40"></div>
+              <div className="absolute -right-16 -top-16 w-80 h-80 rounded-full bg-[#fe6a19]/20 blur-3xl"></div>
+              <div className="absolute left-1/3 -bottom-10 w-64 h-64 rounded-full bg-[#64de83]/10 blur-2xl"></div>
+            </>
+          )}
+
+          {/* Edit Cover button */}
+          {isOwn && isProvider && (
+            <div className="absolute top-4 right-4 z-10">
+              <label className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm hover:bg-black/60 transition shadow-sm" title="Change cover photo">
+                {uploadingCover ? <Loader2 className="h-4 w-4 animate-spin text-white" /> : <Camera className="h-4 w-4" />}
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  disabled={uploadingCover}
+                  onChange={(e) => uploadCover(e.target.files?.[0] ?? null)}
+                />
+              </label>
+            </div>
+          )}
+        </div>
+
+        {/* Identity Details Header Section */}
+        <div className="px-6 md:px-8 pb-8 relative">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 -mt-16 sm:-mt-20 mb-6">
+            
+            {/* Avatar + Personal Title Cluster */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-end gap-6">
+              <div className="relative z-10">
+                <div className="w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 rounded-2xl object-cover ring-4 ring-white shadow-md bg-slate-100 overflow-hidden">
+                   <Avatar name={profile.full_name} url={profile.avatar_url} size={144} />
+                </div>
+                {identity?.is_verified && (
+                  <span className="absolute -bottom-2 -right-2 bg-[#E8F7EE] border-2 border-[#A3E2B8] text-[#22A652] rounded-full p-1 shadow-sm flex items-center justify-center" title="Verified Member">
+                    <CheckCircle2 className="h-5 w-5 fill-[#22A652] text-white" />
+                  </span>
+                )}
+                
+                {isOwn && (
+                  <label className="absolute bottom-1 right-1 flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-white shadow-lg bg-[#FF6B1A]">
+                    {uploadingAvatar ? <Loader2 className="h-4 w-4 animate-spin text-white" /> : <Camera className="h-4 w-4 text-white" />}
+                    <input type="file" accept="image/*" className="hidden" disabled={ownerBusy || uploadingAvatar}
+                    onChange={e => {
+                      const f = e.target.files?.[0];
+                      if (f && user) {
+                        setUploadingAvatar(true);
+                        uploadMedia(user.id, f, "avatars")
+                          .then(url => saveOwnerProfile({ avatar_url: url }))
+                          .catch(err => toast.error(err.message))
+                          .finally(() => setUploadingAvatar(false));
+                      }
+                    }} />
+                  </label>
+                )}
+              </div>
+              
+              <div className="pt-2 z-10">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h1 className="text-2xl font-bold text-[#0B192C]">
+                    {profile.full_name?.trim() || sp?.business_name || "Anonymous User"}
+                  </h1>
+                  {sp?.verified === 'verified' && (
+                    <span className="bg-[#E8F7EE] text-[#22A652] border border-[#A3E2B8] text-[10px] font-bold rounded px-2 py-0.5 uppercase flex items-center gap-1">
+                      <CheckCircle2 className="h-3 w-3" />
+                      Verified Provider
+                    </span>
+                  )}
+                  {sp?.category_slug && (
+                    <span className="bg-slate-100 text-slate-700 border border-slate-200 text-xs font-medium rounded-full px-2.5 py-0.5">
+                      {formatSubcategory(sp.subcategory || sp.category_slug)}
+                    </span>
+                  )}
+                </div>
+                <p className="text-sm font-medium text-slate-600 mt-1">
+                  {[profile.district, profile.town].filter(Boolean).join(" | ")}
+                </p>
+              </div>
+            </div>
+            
+            {/* Action Buttons */}
+            <div className="flex flex-wrap items-center gap-2.5 pt-2 z-10">
+              <button onClick={share} className="px-4 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-[#0B192C] text-sm font-semibold shadow-sm flex items-center gap-2 transition-all active:scale-[0.98]">
+                <Share2 className="h-4 w-4" /> Share Profile
+              </button>
+              
+              {isOwn ? (
+                <button onClick={() => setEditOpen(true)} className="px-4 py-2.5 rounded-xl bg-white border border-[#0B192C] hover:bg-slate-50 text-[#0B192C] text-sm font-semibold shadow-sm flex items-center gap-2 transition-all active:scale-[0.98]">
+                  <Pencil className="h-4 w-4" /> Edit Profile
+                </button>
+              ) : (
+                <button onClick={() => setContactModalOpen(true)} className="px-4 py-2.5 rounded-xl bg-[#0B192C] hover:bg-[#1E3A8A] text-white text-sm font-semibold shadow-sm flex items-center gap-2 transition-all active:scale-[0.98]">
+                  <MessageSquare className="h-4 w-4" /> Message
+                </button>
+              )}
+            </div>
+          </div>
+          
+          {/* Bio Content */}
+          <div className="max-w-3xl">
+            <p className="text-sm text-[#0B1C30] leading-relaxed whitespace-pre-wrap">
+              {sp?.bio || profile.bio || "No bio available."}
+            </p>
+          </div>
+          
+          {/* Reputation Stats Bar */}
+          <div className="mt-6 pt-6 border-t border-slate-200 grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-[#E8F7EE] text-[#22A652] flex items-center justify-center">
+                <CheckCircle2 className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="text-lg font-bold text-[#0B192C]">{isOwn ? ownerCounts.completed : jobsDone}</div>
+                <div className="text-[11px] text-slate-600">Jobs done</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-slate-100 text-[#0B192C] flex items-center justify-center">
+                <Briefcase className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="text-lg font-bold text-[#0B192C]">{services.length}</div>
+                <div className="text-[11px] text-slate-600">Services Listed</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-orange-100 text-[#FF6B1A] flex items-center justify-center">
+                <Star className="h-5 w-5 fill-[#FF6B1A]" />
+              </div>
+              <div>
+                <div className="text-lg font-bold text-[#0B192C] flex items-center gap-1">
+                  {avgRating > 0 ? avgRating.toFixed(1) : "\u2014"} <span className="text-[11px] text-slate-500 font-normal">({totalReviews} reviews)</span>
+                </div>
+                <div className="text-[11px] text-slate-600">Average Rating</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center">
+                <Calendar className="h-5 w-5" />
+              </div>
+              <div>
+                <div className="text-lg font-bold text-[#0B192C]">Verified</div>
+                <div className="text-[11px] text-slate-600">Member Status</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        {/* Profile Tabbed Navigation Bar */}
+        <div className="bg-[#F1F5F9] border-t border-slate-200 px-6 sm:px-8 flex items-center gap-2 overflow-x-auto">
+          {[...visibleTabs, ...(isOwn ? [{ id: "credits", label: "My Credits" } as const, { id: "settings", label: "Settings" } as const] : [])].map(t => (
+            <button key={t.id}
+              onClick={() => {
+                if (t.id === "admin" && t.href) { router.navigate({ to: t.href }); return; }
+                if (t.id === "credits") { loadOwnerPackages(); loadOwnerCredits(); }
+                if (t.id === "settings") setOwnerFullName(profile.full_name);
+                setTab(t.id as Tab);
+              }}
+              className={`px-4 py-3 text-sm font-semibold whitespace-nowrap flex items-center gap-2 ${tab === t.id ? 'text-[#FF6B1A] border-b-2 border-[#FF6B1A]' : 'text-slate-600 hover:text-[#0B192C] border-b-2 border-transparent'}`}
+            >
+              {t.label} {t.id === 'services' ? `(${services.length})` : t.id === 'reviews' ? `(${totalReviews})` : ''}
+            </button>
+          ))}
+        </div>
+      </div>
+      
+      {/* Dual Layout Main Stream */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        {/* Left / Center 8-Column: Service Stacks Cards */}
+        <section className="lg:col-span-8 flex flex-col gap-6">
+          
+          {tab === "timeline" && (
+            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+               {isOwn ? (
+                  <PostComposer onSuccess={() => queryClient.invalidateQueries({ queryKey: ["providerAux", id] })} />
+                ) : (
+                  <div className="mb-4">
+                    <h3 className="font-display text-lg font-bold text-[#0B192C]">Recent Updates</h3>
+                  </div>
+                )}
+                <div className="mt-4 space-y-4">
+                  {posts.length === 0 ? (
+                    <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center text-sm text-slate-500">
+                      No posts yet
+                    </div>
+                  ) : (
+                    posts.map(p => <PostCard key={p.id} post={p} viewerId={user?.id} onAction={() => queryClient.invalidateQueries({ queryKey: ["providerAux", id] })} />)
+                  )}
+                </div>
+            </div>
+          )}
+
+          {tab === "services" && (
+            <>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-bold text-[#0B192C]">Service Stacks</h2>
+                  <p className="text-sm text-slate-600 mt-1">Discover specialized services offered by this provider.</p>
+                </div>
+                {isOwn && ownerPublicProfileId && (
+                  <button
+                    onClick={() => setSvcDialog({ open: true, mode: "create", initial: { is_primary: services.length === 0 } })}
+                    className="inline-flex items-center gap-1 rounded-xl bg-[#0B192C] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1E3A8A]"
+                  >
+                    <Plus className="h-4 w-4" /> Add service
+                  </button>
+                )}
+              </div>
+              
+              {isOwn && !ownerPublicProfileId && (
+                <div className="bg-white border border-dashed border-slate-200 rounded-2xl p-6 text-center">
+                  <p className="font-semibold text-[#0B192C]">Create your provider profile first</p>
+                  <p className="mt-1 text-sm text-slate-500">You need a provider profile before you can add service packages.</p>
+                  <Link to="/profiles/new" className="mt-3 inline-block rounded-full bg-[#FF6B1A] px-4 py-2 text-sm font-semibold text-white">List your service</Link>
+                </div>
+              )}
+              {services.length === 0 ? (
+                <div className="bg-white border border-dashed border-slate-200 rounded-2xl p-8 text-center shadow-sm">
+                  <p className="font-semibold text-[#0B192C]">{isOwn ? "Add your first service." : "No services listed yet."}</p>
+                </div>
+              ) : (
+                services.map(s => (
+                  <article key={s.id} className="bg-white border border-slate-200 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
+                    <div className="p-6">
+                      <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                        <div className="flex items-center gap-2">
+                          <span className="bg-[#e5eeff] text-[#0B192C] text-[10px] font-bold px-2.5 py-0.5 rounded uppercase">
+                            {s.is_primary ? "Primary Service" : "Standard Service"}
+                          </span>
+                        </div>
+                        {s.active && (
+                          <span className="bg-[#E8F7EE] text-[#22A652] border border-[#A3E2B8] text-[10px] font-bold rounded-full px-2.5 py-0.5 uppercase flex items-center gap-1.5">
+                            <span className="w-2 h-2 rounded-full bg-[#22A652] animate-pulse"></span>
+                            Accepting New Bookings
+                          </span>
+                        )}
+                      </div>
+                      
+                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2 mb-2">
+                        <h3 className="text-xl font-bold text-[#0B192C] hover:text-[#FF6B1A] transition-colors">
+                          <Link to="/service/$id" params={{ id: s.id }}>{s.title}</Link>
+                        </h3>
+                        <div className="text-right flex-shrink-0">
+                          <span className="text-[11px] text-slate-500 block uppercase tracking-wider">{s.price_type || 'Pricing'}</span>
+                          <span className="text-lg font-bold text-[#FF6B1A]">
+                            {s.price_fixed_ugx ? `KES ${s.price_fixed_ugx.toLocaleString()}` : s.price_min_ugx ? `KES ${s.price_min_ugx.toLocaleString()}` : "Contact for quote"}
+                          </span>
+                          {s.price_min_ugx && !s.price_fixed_ugx && <span className="text-[11px] text-slate-500 block">/ onwards</span>}
+                        </div>
+                      </div>
+                      
+                      <p className="text-sm text-slate-700 mb-4 whitespace-pre-wrap">{s.description}</p>
+                      
+                      <div className="flex flex-wrap items-center gap-y-2 gap-x-5 py-2.5 px-3.5 bg-slate-50 rounded-xl border border-slate-200 mb-4 text-sm">
+                        <div className="flex items-center gap-1 text-[#FF6B1A]">
+                          <Star className="h-4 w-4 fill-[#FF6B1A]" />
+                          <span className="font-bold text-[#0B192C]">4.9</span>
+                        </div>
+                        <div className="flex items-center gap-1 text-slate-600 text-xs">
+                          <Clock className="h-4 w-4 text-slate-400" /> Standard Turnaround
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-slate-50 border-t border-slate-200 px-6 py-3 flex items-center justify-between">
+                      <div className="flex items-center gap-2 text-xs text-slate-600">
+                        {isOwn && (
+                          <button onClick={() => setSvcDialog({ open: true, mode: "edit", initial: s as any })} className="text-slate-500 hover:text-[#0B192C] flex items-center gap-1"><Pencil className="h-3 w-3" /> Edit Stack</button>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Link to="/service/$id" params={{ id: s.id }} className="text-sm font-semibold text-[#0B192C] hover:text-[#FF6B1A] transition-colors">
+                          View Stack Details →
+                        </Link>
+                        {!isOwn && (
+                          <button onClick={() => setContactModalOpen(true)} className="px-4 py-2 rounded-xl bg-[#FF6B1A] hover:brightness-105 text-white text-sm font-semibold shadow-sm transition-all active:scale-[0.98]">
+                            Request Service
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  </article>
+                ))
+              )}
+            </>
+          )}
+
+          {tab === "reviews" && (
+             <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+               <h3 className="font-display text-lg font-bold text-[#0B192C] mb-4">Client Reviews</h3>
+               {reviews.length === 0 && feedback.length === 0 ? <p className="text-sm text-slate-500">No reviews yet.</p> : (
+                 <div className="space-y-4">
+                   {feedback.map((f) => {
+                      const parsed = parseReviewText(f.review_text);
+                      return (
+                        <div key={f.id} className="rounded-2xl border border-green/30 bg-green/5 p-4">
+                          <div className="flex items-center gap-3">
+                            <Avatar name={f.profile?.full_name ?? "Member"} url={f.profile?.avatar_url ?? null} size={36} />
+                            <div>
+                              <p className="flex flex-wrap items-center gap-2 text-sm font-semibold text-[#0B192C]">{f.profile?.full_name ?? "Member"} <VerifiedReviewBadge /></p>
+                              <p className="text-xs text-slate-500">Booked service · {timeAgo(f.created_at)}</p>
+                            </div>
+                            <span className="ml-auto text-sm text-[#FF6B1A]">{"★".repeat(f.rating || 0)}{"☆".repeat(5 - (f.rating || 0))}</span>
+                          </div>
+                          {parsed.text && <p className="mt-3 text-sm text-[#0B1C30]">{parsed.text}</p>}
+                          {parsed.media.length > 0 && (
+                            <div className="mt-3 flex gap-2 overflow-x-auto">
+                              {parsed.media.map((url, idx) => (
+                                <img key={idx} src={url} alt="Review media" className="h-16 w-16 object-cover rounded-lg border border-slate-200" />
+                              ))}
+                            </div>
+                          )}
+                          <div className="mt-3 pt-3 border-t border-green/20 text-right">
+                             <span className="text-xs font-semibold text-[#22A652]">Service: {f.service_provided}</span>
+                          </div>
+                        </div>
+                      )
+                    })}
+                   {reviews.map((r) => {
+                      const parsed = parseReviewText(r.text);
+                      return (
+                        <div key={r.id} className="rounded-2xl border border-green/30 bg-green/5 p-4">
+                          <div className="flex items-center gap-3">
+                            <Avatar name={r.profile?.full_name ?? "Member"} url={r.profile?.avatar_url ?? null} size={36} />
+                            <div>
+                              <p className="flex flex-wrap items-center gap-2 text-sm font-semibold text-[#0B192C]">{r.profile?.full_name ?? "Member"} <VerifiedReviewBadge /></p>
+                              <p className="text-xs text-slate-500">Booked service · {timeAgo(r.created_at)}</p>
+                            </div>
+                            <span className="ml-auto text-sm text-[#FF6B1A]">{"★".repeat(r.rating || 0)}{"☆".repeat(5 - (r.rating || 0))}</span>
+                          </div>
+                          {parsed.text && <p className="mt-3 text-sm text-[#0B1C30]">{parsed.text}</p>}
+                          {parsed.media.length > 0 && (
+                            <div className="mt-3 flex gap-2 overflow-x-auto">
+                              {parsed.media.map((url, idx) => (
+                                <img key={idx} src={url} alt="Review media" className="h-16 w-16 object-cover rounded-lg border border-slate-200" />
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )
+                    })}
+                 </div>
+               )}
+             </div>
+          )}
+
+          {tab === "requests" && (
+            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+              <h3 className="font-display text-lg font-bold text-[#0B192C] mb-4">My Requests</h3>
+              <p className="text-sm text-slate-500">View your active requests and bookings in the provider dashboard.</p>
+            </div>
+          )}
+          
+          {tab === "credits" && (
+            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+               {/* A. Balance hero */}
+               <div className="rounded-2xl bg-gradient-to-br from-orange-100/50 via-orange-50/30 to-white border border-orange-200/50 p-5 sm:p-7">
+                  <div className="flex items-center gap-2 text-xs font-semibold text-orange-500 uppercase tracking-wide">
+                    <Coins className="h-4 w-4" /> Tuungane Credits
+                  </div>
+                  <h1 className="mt-2 text-4xl sm:text-5xl font-bold leading-none" style={{ color: "#1a2b4b" }}>
+                    {(balance ?? 0).toLocaleString()}
+                    <span className="ml-2 text-lg sm:text-xl font-semibold text-gray-400">credits</span>
+                  </h1>
+                  <p className="mt-3 text-sm text-gray-500">
+                    Use credits to boost your profile, feature posts, mark requests urgent, and promote your services.
+                  </p>
+                  <div className="mt-4 flex flex-wrap items-center gap-3">
+                    <a href="#desktop_packages" className="inline-flex items-center rounded-full px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:brightness-110" style={{ background: "#f47b16" }}>Buy credits</a>
+                    <span className="text-xs text-gray-400">Free to join · Basic use stays free</span>
+                  </div>
+                </div>
+
+                {/* B. How credits work / not-cash notice */}
+                <div className="flex gap-3 rounded-xl border border-gray-200 bg-white p-4 text-sm text-gray-500 mt-6">
+                  <Info className="h-5 w-5 flex-shrink-0" style={{ color: "#1a2b4b" }} />
+                  <p>
+                    <strong style={{ color: "#1a2b4b" }}>Credits are not cash.</strong> They are used inside Tuungane to boost visibility,
+                    feature posts, highlight requests, and promote services. Credits cannot be withdrawn as money.
+                  </p>
+                </div>
+
+                {/* How buying works */}
+                <div className="rounded-xl border border-gray-200 bg-white p-5 mt-6">
+                  <h2 className="text-base font-bold" style={{ color: "#1a2b4b" }}>How buying credits works</h2>
+                  <ol className="mt-3 space-y-1.5 text-sm text-gray-500 list-decimal pl-5">
+                    <li>Choose a credit package</li>
+                    <li>Tap <span className="font-semibold" style={{ color: "#1a2b4b" }}>Request purchase</span></li>
+                    <li>Follow the payment instructions from Tuungane</li>
+                    <li>Admin confirms your payment</li>
+                    <li>Your credits are added automatically</li>
+                  </ol>
+                </div>
+
+                {/* C. Packages */}
+                <div id="desktop_packages" className="mt-6">
+                  <h2 className="mb-3 text-xl font-bold" style={{ color: "#1a2b4b" }}>Buy credits</h2>
+                  <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                    {pkgs.map((p) => {
+                      const hasPending = pendingPkgIds.has(p.id) || pendingPkgNames.has(p.name);
+                      const isSubmitting = creditSubmitting === p.id;
+                      return (
+                        <div key={p.id} className="flex flex-col rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition hover:border-orange-300 hover:shadow-md">
+                          <div className="text-xs font-medium text-gray-500">{p.name}</div>
+                          <div className="mt-1 flex items-baseline gap-1.5">
+                            <span className="text-2xl font-bold leading-none" style={{ color: "#1a2b4b" }}>{p.credits}</span>
+                            <span className="text-sm font-medium text-gray-500">credits</span>
+                          </div>
+                          <div className="mt-1 text-sm font-bold" style={{ color: "#f47b16" }}>{fmtUgx(p.amount_ugx)}</div>
+                          <button
+                            disabled={isSubmitting || hasPending}
+                            onClick={() => requestPurchase(p)}
+                            className={`mt-3 w-full rounded-full px-4 py-2 text-sm font-semibold transition ${
+                              hasPending
+                                ? "bg-orange-100 text-orange-500 cursor-not-allowed"
+                                : "text-white disabled:opacity-60"
+                            }`}
+                            style={{ background: hasPending ? undefined : "#1a2b4b" }}
+                          >
+                            {hasPending ? "Pending approval" : isSubmitting ? "Submitting…" : "Request purchase"}
+                          </button>
+                        </div>
+                      );
+                    })}
+                    {pkgs.length === 0 && <div className="col-span-2 rounded-xl p-6 text-center text-sm border-2 border-dashed border-gray-200 text-gray-400">No packages available.</div>}
+                  </div>
+                </div>
+
+                {/* D. Purchase requests */}
+                {creditReqs.length > 0 && (
+                  <div className="mt-6">
+                    <h2 className="mb-3 text-xl font-bold" style={{ color: "#1a2b4b" }}>Your purchase requests</h2>
+                    <div className="overflow-hidden rounded-xl border border-gray-200">
+                      <table className="w-full text-sm bg-white">
+                        <thead className="bg-gray-50 text-left text-xs uppercase text-gray-500">
+                          <tr>
+                            <th className="px-4 py-2">Package</th>
+                            <th className="px-4 py-2">Credits</th>
+                            <th className="px-4 py-2">Amount</th>
+                            <th className="px-4 py-2">Status</th>
+                            <th className="px-4 py-2">When</th>
+                            <th />
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {creditReqs.map((r) => (
+                            <tr key={r.id} className="border-t border-gray-200">
+                              <td className="px-4 py-3 font-medium" style={{ color: "#1a2b4b" }}>{r.package_name}</td>
+                              <td className="px-4 py-3">{r.credits_requested}</td>
+                              <td className="px-4 py-3">{fmtUgx(r.amount_ugx)}</td>
+                              <td className="px-4 py-3"><StatusBadge status={r.status} /></td>
+                              <td className="px-4 py-3 text-gray-500 whitespace-nowrap">{timeAgo(r.created_at)}</td>
+                              <td className="px-4 py-3 text-right">
+                                {r.status === "pending" && (
+                                  <button onClick={() => cancelRequest(r.id)} className="text-xs text-red-500 hover:underline">Cancel</button>
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
+            </div>
+          )}
+          
+          {tab === "settings" && (
+            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+              <h3 className="font-display text-lg font-bold text-[#0B192C] mb-4">Profile Settings</h3>
+              <div className="space-y-4">
+                  <div>
+                    <label className="text-xs font-semibold text-gray-500">Display Name</label>
+                    <input
+                      type="text"
+                      value={ownerFullName}
+                      onChange={(e) => setOwnerFullName(e.target.value)}
+                      className="mt-1 w-full rounded-xl border border-gray-300 p-3 text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-xs font-semibold text-gray-500">Bio</label>
+                    <textarea
+                      value={profile?.bio || ""}
+                      onChange={(e) => setProfile((p) => p ? { ...p, bio: e.target.value } : p)}
+                      rows={3}
+                      className="mt-1 w-full rounded-xl border border-gray-300 p-3 text-sm focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
+                    />
+                  </div>
+                  <button
+                    onClick={() => saveOwnerProfile({ full_name: ownerFullName, bio: profile?.bio })}
+                    disabled={ownerBusy}
+                    className="w-full rounded-xl py-3 text-sm font-semibold text-white transition hover:brightness-110 disabled:opacity-50"
+                    style={{ background: "#1a2b4b" }}
+                  >
+                    {ownerBusy ? "Saving..." : "Save Changes"}
+                  </button>
+                </div>
+            </div>
+          )}
+          
+          {tab === "admin" && (
+            <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
+              <h3 className="font-display text-lg font-bold text-[#0B192C] mb-4">Admin Dashboard</h3>
+              <p className="text-sm text-slate-500">You will be redirected.</p>
+            </div>
+          )}
+
+        </section>
+        
+        {/* Right Rail: Credentials / Info */}
+        <aside className="lg:col-span-4 flex flex-col gap-6">
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+            <h3 className="font-bold text-[#0B192C] mb-4">Contact Info</h3>
+            <div className="space-y-3 text-sm">
+              <div className="flex items-center gap-2 text-slate-600">
+                <MapPin className="h-4 w-4" /> {[profile.district, profile.town].filter(Boolean).join(", ")}
+              </div>
+              <div className="flex items-center gap-2 text-slate-600">
+                <Phone className="h-4 w-4" /> {sp?.phone || "Hidden"}
+              </div>
+            </div>
+          </div>
+        </aside>
+        
+      </div>
+    </div>
+    </>
   );
 }
 

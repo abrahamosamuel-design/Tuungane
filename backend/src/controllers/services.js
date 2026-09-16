@@ -123,6 +123,7 @@ export const getServiceById = async (req, res) => {
       .from('timeline_posts')
       .select('*')
       .eq('hidden', false)
+      .neq('post_type', 'opportunity_shared')
       .or(`service_id.eq.${service.id}${providerUserId ? `,provider_user_id.eq.${providerUserId}` : ''}`)
       .order('created_at', { ascending: false })
       .limit(30);

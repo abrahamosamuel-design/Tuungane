@@ -193,12 +193,11 @@ function ConversationPage() {
 
   return (
     <>
-      <section className="mx-auto w-full flex h-[calc(100dvh-3.5rem)] md:h-[calc(100dvh-4.5rem)] lg:h-[calc(100dvh-5rem)] overflow-hidden max-w-3xl flex-col">
-
+      <section className="w-full flex flex-1 min-h-0 flex-col bg-surface-container-lowest relative">
 
         {/* Sticky header */}
         <div className="sticky top-0 z-10 flex items-center gap-3 border-b border-border bg-background/95 px-4 py-3 backdrop-blur">
-          <button onClick={() => navigate({ to: "/messages" })} className="rounded-full p-1.5 text-navy hover:bg-muted">
+          <button onClick={() => navigate({ to: "/messages" })} className="lg:hidden rounded-full p-1.5 text-navy hover:bg-muted">
             <ArrowLeft className="h-5 w-5" />
           </button>
           <Link to="/u/$id" params={{ id: other?.id ?? "" }} className="flex min-w-0 flex-1 items-center gap-2">
@@ -220,6 +219,9 @@ function ConversationPage() {
           {conv.service_request_id && (
             <Link to="/requests/$id" params={{ id: conv.service_request_id }} className="hidden rounded-full border border-border px-3 py-1 text-xs font-semibold text-navy hover:border-orange sm:inline-flex">Open request</Link>
           )}
+          {conv.direct_booking_id && (
+            <Link to="/direct-bookings/$id" params={{ id: conv.direct_booking_id }} className="hidden rounded-full border border-border px-3 py-1 text-xs font-semibold text-navy hover:border-orange sm:inline-flex">Open booking</Link>
+          )}
           <button onClick={reportConversation} aria-label="Report" className="rounded-full p-2 text-muted-foreground hover:text-destructive"><Flag className="h-4 w-4" /></button>
           <button onClick={blockOther} aria-label="Block" className="rounded-full p-2 text-muted-foreground hover:text-destructive"><Ban className="h-4 w-4" /></button>
         </div>
@@ -229,73 +231,66 @@ function ConversationPage() {
 
         {/* Request summary card — keeps messaging tied to the service request */}
         {req && (
-          <div className="mb-3 rounded-2xl bg-navy/5 p-4 border-0">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0 flex-1">
+          <div className="mb-2 rounded-xl bg-navy/5 lg:bg-surface-alt lg:border lg:border-border-hairline p-2.5 border-0 lg:shadow-sm">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+              <div className="min-w-0 flex-1 flex flex-col gap-1">
                 <div className="flex flex-wrap items-center gap-1.5">
-                  <span className="rounded-full bg-white px-2.5 py-0.5 text-[10px] font-extrabold uppercase text-navy shadow-sm">{req.status.replace("_", " ")}</span>
+                  <span className="rounded-full bg-white px-2 py-0.5 text-[9px] font-extrabold uppercase text-navy shadow-sm">{req.status.replace("_", " ")}</span>
                   {(req.urgent_flag || req.urgency === "urgent" || req.urgency === "today") && (
-                    <span className="rounded-full bg-destructive/10 px-2.5 py-0.5 text-[10px] font-extrabold uppercase text-destructive">Urgent</span>
+                    <span className="rounded-full bg-destructive/10 px-2 py-0.5 text-[9px] font-extrabold uppercase text-destructive">Urgent</span>
                   )}
+                  <p className="text-sm font-bold text-navy leading-tight line-clamp-1 ml-1">{req.title || req.service_needed}</p>
                 </div>
-                <p className="mt-2 text-base font-bold text-navy leading-tight">{req.title || req.service_needed}</p>
-                {req.description && (
-                  <p className="mt-1 text-sm text-muted-foreground/90 line-clamp-3">{req.description}</p>
-                )}
                 
-                {/* Images row */}
+                {/* Images row - mini version */}
                 {allImages.length > 0 && (
-                  <div className="mt-3 flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-1.5 mt-0.5">
                     {allImages.map((url, idx) => (
                       <img 
                         key={idx} 
                         src={url} 
                         alt="Media" 
                         onClick={() => setSelectedImageIndex(idx)}
-                        className="h-16 w-16 cursor-pointer rounded-lg border border-black/5 object-cover transition-opacity hover:opacity-80" 
+                        className="h-8 w-8 cursor-pointer rounded-md border border-black/5 object-cover transition-opacity hover:opacity-80" 
                       />
                     ))}
                   </div>
                 )}
 
-                <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs font-medium text-navy/80">
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] font-medium text-navy/80">
                   {req.quantity && <span>Qty: <span className="font-bold text-navy">{req.quantity}</span></span>}
                   {req.price_total && <span>Total: <span className="font-bold text-navy">UGX {req.price_total.toLocaleString()}</span></span>}
-                  {req.location && <span className="inline-flex items-center gap-1"><MapPin className="h-3.5 w-3.5 text-orange" /> {req.location}</span>}
+                  {req.location && <span className="inline-flex items-center gap-0.5"><MapPin className="h-3 w-3 text-orange" /> {req.location}</span>}
                   {req.budget_range && <span>Budget: {req.budget_range}</span>}
-                  <span>With: <span className="font-bold text-navy">{other?.full_name ?? "User"}</span></span>
                 </div>
               </div>
-              {conv.service_request_id && (
-                <Link to="/requests/$id" params={{ id: req.id }} className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-[11px] font-bold text-navy shadow-sm hover:text-navy transition-colors">
-                  <ExternalLink className="h-3.5 w-3.5" /> View
-                </Link>
-              )}
-            </div>
-
-            {/* Next-step shortcuts (link into request page where actions execute) */}
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              {conv.customer_id === user.id && req.status === "requested" && (
-                <Link to="/requests/$id" params={{ id: req.id }} className="rounded-full bg-navy px-3 py-1 text-[11px] font-semibold text-navy-foreground hover:brightness-110">Select provider</Link>
-              )}
-              {conv.provider_id === user.id && req.status === "requested" && (
-                <button onClick={() => setAcceptJobOpen(true)} className="rounded-full bg-green px-3 py-1 text-[11px] font-semibold text-white hover:brightness-110">
-                  <CheckCircle2 className="mr-1 inline h-3 w-3" /> Accept Job
-                </button>
-              )}
-              {conv.provider_id === user.id && req.status === "accepted" && (
-                <Link to="/requests/$id" params={{ id: req.id }} className="rounded-full bg-navy px-3 py-1 text-[11px] font-semibold text-navy-foreground hover:brightness-110">
-                  <CheckCircle2 className="mr-1 inline h-3 w-3" /> Mark in progress
-                </Link>
-              )}
-              {req.status === "in_progress" && (
-                <Link to="/requests/$id" params={{ id: req.id }} className="rounded-full bg-navy px-3 py-1 text-[11px] font-semibold text-navy-foreground hover:brightness-110">Complete service</Link>
-              )}
-              {conv.customer_id === user.id && req.status === "completed" && (
-                <Link to="/requests/$id" params={{ id: req.id }} className="rounded-full bg-navy px-3 py-1 text-[11px] font-semibold text-navy-foreground hover:brightness-110">
-                  <Star className="mr-1 inline h-3 w-3" /> Leave review
-                </Link>
-              )}
+              
+              {/* Next-step shortcuts (link into request page where actions execute) */}
+              <div className="flex flex-wrap gap-1.5 shrink-0 self-start sm:self-center">
+                {conv.customer_id === user.id && req.status === "requested" && (
+                  <Link to={conv.direct_booking_id ? "/direct-bookings/$id" : "/requests/$id"} params={{ id: req.id }} className="rounded-full bg-navy px-2.5 py-1 text-[10px] font-semibold text-navy-foreground hover:brightness-110">
+                    {conv.direct_booking_id ? "View booking" : "Select provider"}
+                  </Link>
+                )}
+                {conv.provider_id === user.id && req.status === "requested" && (
+                  <button onClick={() => setAcceptJobOpen(true)} className="rounded-full bg-green px-2.5 py-1 text-[10px] font-semibold text-white hover:brightness-110">
+                    <CheckCircle2 className="mr-1 inline h-3 w-3" /> Accept
+                  </button>
+                )}
+                {conv.provider_id === user.id && req.status === "accepted" && (
+                  <Link to={conv.direct_booking_id ? "/direct-bookings/$id" : "/requests/$id"} params={{ id: req.id }} className="rounded-full bg-navy px-2.5 py-1 text-[10px] font-semibold text-navy-foreground hover:brightness-110">
+                    <CheckCircle2 className="mr-1 inline h-3 w-3" /> Start
+                  </Link>
+                )}
+                {req.status === "in_progress" && (
+                  <Link to={conv.direct_booking_id ? "/direct-bookings/$id" : "/requests/$id"} params={{ id: req.id }} className="rounded-full bg-navy px-2.5 py-1 text-[10px] font-semibold text-navy-foreground hover:brightness-110">Complete</Link>
+                )}
+                {conv.customer_id === user.id && req.status === "completed" && (
+                  <Link to={conv.direct_booking_id ? "/direct-bookings/$id" : "/requests/$id"} params={{ id: req.id }} className="rounded-full bg-navy px-2.5 py-1 text-[10px] font-semibold text-navy-foreground hover:brightness-110">
+                    <Star className="mr-1 inline h-3 w-3" /> Review
+                  </Link>
+                )}
+              </div>
             </div>
           </div>
         )}
@@ -334,8 +329,8 @@ function ConversationPage() {
         </div>
 
         {/* Composer footer */}
-        <div className="shrink-0 bg-background border-t border-border px-4 py-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
-          <div className="mx-auto max-w-3xl flex items-end gap-2 rounded-full bg-muted/30 p-1.5 focus-within:bg-muted/50 focus-within:ring-2 focus-within:ring-navy/20 transition-all">
+        <div className="shrink-0 bg-background border-t border-border px-4 py-3 pb-[max(1rem,env(safe-area-inset-bottom))] lg:pb-3">
+          <div className="mx-auto lg:max-w-none max-w-3xl flex items-end gap-2 rounded-full bg-muted/30 p-1.5 focus-within:bg-muted/50 focus-within:ring-2 focus-within:ring-navy/20 transition-all">
             <textarea
               value={text}
               onChange={(e) => setText(e.target.value)}
@@ -359,6 +354,7 @@ function ConversationPage() {
           requestId={req.id}
           initialPrice={req.price_total || 0}
           onAccepted={() => setReq({ ...req, status: 'accepted' })}
+          isDirectBooking={!!conv.direct_booking_id}
         />
       )}
 

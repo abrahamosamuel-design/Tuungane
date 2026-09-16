@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Tuungane - Services Directory</title>
+<!-- Google Fonts: Inter -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "primary-fixed": "#d6e3ff",
+          "on-primary-fixed": "#071c36",
+          "text-jet": "#050505",
+          "tertiary-container": "#00250c",
+          "tertiary-fixed-dim": "#64de83",
+          "on-tertiary-fixed-variant": "#005323",
+          "inverse-on-surface": "#eaf1ff",
+          "inverse-primary": "#b5c7ea",
+          "surface-tint": "#4d5f7d",
+          "on-secondary-fixed-variant": "#7d2d00",
+          "outline": "#75777e",
+          "primary-fixed-dim": "#b5c7ea",
+          "error-container": "#ffdad6",
+          "secondary-container": "#fe6a19",
+          "tertiary": "#000802",
+          "surface-container-highest": "#d3e4fe",
+          "inverse-surface": "#213145",
+          "growth-green-light": "#E8F7EE",
+          "outline-variant": "#c4c6ce",
+          "surface-dim": "#cbdbf5",
+          "on-error-container": "#93000a",
+          "growth-green-border": "#A3E2B8",
+          "border-subtle": "#E2E8F0",
+          "surface-variant": "#d3e4fe",
+          "secondary-fixed": "#ffdbcd",
+          "border-hairline": "#DADDE1",
+          "canvas-subtle": "#F8FAFC",
+          "surface-container": "#e5eeff",
+          "on-tertiary": "#ffffff",
+          "surface-bright": "#f8f9ff",
+          "primary": "#000615",
+          "hero-indigo-stop": "#1E3A8A",
+          "on-primary-container": "#7587a7",
+          "surface": "#f8f9ff",
+          "on-surface": "#0b1c30",
+          "on-error": "#ffffff",
+          "on-background": "#0b1c30",
+          "text-muted-mobile": "#4B4F56",
+          "on-tertiary-fixed": "#00210a",
+          "error": "#ba1a1a",
+          "on-primary": "#ffffff",
+          "surface-container-high": "#dce9ff",
+          "on-tertiary-container": "#0a9b49",
+          "on-secondary-container": "#591e00",
+          "orange-gradient-end": "#FF8A42",
+          "secondary": "#a43e00",
+          "surface-container-low": "#eff4ff",
+          "tertiary-fixed": "#81fb9c",
+          "destructive-red": "#E53935",
+          "on-secondary": "#ffffff",
+          "background": "#f8f9ff",
+          "surface-alt": "#F1F5F9",
+          "on-primary-fixed-variant": "#364764",
+          "primary-container": "#0b1f3a",
+          "surface-container-lowest": "#ffffff",
+          "on-surface-variant": "#44474d",
+          "on-secondary-fixed": "#360f00",
+          "secondary-fixed-dim": "#ffb596",
+          "navy-dark": "#0B192C"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.25rem",
+          "lg": "0.5rem",
+          "xl": "0.75rem",
+          "full": "9999px"
+        },
+        "spacing": {
+          "space-md": "1rem",
+          "gutter": "1.5rem",
+          "space-xl": "2rem",
+          "space-sm": "0.5rem",
+          "margin-desktop": "2rem",
+          "space-xs": "0.25rem",
+          "gutter-mobile": "0.5rem",
+          "margin": "1.5rem",
+          "gutter-desktop": "2rem",
+          "margin-mobile": "0.75rem",
+          "space-lg": "1.5rem"
+        },
+        "fontFamily": {
+          "headline-md": ["Inter"],
+          "headline-lg-mobile": ["Inter"],
+          "display-2xl": ["Inter"],
+          "display-xl": ["Inter"],
+          "body-base": ["Inter"],
+          "display-lg": ["Inter"],
+          "body-sm": ["Inter"],
+          "body-base-mobile": ["Inter"],
+          "body-sm-mobile": ["Inter"],
+          "headline-sm": ["Inter"],
+          "label-compact-badge": ["Inter"],
+          "caption-mobile": ["Inter"],
+          "headline-lg": ["Inter"],
+          "caption": ["Inter"]
+        },
+        "fontSize": {
+          "headline-md": ["20px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "600" }],
+          "headline-lg-mobile": ["22px", { "lineHeight": "28px", "letterSpacing": "-0.015em", "fontWeight": "700" }],
+          "display-2xl": ["60px", { "lineHeight": "66px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+          "display-xl": ["48px", { "lineHeight": "52px", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+          "body-base": ["16px", { "lineHeight": "24px", "letterSpacing": "0", "fontWeight": "400" }],
+          "display-lg": ["36px", { "lineHeight": "42px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+          "body-sm": ["14px", { "lineHeight": "20px", "letterSpacing": "0", "fontWeight": "400" }],
+          "body-base-mobile": ["16.5px", { "lineHeight": "25.5px", "letterSpacing": "0", "fontWeight": "400" }],
+          "body-sm-mobile": ["15.5px", { "lineHeight": "23px", "letterSpacing": "0", "fontWeight": "400" }],
+          "headline-sm": ["18px", { "lineHeight": "24px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+          "label-compact-badge": ["9px", { "lineHeight": "16px", "letterSpacing": "0.025em", "fontWeight": "700" }],
+          "caption-mobile": ["13.4px", { "lineHeight": "21.6px", "letterSpacing": "0", "fontWeight": "500" }],
+          "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+          "caption": ["12px", { "lineHeight": "16px", "letterSpacing": "0", "fontWeight": "500" }]
+        }
+      }
+    }
+  }
+  </script>
+</head>
+<body class="bg-canvas-subtle text-on-surface antialiased min-h-screen flex flex-col selection:bg-secondary-container selection:text-white">
+<!-- TOP APP BAR -->
+<header class="bg-surface-container-lowest border-b border-border-hairline shadow-sm sticky top-0 z-40">
+<div class="flex justify-between items-center w-full px-gutter-desktop max-w-7xl mx-auto h-16">
+<!-- Brand & Search cluster -->
+<div class="flex items-center gap-space-lg flex-1 max-w-2xl">
+<!-- Logo -->
+<a class="flex items-center gap-space-xs group" href="#">
+<div class="w-9 h-9 rounded-xl bg-primary-container flex items-center justify-center text-white font-bold text-headline-sm shadow-sm group-hover:scale-105 transition-transform">
+            T
+          </div>
+<span class="text-headline-lg font-headline-lg font-bold text-navy-dark tracking-tight">Tuungane</span>
+</a>
+<!-- Global Search Bar -->
+<div class="relative w-full max-w-md hidden sm:block">
+<span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-outline">
+<span class="material-symbols-outlined text-[20px]">search</span>
+</span>
+<input class="w-full pl-10 pr-4 py-2 bg-canvas-subtle border border-border-hairline rounded-full font-body-sm text-body-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-secondary-container/20 focus:border-secondary-container transition-all placeholder:text-outline" placeholder="Search verified services, skills, or tradespeople..." type="text" value="Solar Installation"/>
+<button class="absolute inset-y-1 right-1.5 px-3 bg-white hover:bg-surface-alt text-navy-dark border border-border-hairline rounded-full font-caption text-caption flex items-center gap-1 transition-colors">
+<span class="material-symbols-outlined text-[14px]">tune</span>
+            Filter
+          </button>
+</div>
+</div>
+<!-- Navigation Links Cluster -->
+<nav class="hidden lg:flex items-center gap-space-lg mx-space-md">
+<a class="text-secondary-container font-semibold border-b-2 border-secondary-container pb-1 font-body-sm text-body-sm" href="#">
+          Services Directory
+        </a>
+<a class="text-on-surface-variant font-medium hover:text-navy-dark transition-colors font-body-sm text-body-sm" href="#">
+          Feed
+        </a>
+<a class="text-on-surface-variant font-medium hover:text-navy-dark transition-colors font-body-sm text-body-sm" href="#">
+          Opportunities
+        </a>
+<a class="text-on-surface-variant font-medium hover:text-navy-dark transition-colors font-body-sm text-body-sm" href="#">
+          Businesses
+        </a>
+</nav>
+<!-- Trailing Action Cluster -->
+<div class="flex items-center gap-space-sm">
+<!-- List a Service CTA -->
+<button class="hidden md:inline-flex items-center gap-1.5 px-4 py-2 bg-secondary-container hover:brightness-105 active:scale-[0.98] text-white font-headline-sm text-body-sm font-semibold rounded-xl shadow-sm transition-all">
+<span class="material-symbols-outlined text-[18px]">add_circle</span>
+          List a Service
+        </button>
+<div class="h-6 w-px bg-border-hairline mx-1 hidden sm:block"></div>
+<!-- Trailing Action Icons -->
+<button aria-label="Messages" class="p-2 text-on-surface-variant hover:bg-surface-alt hover:text-navy-dark rounded-xl transition-colors relative">
+<span class="material-symbols-outlined text-[22px]">chat</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 bg-secondary-container rounded-full ring-2 ring-white"></span>
+</button>
+<button aria-label="Notifications" class="p-2 text-on-surface-variant hover:bg-surface-alt hover:text-navy-dark rounded-xl transition-colors relative">
+<span class="material-symbols-outlined text-[22px]">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 bg-tertiary-fixed-dim ring-2 ring-white rounded-full"></span>
+</button>
+<!-- User Profile Avatar -->
+<div class="flex items-center pl-1">
+<button class="flex items-center gap-2 p-1 hover:bg-surface-alt rounded-xl transition-all group">
+<div class="relative">
+<img class="w-9 h-9 rounded-full object-cover ring-2 ring-secondary-container/20 group-hover:ring-secondary-container transition-all" data-alt="Close-up professional headshot portrait of an East African professional male member in Nairobi wearing business casual navy blue shirt with a bright confident smile against a softly blurred modern office interior in pristine daylight." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBoAH3w5DEde_PIeVOV3BYmrindz2A5SD3120IrIMaIJ5hlwS96FqNrdnBgouEv9RHAMJS6VbIWJl_SUvtshrDECRjc-mz900OamatHSJz_5FKj1DRdWCFwDs3JOQ4Mc-EJUWDOhNdilTE9o8oNBkKB1hboYK9DrpuJMlGMEXhsDvnMZVJkJHaiNX2-AeZ0X59lxYuZYYbXQF3RHhQU-f5NkbS36bqMxPsTI98DKo_RTruUy1IrUIlX5A"/>
+<div class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-tertiary-fixed-dim border-2 border-white rounded-full"></div>
+</div>
+<span class="material-symbols-outlined text-outline text-[18px] group-hover:text-navy-dark transition-colors">expand_more</span>
+</button>
+</div>
+</div>
+</div>
+</header>
+<!-- SUBHEADER HERO STRIP -->
+<section class="bg-surface-container-lowest border-b border-border-hairline py-space-md">
+<div class="max-w-7xl mx-auto px-gutter-desktop">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-space-sm">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="inline-flex items-center gap-1 bg-growth-green-light text-on-tertiary-container border border-growth-green-border px-2 py-0.5 rounded-full text-label-compact-badge font-label-compact-badge uppercase">
+<span class="material-symbols-outlined text-[12px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+              Direct Verified Marketplace
+            </span>
+<span class="text-outline text-caption font-caption">• Greater Nairobi Region</span>
+</div>
+<h1 class="text-headline-lg font-headline-lg font-bold text-navy-dark">
+            Showing 148 verified services near Nairobi
+          </h1>
+</div>
+<!-- Sort dropdown -->
+<div class="flex items-center gap-space-sm">
+<label class="text-caption font-caption text-on-surface-variant font-medium whitespace-nowrap">Sort By:</label>
+<div class="relative min-w-[180px]">
+<select class="w-full appearance-none bg-canvas-subtle border border-border-hairline rounded-xl px-3.5 py-2 pr-8 text-body-sm font-body-sm font-semibold text-navy-dark focus:outline-none focus:ring-2 focus:ring-secondary-container/20 focus:border-secondary-container cursor-pointer transition-all">
+<option selected="">Highest Rated (4.8+)</option>
+<option>Most Popular</option>
+<option>Newly Added</option>
+<option>Price: Low to High</option>
+</select>
+<span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none text-[18px]">unfold_more</span>
+</div>
+</div>
+</div>
+<!-- Discovery Quick Tags -->
+<div class="flex items-center gap-2 overflow-x-auto pt-space-sm scrollbar-none">
+<span class="text-caption font-caption text-outline font-semibold uppercase tracking-wider whitespace-nowrap">Popular:</span>
+<button class="inline-flex items-center gap-1.5 px-3 py-1 bg-surface-alt hover:bg-secondary-fixed text-navy-dark font-body-sm text-caption font-medium rounded-full border border-border-hairline hover:border-secondary-container transition-all whitespace-nowrap">
+<span class="material-symbols-outlined text-[14px]">solar_power</span>
+          Solar Installation
+        </button>
+<button class="inline-flex items-center gap-1.5 px-3 py-1 bg-surface-alt hover:bg-secondary-fixed text-navy-dark font-body-sm text-caption font-medium rounded-full border border-border-hairline hover:border-secondary-container transition-all whitespace-nowrap">
+<span class="material-symbols-outlined text-[14px]">palette</span>
+          Graphic Design
+        </button>
+<button class="inline-flex items-center gap-1.5 px-3 py-1 bg-surface-alt hover:bg-secondary-fixed text-navy-dark font-body-sm text-caption font-medium rounded-full border border-border-hairline hover:border-secondary-container transition-all whitespace-nowrap">
+<span class="material-symbols-outlined text-[14px]">code</span>
+          Web Development
+        </button>
+<button class="inline-flex items-center gap-1.5 px-3 py-1 bg-surface-alt hover:bg-secondary-fixed text-navy-dark font-body-sm text-caption font-medium rounded-full border border-border-hairline hover:border-secondary-container transition-all whitespace-nowrap">
+<span class="material-symbols-outlined text-[14px]">restaurant</span>
+          Catering
+        </button>
+<button class="inline-flex items-center gap-1.5 px-3 py-1 bg-surface-alt hover:bg-secondary-fixed text-navy-dark font-body-sm text-caption font-medium rounded-full border border-border-hairline hover:border-secondary-container transition-all whitespace-nowrap">
+<span class="material-symbols-outlined text-[14px]">local_shipping</span>
+          Logistics &amp; Moving
+        </button>
+</div>
+</div>
+</section>
+<!-- MAIN VIEWPORT (2-COLUMN DESKTOP WORKSPACE) -->
+<main class="flex-1 max-w-7xl mx-auto w-full px-gutter-desktop py-space-lg">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
+<!-- LEFT FILTER PANEL (col-span-3) -->
+<aside class="lg:col-span-3 space-y-space-md">
+<div class="bg-surface-container-lowest rounded-2xl border border-border-hairline p-space-md shadow-sm">
+<div class="flex items-center justify-between pb-space-sm border-b border-border-hairline mb-space-sm">
+<div class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-navy-dark text-[20px]">filter_list</span>
+<h2 class="font-headline-sm text-headline-sm font-bold text-navy-dark">Refine Search</h2>
+</div>
+<button class="text-caption font-caption font-semibold text-secondary-container hover:underline">
+              Reset All
+            </button>
+</div>
+<!-- Filter Section 1: Verification Toggle -->
+<div class="py-3 border-b border-border-hairline">
+<div class="flex items-center justify-between">
+<div>
+<span class="text-body-sm font-body-sm font-semibold text-navy-dark flex items-center gap-1">
+                  Verified Providers Only
+                  <span class="material-symbols-outlined text-tertiary-fixed-dim text-[16px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+</span>
+<p class="text-caption font-caption text-outline">Show ID and trade-vetted pros</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-11 h-6 bg-border-hairline peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-border-hairline after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary-container"></div>
+</label>
+</div>
+</div>
+<!-- Filter Section 2: Service Categories -->
+<div class="py-3 border-b border-border-hairline">
+<h3 class="text-caption font-caption font-bold uppercase tracking-wider text-outline mb-2">
+              Industry &amp; Category
+            </h3>
+<div class="space-y-1.5">
+<label class="flex items-center justify-between p-1.5 rounded-lg hover:bg-surface-alt cursor-pointer transition-colors group">
+<div class="flex items-center gap-2">
+<input checked="" class="rounded text-secondary-container focus:ring-secondary-container border-border-hairline" type="checkbox"/>
+<span class="font-body-sm text-body-sm font-medium text-navy-dark group-hover:text-secondary-container">Home &amp; Technical Services</span>
+</div>
+<span class="text-caption font-caption text-outline">64</span>
+</label>
+<label class="flex items-center justify-between p-1.5 rounded-lg hover:bg-surface-alt cursor-pointer transition-colors group">
+<div class="flex items-center gap-2">
+<input checked="" class="rounded text-secondary-container focus:ring-secondary-container border-border-hairline" type="checkbox"/>
+<span class="font-body-sm text-body-sm font-medium text-navy-dark group-hover:text-secondary-container">Tech &amp; Software Dev</span>
+</div>
+<span class="text-caption font-caption text-outline">42</span>
+</label>
+<label class="flex items-center justify-between p-1.5 rounded-lg hover:bg-surface-alt cursor-pointer transition-colors group">
+<div class="flex items-center gap-2">
+<input class="rounded text-secondary-container focus:ring-secondary-container border-border-hairline" type="checkbox"/>
+<span class="font-body-sm text-body-sm font-medium text-navy-dark group-hover:text-secondary-container">Creative &amp; Design</span>
+</div>
+<span class="text-caption font-caption text-outline">28</span>
+</label>
+<label class="flex items-center justify-between p-1.5 rounded-lg hover:bg-surface-alt cursor-pointer transition-colors group">
+<div class="flex items-center gap-2">
+<input class="rounded text-secondary-container focus:ring-secondary-container border-border-hairline" type="checkbox"/>
+<span class="font-body-sm text-body-sm font-medium text-navy-dark group-hover:text-secondary-container">Legal &amp; Business Ops</span>
+</div>
+<span class="text-caption font-caption text-outline">19</span>
+</label>
+<label class="flex items-center justify-between p-1.5 rounded-lg hover:bg-surface-alt cursor-pointer transition-colors group">
+<div class="flex items-center gap-2">
+<input class="rounded text-secondary-container focus:ring-secondary-container border-border-hairline" type="checkbox"/>
+<span class="font-body-sm text-body-sm font-medium text-navy-dark group-hover:text-secondary-container">Agriculture &amp; Logistics</span>
+</div>
+<span class="text-caption font-caption text-outline">35</span>
+</label>
+</div>
+</div>
+<!-- Filter Section 3: Location / Hub City -->
+<div class="py-3 border-b border-border-hairline">
+<h3 class="text-caption font-caption font-bold uppercase tracking-wider text-outline mb-2">
+              Metro Region &amp; Hub
+            </h3>
+<div class="grid grid-cols-2 gap-1.5">
+<button class="px-2.5 py-1.5 rounded-lg bg-navy-dark text-white font-body-sm text-caption font-semibold text-center transition-all">
+                Nairobi
+              </button>
+<button class="px-2.5 py-1.5 rounded-lg bg-surface-alt hover:bg-surface-container text-navy-dark font-body-sm text-caption font-medium text-center border border-border-hairline transition-all">
+                Mombasa
+              </button>
+<button class="px-2.5 py-1.5 rounded-lg bg-surface-alt hover:bg-surface-container text-navy-dark font-body-sm text-caption font-medium text-center border border-border-hairline transition-all">
+                Kisumu
+              </button>
+<button class="px-2.5 py-1.5 rounded-lg bg-surface-alt hover:bg-surface-container text-navy-dark font-body-sm text-caption font-medium text-center border border-border-hairline transition-all">
+                Eldoret
+              </button>
+</div>
+<div class="mt-3">
+<div class="flex justify-between items-center text-caption font-caption mb-1">
+<span class="text-outline font-medium">Proximity Radius</span>
+<span class="font-semibold text-navy-dark">Within 25 km</span>
+</div>
+<input class="w-full accent-secondary-container cursor-pointer" max="100" min="5" type="range" value="25"/>
+</div>
+</div>
+<!-- Filter Section 4: Price Range -->
+<div class="py-3 border-b border-border-hairline">
+<h3 class="text-caption font-caption font-bold uppercase tracking-wider text-outline mb-2">
+              Price Range (KES)
+            </h3>
+<div class="flex items-center gap-2">
+<div class="w-1/2">
+<span class="text-[10px] uppercase font-bold text-outline">Min</span>
+<div class="relative mt-0.5">
+<span class="absolute inset-y-0 left-2 flex items-center text-caption text-outline">KES</span>
+<input class="w-full pl-9 pr-2 py-1 bg-surface-alt border border-border-hairline rounded-lg text-body-sm font-semibold text-navy-dark" type="text" value="2,000"/>
+</div>
+</div>
+<span class="text-outline mt-3">-</span>
+<div class="w-1/2">
+<span class="text-[10px] uppercase font-bold text-outline">Max</span>
+<div class="relative mt-0.5">
+<span class="absolute inset-y-0 left-2 flex items-center text-caption text-outline">KES</span>
+<input class="w-full pl-9 pr-2 py-1 bg-surface-alt border border-border-hairline rounded-lg text-body-sm font-semibold text-navy-dark" type="text" value="80,000"/>
+</div>
+</div>
+</div>
+</div>
+<!-- Filter Section 5: Minimum Rating -->
+<div class="pt-3">
+<h3 class="text-caption font-caption font-bold uppercase tracking-wider text-outline mb-2">
+              Minimum Provider Rating
+            </h3>
+<div class="space-y-1">
+<label class="flex items-center gap-2 p-1.5 rounded-lg hover:bg-surface-alt cursor-pointer">
+<input checked="" class="text-secondary-container focus:ring-secondary-container" name="rating" type="radio"/>
+<span class="flex items-center text-body-sm font-body-sm text-navy-dark font-medium">
+<span class="material-symbols-outlined text-secondary-container text-[18px] mr-1" style="font-variation-settings: 'FILL' 1;">star</span>
+                  4.5 stars &amp; higher
+                </span>
+</label>
+<label class="flex items-center gap-2 p-1.5 rounded-lg hover:bg-surface-alt cursor-pointer">
+<input class="text-secondary-container focus:ring-secondary-container" name="rating" type="radio"/>
+<span class="flex items-center text-body-sm font-body-sm text-navy-dark font-medium">
+<span class="material-symbols-outlined text-secondary-container text-[18px] mr-1" style="font-variation-settings: 'FILL' 1;">star</span>
+                  4.0 stars &amp; higher
+                </span>
+</label>
+</div>
+</div>
+</div>
+<!-- Trust & Guarantee Mini Banner -->
+<div class="p-space-md bg-growth-green-light border border-growth-green-border rounded-2xl flex items-start gap-3">
+<div class="w-8 h-8 rounded-full bg-white flex items-center justify-center shrink-0 text-tertiary-fixed-dim shadow-xs">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+</div>
+<div>
+<h4 class="font-headline-sm text-caption font-bold text-tertiary-container">Tuungane Verified Guarantee</h4>
+<p class="font-body-sm text-caption text-on-surface-variant mt-0.5 leading-snug">
+              Direct verification of trade certifications and identity records ensures escrowed milestone safety.
+            </p>
+</div>
+</div>
+</aside>
+<!-- MAIN CONTENT: 3-COLUMN SERVICE CARD GRID (col-span-9) -->
+<section class="lg:col-span-9">
+<!-- DIRECTORY GRID -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-space-lg">
+<!-- CARD 1: Solar & Inverter -->
+<article class="bg-surface-container-lowest rounded-2xl border border-border-hairline shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 flex flex-col overflow-hidden group">
+<div class="relative h-44 w-full overflow-hidden bg-surface-alt">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Modern rooftop commercial solar panel array installation in sunny Nairobi Kenya under clear bright equatorial sky. High-contrast vivid photography showing precision engineered inverter gear, solar panels reflecting warm amber sunlight, and a certified technician in high-visibility safety vest doing electrical calibration." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCsaCUq76m5WRfdScYVwq_Iuru5MQI44wJUeGKYKA6Ubgqd3clViztUlXH45ZruGGGiFCJOm9Xzg_102MNMJ8dvP4l8VpOeuyZpWUCNtPRHFW1XgvBpHdBhsjUwV6PHxEFalKc_hXZwxotgTXJZYbgSLXciYBZXCBt33rFGlMFxaTfJBKEkGEXuy2cCtKLtr3RYUKPhPB163RVKVyGWhXomrjNBi-WesalBwj4SarEJzjc7ycqW1rQdjQ"/>
+<span class="absolute top-3 left-3 bg-white/95 backdrop-blur-sm text-navy-dark border border-border-hairline text-label-compact-badge font-label-compact-badge uppercase px-2 py-0.5 rounded-full font-bold shadow-xs">
+                Solar &amp; Electrical
+              </span>
+<span class="absolute top-3 right-3 bg-growth-green-light text-on-tertiary-container border border-growth-green-border text-label-compact-badge font-label-compact-badge uppercase px-2 py-0.5 rounded-full flex items-center gap-0.5 font-bold shadow-xs">
+<span class="material-symbols-outlined text-[10px]" style="font-variation-settings: 'FILL' 1;">near_me</span>
+                3.4 km
+              </span>
+</div>
+<!-- Card Body -->
+<div class="p-space-md flex-1 flex flex-col justify-between">
+<div>
+<!-- Provider Meta Row -->
+<div class="flex items-center gap-2.5 mb-2.5">
+<div class="relative">
+<img class="w-10 h-10 rounded-full object-cover ring-2 ring-growth-green-border" data-alt="Professional portrait avatar of an experienced Kalenjin electrical engineer and solar specialist with warm confident demeanor, wearing a clean industrial navy collared shirt with natural sunlit East African background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCa5YbcfkaBfMcKhRtb6wYedgMn-YJkV7wCw8GKSph8tgM2Y5tJ_BX5RuLUmEBu-p_bCeL-YbqzOVS9wLaHqXWgzZKslWMClheIO_BrhpY6Vq_WRvJuZyp0vn_W2-5NwIZmU8NaCNKz6_vXV-OPiQg6leQ2eieDYtpU9Mas4u0p9eU4pO6FEvWI3zFQKGX0SLMjCtgDFilR4jiznKP6-hQbQRdChAnOGis9p267L2ZOAKe56nGiVb1CeA"/>
+<span class="absolute -bottom-0.5 -right-0.5 bg-tertiary-fixed-dim text-white rounded-full p-0.5 flex items-center justify-center">
+<span class="material-symbols-outlined text-[10px]" style="font-variation-settings: 'FILL' 1;">check</span>
+</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-1">
+<h3 class="font-headline-sm text-body-sm font-bold text-navy-dark truncate">Kiprono Koech</h3>
+<span class="material-symbols-outlined text-tertiary-fixed-dim text-[16px]" style="font-variation-settings: 'FILL' 1;" title="Verified Provider">verified</span>
+</div>
+<p class="text-caption font-caption text-outline truncate">EPRA Certified Tech • Westlands</p>
+</div>
+</div>
+<!-- Title -->
+<h4 class="font-headline-sm text-headline-sm font-bold text-navy-dark leading-snug line-clamp-2 group-hover:text-secondary-container transition-colors mb-2">
+                  Professional Commercial Solar &amp; Inverter Installation
+                </h4>
+<!-- Reviews & Location -->
+<div class="flex items-center gap-2 text-caption font-caption mb-3">
+<div class="flex items-center gap-0.5 text-secondary-container font-bold">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span>4.9</span>
+</div>
+<span class="text-outline font-medium">(42 reviews)</span>
+<span class="text-border-hairline">•</span>
+<span class="text-on-surface-variant font-medium flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[14px]">location_on</span>
+                    Nairobi Central
+                  </span>
+</div>
+</div>
+<!-- Price & CTA Block -->
+<div class="pt-3 border-t border-border-hairline flex items-center justify-between mt-auto">
+<div>
+<span class="text-[10px] uppercase font-bold text-outline block">Pricing</span>
+<span class="font-headline-sm text-headline-sm font-extrabold text-navy-dark">KES 15,000</span>
+<span class="text-caption font-caption text-outline">/ setup</span>
+</div>
+<button class="px-3.5 py-2 bg-secondary-container hover:brightness-105 active:scale-[0.98] text-white font-headline-sm text-caption font-semibold rounded-xl shadow-sm transition-all flex items-center gap-1">
+                  Request Service
+                </button>
+</div>
+</div>
+<!-- Bottom Shelf Status -->
+<div class="bg-canvas-subtle px-space-md py-2 border-t border-border-hairline flex items-center justify-between text-caption font-caption">
+<span class="flex items-center gap-1.5 text-tertiary-fixed-dim font-semibold">
+<span class="w-2 h-2 rounded-full bg-tertiary-fixed-dim animate-pulse"></span>
+                Available today
+              </span>
+<span class="text-secondary-container font-semibold group-hover:underline">View details →</span>
+</div>
+</article>
+<!-- CARD 2: Full-Stack React & Mobile -->
+<article class="bg-surface-container-lowest rounded-2xl border border-border-hairline shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 flex flex-col overflow-hidden group">
+<div class="relative h-44 w-full overflow-hidden bg-surface-alt">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Modern tech workspace in Kilimani Nairobi featuring a clean timber desk setup with dual 4K monitors displaying lines of clean React and TypeScript code, sleek laptop, mechanical keyboard, and soft ambient morning studio light. Professional digital economy atmosphere." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAWZw1k_TD63pQnNnvy71an4qXNVH32-9_u4MEbUgzjTV5WDpg0v0jhS7WYG_ettlezK3CxPcFf2SOWoxRoY7BSPZU8CEm3YyTSXUGw3F_gwRw0UctmU88Xzgd2MLFQOxYrcV1hAzNurjLDycUuJRIFWCQldh6LkMNm8q8AoVT_biMCi-ep05Buclmc6sxOQqVuI2007a3BsZU6dDVHXC14e75Xi1lp4WF7PB3KQZ8yIpqJEvQreVOqVA"/>
+<span class="absolute top-3 left-3 bg-white/95 backdrop-blur-sm text-navy-dark border border-border-hairline text-label-compact-badge font-label-compact-badge uppercase px-2 py-0.5 rounded-full font-bold shadow-xs">
+                Software Dev
+              </span>
+<span class="absolute top-3 right-3 bg-growth-green-light text-on-tertiary-container border border-growth-green-border text-label-compact-badge font-label-compact-badge uppercase px-2 py-0.5 rounded-full flex items-center gap-0.5 font-bold shadow-xs">
+<span class="material-symbols-outlined text-[10px]" style="font-variation-settings: 'FILL' 1;">bolt</span>
+                Top Rated
+              </span>
+</div>
+<!-- Card Body -->
+<div class="p-space-md flex-1 flex flex-col justify-between">
+<div>
+<!-- Provider Meta Row -->
+<div class="flex items-center gap-2.5 mb-2.5">
+<div class="relative">
+<img class="w-10 h-10 rounded-full object-cover ring-2 ring-growth-green-border" data-alt="Studio portrait of a talented young female Kenyan software developer in Nairobi with natural braided hair, wearing glasses and a stylish dark blazer with sharp confident expression and bright soft studio lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB-C2SMNCJ2-DKQGkefyvpV6ZSTtC-XLCqzL1vx-Sp7BqT21nl3G1j7fYjQ-Z42fOkSJlvYPMC21-MDb83byk7psl5ntPoMS5Chg-n0x0yXzvqNN5LRoz9JP6neRHXPmlp8xV3As19QrTfdDr2akdb3GE90kMt2fsIcVIYhJoDJLxbydxmHH9Y5qR0e_Te0-KZjCYsM7NbkScaS5uQQvgG4KiT2c76x64VyJb_CbRCYVn-v6dzTGcMg8A"/>
+<span class="absolute -bottom-0.5 -right-0.5 bg-tertiary-fixed-dim text-white rounded-full p-0.5 flex items-center justify-center">
+<span class="material-symbols-outlined text-[10px]" style="font-variation-settings: 'FILL' 1;">check</span>
+</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-1">
+<h3 class="font-headline-sm text-body-sm font-bold text-navy-dark truncate">Amina Odhiambo</h3>
+<span class="material-symbols-outlined text-tertiary-fixed-dim text-[16px]" style="font-variation-settings: 'FILL' 1;" title="Verified Provider">verified</span>
+</div>
+<p class="text-caption font-caption text-outline truncate">Senior Engineer • Kilimani</p>
+</div>
+</div>
+<!-- Title -->
+<h4 class="font-headline-sm text-headline-sm font-bold text-navy-dark leading-snug line-clamp-2 group-hover:text-secondary-container transition-colors mb-2">
+                  Full-Stack Mobile &amp; Web Development with React &amp; Node
+                </h4>
+<!-- Reviews & Location -->
+<div class="flex items-center gap-2 text-caption font-caption mb-3">
+<div class="flex items-center gap-0.5 text-secondary-container font-bold">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span>5.0</span>
+</div>
+<span class="text-outline font-medium">(58 reviews)</span>
+<span class="text-border-hairline">•</span>
+<span class="text-on-surface-variant font-medium flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[14px]">location_on</span>
+                    Remote / Onsite
+                  </span>
+</div>
+</div>
+<!-- Price & CTA Block -->
+<div class="pt-3 border-t border-border-hairline flex items-center justify-between mt-auto">
+<div>
+<span class="text-[10px] uppercase font-bold text-outline block">Rate</span>
+<span class="font-headline-sm text-headline-sm font-extrabold text-navy-dark">KES 3,500</span>
+<span class="text-caption font-caption text-outline">/ hr</span>
+</div>
+<button class="px-3.5 py-2 bg-secondary-container hover:brightness-105 active:scale-[0.98] text-white font-headline-sm text-caption font-semibold rounded-xl shadow-sm transition-all flex items-center gap-1">
+                  Request Service
+                </button>
+</div>
+</div>
+<!-- Bottom Shelf Status -->
+<div class="bg-canvas-subtle px-space-md py-2 border-t border-border-hairline flex items-center justify-between text-caption font-caption">
+<span class="flex items-center gap-1.5 text-tertiary-fixed-dim font-semibold">
+<span class="w-2 h-2 rounded-full bg-tertiary-fixed-dim"></span>
+                Fast response (~15m)
+              </span>
+<span class="text-secondary-container font-semibold group-hover:underline">View details →</span>
+</div>
+</article>
+<!-- CARD 3: Brand Identity & Graphic Design -->
+<article class="bg-surface-container-lowest rounded-2xl border border-border-hairline shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 flex flex-col overflow-hidden group">
+<div class="relative h-44 w-full overflow-hidden bg-surface-alt">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Creative design agency studio table with high-end brand identity books, Pantone color swatch fans, typographic proof prints of African modern patterns, and a digital drawing tablet glowing softly under daylight lamps." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC-XNnS10C1sswBza_cftk2b9G7TzY8N5ZiMZEnWUZRculvMgAURp7Fbt1M9rS631WMWzI7mJI3wsRUWekdG0XcxZ4e_SQpvSYW-fIoqOrE7gt_Cuh3iyEwMQyd24eEQMTTjU0vgeSvCd0sboQe9Sj9qJUZPMDFIqa_5qFZF4ZuCd6FByYbGiMARdBoIShsAGua-DKqP1ffTQbzJ4AilOWYfORfHdhNq5Z3QRRR2iplnpZZM08bPQKpew"/>
+<span class="absolute top-3 left-3 bg-white/95 backdrop-blur-sm text-navy-dark border border-border-hairline text-label-compact-badge font-label-compact-badge uppercase px-2 py-0.5 rounded-full font-bold shadow-xs">
+                Branding &amp; UI
+              </span>
+<span class="absolute top-3 right-3 bg-growth-green-light text-on-tertiary-container border border-growth-green-border text-label-compact-badge font-label-compact-badge uppercase px-2 py-0.5 rounded-full flex items-center gap-0.5 font-bold shadow-xs">
+<span class="material-symbols-outlined text-[10px]" style="font-variation-settings: 'FILL' 1;">near_me</span>
+                5.1 km
+              </span>
+</div>
+<!-- Card Body -->
+<div class="p-space-md flex-1 flex flex-col justify-between">
+<div>
+<!-- Provider Meta Row -->
+<div class="flex items-center gap-2.5 mb-2.5">
+<div class="relative">
+<img class="w-10 h-10 rounded-full object-cover ring-2 ring-growth-green-border" data-alt="Headshot of a creative African designer man in Nairobi wearing a minimal black turtleneck with sharp geometric spectacles, smiling engagingly against a clean architectural studio background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCVP3N_11HU2G0aMEcWkX0D53Jkl_wZzByXXCkOcEDo7izfrPZjgvow3jJQUSLmHsGrU2FPz2hsM9ynix7o35JbX65hLY92PTxdOKuu4wzdNtV9H6zHiHPC3Q7FugfPBGurTgAEntKAq4IsqYmuguEHMf2TDE93fZ5vdNipeCShlXIPsECczCC3cT13TXhQ5h61nCm1NA7kaqW7hdYckVF2bEgZPrWHWagNZC-RL4eV6iAPKsQFtvO-1Q"/>
+<span class="absolute -bottom-0.5 -right-0.5 bg-tertiary-fixed-dim text-white rounded-full p-0.5 flex items-center justify-center">
+<span class="material-symbols-outlined text-[10px]" style="font-variation-settings: 'FILL' 1;">check</span>
+</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-1">
+<h3 class="font-headline-sm text-body-sm font-bold text-navy-dark truncate">David Mutua</h3>
+<span class="material-symbols-outlined text-tertiary-fixed-dim text-[16px]" style="font-variation-settings: 'FILL' 1;" title="Verified Provider">verified</span>
+</div>
+<p class="text-caption font-caption text-outline truncate">Art Director • Lavington</p>
+</div>
+</div>
+<!-- Title -->
+<h4 class="font-headline-sm text-headline-sm font-bold text-navy-dark leading-snug line-clamp-2 group-hover:text-secondary-container transition-colors mb-2">
+                  Complete Brand Identity &amp; Modern Packaging Design
+                </h4>
+<!-- Reviews & Location -->
+<div class="flex items-center gap-2 text-caption font-caption mb-3">
+<div class="flex items-center gap-0.5 text-secondary-container font-bold">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span>4.8</span>
+</div>
+<span class="text-outline font-medium">(31 reviews)</span>
+<span class="text-border-hairline">•</span>
+<span class="text-on-surface-variant font-medium flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[14px]">location_on</span>
+                    Lavington
+                  </span>
+</div>
+</div>
+<!-- Price & CTA Block -->
+<div class="pt-3 border-t border-border-hairline flex items-center justify-between mt-auto">
+<div>
+<span class="text-[10px] uppercase font-bold text-outline block">Package</span>
+<span class="font-headline-sm text-headline-sm font-extrabold text-navy-dark">KES 28,000</span>
+<span class="text-caption font-caption text-outline">/ project</span>
+</div>
+<button class="px-3.5 py-2 bg-secondary-container hover:brightness-105 active:scale-[0.98] text-white font-headline-sm text-caption font-semibold rounded-xl shadow-sm transition-all flex items-center gap-1">
+                  Request Service
+                </button>
+</div>
+</div>
+<!-- Bottom Shelf Status -->
+<div class="bg-canvas-subtle px-space-md py-2 border-t border-border-hairline flex items-center justify-between text-caption font-caption">
+<span class="flex items-center gap-1.5 text-tertiary-fixed-dim font-semibold">
+<span class="w-2 h-2 rounded-full bg-tertiary-fixed-dim"></span>
+                2 slots open this week
+              </span>
+<span class="text-secondary-container font-semibold group-hover:underline">View details →</span>
+</div>
+</article>
+<!-- CARD 4: Corporate Legal Advisory -->
+<article class="bg-surface-container-lowest rounded-2xl border border-border-hairline shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 flex flex-col overflow-hidden group">
+<div class="relative h-44 w-full overflow-hidden bg-surface-alt">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Modern law firm conference boardroom in Upper Hill Nairobi with floor to ceiling glass windows overlooking the city skyline, neat corporate documents, gavel and leather notebooks arranged in high contrast daylight." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBU8UBVTlTb5gqRWVtAi-bzO6oWhEJAM2n6rxD8O3uGIubylPINv6ijmdWUgImOErUHkd0DII0rO_zLFAeq74bJMklKMT0HmrODF-kmSEBRiKJbHmfziQ-bAU7oz-8bGykYSZbpnQeYX0LnNBhcWF9QNfYTtJaHNL9dqhyeCIi_VgAhY8AD3F9nmCkRNmzUtmwMVRtBkk9pSIvK9JRZz2IjaaZGOsPLB_ijuIWIefn_9FrtMTnpkRfEPw"/>
+<span class="absolute top-3 left-3 bg-white/95 backdrop-blur-sm text-navy-dark border border-border-hairline text-label-compact-badge font-label-compact-badge uppercase px-2 py-0.5 rounded-full font-bold shadow-xs">
+                Legal &amp; Compliance
+              </span>
+<span class="absolute top-3 right-3 bg-growth-green-light text-on-tertiary-container border border-growth-green-border text-label-compact-badge font-label-compact-badge uppercase px-2 py-0.5 rounded-full flex items-center gap-0.5 font-bold shadow-xs">
+<span class="material-symbols-outlined text-[10px]" style="font-variation-settings: 'FILL' 1;">near_me</span>
+                1.8 km
+              </span>
+</div>
+<!-- Card Body -->
+<div class="p-space-md flex-1 flex flex-col justify-between">
+<div>
+<!-- Provider Meta Row -->
+<div class="flex items-center gap-2.5 mb-2.5">
+<div class="relative">
+<img class="w-10 h-10 rounded-full object-cover ring-2 ring-growth-green-border" data-alt="Professional portrait of an experienced Kenyan female advocate and legal consultant in tailored navy corporate attire, poised and authoritative with natural confident smile in an Upper Hill office." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBHm6bIHqKv_qmKd-8RmRmdGxTChxGMYI6BBYHxS1-F6bheAjXOOoXlBxz2TluQqBKCTrSSEvzd2WjtiGrXypMmj8j7ikX6v96wo4umr8rGZ0XXWs_4LfBeG9qO_BGKLpOEtImtXcqmhSu-ISlpKIN5wXfoJE9hxtHJd3E_rsmnsrVLzISsknKB8dgzzp4Qq__4HIlQQ6gwVR3eokN4zSB8r3dtIGIX9xMerdrsvCxiTwcV9_mqPcZwfg"/>
+<span class="absolute -bottom-0.5 -right-0.5 bg-tertiary-fixed-dim text-white rounded-full p-0.5 flex items-center justify-center">
+<span class="material-symbols-outlined text-[10px]" style="font-variation-settings: 'FILL' 1;">check</span>
+</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-1">
+<h3 class="font-headline-sm text-body-sm font-bold text-navy-dark truncate">Wanjiku Karanja, Advocate</h3>
+<span class="material-symbols-outlined text-tertiary-fixed-dim text-[16px]" style="font-variation-settings: 'FILL' 1;" title="Verified Provider">verified</span>
+</div>
+<p class="text-caption font-caption text-outline truncate">LSK Member #4912 • Upper Hill</p>
+</div>
+</div>
+<!-- Title -->
+<h4 class="font-headline-sm text-headline-sm font-bold text-navy-dark leading-snug line-clamp-2 group-hover:text-secondary-container transition-colors mb-2">
+                  SME Business Registration, Tax Filing &amp; Contract Review
+                </h4>
+<!-- Reviews & Location -->
+<div class="flex items-center gap-2 text-caption font-caption mb-3">
+<div class="flex items-center gap-0.5 text-secondary-container font-bold">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span>4.9</span>
+</div>
+<span class="text-outline font-medium">(27 reviews)</span>
+<span class="text-border-hairline">•</span>
+<span class="text-on-surface-variant font-medium flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[14px]">location_on</span>
+                    Upper Hill
+                  </span>
+</div>
+</div>
+<!-- Price & CTA Block -->
+<div class="pt-3 border-t border-border-hairline flex items-center justify-between mt-auto">
+<div>
+<span class="text-[10px] uppercase font-bold text-outline block">Retainer from</span>
+<span class="font-headline-sm text-headline-sm font-extrabold text-navy-dark">KES 12,000</span>
+<span class="text-caption font-caption text-outline">/ task</span>
+</div>
+<button class="px-3.5 py-2 bg-secondary-container hover:brightness-105 active:scale-[0.98] text-white font-headline-sm text-caption font-semibold rounded-xl shadow-sm transition-all flex items-center gap-1">
+                  Request Service
+                </button>
+</div>
+</div>
+<!-- Bottom Shelf Status -->
+<div class="bg-canvas-subtle px-space-md py-2 border-t border-border-hairline flex items-center justify-between text-caption font-caption">
+<span class="flex items-center gap-1.5 text-tertiary-fixed-dim font-semibold">
+<span class="w-2 h-2 rounded-full bg-tertiary-fixed-dim"></span>
+                Accepting new clients
+              </span>
+<span class="text-secondary-container font-semibold group-hover:underline">View details →</span>
+</div>
+</article>
+<!-- CARD 5: Commercial Catering & Event Dining -->
+<article class="bg-surface-container-lowest rounded-2xl border border-border-hairline shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 flex flex-col overflow-hidden group">
+<div class="relative h-44 w-full overflow-hidden bg-surface-alt">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Exquisite corporate banquet buffet spread with artisanal East African fusion dishes, stainless steel chafing warmers, vibrant fresh herb garnishes, elegant glassware, and professional culinary presentation under warm festive hall lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBgTghXETUNhvzjneuPX0ARmQPHvqk7rOXL0sqTnUNtTlyPUR48zWZ3OCXVsfG1UlEiWPNnY4HzUe-Mq3PUO3fW3cHIvc3u2J4v0p7CC_j0iTDF7FpU3C1qbjp0LWsPm_hisfD2LQFKrpY5LIjEaSErZeEZ3Phyv60UAGbYQL-bj6ExfozFR1hxKtlomNXB9UdDLHgjaYV0dgdUyUW-1QW1_AXU1YWuEs9I4B7pndX03c9lEK2K4IlHMQ"/>
+<span class="absolute top-3 left-3 bg-white/95 backdrop-blur-sm text-navy-dark border border-border-hairline text-label-compact-badge font-label-compact-badge uppercase px-2 py-0.5 rounded-full font-bold shadow-xs">
+                Catering &amp; Events
+              </span>
+<span class="absolute top-3 right-3 bg-growth-green-light text-on-tertiary-container border border-growth-green-border text-label-compact-badge font-label-compact-badge uppercase px-2 py-0.5 rounded-full flex items-center gap-0.5 font-bold shadow-xs">
+<span class="material-symbols-outlined text-[10px]" style="font-variation-settings: 'FILL' 1;">near_me</span>
+                6.0 km
+              </span>
+</div>
+<!-- Card Body -->
+<div class="p-space-md flex-1 flex flex-col justify-between">
+<div>
+<!-- Provider Meta Row -->
+<div class="flex items-center gap-2.5 mb-2.5">
+<div class="relative">
+<img class="w-10 h-10 rounded-full object-cover ring-2 ring-growth-green-border" data-alt="Portrait of an African head chef woman wearing an immaculate white executive chef coat and black apron, smiling enthusiastically in a modern commercial stainless steel kitchen in Nairobi." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCg01Gz2reR5ecotgYvkB_JlPO912EOZZ7XG4K-8_VDxnGmionUzvor1kj1rLOJHeVINoktncdVwoqdl1JdGBsZsElDdEQNZKwPfYYUyvRk1Uu74l7X4k5wtagRnp3UbaaUTuUvYOao-FEmftSv1b1xKES1qqEi0IaE5h3qgov4x3D6nYBdr682ZCAik9rySNavyb9K1B3VCqkKUyXvDE0II_DC0CLaunygRVBCEqzVhYASQJlbpO2YaQ"/>
+<span class="absolute -bottom-0.5 -right-0.5 bg-tertiary-fixed-dim text-white rounded-full p-0.5 flex items-center justify-center">
+<span class="material-symbols-outlined text-[10px]" style="font-variation-settings: 'FILL' 1;">check</span>
+</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-1">
+<h3 class="font-headline-sm text-body-sm font-bold text-navy-dark truncate">Chef Grace Nekesa</h3>
+<span class="material-symbols-outlined text-tertiary-fixed-dim text-[16px]" style="font-variation-settings: 'FILL' 1;" title="Verified Provider">verified</span>
+</div>
+<p class="text-caption font-caption text-outline truncate">Food Handler Certified • Karen</p>
+</div>
+</div>
+<!-- Title -->
+<h4 class="font-headline-sm text-headline-sm font-bold text-navy-dark leading-snug line-clamp-2 group-hover:text-secondary-container transition-colors mb-2">
+                  Executive Corporate Catering &amp; Farm-to-Table Buffets
+                </h4>
+<!-- Reviews & Location -->
+<div class="flex items-center gap-2 text-caption font-caption mb-3">
+<div class="flex items-center gap-0.5 text-secondary-container font-bold">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span>4.9</span>
+</div>
+<span class="text-outline font-medium">(64 reviews)</span>
+<span class="text-border-hairline">•</span>
+<span class="text-on-surface-variant font-medium flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[14px]">location_on</span>
+                    Karen &amp; Environs
+                  </span>
+</div>
+</div>
+<!-- Price & CTA Block -->
+<div class="pt-3 border-t border-border-hairline flex items-center justify-between mt-auto">
+<div>
+<span class="text-[10px] uppercase font-bold text-outline block">Pricing</span>
+<span class="font-headline-sm text-headline-sm font-extrabold text-navy-dark">KES 1,200</span>
+<span class="text-caption font-caption text-outline">/ plate</span>
+</div>
+<button class="px-3.5 py-2 bg-secondary-container hover:brightness-105 active:scale-[0.98] text-white font-headline-sm text-caption font-semibold rounded-xl shadow-sm transition-all flex items-center gap-1">
+                  Request Service
+                </button>
+</div>
+</div>
+<!-- Bottom Shelf Status -->
+<div class="bg-canvas-subtle px-space-md py-2 border-t border-border-hairline flex items-center justify-between text-caption font-caption">
+<span class="flex items-center gap-1.5 text-tertiary-fixed-dim font-semibold">
+<span class="w-2 h-2 rounded-full bg-tertiary-fixed-dim animate-pulse"></span>
+                Available for weekends
+              </span>
+<span class="text-secondary-container font-semibold group-hover:underline">View details →</span>
+</div>
+</article>
+<!-- CARD 6: Agricultural Cold Chain Logistics -->
+<article class="bg-surface-container-lowest rounded-2xl border border-border-hairline shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 flex flex-col overflow-hidden group">
+<div class="relative h-44 w-full overflow-hidden bg-surface-alt">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" data-alt="Refrigerated agricultural transport truck parked at a modern distribution depot near Nairobi, loading crates of fresh Kenyan avocados and farm produce into temperature controlled cargo bays under high morning daylight." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBrfCIAjT-h9ZJBgN3SZGHLhc_l0xxpQh37TzFlTC1NtNmULprJJSk4_an9PVkugEtMHzPSzWC9a9V8gXYEvnJ9uUH4NrbOrX9nOQlueHl--lGeqaFdGHMEnwnngP3rJzphWGkLFMB_knaMLmhduv4u7DvxE4KVkthyV4YPQ7veqqGkhZsPZlaMicJ4n7mPIURH-DjV6k9027pxGj461L6kDBQVhYNuTKvWJz6WIewO4p9UP1v5qALVYg"/>
+<span class="absolute top-3 left-3 bg-white/95 backdrop-blur-sm text-navy-dark border border-border-hairline text-label-compact-badge font-label-compact-badge uppercase px-2 py-0.5 rounded-full font-bold shadow-xs">
+                Logistics &amp; Ag
+              </span>
+<span class="absolute top-3 right-3 bg-growth-green-light text-on-tertiary-container border border-growth-green-border text-label-compact-badge font-label-compact-badge uppercase px-2 py-0.5 rounded-full flex items-center gap-0.5 font-bold shadow-xs">
+<span class="material-symbols-outlined text-[10px]" style="font-variation-settings: 'FILL' 1;">near_me</span>
+                8.2 km
+              </span>
+</div>
+<!-- Card Body -->
+<div class="p-space-md flex-1 flex flex-col justify-between">
+<div>
+<!-- Provider Meta Row -->
+<div class="flex items-center gap-2.5 mb-2.5">
+<div class="relative">
+<img class="w-10 h-10 rounded-full object-cover ring-2 ring-growth-green-border" data-alt="Headshot of a Kenyan logistics fleet manager man in Nairobi wearing a high-visibility safety vest over a collared shirt, confident and experienced demeanor with outdoor logistics yard backdrop." src="https://lh3.googleusercontent.com/aida-public/AB6AXuChjJOkUwg3J5RRZUrLjTJ7y0r4yWSeYqvELxUiKLVvq7M306hq7_Bg8vzrNIrV7J6OWT23MfBMXglmWaxHbwEhBSg2_IteJD-9TzKn8gcbu8CMomGMm9OMJg2kwjzUICZFI1IQyLxLIDa47jwUSPVosXJ2HO-GUzQ9V3mOTWZeHH9X9xMWEd-voJ6CAkA7HR8f9nRcbW_7magGiZsQyf1UrU9r52frSfvYMbD3X0epDbiHnc2EGOq8FQ"/>
+<span class="absolute -bottom-0.5 -right-0.5 bg-tertiary-fixed-dim text-white rounded-full p-0.5 flex items-center justify-center">
+<span class="material-symbols-outlined text-[10px]" style="font-variation-settings: 'FILL' 1;">check</span>
+</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-1">
+<h3 class="font-headline-sm text-body-sm font-bold text-navy-dark truncate">Samuel Chege</h3>
+<span class="material-symbols-outlined text-tertiary-fixed-dim text-[16px]" style="font-variation-settings: 'FILL' 1;" title="Verified Provider">verified</span>
+</div>
+<p class="text-caption font-caption text-outline truncate">Transporter Verified • Embakasi</p>
+</div>
+</div>
+<!-- Title -->
+<h4 class="font-headline-sm text-headline-sm font-bold text-navy-dark leading-snug line-clamp-2 group-hover:text-secondary-container transition-colors mb-2">
+                  Temperature-Controlled Cold-Chain Produce Haulage
+                </h4>
+<!-- Reviews & Location -->
+<div class="flex items-center gap-2 text-caption font-caption mb-3">
+<div class="flex items-center gap-0.5 text-secondary-container font-bold">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">star</span>
+<span>4.7</span>
+</div>
+<span class="text-outline font-medium">(19 reviews)</span>
+<span class="text-border-hairline">•</span>
+<span class="text-on-surface-variant font-medium flex items-center gap-0.5">
+<span class="material-symbols-outlined text-[14px]">location_on</span>
+                    Nairobi / Rift Valley
+                  </span>
+</div>
+</div>
+<!-- Price & CTA Block -->
+<div class="pt-3 border-t border-border-hairline flex items-center justify-between mt-auto">
+<div>
+<span class="text-[10px] uppercase font-bold text-outline block">Base Freight</span>
+<span class="font-headline-sm text-headline-sm font-extrabold text-navy-dark">KES 9,500</span>
+<span class="text-caption font-caption text-outline">/ trip</span>
+</div>
+<button class="px-3.5 py-2 bg-secondary-container hover:brightness-105 active:scale-[0.98] text-white font-headline-sm text-caption font-semibold rounded-xl shadow-sm transition-all flex items-center gap-1">
+                  Request Service
+                </button>
+</div>
+</div>
+<!-- Bottom Shelf Status -->
+<div class="bg-canvas-subtle px-space-md py-2 border-t border-border-hairline flex items-center justify-between text-caption font-caption">
+<span class="flex items-center gap-1.5 text-tertiary-fixed-dim font-semibold">
+<span class="w-2 h-2 rounded-full bg-tertiary-fixed-dim"></span>
+                GPS Tracked Fleet
+              </span>
+<span class="text-secondary-container font-semibold group-hover:underline">View details →</span>
+</div>
+</article>
+</div>
+<!-- PAGINATION CONTROLS -->
+<div class="mt-space-xl pt-space-md border-t border-border-hairline flex flex-col sm:flex-row items-center justify-between gap-space-md">
+<p class="text-caption font-caption text-outline">
+            Showing <span class="font-semibold text-navy-dark">1 - 6</span> of <span class="font-semibold text-navy-dark">148</span> verified service listings
+          </p>
+<div class="flex items-center gap-1.5">
+<button aria-label="Previous Page" class="p-2 rounded-xl border border-border-hairline bg-surface-container-lowest text-outline hover:text-navy-dark hover:bg-surface-alt disabled:opacity-40 transition-colors" disabled="">
+<span class="material-symbols-outlined text-[18px]">chevron_left</span>
+</button>
+<button class="w-9 h-9 rounded-xl bg-navy-dark text-white font-semibold font-body-sm text-body-sm shadow-xs">
+              1
+            </button>
+<button class="w-9 h-9 rounded-xl border border-border-hairline bg-surface-container-lowest hover:bg-surface-alt text-navy-dark font-medium font-body-sm text-body-sm transition-colors">
+              2
+            </button>
+<button class="w-9 h-9 rounded-xl border border-border-hairline bg-surface-container-lowest hover:bg-surface-alt text-navy-dark font-medium font-body-sm text-body-sm transition-colors">
+              3
+            </button>
+<span class="px-1 text-outline">…</span>
+<button class="w-9 h-9 rounded-xl border border-border-hairline bg-surface-container-lowest hover:bg-surface-alt text-navy-dark font-medium font-body-sm text-body-sm transition-colors">
+              25
+            </button>
+<button aria-label="Next Page" class="p-2 rounded-xl border border-border-hairline bg-surface-container-lowest text-navy-dark hover:bg-surface-alt transition-colors">
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</div>
+</div>
+</section>
+</div>
+</main>
+<!-- WEB FOOTER -->
+<footer class="bg-navy-dark border-t border-border-subtle mt-auto">
+<div class="w-full py-space-xl px-gutter-desktop max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-space-md">
+<!-- Brand & Copyright -->
+<div class="flex flex-col sm:flex-row items-center gap-space-md text-center sm:text-left">
+<span class="text-headline-md font-headline-md font-bold text-surface-bright tracking-tight">Tuungane</span>
+<span class="hidden sm:inline text-outline">•</span>
+<p class="text-body-sm font-body-sm text-surface-bright/80">
+          © 2024 Tuungane Economic Marketplace. Empowering East African Enterprise.
+        </p>
+</div>
+<!-- Footer Links -->
+<div class="flex flex-wrap justify-center items-center gap-x-6 gap-y-2 text-caption font-caption">
+<a class="text-outline-variant hover:text-surface-bright transition-colors" href="#">Civic Guidelines</a>
+<a class="text-outline-variant hover:text-surface-bright transition-colors" href="#">Terms of Service</a>
+<a class="text-outline-variant hover:text-surface-bright transition-colors" href="#">Privacy Policy</a>
+<a class="text-outline-variant hover:text-surface-bright transition-colors" href="#">Verified Directory</a>
+<a class="text-outline-variant hover:text-surface-bright transition-colors" href="#">Trust &amp; Safety</a>
+<a class="text-surface-bright font-semibold underline" href="#">Language: Kiswahili / English</a>
+</div>
+</div>
+</footer>
+</body></html>

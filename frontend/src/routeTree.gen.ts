@@ -34,6 +34,7 @@ import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedRecoveryRouteImport } from './routes/_authenticated/recovery'
 import { Route as AuthenticatedOpportunitiesRouteImport } from './routes/_authenticated/opportunities'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
+import { Route as AuthenticatedMessagesRouteImport } from './routes/_authenticated/messages'
 import { Route as AuthenticatedMeRouteImport } from './routes/_authenticated/me'
 import { Route as AuthenticatedListSkillRouteImport } from './routes/_authenticated/list-skill'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
@@ -52,6 +53,7 @@ import { Route as AuthenticatedOpportunitiesJobIdRouteImport } from './routes/_a
 import { Route as AuthenticatedNotificationsPreferencesRouteImport } from './routes/_authenticated/notifications.preferences'
 import { Route as AuthenticatedNotificationsIdRouteImport } from './routes/_authenticated/notifications.$id'
 import { Route as AuthenticatedMessagesIdRouteImport } from './routes/_authenticated/messages.$id'
+import { Route as AuthenticatedDirectBookingsIdRouteImport } from './routes/_authenticated/direct-bookings.$id'
 import { Route as AuthenticatedBusinessesNewRouteImport } from './routes/_authenticated/businesses.new'
 import { Route as AuthenticatedOpportunitiesJobIdEditRouteImport } from './routes/_authenticated/opportunities_.$jobId_.edit'
 
@@ -181,6 +183,11 @@ const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
   path: '/onboarding',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedMessagesRoute = AuthenticatedMessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedMeRoute = AuthenticatedMeRouteImport.update({
   id: '/me',
   path: '/me',
@@ -220,9 +227,9 @@ const AuthenticatedNotificationsIndexRoute =
   } as any)
 const AuthenticatedMessagesIndexRoute =
   AuthenticatedMessagesIndexRouteImport.update({
-    id: '/messages/',
-    path: '/messages/',
-    getParentRoute: () => AuthenticatedRouteRoute,
+    id: '/',
+    path: '/',
+    getParentRoute: () => AuthenticatedMessagesRoute,
   } as any)
 const AuthenticatedRequestsNewRoute =
   AuthenticatedRequestsNewRouteImport.update({
@@ -277,10 +284,16 @@ const AuthenticatedNotificationsIdRoute =
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 const AuthenticatedMessagesIdRoute = AuthenticatedMessagesIdRouteImport.update({
-  id: '/messages/$id',
-  path: '/messages/$id',
-  getParentRoute: () => AuthenticatedRouteRoute,
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AuthenticatedMessagesRoute,
 } as any)
+const AuthenticatedDirectBookingsIdRoute =
+  AuthenticatedDirectBookingsIdRouteImport.update({
+    id: '/direct-bookings/$id',
+    path: '/direct-bookings/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedBusinessesNewRoute =
   AuthenticatedBusinessesNewRouteImport.update({
     id: '/businesses/new',
@@ -310,6 +323,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/list-skill': typeof AuthenticatedListSkillRoute
   '/me': typeof AuthenticatedMeRoute
+  '/messages': typeof AuthenticatedMessagesRouteWithChildren
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/opportunities': typeof AuthenticatedOpportunitiesRoute
   '/recovery': typeof AuthenticatedRecoveryRoute
@@ -324,6 +338,7 @@ export interface FileRoutesByFullPath {
   '/profiles/': typeof ProfilesIndexRoute
   '/services/': typeof ServicesIndexRoute
   '/businesses/new': typeof AuthenticatedBusinessesNewRoute
+  '/direct-bookings/$id': typeof AuthenticatedDirectBookingsIdRoute
   '/messages/$id': typeof AuthenticatedMessagesIdRoute
   '/notifications/$id': typeof AuthenticatedNotificationsIdRoute
   '/notifications/preferences': typeof AuthenticatedNotificationsPreferencesRoute
@@ -370,6 +385,7 @@ export interface FileRoutesByTo {
   '/profiles': typeof ProfilesIndexRoute
   '/services': typeof ServicesIndexRoute
   '/businesses/new': typeof AuthenticatedBusinessesNewRoute
+  '/direct-bookings/$id': typeof AuthenticatedDirectBookingsIdRoute
   '/messages/$id': typeof AuthenticatedMessagesIdRoute
   '/notifications/$id': typeof AuthenticatedNotificationsIdRoute
   '/notifications/preferences': typeof AuthenticatedNotificationsPreferencesRoute
@@ -404,6 +420,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/list-skill': typeof AuthenticatedListSkillRoute
   '/_authenticated/me': typeof AuthenticatedMeRoute
+  '/_authenticated/messages': typeof AuthenticatedMessagesRouteWithChildren
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/opportunities': typeof AuthenticatedOpportunitiesRoute
   '/_authenticated/recovery': typeof AuthenticatedRecoveryRoute
@@ -418,6 +435,7 @@ export interface FileRoutesById {
   '/profiles/': typeof ProfilesIndexRoute
   '/services/': typeof ServicesIndexRoute
   '/_authenticated/businesses/new': typeof AuthenticatedBusinessesNewRoute
+  '/_authenticated/direct-bookings/$id': typeof AuthenticatedDirectBookingsIdRoute
   '/_authenticated/messages/$id': typeof AuthenticatedMessagesIdRoute
   '/_authenticated/notifications/$id': typeof AuthenticatedNotificationsIdRoute
   '/_authenticated/notifications/preferences': typeof AuthenticatedNotificationsPreferencesRoute
@@ -452,6 +470,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/list-skill'
     | '/me'
+    | '/messages'
     | '/onboarding'
     | '/opportunities'
     | '/recovery'
@@ -466,6 +485,7 @@ export interface FileRouteTypes {
     | '/profiles/'
     | '/services/'
     | '/businesses/new'
+    | '/direct-bookings/$id'
     | '/messages/$id'
     | '/notifications/$id'
     | '/notifications/preferences'
@@ -512,6 +532,7 @@ export interface FileRouteTypes {
     | '/profiles'
     | '/services'
     | '/businesses/new'
+    | '/direct-bookings/$id'
     | '/messages/$id'
     | '/notifications/$id'
     | '/notifications/preferences'
@@ -545,6 +566,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/list-skill'
     | '/_authenticated/me'
+    | '/_authenticated/messages'
     | '/_authenticated/onboarding'
     | '/_authenticated/opportunities'
     | '/_authenticated/recovery'
@@ -559,6 +581,7 @@ export interface FileRouteTypes {
     | '/profiles/'
     | '/services/'
     | '/_authenticated/businesses/new'
+    | '/_authenticated/direct-bookings/$id'
     | '/_authenticated/messages/$id'
     | '/_authenticated/notifications/$id'
     | '/_authenticated/notifications/preferences'
@@ -778,6 +801,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOnboardingRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/messages': {
+      id: '/_authenticated/messages'
+      path: '/messages'
+      fullPath: '/messages'
+      preLoaderRoute: typeof AuthenticatedMessagesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/me': {
       id: '/_authenticated/me'
       path: '/me'
@@ -829,10 +859,10 @@ declare module '@tanstack/react-router' {
     }
     '/_authenticated/messages/': {
       id: '/_authenticated/messages/'
-      path: '/messages'
+      path: '/'
       fullPath: '/messages/'
       preLoaderRoute: typeof AuthenticatedMessagesIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      parentRoute: typeof AuthenticatedMessagesRoute
     }
     '/_authenticated/requests/new': {
       id: '/_authenticated/requests/new'
@@ -899,9 +929,16 @@ declare module '@tanstack/react-router' {
     }
     '/_authenticated/messages/$id': {
       id: '/_authenticated/messages/$id'
-      path: '/messages/$id'
+      path: '/$id'
       fullPath: '/messages/$id'
       preLoaderRoute: typeof AuthenticatedMessagesIdRouteImport
+      parentRoute: typeof AuthenticatedMessagesRoute
+    }
+    '/_authenticated/direct-bookings/$id': {
+      id: '/_authenticated/direct-bookings/$id'
+      path: '/direct-bookings/$id'
+      fullPath: '/direct-bookings/$id'
+      preLoaderRoute: typeof AuthenticatedDirectBookingsIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/businesses/new': {
@@ -921,17 +958,33 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedMessagesRouteChildren {
+  AuthenticatedMessagesIdRoute: typeof AuthenticatedMessagesIdRoute
+  AuthenticatedMessagesIndexRoute: typeof AuthenticatedMessagesIndexRoute
+}
+
+const AuthenticatedMessagesRouteChildren: AuthenticatedMessagesRouteChildren = {
+  AuthenticatedMessagesIdRoute: AuthenticatedMessagesIdRoute,
+  AuthenticatedMessagesIndexRoute: AuthenticatedMessagesIndexRoute,
+}
+
+const AuthenticatedMessagesRouteWithChildren =
+  AuthenticatedMessagesRoute._addFileChildren(
+    AuthenticatedMessagesRouteChildren,
+  )
+
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedListSkillRoute: typeof AuthenticatedListSkillRoute
   AuthenticatedMeRoute: typeof AuthenticatedMeRoute
+  AuthenticatedMessagesRoute: typeof AuthenticatedMessagesRouteWithChildren
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedOpportunitiesRoute: typeof AuthenticatedOpportunitiesRoute
   AuthenticatedRecoveryRoute: typeof AuthenticatedRecoveryRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedBusinessesNewRoute: typeof AuthenticatedBusinessesNewRoute
-  AuthenticatedMessagesIdRoute: typeof AuthenticatedMessagesIdRoute
+  AuthenticatedDirectBookingsIdRoute: typeof AuthenticatedDirectBookingsIdRoute
   AuthenticatedNotificationsIdRoute: typeof AuthenticatedNotificationsIdRoute
   AuthenticatedNotificationsPreferencesRoute: typeof AuthenticatedNotificationsPreferencesRoute
   AuthenticatedOpportunitiesJobIdRoute: typeof AuthenticatedOpportunitiesJobIdRoute
@@ -941,7 +994,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedProfilesNewRoute: typeof AuthenticatedProfilesNewRoute
   AuthenticatedRequestsIdRoute: typeof AuthenticatedRequestsIdRoute
   AuthenticatedRequestsNewRoute: typeof AuthenticatedRequestsNewRoute
-  AuthenticatedMessagesIndexRoute: typeof AuthenticatedMessagesIndexRoute
   AuthenticatedNotificationsIndexRoute: typeof AuthenticatedNotificationsIndexRoute
   AuthenticatedRequestsIndexRoute: typeof AuthenticatedRequestsIndexRoute
   AuthenticatedOpportunitiesJobIdEditRoute: typeof AuthenticatedOpportunitiesJobIdEditRoute
@@ -952,12 +1004,13 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedListSkillRoute: AuthenticatedListSkillRoute,
   AuthenticatedMeRoute: AuthenticatedMeRoute,
+  AuthenticatedMessagesRoute: AuthenticatedMessagesRouteWithChildren,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedOpportunitiesRoute: AuthenticatedOpportunitiesRoute,
   AuthenticatedRecoveryRoute: AuthenticatedRecoveryRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedBusinessesNewRoute: AuthenticatedBusinessesNewRoute,
-  AuthenticatedMessagesIdRoute: AuthenticatedMessagesIdRoute,
+  AuthenticatedDirectBookingsIdRoute: AuthenticatedDirectBookingsIdRoute,
   AuthenticatedNotificationsIdRoute: AuthenticatedNotificationsIdRoute,
   AuthenticatedNotificationsPreferencesRoute:
     AuthenticatedNotificationsPreferencesRoute,
@@ -969,7 +1022,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedProfilesNewRoute: AuthenticatedProfilesNewRoute,
   AuthenticatedRequestsIdRoute: AuthenticatedRequestsIdRoute,
   AuthenticatedRequestsNewRoute: AuthenticatedRequestsNewRoute,
-  AuthenticatedMessagesIndexRoute: AuthenticatedMessagesIndexRoute,
   AuthenticatedNotificationsIndexRoute: AuthenticatedNotificationsIndexRoute,
   AuthenticatedRequestsIndexRoute: AuthenticatedRequestsIndexRoute,
   AuthenticatedOpportunitiesJobIdEditRoute:

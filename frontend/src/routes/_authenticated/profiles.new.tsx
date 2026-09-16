@@ -40,7 +40,6 @@ function NewProfile() {
   const [name, setName] = useState("");
   const [categorySlug, setCategorySlug] = useState(SERVICE_CATEGORIES[0].slug);
   const [subcategory, setSubcategory] = useState(SERVICE_CATEGORIES[0].services[0].service);
-  const [contactForPrice, setContactForPrice] = useState(false);
   const [price, setPrice] = useState("");
   const [district, setDistrict] = useState("");
   const [town, setTown] = useState("");
@@ -74,7 +73,6 @@ function NewProfile() {
             setName(data.title || data.name || "");
             setCategorySlug(data.category_slug || SERVICE_CATEGORIES[0].slug);
             setSubcategory(data.subcategory || SERVICE_CATEGORIES[0].services[0].service);
-            setContactForPrice(data.price === null && data.price_unit === "contact");
             setPrice(data.price_fixed_ugx?.toString() || data.price?.toString() || "");
             setDistrict(data.district || data.profile?.district || "");
             setTown(data.town || data.profile?.town || "");
@@ -135,6 +133,8 @@ function NewProfile() {
     if (!user) return;
     if (!name.trim()) { toast.error("Service name is required"); return; }
     if (images.length < 1) { toast.error("Add at least 1 photo"); return; }
+    if (!price) { toast.error("Please specify a price"); return; }
+    if (!district || !town) { toast.error("Location (District and Town) is required"); return; }
     setBusy(true);
     const slug = `${slugify(name) || "profile"}-${Math.random().toString(36).slice(2, 8)}`;
     try {
@@ -148,11 +148,11 @@ function NewProfile() {
           category_slug: categorySlug,
           subcategory,
           description: bio || "",
-          district: district || null,
-          town: town || null,
-          price_type: contactForPrice ? null : (activeUnit ? "fixed" : null),
-          price_fixed_ugx: contactForPrice ? null : (price ? Number(price) : null),
-          price_note: contactForPrice ? null : activeUnit,
+          district: district,
+          town: town,
+          price_type: activeUnit ? "fixed" : null,
+          price_fixed_ugx: Number(price),
+          price_note: activeUnit,
           photos: images,
         };
       } else {
@@ -162,11 +162,11 @@ function NewProfile() {
           name: name.trim(),
           category_slug: categorySlug,
           subcategory,
-          district: district || null,
-          town: town || null,
+          district: district,
+          town: town,
           bio: bio || "",
-          price: contactForPrice ? null : (price ? Number(price) : null),
-          price_unit: contactForPrice ? "contact" : activeUnit,
+          price: Number(price),
+          price_unit: activeUnit,
           attach_to: attachTo,
           images,
           promo_plan: promoId === "free" ? null : promoId,
@@ -306,37 +306,22 @@ function NewProfile() {
 
         {/* PRICE */}
         <Section>
-          <label className="block text-sm font-semibold text-gray-700">Pricing</label>
-          <div className="mt-2 flex gap-3">
-            <button type="button" onClick={() => setContactForPrice(false)}
-              className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition ${!contactForPrice ? "border-orange-400 bg-orange-50 text-orange-600" : "border-gray-200 text-gray-500"}`}>
-              <span className={`h-4 w-4 rounded-full border-2 ${!contactForPrice ? "border-orange-500 bg-orange-500" : "border-gray-400"}`} />
-              Specify price
-            </button>
-            <button type="button" onClick={() => setContactForPrice(true)}
-              className={`flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-medium transition ${contactForPrice ? "border-orange-400 bg-orange-50 text-orange-600" : "border-gray-200 text-gray-500"}`}>
-              <span className={`h-4 w-4 rounded-full border-2 ${contactForPrice ? "border-orange-500 bg-orange-500" : "border-gray-400"}`} />
-              Contact for price
-            </button>
-          </div>
-
-          {!contactForPrice && (
-            <div className="mt-3 flex items-center gap-2">
-              <div className="relative flex-1">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-semibold text-gray-500">UGX</span>
-                <input type="number" value={price} onChange={e => setPrice(e.target.value)} placeholder="0"
-                  className="w-full rounded-xl border border-gray-200 bg-white py-3 pl-14 pr-4 text-sm outline-none focus:border-orange-400" />
-              </div>
-              <div className="shrink-0 max-w-[130px] truncate rounded-xl border border-gray-200 bg-white px-3 py-3 text-sm text-gray-600">
-                {activeUnit}
-              </div>
+          <label className="block text-sm font-semibold text-gray-700">Pricing *</label>
+          <div className="mt-3 flex items-center gap-2">
+            <div className="relative flex-1">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-semibold text-gray-500">UGX</span>
+              <input type="number" value={price} onChange={e => setPrice(e.target.value)} placeholder="0"
+                className="w-full rounded-xl border border-gray-200 bg-white py-3 pl-14 pr-4 text-sm outline-none focus:border-orange-400" />
             </div>
-          )}
+            <div className="shrink-0 max-w-[130px] truncate rounded-xl border border-gray-200 bg-white px-3 py-3 text-sm text-gray-600">
+              {activeUnit}
+            </div>
+          </div>
         </Section>
 
         {/* LOCATION */}
         <Section>
-          <label className="block text-sm font-semibold text-gray-700">Location</label>
+          <label className="block text-sm font-semibold text-gray-700">Location *</label>
           <div className="mt-2 grid grid-cols-2 gap-3">
             <LocationAutocomplete
               label="District"

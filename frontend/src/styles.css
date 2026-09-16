@@ -48,6 +48,38 @@
 
   --font-display: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
   --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+
+  /* Tuungane Civic Momentum Theme Extensions */
+  --color-surface-container-lowest: var(--surface-container-lowest);
+  --color-surface-container-low: var(--surface-container-low);
+  --color-surface-container: var(--surface-container);
+  --color-surface-container-high: var(--surface-container-high);
+  --color-surface-container-highest: var(--surface-container-highest);
+  --color-on-surface-variant: var(--on-surface-variant);
+  --color-navy-dark: var(--navy-dark);
+  --color-orange-gradient-end: var(--orange-gradient-end);
+  --color-growth-green-light: var(--growth-green-light);
+  --color-growth-green-border: var(--growth-green-border);
+  --color-canvas-subtle: var(--canvas-subtle);
+  --color-surface-alt: var(--surface-alt);
+  --color-border-hairline: var(--border-hairline);
+  --color-border-subtle: var(--border-subtle);
+  --color-text-jet: var(--text-jet);
+  --color-text-muted-mobile: var(--text-muted-mobile);
+  --color-destructive-red: var(--destructive-red);
+  --color-hero-indigo-stop: var(--hero-indigo-stop);
+  --color-outline: var(--outline);
+  --color-outline-variant: var(--outline-variant);
+
+  /* Spacing overrides for desktop layout */
+  --spacing-gutter: 1.5rem;
+  --spacing-gutter-mobile: 0.5rem;
+  --spacing-gutter-desktop: 2rem;
+  --spacing-space-xs: 0.25rem;
+  --spacing-space-sm: 0.5rem;
+  --spacing-space-md: 1rem;
+  --spacing-space-lg: 1.5rem;
+  --spacing-space-xl: 2rem;
 }
 
 :root {
@@ -89,6 +121,28 @@
   /* Preserved exactly — used by homepage hero, must not change look */
   --gradient-hero: linear-gradient(135deg, oklch(0.22 0.08 265) 0%, oklch(0.32 0.09 265) 60%, oklch(0.45 0.12 265) 100%);
   --gradient-accent: linear-gradient(135deg, var(--orange) 0%, #FF8A42 100%);
+
+  /* Tuungane Civic Momentum Tokens */
+  --surface-container-lowest: #ffffff;
+  --surface-container-low: #eff4ff;
+  --surface-container: #e5eeff;
+  --surface-container-high: #dce9ff;
+  --surface-container-highest: #d3e4fe;
+  --on-surface-variant: #44474d;
+  --navy-dark: #0B192C;
+  --orange-gradient-end: #FF8A42;
+  --growth-green-light: #E8F7EE;
+  --growth-green-border: #A3E2B8;
+  --canvas-subtle: #F8FAFC;
+  --surface-alt: #F1F5F9;
+  --border-hairline: #DADDE1;
+  --border-subtle: #E2E8F0;
+  --text-jet: #050505;
+  --text-muted-mobile: #4B4F56;
+  --destructive-red: #E53935;
+  --hero-indigo-stop: #1E3A8A;
+  --outline: #75777e;
+  --outline-variant: #c4c6ce;
 }
 
 .dark {

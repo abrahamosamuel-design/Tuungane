@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Search, MapPin, BadgeCheck, Wrench, Sparkles, Building2, Scissors, Truck, Car, GraduationCap, Camera, ChefHat, Laptop, HeartPulse, Sprout, MoreHorizontal, ShieldCheck, ChevronRight, ChevronDown, Star, ClipboardList, Bell, Heart, Phone, MessageCircle, ArrowLeft } from "lucide-react";
 
@@ -87,6 +87,23 @@ export function ServicesIndexPage({ initialSort }: { initialSort?: "recent" }) {
   const [loadingReal, setLoadingReal] = useState(true);
   const [dbCats, setDbCats] = useState<Array<{ slug: string; name: string; icon: string; blurb: string; subCount: number; examples: string }> | null>(null);
   const [showAllCats, setShowAllCats] = useState(false);
+  const popularContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const el = popularContainerRef.current;
+      if (!el) return;
+      const maxScroll = el.scrollWidth - el.clientWidth;
+      if (maxScroll <= 0) return;
+      const currentScroll = el.scrollLeft;
+      if (currentScroll + 10 >= maxScroll) {
+        el.scrollTo({ left: 0, behavior: 'smooth' });
+      } else {
+        el.scrollTo({ left: currentScroll + 256, behavior: 'smooth' });
+      }
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -278,7 +295,7 @@ export function ServicesIndexPage({ initialSort }: { initialSort?: "recent" }) {
                 <div className="flex items-center justify-between px-6 mb-4">
                   <h2 className="font-display text-xl font-bold text-navy">Popular services</h2>
                 </div>
-                <div className="flex overflow-x-auto pb-4 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                <div ref={popularContainerRef} className="flex overflow-x-auto pb-4 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                   <div className="w-6 shrink-0" />
                   {recommended.map((p, idx) => (
                     <div key={p.user_id} className={`w-[240px] shrink-0 snap-start ${idx !== recommended.length - 1 ? 'mr-4' : ''}`}>

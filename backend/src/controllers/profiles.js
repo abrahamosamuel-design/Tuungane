@@ -13,7 +13,18 @@ export const getMyProfile = async (req, res) => {
 
     if (error) throw error;
 
-    if (data) {
+    if (!data) {
+      const metaName = req.user.user_metadata?.full_name || req.user.user_metadata?.name || 'Anonymous User';
+      const metaAvatar = req.user.user_metadata?.avatar_url || req.user.user_metadata?.picture || null;
+      const { data: newProfile, error: insertError } = await supabaseAdmin
+        .from("profiles")
+        .insert([{ id: userId, full_name: metaName, avatar_url: metaAvatar }])
+        .select()
+        .single();
+      
+      if (insertError) throw insertError;
+      data = newProfile;
+    } else {
       let updated = false;
       let newName = data.full_name;
       let newAvatar = data.avatar_url;
@@ -365,7 +376,18 @@ export const getMyProfileDetails = async (req, res) => {
     const userId = req.user.id;
     let { data: p } = await supabaseAdmin.from("profiles").select("*").eq("id", userId).maybeSingle();
 
-    if (p) {
+    if (!p) {
+      const metaName = req.user.user_metadata?.full_name || req.user.user_metadata?.name || 'Anonymous User';
+      const metaAvatar = req.user.user_metadata?.avatar_url || req.user.user_metadata?.picture || null;
+      const { data: newProfile, error: insertError } = await supabaseAdmin
+        .from("profiles")
+        .insert([{ id: userId, full_name: metaName, avatar_url: metaAvatar }])
+        .select()
+        .single();
+      
+      if (insertError) throw insertError;
+      p = newProfile;
+    } else {
       let updated = false;
       let newName = p.full_name;
       let newAvatar = p.avatar_url;
@@ -743,6 +765,7 @@ export const getPublicProfileBySlug = async (req, res) => {
         .select("*")
         .eq("public_profile_id", p.id)
         .eq("hidden", false)
+        .neq("post_type", "opportunity_shared")
         .order("created_at", { ascending: false })
         .limit(30),
       supabaseAdmin
@@ -802,7 +825,7 @@ export const getProviderAuxData = async (req, res) => {
 
     services = userId === id ? (svcRows || []) : (svcRows || []).filter((r) => r.active);
 
-    const { data: psRaw } = await supabaseAdmin.from("timeline_posts").select("*").eq("provider_user_id", id).eq("hidden", false).order("created_at", { ascending: false });
+    const { data: psRaw } = await supabaseAdmin.from("timeline_posts").select("*").eq("provider_user_id", id).eq("hidden", false).neq("post_type", "opportunity_shared").order("created_at", { ascending: false });
     const { data: userProfile } = await supabaseAdmin.from("profiles").select("id,full_name,avatar_url").eq("id", id).maybeSingle();
     
     const serviceTitleMap = new Map((svcRows || []).map(s => [s.id, s.title]));

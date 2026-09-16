@@ -1,4 +1,4 @@
-﻿// Auto-generated from Tuungane_Services_Measurement_Units_Expanded.xlsx
+// Auto-generated from Tuungane_Services_Measurement_Units_Expanded.xlsx
 
 export interface ServiceEntry {
   service: string;
@@ -124,7 +124,7 @@ export const SERVICE_CATEGORIES: CategoryData[] = [
   { slug:"security", name:"Security & Safety", icon:"🔒", services:[
     {service:"Security guard services",unit:"per shift / per month"},{service:"Alarm system installation",unit:"per system / per point"},
     {service:"CCTV monitoring",unit:"per month"},{service:"Fire safety equipment supply & install",unit:"per unit / per job"},
-    {service:"Access control installation",unit:"per door / per system"},
+    {service:"Access control installation",unit:"per door / per system"},{service:"Keys and Locks",unit:"per key / per lock"},
   ]},
   { slug:"fashion", name:"Fashion & Tailoring", icon:"👗", services:[
     {service:"Tailoring / dressmaking",unit:"per garment"},{service:"Alterations & repairs",unit:"per item"},

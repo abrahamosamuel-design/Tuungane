@@ -1,13 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
+import { Loader2, ImagePlus, X } from "lucide-react";
 import { apiClient } from "@/lib/api";
 import { toast } from "sonner";
 import { PRICE_TYPE_OPTIONS, validatePriceGuide, type PriceType } from "@/lib/price-guide";
+import { useAuth } from "@/hooks/use-auth";
+import { uploadMedia } from "@/lib/upload";
 
 export type ServiceForm = {
   id?: string;
@@ -20,6 +22,7 @@ export type ServiceForm = {
   price_min_ugx: number | null;
   price_max_ugx: number | null;
   price_note: string | null;
+  photos: string[];
 };
 
 type Props = {
@@ -41,6 +44,7 @@ const empty: ServiceForm = {
   price_min_ugx: null,
   price_max_ugx: null,
   price_note: "",
+  photos: [],
 };
 
 const parseNum = (v: string): number | null => {
@@ -51,12 +55,34 @@ const parseNum = (v: string): number | null => {
 };
 
 export function ManageServiceDialog({ open, onClose, mode, profileId, initial, onSaved }: Props) {
+  const { user } = useAuth();
   const [form, setForm] = useState<ServiceForm>({ ...empty, ...(initial ?? {}) });
   const [busy, setBusy] = useState(false);
+  const [uploadingImg, setUploadingImg] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { if (open) setForm({ ...empty, ...(initial ?? {}) }); }, [open, initial]);
 
   const set = <K extends keyof ServiceForm>(k: K, v: ServiceForm[K]) => setForm((f) => ({ ...f, [k]: v }));
+
+  const handleImagePick = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    if (!files.length || !user) return;
+    if (form.photos.length + files.length > 5) { toast.error("Max 5 images"); return; }
+    
+    const validFiles = files.filter(f => f.size <= 3 * 1024 * 1024);
+    if (validFiles.length < files.length) {
+      toast.error("Images must be 3MB or less");
+    }
+    if (validFiles.length === 0) return;
+
+    setUploadingImg(true);
+    try {
+      const urls = await Promise.all(validFiles.map(f => uploadMedia(user.id, f, "service-images")));
+      set("photos", [...form.photos, ...urls]);
+    } catch { toast.error("Image upload failed"); }
+    finally { setUploadingImg(false); if (fileRef.current) fileRef.current.value = ""; }
+  };
 
   const save = async () => {
     if (!form.title.trim()) { toast.error("Service name is required"); return; }
@@ -80,6 +106,7 @@ export function ManageServiceDialog({ open, onClose, mode, profileId, initial, o
       price_max_ugx: form.price_type === "range" ? form.price_max_ugx : null,
       price_currency: "UGX",
       price_note: form.price_type ? (form.price_note?.trim() || null) : null,
+      photos: form.photos,
     };
     try {
       if (mode === "create") {
@@ -111,6 +138,26 @@ export function ManageServiceDialog({ open, onClose, mode, profileId, initial, o
           <div>
             <Label>Short description (optional)</Label>
             <Textarea value={form.description ?? ""} onChange={(e) => set("description", e.target.value)} rows={3} maxLength={500} />
+          </div>
+
+          <div>
+            <Label>Photos (up to 5)</Label>
+            <div className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-4">
+              {form.photos.map((url, idx) => (
+                <div key={idx} className="relative aspect-square overflow-hidden rounded-md border border-border">
+                  <img src={url} alt="Service" className="h-full w-full object-cover" />
+                  <button type="button" onClick={() => set("photos", form.photos.filter((_, i) => i !== idx))} className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-white hover:bg-red-500">
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
+              {form.photos.length < 5 && (
+                <button type="button" onClick={() => fileRef.current?.click()} disabled={busy || uploadingImg} className="flex aspect-square flex-col items-center justify-center gap-1 rounded-md border-2 border-dashed border-border bg-muted/20 text-muted-foreground hover:bg-muted/50 disabled:opacity-50">
+                  {uploadingImg ? <span className="text-xs">Uploading…</span> : <><ImagePlus className="h-6 w-6" /><span className="text-[10px]">Add photo</span></>}
+                </button>
+              )}
+            </div>
+            <input type="file" ref={fileRef} accept="image/*" multiple className="hidden" onChange={handleImagePick} />
           </div>
 
           <div className="rounded-xl border border-border p-3">
