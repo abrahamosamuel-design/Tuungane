@@ -421,60 +421,60 @@ function ProviderCard({ data }: { data: any }) {
   const isVerified = data.verified === "verified" || data.verified === "featured";
   const location = data.town || data.district || data.area || "";
   
-  const rawCover = data.cover_url || (data.media_urls && data.media_urls.length > 0 ? data.media_urls[0] : null) || data.avatar_url;
-  const coverImage = getOptimizedImageUrl(rawCover, 400, 300, 'cover');
-
   return (
-    <div className="group flex h-full flex-col overflow-hidden rounded-[20px] bg-white shadow-[0_4px_20px_rgb(0,0,0,0.06)] border border-border/40 relative">
-      <Link to="/u/$id" params={{ id: data.owner_id || data.id }} className="relative aspect-[4/3] w-full shrink-0 overflow-hidden bg-muted block">
-        {coverImage ? (
-          <img src={coverImage} alt={name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center bg-surface absolute inset-0">
-            <span className="font-display text-3xl font-bold uppercase text-muted-foreground/30">{name.substring(0, 2)}</span>
-          </div>
-        )}
-        {isVerified && (
-          <div className="absolute top-2 right-2 flex items-center justify-center rounded-full bg-white/95 p-1.5 shadow-sm backdrop-blur-sm">
-            <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full bg-green text-[8px] text-white">✓</span>
-          </div>
-        )}
-      </Link>
+    <div className="group flex flex-col h-full overflow-hidden rounded-[20px] bg-white shadow-[0_4px_20px_rgb(0,0,0,0.06)] border border-border/40 p-4 relative">
+      <div className="flex items-start gap-3">
+        <div className="shrink-0 relative">
+          <Avatar 
+            name={name} 
+            src={data.avatar_url || (data.media_urls && data.media_urls[0])} 
+            size={48} 
+            verifiedRing={isVerified} 
+          />
+        </div>
+        <div className="flex-1 min-w-0">
+          <Link to="/u/$id" params={{ id: data.owner_id || data.id }} className="font-display text-sm font-bold leading-tight text-navy line-clamp-1 hover:underline block tracking-tight">
+             {name}
+          </Link>
+          <p className="text-[11px] font-medium text-muted-foreground line-clamp-1 mt-0.5">
+            {data.subcategory || data.category_slug || "Service Provider"}
+          </p>
+          {location && (
+            <div className="mt-0.5 flex items-center gap-1 text-[11px] font-medium text-muted-foreground truncate">
+              <MapPin className="h-3 w-3 shrink-0" />
+              <span className="truncate">{location}</span>
+            </div>
+          )}
+        </div>
+      </div>
       
-      <div className="p-3 flex flex-col flex-1">
-         <div className="flex items-start justify-between gap-1">
-            <Link to="/u/$id" params={{ id: data.owner_id || data.id }} className="font-display text-[16px] font-bold leading-tight text-[#1A1A1A] line-clamp-1 block tracking-tight">
-               {name}
-            </Link>
-         </div>
-         
-         <p className="text-[12px] font-medium text-[#8F8F8F] line-clamp-1 mt-0.5">{data.subcategory || "Service Provider"}</p>
-         
-         {/* Meta Row */}
-         {location && (
-           <div className="mt-1.5 flex items-center gap-2 text-[11px] font-bold text-[#4A4A4A] truncate">
-             <div className="flex items-center gap-1">
-               <MapPin className="h-3 w-3 text-[#8F8F8F] shrink-0" />
-               <span className="truncate">{location}</span>
-             </div>
-           </div>
-         )}
-         
-         {/* Action Row */}
-         <div className="mt-auto pt-3 flex items-center gap-1.5">
-            <Link 
-              to="/service/$id" params={{ id: data.id }}
-              className="flex h-[36px] flex-1 items-center justify-center rounded-xl bg-orange text-[12.5px] font-bold text-white hover:brightness-110 transition-all shadow-sm"
-            >
-               View Details
-            </Link>
-            <Link 
-              to="/messages"
-              className="flex h-[36px] w-[36px] shrink-0 items-center justify-center rounded-xl border border-border text-navy/50 hover:bg-muted/50 transition-colors"
-            >
-               <MessageSquare className="h-4 w-4" />
-            </Link>
-         </div>
+      <div className="mt-3">
+        <span className="inline-flex items-center rounded bg-[#3b82f6] px-1.5 py-0.5 text-[10px] font-bold text-white">
+          Available
+        </span>
+      </div>
+      
+      {data.bio && (
+        <p className="mt-2 text-xs text-muted-foreground line-clamp-2">
+          {data.bio}
+        </p>
+      )}
+      
+      {/* Action Row */}
+      <div className="mt-auto pt-4 flex items-center gap-2">
+         <Link 
+           to="/service/$id" params={{ id: data.id }}
+           className="flex h-[40px] flex-1 items-center justify-center gap-1.5 rounded-xl bg-navy text-xs font-bold text-white hover:brightness-110 transition-all shadow-sm"
+         >
+            <CalendarPlus className="h-4 w-4" />
+            Request service
+         </Link>
+         <Link 
+           to="/messages"
+           className="flex h-[40px] w-[40px] shrink-0 items-center justify-center rounded-full border border-border text-navy hover:bg-muted/50 transition-colors"
+         >
+            <MessageSquare className="h-4 w-4 fill-current/10" />
+         </Link>
       </div>
     </div>
   );
