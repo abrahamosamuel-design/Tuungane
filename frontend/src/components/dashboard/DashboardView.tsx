@@ -141,7 +141,7 @@ export function DashboardView() {
     if (!data || !data.pages[0]) return { carouselServices: [], carouselRequests: [], carouselOpportunities: [] };
     const firstPage = data.pages[0];
     
-    const services = firstPage.profiles.slice(0, 10);
+    const services = shuffleArray([...firstPage.profiles], timeSeed()).slice(0, 10);
     const requests = firstPage.requests.slice(0, 10);
     const opps = firstPage.timelinePosts.filter((tp: any) => {
       if (tp.postType === "opportunity_shared") return true;
@@ -170,24 +170,18 @@ export function DashboardView() {
     
     shuffledPosts.forEach((post, index) => {
        finalFeed.push(post);
-       if (index === 9 && carouselServices.length > 0) {
-          finalFeed.push({ type: "carousel_services", id: "cs_1", data: carouselServices });
-       }
-       if (index === 19 && carouselRequests.length > 0) {
+       if (index === 9 && carouselRequests.length > 0) {
           finalFeed.push({ type: "carousel_requests", id: "cr_1", data: carouselRequests });
        }
-       if (index === 29 && carouselOpportunities.length > 0) {
+       if (index === 19 && carouselOpportunities.length > 0) {
           finalFeed.push({ type: "carousel_opportunities", id: "co_1", data: carouselOpportunities });
        }
     });
 
-    if (shuffledPosts.length <= 9 && carouselServices.length > 0) {
-        finalFeed.push({ type: "carousel_services", id: "cs_1", data: carouselServices });
-    }
-    if (shuffledPosts.length <= 19 && carouselRequests.length > 0) {
+    if (shuffledPosts.length <= 9 && carouselRequests.length > 0) {
         finalFeed.push({ type: "carousel_requests", id: "cr_1", data: carouselRequests });
     }
-    if (shuffledPosts.length <= 29 && carouselOpportunities.length > 0) {
+    if (shuffledPosts.length <= 19 && carouselOpportunities.length > 0) {
         finalFeed.push({ type: "carousel_opportunities", id: "co_1", data: carouselOpportunities });
     }
     
@@ -214,6 +208,14 @@ export function DashboardView() {
           <section className="col-span-12 lg:col-span-6 space-y-6">
             
             {/* Carousels now injected natively into the feed */}
+
+            {/* Services Near You (Top Row) */}
+            <DashboardCarousel 
+              title="Services Near You"
+              items={carouselServices}
+              renderItem={(item: any) => <ProviderCard data={item} />}
+              viewAllLink="/services"
+            />
 
             {/* Main Feed Header */}
             <div className="mb-4 mt-6">

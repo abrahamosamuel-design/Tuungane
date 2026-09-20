@@ -14,9 +14,9 @@ router.post('/presign', requireAuth, async (req, res) => {
       return res.status(400).json({ error: 'fileName and contentType are required' });
     }
 
-    // Only allow images
-    if (!contentType.startsWith('image/')) {
-      return res.status(400).json({ error: 'Only images are allowed' });
+    // Allow images and videos
+    if (!contentType.startsWith('image/') && !contentType.startsWith('video/')) {
+      return res.status(400).json({ error: 'Only images and short videos are allowed' });
     }
 
     // Generate a secure unique key

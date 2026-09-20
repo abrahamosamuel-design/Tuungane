@@ -16,11 +16,28 @@ type Props = {
 
 type MediaItem = { url: string; type: "image" | "video" };
 
+const getVideoDuration = (file: File): Promise<number> => {
+  return new Promise((resolve, reject) => {
+    const video = document.createElement("video");
+    video.preload = "metadata";
+    video.onloadedmetadata = () => {
+      URL.revokeObjectURL(video.src);
+      resolve(video.duration);
+    };
+    video.onerror = () => {
+      URL.revokeObjectURL(video.src);
+      reject(new Error("Invalid video file"));
+    };
+    video.src = URL.createObjectURL(file);
+  });
+};
+
 export function AddTimelinePostDialog({ open, onClose, jobTitle, requestId, serviceId, onPosted }: Props) {
   const { user } = useAuth();
   const [text, setText] = useState("");
   const [media, setMedia] = useState<MediaItem[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [progressMsg, setProgressMsg] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -29,15 +46,31 @@ export function AddTimelinePostDialog({ open, onClose, jobTitle, requestId, serv
   const addFiles = async (files: FileList | null) => {
     if (!files) return;
     setUploading(true);
+    setProgressMsg("Preparing upload...");
     try {
       const newItems: MediaItem[] = [];
       for (const f of Array.from(files).slice(0, 6 - media.length)) {
         const isVideo = f.type.startsWith("video/");
-        if (isVideo && f.size > 30 * 1024 * 1024) {
-          toast.error(`${f.name} exceeds 30 MB limit`);
-          continue;
+        if (isVideo) {
+          if (f.size > 30 * 1024 * 1024) {
+            toast.error(`${f.name} exceeds 30 MB limit`);
+            continue;
+          }
+          try {
+            const duration = await getVideoDuration(f);
+            if (duration > 60) {
+              toast.error(`${f.name} is longer than 60 seconds.`);
+              continue;
+            }
+          } catch (err) {
+            toast.error(`Could not read video metadata for ${f.name}`);
+            continue;
+          }
         }
-        const url = await uploadMedia(user.id, f, "timeline");
+        
+        const url = await uploadMedia(user.id, f, "timeline", (msg) => {
+          setProgressMsg(msg);
+        });
         newItems.push({ url, type: isVideo ? "video" : "image" });
       }
       setMedia((m) => [...m, ...newItems].slice(0, 6));
@@ -45,6 +78,7 @@ export function AddTimelinePostDialog({ open, onClose, jobTitle, requestId, serv
       toast.error(e instanceof Error ? e.message : "Upload failed");
     } finally {
       setUploading(false);
+      setProgressMsg("");
     }
   };
 
@@ -135,31 +169,38 @@ export function AddTimelinePostDialog({ open, onClose, jobTitle, requestId, serv
           )}
 
           {/* Add Media Button */}
-          <div className="flex gap-2">
-            <button
-              onClick={() => fileRef.current?.click()}
-              disabled={uploading || media.length >= 6}
-              className="flex items-center gap-2 rounded-xl border border-dashed border-border bg-muted/30 px-4 py-2.5 text-sm font-medium text-muted-foreground hover:border-orange hover:text-orange transition-colors disabled:opacity-50"
-            >
-              {uploading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <ImagePlus className="h-4 w-4" />
-              )}
-              Add Photos
-            </button>
-            <button
-              onClick={() => fileRef.current?.click()}
-              disabled={uploading || media.length >= 6}
-              className="flex items-center gap-2 rounded-xl border border-dashed border-border bg-muted/30 px-4 py-2.5 text-sm font-medium text-muted-foreground hover:border-orange hover:text-orange transition-colors disabled:opacity-50"
-            >
-              {uploading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Video className="h-4 w-4" />
-              )}
-              Add Video
-            </button>
+          <div className="flex flex-col gap-2">
+            <div className="flex gap-2">
+              <button
+                onClick={() => fileRef.current?.click()}
+                disabled={uploading || media.length >= 6}
+                className="flex items-center gap-2 rounded-xl border border-dashed border-border bg-muted/30 px-4 py-2.5 text-sm font-medium text-muted-foreground hover:border-orange hover:text-orange transition-colors disabled:opacity-50"
+              >
+                {uploading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <ImagePlus className="h-4 w-4" />
+                )}
+                Add Photos
+              </button>
+              <button
+                onClick={() => fileRef.current?.click()}
+                disabled={uploading || media.length >= 6}
+                className="flex items-center gap-2 rounded-xl border border-dashed border-border bg-muted/30 px-4 py-2.5 text-sm font-medium text-muted-foreground hover:border-orange hover:text-orange transition-colors disabled:opacity-50"
+              >
+                {uploading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Video className="h-4 w-4" />
+                )}
+                Add Video
+              </button>
+            </div>
+            {uploading && progressMsg && (
+              <p className="text-xs font-medium text-orange animate-pulse">
+                {progressMsg}
+              </p>
+            )}
           </div>
           <input
             ref={fileRef}

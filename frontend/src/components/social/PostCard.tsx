@@ -210,12 +210,11 @@ export function PostCard({ post, onChanged, userLoc, autoExpandComments = false 
               </div>
               {post.author?.is_provider && (
                 <Link
-                  to="/u/$id"
-                  search={{ serviceId: post.service_id } as never}
-                  params={{ id: post.provider_user_id }}
+                  to={post.service_id ? "/service/$id" : "/u/$id"}
+                  params={{ id: post.service_id || post.provider_user_id }}
                   className="rounded-full bg-navy px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:brightness-110"
                 >
-                  View service
+                  {post.service_id ? "View service" : "View provider"}
                 </Link>
               )}
             </div>
