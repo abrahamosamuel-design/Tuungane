@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState, forwardRef, Ref } from "react";
+import { useEffect, useMemo, useState, forwardRef, Ref, useRef } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Search, MoreHorizontal, Star, Wrench, Zap, Sparkles, Heart, MessageCircle, MessageSquare, Send, MapPin, ChevronRight, CalendarPlus } from "lucide-react";
+import { Search, MoreHorizontal, Star, Wrench, Zap, Sparkles, Heart, MessageCircle, MessageSquare, Send, MapPin, ChevronRight, ChevronLeft, CalendarPlus } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { apiClient } from "@/lib/api";
 import { FeedAvatar } from "@/components/feed/FeedAvatar";
@@ -737,18 +737,38 @@ function TimelinePostCard({ data }: { data: any }) {
 /* ---------- Dashboard Carousel ---------- */
 
 function DashboardCarousel({ title, items, renderItem, viewAllLink }: any) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  
   if (!items || items.length === 0) return null;
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollRef.current) {
+      const scrollAmount = 320;
+      scrollRef.current.scrollBy({ left: direction === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' });
+    }
+  };
+
   return (
-    <div className="mb-8">
+    <div className="mb-8 relative group">
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-lg font-bold text-navy">{title}</h2>
-        {viewAllLink && (
-          <Link to={viewAllLink} className="text-sm font-semibold text-orange hover:underline">
-            View All →
-          </Link>
-        )}
+        <div className="flex items-center gap-3">
+          <div className="hidden sm:flex items-center gap-1">
+            <button onClick={() => scroll('left')} className="p-1 rounded-full hover:bg-surface-alt text-navy/50 hover:text-navy transition-colors">
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+            <button onClick={() => scroll('right')} className="p-1 rounded-full hover:bg-surface-alt text-navy/50 hover:text-navy transition-colors">
+              <ChevronRight className="h-5 w-5" />
+            </button>
+          </div>
+          {viewAllLink && (
+            <Link to={viewAllLink} className="text-sm font-semibold text-orange hover:underline">
+              View All →
+            </Link>
+          )}
+        </div>
       </div>
-      <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory hide-scrollbar" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+      <div ref={scrollRef} className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory hide-scrollbar" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
         {items.map((item: any, idx: number) => (
           <div key={item.id || idx} className="snap-start shrink-0 w-[280px] md:w-[320px]">
             {renderItem(item)}
@@ -772,16 +792,36 @@ function DashboardCarousel({ title, items, renderItem, viewAllLink }: any) {
 /* ---------- carousel section ---------- */
 
 function CarouselSection({ title, items, renderItem, moreLink }: { title: string, items: any[], renderItem: (item: any) => React.ReactNode, moreLink: string }) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
   if (!items || items.length === 0) return null;
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollRef.current) {
+      const scrollAmount = 300;
+      scrollRef.current.scrollBy({ left: direction === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' });
+    }
+  };
+
   return (
-    <div className="mb-6 -mx-4 px-4 sm:mx-0 sm:px-0">
+    <div className="mb-6 -mx-4 px-4 sm:mx-0 sm:px-0 relative group">
       <div className="flex items-center justify-between mb-3 px-1">
         <h2 className="font-display text-lg font-bold text-navy">{title}</h2>
-        <Link to={moreLink} className="text-xs font-semibold text-navy hover:text-orange transition-colors">
-          View all <span className="text-sm">→</span>
-        </Link>
+        <div className="flex items-center gap-3">
+          <div className="hidden sm:flex items-center gap-1">
+            <button onClick={() => scroll('left')} className="p-1 rounded-full hover:bg-surface-alt text-navy/50 hover:text-navy transition-colors">
+              <ChevronLeft className="h-5 w-5" />
+            </button>
+            <button onClick={() => scroll('right')} className="p-1 rounded-full hover:bg-surface-alt text-navy/50 hover:text-navy transition-colors">
+              <ChevronRight className="h-5 w-5" />
+            </button>
+          </div>
+          <Link to={moreLink} className="text-xs font-semibold text-navy hover:text-orange transition-colors">
+            View all <span className="text-sm">→</span>
+          </Link>
+        </div>
       </div>
-      <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+      <div ref={scrollRef} className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         {items.map((item, i) => (
           <div key={i} className="w-[280px] shrink-0 snap-start flex flex-col items-stretch">
             {renderItem(item)}
