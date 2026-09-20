@@ -224,23 +224,6 @@ export function DashboardView() {
 
             {/* Desktop Sticky Top Bar */}
             <div className="hidden lg:flex flex-col gap-6 sticky top-24 z-30 pb-4 pt-2 -mt-2 bg-background">
-              {/* Desktop Post Creation Card (hidden on mobile) */}
-              <div className="bg-surface-container-lowest rounded-2xl border border-border-hairline shadow-sm p-4">
-                 <div className="flex items-center gap-3">
-                   <FeedAvatar src={user?.profile?.avatar_url || ""} name={user?.profile?.full_name || user?.email || "User"} size={40} />
-                   <button className="flex-1 text-left bg-surface-alt hover:bg-surface-container-low px-4 py-2.5 rounded-full text-sm text-outline border border-border-hairline/80 transition-colors">
-                     What opportunity or service are you looking for today, {user?.profile?.full_name?.split(' ')[0] || user?.email?.split('@')[0] || "friend"}?
-                   </button>
-                 </div>
-                 <div className="flex items-center justify-between pt-3 mt-3 border-t border-border-hairline/70">
-                   <Link to="/requests/new" className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-semibold text-orange hover:bg-orange/10 transition-all">
-                     <Wrench className="h-4 w-4" /> Post a Project Need
-                   </Link>
-                   <Link to="/opportunities/new-request" className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-semibold text-navy hover:bg-surface-alt transition-all">
-                     <Zap className="h-4 w-4 text-green" /> Share Opportunity
-                   </Link>
-                 </div>
-              </div>
 
               {/* Desktop Feed Filter Tabs */}
               <div className="flex bg-surface-container-lowest rounded-2xl border border-border-hairline shadow-sm p-1.5 items-center overflow-x-auto gap-1">
