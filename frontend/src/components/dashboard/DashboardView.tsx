@@ -59,7 +59,10 @@ const POST_TYPE_LABELS: Record<string, string> = {
 type FeedItem =
   | { type: "provider"; id: string; data: any }
   | { type: "request"; id: string; data: any }
-  | { type: "timeline_post"; id: string; data: any };
+  | { type: "timeline_post"; id: string; data: any }
+  | { type: "carousel_services"; id: string; data: any[] }
+  | { type: "carousel_requests"; id: string; data: any[] }
+  | { type: "carousel_opportunities"; id: string; data: any[] };
 
 export function DashboardView() {
   const { user } = useAuth();
@@ -134,21 +137,62 @@ export function DashboardView() {
     staleTime: 1000 * 60 * 5,
   });
 
+  const { carouselServices, carouselRequests, carouselOpportunities } = useMemo(() => {
+    if (!data || !data.pages[0]) return { carouselServices: [], carouselRequests: [], carouselOpportunities: [] };
+    const firstPage = data.pages[0];
+    
+    const services = firstPage.profiles.slice(0, 10);
+    const requests = firstPage.requests.slice(0, 10);
+    const opps = firstPage.timelinePosts.filter((tp: any) => {
+      if (tp.postType === "opportunity_shared") return true;
+      if (tp.text && typeof tp.text === 'string' && tp.text.trim().startsWith('{')) {
+        try {
+          const p = JSON.parse(tp.text);
+          return p.type === 'job_opportunity' || p.type === 'job_request';
+        } catch { return false; }
+      }
+      return false;
+    }).slice(0, 10);
+    
+    return { carouselServices: services, carouselRequests: requests, carouselOpportunities: opps };
+  }, [data]);
+
   const mixedFeed = useMemo(() => {
     if (!data) return [];
-    const allItems: FeedItem[] = [];
     
-    data.pages.forEach((page, pageIndex) => {
-        const pageFeed: FeedItem[] = [];
-        page.profiles.forEach((p: any) => pageFeed.push({ type: "provider", id: `prov-${p.id}`, data: p }));
-        page.requests.forEach((r: any) => pageFeed.push({ type: "request", id: `req-${r.id}`, data: r }));
-        page.timelinePosts.forEach((tp: any) => pageFeed.push({ type: "timeline_post", id: `tp-${tp.id}`, data: tp }));
-        
-        allItems.push(...shuffleArray(pageFeed, timeSeed() + pageIndex));
+    const allPosts: FeedItem[] = [];
+    data.pages.forEach((page) => {
+        page.timelinePosts.forEach((tp: any) => allPosts.push({ type: "timeline_post", id: `tp-${tp.id}`, data: tp }));
+    });
+    
+    const shuffledPosts = shuffleArray(allPosts, timeSeed());
+    const finalFeed: FeedItem[] = [];
+    
+    shuffledPosts.forEach((post, index) => {
+       finalFeed.push(post);
+       if (index === 9 && carouselServices.length > 0) {
+          finalFeed.push({ type: "carousel_services", id: "cs_1", data: carouselServices });
+       }
+       if (index === 19 && carouselRequests.length > 0) {
+          finalFeed.push({ type: "carousel_requests", id: "cr_1", data: carouselRequests });
+       }
+       if (index === 29 && carouselOpportunities.length > 0) {
+          finalFeed.push({ type: "carousel_opportunities", id: "co_1", data: carouselOpportunities });
+       }
     });
 
-    return allItems;
-  }, [data]);
+    if (shuffledPosts.length <= 9 && carouselServices.length > 0) {
+        finalFeed.push({ type: "carousel_services", id: "cs_1", data: carouselServices });
+    }
+    if (shuffledPosts.length <= 19 && carouselRequests.length > 0) {
+        finalFeed.push({ type: "carousel_requests", id: "cr_1", data: carouselRequests });
+    }
+    if (shuffledPosts.length <= 29 && carouselOpportunities.length > 0) {
+        finalFeed.push({ type: "carousel_opportunities", id: "co_1", data: carouselOpportunities });
+    }
+    
+    return finalFeed;
+  }, [data, carouselServices, carouselRequests, carouselOpportunities]);
 
   return (
     <div className="flex min-h-screen flex-col bg-background pb-20 md:pb-0">
@@ -156,15 +200,6 @@ export function DashboardView() {
       {/* MOBILE UI */}
       <div className="md:hidden bg-white">
         <MobileSearchBar placeholder="Search friend services" />
-        <CategoryScroll 
-          title="Services"
-          categories={[
-            { id: "1", name: "Plumbing", icon: <Wrench className="h-6 w-6" />, colorClass: "bg-navy" },
-            { id: "2", name: "Electric", icon: <Zap className="h-6 w-6" />, colorClass: "bg-orange" },
-            { id: "3", name: "Cleaning", icon: <Sparkles className="h-6 w-6" />, colorClass: "bg-green" },
-            { id: "4", name: "More", icon: <MoreHorizontal className="h-6 w-6" />, colorClass: "bg-slate-800", isMore: true },
-          ]} 
-        />
       </div>
 
       <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8 pt-2 md:pt-8">
@@ -178,15 +213,11 @@ export function DashboardView() {
           {/* ================= CENTER COLUMN (Feed) ================= */}
           <section className="col-span-12 lg:col-span-6 space-y-6">
             
-            {/* Section header (Mobile/Tablet only) */}
-            <div className="mb-6 flex items-center justify-between lg:hidden">
-              <div>
-                <h1 className="font-display text-xl font-bold text-navy md:text-2xl">Trusted providers near you</h1>
-                <p className="text-xs text-muted-foreground mt-1">Find local providers offering services around your area.</p>
-              </div>
-              <Link to="/services" className="hidden sm:inline-flex items-center gap-1 text-sm font-semibold text-navy hover:text-orange transition-colors">
-                View all <span className="text-lg">→</span>
-              </Link>
+            {/* Carousels now injected natively into the feed */}
+
+            {/* Main Feed Header */}
+            <div className="mb-4 mt-6">
+              <h2 className="font-display text-xl font-bold text-navy md:text-2xl">Community Feed</h2>
             </div>
 
             {/* Desktop Sticky Top Bar */}
@@ -231,6 +262,15 @@ export function DashboardView() {
                 }
                 if (item.type === "timeline_post") {
                   return <TimelinePostCard key={item.id} data={item.data} />;
+                }
+                if (item.type === "carousel_services") {
+                  return <DashboardCarousel key={item.id} title="Services Near You" items={item.data} viewAllLink="/services" renderItem={(p: any) => <ProviderCard data={p} />} />;
+                }
+                if (item.type === "carousel_requests") {
+                  return <DashboardCarousel key={item.id} title="Service Requests Near You" items={item.data} viewAllLink="/requests" renderItem={(r: any) => <RequestCard data={r} />} />;
+                }
+                if (item.type === "carousel_opportunities") {
+                  return <DashboardCarousel key={item.id} title="Opportunities For You" items={item.data} viewAllLink="/opportunities" renderItem={(o: any) => <TimelinePostCard data={o} />} />;
                 }
                 return null;
               })}
@@ -375,98 +415,64 @@ function RightSidebar() {
 /* ---------- provider card (matching reference design) ---------- */
 
 function ProviderCard({ data }: { data: any }) {
-  const location = data.area || data.town || data.district || "";
+  const name = data.business_name || data.name || data.profile?.full_name || "Provider";
   const isVerified = data.verified === "verified" || data.verified === "featured";
-  const isAvailable = data.availability === "available" || data.availability === "Available";
-  const [expanded, setExpanded] = useState(false);
-  const bioText = data.bio || "";
-  const showMore = bioText.length > 120;
+  const location = data.town || data.district || data.area || "";
+  
+  const rawCover = data.cover_url || (data.media_urls && data.media_urls.length > 0 ? data.media_urls[0] : null) || data.avatar_url;
+  const coverImage = getOptimizedImageUrl(rawCover, 400, 300, 'cover');
 
   return (
-    <div className="flex flex-col rounded-2xl border border-border bg-card shadow-sm overflow-hidden">
-      <div className="p-4 flex-1">
-        {/* Header: avatar + name + category */}
-        <div className="flex items-start gap-3 mb-3">
-          {data.avatar_url ? (
-            <img src={getOptimizedImageUrl(data.avatar_url, 64, 64)} className="h-11 w-11 rounded-full object-cover shrink-0" />
-          ) : (
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-navy/10 text-navy font-bold text-sm">
-              {(data.name || "?").charAt(0).toUpperCase()}{(data.name || "?").split(" ")[1]?.charAt(0)?.toUpperCase() || ""}
-            </div>
-          )}
-          <div className="min-w-0 flex-1">
-            <h3 className="text-sm font-bold text-navy truncate flex items-center gap-1">
-              {data.name}
-              {isVerified && (
-                <span className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-green text-[8px] text-white">✓</span>
-              )}
-            </h3>
-            <p className="text-[10px] text-muted-foreground truncate">
-              {data.subcategory}{data.category_slug ? ` · ${data.category_slug.replace(/-/g, " ").replace(/\b\w/g, (c: string) => c.toUpperCase())}` : ""}
-            </p>
-          </div>
-        </div>
-
-        {/* Location */}
-        {location && (
-          <div className="flex items-center gap-1 text-[10px] text-muted-foreground mb-2">
-            <MapPin className="h-3 w-3 text-orange shrink-0" />
-            <span className="truncate">{location}</span>
+    <div className="group flex h-full flex-col overflow-hidden rounded-[20px] bg-white shadow-[0_4px_20px_rgb(0,0,0,0.06)] border border-border/40 relative">
+      <Link to="/u/$id" params={{ id: data.owner_id || data.id }} className="relative aspect-[4/3] w-full shrink-0 overflow-hidden bg-muted block">
+        {coverImage ? (
+          <img src={coverImage} alt={name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center bg-surface absolute inset-0">
+            <span className="font-display text-3xl font-bold uppercase text-muted-foreground/30">{name.substring(0, 2)}</span>
           </div>
         )}
-
-        {/* Badges: Availability & Price */}
-        <div className="flex flex-wrap gap-2 mb-2">
-          {isAvailable && (
-            <span className="inline-block rounded-md bg-green/10 px-2 py-0.5 text-[10px] font-semibold text-green">
-              Available
-            </span>
-          )}
-          
-          {(data.price_fixed_ugx || data.price_min_ugx || data.price_note) && (
-            <span className="inline-block rounded-md bg-orange/10 px-2 py-0.5 text-[10px] font-semibold text-orange">
-              {data.price_note ? data.price_note : (data.price_fixed_ugx ? `UGX ${data.price_fixed_ugx.toLocaleString()}` : `From UGX ${data.price_min_ugx?.toLocaleString()}`)}
-            </span>
-          )}
-        </div>
-
-        {/* Bio */}
-        {bioText && (
-          <div className="mb-2">
-            <p className="text-xs text-navy/70 leading-relaxed whitespace-pre-line">
-              {expanded || !showMore ? bioText : bioText.slice(0, 120) + "..."}
-            </p>
-            {showMore && (
-              <button onClick={() => setExpanded(!expanded)} className="text-[11px] font-semibold text-orange hover:underline mt-0.5">
-                {expanded ? "Show less" : "Show more"}
-              </button>
-            )}
+        {isVerified && (
+          <div className="absolute top-2 right-2 flex items-center justify-center rounded-full bg-white/95 p-1.5 shadow-sm backdrop-blur-sm">
+            <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full bg-green text-[8px] text-white">✓</span>
           </div>
         )}
-      </div>
-
-      {/* Action bar */}
-      <div className="flex items-center gap-2 px-4 py-3 border-t border-border">
-        <Link
-          to="/service/$id"
-          params={{ id: data.id }}
-          className="flex flex-1 items-center justify-center gap-2 rounded-full bg-navy py-2.5 text-xs font-bold text-white hover:brightness-110 transition-all"
-        >
-          <CalendarPlus className="h-4 w-4" /> Request service
-        </Link>
-        <Link
-          to="/messages"
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border text-navy/50 hover:text-navy hover:bg-muted/50 transition-colors"
-        >
-          <MessageSquare className="h-4 w-4" />
-        </Link>
-        <Link
-          to="/service/$id"
-          params={{ id: data.id }}
-          className="flex items-center justify-center rounded-full border border-border px-5 py-2.5 text-xs font-semibold text-navy hover:bg-muted/50 transition-colors"
-        >
-          View
-        </Link>
+      </Link>
+      
+      <div className="p-3 flex flex-col flex-1">
+         <div className="flex items-start justify-between gap-1">
+            <Link to="/u/$id" params={{ id: data.owner_id || data.id }} className="font-display text-[16px] font-bold leading-tight text-[#1A1A1A] line-clamp-1 block tracking-tight">
+               {name}
+            </Link>
+         </div>
+         
+         <p className="text-[12px] font-medium text-[#8F8F8F] line-clamp-1 mt-0.5">{data.subcategory || "Service Provider"}</p>
+         
+         {/* Meta Row */}
+         {location && (
+           <div className="mt-1.5 flex items-center gap-2 text-[11px] font-bold text-[#4A4A4A] truncate">
+             <div className="flex items-center gap-1">
+               <MapPin className="h-3 w-3 text-[#8F8F8F] shrink-0" />
+               <span className="truncate">{location}</span>
+             </div>
+           </div>
+         )}
+         
+         {/* Action Row */}
+         <div className="mt-auto pt-3 flex items-center gap-1.5">
+            <Link 
+              to="/service/$id" params={{ id: data.id }}
+              className="flex h-[36px] flex-1 items-center justify-center rounded-xl bg-orange text-[12.5px] font-bold text-white hover:brightness-110 transition-all shadow-sm"
+            >
+               View Details
+            </Link>
+            <Link 
+              to="/messages"
+              className="flex h-[36px] w-[36px] shrink-0 items-center justify-center rounded-xl border border-border text-navy/50 hover:bg-muted/50 transition-colors"
+            >
+               <MessageSquare className="h-4 w-4" />
+            </Link>
+         </div>
       </div>
     </div>
   );
@@ -739,6 +745,72 @@ function TimelinePostCard({ data }: { data: any }) {
           )}
         </div>
       )}
+    </div>
+  );
+}
+
+/* ---------- Dashboard Carousel ---------- */
+
+function DashboardCarousel({ title, items, renderItem, viewAllLink }: any) {
+  if (!items || items.length === 0) return null;
+  return (
+    <div className="mb-8">
+      <div className="flex items-center justify-between mb-3">
+        <h2 className="text-lg font-bold text-navy">{title}</h2>
+        {viewAllLink && (
+          <Link to={viewAllLink} className="text-sm font-semibold text-orange hover:underline">
+            View All →
+          </Link>
+        )}
+      </div>
+      <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory hide-scrollbar" style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+        {items.map((item: any, idx: number) => (
+          <div key={item.id || idx} className="snap-start shrink-0 w-[280px] md:w-[320px]">
+            {renderItem(item)}
+          </div>
+        ))}
+        {viewAllLink && items.length >= 3 && (
+          <div className="snap-start shrink-0 w-[150px] flex items-center justify-center">
+             <Link to={viewAllLink} className="flex flex-col items-center gap-2 text-navy/60 hover:text-orange transition-colors">
+               <div className="h-12 w-12 rounded-full bg-surface-alt flex items-center justify-center">
+                 <ChevronRight className="h-6 w-6" />
+               </div>
+               <span className="text-sm font-semibold">See More</span>
+             </Link>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ---------- carousel section ---------- */
+
+function CarouselSection({ title, items, renderItem, moreLink }: { title: string, items: any[], renderItem: (item: any) => React.ReactNode, moreLink: string }) {
+  if (!items || items.length === 0) return null;
+  return (
+    <div className="mb-6 -mx-4 px-4 sm:mx-0 sm:px-0">
+      <div className="flex items-center justify-between mb-3 px-1">
+        <h2 className="font-display text-lg font-bold text-navy">{title}</h2>
+        <Link to={moreLink} className="text-xs font-semibold text-navy hover:text-orange transition-colors">
+          View all <span className="text-sm">→</span>
+        </Link>
+      </div>
+      <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        {items.map((item, i) => (
+          <div key={i} className="w-[280px] shrink-0 snap-start flex flex-col items-stretch">
+            {renderItem(item)}
+          </div>
+        ))}
+        <div className="w-[200px] shrink-0 snap-start flex items-center justify-center py-2">
+          <Link to={moreLink} className="flex flex-col items-center justify-center gap-2 text-navy hover:text-orange transition-colors h-full min-h-[160px] w-full rounded-2xl border-2 border-dashed border-border hover:border-orange bg-muted/20">
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-navy/5">
+              <MoreHorizontal className="h-5 w-5" />
+            </span>
+            <span className="text-sm font-semibold">View More</span>
+          </Link>
+        </div>
+      </div>
     </div>
   );
 }
