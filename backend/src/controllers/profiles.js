@@ -295,16 +295,38 @@ export const browseProfiles = async (req, res) => {
     let services = [];
     if (profiles && profiles.length > 0) {
       const ids = profiles.map((p) => p.id);
-      const { data: ps, error: sError } = await supabaseAdmin
-        .from("profile_services")
-        .select("id,profile_id,title,is_primary,price_type,price_fixed_ugx,price_min_ugx,price_max_ugx,price_currency")
-        .in("profile_id", ids)
-        .eq("active", true)
-        .order("is_primary", { ascending: false })
-        .order("sort_order");
+      const [
+        { data: ps, error: sError },
+        { data: media }
+      ] = await Promise.all([
+        supabaseAdmin
+          .from("profile_services")
+          .select("id,profile_id,title,is_primary,price_type,price_fixed_ugx,price_min_ugx,price_max_ugx,price_currency,photos")
+          .in("profile_id", ids)
+          .eq("active", true)
+          .order("is_primary", { ascending: false })
+          .order("sort_order"),
+        supabaseAdmin
+          .from("service_media")
+          .select("public_profile_id,url,is_cover")
+          .in("public_profile_id", ids)
+          .order("is_cover", { ascending: false })
+      ]);
 
       if (!sError) {
         services = ps || [];
+      }
+
+      // Attach media from service_media if available, and if no cover_url
+      if (media && media.length > 0) {
+        profiles.forEach(p => {
+          if (!p.cover_url) {
+            const m = media.find(x => x.public_profile_id === p.id);
+            if (m) {
+              p.cover_url = m.url;
+            }
+          }
+        });
       }
     }
 
