@@ -22,7 +22,6 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ServicesIndexRouteImport } from './routes/services.index'
-import { Route as ProfilesIndexRouteImport } from './routes/profiles.index'
 import { Route as ServicesSlugRouteImport } from './routes/services.$slug'
 import { Route as ServiceIdRouteImport } from './routes/service.$id'
 import { Route as PostsIdRouteImport } from './routes/posts.$id'
@@ -119,11 +118,6 @@ const IndexRoute = IndexRouteImport.update({
 const ServicesIndexRoute = ServicesIndexRouteImport.update({
   id: '/services/',
   path: '/services/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProfilesIndexRoute = ProfilesIndexRouteImport.update({
-  id: '/profiles/',
-  path: '/profiles/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ServicesSlugRoute = ServicesSlugRouteImport.update({
@@ -335,7 +329,6 @@ export interface FileRoutesByFullPath {
   '/posts/$id': typeof PostsIdRoute
   '/service/$id': typeof ServiceIdRoute
   '/services/$slug': typeof ServicesSlugRoute
-  '/profiles/': typeof ProfilesIndexRoute
   '/services/': typeof ServicesIndexRoute
   '/businesses/new': typeof AuthenticatedBusinessesNewRoute
   '/direct-bookings/$id': typeof AuthenticatedDirectBookingsIdRoute
@@ -382,7 +375,6 @@ export interface FileRoutesByTo {
   '/posts/$id': typeof PostsIdRoute
   '/service/$id': typeof ServiceIdRoute
   '/services/$slug': typeof ServicesSlugRoute
-  '/profiles': typeof ProfilesIndexRoute
   '/services': typeof ServicesIndexRoute
   '/businesses/new': typeof AuthenticatedBusinessesNewRoute
   '/direct-bookings/$id': typeof AuthenticatedDirectBookingsIdRoute
@@ -432,7 +424,6 @@ export interface FileRoutesById {
   '/posts/$id': typeof PostsIdRoute
   '/service/$id': typeof ServiceIdRoute
   '/services/$slug': typeof ServicesSlugRoute
-  '/profiles/': typeof ProfilesIndexRoute
   '/services/': typeof ServicesIndexRoute
   '/_authenticated/businesses/new': typeof AuthenticatedBusinessesNewRoute
   '/_authenticated/direct-bookings/$id': typeof AuthenticatedDirectBookingsIdRoute
@@ -482,7 +473,6 @@ export interface FileRouteTypes {
     | '/posts/$id'
     | '/service/$id'
     | '/services/$slug'
-    | '/profiles/'
     | '/services/'
     | '/businesses/new'
     | '/direct-bookings/$id'
@@ -529,7 +519,6 @@ export interface FileRouteTypes {
     | '/posts/$id'
     | '/service/$id'
     | '/services/$slug'
-    | '/profiles'
     | '/services'
     | '/businesses/new'
     | '/direct-bookings/$id'
@@ -578,7 +567,6 @@ export interface FileRouteTypes {
     | '/posts/$id'
     | '/service/$id'
     | '/services/$slug'
-    | '/profiles/'
     | '/services/'
     | '/_authenticated/businesses/new'
     | '/_authenticated/direct-bookings/$id'
@@ -619,7 +607,6 @@ export interface RootRouteChildren {
   PostsIdRoute: typeof PostsIdRoute
   ServiceIdRoute: typeof ServiceIdRoute
   ServicesSlugRoute: typeof ServicesSlugRoute
-  ProfilesIndexRoute: typeof ProfilesIndexRoute
   ServicesIndexRoute: typeof ServicesIndexRoute
   UIdIndexRoute: typeof UIdIndexRoute
 }
@@ -715,13 +702,6 @@ declare module '@tanstack/react-router' {
       path: '/services'
       fullPath: '/services/'
       preLoaderRoute: typeof ServicesIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/profiles/': {
-      id: '/profiles/'
-      path: '/profiles'
-      fullPath: '/profiles/'
-      preLoaderRoute: typeof ProfilesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/services/$slug': {
@@ -1051,7 +1031,6 @@ const rootRouteChildren: RootRouteChildren = {
   PostsIdRoute: PostsIdRoute,
   ServiceIdRoute: ServiceIdRoute,
   ServicesSlugRoute: ServicesSlugRoute,
-  ProfilesIndexRoute: ProfilesIndexRoute,
   ServicesIndexRoute: ServicesIndexRoute,
   UIdIndexRoute: UIdIndexRoute,
 }

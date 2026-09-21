@@ -38,7 +38,7 @@ function isEngaged(pathname: string, isAuthed: boolean): boolean {
     "/settings",
     "/requests",
     "/profiles/new",
-    "/profiles",
+    "/services",
     "/messages",
   ];
   if (engagedPaths.some((p) => pathname.startsWith(p))) return true;

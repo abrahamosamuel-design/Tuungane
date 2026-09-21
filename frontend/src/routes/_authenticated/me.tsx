@@ -240,7 +240,7 @@ function Me() {
               </p>
             )}
             <div className="mt-4 flex gap-3 w-full">
-              <Link to="/profiles/" className="flex-1 flex items-center justify-center gap-2 rounded-full border-2 border-navy/20 py-2 text-sm font-semibold text-navy hover:border-navy/40 transition-colors">
+              <Link to="/services/" className="flex-1 flex items-center justify-center gap-2 rounded-full border-2 border-navy/20 py-2 text-sm font-semibold text-navy hover:border-navy/40 transition-colors">
                 <Pencil className="h-4 w-4" /> Edit
               </Link>
               <button
@@ -284,7 +284,7 @@ function Me() {
               <StatCard icon={<Clock className="h-5 w-5" />}        label="Pending Jobs"      value={counts.pending}   color="bg-yellow-50 text-yellow-600" />
             </div>
 
-            <SectionCard title="My Services" action={{ label: "Manage All", to: "/profiles/" }}>
+            <SectionCard title="My Services" action={{ label: "Manage All", to: "/services/" }}>
               {!dashLoaded ? <p className="text-sm text-muted-foreground py-2">Loading…</p>
                 : services.length === 0 ? (
                   <div className="rounded-xl border border-dashed border-border bg-muted/30 p-5 text-center">

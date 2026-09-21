@@ -24,7 +24,7 @@ export function MyServicesSummary() {
     <div className="mt-6 rounded-2xl border border-border bg-card p-6">
       <div className="flex items-center justify-between">
         <h3 className="font-display text-base font-bold text-navy">My Services</h3>
-        <Link to="/profiles/" className="text-sm font-semibold text-orange hover:underline">
+        <Link to="/services/" className="text-sm font-semibold text-orange hover:underline">
           Manage All
         </Link>
       </div>
