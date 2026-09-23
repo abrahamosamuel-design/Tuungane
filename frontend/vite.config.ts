@@ -15,7 +15,7 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      "@": path.resolve(import.meta.dirname, "./src"),
     },
   },
   server: {
@@ -25,10 +25,12 @@ export default defineConfig({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: {
-          'vendor': ['react', 'react-dom'],
-          'router': ['@tanstack/react-router'],
-          'ui': ['lucide-react', 'sonner'],
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom')) return 'vendor';
+            if (id.includes('@tanstack/react-router')) return 'router';
+            if (id.includes('lucide-react') || id.includes('sonner')) return 'ui';
+          }
         }
       }
     }
