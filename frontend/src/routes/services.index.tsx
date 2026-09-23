@@ -1,11 +1,18 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { apiClient } from "@/lib/api";
-import { ShieldCheck, ChevronDown, Filter, ChevronLeft, ChevronRight } from "lucide-react";
+import { ShieldCheck, ChevronDown, Filter, ChevronLeft, ChevronRight, MapPin, BadgeCheck, Sparkles, Wrench, Building2, Scissors, Truck, Car, GraduationCap, Camera, ChefHat, Laptop, HeartPulse, Sprout, MoreHorizontal, MessageCircle } from "lucide-react";
 import { EmptyState } from "@/components/EmptyState";
 import { ServiceCard } from "@/components/pages/services/ServiceCard";
 import { ServiceFilterSidebar, FilterState } from "@/components/pages/services/ServiceFilterSidebar";
-import type { PriceType } from "@/lib/price-guide";
+import { Avatar } from "@/components/social/Avatar";
+import { ExpandableText } from "@/components/feed/ExpandableText";
+import { PriceGuideChip } from "@/components/PriceGuide";
+import type { PriceType, PriceGuide } from "@/lib/price-guide";
+import { MobileSearchBar } from "@/components/MobileSearchBar";
+import { categories } from "@/data/categories";
+
+const iconMap: Record<string, any> = { Wrench, Sparkles, Building2, Scissors, Truck, Car, GraduationCap, Camera, ChefHat, Laptop, HeartPulse, Sprout, MoreHorizontal };
 
 export const Route = createFileRoute("/services/")({
   head: () => ({
@@ -123,10 +130,13 @@ function ServicesDirectoryPage() {
     });
   }, [profiles, q, filters, servicesByProfile]);
 
+  const isSearching = q.length > 0 || filters.categories.length > 0 || filters.region.length > 0 || filters.verifiedOnly;
+  const [showAllCats, setShowAllCats] = useState(false);
+
   return (
     <div className="bg-muted/10 min-h-screen flex flex-col">
       {/* SUBHEADER HERO STRIP */}
-      <section className="bg-white border-b border-border py-6">
+      <section className="hidden md:block bg-white border-b border-border py-6">
         <div className="max-w-7xl mx-auto px-4 md:px-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
@@ -177,25 +187,99 @@ function ServicesDirectoryPage() {
       </section>
 
       {/* MAIN VIEWPORT */}
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 md:px-6 py-6 md:py-8">
+      <main className="flex-1 max-w-7xl mx-auto w-full px-0 py-0 md:px-6 md:py-8">
         
-        {/* Mobile Filter Toggle */}
-        <div className="lg:hidden mb-4 flex gap-2">
-          <input 
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Search by name or bio"
-            className="flex-1 rounded-xl border border-border bg-white px-4 py-2 text-sm"
-          />
+        {/* MOBILE DEFAULT: CATEGORIES LIST */}
+        <div className={`md:hidden ${isSearching ? 'hidden' : 'block'}`}>
+          <MobileSearchBar placeholder="What service do you need?" value={q} onChange={(e) => setQ(e.target.value)} />
+
+          {/* Popular Services (Horizontal Scroll) */}
+          {filteredItems.length > 0 && (
+            <div className="pt-2 pb-4">
+              <div className="flex items-center justify-between px-6 mb-4 mt-4">
+                <h2 className="font-display text-xl font-bold text-navy">Popular services</h2>
+              </div>
+              <div className="flex overflow-x-auto pb-4 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                <div className="w-6 shrink-0" />
+                {filteredItems.slice(0, 4).map((p, idx) => {
+                  const svcs = servicesByProfile[p.id] ?? [];
+                  const primary = svcs.find(s => s.is_primary) || svcs[0];
+                  return (
+                    <div key={p.id} className={`w-[240px] shrink-0 snap-start ${idx !== 3 ? 'mr-4' : ''}`}>
+                      <ProviderCardListMobile
+                        id={primary?.id || p.id}
+                        profileSlug={p.slug}
+                        coverUrl={primary?.photos?.[0] || p.cover_url || p.avatar_url}
+                        category={primary?.category_slug || p.profile_type}
+                        providerName={p.name}
+                        isVerified={p.verified === "verified"}
+                        locationName={[p.area, p.town].filter(Boolean).join(", ") || p.district || "Uganda"}
+                      />
+                    </div>
+                  );
+                })}
+                <div className="w-6 shrink-0" />
+              </div>
+            </div>
+          )}
+
+          {/* Services */}
+          <h2 className="font-display text-xl font-bold text-navy mb-3 px-6 pt-2">Services</h2>
+          <div className="flex flex-col gap-3 px-6 pb-6">
+            {(showAllCats ? categories : categories.slice(0, 4)).map((c) => {
+              const Icon = iconMap[c.icon] || Sparkles;
+              return (
+                <button
+                  key={c.slug}
+                  onClick={() => {
+                    setFilters(prev => ({ ...prev, categories: [c.slug] }));
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  className="flex items-center gap-3 rounded-2xl border border-border/30 bg-white p-3.5 shadow-sm transition-transform hover:-translate-y-0.5 active:scale-[0.98] text-left"
+                >
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-slate-100 text-navy">
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <div className="flex flex-1 flex-col gap-0.5">
+                    <span className="text-sm font-bold text-navy">{c.name}</span>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-navy/40" />
+                </button>
+              );
+            })}
+            {!showAllCats && categories.length > 4 && (
+              <button
+                onClick={() => setShowAllCats(true)}
+                className="flex items-center justify-center gap-2 rounded-2xl border border-border/30 bg-slate-50 p-3.5 shadow-sm transition-colors hover:bg-slate-100 text-sm font-bold text-navy mt-1"
+              >
+                More categories
+                <ChevronDown className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Mobile Filter Toggle (Only when searching) */}
+        <div className={`lg:hidden mb-4 flex gap-2 ${!isSearching ? 'hidden' : 'flex'} items-center`}>
+          <div className="flex-1">
+             <MobileSearchBar placeholder="What service do you need?" value={q} onChange={(e) => setQ(e.target.value)} />
+          </div>
           <button 
             onClick={() => setIsMobileFilterOpen(!isMobileFilterOpen)}
-            className="px-4 py-2 bg-white border border-border rounded-xl text-navy font-semibold text-sm flex items-center gap-2"
+            className="px-4 py-2 bg-white border border-border rounded-xl text-navy font-semibold text-sm flex items-center justify-center gap-2 h-[56px] mr-4 md:mr-0"
           >
             <Filter className="w-4 h-4" /> Filters
           </button>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start px-4 md:px-0 pb-12 md:pb-0">
+          
+          {/* Mobile Provider List Header (Only when NOT searching) */}
+          {!isSearching && (
+            <div className="md:hidden">
+              <h2 className="font-display text-xl font-bold text-navy pt-2">Service providers on Tuungane</h2>
+            </div>
+          )}
           
           {/* LEFT FILTER PANEL (col-span-3) */}
           <div className={`lg:col-span-3 ${isMobileFilterOpen ? 'block' : 'hidden lg:block'}`}>
@@ -226,61 +310,129 @@ function ServicesDirectoryPage() {
                 action={{ label: "Clear filters", onClick: () => { setQ(""); setFilters(initialFilters); } }}
               />
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {filteredItems.map(p => {
-                  const svcs = servicesByProfile[p.id] ?? [];
-                  const primary = svcs.find(s => s.is_primary) || svcs[0];
-                  
-                  // Mock data for missing fields
-                  const mockDistance = Math.random() * 10 + 1; 
-                  const mockRating = 4.5 + Math.random() * 0.5;
-                  const mockReviews = Math.floor(Math.random() * 100) + 5;
-                  
-                  return (
-                    <ServiceCard
-                      key={p.id}
-                      id={primary?.id || p.id}
-                      profileSlug={p.slug}
-                      coverUrl={primary?.photos?.[0] || p.cover_url}
-                      category={primary?.category_slug || p.profile_type}
-                      distanceKm={mockDistance}
-                      avatarUrl={p.avatar_url}
-                      providerName={p.name}
-                      isVerified={p.verified === "verified"}
-                      providerSubtitle={p.bio ? (p.bio.length > 40 ? p.bio.substring(0, 40) + '...' : p.bio) : undefined}
-                      title={primary?.title || `${p.name}'s Services`}
-                      rating={mockRating}
-                      reviewCount={mockReviews}
-                      locationName={[p.area, p.town].filter(Boolean).join(", ") || p.district || "Uganda"}
-                      priceAmount={primary?.price_fixed_ugx || primary?.price_min_ugx}
-                      priceCurrency="UGX"
-                      priceUnit={primary?.price_type === 'hourly' ? '/ hr' : undefined}
-                    />
-                  );
-                })}
-              </div>
+              <>
+                {/* Desktop View */}
+                <div className="hidden md:grid md:grid-cols-2 xl:grid-cols-3 gap-6">
+                  {filteredItems.map(p => {
+                    const svcs = servicesByProfile[p.id] ?? [];
+                    const primary = svcs.find(s => s.is_primary) || svcs[0];
+                    
+                    // Mock data for missing fields
+                    const mockDistance = Math.random() * 10 + 1; 
+                    const mockRating = 4.5 + Math.random() * 0.5;
+                    const mockReviews = Math.floor(Math.random() * 100) + 5;
+                    
+                    return (
+                      <ServiceCard
+                        key={p.id}
+                        id={primary?.id || p.id}
+                        profileSlug={p.slug}
+                        coverUrl={primary?.photos?.[0] || p.cover_url || p.avatar_url}
+                        category={primary?.category_slug || p.profile_type}
+                        distanceKm={mockDistance}
+                        avatarUrl={p.avatar_url}
+                        providerName={p.name}
+                        isVerified={p.verified === "verified"}
+                        providerSubtitle={p.bio ? (p.bio.length > 40 ? p.bio.substring(0, 40) + '...' : p.bio) : undefined}
+                        title={primary?.title || `${p.name}'s Services`}
+                        rating={mockRating}
+                        reviewCount={mockReviews}
+                        locationName={[p.area, p.town].filter(Boolean).join(", ") || p.district || "Uganda"}
+                        priceAmount={primary?.price_fixed_ugx || primary?.price_min_ugx}
+                        priceCurrency="UGX"
+                        priceUnit={primary?.price_type === 'hourly' ? '/ hr' : undefined}
+                      />
+                    );
+                  })}
+                </div>
+
+                {/* Mobile View */}
+                <div className="grid md:hidden grid-cols-2 gap-3">
+                  {filteredItems.map(p => {
+                    const svcs = servicesByProfile[p.id] ?? [];
+                    const primary = svcs.find(s => s.is_primary) || svcs[0];
+                    return (
+                      <ProviderCardListMobile
+                        key={p.id}
+                        id={primary?.id || p.id}
+                        profileSlug={p.slug}
+                        coverUrl={primary?.photos?.[0] || p.cover_url || p.avatar_url}
+                        category={primary?.category_slug || p.profile_type}
+                        providerName={p.name}
+                        isVerified={p.verified === "verified"}
+                        locationName={[p.area, p.town].filter(Boolean).join(", ") || p.district || "Uganda"}
+                      />
+                    );
+                  })}
+                </div>
+              </>
             )}
 
-            {/* PAGINATION CONTROLS */}
-            {!loading && filteredItems.length > 0 && (
-              <div className="mt-12 pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
-                <p className="text-xs text-muted-foreground">
-                  Showing <span className="font-semibold text-navy">1 - {filteredItems.length}</span> of <span className="font-semibold text-navy">{filteredItems.length}</span> verified service listings
-                </p>
-                <div className="flex items-center gap-1.5">
-                  <button disabled className="p-2 rounded-xl border border-border bg-white text-muted-foreground disabled:opacity-40 transition-colors">
-                    <ChevronLeft className="w-4 h-4" />
-                  </button>
-                  <button className="w-9 h-9 rounded-xl bg-navy text-white font-semibold text-sm shadow-sm">1</button>
-                  <button className="p-2 rounded-xl border border-border bg-white text-navy hover:bg-muted transition-colors">
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            )}
           </section>
         </div>
       </main>
+    </div>
+  );
+}
+
+function ProviderCardListMobile({ 
+  id, profileSlug, coverUrl, category, providerName, isVerified, locationName
+}: { 
+  id: string; profileSlug: string; coverUrl?: string | null; category: string;
+  providerName: string; isVerified: boolean; locationName: string;
+}) {
+  const [imgError, setImgError] = useState(false);
+
+  return (
+    <div className="group flex flex-col overflow-hidden rounded-[20px] bg-white shadow-[0_4px_20px_rgb(0,0,0,0.06)] border border-border/40 relative h-full">
+      <Link to="/service/$id" params={{ id: id }} className="relative aspect-[4/3] w-full shrink-0 overflow-hidden bg-muted block">
+        {coverUrl && !imgError ? (
+          <img 
+            src={coverUrl} 
+            alt={providerName} 
+            className="absolute inset-0 h-full w-full object-cover" 
+            onError={() => setImgError(true)} 
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center bg-surface absolute inset-0">
+            <span className="font-display text-3xl font-bold uppercase text-muted-foreground/30">{providerName.substring(0, 2)}</span>
+          </div>
+        )}
+        {isVerified && (
+          <div className="absolute top-2 right-2 flex items-center justify-center rounded-full bg-white/95 p-1.5 shadow-sm backdrop-blur-sm">
+            <BadgeCheck className="h-3.5 w-3.5 text-green-600" />
+          </div>
+        )}
+      </Link>
+      <div className="p-2 flex flex-col flex-1">
+         <div className="flex items-start justify-between gap-1">
+            <Link to="/p/$slug" params={{ slug: profileSlug }} className="font-display text-[16px] font-bold leading-tight text-[#1A1A1A] line-clamp-1 block tracking-tight">
+               {providerName}
+            </Link>
+         </div>
+         <p className="text-[12px] font-medium text-[#8F8F8F] line-clamp-1">{category || "Service"}</p>
+         <div className="mt-1 flex items-center gap-2 text-[11px] font-bold text-[#4A4A4A] truncate">
+           <div className="flex items-center gap-1">
+             <MapPin className="h-3 w-3 text-[#8F8F8F] shrink-0" />
+             <span className="truncate">{locationName || "Uganda"}</span>
+           </div>
+         </div>
+         <div className="mt-auto pt-2.5 flex items-center gap-1.5">
+            <Link 
+              to="/service/$id" params={{ id: id }}
+              className="flex h-[36px] flex-1 items-center justify-center rounded-[8px] bg-orange text-[12.5px] font-bold text-white hover:brightness-110 transition-all shadow-[0_4px_12px_rgba(249,115,22,0.3)]"
+            >
+               View details
+            </Link>
+            <div 
+              role="button"
+              onClick={(e) => { e.preventDefault(); }}
+              className="flex h-[36px] w-[36px] shrink-0 items-center justify-center rounded-[8px] border border-orange/20 bg-orange/5 text-orange hover:bg-orange/10 transition-colors cursor-pointer"
+            >
+               <MessageCircle className="h-4 w-4 pointer-events-none" />
+            </div>
+         </div>
+      </div>
     </div>
   );
 }

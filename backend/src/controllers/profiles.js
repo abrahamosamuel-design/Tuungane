@@ -282,7 +282,7 @@ export const deletePublicProfile = async (req, res) => {
 
 export const browseProfiles = async (req, res) => {
   try {
-    const { data: profiles, error: pError } = await supabaseAdmin
+    const { data: publicProfiles, error: pError } = await supabaseAdmin
       .from("public_profiles")
       .select("id,owner_id,slug,name,profile_type,bio,avatar_url,cover_url,district,town,area,verified,is_featured")
       .eq("suspended", false)
@@ -292,30 +292,67 @@ export const browseProfiles = async (req, res) => {
 
     if (pError) throw pError;
 
-    let services = [];
-    if (profiles && profiles.length > 0) {
-      const ids = profiles.map((p) => p.id);
-      const [
-        { data: ps, error: sError },
-        { data: media }
-      ] = await Promise.all([
-        supabaseAdmin
-          .from("profile_services")
-          .select("id,profile_id,title,is_primary,price_type,price_fixed_ugx,price_min_ugx,price_max_ugx,price_currency,photos")
-          .in("profile_id", ids)
-          .eq("active", true)
-          .order("is_primary", { ascending: false })
-          .order("sort_order"),
-        supabaseAdmin
-          .from("service_media")
-          .select("public_profile_id,url,is_cover")
-          .in("public_profile_id", ids)
-          .order("is_cover", { ascending: false })
-      ]);
+    // Fetch all active services
+    const { data: ps, error: sError } = await supabaseAdmin
+      .from("profile_services")
+      .select("id,profile_id,user_profile_id,title,category_slug,subcategory,is_primary,price_type,price_fixed_ugx,price_min_ugx,price_max_ugx,price_currency,photos")
+      .eq("active", true)
+      .order("is_primary", { ascending: false })
+      .order("sort_order")
+      .limit(500);
 
-      if (!sError) {
-        services = ps || [];
+    let services = ps || [];
+    let profiles = publicProfiles || [];
+
+    // Find services that only have user_profile_id
+    const userProfileIds = services
+      .filter(s => !s.profile_id && s.user_profile_id)
+      .map(s => s.user_profile_id);
+      
+    const uniqueUserIds = [...new Set(userProfileIds)];
+
+    if (uniqueUserIds.length > 0) {
+      const { data: userProfiles } = await supabaseAdmin
+        .from("profiles")
+        .select("id,full_name,avatar_url")
+        .in("id", uniqueUserIds);
+
+      if (userProfiles) {
+        userProfiles.forEach(up => {
+          profiles.push({
+            id: up.id, 
+            owner_id: up.id,
+            slug: `user-${up.id.substring(0,8)}`,
+            name: up.full_name || "User",
+            profile_type: "individual",
+            bio: "",
+            avatar_url: up.avatar_url,
+            cover_url: null,
+            district: null,
+            town: null,
+            area: null,
+            verified: "unverified",
+            is_featured: false
+          });
+        });
       }
+    }
+
+    // Now fix up services so they all have a profile_id
+    services = services.map(s => {
+      if (!s.profile_id && s.user_profile_id) {
+        s.profile_id = s.user_profile_id;
+      }
+      return s;
+    });
+
+    const ids = profiles.map((p) => p.id);
+    if (ids.length > 0) {
+      const { data: media } = await supabaseAdmin
+        .from("service_media")
+        .select("public_profile_id,url,is_cover")
+        .in("public_profile_id", ids)
+        .order("is_cover", { ascending: false });
 
       // Attach media from service_media if available, and if no cover_url
       if (media && media.length > 0) {
@@ -330,7 +367,7 @@ export const browseProfiles = async (req, res) => {
       }
     }
 
-    res.json({ data: { profiles: profiles || [], services } });
+    res.json({ data: { profiles, services } });
   } catch (err) {
     console.error('Error browsing profiles:', err);
     res.status(500).json({ error: 'Failed to browse profiles' });
