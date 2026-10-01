@@ -124,7 +124,7 @@ function NewProfile() {
     try {
       const urls = await Promise.all(validFiles.map(f => uploadMedia(user.id, f, "service-images")));
       setImages(prev => [...prev, ...urls]);
-    } catch { toast.error("Image upload failed"); }
+    } catch (err) { console.error("Upload error:", err); toast.error("Image upload failed"); }
     finally { setUploadingImg(false); if (fileRef.current) fileRef.current.value = ""; }
   };
 

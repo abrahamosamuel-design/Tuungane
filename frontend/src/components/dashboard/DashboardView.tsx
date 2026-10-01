@@ -165,10 +165,15 @@ export function DashboardView() {
         page.timelinePosts.forEach((tp: any) => allPosts.push({ type: "timeline_post", id: `tp-${tp.id}`, data: tp }));
     });
     
-    const shuffledPosts = shuffleArray(allPosts, timeSeed());
+    const sortedPosts = [...allPosts].sort((a, b) => {
+      const dateA = a.data.createdAt ? new Date(a.data.createdAt).getTime() : 0;
+      const dateB = b.data.createdAt ? new Date(b.data.createdAt).getTime() : 0;
+      return dateB - dateA;
+    });
+    
     const finalFeed: FeedItem[] = [];
     
-    shuffledPosts.forEach((post, index) => {
+    sortedPosts.forEach((post, index) => {
        finalFeed.push(post);
        if (index === 9 && carouselRequests.length > 0) {
           finalFeed.push({ type: "carousel_requests", id: "cr_1", data: carouselRequests });
@@ -178,10 +183,10 @@ export function DashboardView() {
        }
     });
 
-    if (shuffledPosts.length <= 9 && carouselRequests.length > 0) {
+    if (sortedPosts.length <= 9 && carouselRequests.length > 0) {
         finalFeed.push({ type: "carousel_requests", id: "cr_1", data: carouselRequests });
     }
-    if (shuffledPosts.length <= 19 && carouselOpportunities.length > 0) {
+    if (sortedPosts.length <= 19 && carouselOpportunities.length > 0) {
         finalFeed.push({ type: "carousel_opportunities", id: "co_1", data: carouselOpportunities });
     }
     
@@ -400,64 +405,65 @@ function RightSidebar() {
 /* ---------- provider card (matching reference design) ---------- */
 
 function ProviderCard({ data }: { data: any }) {
+  const [imgError, setImgError] = useState(false);
+  
+  const id = data.id || data.owner_id;
+  const profileSlug = data.slug || data.profile?.slug || id;
   const name = data.business_name || data.name || data.profile?.full_name || "Provider";
   const isVerified = data.verified === "verified" || data.verified === "featured";
-  const location = data.town || data.district || data.area || "";
+  const location = data.town || data.district || data.area || "Uganda";
+  const category = data.subcategory || data.category_slug || data.profile_type || "Service Provider";
+  const coverUrl = data.cover_url || data.photos?.[0] || data.avatar_url;
   
   return (
-    <div className="group flex flex-col h-full overflow-hidden rounded-[20px] bg-white shadow-[0_4px_20px_rgb(0,0,0,0.06)] border border-border/40 p-4 relative">
-      <div className="flex items-start gap-3">
-        <div className="shrink-0 relative">
-          <Avatar 
-            name={name} 
-            src={data.avatar_url || (data.media_urls && data.media_urls[0])} 
-            size={48} 
-            verifiedRing={isVerified} 
+    <div className="group flex flex-col overflow-hidden rounded-[20px] bg-white shadow-[0_4px_20px_rgb(0,0,0,0.06)] border border-border/40 relative h-full">
+      <Link to="/service/$id" params={{ id: id }} className="relative aspect-[4/3] w-full shrink-0 overflow-hidden bg-muted block">
+        {coverUrl && !imgError ? (
+          <img 
+            src={coverUrl} 
+            alt={name} 
+            className="absolute inset-0 h-full w-full object-cover" 
+            onError={() => setImgError(true)} 
           />
-        </div>
-        <div className="flex-1 min-w-0">
-          <Link to="/u/$id" params={{ id: data.owner_id || data.id }} className="font-display text-sm font-bold leading-tight text-navy line-clamp-1 hover:underline block tracking-tight">
-             {name}
-          </Link>
-          <p className="text-[11px] font-medium text-muted-foreground line-clamp-1 mt-0.5">
-            {data.subcategory || data.category_slug || "Service Provider"}
-          </p>
-          {location && (
-            <div className="mt-0.5 flex items-center gap-1 text-[11px] font-medium text-muted-foreground truncate">
-              <MapPin className="h-3 w-3 shrink-0" />
-              <span className="truncate">{location}</span>
+        ) : (
+          <div className="flex h-full w-full items-center justify-center bg-surface absolute inset-0">
+            <span className="font-display text-3xl font-bold uppercase text-muted-foreground/30">{name.substring(0, 2)}</span>
+          </div>
+        )}
+        {isVerified && (
+          <div className="absolute top-2 right-2 flex items-center justify-center rounded-full bg-white/95 p-1.5 shadow-sm backdrop-blur-sm">
+            <span className="flex h-3.5 w-3.5 items-center justify-center text-green-600">✓</span>
+          </div>
+        )}
+      </Link>
+      <div className="p-2 flex flex-col flex-1">
+         <div className="flex items-start justify-between gap-1">
+            <Link to="/u/$id" params={{ id: id }} className="font-display text-[16px] font-bold leading-tight text-[#1A1A1A] line-clamp-1 block tracking-tight">
+               {name}
+            </Link>
+         </div>
+         <p className="text-[12px] font-medium text-[#8F8F8F] line-clamp-1">{category}</p>
+         <div className="mt-1 flex items-center gap-2 text-[11px] font-bold text-[#4A4A4A] truncate">
+           <div className="flex items-center gap-1">
+             <MapPin className="h-3 w-3 text-[#8F8F8F] shrink-0" />
+             <span className="truncate">{location}</span>
+           </div>
+         </div>
+         <div className="mt-auto pt-2.5 flex items-center gap-1.5">
+            <Link 
+              to="/service/$id" params={{ id: id }}
+              className="flex h-[36px] flex-1 items-center justify-center rounded-[8px] bg-orange text-[12.5px] font-bold text-white hover:brightness-110 transition-all shadow-[0_4px_12px_rgba(249,115,22,0.3)]"
+            >
+               View details
+            </Link>
+            <div 
+              role="button"
+              onClick={(e) => { e.preventDefault(); }}
+              className="flex h-[36px] w-[36px] shrink-0 items-center justify-center rounded-[8px] border border-orange/20 bg-orange/5 text-orange hover:bg-orange/10 transition-colors cursor-pointer"
+            >
+               <MessageCircle className="h-4 w-4 pointer-events-none" />
             </div>
-          )}
-        </div>
-      </div>
-      
-      <div className="mt-3">
-        <span className="inline-flex items-center rounded bg-[#3b82f6] px-1.5 py-0.5 text-[10px] font-bold text-white">
-          Available
-        </span>
-      </div>
-      
-      {data.bio && (
-        <p className="mt-2 text-xs text-muted-foreground line-clamp-2">
-          {data.bio}
-        </p>
-      )}
-      
-      {/* Action Row */}
-      <div className="mt-auto pt-4 flex items-center gap-2">
-         <Link 
-           to="/service/$id" params={{ id: data.id }}
-           className="flex h-[40px] flex-1 items-center justify-center gap-1.5 rounded-xl bg-navy text-xs font-bold text-white hover:brightness-110 transition-all shadow-sm"
-         >
-            <CalendarPlus className="h-4 w-4" />
-            Request service
-         </Link>
-         <Link 
-           to="/messages"
-           className="flex h-[40px] w-[40px] shrink-0 items-center justify-center rounded-full border border-border text-navy hover:bg-muted/50 transition-colors"
-         >
-            <MessageSquare className="h-4 w-4 fill-current/10" />
-         </Link>
+         </div>
       </div>
     </div>
   );
@@ -599,7 +605,7 @@ function TimelinePostCard({ data }: { data: any }) {
               {data.location ? ` • ${data.location}` : ""}
             </p>
           </div>
-          <span className={`rounded-md px-2 py-0.5 text-[10px] font-semibold shrink-0 ${isJobPost ? 'bg-green text-white' : 'bg-navy/5 text-navy/60'}`}>
+          <span className={`rounded-md px-2 py-0.5 text-[10px] font-bold shrink-0 ${isJobPost ? 'bg-green text-white' : 'bg-navy/10 text-navy/90'}`}>
             {customLabel}
           </span>
         </div>
@@ -612,18 +618,18 @@ function TimelinePostCard({ data }: { data: any }) {
             return (
               <div className="mb-3 rounded-xl border border-border bg-muted/20 p-3">
                 <h4 className="font-semibold text-navy text-sm mb-1">{parsedJob.job_title}</h4>
-                <div className="flex flex-col gap-1 text-[11px] text-muted-foreground">
-                  {parsedJob.company_name && <p><span className="font-medium text-navy/70">Company:</span> {parsedJob.company_name}</p>}
-                  {parsedJob.location && <p><span className="font-medium text-navy/70">Location:</span> {parsedJob.location}</p>}
-                  {parsedJob.salary && <p><span className="font-medium text-navy/70">Salary:</span> {parsedJob.salary}</p>}
-                  {parsedJob.qualification && <p><span className="font-medium text-navy/70">Qualification:</span> {parsedJob.qualification}</p>}
+                <div className="flex flex-col gap-1 text-[12px] text-navy/80">
+                  {parsedJob.company_name && <p><span className="font-medium text-navy">Company:</span> {parsedJob.company_name}</p>}
+                  {parsedJob.location && <p><span className="font-medium text-navy">Location:</span> {parsedJob.location}</p>}
+                  {parsedJob.salary && <p><span className="font-medium text-navy">Salary:</span> {parsedJob.salary}</p>}
+                  {parsedJob.qualification && <p><span className="font-medium text-navy">Qualification:</span> {parsedJob.qualification}</p>}
                 </div>
               </div>
             );
           }
 
           return (
-            <p className="mb-3 text-xs leading-relaxed text-navy/70 whitespace-pre-line">
+            <p className="mb-3 text-[13px] leading-relaxed text-[#2C3E50] whitespace-pre-line font-medium">
               {data.text.length > 180 ? data.text.slice(0, 180) + "…" : data.text}
             </p>
           );
@@ -738,7 +744,25 @@ function TimelinePostCard({ data }: { data: any }) {
 
 function DashboardCarousel({ title, items, renderItem, viewAllLink }: any) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [isPaused, setIsPaused] = useState(false);
   
+  useEffect(() => {
+    if (!items || items.length === 0 || isPaused) return;
+    
+    const interval = setInterval(() => {
+      if (scrollRef.current) {
+        const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+        if (scrollLeft + clientWidth >= scrollWidth - 20) {
+          scrollRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+          scrollRef.current.scrollBy({ left: 320, behavior: 'smooth' });
+        }
+      }
+    }, 4000);
+    
+    return () => clearInterval(interval);
+  }, [items, isPaused]);
+
   if (!items || items.length === 0) return null;
 
   const scroll = (direction: 'left' | 'right') => {
@@ -749,7 +773,13 @@ function DashboardCarousel({ title, items, renderItem, viewAllLink }: any) {
   };
 
   return (
-    <div className="mb-8 relative group">
+    <div 
+      className="mb-8 relative group"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+      onTouchStart={() => setIsPaused(true)}
+      onTouchEnd={() => setIsPaused(false)}
+    >
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-lg font-bold text-navy">{title}</h2>
         <div className="flex items-center gap-3">

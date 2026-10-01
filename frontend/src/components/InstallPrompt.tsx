@@ -177,7 +177,7 @@ export function InstallPrompt() {
         }
       >
         <div className="flex items-start gap-3">
-          <img src="/icon-192.png" alt="" className="h-11 w-11 rounded-lg" />
+          <img src="/apple-touch-icon.png" alt="Tuungane" className="h-11 w-11 rounded-lg shadow-sm" />
           <div className="flex-1">
             <div className="flex items-start justify-between gap-2">
               <h2 className="text-sm font-semibold text-foreground">{title}</h2>
@@ -213,10 +213,10 @@ export function InstallPrompt() {
         className="fixed inset-x-0 bottom-0 z-40 mx-auto max-w-md rounded-t-2xl border-t border-border bg-background p-4 pb-6 shadow-2xl mb-16"
       >
         <div className="flex items-start gap-3">
-          <img src="/icon-192.png" alt="" className="h-11 w-11 rounded-lg" />
+          <img src="/apple-touch-icon.png" alt="Tuungane" className="h-11 w-11 rounded-lg shadow-sm" />
           <div className="flex-1">
             <div className="flex items-start justify-between gap-2">
-              <h2 className="text-sm font-semibold text-foreground">Install Tuungane on your iPhone</h2>
+              <h2 className="text-sm font-bold text-foreground">Install Tuungane on iPhone</h2>
               <button
                 onClick={dismissIos}
                 aria-label="Dismiss install instructions"
@@ -225,9 +225,8 @@ export function InstallPrompt() {
                 <X className="h-4 w-4" />
               </button>
             </div>
-            <p className="mt-1 flex items-center gap-1 text-xs leading-relaxed text-muted-foreground">
-              Tap the Share button <Share className="inline h-3.5 w-3.5" />, then choose{" "}
-              <span className="font-medium text-foreground">Add to Home Screen</span>.
+            <p className="mt-1 text-[13px] leading-relaxed text-muted-foreground">
+              Tap the Share button <Share className="inline-block h-3.5 w-3.5 align-middle text-foreground mx-1" /> below, then choose <span className="font-bold text-foreground">Add to Home Screen</span>.
             </p>
             <div className="mt-3 flex gap-2">
               <Button size="sm" onClick={dismissIos}>

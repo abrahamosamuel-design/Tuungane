@@ -45,6 +45,26 @@ export const getPresignedUploadUrl = async (key, contentType, expiresIn = 3600) 
 };
 
 /**
+ * Upload an object directly to R2 from the backend
+ * @param {string} key The object key
+ * @param {Buffer|string} body The file content
+ * @param {string} contentType The MIME type
+ */
+export const uploadObject = async (key, body, contentType) => {
+  if (!s3) throw new Error('R2 Client is not configured');
+
+  const command = new PutObjectCommand({
+    Bucket: R2_BUCKET_NAME,
+    Key: key,
+    Body: body,
+    ContentType: contentType,
+  });
+
+  return await s3.send(command);
+};
+
+
+/**
  * Get the public URL for an R2 object
  * @param {string} key The object key
  * @returns {string} The public HTTP URL

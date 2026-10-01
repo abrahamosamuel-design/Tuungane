@@ -7,6 +7,8 @@ import { AuthGateProvider } from "./RequireAuthDialog";
 import { ContactPromptDialog } from "./ContactPromptDialog";
 import { useAuth } from "@/hooks/use-auth";
 import { Link, useMatches } from "@tanstack/react-router";
+import { InstallPrompt } from "./InstallPrompt";
+import { PushPrompt } from "./PushPrompt";
 
 export function Layout({ children }: { children: ReactNode }) {
   const matches = useMatches();
@@ -54,6 +56,8 @@ export function Layout({ children }: { children: ReactNode }) {
         ) : (
           <MobileBottomNav />
         )}
+        <InstallPrompt />
+        <PushPrompt />
       </div>
     </AuthGateProvider>
   );

@@ -31,6 +31,7 @@ import { requireAuth, optionalAuth } from '../middleware/auth.js';
 const router = Router();
 
 // Open routes (public)
+router.get('/public/me', optionalAuth, getMyPublicProfiles);
 router.get('/public/:id', getProfileById);
 router.get('/slug/:slug', getPublicProfileBySlug);
 router.get('/browse', browseProfiles);
@@ -60,7 +61,6 @@ router.get('/me/privacy', getPrivacySettings);
 router.put('/me/privacy', updatePrivacySettings);
 
 // Public profiles management
-router.get('/public/me', getMyPublicProfiles);
 router.post('/public/business', createBusinessProfile);
 router.post('/public', createPublicProfile);
 router.patch('/public/:id', updatePublicProfile);

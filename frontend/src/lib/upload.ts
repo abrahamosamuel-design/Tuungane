@@ -1,3 +1,4 @@
+import { apiClient } from "@/lib/api";
 import { supabase } from "@/integrations/supabase/client";
 import imageCompression from 'browser-image-compression';
 import { FFmpeg } from "@ffmpeg/ffmpeg";
@@ -117,41 +118,26 @@ export async function uploadMedia(
     throw new Error("Your session expired. Please log in again and retry the upload.");
   }
 
-  const baseUrl = import.meta.env.VITE_API_URL || (typeof window !== 'undefined' ? `${window.location.protocol}//${window.location.hostname}:3000/api` : 'http://localhost:3000/api');
-  const presignRes = await fetch(`${baseUrl}/upload/presign`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${session.access_token}`,
-    },
-    body: JSON.stringify({
-      folder,
-      fileName: file.name,
-      contentType: file.type || "application/octet-stream",
-    }),
+  // Convert File to Base64
+  const base64Data = await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      const base64 = (reader.result as string).split(',')[1];
+      resolve(base64);
+    };
+    reader.onerror = error => reject(error);
   });
 
-  if (!presignRes.ok) {
-    const errorPayload = await presignRes.json().catch(() => null);
-    throw new Error(errorPayload?.error || "Failed to generate secure upload link.");
-  }
-
-  const { uploadUrl, publicUrl } = await presignRes.json();
-
-  if (!uploadUrl || !publicUrl) {
-    throw new Error("Backend did not return required upload URLs.");
-  }
-
-  const response = await fetch(uploadUrl, {
-    method: "PUT",
-    headers: {
-      "Content-Type": file.type || "application/octet-stream",
-    },
-    body: file,
+  const { publicUrl } = await apiClient.post('/media/direct', {
+    folder,
+    fileName: file.name,
+    contentType: file.type || "application/octet-stream",
+    base64Data,
   });
 
-  if (!response.ok) {
-    throw new Error("Failed to upload media to cloud storage.");
+  if (!publicUrl) {
+    throw new Error("Backend did not return a public URL.");
   }
 
   return publicUrl;

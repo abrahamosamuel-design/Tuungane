@@ -40,4 +40,41 @@ router.post('/presign', requireAuth, async (req, res) => {
   }
 });
 
+router.post('/direct', requireAuth, async (req, res) => {
+  try {
+    const { folder = 'misc', fileName, contentType, base64Data } = req.body;
+    const userId = req.user.id;
+
+    if (!fileName || !contentType || !base64Data) {
+      return res.status(400).json({ error: 'fileName, contentType, and base64Data are required' });
+    }
+
+    if (!contentType.startsWith('image/') && !contentType.startsWith('video/')) {
+      return res.status(400).json({ error: 'Only images and short videos are allowed' });
+    }
+
+    const ext = fileName.split('.').pop() || 'jpeg';
+    const timestamp = Date.now();
+    const randomHex = crypto.randomBytes(4).toString('hex');
+    const safeFolder = folder.replace(/[^a-zA-Z0-9_-]/g, '');
+    const key = `${userId}/${safeFolder}/${timestamp}-${randomHex}.${ext}`;
+
+    const buffer = Buffer.from(base64Data, 'base64');
+    
+    // Import uploadObject dynamically or destructure from imported
+    const { uploadObject } = await import('../lib/r2Client.js');
+    await uploadObject(key, buffer, contentType);
+    
+    const publicUrl = getPublicUrl(key);
+
+    res.json({
+      publicUrl,
+      key
+    });
+  } catch (error) {
+    console.error('Error in direct upload:', error);
+    res.status(500).json({ error: 'Failed to upload file directly' });
+  }
+});
+
 export default router;
