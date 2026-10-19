@@ -21,7 +21,6 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TrustRouteImport } from './routes/trust'
-import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedListSkillRouteImport } from './routes/_authenticated/list-skill'
 import { Route as AuthenticatedMeRouteImport } from './routes/_authenticated/me'
@@ -114,11 +113,6 @@ const TrustRoute = TrustRouteImport.update({
   id: '/trust',
   path: '/trust',
   getParentRoute: () => rootRouteImport,
-} as any)
-const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   id: '/dashboard',
@@ -313,7 +307,6 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/trust': typeof TrustRoute
-  '/admin': typeof AuthenticatedAdminRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/list-skill': typeof AuthenticatedListSkillRoute
   '/me': typeof AuthenticatedMeRoute
@@ -360,7 +353,6 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/trust': typeof TrustRoute
-  '/admin': typeof AuthenticatedAdminRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/list-skill': typeof AuthenticatedListSkillRoute
   '/me': typeof AuthenticatedMeRoute
@@ -408,7 +400,6 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/trust': typeof TrustRoute
-  '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/list-skill': typeof AuthenticatedListSkillRoute
   '/_authenticated/me': typeof AuthenticatedMeRoute
@@ -457,7 +448,6 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/trust'
-    | '/admin'
     | '/dashboard'
     | '/list-skill'
     | '/me'
@@ -504,7 +494,6 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/trust'
-    | '/admin'
     | '/dashboard'
     | '/list-skill'
     | '/me'
@@ -551,7 +540,6 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/trust'
-    | '/_authenticated/admin'
     | '/_authenticated/dashboard'
     | '/_authenticated/list-skill'
     | '/_authenticated/me'
@@ -696,13 +684,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/trust'
       preLoaderRoute: typeof TrustRouteImport
       parentRoute: typeof rootRouteImport
-    }
-    '/_authenticated/admin': {
-      id: '/_authenticated/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AuthenticatedAdminRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard': {
       id: '/_authenticated/dashboard'
@@ -954,7 +935,6 @@ const AuthenticatedMessagesRouteWithChildren =
   )
 
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedListSkillRoute: typeof AuthenticatedListSkillRoute
   AuthenticatedMeRoute: typeof AuthenticatedMeRoute
@@ -980,7 +960,6 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedListSkillRoute: AuthenticatedListSkillRoute,
   AuthenticatedMeRoute: AuthenticatedMeRoute,

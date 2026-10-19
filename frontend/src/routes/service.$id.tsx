@@ -87,14 +87,24 @@ function ServiceDetailPage() {
   // Gather all available images and deduplicate
   let images: string[] = [];
   if (service.media && service.media.length > 0) {
-    images.push(...service.media.map((m: any) => m.url));
+    for (const m of service.media) {
+      if (m.kind === 'photo' || (m.url && !m.url.endsWith('.mp4'))) {
+        images.push(m.url);
+      } else if (m.thumbnail_url) {
+        images.push(m.thumbnail_url);
+      }
+    }
   }
   if (service.photos && service.photos.length > 0) {
-    images.push(...service.photos);
+    images.push(...service.photos.filter((p: string) => !p.endsWith('.mp4')));
   }
   if (images.length === 0) {
-    if (service.profile?.cover_url) images.push(service.profile.cover_url);
-    if (service.profile?.avatar_url && !service.profile?.cover_url) images.push(service.profile.avatar_url);
+    if (service.profile?.cover_url && !service.profile?.cover_url.endsWith('.mp4')) {
+      images.push(service.profile.cover_url);
+    }
+    if (service.profile?.avatar_url && images.length === 0) {
+      images.push(service.profile.avatar_url);
+    }
   }
   images = Array.from(new Set(images.filter(Boolean)));
   

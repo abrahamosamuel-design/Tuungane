@@ -100,7 +100,10 @@ export function DashboardView() {
         owner_id: p.user_id,
         slug: p.slug,
         name: p.business_name || p.name || p.profile?.full_name || "Provider",
-        avatar_url: p.avatar_url || p.cover_url || p.profile?.avatar_url || null,
+        cover_url: (p.media_urls && p.media_urls.length > 0 ? p.media_urls[0] : null) || p.cover_url || null,
+        media_urls: p.media_urls || [],
+        photos: p.photos || p.media_urls || [],
+        avatar_url: p.avatar_url || p.profile?.avatar_url || null,
         category_slug: p.category_slug || "",
         subcategory: p.subcategory || p.category_slug || "Service Provider",
         bio: p.bio || "",
@@ -413,7 +416,8 @@ function ProviderCard({ data }: { data: any }) {
   const isVerified = data.verified === "verified" || data.verified === "featured";
   const location = data.town || data.district || data.area || "Uganda";
   const category = data.subcategory || data.category_slug || data.profile_type || "Service Provider";
-  const coverUrl = data.cover_url || data.photos?.[0] || data.avatar_url;
+  // Prioritize the service's photo and do not show the service provider's profile avatar
+  const coverUrl = (data.media_urls && data.media_urls.length > 0 ? data.media_urls[0] : null) || data.photos?.[0] || data.cover_url || null;
   
   return (
     <div className="group flex flex-col overflow-hidden rounded-[20px] bg-white shadow-[0_4px_20px_rgb(0,0,0,0.06)] border border-border/40 relative h-full">
@@ -438,7 +442,7 @@ function ProviderCard({ data }: { data: any }) {
       </Link>
       <div className="p-2 flex flex-col flex-1">
          <div className="flex items-start justify-between gap-1">
-            <Link to="/u/$id" params={{ id: id }} className="font-display text-[16px] font-bold leading-tight text-[#1A1A1A] line-clamp-1 block tracking-tight">
+            <Link to="/service/$id" params={{ id: id }} className="font-display text-[16px] font-bold leading-tight text-[#1A1A1A] line-clamp-1 block tracking-tight hover:text-orange transition-colors">
                {name}
             </Link>
          </div>

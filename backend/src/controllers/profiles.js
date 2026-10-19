@@ -304,18 +304,39 @@ export const browseProfiles = async (req, res) => {
     let services = ps || [];
     let profiles = publicProfiles || [];
 
-    // Find services that only have user_profile_id
-    const userProfileIds = services
-      .filter(s => !s.profile_id && s.user_profile_id)
-      .map(s => s.user_profile_id);
-      
-    const uniqueUserIds = [...new Set(userProfileIds)];
+    // Map existing public profile owners so we know if an owner already has a public profile
+    const ownerToPublicProfile = new Map();
+    profiles.forEach(p => {
+      if (p.owner_id) ownerToPublicProfile.set(p.owner_id, p);
+    });
 
-    if (uniqueUserIds.length > 0) {
+    // Re-map services that have no profile_id:
+    // If the owner has a public profile, attach the service to that public profile!
+    // If not, set s.profile_id to user_profile_id so it can be grouped under that user
+    services = services.map(s => {
+      if (!s.profile_id && s.user_profile_id) {
+        const pub = ownerToPublicProfile.get(s.user_profile_id);
+        if (pub) {
+          s.profile_id = pub.id;
+        } else {
+          s.profile_id = s.user_profile_id;
+        }
+      }
+      return s;
+    });
+
+    // Now find any user IDs that have services but DO NOT have a public profile
+    const orphanUserIds = [...new Set(
+      services
+        .filter(s => s.profile_id === s.user_profile_id && !ownerToPublicProfile.has(s.user_profile_id))
+        .map(s => s.user_profile_id)
+    )];
+
+    if (orphanUserIds.length > 0) {
       const { data: userProfiles } = await supabaseAdmin
         .from("profiles")
-        .select("id,full_name,avatar_url")
-        .in("id", uniqueUserIds);
+        .select("id,full_name,avatar_url,bio,district,town,area,is_provider,profile_identity")
+        .in("id", orphanUserIds);
 
       if (userProfiles) {
         userProfiles.forEach(up => {
@@ -323,49 +344,73 @@ export const browseProfiles = async (req, res) => {
             id: up.id, 
             owner_id: up.id,
             slug: `user-${up.id.substring(0,8)}`,
-            name: up.full_name || "User",
-            profile_type: "individual",
-            bio: "",
+            name: up.full_name || "Service Provider",
+            profile_type: up.profile_identity || "individual",
+            bio: up.bio || "",
             avatar_url: up.avatar_url,
             cover_url: null,
-            district: null,
-            town: null,
-            area: null,
-            verified: "unverified",
+            district: up.district || null,
+            town: up.town || null,
+            area: up.area || null,
+            verified: up.is_provider ? "verified" : "unverified",
             is_featured: false
           });
         });
       }
     }
 
-    // Now fix up services so they all have a profile_id
-    services = services.map(s => {
-      if (!s.profile_id && s.user_profile_id) {
-        s.profile_id = s.user_profile_id;
-      }
-      return s;
-    });
-
     const ids = profiles.map((p) => p.id);
-    if (ids.length > 0) {
+    const ownerIds = profiles.map((p) => p.owner_id).filter(Boolean);
+
+    const mediaOrFilter = [];
+    if (ids.length > 0) mediaOrFilter.push(`public_profile_id.in.(${ids.join(',')})`);
+    if (ownerIds.length > 0) mediaOrFilter.push(`service_user_id.in.(${ownerIds.join(',')})`);
+
+    if (mediaOrFilter.length > 0) {
       const { data: media } = await supabaseAdmin
         .from("service_media")
-        .select("public_profile_id,url,is_cover")
-        .in("public_profile_id", ids)
-        .order("is_cover", { ascending: false });
+        .select("public_profile_id,service_user_id,url,thumbnail_url,kind,is_cover,sort_order")
+        .or(mediaOrFilter.join(','))
+        .order("is_cover", { ascending: false })
+        .order("sort_order", { ascending: true });
 
       // Attach media from service_media if available, and if no cover_url
       if (media && media.length > 0) {
         profiles.forEach(p => {
           if (!p.cover_url) {
-            const m = media.find(x => x.public_profile_id === p.id);
-            if (m) {
-              p.cover_url = m.url;
+            const pMedia = media.filter(x => x.public_profile_id === p.id || (p.owner_id && x.service_user_id === p.owner_id));
+            if (pMedia.length > 0) {
+              // 1. Prefer marked cover that is an image
+              const coverImg = pMedia.find(x => x.is_cover && (!x.kind || x.kind === 'photo') && !x.url.endsWith('.mp4'));
+              // 2. Next prefer any photo
+              const anyPhoto = pMedia.find(x => (!x.kind || x.kind === 'photo') && !x.url.endsWith('.mp4'));
+              // 3. Next prefer video thumbnail
+              const videoThumb = pMedia.find(x => x.thumbnail_url);
+              
+              const chosen = coverImg?.url || anyPhoto?.url || videoThumb?.thumbnail_url;
+              if (chosen) {
+                p.cover_url = chosen;
+              }
             }
           }
         });
       }
     }
+
+    // Fallback 1: If a profile still has no cover_url, check its services for photos
+    profiles.forEach(p => {
+      if (!p.cover_url) {
+        const pSvcs = services.filter(s => s.profile_id === p.id);
+        const withPhoto = pSvcs.find(s => s.photos && s.photos.length > 0);
+        if (withPhoto && withPhoto.photos?.[0]) {
+          p.cover_url = withPhoto.photos[0];
+        }
+      }
+      // Fallback 2: If still no cover_url, use profile avatar_url (e.g. business flyers or logos)
+      if (!p.cover_url && p.avatar_url) {
+        p.cover_url = p.avatar_url;
+      }
+    });
 
     res.json({ data: { profiles, services } });
   } catch (err) {
@@ -783,11 +828,90 @@ export const getFullProfile = async (req, res) => {
 export const getPublicProfileBySlug = async (req, res) => {
   try {
     const { slug } = req.params;
-    const { data: p } = await supabaseAdmin
+    let p = null;
+
+    // 1. Direct match on public_profiles.slug
+    const { data: directSlug } = await supabaseAdmin
       .from("public_profiles")
       .select("*")
       .eq("slug", slug)
       .maybeSingle();
+
+    if (directSlug) {
+      p = directSlug;
+    }
+
+    // 2. Check if slug is a UUID matching public_profiles.id or public_profiles.owner_id
+    if (!p) {
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(slug);
+      if (isUuid) {
+        const { data: pById } = await supabaseAdmin
+          .from("public_profiles")
+          .select("*")
+          .or(`id.eq.${slug},owner_id.eq.${slug}`)
+          .maybeSingle();
+        if (pById) p = pById;
+      }
+    }
+
+    // 3. Check if slug starts with 'user-' or is an 8-character prefix or UUID
+    if (!p) {
+      let resolvedUserId = null;
+      const clean = slug.replace(/^user-/, '');
+      if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(clean)) {
+        resolvedUserId = clean;
+      } else if (/^[0-9a-f]{8}$/i.test(clean)) {
+        const minUuid = clean + '-0000-0000-0000-000000000000';
+        const maxUuid = clean + '-ffff-ffff-ffff-ffffffffffff';
+        const { data: u } = await supabaseAdmin
+          .from('profiles')
+          .select('id')
+          .gte('id', minUuid)
+          .lte('id', maxUuid)
+          .maybeSingle();
+        if (u) resolvedUserId = u.id;
+      }
+
+      if (resolvedUserId) {
+        // Does this user have a public_profile?
+        const { data: userPubProfile } = await supabaseAdmin
+          .from("public_profiles")
+          .select("*")
+          .eq("owner_id", resolvedUserId)
+          .maybeSingle();
+
+        if (userPubProfile) {
+          p = userPubProfile;
+        } else {
+          // Fallback to synthesizing a public profile from profiles
+          const { data: up } = await supabaseAdmin
+            .from("profiles")
+            .select("*")
+            .eq("id", resolvedUserId)
+            .maybeSingle();
+
+          if (up) {
+            p = {
+              id: up.id,
+              owner_id: up.id,
+              profile_type: up.profile_identity || "individual",
+              slug: `user-${up.id.substring(0,8)}`,
+              name: up.full_name || "Service Provider",
+              category_slug: null,
+              subcategory: null,
+              bio: up.bio || "",
+              avatar_url: up.avatar_url,
+              cover_url: null,
+              district: up.district,
+              town: up.town,
+              phone: up.phone,
+              verified: up.is_provider ? "verified" : "unverified",
+              suspended: false
+            };
+          }
+        }
+      }
+    }
 
     if (!p) {
       return res.status(404).json({ error: 'Profile not found' });
@@ -813,16 +937,16 @@ export const getPublicProfileBySlug = async (req, res) => {
       supabaseAdmin
         .from("profile_services")
         .select(
-          "id,title,description,price_guidance_ugx,active,is_primary,price_type,price_fixed_ugx,price_min_ugx,price_max_ugx,price_currency,price_note",
+          "id,title,description,price_guidance_ugx,active,is_primary,price_type,price_fixed_ugx,price_min_ugx,price_max_ugx,price_currency,price_note,photos",
         )
-        .eq("profile_id", p.id)
+        .or(`profile_id.eq.${p.id},user_profile_id.eq.${p.owner_id}`)
         .eq("active", true)
         .order("is_primary", { ascending: false })
         .order("sort_order"),
       supabaseAdmin
         .from("timeline_posts")
         .select("*")
-        .eq("public_profile_id", p.id)
+        .or(`public_profile_id.eq.${p.id},provider_user_id.eq.${p.owner_id}`)
         .eq("hidden", false)
         .neq("post_type", "opportunity_shared")
         .order("created_at", { ascending: false })
@@ -830,16 +954,25 @@ export const getPublicProfileBySlug = async (req, res) => {
       supabaseAdmin
         .from("service_requests")
         .select("*", { count: "exact", head: true })
-        .eq("public_profile_id", p.id)
+        .or(`public_profile_id.eq.${p.id},provider_user_id.eq.${p.owner_id}`)
         .eq("status", "completed"),
     ]);
+
+    let finalMedia = mediaRows || [];
+    if (finalMedia.length === 0 && s && s.length > 0) {
+      for (const svc of s) {
+        if (svc.photos && svc.photos.length > 0) {
+          finalMedia.push(...svc.photos.map((url, i) => ({ id: `${svc.id}-${i}`, url, is_cover: i === 0 })));
+        }
+      }
+    }
 
     res.json({
       data: {
         profile: p,
         extras: sp,
         owner: ownerRow,
-        media: mediaRows || [],
+        media: finalMedia,
         services: s || [],
         posts: t || [],
         completedCount: c || 0

@@ -18,6 +18,8 @@ dist-ssr
 .env
 .env.*
 .env.local
+test-results/
+scratch/
 
 # Wrangler / Cloudflare
 .wrangler/

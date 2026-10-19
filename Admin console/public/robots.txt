@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /me
+Disallow: /notifications
+
+Sitemap: https://tuungane.com/sitemap.xml

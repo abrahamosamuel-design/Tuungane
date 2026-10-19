@@ -50,7 +50,7 @@ export function ServiceCard({
 
   return (
     <article className="bg-white rounded-2xl border border-border shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 flex flex-col overflow-hidden group">
-      <Link to="/p/$slug" params={{ slug: profileSlug }} className="relative h-44 w-full overflow-hidden bg-muted flex items-center justify-center">
+      <Link to="/service/$id" params={{ id: id }} className="relative h-44 w-full overflow-hidden bg-muted flex items-center justify-center">
         {coverUrl && !imgError ? (
           <img 
             src={coverUrl} 
@@ -79,14 +79,14 @@ export function ServiceCard({
         <div>
           {/* Provider Meta Row */}
           <div className="flex items-center gap-2.5 mb-2.5">
-            <div className="relative shrink-0">
+            <Link to="/p/$slug" params={{ slug: profileSlug }} className="relative shrink-0 block">
               <Avatar name={providerName} url={avatarUrl} size={40} className="ring-2 ring-green-100" />
               {isVerified && (
                 <span className="absolute -bottom-0.5 -right-0.5 bg-green-500 text-white rounded-full p-0.5 flex items-center justify-center">
                   <Check className="w-2.5 h-2.5" />
                 </span>
               )}
-            </div>
+            </Link>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1">
                 <Link to="/p/$slug" params={{ slug: profileSlug }} className="font-semibold text-sm text-navy hover:underline truncate">

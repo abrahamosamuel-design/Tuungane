@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { requireAuth, optionalAuth } from '../middleware/auth.js';
+import { supabaseAdmin } from '../lib/supabaseClient.js';
 import * as admin from '../controllers/admin.js';
 import {
   getOfficialData,
@@ -20,15 +21,12 @@ const router = Router();
 
 // Middleware to check admin/moderator roles
 const requireModerator = async (req, res, next) => {
-  // Assuming requireAuth has already set req.user
-  // In a real app we'd fetch the role from the db, 
-  // but we can trust the route guard on the frontend for basic gating,
-  // or add a quick role check here. Let's do a quick DB check.
   try {
-    const { data: roles } = await req.supabase
+    const { data: roles, error } = await supabaseAdmin
       .from("user_roles")
       .select("role")
       .eq("user_id", req.user.id);
+    if (error) throw error;
     const userRoles = (roles || []).map(r => r.role);
     if (userRoles.includes("admin") || userRoles.includes("moderator") || userRoles.includes("finance_admin")) {
       req.userRoles = userRoles;

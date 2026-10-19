@@ -42,21 +42,44 @@ export const getServiceById = async (req, res) => {
       .single();
 
     if (serviceError) {
-      // Fallback: If not found in profile_services, try v_search_services (for legacy public_profiles / service_profiles)
+      // Fallback 1: If not found in profile_services, try v_search_services (for legacy public_profiles / service_profiles)
       const { data: fallback, error: fallbackErr } = await supabaseAdmin
         .from('v_search_services')
         .select('*')
         .eq('service_id', id)
-        .single();
-        
-      if (fallbackErr) throw fallbackErr;
-      
-      // Fetch personal profile for the fallback user
-      const { data: personalProf } = await supabaseAdmin
-        .from('profiles')
-        .select('id, full_name, avatar_url, phone')
-        .eq('id', fallback.user_id)
         .maybeSingle();
+        
+      if (!fallback) {
+        // Fallback 2: Check if id is a profile_id or user_profile_id in profile_services
+        const { data: altService } = await supabaseAdmin
+          .from('profile_services')
+          .select(`
+            *,
+            profile:public_profiles!profile_services_profile_id_fkey (
+              id, owner_id, name, avatar_url, verified,
+              town, district, area, slug, phone
+            ),
+            user_profile:profiles!profile_services_user_profile_id_fkey (
+              id, full_name, avatar_url, phone
+            )
+          `)
+          .or(`profile_id.eq.${id},user_profile_id.eq.${id}`)
+          .order('is_primary', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (altService) {
+          service = altService;
+        } else {
+          return res.status(404).json({ error: 'Service not found' });
+        }
+      } else {
+        // Fetch personal profile for the fallback user
+        const { data: personalProf } = await supabaseAdmin
+          .from('profiles')
+          .select('id, full_name, avatar_url, phone')
+          .eq('id', fallback.user_id)
+          .maybeSingle();
 
       service = {
         id: fallback.service_id,
@@ -92,6 +115,7 @@ export const getServiceById = async (req, res) => {
           slug: fallback.slug
         }
       };
+      }
     }
     
     // Normalize the profile data for the frontend (for standard profile_services)
@@ -128,12 +152,22 @@ export const getServiceById = async (req, res) => {
       .order('created_at', { ascending: false })
       .limit(30);
 
+    const pubMediaId = service.profile_id || service.profile?.id;
+    const userMediaId = service.user_profile_id || service.profile?.owner_id;
+    const mediaFilter = [];
+    if (pubMediaId) mediaFilter.push(`public_profile_id.eq.${pubMediaId}`);
+    if (userMediaId) mediaFilter.push(`service_user_id.eq.${userMediaId}`);
+
+    const mediaQuery = mediaFilter.length > 0
+      ? supabaseAdmin.from('service_media').select('*').or(mediaFilter.join(','))
+      : Promise.resolve({ data: [] });
+
     const [
       { data: media },
       { data: rawReviews },
       { data: timeline_posts }
     ] = await Promise.all([
-      supabaseAdmin.from('service_media').select('*').eq('service_id', service.id),
+      mediaQuery,
       reviewsQuery,
       postsQuery
     ]);

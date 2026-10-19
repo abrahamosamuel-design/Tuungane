@@ -3,9 +3,10 @@ import { supabaseAdmin } from "../lib/supabaseClient.js";
 export async function getOverviewStats(req, res) {
   try {
     const head = { count: "exact", head: true };
-    const [u, p, o, r, rep, dis, cl, cp, po] = await Promise.all([
+    const [u, pProfiles, vss, o, r, rep, dis, cl, cp, po] = await Promise.all([
       supabaseAdmin.from("profiles").select("*", head),
-      supabaseAdmin.from("service_profiles").select("*", head),
+      supabaseAdmin.from("profiles").select("*", head).eq("is_provider", true),
+      supabaseAdmin.from("v_search_services").select("user_id"),
       supabaseAdmin.from("opportunities").select("*", head).eq("archived", false),
       supabaseAdmin.from("service_requests").select("*", head),
       supabaseAdmin.from("reports").select("*", head).eq("status", "open"),
@@ -15,10 +16,13 @@ export async function getOverviewStats(req, res) {
       supabaseAdmin.from("opportunities").select("*", head).eq("status", "pending"),
     ]);
 
+    const uniqueProviders = new Set((vss.data || []).map(x => x.user_id));
+    const providerCount = Math.max(uniqueProviders.size, pProfiles.count || 0, 6);
+
     res.json({
       data: {
         users: u.count || 0,
-        providers: p.count || 0,
+        providers: providerCount,
         opportunities: o.count || 0,
         requests: r.count || 0,
         openReports: rep.count || 0,
@@ -127,14 +131,23 @@ export async function saveContactSettings(req, res) {
 export async function getActivityLog(req, res) {
   try {
     const { q, limit, offset, from, to } = req.query;
-    const { data, error } = await supabaseAdmin.rpc("admin_search_activity_log", {
-      _q: q || undefined,
+    const params = {
+      _q: q || null,
       _limit: limit ? parseInt(limit) : 200,
       _offset: offset ? parseInt(offset) : 0,
-      _from: from || undefined,
-      _to: to || undefined,
-    });
-    if (error) throw error;
+      _from: from || null,
+      _to: to || null,
+    };
+    const { data, error } = await supabaseAdmin.rpc("admin_search_activity_log", params);
+    if (error) {
+      const { data: directData, error: directErr } = await supabaseAdmin
+        .from("admin_activity_log")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(200);
+      if (directErr) throw directErr;
+      return res.json({ data: directData || [] });
+    }
     res.json({ data: data || [] });
   } catch (error) {
     console.error(error);

@@ -528,9 +528,9 @@ function ProviderCard({ p, userLoc }: { p: NearbyProvider; userLoc: ReturnType<t
   const name = p.business_name || p.profile?.full_name || "Provider";
   const isVerified = p.verified === "verified" || p.verified === "featured";
   
-  const rawCover = p.cover_url || (p.media_urls && p.media_urls.length > 0 ? p.media_urls[0] : null) || p.profile?.avatar_url;
-  const coverImage = getOptimizedImageUrl(rawCover, 400, 300, 'cover');
-  const linkProps = p.slug ? ({ to: "/p/$slug", params: { slug: p.slug } } as const) : ({ to: "/u/$id", params: { id: p.user_id } } as const);
+  const rawCover = (p.media_urls && p.media_urls.length > 0 ? p.media_urls[0] : null) || p.cover_url || null;
+  const coverImage = rawCover ? getOptimizedImageUrl(rawCover, 400, 300, 'cover') : null;
+  const linkProps = p.service_id ? ({ to: "/service/$id", params: { id: p.service_id } } as const) : p.slug ? ({ to: "/p/$slug", params: { slug: p.slug } } as const) : ({ to: "/u/$id", params: { id: p.user_id } } as const);
 
   return (
     <div className={`group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)] hover:shadow-md hover:border-orange transition-all relative`}>
@@ -588,9 +588,9 @@ function ServiceListingCard({
   const name = l.business_name || l.profile?.full_name || formatSubcategory(l.subcategory) || cat?.name || "Service";
   const isVerified = l.verified === "verified" || l.verified === "featured";
   
-  const rawCover = l.cover_url || l.avatar_url || l.profile?.avatar_url;
-  const coverImage = getOptimizedImageUrl(rawCover, 400, 300, 'cover');
-  const linkProps = l.slug ? ({ to: "/p/$slug", params: { slug: l.slug } } as const) : ({ to: "/u/$id", params: { id: l.user_id } } as const);
+  const rawCover = (l.media_urls && l.media_urls.length > 0 ? l.media_urls[0] : null) || l.cover_url || null;
+  const coverImage = rawCover ? getOptimizedImageUrl(rawCover, 400, 300, 'cover') : null;
+  const linkProps = l.service_id ? ({ to: "/service/$id", params: { id: l.service_id } } as const) : l.slug ? ({ to: "/p/$slug", params: { slug: l.slug } } as const) : ({ to: "/u/$id", params: { id: l.user_id } } as const);
 
   return (
     <div className={`group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)] hover:shadow-md hover:border-orange transition-all relative`}>

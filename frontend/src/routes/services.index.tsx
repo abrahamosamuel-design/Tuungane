@@ -209,7 +209,7 @@ function ServicesDirectoryPage() {
                       <ProviderCardListMobile
                         id={primary?.id || p.id}
                         profileSlug={p.slug}
-                        coverUrl={primary?.photos?.[0] || p.cover_url || p.avatar_url}
+                        coverUrl={primary?.photos?.[0] || (primary?.media_urls && primary?.media_urls[0]) || p.cover_url || null}
                         category={primary?.category_slug || p.profile_type}
                         providerName={p.name}
                         isVerified={p.verified === "verified"}
@@ -327,7 +327,7 @@ function ServicesDirectoryPage() {
                         key={p.id}
                         id={primary?.id || p.id}
                         profileSlug={p.slug}
-                        coverUrl={primary?.photos?.[0] || p.cover_url || p.avatar_url}
+                        coverUrl={primary?.photos?.[0] || (primary?.media_urls && primary?.media_urls[0]) || p.cover_url || p.avatar_url || null}
                         category={primary?.category_slug || p.profile_type}
                         distanceKm={mockDistance}
                         avatarUrl={p.avatar_url}
@@ -356,7 +356,7 @@ function ServicesDirectoryPage() {
                         key={p.id}
                         id={primary?.id || p.id}
                         profileSlug={p.slug}
-                        coverUrl={primary?.photos?.[0] || p.cover_url || p.avatar_url}
+                        coverUrl={primary?.photos?.[0] || (primary?.media_urls && primary?.media_urls[0]) || p.cover_url || p.avatar_url || null}
                         category={primary?.category_slug || p.profile_type}
                         providerName={p.name}
                         isVerified={p.verified === "verified"}

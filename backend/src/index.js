@@ -6,7 +6,8 @@ import { createClient } from '@supabase/supabase-js';
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 3000;
+const primaryPort = process.env.PORT || 8001;
+const secondaryPort = Number(primaryPort) === 8001 ? 3000 : 8001;
 
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
@@ -63,7 +64,13 @@ app.use('/api/opportunities', opportunitiesRoutes);
 
 import { startPushDispatcher } from './pushDispatcher.js';
 
-app.listen(port, () => {
-  console.log(`Backend server listening on port ${port}`);
+app.listen(primaryPort, () => {
+  console.log(`Backend server listening on primary port ${primaryPort}`);
   startPushDispatcher();
+});
+
+const secondaryServer = app.listen(secondaryPort, () => {
+  console.log(`Backend server also listening on secondary port ${secondaryPort}`);
+}).on('error', (err) => {
+  console.warn(`Secondary port ${secondaryPort} not available:`, err.message);
 });

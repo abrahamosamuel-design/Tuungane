@@ -1,0 +1,192 @@
+// Browser web-push subscribe/unsubscribe helpers.
+import { supabase } from "@/integrations/supabase/client";
+
+const VAPID_PUBLIC_KEY =
+  "BIr-EPGZBrxyaOU2tuoDBgyMr3Ge_4HfaUbA34q-W0K6qw3ttAY4arXibxShyrBj9l8bsklMVy0yKGvXlP7ue0M";
+
+const SW_URL = "/sw.js";
+
+export function isPushSupported(): boolean {
+  if (typeof window === "undefined") return false;
+  return (
+    "serviceWorker" in navigator &&
+    "PushManager" in window &&
+    "Notification" in window
+  );
+}
+
+export function getPushPermission(): NotificationPermission | "unsupported" {
+  if (!isPushSupported()) return "unsupported";
+  return Notification.permission;
+}
+
+function urlBase64ToUint8Array(base64: string): Uint8Array {
+  const padding = "=".repeat((4 - (base64.length % 4)) % 4);
+  const b64 = (base64 + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const raw = atob(b64);
+  const out = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i++) out[i] = raw.charCodeAt(i);
+  return out;
+}
+
+function arrayBufferToBase64Url(buf: ArrayBuffer | null): string {
+  if (!buf) return "";
+  const bytes = new Uint8Array(buf);
+  let bin = "";
+  for (let i = 0; i < bytes.byteLength; i++) bin += String.fromCharCode(bytes[i]);
+  return btoa(bin).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+async function getRegistration(): Promise<ServiceWorkerRegistration> {
+  const existing = await navigator.serviceWorker.getRegistration(SW_URL);
+  if (existing) return existing;
+  return navigator.serviceWorker.register(SW_URL, { scope: "/" });
+}
+
+export async function enablePush(): Promise<{ ok: boolean; reason?: string }> {
+  if (!isPushSupported()) return { ok: false, reason: "unsupported" };
+
+  const perm = await Notification.requestPermission();
+  if (perm !== "granted") return { ok: false, reason: "denied" };
+
+  const reg = await getRegistration();
+  // Reuse subscription if it already exists
+  let sub = await reg.pushManager.getSubscription();
+  if (!sub) {
+    const key = urlBase64ToUint8Array(VAPID_PUBLIC_KEY);
+    sub = await reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: key.buffer.slice(key.byteOffset, key.byteOffset + key.byteLength) as ArrayBuffer,
+    });
+  }
+
+  const { data: auth } = await supabase.auth.getUser();
+  const userId = auth.user?.id;
+  if (!userId) return { ok: false, reason: "not_signed_in" };
+
+  const endpoint = sub.endpoint;
+  const p256dh = arrayBufferToBase64Url(sub.getKey("p256dh"));
+  const authKey = arrayBufferToBase64Url(sub.getKey("auth"));
+
+  const { error } = await supabase
+    .from("notification_push_subscriptions")
+    .upsert(
+      {
+        user_id: userId,
+        endpoint,
+        p256dh,
+        auth: authKey,
+        user_agent: navigator.userAgent.slice(0, 500),
+        last_used_at: new Date().toISOString(),
+      },
+      { onConflict: "endpoint" },
+    );
+  if (error) return { ok: false, reason: error.message };
+  return { ok: true };
+}
+
+export async function disablePush(): Promise<{ ok: boolean }> {
+  if (!isPushSupported()) return { ok: true };
+  const reg = await navigator.serviceWorker.getRegistration(SW_URL);
+  const sub = await reg?.pushManager.getSubscription();
+  if (sub) {
+    try {
+      await supabase
+        .from("notification_push_subscriptions")
+        .delete()
+        .eq("endpoint", sub.endpoint);
+    } catch {}
+    try {
+      await sub.unsubscribe();
+    } catch {}
+  }
+  return { ok: true };
+}
+
+export async function getActiveSubscriptionEndpoint(): Promise<string | null> {
+  if (!isPushSupported()) return null;
+  const reg = await navigator.serviceWorker.getRegistration(SW_URL);
+  const sub = await reg?.pushManager.getSubscription();
+  return sub?.endpoint || null;
+}
+
+const AUTO_OPT_OUT_KEY = "tuungane_push_auto_opt_out";
+
+export function hasUserOptedOutOfPush(): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    return localStorage.getItem(AUTO_OPT_OUT_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function setPushOptOut(v: boolean): void {
+  if (typeof window === "undefined") return;
+  try {
+    if (v) localStorage.setItem(AUTO_OPT_OUT_KEY, "1");
+    else localStorage.removeItem(AUTO_OPT_OUT_KEY);
+  } catch {}
+}
+
+// Auto-enable push on app load when the browser supports it, permission has
+// not been explicitly denied, and the user hasn't previously opted out on
+// this device. Safe to call repeatedly — it short-circuits when already
+// subscribed. Returns true only when a new subscription was created.
+export async function autoEnablePushIfNeeded(): Promise<boolean> {
+  if (!isPushSupported()) return false;
+  if (hasUserOptedOutOfPush()) return false;
+
+  const perm = Notification.permission;
+  if (perm === "denied") return false;
+
+  // If already subscribed, just make sure the row exists server-side.
+  const reg = await getRegistration();
+  const existing = await reg.pushManager.getSubscription();
+  if (existing) {
+    const { data: auth } = await supabase.auth.getUser();
+    const userId = auth.user?.id;
+    if (userId) {
+      await supabase
+        .from("notification_push_subscriptions")
+        .upsert(
+          {
+            user_id: userId,
+            endpoint: existing.endpoint,
+            p256dh: arrayBufferToBase64Url(existing.getKey("p256dh")),
+            auth: arrayBufferToBase64Url(existing.getKey("auth")),
+            user_agent: navigator.userAgent.slice(0, 500),
+            last_used_at: new Date().toISOString(),
+          },
+          { onConflict: "endpoint" },
+        );
+    }
+    return false;
+  }
+
+  // Permission is "default" — request it. Browsers require this to be in
+  // response to a user gesture on some platforms; when not granted we
+  // silently bail and the user can flip it on from the preferences page.
+  const result = await enablePush();
+  return result.ok;
+}
+
+const CATEGORIES = ["requests", "messages", "social", "reviews", "credits", "official"] as const;
+export type PushCategory = (typeof CATEGORIES)[number];
+
+export async function syncPushPrefsToServer(
+  prefs: Record<PushCategory, boolean>,
+): Promise<void> {
+  const { data: auth } = await supabase.auth.getUser();
+  const userId = auth.user?.id;
+  if (!userId) return;
+  const rows = CATEGORIES.map((c) => ({
+    user_id: userId,
+    category: c,
+    enabled: !!prefs[c],
+    updated_at: new Date().toISOString(),
+  }));
+  await supabase
+    .from("notification_push_prefs")
+    .upsert(rows, { onConflict: "user_id,category" });
+}

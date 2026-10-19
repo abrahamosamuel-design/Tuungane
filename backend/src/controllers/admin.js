@@ -63,20 +63,99 @@ export async function toggleRole(req, res) {
 // Providers
 export async function getProviders(req, res) {
   try {
-    const { data: sp, error } = await supabaseAdmin.from("service_profiles")
-      .select("user_id,business_name,subcategory,verified,suspended").limit(200);
-    if (error) throw error;
-    
-    const ids = (sp || []).map(x => x.user_id);
-    let pm = [];
-    if (ids.length > 0) {
-      const { data } = await supabaseAdmin.from("profiles").select("id,full_name,avatar_url").in("id", ids);
-      pm = data || [];
+    const [spRes, pubPRes, vssRes, provProfilesRes] = await Promise.all([
+      supabaseAdmin.from('service_profiles').select('user_id, business_name, subcategory, verified, suspended'),
+      supabaseAdmin.from('public_profiles').select('id, owner_id, name, subcategory, verified, suspended, avatar_url'),
+      supabaseAdmin.from('v_search_services_enriched').select('user_id, business_name, subcategory, verified, profile_full_name, final_avatar_url'),
+      supabaseAdmin.from('profiles').select('id, full_name, avatar_url, is_provider').eq('is_provider', true)
+    ]);
+
+    const map = new Map();
+
+    const getOrSet = (userId) => {
+      if (!map.has(userId)) {
+        map.set(userId, {
+          user_id: userId,
+          business_name: null,
+          subcategory: 'General Services',
+          verified: 'none',
+          suspended: false,
+          services_count: 0,
+          profile: { full_name: 'Unnamed Provider', avatar_url: null }
+        });
+      }
+      return map.get(userId);
+    };
+
+    // 1. Add from v_search_services_enriched (active directory listings)
+    for (const s of (vssRes.data || [])) {
+      if (!s.user_id) continue;
+      const p = getOrSet(s.user_id);
+      p.services_count++;
+      if (!p.business_name && s.business_name) p.business_name = s.business_name;
+      if ((!p.subcategory || p.subcategory === 'General Services') && s.subcategory) p.subcategory = s.subcategory;
+      if (s.verified && s.verified !== 'none' && s.verified !== 'unverified') p.verified = s.verified;
+      if (s.profile_full_name && p.profile.full_name === 'Unnamed Provider') p.profile.full_name = s.profile_full_name;
+      if (s.final_avatar_url && !p.profile.avatar_url) p.profile.avatar_url = s.final_avatar_url;
     }
-    
-    const map = new Map(pm.map(x => [x.id, { full_name: x.full_name, avatar_url: x.avatar_url }]));
-    const result = (sp || []).map(x => ({ ...x, profile: map.get(x.user_id) }));
-    
+
+    // 2. Add / enrich from public_profiles
+    for (const pb of (pubPRes.data || [])) {
+      if (!pb.owner_id) continue;
+      const p = getOrSet(pb.owner_id);
+      if (!p.business_name && pb.name) p.business_name = pb.name;
+      if ((!p.subcategory || p.subcategory === 'General Services') && pb.subcategory) p.subcategory = pb.subcategory;
+      if (pb.verified && pb.verified !== 'none') p.verified = pb.verified;
+      if (pb.suspended) p.suspended = true;
+      if (pb.avatar_url && !p.profile.avatar_url) p.profile.avatar_url = pb.avatar_url;
+    }
+
+    // 3. Add / enrich from service_profiles
+    for (const sp of (spRes.data || [])) {
+      if (!sp.user_id) continue;
+      const p = getOrSet(sp.user_id);
+      if (!p.business_name && sp.business_name) p.business_name = sp.business_name;
+      if ((!p.subcategory || p.subcategory === 'General Services') && sp.subcategory) p.subcategory = sp.subcategory;
+      if (sp.verified && sp.verified !== 'none') p.verified = sp.verified;
+      if (sp.suspended) p.suspended = true;
+    }
+
+    // 4. Enrich with provider user profiles
+    for (const up of (provProfilesRes.data || [])) {
+      if (!up.id) continue;
+      const p = getOrSet(up.id);
+      if (up.full_name && (p.profile.full_name === 'Unnamed Provider' || !p.profile.full_name)) {
+        p.profile.full_name = up.full_name;
+      }
+      if (up.avatar_url && !p.profile.avatar_url) {
+        p.profile.avatar_url = up.avatar_url;
+      }
+    }
+
+    // Fetch full_name for any providers still unnamed
+    const missingNames = Array.from(map.values())
+      .filter(p => !p.profile.full_name || p.profile.full_name === 'Unnamed Provider')
+      .map(p => p.user_id);
+
+    if (missingNames.length > 0) {
+      const { data: profs } = await supabaseAdmin.from('profiles').select('id, full_name, avatar_url').in('id', missingNames);
+      for (const pr of (profs || [])) {
+        const p = map.get(pr.id);
+        if (p) {
+          if (pr.full_name) p.profile.full_name = pr.full_name;
+          if (pr.avatar_url && !p.profile.avatar_url) p.profile.avatar_url = pr.avatar_url;
+        }
+      }
+    }
+
+    const result = Array.from(map.values()).sort((a, b) => {
+      const rank = { featured: 3, verified: 2, none: 1, unverified: 1 };
+      const rA = rank[a.verified] || 1;
+      const rB = rank[b.verified] || 1;
+      if (rA !== rB) return rB - rA;
+      return b.services_count - a.services_count;
+    });
+
     res.json({ data: result });
   } catch (error) {
     console.error(error);
@@ -92,8 +171,15 @@ export async function updateProviderStatus(req, res) {
     if (verified !== undefined) updates.verified = verified;
     if (suspended !== undefined) updates.suspended = suspended;
     
-    const { error } = await supabaseAdmin.from("service_profiles").update(updates).eq("user_id", id);
-    if (error) throw error;
+    // Update across service_profiles, public_profiles, and profiles
+    await Promise.allSettled([
+      supabaseAdmin.from("service_profiles").update(updates).eq("user_id", id),
+      supabaseAdmin.from("public_profiles").update(updates).eq("owner_id", id),
+      verified === "verified" || verified === "featured"
+        ? supabaseAdmin.from("profiles").update({ is_provider: true }).eq("id", id)
+        : Promise.resolve()
+    ]);
+
     res.json({ success: true });
   } catch (error) {
     console.error(error);

@@ -1,0 +1,299 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Tuungane design system
+ * Navy (60%) — trust, professionalism
+ * Orange (30%) — opportunity, action
+ * Green (10%) — growth, verified
+ */
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-navy: var(--navy);
+  --color-navy-foreground: var(--navy-foreground);
+  --color-orange: var(--orange);
+  --color-orange-foreground: var(--orange-foreground);
+  --color-green: var(--green);
+  --color-green-foreground: var(--green-foreground);
+  --color-surface: var(--surface);
+
+  --font-display: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+
+  /* Tuungane Civic Momentum Theme Extensions */
+  --color-surface-container-lowest: var(--surface-container-lowest);
+  --color-surface-container-low: var(--surface-container-low);
+  --color-surface-container: var(--surface-container);
+  --color-surface-container-high: var(--surface-container-high);
+  --color-surface-container-highest: var(--surface-container-highest);
+  --color-on-surface-variant: var(--on-surface-variant);
+  --color-navy-dark: var(--navy-dark);
+  --color-orange-gradient-end: var(--orange-gradient-end);
+  --color-growth-green-light: var(--growth-green-light);
+  --color-growth-green-border: var(--growth-green-border);
+  --color-canvas-subtle: var(--canvas-subtle);
+  --color-surface-alt: var(--surface-alt);
+  --color-border-hairline: var(--border-hairline);
+  --color-border-subtle: var(--border-subtle);
+  --color-text-jet: var(--text-jet);
+  --color-text-muted-mobile: var(--text-muted-mobile);
+  --color-destructive-red: var(--destructive-red);
+  --color-hero-indigo-stop: var(--hero-indigo-stop);
+  --color-outline: var(--outline);
+  --color-outline-variant: var(--outline-variant);
+
+  /* Spacing overrides for desktop layout */
+  --spacing-gutter: 1.5rem;
+  --spacing-gutter-mobile: 0.5rem;
+  --spacing-gutter-desktop: 2rem;
+  --spacing-space-xs: 0.25rem;
+  --spacing-space-sm: 0.5rem;
+  --spacing-space-md: 1rem;
+  --spacing-space-lg: 1.5rem;
+  --spacing-space-xl: 2rem;
+}
+
+:root {
+  --radius: 0.75rem;
+
+  /* Brand (kept as accents — not default text) */
+  --navy: #0B1F3A;
+  --navy-foreground: #FFFFFF;
+  --orange: #FF6B1A;
+  --orange-foreground: #FFFFFF;
+  --green: #22A652;
+  --green-foreground: #FFFFFF;
+
+  /* Surfaces — white, FB/LinkedIn-style */
+  --background: #FFFFFF;
+  --foreground: #050505;
+  --surface: #FFFFFF;
+  --card: #FFFFFF;
+  --card-foreground: #050505;
+  --popover: #FFFFFF;
+  --popover-foreground: #050505;
+
+  --primary: var(--navy);
+  --primary-foreground: var(--navy-foreground);
+  --secondary: #F0F2F5;
+  --secondary-foreground: #050505;
+  --muted: #F0F2F5;
+  --muted-foreground: #65676B;
+  --accent: var(--orange);
+  --accent-foreground: var(--orange-foreground);
+  --destructive: #E53935;
+  --destructive-foreground: #FFFFFF;
+  --border: #DADDE1;
+  --input: #DADDE1;
+  --ring: var(--orange);
+
+  --shadow-card: 0 1px 2px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.06);
+  --shadow-elevated: 0 4px 12px rgba(0,0,0,0.08), 0 12px 32px rgba(0,0,0,0.10);
+  /* Preserved exactly — used by homepage hero, must not change look */
+  --gradient-hero: linear-gradient(135deg, oklch(0.22 0.08 265) 0%, oklch(0.32 0.09 265) 60%, oklch(0.45 0.12 265) 100%);
+  --gradient-accent: linear-gradient(135deg, var(--orange) 0%, #FF8A42 100%);
+
+  /* Tuungane Civic Momentum Tokens */
+  --surface-container-lowest: #ffffff;
+  --surface-container-low: #eff4ff;
+  --surface-container: #e5eeff;
+  --surface-container-high: #dce9ff;
+  --surface-container-highest: #d3e4fe;
+  --on-surface-variant: #44474d;
+  --navy-dark: #0B192C;
+  --orange-gradient-end: #FF8A42;
+  --growth-green-light: #E8F7EE;
+  --growth-green-border: #A3E2B8;
+  --canvas-subtle: #F8FAFC;
+  --surface-alt: #F1F5F9;
+  --border-hairline: #DADDE1;
+  --border-subtle: #E2E8F0;
+  --text-jet: #050505;
+  --text-muted-mobile: #4B4F56;
+  --destructive-red: #E53935;
+  --hero-indigo-stop: #1E3A8A;
+  --outline: #75777e;
+  --outline-variant: #c4c6ce;
+}
+
+.dark {
+  --background: oklch(0.16 0.03 265);
+  --foreground: oklch(0.97 0.01 250);
+  --surface: oklch(0.2 0.04 265);
+  --card: oklch(0.22 0.04 265);
+  --card-foreground: oklch(0.97 0.01 250);
+  --popover: oklch(0.22 0.04 265);
+  --popover-foreground: oklch(0.97 0.01 250);
+  --primary: oklch(0.97 0.01 250);
+  --primary-foreground: oklch(0.18 0.04 265);
+  --secondary: oklch(0.26 0.05 265);
+  --secondary-foreground: oklch(0.97 0.01 250);
+  --muted: oklch(0.26 0.05 265);
+  --muted-foreground: oklch(0.7 0.03 265);
+  --accent: var(--orange);
+  --accent-foreground: oklch(0.985 0 0);
+  --border: oklch(1 0 0 / 12%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: var(--orange);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+  html {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+  }
+  h1, h2, h3, h4, h5 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+}
+
+/*
+ * Mobile-first global layout polish.
+ * Narrows side gutters and softens oversized radii on width-constrained
+ * top-level containers inside <main>, without touching forms, buttons,
+ * dialogs, or other components that rely on their own px-4.
+ * Desktop (sm+) layout is preserved because Tailwind's sm: utilities
+ * win via the @media (min-width: 640px) cascade.
+ */
+@media (max-width: 639px) {
+  /* Width-constrained section/page containers: reduce horizontal gutter */
+  main [class*="max-w-"].px-4,
+  main [class*="max-w-"].px-6 {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+  /* Soften oversized card radii so cards feel like a real mobile app */
+  main .rounded-3xl { border-radius: 1rem; }
+  main .rounded-2xl { border-radius: 0.875rem; }
+}
+
+/* Mobile tap-target safety net: buttons and link-buttons inside main get a
+   44px minimum touch height on small screens. Excludes plain text links and
+   tiny inline icon triggers (data-icon-only). */
+@media (max-width: 639px) {
+  main button:not(.h-auto):not([data-icon-only]),
+  main a[role="button"]:not([data-icon-only]),
+  main [type="submit"]:not([data-icon-only]) {
+    min-height: 44px;
+  }
+}
+
+/*
+ * Mobile typography polish — match the readability of Facebook, LinkedIn,
+ * ChatGPT and Lovable on small screens. We lift the smallest text sizes
+ * (text-xs / text-sm) to a comfortable floor, nudge body line-height up,
+ * and slightly darken muted-foreground for better contrast. Desktop is
+ * untouched (no changes above 640px).
+ */
+@media (max-width: 639px) {
+  html {
+    /* Anchor rem-based sizes — Tailwind text-* are in rem. */
+    font-size: 16.5px;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+  body {
+    line-height: 1.5;
+  }
+  /* Lift the smallest utility sizes to readable floors. */
+  main .text-xs,
+  main .text-\[10px\],
+  main .text-\[11px\],
+  main .text-\[12px\] {
+    font-size: 0.8125rem; /* ~13.4px */
+    line-height: 1.35rem;
+  }
+  main .text-sm {
+    font-size: 0.9375rem; /* ~15.5px */
+    line-height: 1.45rem;
+  }
+  main .text-base {
+    font-size: 1rem;       /* ~16.5px */
+    line-height: 1.55rem;
+  }
+  /* Stronger contrast on muted text for outdoor / mobile use. */
+  main .text-muted-foreground {
+    color: #4b4f56;
+  }
+}
+
+
+
+/*
+ * Compact status/indicator pills — normalize small rounded-full <span> badges
+ * (Near you, Same district, Flexible, Urgent, Featured, Work update, You, etc.)
+ * to a single tight size across the whole app. Only targets <span> so real
+ * pill-shaped buttons/links keep their tap size.
+ */
+span.rounded-full.text-\[10px\]:not([data-hero-chip]),
+span.rounded-full.text-\[11px\]:not([data-hero-chip]),
+span.rounded-full.text-\[12px\]:not([data-hero-chip]),
+span.rounded-full.text-xs:not([data-hero-chip]) {
+  font-size: 9px !important;
+  line-height: 1rem !important;
+  padding-top: 1px !important;
+  padding-bottom: 1px !important;
+  padding-left: 6px !important;
+  padding-right: 6px !important;
+}
+
+/* Icons inside compact pills shrink to match. */
+span.rounded-full.text-\[10px\]:not([data-hero-chip]) svg,
+span.rounded-full.text-\[11px\]:not([data-hero-chip]) svg,
+span.rounded-full.text-\[12px\]:not([data-hero-chip]) svg,
+span.rounded-full.text-xs:not([data-hero-chip]) svg {
+  width: 10px !important;
+  height: 10px !important;
+}
+
+/* Override the mobile readability lift for these pills specifically. */
+@media (max-width: 639px) {
+  main span.rounded-full.text-\[10px\]:not([data-hero-chip]),
+  main span.rounded-full.text-\[11px\]:not([data-hero-chip]),
+  main span.rounded-full.text-\[12px\]:not([data-hero-chip]),
+  main span.rounded-full.text-xs:not([data-hero-chip]) {
+    font-size: 9px !important;
+    line-height: 1rem !important;
+  }
+}
+
+
+
+
