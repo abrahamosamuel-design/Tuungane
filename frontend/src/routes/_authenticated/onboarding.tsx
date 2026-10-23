@@ -80,7 +80,7 @@ function Onboarding() {
         ? "/profiles/new"
         : chosenAction === "request"
           ? "/requests/new"
-          : "/dashboard";
+          : "/";
 
     nav({ to: dest });
   };

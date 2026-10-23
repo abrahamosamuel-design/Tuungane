@@ -58,7 +58,7 @@ export function LoginPage({
 
   useEffect(() => {
     if (!loading && user && !signupSuccess && !verified && !isSigningOut) {
-      void nav({ to: (redirectUrl as never) ?? "/dashboard" });
+      void nav({ to: (redirectUrl as never) ?? "/" });
     }
   }, [loading, user, redirectUrl, nav, signupSuccess, verified, isSigningOut]);
 
@@ -144,7 +144,7 @@ export function LoginPage({
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast.success("Welcome back!");
-        nav({ to: (redirectUrl as never) ?? "/dashboard" });
+        nav({ to: (redirectUrl as never) ?? "/" });
       }
     } catch (err) {
       await showErr(err, tab === "signup" ? "Couldn't create your account" : "Couldn't sign you in");

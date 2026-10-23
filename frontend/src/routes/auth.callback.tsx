@@ -38,7 +38,7 @@ function AuthCallback() {
             return;
           }
           if (data.session) {
-            if (!cancelled) nav({ to: "/dashboard", replace: true });
+            if (!cancelled) nav({ to: "/", replace: true });
             return;
           } else {
             if (!cancelled) {
@@ -54,7 +54,7 @@ function AuthCallback() {
           for (let i = 0; i < 15; i++) {
             const { data } = await supabase.auth.getSession();
             if (data.session?.user) {
-              if (!cancelled) nav({ to: "/dashboard", replace: true });
+              if (!cancelled) nav({ to: "/", replace: true });
               return;
             }
             await new Promise((r) => setTimeout(r, 300));
@@ -70,7 +70,7 @@ function AuthCallback() {
         for (let i = 0; i < 5; i++) {
           const { data } = await supabase.auth.getSession();
           if (data.session?.user) {
-            if (!cancelled) nav({ to: "/dashboard", replace: true });
+            if (!cancelled) nav({ to: "/", replace: true });
             return;
           }
           await new Promise((r) => setTimeout(r, 500));

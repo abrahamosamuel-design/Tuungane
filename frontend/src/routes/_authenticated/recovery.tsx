@@ -67,7 +67,7 @@ function RecoveryPage() {
           } else {
             toast.success("Account ownership confirmed! All services and listings have been transferred.");
             setTimeout(() => {
-              navigate({ to: "/dashboard" });
+              navigate({ to: "/" });
             }, 2000);
           }
         })
@@ -88,7 +88,7 @@ function RecoveryPage() {
         .then((res) => {
           const data = res.data;
           if (!data || !data.isDuplicate || !data.legacyProfile) {
-            navigate({ to: "/dashboard" });
+            navigate({ to: "/" });
           } else {
             setLegacyProfile(data.legacyProfile);
             if (data.legacyProfile.auth_email) {
@@ -133,7 +133,7 @@ function RecoveryPage() {
 
   const handleDismiss = () => {
     localStorage.setItem("tuungane_legacy_checked", "1");
-    navigate({ to: "/dashboard" });
+    navigate({ to: "/" });
   };
 
   // State: Loading check
