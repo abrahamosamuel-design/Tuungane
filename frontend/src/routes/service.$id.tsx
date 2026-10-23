@@ -19,6 +19,43 @@ export const Route = createFileRoute("/service/$id")({
   component: ServiceDetailPage,
 });
 
+function WhatsAppIcon({ className = "h-5 w-5" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+    </svg>
+  );
+}
+
+function getServiceDisplayImage(service: any) {
+  if (!service) return "";
+  let img = "";
+  if (service.media && service.media.length > 0) {
+    for (const m of service.media) {
+      if (m.kind === 'photo' || (m.url && !m.url.endsWith('.mp4'))) {
+        img = m.url;
+        break;
+      } else if (m.thumbnail_url) {
+        img = m.thumbnail_url;
+        break;
+      }
+    }
+  }
+  if (!img && service.photos && service.photos.length > 0) {
+    img = service.photos.find((p: string) => !p.endsWith('.mp4')) || "";
+  }
+  if (!img && service.profile?.cover_url && !service.profile?.cover_url.endsWith('.mp4')) {
+    img = service.profile.cover_url;
+  }
+  if (!img && service.profile?.avatar_url) {
+    img = service.profile.avatar_url;
+  }
+  if (img && !img.startsWith("http") && typeof window !== "undefined") {
+    img = `${window.location.origin}${img}`;
+  }
+  return img;
+}
+
 function ServiceDetailPage() {
   const { id } = Route.useParams();
   const nav = useNavigate();
@@ -69,6 +106,33 @@ function ServiceDetailPage() {
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
+  useEffect(() => {
+    if (service?.title) {
+      document.title = `${service.title} — Tuungane`;
+      
+      const updateMeta = (property: string, content: string) => {
+        if (!content) return;
+        let el = document.querySelector(`meta[property="${property}"]`);
+        if (!el) {
+          el = document.createElement("meta");
+          el.setAttribute("property", property);
+          document.head.appendChild(el);
+        }
+        el.setAttribute("content", content);
+      };
+
+      const img = getServiceDisplayImage(service);
+      updateMeta("og:title", `${service.title} on Tuungane`);
+      updateMeta("og:description", service.description || `Verified service on Tuungane.`);
+      if (img) {
+        updateMeta("og:image", img);
+      }
+      if (typeof window !== "undefined") {
+        updateMeta("og:url", window.location.href);
+      }
+    }
+  }, [service]);
+
   const isOwner = user?.id && service && (user.id === service.user_profile_id || user.id === service.profile?.owner_id);
 
   if (loading && !service) {
@@ -118,6 +182,57 @@ function ServiceDetailPage() {
   } else if (service.price_note) {
     priceDisplay = service.price_note;
   }
+
+  const rawPhone =
+    service.phone ||
+    service.profile?.phone ||
+    service.user_profile?.phone ||
+    "";
+
+  const rawWhatsapp =
+    service.whatsapp ||
+    service.profile?.whatsapp ||
+    rawPhone;
+
+  const getCleanWhatsappNumber = (phoneStr: string) => {
+    let cleaned = phoneStr.replace(/\D/g, "");
+    if (cleaned.startsWith("0")) {
+      cleaned = "256" + cleaned.slice(1);
+    } else if (!cleaned.startsWith("256") && cleaned.length === 9) {
+      cleaned = "256" + cleaned;
+    }
+    return cleaned;
+  };
+
+  const serviceUrl =
+    typeof window !== "undefined"
+      ? window.location.href
+      : `https://tuungane.com/service/${id}`;
+
+  const displayImage = images[0]
+    ? images[0].startsWith("http")
+      ? images[0]
+      : `${typeof window !== "undefined" ? window.location.origin : "https://tuungane.com"}${images[0]}`
+    : "";
+
+  const whatsappMessage = [
+    `Hello! I found your service on Tuungane.`,
+    ``,
+    `*Service Requested:* ${service.title}`,
+    priceDisplay && priceDisplay !== "Price varies" ? `*Price:* ${priceDisplay}` : null,
+    service.town || service.district ? `*Location:* ${[service.town, service.district].filter(Boolean).join(", ")}` : null,
+    ``,
+    `*Service Link:*`,
+    serviceUrl,
+    displayImage ? `\n*Service Photo:*\n${displayImage}` : null,
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  const whatsappNumber = getCleanWhatsappNumber(rawWhatsapp);
+  const whatsappUrl = whatsappNumber
+    ? `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappMessage)}`
+    : "";
   
   const handleOrder = () => {
     requireAuth(
@@ -469,20 +584,49 @@ function ServiceDetailPage() {
               </button>
             </>
           ) : (
-            <>
-              <button 
-                onClick={handleOrder}
-                className="flex-1 rounded-full bg-orange py-4 text-center font-bold text-white shadow-lg hover:bg-orange/90 active:scale-[0.98] transition-transform"
-              >
-                Request Service
-              </button>
-              <a
-                href={`tel:${service.user_profile?.phone || service.profile?.phone || ''}`}
-                className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg hover:bg-[#20b858] active:scale-[0.98] transition-transform"
-              >
-                <Phone className="h-6 w-6 fill-current" />
-              </a>
-            </>
+            <div className="flex w-full items-center gap-3">
+              {/* Call Button */}
+              {rawPhone ? (
+                <a
+                  href={`tel:${rawPhone}`}
+                  className="flex-1 flex items-center justify-center gap-2 rounded-full bg-[#0B192C] py-3.5 px-4 text-center font-bold text-white shadow-md hover:bg-[#0B192C]/90 active:scale-[0.98] transition-all"
+                >
+                  <Phone className="h-5 w-5 fill-current" />
+                  <span>Call</span>
+                </a>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => toast.error("Phone number is not available for this provider.")}
+                  className="flex-1 flex items-center justify-center gap-2 rounded-full border-2 border-slate-200 bg-slate-50 py-3.5 px-4 text-center font-bold text-slate-400 cursor-not-allowed opacity-80"
+                >
+                  <Phone className="h-5 w-5" />
+                  <span>Call</span>
+                </button>
+              )}
+
+              {/* WhatsApp Button */}
+              {whatsappUrl ? (
+                <a
+                  href={whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-1 flex items-center justify-center gap-2 rounded-full bg-[#25D366] py-3.5 px-4 text-center font-bold text-white shadow-md hover:bg-[#20b858] active:scale-[0.98] transition-all"
+                >
+                  <WhatsAppIcon className="h-5 w-5 fill-white" />
+                  <span>WhatsApp</span>
+                </a>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => toast.error("WhatsApp is not available for this provider.")}
+                  className="flex-1 flex items-center justify-center gap-2 rounded-full bg-slate-200 py-3.5 px-4 text-center font-bold text-slate-400 cursor-not-allowed opacity-80"
+                >
+                  <WhatsAppIcon className="h-5 w-5 fill-slate-400" />
+                  <span>WhatsApp</span>
+                </button>
+              )}
+            </div>
           )}
         </div>
       </div>
@@ -756,39 +900,69 @@ function ServiceDetailPage() {
                 </button>
               </div>
             ) : (
-              <button 
-                onClick={handleOrder}
-                className="w-full py-3.5 px-4 rounded-xl bg-orange text-white font-bold text-base shadow-lg shadow-orange/20 hover:brightness-105 transition-all flex items-center justify-center gap-2 mb-4"
-              >
-                <span>Send Service Request</span>
-                <ArrowLeft className="h-5 w-5 rotate-180" />
-              </button>
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                {/* Call Button */}
+                {rawPhone ? (
+                  <a
+                    href={`tel:${rawPhone}`}
+                    className="py-3.5 px-4 rounded-xl bg-[#0B192C] text-white font-bold text-sm shadow-md hover:bg-[#0B192C]/90 active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-center"
+                  >
+                    <Phone className="h-4 w-4 fill-current" />
+                    <span>Call</span>
+                  </a>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => toast.error("Phone number is not available")}
+                    className="py-3.5 px-4 rounded-xl border border-border text-muted-foreground font-bold text-sm bg-muted/30 transition-all flex items-center justify-center gap-2 cursor-not-allowed opacity-75"
+                  >
+                    <Phone className="h-4 w-4" />
+                    <span>Call</span>
+                  </button>
+                )}
+
+                {/* WhatsApp Button */}
+                {whatsappUrl ? (
+                  <a
+                    href={whatsappUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="py-3.5 px-4 rounded-xl bg-[#25D366] text-white font-bold text-sm shadow-md hover:bg-[#20b858] active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-center"
+                  >
+                    <WhatsAppIcon className="h-4 w-4 fill-white" />
+                    <span>WhatsApp</span>
+                  </a>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => toast.error("WhatsApp number is not available")}
+                    className="py-3.5 px-4 rounded-xl border border-border text-muted-foreground font-bold text-sm bg-muted/30 transition-all flex items-center justify-center gap-2 cursor-not-allowed opacity-75"
+                  >
+                    <WhatsAppIcon className="h-4 w-4 fill-muted-foreground" />
+                    <span>WhatsApp</span>
+                  </button>
+                )}
+              </div>
             )}
 
             {!isOwner && (
-              <div className="grid grid-cols-2 gap-3">
-                <button 
-                  onClick={handleOrder}
-                  className="py-3 px-3 rounded-xl border border-border text-navy font-semibold text-sm hover:bg-muted transition-colors flex items-center justify-center gap-2"
-                >
-                  <MessageSquare className="h-4 w-4" />
-                  <span>Message</span>
-                </button>
-                <button 
-                  onClick={() => {
-                    if (navigator.share) {
-                      navigator.share({
-                        title: service.title,
-                        url: window.location.href,
-                      });
-                    }
-                  }}
-                  className="py-3 px-3 rounded-xl border border-border text-navy font-semibold text-sm hover:bg-muted transition-colors flex items-center justify-center gap-2"
-                >
-                  <Share2 className="h-4 w-4" />
-                  <span>Share</span>
-                </button>
-              </div>
+              <button 
+                onClick={() => {
+                  if (navigator.share) {
+                    navigator.share({
+                      title: service.title,
+                      url: window.location.href,
+                    });
+                  } else {
+                    navigator.clipboard.writeText(window.location.href);
+                    toast.success("Link copied to clipboard");
+                  }
+                }}
+                className="w-full py-3 px-3 rounded-xl border border-border text-navy font-semibold text-sm hover:bg-muted transition-colors flex items-center justify-center gap-2"
+              >
+                <Share2 className="h-4 w-4" />
+                <span>Share Service</span>
+              </button>
             )}
             
             <p className="text-xs text-muted-foreground text-center mt-5 px-4 leading-relaxed">

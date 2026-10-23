@@ -140,7 +140,7 @@ export function ServiceCard({
             params={{ id: id }}
             className="px-3.5 py-1.5 bg-orange hover:bg-orange/90 active:scale-[0.98] text-white text-xs font-semibold rounded-xl shadow-sm transition-all flex items-center gap-1"
           >
-            Request Service
+            View details
           </Link>
         </div>
       </div>

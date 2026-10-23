@@ -32,7 +32,7 @@ export const getServiceById = async (req, res) => {
         *,
         profile:public_profiles!profile_services_profile_id_fkey (
           id, owner_id, name, avatar_url, verified,
-          town, district, area, slug, phone
+          town, district, area, slug, phone, whatsapp
         ),
         user_profile:profiles!profile_services_user_profile_id_fkey (
           id, full_name, avatar_url, phone
@@ -57,7 +57,7 @@ export const getServiceById = async (req, res) => {
             *,
             profile:public_profiles!profile_services_profile_id_fkey (
               id, owner_id, name, avatar_url, verified,
-              town, district, area, slug, phone
+              town, district, area, slug, phone, whatsapp
             ),
             user_profile:profiles!profile_services_user_profile_id_fkey (
               id, full_name, avatar_url, phone
