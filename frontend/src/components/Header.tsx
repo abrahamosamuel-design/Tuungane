@@ -92,9 +92,9 @@ export function Header() {
               
               <nav className="hidden md:flex items-center justify-end gap-6 lg:gap-8 ml-auto pl-8 lg:pl-16 mr-6">
                 {[
-                  { to: "/dashboard", label: "Home", exact: true },
-                  { to: "/services", label: "Services", exact: false },
-                  { to: "/opportunities", label: "Opportunities", exact: false },
+                  { to: "/", label: "Home", exact: true },
+                  { to: "/feed", label: "Feed", exact: false },
+                  { to: "/categories", label: "Categories", exact: false },
                   { to: `/u/${user.id}`, label: "My Account", exact: false },
                 ].map((n) => (
                   <Link
@@ -112,7 +112,7 @@ export function Header() {
             </>
           ) : (
             <>
-              {/* Unauthenticated Desktop Header Layout (Original) */}
+              {/* Unauthenticated Desktop Header Layout */}
               <Link to="/" className="hidden md:flex -ml-1 items-center" aria-label="Tuungane home">
                 <Logo className="h-14 w-auto" />
               </Link>
@@ -120,7 +120,8 @@ export function Header() {
               <nav className="hidden md:flex flex-1 items-center justify-center gap-8">
                 {[
                   { to: "/", label: "Home", exact: true },
-                  { to: "/services", label: "Services", exact: false },
+                  { to: "/feed", label: "Feed", exact: false },
+                  { to: "/categories", label: "Categories", exact: false },
                   { to: "/about", label: "About Us", exact: false },
                 ].map((n) => (
                   <Link

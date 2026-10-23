@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, forwardRef, Ref, useRef } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Search, MoreHorizontal, Star, Wrench, Zap, Sparkles, Heart, MessageCircle, MessageSquare, Send, MapPin, ChevronRight, ChevronLeft, CalendarPlus } from "lucide-react";
+import { Search, MoreHorizontal, Star, Wrench, Zap, Sparkles, Heart, MessageCircle, MessageSquare, Send, MapPin, ChevronRight, ChevronLeft, CalendarPlus, LayoutGrid } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { apiClient } from "@/lib/api";
 import { FeedAvatar } from "@/components/feed/FeedAvatar";
@@ -263,7 +263,7 @@ export function DashboardView() {
                   return <DashboardCarousel key={item.id} title="Service Requests Near You" items={item.data} viewAllLink="/requests" renderItem={(r: any) => <RequestCard data={r} />} />;
                 }
                 if (item.type === "carousel_opportunities") {
-                  return <DashboardCarousel key={item.id} title="Opportunities For You" items={item.data} viewAllLink="/opportunities" renderItem={(o: any) => <TimelinePostCard data={o} />} />;
+                  return <DashboardCarousel key={item.id} title="Opportunities For You" items={item.data} viewAllLink="/categories" renderItem={(o: any) => <TimelinePostCard data={o} />} />;
                 }
                 return null;
               })}
@@ -357,12 +357,12 @@ function LeftSidebar({ user }: { user: any }) {
               <span>Services Directory</span>
             </div>
           </Link>
-          <Link to="/opportunities" className="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-navy hover:bg-surface-alt transition-all group">
+          <Link to="/categories" className="flex items-center justify-between px-3 py-2.5 rounded-xl text-sm font-medium text-navy hover:bg-surface-alt transition-all group">
             <div className="flex items-center gap-2">
-              <span className="w-8 h-8 rounded-lg bg-green/15 text-green flex items-center justify-center group-hover:scale-105 transition-transform">
-                <Zap className="h-4 w-4" />
+              <span className="w-8 h-8 rounded-lg bg-orange/15 text-orange flex items-center justify-center group-hover:scale-105 transition-transform">
+                <LayoutGrid className="h-4 w-4" />
               </span>
-              <span>Opportunities</span>
+              <span>Categories</span>
             </div>
           </Link>
         </nav>
@@ -377,9 +377,9 @@ function RightSidebar() {
       <div className="flex items-center justify-between pb-3 border-b border-border-hairline">
         <div className="flex items-center gap-2">
           <TrendingUp className="h-5 w-5 text-orange" />
-          <h3 className="text-sm font-bold text-navy">Trending Opps</h3>
+          <h3 className="text-sm font-bold text-navy">Popular Categories</h3>
         </div>
-        <Link to="/opportunities" className="text-xs text-orange font-semibold hover:underline">View All</Link>
+        <Link to="/categories" className="text-xs text-orange font-semibold hover:underline">View All</Link>
       </div>
       <div className="divide-y divide-border-hairline/70 mt-2">
         <div className="py-3 group">
@@ -387,7 +387,7 @@ function RightSidebar() {
             <span className="text-[9px] font-bold text-orange uppercase tracking-wider">CIVIC TENDER</span>
             <span className="text-xs text-outline">2d left</span>
           </div>
-          <Link to="/opportunities" className="text-sm font-semibold text-navy group-hover:text-orange transition-colors line-clamp-2 mt-1">
+          <Link to="/categories" className="text-sm font-semibold text-navy group-hover:text-orange transition-colors line-clamp-2 mt-1">
             Supply of Commercial Cold Storage Units for Market
           </Link>
         </div>
@@ -396,7 +396,7 @@ function RightSidebar() {
             <span className="text-[9px] font-bold text-green uppercase tracking-wider">COOPERATIVE GIG</span>
             <span className="text-xs text-outline">5h left</span>
           </div>
-          <Link to="/opportunities" className="text-sm font-semibold text-navy group-hover:text-orange transition-colors line-clamp-2 mt-1">
+          <Link to="/categories" className="text-sm font-semibold text-navy group-hover:text-orange transition-colors line-clamp-2 mt-1">
             Chartered Agronomy Surveyor for Macadamia Cooperative
           </Link>
         </div>

@@ -1,7 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { DashboardView } from "@/components/dashboard/DashboardView";
+import { createFileRoute, Navigate } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
-  head: () => ({ meta: [{ title: "Dashboard — Tuungane" }] }),
-  component: DashboardView,
+  head: () => ({ meta: [{ title: "Feed — Tuungane" }] }),
+  component: () => <Navigate to="/feed" replace />,
 });

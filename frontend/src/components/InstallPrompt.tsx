@@ -163,7 +163,7 @@ export function InstallPrompt() {
     ? isProvider
       ? "Install Tuungane so you don't miss new service requests near you."
       : "Install Tuungane so you can quickly find trusted service providers when you need help."
-    : "Add Tuungane to your home screen for faster access to services, requests, messages, and opportunities.";
+    : "Add Tuungane to your home screen for faster access to services, requests, messages, and categories.";
 
   if (visible && deferred) {
     return (
