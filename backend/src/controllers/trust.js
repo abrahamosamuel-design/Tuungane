@@ -3,9 +3,8 @@ import { supabaseAdmin } from '../lib/supabaseClient.js';
 export const getMyTrustStatus = async (req, res) => {
   try {
     const userId = req.user.id;
-    const [sp, bp, ts, pvrPending, pvrRejected, appeals] = await Promise.all([
+    const [sp, ts, pvrPending, pvrRejected, appeals] = await Promise.all([
       supabaseAdmin.from("service_profiles").select("user_id,business_name,subcategory").eq("user_id", userId),
-      supabaseAdmin.from("business_pages").select("id,name,org_type").eq("owner_id", userId),
       supabaseAdmin.from("profile_trust_status").select("profile_kind,profile_id,manual_level,auto_level").eq("owner_user_id", userId),
       supabaseAdmin.from("profile_verification_requests").select("profile_kind,profile_id,status").eq("owner_user_id", userId).in("status", ["pending", "more_info"]),
       supabaseAdmin.from("profile_verification_requests").select("id,profile_kind,profile_id,created_at").eq("owner_user_id", userId).eq("status", "rejected").order("created_at", { ascending: false }),
@@ -15,7 +14,7 @@ export const getMyTrustStatus = async (req, res) => {
     res.json({
       data: {
         service_profiles: sp.data,
-        business_pages: bp.data,
+        business_pages: [],
         trust_status: ts.data,
         pending_requests: pvrPending.data,
         rejected_requests: pvrRejected.data,

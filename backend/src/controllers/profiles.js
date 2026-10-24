@@ -111,12 +111,11 @@ export const getMyCounts = async (req, res) => {
 export const getMyPostAsOptions = async (req, res) => {
   try {
     const userId = req.user.id;
-    const [{ data: me }, { data: sp }, { data: bp }] = await Promise.all([
+    const [{ data: me }, { data: sp }] = await Promise.all([
       supabaseAdmin.from("profiles").select("id,full_name,avatar_url").eq("id", userId).maybeSingle(),
       supabaseAdmin.from("service_profiles").select("user_id,business_name,cover_url").eq("user_id", userId).maybeSingle(),
-      supabaseAdmin.from("business_pages").select("id,name,logo_url").eq("owner_id", userId),
     ]);
-    res.json({ data: { me, sp, bp } });
+    res.json({ data: { me, sp, bp: [] } });
   } catch (err) {
     console.error('Error fetching post as options:', err);
     res.status(500).json({ error: 'Failed to fetch options' });

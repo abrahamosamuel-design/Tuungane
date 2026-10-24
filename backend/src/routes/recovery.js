@@ -306,12 +306,6 @@ router.post('/confirm-claim', requireAuth, async (req, res) => {
       .eq('user_profile_id', legacyOwnerId);
     if (psErr) console.error('Error transferring profile_services:', psErr);
 
-    // 4. Transfer business_pages
-    const { error: bpErr } = await supabaseAdmin
-      .from('business_pages')
-      .update({ owner_id: targetUserId })
-      .eq('owner_id', legacyOwnerId);
-    if (bpErr) console.error('Error transferring business_pages:', bpErr);
 
     // 5. Transfer timeline_posts
     const { error: tpErr } = await supabaseAdmin
