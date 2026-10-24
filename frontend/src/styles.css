@@ -216,37 +216,40 @@
 }
 
 /*
- * Mobile typography polish — match the readability of Facebook, LinkedIn,
- * ChatGPT and Lovable on small screens. We lift the smallest text sizes
- * (text-xs / text-sm) to a comfortable floor, nudge body line-height up,
- * and slightly darken muted-foreground for better contrast. Desktop is
- * untouched (no changes above 640px).
+ * Global typography base — boost font-size slightly for improved readability
+ * across the entire app.
  */
+html {
+  font-size: 17px;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 @media (max-width: 639px) {
   html {
-    /* Anchor rem-based sizes — Tailwind text-* are in rem. */
-    font-size: 16.5px;
+    /* Lift mobile rem base for optimal legibility */
+    font-size: 17.5px;
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
   }
   body {
-    line-height: 1.5;
+    line-height: 1.55;
   }
-  /* Lift the smallest utility sizes to readable floors. */
+  /* Lift the smallest utility sizes to comfortable, readable floors. */
   main .text-xs,
   main .text-\[10px\],
   main .text-\[11px\],
   main .text-\[12px\] {
-    font-size: 0.8125rem; /* ~13.4px */
-    line-height: 1.35rem;
+    font-size: 0.85rem; /* ~14.9px */
+    line-height: 1.38rem;
   }
   main .text-sm {
-    font-size: 0.9375rem; /* ~15.5px */
-    line-height: 1.45rem;
+    font-size: 0.965rem; /* ~16.9px */
+    line-height: 1.48rem;
   }
   main .text-base {
-    font-size: 1rem;       /* ~16.5px */
-    line-height: 1.55rem;
+    font-size: 1.05rem;  /* ~18.4px */
+    line-height: 1.6rem;
   }
   /* Stronger contrast on muted text for outdoor / mobile use. */
   main .text-muted-foreground {
@@ -266,12 +269,12 @@ span.rounded-full.text-\[10px\]:not([data-hero-chip]),
 span.rounded-full.text-\[11px\]:not([data-hero-chip]),
 span.rounded-full.text-\[12px\]:not([data-hero-chip]),
 span.rounded-full.text-xs:not([data-hero-chip]) {
-  font-size: 9px !important;
-  line-height: 1rem !important;
-  padding-top: 1px !important;
-  padding-bottom: 1px !important;
-  padding-left: 6px !important;
-  padding-right: 6px !important;
+  font-size: 10.5px !important;
+  line-height: 1.1rem !important;
+  padding-top: 1.5px !important;
+  padding-bottom: 1.5px !important;
+  padding-left: 7px !important;
+  padding-right: 7px !important;
 }
 
 /* Icons inside compact pills shrink to match. */
@@ -279,8 +282,8 @@ span.rounded-full.text-\[10px\]:not([data-hero-chip]) svg,
 span.rounded-full.text-\[11px\]:not([data-hero-chip]) svg,
 span.rounded-full.text-\[12px\]:not([data-hero-chip]) svg,
 span.rounded-full.text-xs:not([data-hero-chip]) svg {
-  width: 10px !important;
-  height: 10px !important;
+  width: 11px !important;
+  height: 11px !important;
 }
 
 /* Override the mobile readability lift for these pills specifically. */
@@ -289,8 +292,8 @@ span.rounded-full.text-xs:not([data-hero-chip]) svg {
   main span.rounded-full.text-\[11px\]:not([data-hero-chip]),
   main span.rounded-full.text-\[12px\]:not([data-hero-chip]),
   main span.rounded-full.text-xs:not([data-hero-chip]) {
-    font-size: 9px !important;
-    line-height: 1rem !important;
+    font-size: 10.5px !important;
+    line-height: 1.1rem !important;
   }
 }
 
