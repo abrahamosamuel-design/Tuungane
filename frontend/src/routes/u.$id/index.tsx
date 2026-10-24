@@ -1,7 +1,7 @@
 import { createFileRoute, useParams, Link, useNavigate, useRouter } from "@tanstack/react-router";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { MapPin, Phone, BadgeCheck, Star, Share2, Camera, Users, ThumbsUp, ClipboardList, Pencil, Plus, ChevronRight, ArrowLeft, MessageSquare, Loader2, Wrench, Zap, Sparkles, Calendar, GraduationCap, LayoutDashboard, Coins, Settings, Briefcase, CheckCircle2, Clock, ImagePlus, ArrowRight, Info, Check, X as XIcon, LogOut } from "lucide-react";
+import { MapPin, Phone, BadgeCheck, Star, Share2, Camera, Users, ThumbsUp, ClipboardList, Pencil, Plus, ChevronRight, ArrowLeft, MessageSquare, Loader2, Wrench, Zap, Sparkles, Calendar, GraduationCap, LayoutDashboard, Coins, Settings, Briefcase, CheckCircle2, Clock, ImagePlus, ArrowRight, Info, Check, X as XIcon, LogOut, Eye } from "lucide-react";
 import { useCreditWallet } from "@/hooks/use-credits";
 import { RemovePhotoConfirm } from "@/components/RemovePhotoConfirm";
 import { ManageServiceDialog, type ServiceForm } from "@/components/ManageServiceDialog";
@@ -195,12 +195,12 @@ export default function UserProfile() {
   const [calling, setCalling] = useState(false);
 
   // ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ Owner dashboard state ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬ÃƒÂ¢Ã¢â‚¬ÂÃ¢â€šÂ¬
-  type OwnerTab = "dashboard" | "credits" | "settings";
+  type OwnerSection = "main" | "services" | "credits" | "public" | "settings";
   type Pkg = { id: string; name: string; credits: number; amount_ugx: number; active: boolean; sort_order: number };
   type Tx  = { id: string; transaction_type: string; amount: number; reason: string; created_at: string };
   type CreditReq = { id: string; package_id: string | null; package_name: string; credits_requested: number; amount_ugx: number; status: string; admin_note: string | null; created_at: string };
   const { balance } = useCreditWallet();
-  const [ownerTab, setOwnerTab] = useState<OwnerTab>("dashboard");
+  const [ownerSection, setOwnerSection] = useState<OwnerSection>("main");
   const [ownerRequests, setOwnerRequests] = useState<any[]>([]);
   const [ownerCounts, setOwnerCounts] = useState({ services: 0, requests: 0, completed: 0, pending: 0 });
   const [ownerReqLoaded, setOwnerReqLoaded] = useState(false);
@@ -390,8 +390,9 @@ export default function UserProfile() {
   const cat = useCategory(sp?.category_slug);
 
   const isOwn = user?.id === id;
+  const isPublicPreview = isOwn && ownerSection === "public";
   const isProvider = !!profile?.is_provider;
-  const visibleTabs = TABS.filter((t) => (!t.providerOnly || isProvider) && (!t.ownerOnly || isOwn) && (!t.adminOnly || isModerator));
+  const visibleTabs = TABS.filter((t) => (!t.providerOnly || isProvider) && (!t.ownerOnly || (isOwn && !isPublicPreview)) && (!t.adminOnly || (isModerator && !isPublicPreview)));
   
   // ── UNIFIED RATING ──
   const totalReviews = feedback.length + reviews.length;
@@ -400,12 +401,6 @@ export default function UserProfile() {
   const portfolioPosts = posts.filter((p) => p.media_urls.length > 0);
 
   // ── DASHBOARD LOGIC ──
-  type OTab = OwnerTab;
-  const ownerTabs = [
-    { id: "dashboard" as OTab, label: "Dashboard",  icon: <LayoutDashboard className="h-[15px] w-[15px]" /> },
-    { id: "credits"   as OTab, label: "My Credits", icon: <Coins className="h-[15px] w-[15px]" /> },
-    { id: "settings"  as OTab, label: "Settings",   icon: <Settings className="h-[15px] w-[15px]" /> },
-  ];
   const fmtUgx = (n: number) => `${n.toLocaleString()} UGX`;
   const pendingPkgIds   = new Set(creditReqs.filter(r => r.status === "pending").map(r => r.package_id).filter(Boolean) as string[]);
   const pendingPkgNames = new Set(creditReqs.filter(r => r.status === "pending").map(r => r.package_name));
@@ -436,7 +431,7 @@ export default function UserProfile() {
             <ArrowLeft className="h-5 w-5" />
           </button>
           {/* Cover Photo Upload — top right */}
-          {isOwn && isProvider && (
+          {isOwn && isProvider && !isPublicPreview && (
             <div className="absolute top-4 right-4 z-10">
               <label className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-black/40 text-white backdrop-blur-sm hover:bg-black/60 transition shadow-sm" title="Change cover photo">
                 {uploadingCover ? <Loader2 className="h-4 w-4 animate-spin text-white" /> : <Camera className="h-4 w-4" />}
@@ -461,7 +456,7 @@ export default function UserProfile() {
               <div className="rounded-full overflow-hidden bg-white" style={{ width: 120, height: 120, border: "5px solid #fff", boxShadow: "0 8px 32px rgba(0,0,0,0.18)" }}>
                 <Avatar name={profile.full_name} url={profile.avatar_url} size={120} />
               </div>
-              {isOwn && (
+              {isOwn && !isPublicPreview && (
                 <label className="absolute bottom-1 right-1 flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border-[3px] border-white shadow-lg" style={{ background: "#f47b16" }}>
                   {uploadingAvatar ? <Loader2 className="h-4 w-4 animate-spin text-white" /> : <Camera className="h-4 w-4 text-white" />}
                   <input type="file" accept="image/*" className="hidden" disabled={ownerBusy || uploadingAvatar}
@@ -495,7 +490,7 @@ export default function UserProfile() {
 
           {/* Action Buttons */}
           <div className="mt-5 flex gap-3 px-6 max-w-sm mx-auto">
-            {isOwn ? (
+            {isOwn && !isPublicPreview ? (
               <button onClick={() => setEditOpen(true)}
                 className="flex-1 flex items-center justify-center gap-2 rounded-full py-3 text-[13px] font-bold transition hover:opacity-80"
                 style={{ border: "2.5px solid #1a2b4b", color: "#1a2b4b", background: "#fff" }}>
@@ -532,31 +527,12 @@ export default function UserProfile() {
             </div>
           </div>
 
-          {isOwn ? (
-          <>
-            {/* Tabs */}
-            <div className="mt-4 flex" style={{ borderBottom: "2px solid #f3f4f6" }}>
-            {ownerTabs.map(t => (
-              <button key={t.id}
-                onClick={() => {
-                  setOwnerTab(t.id);
-                  if (t.id === "credits") { loadOwnerPackages(); loadOwnerCredits(); }
-                  if (t.id === "settings") setOwnerFullName(profile.full_name);
-                }}
-                className="relative flex flex-1 items-center justify-center gap-1.5 py-3.5 text-[12px] font-semibold transition-colors"
-                style={{ color: ownerTab === t.id ? "#f47b16" : "#9ca3af" }}
-              >
-                {t.icon}<span>{t.label}</span>
-                {ownerTab === t.id && <span className="absolute bottom-0 left-4 right-4 rounded-full" style={{ height: 2.5, background: "#f47b16" }} />}
-              </button>
-            ))}
-          </div>
-
-          {/* Tab content */}
+          {isOwn && !isPublicPreview ? (
           <div className="px-4 pt-4">
 
-            {ownerTab === "dashboard" && (
+            {ownerSection === "main" && (
               <div className="space-y-4 pb-28">
+                {/* 1. Summary Cards First */}
                 <div className="grid grid-cols-2 gap-3">
                   {([
                     { icon: <Briefcase className="h-5 w-5" />,     label: "Services Listed",  value: services.length,       bg: "#eff6ff", ic: "#3b82f6" },
@@ -574,9 +550,149 @@ export default function UserProfile() {
                   ))}
                 </div>
 
+                {/* 2. Vertical Menu Cards (Service Category Style) */}
+                <div className="flex flex-col gap-3 pt-1">
+                  {/* Card 1: My Services */}
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setOwnerSection("services")}
+                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setOwnerSection("services"); }}
+                    className="group flex items-center gap-3.5 p-3.5 sm:p-4 rounded-2xl border border-border/40 bg-white shadow-xs transition-all duration-150 hover:border-orange/50 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99] cursor-pointer"
+                  >
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-600 group-hover:bg-orange/10 group-hover:text-orange transition-colors">
+                      <Briefcase className="h-5 w-5" />
+                    </div>
+                    <div className="flex flex-1 flex-col gap-0.5 min-w-0">
+                      <span className="text-sm font-bold text-navy tracking-tight truncate group-hover:text-orange transition-colors">
+                        My Services
+                      </span>
+                      <span className="text-[12px] text-muted-foreground line-clamp-1">
+                        {services.length} {services.length === 1 ? "service" : "services"} listed · Manage offerings
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-[11px] font-semibold text-slate-400 hidden sm:inline">
+                        {services.length} listed
+                      </span>
+                      <ChevronRight className="h-4 w-4 text-navy/40 group-hover:text-orange group-hover:translate-x-0.5 transition-all" />
+                    </div>
+                  </div>
+
+                  {/* Card 2: Credits */}
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => {
+                      loadOwnerPackages();
+                      loadOwnerCredits();
+                      setOwnerSection("credits");
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        loadOwnerPackages();
+                        loadOwnerCredits();
+                        setOwnerSection("credits");
+                      }
+                    }}
+                    className="group flex items-center gap-3.5 p-3.5 sm:p-4 rounded-2xl border border-border/40 bg-white shadow-xs transition-all duration-150 hover:border-orange/50 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99] cursor-pointer"
+                  >
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-amber-50 text-amber-600 group-hover:bg-orange/10 group-hover:text-orange transition-colors">
+                      <Coins className="h-5 w-5" />
+                    </div>
+                    <div className="flex flex-1 flex-col gap-0.5 min-w-0">
+                      <span className="text-sm font-bold text-navy tracking-tight truncate group-hover:text-orange transition-colors">
+                        Credits
+                      </span>
+                      <span className="text-[12px] text-muted-foreground line-clamp-1">
+                        {(balance ?? 0).toLocaleString()} credits available · Buy & history
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-[11px] font-semibold text-slate-400 hidden sm:inline">
+                        {(balance ?? 0).toLocaleString()} credits
+                      </span>
+                      <ChevronRight className="h-4 w-4 text-navy/40 group-hover:text-orange group-hover:translate-x-0.5 transition-all" />
+                    </div>
+                  </div>
+
+                  {/* Card 3: Profile view */}
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setOwnerSection("public")}
+                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") setOwnerSection("public"); }}
+                    className="group flex items-center gap-3.5 p-3.5 sm:p-4 rounded-2xl border border-border/40 bg-white shadow-xs transition-all duration-150 hover:border-orange/50 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99] cursor-pointer"
+                  >
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 group-hover:bg-orange/10 group-hover:text-orange transition-colors">
+                      <Eye className="h-5 w-5" />
+                    </div>
+                    <div className="flex flex-1 flex-col gap-0.5 min-w-0">
+                      <span className="text-sm font-bold text-navy tracking-tight truncate group-hover:text-orange transition-colors">
+                        Profile view
+                      </span>
+                      <span className="text-[12px] text-muted-foreground line-clamp-1">
+                        Shows how the profile appears to the public for other users
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-[11px] font-semibold text-emerald-600 hidden sm:inline">
+                        Public preview
+                      </span>
+                      <ChevronRight className="h-4 w-4 text-navy/40 group-hover:text-orange group-hover:translate-x-0.5 transition-all" />
+                    </div>
+                  </div>
+
+                  {/* Card 4: Settings */}
+                  <div
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => {
+                      setOwnerFullName(profile.full_name);
+                      setOwnerSection("settings");
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" || e.key === " ") {
+                        setOwnerFullName(profile.full_name);
+                        setOwnerSection("settings");
+                      }
+                    }}
+                    className="group flex items-center gap-3.5 p-3.5 sm:p-4 rounded-2xl border border-border/40 bg-white shadow-xs transition-all duration-150 hover:border-orange/50 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.99] cursor-pointer"
+                  >
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-700 group-hover:bg-orange/10 group-hover:text-orange transition-colors">
+                      <Settings className="h-5 w-5" />
+                    </div>
+                    <div className="flex flex-1 flex-col gap-0.5 min-w-0">
+                      <span className="text-sm font-bold text-navy tracking-tight truncate group-hover:text-orange transition-colors">
+                        Settings
+                      </span>
+                      <span className="text-[12px] text-muted-foreground line-clamp-1">
+                        Profile information, photo, location & account
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <ChevronRight className="h-4 w-4 text-navy/40 group-hover:text-orange group-hover:translate-x-0.5 transition-all" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {ownerSection === "services" && (
+              <div className="space-y-4 pb-28">
+                <button
+                  onClick={() => setOwnerSection("main")}
+                  className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-white px-3.5 py-1.5 text-xs font-semibold text-navy shadow-xs transition hover:bg-slate-50 cursor-pointer active:scale-95"
+                >
+                  <ArrowLeft className="h-3.5 w-3.5" /> Back to Profile Menu
+                </button>
+
                 <div className="rounded-2xl bg-white p-5" style={{ border: "1.5px solid #f3f4f6", boxShadow: "0 2px 8px rgba(0,0,0,0.05)" }}>
                   <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-[14px] font-extrabold" style={{ color: "#1a2b4b" }}>My Services</h2>
+                    <div>
+                      <h2 className="text-[14px] font-extrabold" style={{ color: "#1a2b4b" }}>My Services</h2>
+                      <p className="text-[11px] text-muted-foreground">Manage your service offerings</p>
+                    </div>
                     {ownerPublicProfileId && (
                       <Link to="/profiles/$id" params={{ id: ownerPublicProfileId }} className="flex items-center gap-1 text-xs font-semibold hover:underline" style={{ color: "#f47b16" }}>
                         Manage <ArrowRight className="h-3 w-3" />
@@ -631,8 +747,14 @@ export default function UserProfile() {
               </div>
             )}
 
-            {ownerTab === "credits" && (
-              <div className="space-y-6 pb-10">
+            {ownerSection === "credits" && (
+              <div className="space-y-6 pb-28">
+                <button
+                  onClick={() => setOwnerSection("main")}
+                  className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-white px-3.5 py-1.5 text-xs font-semibold text-navy shadow-xs transition hover:bg-slate-50 cursor-pointer active:scale-95"
+                >
+                  <ArrowLeft className="h-3.5 w-3.5" /> Back to Profile Menu
+                </button>
                 {/* A. Balance hero */}
                 <div className="rounded-2xl bg-gradient-to-br from-orange-100/50 via-orange-50/30 to-white border border-orange-200/50 p-5 sm:p-7">
                   <div className="flex items-center gap-2 text-xs font-semibold text-orange-500 uppercase tracking-wide">
@@ -830,8 +952,14 @@ export default function UserProfile() {
               </div>
             )}
 
-            {ownerTab === "settings" && (
-              <div className="space-y-4 pb-10">
+            {ownerSection === "settings" && (
+              <div className="space-y-4 pb-28">
+                <button
+                  onClick={() => setOwnerSection("main")}
+                  className="inline-flex items-center gap-2 rounded-full border border-border/60 bg-white px-3.5 py-1.5 text-xs font-semibold text-navy shadow-xs transition hover:bg-slate-50 cursor-pointer active:scale-95"
+                >
+                  <ArrowLeft className="h-3.5 w-3.5" /> Back to Profile Menu
+                </button>
                 <div className="rounded-2xl bg-white p-5" style={{ border: "1.5px solid #f3f4f6" }}>
                   <h2 className="text-[14px] font-extrabold mb-4" style={{ color: "#1a2b4b" }}>Profile Information</h2>
                   <div className="space-y-3">
@@ -887,9 +1015,27 @@ export default function UserProfile() {
               </div>
             )}
           </div>
-          </>
         ) : (
           <div className="bg-white px-2 pt-2 pb-16">
+            {isPublicPreview && (
+              <div className="mx-2 mb-3 mt-2 flex items-center justify-between gap-3 rounded-2xl bg-[#1a2b4b] p-3.5 text-white shadow-md">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/15 text-[#f47b16]">
+                    <Eye className="h-4 w-4" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold truncate">Public Profile View</p>
+                    <p className="text-[11px] text-white/70 truncate">Showing how your profile appears to other users</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setOwnerSection("main")}
+                  className="shrink-0 rounded-full bg-[#f47b16] px-3.5 py-1.5 text-xs font-bold text-white shadow-xs transition hover:brightness-110 active:scale-95 cursor-pointer"
+                >
+                  Exit Preview
+                </button>
+              </div>
+            )}
             <div className="mt-4 flex px-4" style={{ borderBottom: "2px solid #f3f4f6" }}>
               {visibleTabs.map((t) => {
                 const isActive = tab === t.id;
@@ -1081,7 +1227,7 @@ export default function UserProfile() {
                           </div>
                           {s.price_note && <p className="mt-1 text-[11px] text-muted-foreground">{s.price_note}</p>}
                         </div>
-                        {!isOwn && isProvider && (
+                        {(!isOwn || isPublicPreview) && isProvider && (
                           <Link
                             to="/service/$id"
                             params={{ id: s.id }}
@@ -1090,7 +1236,7 @@ export default function UserProfile() {
                             View
                           </Link>
                         )}
-                        {isOwn && (
+                        {isOwn && !isPublicPreview && (
                           <button
                             onClick={() => setSvcDialog({ open: true, mode: "edit", initial: {
                               id: s.id,
@@ -1112,7 +1258,7 @@ export default function UserProfile() {
                           </button>
                         )}
                       </div>
-                      {isOwn && (
+                      {isOwn && !isPublicPreview && (
                         <div className="mt-3 flex flex-wrap gap-2 border-t border-border/60 pt-2 text-[11px] font-semibold">
                           {!s.is_primary && (
                             <button
@@ -1153,7 +1299,7 @@ export default function UserProfile() {
             </>
           )}
           
-          {tab === "requests" && isOwn && (
+          {tab === "requests" && isOwn && !isPublicPreview && (
             <ProfileRequestsTab userId={id} />
           )}
         </div>
@@ -1209,7 +1355,7 @@ export default function UserProfile() {
       )}
 
 
-      {!isOwn && isProvider && (
+      {(!isOwn || isPublicPreview) && isProvider && (
         <MobileActionBar className="bottom-0">
           <button 
             onClick={() => requireAuth(() => setRequestOpen(true), { title: "Sign in to request this service", message: "Create a free Tuungane account to send a request to this provider.", redirect: `/u/${id}` })} 
