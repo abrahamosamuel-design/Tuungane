@@ -79,7 +79,7 @@ export function ServiceCard({
         <div>
           {/* Provider Meta Row */}
           <div className="flex items-center gap-2.5 mb-2.5">
-            <Link to="/p/$slug" params={{ slug: profileSlug }} className="relative shrink-0 block">
+            <Link to="/service/$id" params={{ id: id }} className="relative shrink-0 block">
               <Avatar name={providerName} url={avatarUrl} size={40} className="ring-2 ring-green-100" />
               {isVerified && (
                 <span className="absolute -bottom-0.5 -right-0.5 bg-green-500 text-white rounded-full p-0.5 flex items-center justify-center">
@@ -89,7 +89,7 @@ export function ServiceCard({
             </Link>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-1">
-                <Link to="/p/$slug" params={{ slug: profileSlug }} className="font-semibold text-sm text-navy hover:underline truncate">
+                <Link to="/service/$id" params={{ id: id }} className="font-semibold text-sm text-navy hover:underline truncate">
                   {providerName}
                 </Link>
                 {isVerified && <BadgeCheck className="w-4 h-4 text-green-500 shrink-0" title="Verified Provider" />}

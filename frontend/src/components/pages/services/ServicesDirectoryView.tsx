@@ -617,9 +617,9 @@ export function ProviderCardListMobile({
       <div className="p-2 flex flex-col flex-1">
         <div className="flex items-start justify-between gap-1">
           <Link
-            to="/p/$slug"
-            params={{ slug: profileSlug }}
-            className="font-display text-[16px] font-bold leading-tight text-[#1A1A1A] line-clamp-1 block tracking-tight"
+            to="/service/$id"
+            params={{ id: id }}
+            className="font-display text-[16px] font-bold leading-tight text-[#1A1A1A] line-clamp-1 block tracking-tight hover:text-orange transition-colors"
           >
             {providerName}
           </Link>

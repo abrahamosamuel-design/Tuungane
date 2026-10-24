@@ -920,12 +920,12 @@ export const getPublicProfileBySlug = async (req, res) => {
     const [{ data: sp }, { data: ownerRow }, { data: mediaRows }, { data: s }, { data: t }, { count: c }] = await Promise.all([
       supabaseAdmin
         .from("service_profiles")
-        .select("price_display,price_min,price_max,created_at")
+        .select("price_display,price_min,price_max,created_at,phone,whatsapp")
         .eq("user_id", p.owner_id)
         .maybeSingle(),
       supabaseAdmin
         .from("profiles")
-        .select("id,full_name,avatar_url")
+        .select("id,full_name,avatar_url,phone")
         .eq("id", p.owner_id)
         .maybeSingle(),
       supabaseAdmin
@@ -966,6 +966,11 @@ export const getPublicProfileBySlug = async (req, res) => {
         }
       }
     }
+
+    if (!p.phone && ownerRow?.phone) p.phone = ownerRow.phone;
+    if (!p.phone && sp?.phone) p.phone = sp.phone;
+    if (!p.whatsapp && sp?.whatsapp) p.whatsapp = sp.whatsapp;
+    if (!p.whatsapp && p.phone) p.whatsapp = p.phone;
 
     res.json({
       data: {
