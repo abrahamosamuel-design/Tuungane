@@ -127,6 +127,71 @@ export const getServiceById = async (req, res) => {
         isPersonal: true
       };
     }
+
+    // Ensure phone and whatsapp are resolved for the service from any available source
+    let resolvedPhone = service.phone || service.profile?.phone || service.user_profile?.phone || null;
+    let resolvedWhatsapp = service.whatsapp || service.profile?.whatsapp || null;
+
+    const ownerId = service.user_profile_id || service.profile?.owner_id || service.profile_id;
+    if (ownerId && (!resolvedPhone || !resolvedWhatsapp)) {
+      // 1. Try public_profiles by owner_id or id
+      const { data: pubRow } = await supabaseAdmin
+        .from('public_profiles')
+        .select('phone, whatsapp')
+        .or(`owner_id.eq.${ownerId},id.eq.${ownerId}`)
+        .not('phone', 'is', null)
+        .limit(1)
+        .maybeSingle();
+
+      if (pubRow?.phone && !resolvedPhone) resolvedPhone = pubRow.phone;
+      if (pubRow?.whatsapp && !resolvedWhatsapp) resolvedWhatsapp = pubRow.whatsapp;
+
+      // 2. Try service_profiles by user_id
+      if (!resolvedPhone || !resolvedWhatsapp) {
+        const { data: spRow } = await supabaseAdmin
+          .from('service_profiles')
+          .select('phone, whatsapp')
+          .eq('user_id', ownerId)
+          .maybeSingle();
+
+        if (spRow?.phone && !resolvedPhone) resolvedPhone = spRow.phone;
+        if (spRow?.whatsapp && !resolvedWhatsapp) resolvedWhatsapp = spRow.whatsapp;
+      }
+
+      // 3. Try profiles by id
+      if (!resolvedPhone) {
+        const { data: pRow } = await supabaseAdmin
+          .from('profiles')
+          .select('phone')
+          .eq('id', ownerId)
+          .maybeSingle();
+
+        if (pRow?.phone) resolvedPhone = pRow.phone;
+      }
+    }
+
+    // 4. Try from media[].public_profile_id if still not resolved
+    const mediaPubId = service.media?.find(m => m.public_profile_id)?.public_profile_id;
+    if (mediaPubId && (!resolvedPhone || !resolvedWhatsapp)) {
+      const { data: pubMedia } = await supabaseAdmin
+        .from('public_profiles')
+        .select('phone, whatsapp')
+        .eq('id', mediaPubId)
+        .maybeSingle();
+
+      if (pubMedia?.phone && !resolvedPhone) resolvedPhone = pubMedia.phone;
+      if (pubMedia?.whatsapp && !resolvedWhatsapp) resolvedWhatsapp = pubMedia.whatsapp;
+    }
+
+    service.phone = resolvedPhone;
+    service.whatsapp = resolvedWhatsapp || resolvedPhone;
+    if (service.profile) {
+      service.profile.phone = resolvedPhone;
+      service.profile.whatsapp = resolvedWhatsapp || resolvedPhone;
+    }
+    if (service.user_profile) {
+      service.user_profile.phone = resolvedPhone;
+    }
     
     // Run independent queries in parallel
     const providerUserId = service.user_profile_id || service.profile?.owner_id || service.profile?.id;

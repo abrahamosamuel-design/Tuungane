@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { ArrowLeft, Star, MessageSquare, Clock, ImageIcon, Phone, Coins, Plus, MapPin, Zap, ShieldCheck, Share2, BadgeCheck, Trash2 } from "lucide-react";
 import { apiClient } from "@/lib/api";
+import { supabase } from "@/integrations/supabase/client";
 import { useAuthGate } from "@/components/RequireAuthDialog";
 import { PostCard } from "@/components/social/PostCard";
 import { AddTimelinePostDialog } from "@/components/AddTimelinePostDialog";
@@ -106,6 +107,69 @@ function ServiceDetailPage() {
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
 
+  // Fallback contact resolution: If phone is not returned by the API (e.g. older backend or profile_id is null in DB),
+  // directly query public_profiles / service_profiles / profiles from Supabase.
+  const providerId = service?.user_profile_id || service?.profile?.owner_id || service?.profile_id;
+  const mediaPublicProfileId = service?.media?.find((m: any) => m.public_profile_id)?.public_profile_id;
+  const initialPhone = service?.phone || service?.profile?.phone || service?.user_profile?.phone;
+
+  const { data: fallbackContact } = useQuery({
+    queryKey: ['serviceFallbackContact', id, providerId, mediaPublicProfileId],
+    queryFn: async () => {
+      if (!providerId && !mediaPublicProfileId) return null;
+
+      // 1. Try public_profiles by media's public_profile_id if available
+      if (mediaPublicProfileId) {
+        const { data: pubById } = await supabase
+          .from('public_profiles')
+          .select('phone, whatsapp')
+          .eq('id', mediaPublicProfileId)
+          .maybeSingle();
+        if (pubById?.phone) {
+          return { phone: pubById.phone, whatsapp: pubById.whatsapp || pubById.phone };
+        }
+      }
+
+      // 2. Try public_profiles by owner_id or id
+      if (providerId) {
+        const { data: pub } = await supabase
+          .from('public_profiles')
+          .select('phone, whatsapp')
+          .or(`owner_id.eq.${providerId},id.eq.${providerId}`)
+          .not('phone', 'is', null)
+          .limit(1)
+          .maybeSingle();
+        if (pub?.phone) {
+          return { phone: pub.phone, whatsapp: pub.whatsapp || pub.phone };
+        }
+
+        // 3. Try service_profiles
+        const { data: sp } = await supabase
+          .from('service_profiles')
+          .select('phone, whatsapp')
+          .eq('user_id', providerId)
+          .maybeSingle();
+        if (sp?.phone) {
+          return { phone: sp.phone, whatsapp: sp.whatsapp || sp.phone };
+        }
+
+        // 4. Try profiles table
+        const { data: prof } = await supabase
+          .from('profiles')
+          .select('phone')
+          .eq('id', providerId)
+          .maybeSingle();
+        if (prof?.phone) {
+          return { phone: prof.phone, whatsapp: prof.phone };
+        }
+      }
+
+      return null;
+    },
+    enabled: Boolean(!initialPhone && (providerId || mediaPublicProfileId)),
+    staleTime: 1000 * 60 * 10,
+  });
+
   useEffect(() => {
     if (service?.title) {
       document.title = `${service.title} — Tuungane`;
@@ -187,11 +251,13 @@ function ServiceDetailPage() {
     service.phone ||
     service.profile?.phone ||
     service.user_profile?.phone ||
+    fallbackContact?.phone ||
     "";
 
   const rawWhatsapp =
     service.whatsapp ||
     service.profile?.whatsapp ||
+    fallbackContact?.whatsapp ||
     rawPhone;
 
   const getCleanWhatsappNumber = (phoneStr: string) => {
