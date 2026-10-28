@@ -45,7 +45,7 @@ export function ExpandableText({
     <div className={className}>
       <p
         ref={ref}
-        className="whitespace-pre-wrap break-words text-[14px] leading-relaxed text-foreground/85"
+        className="whitespace-pre-wrap break-words text-base leading-relaxed text-foreground/90"
         style={{
           display: "-webkit-box",
           WebkitLineClamp: activeLines,

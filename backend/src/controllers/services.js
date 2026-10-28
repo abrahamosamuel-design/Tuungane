@@ -213,7 +213,7 @@ export const getServiceById = async (req, res) => {
       .select('*')
       .eq('hidden', false)
       .neq('post_type', 'opportunity_shared')
-      .or(`service_id.eq.${service.id}${providerUserId ? `,provider_user_id.eq.${providerUserId}` : ''}`)
+      .or(`service_id.eq.${service.id}${providerUserId ? `,and(service_id.is.null,provider_user_id.eq.${providerUserId})` : ''}`)
       .order('created_at', { ascending: false })
       .limit(30);
 
@@ -787,3 +787,10 @@ export const unsetServiceMediaCover = async (req, res) => {
     res.status(500).json({ error: 'Failed to unset service media cover' });
   }
 };
+
+export const clearServiceCache = (id) => {
+  if (id) {
+    apiCache.del(`service_detail_${id}`);
+  }
+};
+

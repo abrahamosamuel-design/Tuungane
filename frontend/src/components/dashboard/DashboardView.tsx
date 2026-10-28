@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, forwardRef, Ref, useRef } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Search, MoreHorizontal, Star, Wrench, Zap, Sparkles, Heart, MessageCircle, MessageSquare, Send, MapPin, ChevronRight, ChevronLeft, CalendarPlus, LayoutGrid } from "lucide-react";
+import { Search, MoreHorizontal, Star, Wrench, Zap, Sparkles, Heart, MessageCircle, MessageSquare, Send, MapPin, ChevronRight, ChevronLeft, CalendarPlus, LayoutGrid, Sliders } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { apiClient } from "@/lib/api";
 import { FeedAvatar } from "@/components/feed/FeedAvatar";
@@ -54,6 +54,28 @@ const POST_TYPE_LABELS: Record<string, string> = {
   opportunity_shared: "Opportunity",
 };
 
+const VIEWED_POSTS_STORAGE_KEY = "tuungane_viewed_posts_v1";
+
+function getViewedPosts(): Set<string> {
+  try {
+    const raw = localStorage.getItem(VIEWED_POSTS_STORAGE_KEY);
+    if (raw) {
+      const arr = JSON.parse(raw);
+      if (Array.isArray(arr)) return new Set(arr);
+    }
+  } catch {}
+  return new Set();
+}
+
+function markPostViewed(id: string) {
+  try {
+    const set = getViewedPosts();
+    set.add(id);
+    const arr = Array.from(set).slice(-300);
+    localStorage.setItem(VIEWED_POSTS_STORAGE_KEY, JSON.stringify(arr));
+  } catch {}
+}
+
 /* ---------- types ---------- */
 
 type FeedItem =
@@ -67,6 +89,9 @@ type FeedItem =
 export function DashboardView() {
   const { user } = useAuth();
   const { location: userLoc } = useUserLocation();
+  const [feedViewMode, setFeedViewMode] = useState<"slides" | "grid">("slides");
+  const [viewedPostIds, setViewedPostIds] = useState<Set<string>>(() => getViewedPosts());
+  const [feedRandomSeed] = useState(() => Math.floor(Math.random() * 1000000) + 1);
 
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteQuery({
     queryKey: ["dashboard-data", userLoc?.latitude, userLoc?.longitude],
@@ -160,41 +185,81 @@ export function DashboardView() {
     return { carouselServices: services, carouselRequests: requests, carouselOpportunities: opps };
   }, [data]);
 
-  const mixedFeed = useMemo(() => {
-    if (!data) return [];
-    
-    const allPosts: FeedItem[] = [];
+  const { mixedFeed, latestPostIdToMark } = useMemo(() => {
+    if (!data) return { mixedFeed: [], latestPostIdToMark: null };
+
+    // 1. Gather all timeline posts across pages, strictly deduplicated by id (never repeating)
+    const postsById = new Map<string, any>();
     data.pages.forEach((page) => {
-        page.timelinePosts.forEach((tp: any) => allPosts.push({ type: "timeline_post", id: `tp-${tp.id}`, data: tp }));
+      (page.timelinePosts || []).forEach((tp: any) => {
+        if (tp && tp.id && !postsById.has(tp.id)) {
+          postsById.set(tp.id, tp);
+        }
+      });
     });
-    
-    const sortedPosts = [...allPosts].sort((a, b) => {
-      const dateA = a.data.createdAt ? new Date(a.data.createdAt).getTime() : 0;
-      const dateB = b.data.createdAt ? new Date(b.data.createdAt).getTime() : 0;
-      return dateB - dateA;
-    });
-    
-    const finalFeed: FeedItem[] = [];
-    
-    sortedPosts.forEach((post, index) => {
-       finalFeed.push(post);
-       if (index === 9 && carouselRequests.length > 0) {
-          finalFeed.push({ type: "carousel_requests", id: "cr_1", data: carouselRequests });
-       }
-       if (index === 19 && carouselOpportunities.length > 0) {
-          finalFeed.push({ type: "carousel_opportunities", id: "co_1", data: carouselOpportunities });
-       }
+    const uniqueTimelinePosts = Array.from(postsById.values());
+
+    // 2. Sort all posts chronologically by created_at descending
+    const byDate = [...uniqueTimelinePosts].sort((a, b) => {
+      const tA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const tB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return tB - tA;
     });
 
-    if (sortedPosts.length <= 9 && carouselRequests.length > 0) {
+    // 3. Determine if the latest post has NOT been viewed yet
+    const latestPost = byDate[0] || null;
+    const isLatestUnviewed = Boolean(latestPost && !viewedPostIds.has(latestPost.id));
+
+    let orderedPosts: any[] = [];
+    let toMark: string | null = null;
+
+    if (isLatestUnviewed && latestPost) {
+      // The unviewed latest post stays strictly at the top
+      toMark = latestPost.id;
+      // The remaining posts are shuffled in a random pattern
+      const remainingShuffled = shuffleArray(byDate.slice(1), feedRandomSeed);
+      orderedPosts = [latestPost, ...remainingShuffled];
+    } else {
+      // If the user has already viewed the latest post, all posts are in a random pattern
+      orderedPosts = shuffleArray(byDate, feedRandomSeed);
+    }
+
+    const finalFeed: FeedItem[] = [];
+    let requestsInjected = false;
+    let oppsInjected = false;
+
+    orderedPosts.forEach((tp, index) => {
+      finalFeed.push({ type: "timeline_post", id: `tp-${tp.id}`, data: tp });
+      if (index === 4 && carouselRequests.length > 0 && !requestsInjected) {
         finalFeed.push({ type: "carousel_requests", id: "cr_1", data: carouselRequests });
-    }
-    if (sortedPosts.length <= 19 && carouselOpportunities.length > 0) {
+        requestsInjected = true;
+      }
+      if (index === 9 && carouselOpportunities.length > 0 && !oppsInjected) {
         finalFeed.push({ type: "carousel_opportunities", id: "co_1", data: carouselOpportunities });
+        oppsInjected = true;
+      }
+    });
+
+    if (!requestsInjected && carouselRequests.length > 0 && orderedPosts.length > 0) {
+      finalFeed.push({ type: "carousel_requests", id: "cr_1", data: carouselRequests });
     }
-    
-    return finalFeed;
-  }, [data, carouselServices, carouselRequests, carouselOpportunities]);
+    if (!oppsInjected && carouselOpportunities.length > 0 && orderedPosts.length > 0) {
+      finalFeed.push({ type: "carousel_opportunities", id: "co_1", data: carouselOpportunities });
+    }
+
+    return { mixedFeed: finalFeed, latestPostIdToMark: toMark };
+  }, [data, carouselServices, carouselRequests, carouselOpportunities, viewedPostIds, feedRandomSeed]);
+
+  // Mark latest post as viewed once user has had it on screen
+  useEffect(() => {
+    if (latestPostIdToMark) {
+      const timer = setTimeout(() => {
+        markPostViewed(latestPostIdToMark);
+        setViewedPostIds((prev) => new Set([...prev, latestPostIdToMark]));
+      }, 3500);
+      return () => clearTimeout(timer);
+    }
+  }, [latestPostIdToMark]);
 
   return (
     <div className="flex min-h-screen flex-col bg-background pb-20 md:pb-0">
@@ -225,9 +290,39 @@ export function DashboardView() {
               viewAllLink="/services"
             />
 
-            {/* Main Feed Header */}
-            <div className="mb-4 mt-6">
+            {/* Main Feed Header with View Filter */}
+            <div className="mb-4 mt-6 flex items-center justify-between gap-3">
               <h2 className="font-display text-xl font-bold text-navy md:text-2xl">Community Feed</h2>
+
+              {/* Page-level Slides / Grid filter */}
+              <div className="flex items-center gap-1 rounded-xl bg-surface-container-lowest border border-border-hairline p-1 shadow-xs">
+                <button
+                  type="button"
+                  onClick={() => setFeedViewMode("slides")}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                    feedViewMode === "slides"
+                      ? "bg-navy text-white shadow-xs"
+                      : "text-navy/70 hover:text-navy hover:bg-surface-alt"
+                  }`}
+                  aria-label="Slides view"
+                >
+                  <Sliders className="h-3.5 w-3.5" />
+                  <span>Slides</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFeedViewMode("grid")}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                    feedViewMode === "grid"
+                      ? "bg-navy text-white shadow-xs"
+                      : "text-navy/70 hover:text-navy hover:bg-surface-alt"
+                  }`}
+                  aria-label="Grid view"
+                >
+                  <LayoutGrid className="h-3.5 w-3.5" />
+                  <span>Grid</span>
+                </button>
+              </div>
             </div>
 
             {/* Desktop Sticky Top Bar */}
@@ -245,7 +340,7 @@ export function DashboardView() {
             {isLoading && <div className="text-sm text-muted-foreground text-center py-12">Loading feed...</div>}
             {!isLoading && mixedFeed.length === 0 && <div className="text-sm text-muted-foreground text-center py-12">No community posts yet.</div>}
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-col gap-5 pb-8">
+            <div className={feedViewMode === "grid" ? "grid grid-cols-1 sm:grid-cols-2 gap-4 pb-8" : "flex flex-col gap-5 pb-8"}>
               {mixedFeed.map((item) => {
                 if (item.type === "provider") {
                   return <ProviderCard key={item.id} data={item.data} />;
@@ -254,7 +349,7 @@ export function DashboardView() {
                   return <RequestCard key={item.id} data={item.data} />;
                 }
                 if (item.type === "timeline_post") {
-                  return <TimelinePostCard key={item.id} data={item.data} />;
+                  return <TimelinePostCard key={item.id} data={item.data} viewMode={feedViewMode} />;
                 }
                 if (item.type === "carousel_services") {
                   return <DashboardCarousel key={item.id} title="Services Near You" items={item.data} viewAllLink="/services" renderItem={(p: any) => <ProviderCard data={p} />} />;
@@ -505,7 +600,7 @@ function RequestCard({ data }: { data: any }) {
 
 /* ---------- timeline post card ---------- */
 
-function TimelinePostCard({ data }: { data: any }) {
+function TimelinePostCard({ data, viewMode = "slides" }: { data: any; viewMode?: "slides" | "grid" }) {
   const { user } = useAuth();
   const nav = useNavigate();
   const label = POST_TYPE_LABELS[data.postType] || "Update";
@@ -604,12 +699,12 @@ function TimelinePostCard({ data }: { data: any }) {
                 <span className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-green text-[8px] text-white">✓</span>
               )}
             </h3>
-            <p className="text-[10px] text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               {timeAgo(data.createdAt)}
               {data.location ? ` • ${data.location}` : ""}
             </p>
           </div>
-          <span className={`rounded-md px-2 py-0.5 text-[10px] font-bold shrink-0 ${isJobPost ? 'bg-green text-white' : 'bg-navy/10 text-navy/90'}`}>
+          <span className={`rounded-md px-2 py-0.5 text-[11px] font-bold shrink-0 ${isJobPost ? 'bg-green text-white' : 'bg-navy/10 text-navy/90'}`}>
             {customLabel}
           </span>
         </div>
@@ -620,9 +715,9 @@ function TimelinePostCard({ data }: { data: any }) {
           
           if (isJobPost && parsedJob) {
             return (
-              <div className="mb-3 rounded-xl border border-border bg-muted/20 p-3">
-                <h4 className="font-semibold text-navy text-sm mb-1">{parsedJob.job_title}</h4>
-                <div className="flex flex-col gap-1 text-[12px] text-navy/80">
+              <div className="mb-3 rounded-xl border border-border bg-muted/20 p-3.5">
+                <h4 className="font-semibold text-navy text-base mb-1.5">{parsedJob.job_title}</h4>
+                <div className="flex flex-col gap-1.5 text-sm text-navy/85">
                   {parsedJob.company_name && <p><span className="font-medium text-navy">Company:</span> {parsedJob.company_name}</p>}
                   {parsedJob.location && <p><span className="font-medium text-navy">Location:</span> {parsedJob.location}</p>}
                   {parsedJob.salary && <p><span className="font-medium text-navy">Salary:</span> {parsedJob.salary}</p>}
@@ -633,8 +728,8 @@ function TimelinePostCard({ data }: { data: any }) {
           }
 
           return (
-            <p className="mb-3 text-[13px] leading-relaxed text-[#2C3E50] whitespace-pre-line font-medium">
-              {data.text.length > 180 ? data.text.slice(0, 180) + "…" : data.text}
+            <p className="mb-3 text-base leading-relaxed text-[#2C3E50] dark:text-slate-100 whitespace-pre-line font-medium">
+              {data.text.length > 240 ? data.text.slice(0, 240) + "…" : data.text}
             </p>
           );
         })()}
@@ -642,13 +737,13 @@ function TimelinePostCard({ data }: { data: any }) {
         {/* Media */}
         {hasImages && (
           <div className="mb-3">
-            <PostMedia urls={data.mediaUrls} alt={data.authorName} />
+            <PostMedia urls={data.mediaUrls} alt={data.authorName} viewMode={viewMode} />
           </div>
         )}
 
         {/* Like / comment summary */}
         {(likes > 0 || commentCount > 0) && (
-          <div className="flex items-center justify-between pb-1 text-[11px] text-muted-foreground">
+          <div className="flex items-center justify-between pb-1 text-xs text-muted-foreground">
             <span>{likes > 0 && `${likes} like${likes === 1 ? "" : "s"}`}</span>
             <button onClick={toggleComments} className="hover:text-navy transition-colors">
               {commentCount > 0 && `${commentCount} comment${commentCount === 1 ? "" : "s"}`}

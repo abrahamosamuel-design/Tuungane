@@ -63,8 +63,8 @@ export function PostShell({
       {/* 4. Message (above media) */}
       {message && <div className="mt-3 px-4 sm:px-5">{message}</div>}
 
-      {/* 5. Media — full-bleed on mobile */}
-      {media && <div className="mt-4 sm:px-5">{media}</div>}
+      {/* 5. Media */}
+      {media && <div className="mt-3 px-4 sm:px-5">{media}</div>}
 
       {/* 6. Meta */}
       {meta && <div className="mt-4 px-4 text-xs text-muted-foreground sm:px-5">{meta}</div>}

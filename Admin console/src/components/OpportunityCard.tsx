@@ -118,7 +118,7 @@ export function OpportunityCard({ item }: { item: OpportunityItem }) {
           <h3 className="font-display text-lg sm:text-[22px] font-bold leading-tight text-navy">
             {item.title}
           </h3>
-          <p className="mt-2.5 text-[13px] sm:text-[15px] font-medium text-muted-foreground line-clamp-2 leading-relaxed">
+          <p className="mt-2.5 text-sm sm:text-base font-medium text-muted-foreground line-clamp-2 leading-relaxed">
             {item.description}
           </p>
         </div>

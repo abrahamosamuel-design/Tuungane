@@ -148,6 +148,10 @@ export const getHomeFeed = async (req, res) => {
     let provs = [];
     let nearbyFlag = false;
 
+    const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+    const limit = Math.max(1, parseInt(req.query.limit, 10) || 20);
+    const offset = (page - 1) * limit;
+
     if (hasCoords) {
       const { data: rpcReqs } = await supabaseAdmin.rpc("nearby_service_requests", { in_lat: parseFloat(lat), in_lng: parseFloat(lng), in_radius_km: 50, in_limit: 24 });
       reqs = rpcReqs;
@@ -163,15 +167,15 @@ export const getHomeFeed = async (req, res) => {
         .is("provider_id", null)
         .order("urgent_flag", { ascending: false })
         .order("created_at", { ascending: false })
-        .limit(12);
+        .range(offset, offset + limit - 1);
       reqs = data || [];
     }
 
-    const { data: vssData, error: vssError } = await supabaseAdmin
+    const { data: vssData, error: vssError } = page === 1 ? await supabaseAdmin
       .from("v_search_services")
       .select("*")
       .order("updated_at", { ascending: false })
-      .limit(8);
+      .limit(8) : { data: [] };
       
     if (vssError) console.error("Error fetching v_search_services:", vssError);
     
@@ -185,11 +189,11 @@ export const getHomeFeed = async (req, res) => {
     }));
 
     // For the listings row above the mixed feed (usually sorted by created_at)
-    const { data: vssListings } = await supabaseAdmin
+    const { data: vssListings } = page === 1 ? await supabaseAdmin
       .from("v_search_services")
       .select("*")
       .order("created_at", { ascending: false })
-      .limit(12);
+      .limit(12) : { data: [] };
 
     const listings = (vssListings || []).map((r) => ({
       ...r,
@@ -217,7 +221,7 @@ export const getHomeFeed = async (req, res) => {
         .eq("hidden", false)
         .in("post_type", ALLOWED_TYPES)
         .order("created_at", { ascending: false })
-        .limit(20);
+        .range(offset, offset + limit - 1);
 
       const tpFiltered = tpRaw || [];
       if (tpFiltered.length) {

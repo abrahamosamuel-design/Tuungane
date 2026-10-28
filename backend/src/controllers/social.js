@@ -1,5 +1,6 @@
 import { supabaseAdmin } from '../lib/supabaseClient.js';
 import { createClient } from '@supabase/supabase-js';
+import { clearServiceCache } from './services.js';
 
 const getSupabaseUserClient = (req) => {
   const supabaseUrl = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || '';
@@ -348,20 +349,45 @@ export const addPost = async (req, res) => {
     const userId = req.user.id;
     const { business_page_id, public_profile_id, text, category_slug, location, media_urls, post_type, service_id } = req.body;
     const supabaseUser = getSupabaseUserClient(req);
+
+    let finalPublicProfileId = public_profile_id || null;
+    let finalCategorySlug = category_slug || null;
+
+    if (service_id) {
+      const { data: svc } = await supabaseAdmin
+        .from('profile_services')
+        .select('profile_id, category_slug')
+        .eq('id', service_id)
+        .maybeSingle();
+
+      if (svc) {
+        if (!finalPublicProfileId && svc.profile_id) {
+          finalPublicProfileId = svc.profile_id;
+        }
+        if (!finalCategorySlug && svc.category_slug) {
+          finalCategorySlug = svc.category_slug;
+        }
+      }
+    }
     
     const { error } = await supabaseUser.from("timeline_posts").insert({
       provider_user_id: userId,
       business_page_id: business_page_id || null,
-      public_profile_id: public_profile_id || null,
+      public_profile_id: finalPublicProfileId,
       service_id: service_id || null,
       text: text || null,
-      category_slug: category_slug || null,
+      category_slug: finalCategorySlug,
       location: location || null,
       media_urls: media_urls || [],
       post_type,
     });
     
     if (error) throw error;
+
+    if (service_id) {
+      clearServiceCache(service_id);
+    }
+
     res.json({ success: true });
   } catch (err) {
     console.error("Add post error:", err);

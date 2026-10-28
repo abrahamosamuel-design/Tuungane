@@ -47,7 +47,11 @@ export async function compressVideo(file: File, onProgress?: (p: number) => void
   if (!file.type.startsWith("video/")) return file;
   
   try {
-    const ffmpegInstance = await loadFFmpeg();
+    const ffmpegPromise = loadFFmpeg();
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("FFmpeg load timeout")), 5000)
+    );
+    const ffmpegInstance = (await Promise.race([ffmpegPromise, timeoutPromise])) as FFmpeg;
     
     const progressCallback = ({ progress }: { progress: number }) => {
       if (onProgress) onProgress(progress * 100);
