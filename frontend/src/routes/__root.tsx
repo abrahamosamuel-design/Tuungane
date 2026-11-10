@@ -77,16 +77,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" },
       { name: "google-site-verification", content: "DeizTKDdy9TTTpkKY2gn71Djks2MJ8BRfrhDKtLEmQ0" },
-      { title: "Tuungane — Connect to Opportunity" },
-      { name: "description", content: "Find trusted service providers near you in Uganda. Post your skill and get discovered on Tuungane." },
+      { title: "Tuungane — Trusted Local Services, Verified Professionals & Community Marketplace in Uganda" },
+      { name: "description", content: "Tuungane connects people in Uganda with trusted, verified local service providers, skilled tradespeople, businesses, and community service requests across Kampala, Wakiso, Entebbe, Jinja, Mbarara, Gulu, and nationwide. Browse services, post your skills, or request quotes directly." },
       { name: "author", content: "Tuungane" },
-      { property: "og:title", content: "Tuungane — Connect to Opportunity" },
-      { property: "og:description", content: "Find trusted service providers near you in Uganda. Post your skill and get discovered on Tuungane." },
+      { property: "og:title", content: "Tuungane — Trusted Local Services & Verified Professionals in Uganda" },
+      { property: "og:description", content: "Find verified service providers, post community requests, and grow your business on Tuungane — Uganda's trusted marketplace for local services and skilled professionals." },
       { property: "og:site_name", content: "Tuungane" },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "Tuungane — Connect to Opportunity" },
-      { name: "twitter:description", content: "Find trusted service providers near you in Uganda. Post your skill and get discovered on Tuungane." },
+      { name: "twitter:title", content: "Tuungane — Trusted Local Services & Verified Professionals in Uganda" },
+      { name: "twitter:description", content: "Find verified service providers, post community requests, and grow your business on Tuungane — Uganda's trusted marketplace for local services." },
       { name: "theme-color", content: "#1e3a8a" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-status-bar-style", content: "default" },
@@ -119,6 +119,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 function RootShell({ children }: { children: ReactNode }) {
   return (
     <>
+      <HeadContent />
       {children}
       <Scripts />
     </>

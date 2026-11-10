@@ -2,32 +2,192 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Tuungane</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+    <title>Tuungane — Find Trusted Service Providers &amp; Skilled Professionals in Uganda</title>
+    <meta
+      name="description"
+      content="Tuungane is Uganda's trusted services marketplace connecting customers with verified local service providers across home repair, plumbing, electrical, cleaning, real estate, beauty, transport, automotive, catering, education, and digital services. Post a service request or list your skill today."
+    />
+    <meta
+      name="keywords"
+      content="Tuungane, Tuungane Uganda, service providers Uganda, find plumbers Kampala, electricians Uganda, handymen, cleaning services, real estate brokers Uganda, skilled professionals, post service request, local services marketplace"
+    />
+    <meta name="author" content="Tuungane" />
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <meta name="google-site-verification" content="DeizTKDdy9TTTpkKY2gn71Djks2MJ8BRfrhDKtLEmQ0" />
+    <link rel="canonical" href="https://www.tuungane.com/" />
+
+    <!-- Icons & PWA -->
     <link rel="icon" type="image/png" href="/icon.png" />
-    <link rel="apple-touch-icon" href="/icon.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
-    <meta name="theme-color" content="#ffffff" />
+    <meta name="theme-color" content="#0B192C" />
+    <meta name="application-name" content="Tuungane" />
+    <meta name="apple-mobile-web-app-title" content="Tuungane" />
+
+    <!-- Open Graph / Facebook / WhatsApp -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Tuungane" />
+    <meta property="og:locale" content="en_UG" />
+    <meta property="og:url" content="https://www.tuungane.com/" />
+    <meta property="og:title" content="Tuungane — Find Trusted Service Providers &amp; Skilled Professionals in Uganda" />
+    <meta
+      property="og:description"
+      content="Connect with verified service providers near you in Uganda. Browse plumbers, electricians, cleaners, builders, caterers, and more — or list your skill and get discovered on Tuungane."
+    />
+    <meta property="og:image" content="https://www.tuungane.com/TUUNGANE-CLEAR.png" />
+    <meta property="og:image:alt" content="Tuungane — Connect to Opportunity in Uganda" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Tuungane — Find Trusted Service Providers &amp; Skilled Professionals in Uganda" />
+    <meta
+      name="twitter:description"
+      content="Connect with verified service providers near you in Uganda. Post a service request or list your skill to get discovered on Tuungane."
+    />
+    <meta name="twitter:image" content="https://www.tuungane.com/TUUNGANE-CLEAR.png" />
+
+    <!-- Structured Data (JSON-LD) for Google Search Rich Results, Logo, & Sitelinks -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://www.tuungane.com/#organization",
+            "name": "Tuungane",
+            "alternateName": "Tuungane Uganda",
+            "url": "https://www.tuungane.com/",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://www.tuungane.com/icon.png",
+              "width": 512,
+              "height": 512
+            },
+            "image": "https://www.tuungane.com/TUUNGANE-CLEAR.png",
+            "description": "Tuungane is Uganda's trusted local services marketplace connecting customers with verified service providers, technicians, artisans, and businesses across Uganda.",
+            "areaServed": {
+              "@type": "Country",
+              "name": "Uganda"
+            }
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://www.tuungane.com/#website",
+            "url": "https://www.tuungane.com/",
+            "name": "Tuungane",
+            "alternateName": "Tuungane — Connect to Opportunity",
+            "description": "Find trusted service providers near you in Uganda. Post your skill, browse verified professionals, or request a service on Tuungane.",
+            "publisher": {
+              "@id": "https://www.tuungane.com/#organization"
+            },
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": {
+                "@type": "EntryPoint",
+                "urlTemplate": "https://www.tuungane.com/services?q={search_term_string}"
+              },
+              "query-input": "required name=search_term_string"
+            }
+          },
+          {
+            "@type": "ItemList",
+            "name": "Tuungane Main Sections",
+            "itemListElement": [
+              {
+                "@type": "SiteNavigationElement",
+                "position": 1,
+                "name": "Browse Verified Services",
+                "description": "Explore vetted plumbers, electricians, cleaners, builders, mechanics, and local professionals in Uganda.",
+                "url": "https://www.tuungane.com/services"
+              },
+              {
+                "@type": "SiteNavigationElement",
+                "position": 2,
+                "name": "Service Categories",
+                "description": "Browse all service categories including Home Repair, Cleaning, Real Estate, Beauty, Transport, Automotive, Catering, and Digital Services.",
+                "url": "https://www.tuungane.com/categories"
+              },
+              {
+                "@type": "SiteNavigationElement",
+                "position": 3,
+                "name": "Community Feed",
+                "description": "See recent work photos, updates, and promotions from verified service providers across Uganda.",
+                "url": "https://www.tuungane.com/feed"
+              },
+              {
+                "@type": "SiteNavigationElement",
+                "position": 4,
+                "name": "Open Service Requests",
+                "description": "Browse customer service requests and inquiries or post what service you need today.",
+                "url": "https://www.tuungane.com/requests/browse"
+              },
+              {
+                "@type": "SiteNavigationElement",
+                "position": 5,
+                "name": "About Tuungane",
+                "description": "Learn how Tuungane connects Ugandan households and businesses with trusted local service providers.",
+                "url": "https://www.tuungane.com/about"
+              }
+            ]
+          }
+        ]
+      }
+    </script>
+
     <style>
       @keyframes bounce {
         from { transform: translateY(0); }
         to { transform: translateY(-20px); }
       }
+      .sr-seo-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
     </style>
-    <script>
-      window.addEventListener('error', function(e) {
-        document.body.innerHTML += '<div style="position:fixed;top:0;left:0;z-index:9999;background:red;color:white;padding:10px;width:100%;">JS Error: ' + e.message + '</div>';
-      });
-      window.addEventListener('unhandledrejection', function(e) {
-        document.body.innerHTML += '<div style="position:fixed;top:0;left:0;z-index:9999;background:red;color:white;padding:10px;width:100%;">Promise Error: ' + (e.reason && e.reason.message || e.reason) + '</div>';
-      });
-    </script>
   </head>
   <body>
     <div id="root">
       <div style="display: flex; justify-content: center; align-items: center; height: 100vh; background-color: white;">
-        <img src="/icon.png" alt="Loading..." style="width: 100px; height: 100px; animation: bounce 0.6s infinite alternate;" />
+        <img src="/icon.png" alt="Tuungane — Connect to Opportunity in Uganda" style="width: 100px; height: 100px; animation: bounce 0.6s infinite alternate;" />
       </div>
+      <!-- Crawlable semantic content for search engines before JS hydration -->
+      <main class="sr-seo-only">
+        <h1>Tuungane — Find Trusted Service Providers &amp; Skilled Professionals in Uganda</h1>
+        <p>
+          Tuungane is Uganda's direct verified services marketplace connecting households, customers, and organizations with trusted local service providers. Post a service request describing what you need, or list your skill and business to get discovered by customers near you.
+        </p>
+        <h2>Popular Service Categories on Tuungane</h2>
+        <ul>
+          <li><a href="/categories/home-repair">Home Repair &amp; Maintenance — Plumbers, Electricians, Carpenters, Masons, Welders &amp; Handymen</a></li>
+          <li><a href="/categories/cleaning">Cleaning &amp; Home Care — House Cleaning, Laundry, Fumigation, Compound &amp; Sofa Cleaning</a></li>
+          <li><a href="/categories/real-estate">Real Estate &amp; Property — Brokers, Land Surveyors, Architects, Engineers &amp; Builders</a></li>
+          <li><a href="/categories/beauty">Beauty, Fashion &amp; Personal Care — Hairdressers, Barbers, Makeup Artists &amp; Tailors</a></li>
+          <li><a href="/categories/transport">Transport, Delivery &amp; Logistics — Drivers, Movers, Truck Hire &amp; Courier Services</a></li>
+          <li><a href="/categories/automotive">Automotive &amp; Mechanical — Car Mechanics, Auto Electricians, Panel Beaters &amp; Car Wash</a></li>
+          <li><a href="/categories/education">Education, Training &amp; Coaching — Tutors, Driving Instructors, Fitness &amp; Skills Trainers</a></li>
+          <li><a href="/categories/events">Events, Media &amp; Entertainment — Photographers, Videographers, DJs, MCs &amp; Event Planners</a></li>
+          <li><a href="/categories/food">Food, Catering &amp; Hospitality — Caterers, Private Chefs, Bakers &amp; Event Food Suppliers</a></li>
+          <li><a href="/categories/digital">Digital, Creative &amp; Business — Graphic Designers, Web Developers, Accountants &amp; IT Support</a></li>
+          <li><a href="/categories/health">Health, Wellness &amp; Care — Home Care Nurses, Caregivers, Physiotherapists &amp; Childcare</a></li>
+          <li><a href="/categories/agriculture">Agriculture, Animals &amp; Outdoor — Farm Workers, Veterinary Support, Landscapers &amp; Irrigation</a></li>
+        </ul>
+        <nav aria-label="Main Navigation">
+          <a href="/services">Browse Verified Services</a>
+          <a href="/categories">All Categories</a>
+          <a href="/feed">Community Feed</a>
+          <a href="/requests/browse">Service Requests</a>
+          <a href="/about">About Tuungane</a>
+          <a href="/contact">Contact Us</a>
+        </nav>
+      </main>
     </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

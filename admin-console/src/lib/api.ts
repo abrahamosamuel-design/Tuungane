@@ -1,6 +1,27 @@
 import { supabase } from '@/integrations/supabase/client';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
+function resolveApiBaseUrl(): string {
+  const raw = (import.meta.env.VITE_API_URL || '').trim().replace(/\/+$/, '');
+  if (raw) {
+    if (raw.startsWith('/')) return raw;
+    const withProtocol = /^https?:\/\//i.test(raw)
+      ? raw
+      : /^(localhost|127\.0\.0\.1)/i.test(raw)
+      ? `http://${raw}`
+      : `https://${raw}`;
+    return withProtocol.endsWith('/api') ? withProtocol : `${withProtocol}/api`;
+  }
+  if (typeof window !== 'undefined') {
+    const host = window.location.hostname;
+    if (host === 'localhost' || host === '127.0.0.1') {
+      return '/api';
+    }
+    return 'https://api.tuungane.com/api';
+  }
+  return 'https://api.tuungane.com/api';
+}
+
+const API_BASE_URL = resolveApiBaseUrl();
 
 /**
  * Core API client that automatically injects the Supabase JWT token.
