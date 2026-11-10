@@ -787,37 +787,84 @@ export const updatePublicProfile = async (req, res) => {
 export const getFullProfile = async (req, res) => {
   try {
     const { id } = req.params;
-    const [profileRes, spRes] = await Promise.all([
+    const [profileRes, spRes, rawProfileRes, pubRes, trustRes] = await Promise.all([
       supabaseAdmin.rpc("get_profile_card", { _id: id }).maybeSingle(),
-      supabaseAdmin.from("service_profiles").select("business_name,subcategory,bio,category_slug,district,town,verified,cover_url,header_url").eq("user_id", id).maybeSingle(),
+      supabaseAdmin.from("service_profiles").select("business_name,subcategory,bio,category_slug,district,town,verified,suspended,cover_url,header_url").eq("user_id", id).maybeSingle(),
+      supabaseAdmin.from("profiles").select("id,full_name,avatar_url,bio,district,town,is_provider,registration_status").eq("id", id).maybeSingle(),
+      supabaseAdmin.from("public_profiles").select("id,name,subcategory,bio,category_slug,district,town,verified,suspended,cover_url").eq("owner_id", id).limit(1).maybeSingle(),
+      supabaseAdmin.from("profile_trust_status").select("trust_level").in("profile_id", [id]).limit(1).maybeSingle(),
     ]);
 
-    let spData = spRes.data;
-    if (!spData) {
-      // Fallback: Query public_profiles table for this user
-      const { data: pub } = await supabaseAdmin
-        .from("public_profiles")
-        .select("name,subcategory,bio,category_slug,district,town,verified,cover_url")
-        .eq("owner_id", id)
-        .eq("profile_type", "individual")
-        .maybeSingle();
-      
-      if (pub) {
-        spData = {
-          business_name: pub.name,
-          subcategory: pub.subcategory,
-          bio: pub.bio,
-          category_slug: pub.category_slug,
-          district: pub.district,
-          town: pub.town,
-          verified: pub.verified,
-          cover_url: pub.cover_url,
-          header_url: null
-        };
-      }
+    const rawProf = rawProfileRes.data || {};
+    const pub = pubRes.data;
+    let trustLevel = trustRes.data?.trust_level || null;
+    if (!trustLevel && pub?.id) {
+      const { data: pubTrust } = await supabaseAdmin.from("profile_trust_status").select("trust_level").eq("profile_id", pub.id).maybeSingle();
+      trustLevel = pubTrust?.trust_level || null;
     }
 
-    res.json({ data: { profile: profileRes.data, sp: spData } });
+    const reconciledVerified =
+      spRes.data?.verified === "featured" || pub?.verified === "featured"
+        ? "featured"
+        : spRes.data?.verified === "verified" ||
+          pub?.verified === "verified" ||
+          trustLevel === "verified" ||
+          rawProf.registration_status === "verified"
+        ? "verified"
+        : "none";
+
+    const reconciledSuspended = Boolean(
+      spRes.data?.suspended ||
+      pub?.suspended ||
+      trustLevel === "suspended" ||
+      rawProf.registration_status === "suspended"
+    );
+
+    let spData = spRes.data;
+    if (!spData && pub) {
+      spData = {
+        business_name: pub.name,
+        subcategory: pub.subcategory,
+        bio: pub.bio,
+        category_slug: pub.category_slug,
+        district: pub.district,
+        town: pub.town,
+        verified: reconciledVerified,
+        suspended: reconciledSuspended,
+        cover_url: pub.cover_url,
+        header_url: null,
+      };
+    } else if (!spData) {
+      spData = {
+        business_name: rawProf.full_name || null,
+        subcategory: null,
+        bio: rawProf.bio || null,
+        category_slug: null,
+        district: rawProf.district || null,
+        town: rawProf.town || null,
+        verified: reconciledVerified,
+        suspended: reconciledSuspended,
+        cover_url: null,
+        header_url: null,
+      };
+    } else {
+      spData = {
+        ...spData,
+        verified: reconciledVerified,
+        suspended: reconciledSuspended,
+      };
+    }
+
+    const baseProfile = profileRes.data || rawProf || null;
+    const enrichedProfile = baseProfile
+      ? {
+          ...baseProfile,
+          verified: reconciledVerified,
+          suspended: reconciledSuspended,
+        }
+      : null;
+
+    res.json({ data: { profile: enrichedProfile, sp: spData } });
   } catch (err) {
     console.error('Error fetching full profile:', err);
     res.status(500).json({ error: 'Failed to fetch full profile' });
@@ -1122,8 +1169,19 @@ export const submitProfileReport = async (req, res) => {
 export const getSuspendedStatus = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { data } = await supabaseAdmin.from("service_profiles").select("suspended").eq("user_id", userId).maybeSingle();
-    res.json({ suspended: !!data?.suspended });
+    const [{ data: sp }, { data: prof }, { data: pub }, { data: trust }] = await Promise.all([
+      supabaseAdmin.from("service_profiles").select("suspended").eq("user_id", userId).maybeSingle(),
+      supabaseAdmin.from("profiles").select("registration_status").eq("id", userId).maybeSingle(),
+      supabaseAdmin.from("public_profiles").select("suspended").eq("owner_id", userId).limit(1).maybeSingle(),
+      supabaseAdmin.from("profile_trust_status").select("trust_level").eq("profile_id", userId).maybeSingle(),
+    ]);
+    const isSuspended = Boolean(
+      sp?.suspended ||
+      pub?.suspended ||
+      prof?.registration_status === "suspended" ||
+      trust?.trust_level === "suspended"
+    );
+    res.json({ suspended: isSuspended });
   } catch (err) {
     res.status(500).json({ error: 'Failed to fetch suspended status' });
   }

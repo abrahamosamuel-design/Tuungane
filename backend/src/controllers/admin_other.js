@@ -3,34 +3,122 @@ import { supabaseAdmin } from "../lib/supabaseClient.js";
 export async function getOverviewStats(req, res) {
   try {
     const head = { count: "exact", head: true };
-    const [u, pProfiles, vss, o, r, rep, dis, cl, cp, po] = await Promise.all([
+    const [
+      u,
+      pProfiles,
+      allProfilesStatus,
+      vss,
+      ps,
+      tp,
+      o,
+      r,
+      rep,
+      profRep,
+      dis,
+      cl,
+      cpReqs,
+      verReqs,
+      po,
+      sp,
+      pp,
+      pts,
+      wallets,
+    ] = await Promise.all([
       supabaseAdmin.from("profiles").select("*", head),
       supabaseAdmin.from("profiles").select("*", head).eq("is_provider", true),
-      supabaseAdmin.from("v_search_services").select("user_id"),
+      supabaseAdmin.from("profiles").select("id,registration_status"),
+      supabaseAdmin.from("v_search_services").select("service_id,user_id"),
+      supabaseAdmin.from("profile_services").select("id,user_profile_id,profile_id,active"),
+      supabaseAdmin.from("timeline_posts").select("*", head),
       supabaseAdmin.from("opportunities").select("*", head).eq("archived", false),
       supabaseAdmin.from("service_requests").select("*", head),
       supabaseAdmin.from("reports").select("*", head).eq("status", "open"),
+      supabaseAdmin.from("profile_reports").select("*", head).eq("status", "open"),
       supabaseAdmin.from("service_disputes").select("*", head).eq("status", "open"),
       supabaseAdmin.from("profile_claim_requests").select("*", head).eq("status", "pending"),
-      supabaseAdmin.from("credit_purchase_requests").select("*", head).eq("status", "pending"),
+      supabaseAdmin.from("credit_purchase_requests").select("id,user_id,credits_requested,amount_ugx,status"),
+      supabaseAdmin.from("profile_verification_requests").select("*", head).in("status", ["pending", "more_info"]),
       supabaseAdmin.from("opportunities").select("*", head).eq("status", "pending"),
+      supabaseAdmin.from("service_profiles").select("user_id,verified,suspended"),
+      supabaseAdmin.from("public_profiles").select("id,owner_id,verified,suspended"),
+      supabaseAdmin.from("profile_trust_status").select("profile_id,owner_user_id,manual_level,manual_reason"),
+      supabaseAdmin.from("credit_wallets").select("balance"),
     ]);
 
-    const uniqueProviders = new Set((vss.data || []).map(x => x.user_id));
-    const providerCount = Math.max(uniqueProviders.size, pProfiles.count || 0, 6);
+    const uniqueProviders = new Set((vss.data || []).map((x) => x.user_id).filter(Boolean));
+    for (const row of sp.data || []) if (row.user_id) uniqueProviders.add(row.user_id);
+    for (const row of pp.data || []) if (row.owner_id) uniqueProviders.add(row.owner_id);
+    const providerCount = Math.max(uniqueProviders.size, pProfiles.count || 0);
+
+    // Total unique services posted across profile_services and v_search_services
+    const uniqueServiceIds = new Set();
+    for (const row of ps.data || []) if (row.id) uniqueServiceIds.add(row.id);
+    for (const row of vss.data || []) if (row.service_id) uniqueServiceIds.add(row.service_id);
+    const totalServices = uniqueServiceIds.size;
+
+    // Count verified providers & suspended users
+    const verifiedSet = new Set();
+    const suspendedSet = new Set();
+    for (const row of allProfilesStatus.data || []) {
+      if (row.registration_status === "suspended") suspendedSet.add(row.id);
+      if (row.registration_status === "verified" || row.registration_status === "featured") verifiedSet.add(row.id);
+    }
+    for (const row of sp.data || []) {
+      if (row.suspended) suspendedSet.add(row.user_id);
+      if (row.verified === "verified" || row.verified === "featured") verifiedSet.add(row.user_id);
+    }
+    for (const row of pp.data || []) {
+      if (row.suspended && row.owner_id) suspendedSet.add(row.owner_id);
+      if ((row.verified === "verified" || row.verified === "featured") && row.owner_id) verifiedSet.add(row.owner_id);
+    }
+    for (const row of pts.data || []) {
+      const uid = row.owner_user_id || row.profile_id;
+      if (!uid) continue;
+      if (row.manual_level === "suspended") suspendedSet.add(uid);
+      if (
+        row.manual_level === "verified_provider" ||
+        row.manual_level === "verified_business" ||
+        row.manual_level === "verified_organization"
+      ) {
+        verifiedSet.add(uid);
+      }
+    }
+
+    // Credit & revenue stats
+    const allPurchaseReqs = cpReqs.data || [];
+    const paidReqs = allPurchaseReqs.filter((x) => x.status === "paid" || x.status === "approved");
+    const pendingReqs = allPurchaseReqs.filter((x) => x.status === "pending");
+
+    const creditsBoughtTotal = paidReqs.reduce((sum, x) => sum + Number(x.credits_requested || 0), 0);
+    const creditRevenueUgx = paidReqs.reduce((sum, x) => sum + Number(x.amount_ugx || 0), 0);
+    const pendingCreditRevenueUgx = pendingReqs.reduce((sum, x) => sum + Number(x.amount_ugx || 0), 0);
+    const uniqueCreditBuyers = new Set(paidReqs.map((x) => x.user_id)).size;
+    const totalWalletBalance = (wallets.data || []).reduce((sum, w) => sum + Number(w.balance || 0), 0);
 
     res.json({
       data: {
         users: u.count || 0,
+        suspendedUsers: suspendedSet.size,
         providers: providerCount,
+        verifiedProviders: verifiedSet.size,
+        services: totalServices,
+        profileServices: (ps.data || []).length,
+        posts: tp.count || 0,
         opportunities: o.count || 0,
         requests: r.count || 0,
-        openReports: rep.count || 0,
+        openReports: (rep.count || 0) + (profRep.count || 0),
         openDisputes: dis.count || 0,
         pendingClaims: cl.count || 0,
-        pendingPurchases: cp.count || 0,
+        pendingPurchases: pendingReqs.length,
+        pendingVerifications: verReqs.count || 0,
         pendingOpps: po.count || 0,
-      }
+        creditsBoughtTotal,
+        creditRevenueUgx,
+        pendingCreditRevenueUgx,
+        paidPurchasesCount: paidReqs.length,
+        uniqueCreditBuyers,
+        totalWalletBalance,
+      },
     });
   } catch (error) {
     console.error(error);

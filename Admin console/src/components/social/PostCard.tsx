@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Heart, MessageCircle, ThumbsUp, Share2, Flag, MapPin, Trash2, EyeOff, Pencil } from "lucide-react";
+import { Heart, MessageCircle, ThumbsUp, Share2, Flag, MapPin, Trash2, EyeOff, Pencil, CheckCircle2 } from "lucide-react";
 import { EditPostDialog } from "@/components/EditPostDialog";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { apiClient } from "@/lib/api";
@@ -42,6 +42,7 @@ export interface PostRow {
     full_name: string;
     avatar_url: string | null;
     is_provider: boolean;
+    verified?: string | null;
     district?: string | null;
     town?: string | null;
     area?: string | null;
@@ -180,9 +181,17 @@ export function PostCard({ post, onChanged, userLoc, autoExpandComments = false 
                 <Avatar name={post.author?.full_name ?? "Provider"} url={post.author?.avatar_url ?? null} size={44} />
               </Link>
               <div className="leading-tight flex-1 min-w-0">
-                <Link to="/u/$id" params={{ id: post.provider_user_id }} className="hover:underline block truncate">
-                  <p className="font-semibold text-navy truncate">{displayName}</p>
-                </Link>
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <Link to="/u/$id" params={{ id: post.provider_user_id }} className="hover:underline block truncate">
+                    <p className="font-semibold text-navy truncate">{displayName}</p>
+                  </Link>
+                  {(post.author?.verified === "verified" || post.author?.verified === "featured") && (
+                    <span className="inline-flex shrink-0 items-center gap-0.5 rounded-full bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 text-[10px] font-bold text-emerald-700" title="Verified Provider">
+                      <CheckCircle2 className="h-3 w-3 text-emerald-600" />
+                      {post.author?.verified === "featured" ? "Featured" : "Verified"}
+                    </span>
+                  )}
+                </div>
                 {authorType && <p className="text-[11px] font-medium text-orange truncate">{authorType}</p>}
                 <p className="text-xs text-muted-foreground truncate">
                   {post.location && <><MapPin className="mr-0.5 inline h-3 w-3" />{post.location} · </>}
@@ -250,7 +259,8 @@ export function PostCard({ post, onChanged, userLoc, autoExpandComments = false 
               </div>
               <div className="flex items-center gap-1">
                 {user?.id === post.provider_user_id && <ActionBtn onClick={() => setEditOpen(true)} icon={<Pencil className="h-4 w-4" />} label="Edit" />}
-                {user?.id === post.provider_user_id && <ActionBtn onClick={deletePost} icon={<Trash2 className="h-4 w-4 text-destructive" />} label="Delete" />}
+                {isModerator && <ActionBtn onClick={hidePost} icon={<EyeOff className="h-4 w-4" />} label={post.hidden ? "Restore" : "Hide"} />}
+                {(user?.id === post.provider_user_id || isModerator) && <ActionBtn onClick={deletePost} icon={<Trash2 className="h-4 w-4 text-destructive" />} label="Delete" />}
               </div>
             </div>
 

@@ -4,7 +4,7 @@ import { supabaseAdmin } from "../lib/supabaseClient.js";
 export async function getRequests(req, res) {
   try {
     const [r, f, d] = await Promise.all([
-      supabaseAdmin.rpc("admin_list_service_requests", { _limit: 200 }),
+      supabaseAdmin.from("service_requests").select("*").order("created_at", { ascending: false }).limit(200),
       supabaseAdmin.from("service_feedback").select("*").order("created_at", { ascending: false }).limit(100),
       supabaseAdmin.from("service_disputes").select("*").order("created_at", { ascending: false }).limit(100),
     ]);

@@ -192,6 +192,38 @@ export const getServiceById = async (req, res) => {
     if (service.user_profile) {
       service.user_profile.phone = resolvedPhone;
     }
+
+    // Reconcile verified status from service_profiles, public_profiles, profile_trust_status, and profiles
+    if (ownerId) {
+      const [{ data: spVer }, { data: pubVer }, { data: trustVer }, { data: profVer }] = await Promise.all([
+        supabaseAdmin.from('service_profiles').select('verified, suspended').eq('user_id', ownerId).maybeSingle(),
+        supabaseAdmin.from('public_profiles').select('verified, suspended').or(`owner_id.eq.${ownerId},id.eq.${ownerId}`).limit(1).maybeSingle(),
+        supabaseAdmin.from('profile_trust_status').select('trust_level').eq('profile_id', ownerId).maybeSingle(),
+        supabaseAdmin.from('profiles').select('registration_status').eq('id', ownerId).maybeSingle(),
+      ]);
+      const reconciledVer =
+        spVer?.verified === 'featured' || pubVer?.verified === 'featured' || service.profile?.verified === 'featured'
+          ? 'featured'
+          : spVer?.verified === 'verified' ||
+            pubVer?.verified === 'verified' ||
+            service.profile?.verified === 'verified' ||
+            trustVer?.trust_level === 'verified' ||
+            profVer?.registration_status === 'verified'
+          ? 'verified'
+          : service.profile?.verified || 'none';
+      const reconciledSusp = Boolean(
+        spVer?.suspended ||
+        pubVer?.suspended ||
+        trustVer?.trust_level === 'suspended' ||
+        profVer?.registration_status === 'suspended'
+      );
+      service.verified = reconciledVer;
+      service.suspended = reconciledSusp;
+      if (service.profile) {
+        service.profile.verified = reconciledVer;
+        service.profile.suspended = reconciledSusp;
+      }
+    }
     
     // Run independent queries in parallel
     const providerUserId = service.user_profile_id || service.profile?.owner_id || service.profile?.id;
@@ -538,6 +570,47 @@ export const getFeaturedLocations = async (req, res) => {
   }
 };
 
+const enrichProvidersVerified = async (providers) => {
+  if (!providers || providers.length === 0) return [];
+  const userIds = Array.from(new Set(providers.map(p => p.user_id || p.profile?.id).filter(Boolean)));
+  if (userIds.length === 0) return providers;
+
+  const [{ data: trusts }, { data: profs }, { data: sps }, { data: pubs }] = await Promise.all([
+    supabaseAdmin.from("profile_trust_status").select("profile_id, trust_level").in("profile_id", userIds),
+    supabaseAdmin.from("profiles").select("id, registration_status").in("id", userIds),
+    supabaseAdmin.from("service_profiles").select("user_id, verified, suspended").in("user_id", userIds),
+    supabaseAdmin.from("public_profiles").select("owner_id, verified, suspended").in("owner_id", userIds),
+  ]);
+
+  const trustMap = new Map((trusts || []).map(t => [t.profile_id, t.trust_level]));
+  const profMap = new Map((profs || []).map(p => [p.id, p.registration_status]));
+  const spMap = new Map((sps || []).map(s => [s.user_id, s]));
+  const pubMap = new Map((pubs || []).map(p => [p.owner_id, p]));
+
+  return providers
+    .map(p => {
+      const uid = p.user_id || p.profile?.id;
+      const sp = spMap.get(uid);
+      const pub = pubMap.get(uid);
+      const tl = trustMap.get(uid);
+      const rs = profMap.get(uid);
+      const isSusp = Boolean(p.suspended || sp?.suspended || pub?.suspended || tl === "suspended" || rs === "suspended");
+      const ver =
+        p.verified === "featured" || sp?.verified === "featured" || pub?.verified === "featured"
+          ? "featured"
+          : p.verified === "verified" || sp?.verified === "verified" || pub?.verified === "verified" || tl === "verified" || rs === "verified"
+          ? "verified"
+          : p.verified || "none";
+      return {
+        ...p,
+        verified: ver,
+        suspended: isSusp,
+        profile: p.profile ? { ...p.profile, verified: ver, suspended: isSusp } : p.profile,
+      };
+    })
+    .filter(p => !p.suspended);
+};
+
 export const getHomeNearby = async (req, res) => {
   try {
     const cacheKey = generateCacheKey(req);
@@ -609,6 +682,7 @@ export const getHomeNearby = async (req, res) => {
       }));
     }
 
+    provs = await enrichProvidersVerified(provs);
     const responseData = { data: { requests: reqs, providers: provs } };
     apiCache.set(cacheKey, responseData); // 30s default cache
     res.json(responseData);
@@ -641,7 +715,7 @@ export const searchServices = async (req, res) => {
     const { data: merged, error } = await q;
     if (error) throw error;
 
-    const data = (merged || []).map((p) => ({
+    const rawData = (merged || []).map((p) => ({
       ...p,
       profile: {
         id: p.user_id,
@@ -649,6 +723,7 @@ export const searchServices = async (req, res) => {
         avatar_url: p.final_avatar_url
       }
     }));
+    const data = await enrichProvidersVerified(rawData);
 
     const responseData = { data };
     apiCache.set(cacheKey, responseData);
@@ -711,7 +786,9 @@ export const getCategoryServices = async (req, res) => {
       }));
     }
 
-    const responseData = { list: inCat, others: outCat };
+    const enrichedInCat = await enrichProvidersVerified(inCat);
+    const enrichedOutCat = await enrichProvidersVerified(outCat);
+    const responseData = { list: enrichedInCat, others: enrichedOutCat };
     apiCache.set(cacheKey, responseData);
     res.json(responseData);
   } catch (err) {

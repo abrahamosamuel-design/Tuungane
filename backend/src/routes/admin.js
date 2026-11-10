@@ -44,15 +44,24 @@ router.use(requireModerator);
 
 // Users
 router.get("/users", admin.getUsers);
+router.get("/users/:id/details", admin.getUserDetails);
 router.post("/users/:id/role/:role", admin.toggleRole);
+router.put("/users/:id/status", admin.updateProviderStatus);
 
 // Providers
 router.get("/providers", admin.getProviders);
 router.put("/providers/:id/status", admin.updateProviderStatus);
 
+// Services
+router.get("/services", admin.getAdminServices);
+router.put("/services/:id/status", admin.toggleAdminServiceActive);
+router.delete("/services/:id", admin.deleteAdminService);
+
 // Posts
 router.get("/posts", admin.getPosts);
 router.put("/posts/:id/feature", admin.updatePost);
+router.put("/posts/:id/hide", admin.toggleHideAdminPost);
+router.delete("/posts/:id", admin.deleteAdminPost);
 
 // Recs
 router.get("/recs", admin.getRecs);
@@ -67,6 +76,7 @@ router.get('/official', getOfficialData);
 router.get('/official-posts/:id/interactions', optionalAuth, getOfficialPostInteractions);
 router.post('/official-posts/:id/likes', requireAuth, toggleOfficialPostLike);
 router.get('/claims/:id/contact', revealClaimContact);
+router.get('/official/claim-contact/:id', revealClaimContact);
 router.put("/official/posts/:id", updateOfficialPost);
 router.post("/official/posts", admin.createOfficialPost);
 router.delete("/official/posts/:id", deleteOfficialPost);

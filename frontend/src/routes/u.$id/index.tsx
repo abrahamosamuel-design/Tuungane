@@ -477,9 +477,22 @@ export default function UserProfile() {
 
           {/* Name + Location */}
           <div className="mt-3 text-center px-6">
-            <h1 className="text-[22px] font-extrabold" style={{ color: "#1a2b4b" }}>
-              {profile.full_name?.trim() || sp?.business_name || (user?.id === profile.id ? (user?.user_metadata?.full_name || user?.user_metadata?.name) : null) || "Anonymous User"}
-            </h1>
+            <div className="flex flex-wrap items-center justify-center gap-2">
+              <h1 className="text-[22px] font-extrabold" style={{ color: "#1a2b4b" }}>
+                {profile.full_name?.trim() || sp?.business_name || (user?.id === profile.id ? (user?.user_metadata?.full_name || user?.user_metadata?.name) : null) || "Anonymous User"}
+              </h1>
+              {(sp?.verified === "verified" || sp?.verified === "featured" || identity?.verified) && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700">
+                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                  {sp?.verified === "featured" ? "Featured Provider" : "Verified"}
+                </span>
+              )}
+              {(sp?.suspended || (profile as any)?.suspended) && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-red-50 border border-red-200 px-2.5 py-0.5 text-[11px] font-bold text-red-600">
+                  Suspended
+                </span>
+              )}
+            </div>
             {(profile.town || profile.district) && (
               <p className="mt-1 flex items-center justify-center gap-1 text-[13px]" style={{ color: "#9ca3af" }}>
                 <MapPin className="h-3.5 w-3.5" style={{ color: "#f47b16" }} />
@@ -1414,8 +1427,8 @@ export default function UserProfile() {
                 <div className="w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 rounded-2xl object-cover ring-4 ring-white shadow-md bg-slate-100 overflow-hidden">
                    <Avatar name={profile.full_name} url={profile.avatar_url} size={144} />
                 </div>
-                {identity?.is_verified && (
-                  <span className="absolute -bottom-2 -right-2 bg-[#E8F7EE] border-2 border-[#A3E2B8] text-[#22A652] rounded-full p-1 shadow-sm flex items-center justify-center" title="Verified Member">
+                {(identity?.is_verified || identity?.verified || sp?.verified === 'verified' || sp?.verified === 'featured') && (
+                  <span className="absolute -bottom-2 -right-2 bg-[#E8F7EE] border-2 border-[#A3E2B8] text-[#22A652] rounded-full p-1 shadow-sm flex items-center justify-center" title="Verified Provider">
                     <CheckCircle2 className="h-5 w-5 fill-[#22A652] text-white" />
                   </span>
                 )}
@@ -1443,10 +1456,15 @@ export default function UserProfile() {
                   <h1 className="text-2xl font-bold text-[#0B192C]">
                     {profile.full_name?.trim() || sp?.business_name || "Anonymous User"}
                   </h1>
-                  {sp?.verified === 'verified' && (
+                  {(sp?.verified === 'verified' || sp?.verified === 'featured' || identity?.verified) && (
                     <span className="bg-[#E8F7EE] text-[#22A652] border border-[#A3E2B8] text-[10px] font-bold rounded px-2 py-0.5 uppercase flex items-center gap-1">
                       <CheckCircle2 className="h-3 w-3" />
-                      Verified Provider
+                      {sp?.verified === 'featured' ? 'Featured Provider' : 'Verified Provider'}
+                    </span>
+                  )}
+                  {(sp?.suspended || (profile as any)?.suspended) && (
+                    <span className="bg-red-50 text-red-600 border border-red-200 text-[10px] font-bold rounded px-2 py-0.5 uppercase flex items-center gap-1">
+                      Suspended
                     </span>
                   )}
                   {sp?.category_slug && (
@@ -1518,11 +1536,13 @@ export default function UserProfile() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center">
-                <Calendar className="h-5 w-5" />
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${(sp?.verified === 'verified' || sp?.verified === 'featured' || identity?.verified) ? 'bg-[#E8F7EE] text-[#22A652]' : 'bg-slate-100 text-slate-600'}`}>
+                <CheckCircle2 className="h-5 w-5" />
               </div>
               <div>
-                <div className="text-lg font-bold text-[#0B192C]">Verified</div>
+                <div className="text-lg font-bold text-[#0B192C]">
+                  {sp?.verified === 'featured' ? 'Featured' : (sp?.verified === 'verified' || identity?.verified) ? 'Verified' : 'Standard'}
+                </div>
                 <div className="text-[11px] text-slate-600">Member Status</div>
               </div>
             </div>
