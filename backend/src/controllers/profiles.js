@@ -290,28 +290,37 @@ export const browseProfiles = async (req, res) => {
 
     if (pError) throw pError;
 
-    // Fetch all active services
-    const { data: ps, error: sError } = await supabaseAdmin
-      .from("profile_services")
-      .select("id,profile_id,user_profile_id,title,category_slug,subcategory,is_primary,price_type,price_fixed_ugx,price_min_ugx,price_max_ugx,price_currency,photos")
-      .eq("active", true)
-      .order("is_primary", { ascending: false })
-      .order("sort_order")
-      .limit(500);
+    // Fetch all active services and legacy directory listings
+    const [{ data: ps, error: sError }, { data: vssRows }] = await Promise.all([
+      supabaseAdmin
+        .from("profile_services")
+        .select("id,profile_id,user_profile_id,title,category_slug,subcategory,is_primary,price_type,price_fixed_ugx,price_min_ugx,price_max_ugx,price_currency,photos")
+        .eq("active", true)
+        .order("is_primary", { ascending: false })
+        .order("sort_order")
+        .limit(500),
+      supabaseAdmin
+        .from("v_search_services_enriched")
+        .select("*"),
+    ]);
 
     let services = ps || [];
     let profiles = publicProfiles || [];
 
     // Map existing public profile owners so we know if an owner already has a public profile
     const ownerToPublicProfile = new Map();
+    const profileIdsSet = new Set();
     profiles.forEach(p => {
+      profileIdsSet.add(p.id);
       if (p.owner_id) ownerToPublicProfile.set(p.owner_id, p);
     });
 
     // Re-map services that have no profile_id:
     // If the owner has a public profile, attach the service to that public profile!
     // If not, set s.profile_id to user_profile_id so it can be grouped under that user
+    const seenServiceIds = new Set();
     services = services.map(s => {
+      seenServiceIds.add(s.id);
       if (!s.profile_id && s.user_profile_id) {
         const pub = ownerToPublicProfile.get(s.user_profile_id);
         if (pub) {
@@ -322,6 +331,32 @@ export const browseProfiles = async (req, res) => {
       }
       return s;
     });
+
+    // Include legacy/standalone directory services from v_search_services_enriched not already in profile_services
+    for (const v of vssRows || []) {
+      if (!v.service_id || seenServiceIds.has(v.service_id)) {
+        continue;
+      }
+      seenServiceIds.add(v.service_id);
+      const targetProfileId = profileIdsSet.has(v.service_id)
+        ? v.service_id
+        : (ownerToPublicProfile.get(v.user_id)?.id || v.user_id || v.service_id);
+      services.push({
+        id: v.service_id,
+        profile_id: targetProfileId,
+        user_profile_id: v.user_id || targetProfileId,
+        title: v.business_name || v.subcategory || v.profile_full_name || "Service Listing",
+        category_slug: v.category_slug || "other",
+        subcategory: v.subcategory || "General",
+        is_primary: false,
+        price_type: v.price_type || null,
+        price_fixed_ugx: v.price_fixed_ugx || null,
+        price_min_ugx: v.price_min_ugx || null,
+        price_max_ugx: v.price_max_ugx || null,
+        price_currency: v.price_currency || "UGX",
+        photos: v.media_urls || (v.cover_url ? [v.cover_url] : []),
+      });
+    }
 
     // Now find any user IDs that have services but DO NOT have a public profile
     const orphanUserIds = [...new Set(

@@ -165,31 +165,42 @@ export function ServicesDirectoryView() {
     };
   }, []);
 
+  const allListings = useMemo(() => {
+    const items: { key: string; profile: PProfile; service?: ServiceRow }[] = [];
+    for (const p of profiles) {
+      const svcs = servicesByProfile[p.id] ?? [];
+      if (svcs.length > 0) {
+        for (const s of svcs) {
+          items.push({ key: s.id, profile: p, service: s });
+        }
+      } else {
+        items.push({ key: p.id, profile: p, service: undefined });
+      }
+    }
+    return items;
+  }, [profiles, servicesByProfile]);
+
   const filteredItems = useMemo(() => {
     const term = q.trim().toLowerCase();
     const minP = filters.minPrice ? parseInt(filters.minPrice) : 0;
     const maxP = filters.maxPrice ? parseInt(filters.maxPrice) : Infinity;
 
-    return profiles.filter((p) => {
-      const svcs = servicesByProfile[p.id] ?? [];
-      const primary = svcs.find((s) => s.is_primary) || svcs[0];
-
+    return allListings.filter(({ profile: p, service: s }) => {
       // Name/Bio or Service Title/Category search
       if (term) {
         const matchesNameOrBio =
           p.name.toLowerCase().includes(term) || (p.bio || "").toLowerCase().includes(term);
-        const matchesServices = svcs.some(
-          (s) =>
-            (s.title || "").toLowerCase().includes(term) ||
-            (s.category_slug || "").toLowerCase().includes(term)
-        );
-        if (!matchesNameOrBio && !matchesServices) {
+        const matchesService =
+          s &&
+          ((s.title || "").toLowerCase().includes(term) ||
+            (s.category_slug || "").toLowerCase().includes(term));
+        if (!matchesNameOrBio && !matchesService) {
           return false;
         }
       }
 
       // Verified Only
-      if (filters.verifiedOnly && p.verified !== "verified") {
+      if (filters.verifiedOnly && p.verified !== "verified" && p.verified !== "featured") {
         return false;
       }
 
@@ -209,15 +220,15 @@ export function ServicesDirectoryView() {
         }
 
         const hasMatchingCat =
-          svcs.some((s) => s.category_slug && allowedSlugs.has(s.category_slug)) ||
+          (s?.category_slug && allowedSlugs.has(s.category_slug)) ||
           filters.categories.includes(p.profile_type);
         if (!hasMatchingCat) return false;
       }
 
       // Price Range
       if (minP > 0 || maxP < Infinity) {
-        if (!primary) return false;
-        const price = primary.price_fixed_ugx || primary.price_min_ugx || 0;
+        if (!s) return false;
+        const price = s.price_fixed_ugx || s.price_min_ugx || 0;
         if (price < minP || price > maxP) return false;
       }
 
@@ -227,7 +238,7 @@ export function ServicesDirectoryView() {
 
       return true;
     });
-  }, [profiles, q, filters, servicesByProfile]);
+  }, [allListings, q, filters]);
 
   const isSearching =
     q.length > 0 || filters.categories.length > 0 || filters.region.length > 0 || filters.verifiedOnly;
@@ -308,11 +319,9 @@ export function ServicesDirectoryView() {
               </div>
               <div className="flex overflow-x-auto pb-4 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                 <div className="w-6 shrink-0" />
-                {filteredItems.slice(0, 4).map((p, idx) => {
-                  const svcs = servicesByProfile[p.id] ?? [];
-                  const primary = svcs.find((s) => s.is_primary) || svcs[0];
+                {filteredItems.slice(0, 4).map(({ key, profile: p, service: primary }, idx) => {
                   return (
-                    <div key={p.id} className={`w-[240px] shrink-0 snap-start ${idx !== 3 ? "mr-4" : ""}`}>
+                    <div key={key} className={`w-[240px] shrink-0 snap-start ${idx !== 3 ? "mr-4" : ""}`}>
                       <ProviderCardListMobile
                         id={primary?.id || p.id}
                         profileSlug={p.slug}
@@ -323,8 +332,8 @@ export function ServicesDirectoryView() {
                           null
                         }
                         category={primary?.category_slug || p.profile_type}
-                        providerName={p.name}
-                        isVerified={p.verified === "verified"}
+                        providerName={primary?.title || p.name}
+                        isVerified={p.verified === "verified" || p.verified === "featured"}
                         locationName={[p.area, p.town].filter(Boolean).join(", ") || p.district || "Uganda"}
                       />
                     </div>
@@ -494,17 +503,14 @@ export function ServicesDirectoryView() {
               <>
                 {/* Desktop View */}
                 <div className="hidden md:grid md:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {filteredItems.map((p) => {
-                    const svcs = servicesByProfile[p.id] ?? [];
-                    const primary = svcs.find((s) => s.is_primary) || svcs[0];
-
+                  {filteredItems.map(({ key, profile: p, service: primary }) => {
                     const mockDistance = Math.random() * 10 + 1;
                     const mockRating = 4.8;
                     const mockReviews = Math.floor(Math.random() * 100) + 5;
 
                     return (
                       <ServiceCard
-                        key={p.id}
+                        key={key}
                         id={primary?.id || p.id}
                         profileSlug={p.slug}
                         coverUrl={
@@ -518,7 +524,7 @@ export function ServicesDirectoryView() {
                         distanceKm={mockDistance}
                         avatarUrl={p.avatar_url}
                         providerName={p.name}
-                        isVerified={p.verified === "verified"}
+                        isVerified={p.verified === "verified" || p.verified === "featured"}
                         providerSubtitle={
                           p.bio
                             ? p.bio.length > 40
@@ -540,12 +546,10 @@ export function ServicesDirectoryView() {
 
                 {/* Mobile View */}
                 <div className="grid md:hidden grid-cols-2 gap-3">
-                  {filteredItems.map((p) => {
-                    const svcs = servicesByProfile[p.id] ?? [];
-                    const primary = svcs.find((s) => s.is_primary) || svcs[0];
+                  {filteredItems.map(({ key, profile: p, service: primary }) => {
                     return (
                       <ProviderCardListMobile
-                        key={p.id}
+                        key={key}
                         id={primary?.id || p.id}
                         profileSlug={p.slug}
                         coverUrl={
@@ -556,8 +560,8 @@ export function ServicesDirectoryView() {
                           null
                         }
                         category={primary?.category_slug || p.profile_type}
-                        providerName={p.name}
-                        isVerified={p.verified === "verified"}
+                        providerName={primary?.title || p.name}
+                        isVerified={p.verified === "verified" || p.verified === "featured"}
                         locationName={[p.area, p.town].filter(Boolean).join(", ") || p.district || "Uganda"}
                       />
                     );
