@@ -27,7 +27,7 @@ function Index() {
           if (!cancelled) nav({ to: "/login", replace: true });
           return;
         }
-        const roles = await fetchUserRoles(data.session.user.id);
+        const roles = await fetchUserRoles(data.session.user.id, data.session.access_token);
         if (cancelled) return;
         if (!hasAdminPrivilege(roles)) {
           await supabase.auth.signOut();
@@ -46,7 +46,7 @@ function Index() {
         for (let i = 0; i < 15; i++) {
           const { data } = await supabase.auth.getSession();
           if (data.session?.user) {
-            const roles = await fetchUserRoles(data.session.user.id);
+            const roles = await fetchUserRoles(data.session.user.id, data.session.access_token);
             if (cancelled) return;
             if (!hasAdminPrivilege(roles)) {
               await supabase.auth.signOut();

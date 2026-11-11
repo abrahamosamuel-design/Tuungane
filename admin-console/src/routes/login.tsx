@@ -10,7 +10,7 @@ export const Route = createFileRoute("/login")({
 });
 
 function AdminLogin() {
-  const { user, loading, isModerator } = useAuth();
+  const { user, session, loading, isModerator } = useAuth();
   const nav = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -36,21 +36,35 @@ function AdminLogin() {
   }, []);
 
   useEffect(() => {
-    if (!loading && user) {
-      if (isModerator) {
+    if (loading || busy || googleBusy || !user) return;
+
+    if (isModerator) {
+      nav({ to: "/admin", replace: true });
+      return;
+    }
+
+    let cancelled = false;
+    (async () => {
+      const verifiedRoles = await fetchUserRoles(user.id, session?.access_token);
+      if (cancelled) return;
+      if (hasAdminPrivilege(verifiedRoles)) {
         nav({ to: "/admin", replace: true });
       } else {
         const deniedEmail = user.email;
-        void supabase.auth.signOut().then(() => {
-          const msg = deniedEmail
-            ? `Access denied: ${deniedEmail} does not have Admin privileges.`
-            : "Access denied: Only users with Admin privileges can sign in to the Admin Console.";
-          setAuthError(msg);
-          toast.error(msg);
-        });
+        await supabase.auth.signOut();
+        if (cancelled) return;
+        const msg = deniedEmail
+          ? `Access denied: ${deniedEmail} does not have Admin privileges.`
+          : "Access denied: Only users with Admin privileges can sign in to the Admin Console.";
+        setAuthError(msg);
+        toast.error(msg);
       }
-    }
-  }, [loading, user, isModerator, nav]);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [loading, busy, googleBusy, user, session, isModerator, nav]);
 
   const onGoogleSignIn = async () => {
     setAuthError(null);
@@ -80,7 +94,10 @@ function AdminLogin() {
     setAuthError(null);
     setBusy(true);
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
       if (error) throw error;
 
       const signedInUser = data.user;
@@ -88,7 +105,7 @@ function AdminLogin() {
         throw new Error("Could not verify user account.");
       }
 
-      const userRoles = await fetchUserRoles(signedInUser.id);
+      const userRoles = await fetchUserRoles(signedInUser.id, data.session?.access_token);
       if (!hasAdminPrivilege(userRoles)) {
         await supabase.auth.signOut();
         const msg = `Access denied: ${signedInUser.email || email} does not have Admin privileges.`;
@@ -108,7 +125,7 @@ function AdminLogin() {
     }
   };
 
-  if (loading) return null;
+  if (loading && !busy && !googleBusy) return null;
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-[#f8fafc] px-4">

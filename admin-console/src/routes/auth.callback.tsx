@@ -11,8 +11,12 @@ function AuthCallback() {
   useEffect(() => {
     let cancelled = false;
 
-    const verifyAdminAndRedirect = async (userId: string, email?: string | null) => {
-      const roles = await fetchUserRoles(userId);
+    const verifyAdminAndRedirect = async (
+      userId: string,
+      email?: string | null,
+      accessToken?: string
+    ) => {
+      const roles = await fetchUserRoles(userId, accessToken);
       if (cancelled) return;
 
       if (!hasAdminPrivilege(roles)) {
@@ -58,7 +62,11 @@ function AuthCallback() {
             return;
           }
           if (data.session?.user) {
-            await verifyAdminAndRedirect(data.session.user.id, data.session.user.email);
+            await verifyAdminAndRedirect(
+              data.session.user.id,
+              data.session.user.email,
+              data.session.access_token
+            );
             return;
           } else {
             if (!cancelled) {
@@ -73,7 +81,11 @@ function AuthCallback() {
           for (let i = 0; i < 15; i++) {
             const { data } = await supabase.auth.getSession();
             if (data.session?.user) {
-              await verifyAdminAndRedirect(data.session.user.id, data.session.user.email);
+              await verifyAdminAndRedirect(
+                data.session.user.id,
+                data.session.user.email,
+                data.session.access_token
+              );
               return;
             }
             await new Promise((r) => setTimeout(r, 300));
@@ -88,7 +100,11 @@ function AuthCallback() {
         for (let i = 0; i < 5; i++) {
           const { data } = await supabase.auth.getSession();
           if (data.session?.user) {
-            await verifyAdminAndRedirect(data.session.user.id, data.session.user.email);
+            await verifyAdminAndRedirect(
+              data.session.user.id,
+              data.session.user.email,
+              data.session.access_token
+            );
             return;
           }
           await new Promise((r) => setTimeout(r, 400));

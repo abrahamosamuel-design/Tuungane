@@ -36,12 +36,19 @@ export type ApiClientType = {
 };
 
 const _apiClient = async function<T = any>(endpoint: string, options: RequestInit = {}): Promise<T> {
-  const { data: { session } } = await supabase.auth.getSession();
-  const token = session?.access_token;
+  const existingHeaders = (options.headers as Record<string, string>) || {};
+  let token = existingHeaders['Authorization']
+    ? existingHeaders['Authorization'].replace(/^Bearer\s+/i, '')
+    : undefined;
+
+  if (!token) {
+    const { data: { session } } = await supabase.auth.getSession();
+    token = session?.access_token;
+  }
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    ...(options.headers as Record<string, string> || {}),
+    ...existingHeaders,
   };
 
   if (options.body instanceof FormData) {

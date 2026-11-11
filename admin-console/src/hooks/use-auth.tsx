@@ -11,10 +11,13 @@ export function hasAdminPrivilege(roles: string[]): boolean {
   return roles.some((r) => ADMIN_CONSOLE_ROLES.includes(r as Role));
 }
 
-export async function fetchUserRoles(userId: string): Promise<Role[]> {
+export async function fetchUserRoles(userId: string, accessToken?: string): Promise<Role[]> {
   let loadedRoles: Role[] = [];
   try {
-    const apiRes = await apiClient<any>("/profiles/me/roles");
+    const reqInit: RequestInit | undefined = accessToken
+      ? { headers: { Authorization: `Bearer ${accessToken}` } }
+      : undefined;
+    const apiRes = await apiClient<any>("/profiles/me/roles", reqInit);
     const raw = Array.isArray(apiRes?.data) ? apiRes.data : Array.isArray(apiRes) ? apiRes : [];
     loadedRoles = raw.map((r: any) => (typeof r === "object" && r?.role ? r.role : r) as Role);
   } catch (e) {
@@ -71,6 +74,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let initialChecked = false;
+    let mounted = true;
 
     const enforceRememberMeOnce = async (sess: Session | null): Promise<Session | null> => {
       if (!sess || typeof window === "undefined") return sess;
@@ -91,27 +95,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     const syncAuth = async (sess: Session | null) => {
+      if (!mounted) return;
+      setLoading(true);
+
       const effective = await enforceRememberMeOnce(sess);
-      setSession(effective);
-      setUser(effective?.user ?? null);
+      let loadedRoles: Role[] = [];
 
       if (effective?.user) {
-        const loadedRoles = await fetchUserRoles(effective.user.id);
-        setRoles(loadedRoles);
-      } else {
-        setRoles([]);
+        loadedRoles = await fetchUserRoles(effective.user.id, effective.access_token);
       }
 
+      if (!mounted) return;
+      setSession(effective);
+      setUser(effective?.user ?? null);
+      setRoles(loadedRoles);
       setLoading(false);
     };
 
     const { data: sub } = supabase.auth.onAuthStateChange((_e, sess) => {
-      void syncAuth(sess);
+      // Defer out of onAuthStateChange callback to prevent Supabase JS v2 internal auth lock deadlock
+      setLoading(true);
+      setTimeout(() => {
+        void syncAuth(sess);
+      }, 0);
     });
 
     void supabase.auth.getSession().then(({ data }) => syncAuth(data.session));
 
-    return () => sub.subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      sub.subscription.unsubscribe();
+    };
   }, []);
 
   const value = useMemo<AuthCtx>(
