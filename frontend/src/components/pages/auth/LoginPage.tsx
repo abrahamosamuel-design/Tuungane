@@ -41,10 +41,12 @@ export function LoginPage({
     }
   }, [verified, nav, redirectUrl, isSigningOut]);
 
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [phone, setPhone] = useState("");
+  const [fullNameTouched, setFullNameTouched] = useState(false);
   const [emailTouched, setEmailTouched] = useState(false);
   const [passwordTouched, setPasswordTouched] = useState(false);
   const [confirmPasswordTouched, setConfirmPasswordTouched] = useState(false);
@@ -62,11 +64,18 @@ export function LoginPage({
     }
   }, [loading, user, redirectUrl, nav, signupSuccess, verified, isSigningOut]);
 
+  const trimmedFullName = fullName.trim();
+  const fullNameValid =
+    trimmedFullName.length >= 2 &&
+    !["unnamed", "unnamed user", "anonymous", "anonymous user", "user"].includes(
+      trimmedFullName.toLowerCase(),
+    );
   const emailValid = emailRegex.test(email.trim());
   const passwordValid = password.length >= 6;
   const passwordsMatch = password === confirmPassword;
   const phoneValid = phone.length > 10; // Simple validation for country code + length
 
+  const showFullNameError = fullNameTouched && !fullNameValid;
   const showEmailError = emailTouched && email.length > 0 && !emailValid;
   const showPasswordError = passwordTouched && password.length > 0 && !passwordValid;
   const showConfirmPasswordError = confirmPasswordTouched && confirmPassword.length > 0 && !passwordsMatch;
@@ -81,7 +90,11 @@ export function LoginPage({
     return s;
   }, [password]);
 
-  const canSubmitEmail = emailValid && passwordValid && (tab === "login" || (passwordsMatch && phoneValid)) && !busy;
+  const canSubmitEmail =
+    emailValid &&
+    passwordValid &&
+    (tab === "login" || (fullNameValid && passwordsMatch && phoneValid)) &&
+    !busy;
 
   if (!loading && user) return null;
 
@@ -114,10 +127,11 @@ export function LoginPage({
     setEmailTouched(true);
     setPasswordTouched(true);
     if (tab === "signup") {
+      setFullNameTouched(true);
       setConfirmPasswordTouched(true);
       setPhoneTouched(true);
     }
-    if (!emailValid || !passwordValid || (tab === "signup" && (!passwordsMatch || !phoneValid))) return;
+    if (!emailValid || !passwordValid || (tab === "signup" && (!fullNameValid || !passwordsMatch || !phoneValid))) return;
     setBusy(true);
     try {
       if (tab === "signup") {
@@ -127,7 +141,7 @@ export function LoginPage({
           password,
           options: { 
             emailRedirectTo: `${window.location.origin}/login?verified=true${redirectUrl ? `&redirect=${encodeURIComponent(redirectUrl)}` : ''}`,
-            data: { phone }
+            data: { full_name: trimmedFullName, name: trimmedFullName, phone }
           },
         });
         if (error) throw error;
@@ -190,6 +204,48 @@ export function LoginPage({
           </div>
 
           <form className="space-y-3" onSubmit={onEmailSubmit} noValidate>
+            {tab === "signup" && (
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                  Full Name <span className="text-destructive">*</span>
+                </label>
+                <div className="relative mt-1.5">
+                  <input
+                    type="text"
+                    autoComplete="name"
+                    enterKeyHint="next"
+                    placeholder="Enter your full name"
+                    value={fullName}
+                    required
+                    onChange={(e) => setFullName(e.target.value)}
+                    onBlur={() => setFullNameTouched(true)}
+                    aria-invalid={showFullNameError}
+                    className={`w-full min-h-[44px] rounded-xl border bg-background px-4 py-2 pr-10 text-base outline-none focus:ring-2 transition-all ${
+                      showFullNameError
+                        ? "border-destructive focus:ring-destructive/20"
+                        : fullNameValid
+                          ? "border-green focus:ring-green/20"
+                          : "border-border focus:border-orange focus:ring-orange/20"
+                    }`}
+                  />
+                  {fullName.length > 0 && (
+                    <span className="absolute inset-y-0 right-0 flex items-center px-4">
+                      {fullNameValid ? (
+                        <Check className="h-5 w-5 text-green" />
+                      ) : fullNameTouched ? (
+                        <AlertCircle className="h-5 w-5 text-destructive" />
+                      ) : null}
+                    </span>
+                  )}
+                </div>
+                {showFullNameError && (
+                  <p className="mt-1.5 text-xs text-destructive font-medium">
+                    Please enter your full name to sign up
+                  </p>
+                )}
+              </div>
+            )}
+
             <div>
               <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Email</label>
               <div className="relative mt-1.5">

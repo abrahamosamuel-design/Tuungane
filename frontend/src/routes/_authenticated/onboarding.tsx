@@ -11,9 +11,11 @@ import {
 
 import { Avatar } from "@/components/social/Avatar";
 import { Logo } from "@/components/Logo";
+import { PhoneInput } from "@/components/PhoneInput";
 import { useAuth } from "@/hooks/use-auth";
 import { apiClient } from "@/lib/api";
 import { uploadMedia } from "@/lib/upload";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_authenticated/onboarding")({
@@ -27,6 +29,24 @@ export const Route = createFileRoute("/_authenticated/onboarding")({
 
 /* ---------- helpers ---------- */
 
+function isPlaceholderName(name?: string | null): boolean {
+  if (!name) return true;
+  const clean = name.trim().toLowerCase();
+  return (
+    clean.length < 2 ||
+    [
+      "unnamed",
+      "unnamed user",
+      "unnamed provider",
+      "anonymous",
+      "anonymous user",
+      "user",
+      "null",
+      "undefined",
+    ].includes(clean)
+  );
+}
+
 function getDisplayName(
   user: { user_metadata?: Record<string, unknown> | null; email?: string | null } | null | undefined,
 ): string {
@@ -34,8 +54,18 @@ function getDisplayName(
   const meta = (user.user_metadata ?? {}) as Record<string, unknown>;
   const candidates = [meta.full_name, meta.name, meta.display_name];
   for (const c of candidates) {
-    if (typeof c === "string" && c.trim()) return c.trim();
+    if (typeof c === "string" && !isPlaceholderName(c)) return c.trim();
   }
+  return "";
+}
+
+function getDisplayPhone(
+  user: { user_metadata?: Record<string, unknown> | null; phone?: string | null } | null | undefined,
+): string {
+  if (!user) return "";
+  if (typeof user.phone === "string" && user.phone.trim()) return user.phone.trim();
+  const meta = (user.user_metadata ?? {}) as Record<string, unknown>;
+  if (typeof meta.phone === "string" && meta.phone.trim()) return meta.phone.trim();
   return "";
 }
 
@@ -132,43 +162,59 @@ function StepIndicator({ current }: { current: 1 | 2 | 3 }) {
   );
 }
 
-/* ---------- step 1: welcome + photo + name ---------- */
+/* ---------- step 1: welcome + photo + full name + phone ---------- */
 
 function Step1Welcome({
   user,
   onContinue,
 }: {
-  user: { id: string; email?: string | null; user_metadata?: Record<string, unknown> | null };
+  user: { id: string; email?: string | null; phone?: string | null; user_metadata?: Record<string, unknown> | null };
   onContinue: () => void;
 }) {
   const prefillName = useMemo(() => getDisplayName(user), [user]);
+  const prefillPhone = useMemo(() => getDisplayPhone(user), [user]);
   const [fullName, setFullName] = useState(prefillName);
+  const [phone, setPhone] = useState(prefillPhone);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [uploadBusy, setUploadBusy] = useState(false);
   const [saveBusy, setSaveBusy] = useState(false);
   const [nameError, setNameError] = useState(false);
+  const [phoneError, setPhoneError] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  // Load existing avatar if any
+  // Load existing profile fields if any
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const { data } = await apiClient<{ data: { avatar_url: string | null; full_name: string | null } }>("/profiles/me");
+        const res = await apiClient<any>("/profiles/me");
         if (cancelled) return;
-        if (data.data?.avatar_url) setAvatarUrl(data.data.avatar_url);
-        // If server has a name and we don't have one from Google metadata, use it
-        if (data.data?.full_name && !fullName) setFullName(data.data.full_name);
+        const prof = res?.data?.data ?? res?.data ?? res;
+        if (prof?.avatar_url) setAvatarUrl(prof.avatar_url);
+        if (prof?.full_name && !isPlaceholderName(prof.full_name) && !fullName) {
+          setFullName(prof.full_name.trim());
+        }
+        if (prof?.phone && !phone) {
+          setPhone(prof.phone.trim());
+        }
       } catch {
         /* ignore */
       }
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const handleFile = async (file: File) => {
-    if (!file.type.startsWith("image/")) { toast.error("Please choose an image file"); return; }
-    if (file.size > 8 * 1024 * 1024) { toast.error("Image must be smaller than 8 MB"); return; }
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please choose an image file");
+      return;
+    }
+    if (file.size > 8 * 1024 * 1024) {
+      toast.error("Image must be smaller than 8 MB");
+      return;
+    }
     setUploadBusy(true);
     try {
       const url = await uploadMedia(user.id, file, "avatars");
@@ -183,17 +229,28 @@ function Step1Welcome({
   };
 
   const handleContinue = async () => {
-    const trimmed = fullName.trim();
-    if (!trimmed) {
-      setNameError(true);
-      return;
-    }
+    const trimmedName = fullName.trim();
+    const validName = !isPlaceholderName(trimmedName);
+    const validPhone = phone.trim().length > 10;
+
+    if (!validName) setNameError(true);
+    if (!validPhone) setPhoneError(true);
+    if (!validName || !validPhone) return;
+
     setSaveBusy(true);
     try {
-      await apiClient.put("/profiles/me", { full_name: trimmed });
+      await apiClient.put("/profiles/me", {
+        full_name: trimmedName,
+        phone: phone.trim(),
+      });
+      await supabase.auth
+        .updateUser({
+          data: { full_name: trimmedName, name: trimmedName, phone: phone.trim() },
+        })
+        .catch(() => {});
       onContinue();
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Failed to save name");
+      toast.error(e instanceof Error ? e.message : "Failed to save profile details");
     } finally {
       setSaveBusy(false);
     }
@@ -205,7 +262,7 @@ function Step1Welcome({
         Welcome to Tuungane
       </h1>
       <p className="mt-3 text-center text-sm text-muted-foreground max-w-sm mx-auto">
-        Let's set up your profile so people can connect with you.
+        Let's complete your profile details so people can connect with you.
       </p>
 
       {/* Avatar upload */}
@@ -237,18 +294,19 @@ function Step1Welcome({
         />
       </div>
 
-      {/* Name input */}
+      {/* Compulsory Full Name input */}
       <div className="mt-6">
         <label htmlFor="onboarding-name" className="block text-xs font-semibold text-navy mb-1.5">
-          Your Name <span className="text-red-500">*</span>
+          Full Name <span className="text-red-500">*</span>
         </label>
         <input
           id="onboarding-name"
           type="text"
+          required
           value={fullName}
           onChange={(e) => {
             setFullName(e.target.value);
-            if (nameError && e.target.value.trim()) setNameError(false);
+            if (nameError && !isPlaceholderName(e.target.value)) setNameError(false);
           }}
           placeholder="Enter your full name"
           className={`w-full rounded-xl border bg-background px-4 py-3 text-sm outline-none transition focus:ring-2 ${
@@ -259,7 +317,27 @@ function Step1Welcome({
         />
         {nameError && (
           <p className="mt-1.5 text-xs text-red-500 animate-in fade-in">
-            Please enter your name to continue
+            Please enter your full name to continue
+          </p>
+        )}
+      </div>
+
+      {/* Compulsory Phone Number input */}
+      <div className="mt-4">
+        <label className="block text-xs font-semibold text-navy mb-1.5">
+          Phone Number <span className="text-red-500">*</span>
+        </label>
+        <PhoneInput
+          value={phone}
+          onChange={(v) => {
+            setPhone(v);
+            if (phoneError && v.trim().length > 10) setPhoneError(false);
+          }}
+          required
+        />
+        {phoneError && (
+          <p className="mt-1.5 text-xs text-red-500 animate-in fade-in">
+            Please enter a valid complete phone number to continue
           </p>
         )}
       </div>

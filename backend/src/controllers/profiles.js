@@ -13,42 +13,41 @@ export const getMyProfile = async (req, res) => {
 
     if (error) throw error;
 
+    const metaName = (req.user.user_metadata?.full_name || req.user.user_metadata?.name || '').trim() || null;
+    const metaAvatar = req.user.user_metadata?.avatar_url || req.user.user_metadata?.picture || null;
+    const metaPhone = (req.user.user_metadata?.phone || req.user.phone || '').trim() || null;
+
     if (!data) {
-      const metaName = req.user.user_metadata?.full_name || req.user.user_metadata?.name || 'Anonymous User';
-      const metaAvatar = req.user.user_metadata?.avatar_url || req.user.user_metadata?.picture || null;
       const { data: newProfile, error: insertError } = await supabaseAdmin
         .from("profiles")
-        .insert([{ id: userId, full_name: metaName, avatar_url: metaAvatar }])
+        .insert([{ id: userId, full_name: metaName, avatar_url: metaAvatar, phone: metaPhone }])
         .select()
         .single();
       
       if (insertError) throw insertError;
       data = newProfile;
     } else {
-      let updated = false;
-      let newName = data.full_name;
-      let newAvatar = data.avatar_url;
+      const updates = {};
+      const curName = (data.full_name || '').trim();
+      const isPlaceholderName = !curName || ['anonymous user', 'unnamed user', 'unnamed', 'user'].includes(curName.toLowerCase());
 
-      if (!newName || newName.trim() === '') {
-        const metaName = req.user.user_metadata?.full_name || req.user.user_metadata?.name;
-        if (metaName) {
-          newName = metaName;
-          updated = true;
-        }
+      if (isPlaceholderName && metaName) {
+        updates.full_name = metaName;
+        data.full_name = metaName;
       }
 
-      if (!newAvatar) {
-        const metaAvatar = req.user.user_metadata?.avatar_url || req.user.user_metadata?.picture;
-        if (metaAvatar) {
-          newAvatar = metaAvatar;
-          updated = true;
-        }
+      if (!data.avatar_url && metaAvatar) {
+        updates.avatar_url = metaAvatar;
+        data.avatar_url = metaAvatar;
       }
 
-      if (updated) {
-        await supabaseAdmin.from("profiles").update({ full_name: newName, avatar_url: newAvatar }).eq("id", userId);
-        data.full_name = newName;
-        data.avatar_url = newAvatar;
+      if (!data.phone && metaPhone) {
+        updates.phone = metaPhone;
+        data.phone = metaPhone;
+      }
+
+      if (Object.keys(updates).length > 0) {
+        await supabaseAdmin.from("profiles").update(updates).eq("id", userId);
       }
     }
 
@@ -425,6 +424,14 @@ export const updateMyProfile = async (req, res) => {
     const { error } = await supabaseAdmin.from("profiles").update(patch).eq("id", userId);
 
     if (error) throw error;
+
+    if (patch?.phone) {
+      await Promise.allSettled([
+        supabaseAdmin.from("service_profiles").update({ phone: patch.phone }).eq("user_id", userId).is("phone", null),
+        supabaseAdmin.from("public_profiles").update({ phone: patch.phone }).eq("owner_id", userId).is("phone", null),
+      ]);
+    }
+
     res.json({ success: true });
   } catch (err) {
     console.error('Error updating profile:', err);
